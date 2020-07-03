@@ -17,7 +17,10 @@
     "strip-ansi": "^6.0.0",
     "wrap-ansi": "^7.0.0",
     "@oclif/linewrap": "^1.0.0",
-    "chalk": "^2.4.2"
+    "chalk": "^2.4.2",
+    "@oclif/config": "^1.15.1",
+    "@oclif/plugin-help": "^3",
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -45,7 +48,12 @@
     "nock": "^13.0.0",
     "@types/nock": "^11.1.0",
     "@types/node-notifier": "^6.0.1",
-    "@types/read-pkg": "^5.1.0"
+    "@types/read-pkg": "^5.1.0",
+    "@oclif/plugin-plugins": "^1.7.7",
+    "@types/semver": "^7.3.1",
+    "cli-ux": "^5.1.0",
+    "globby": "^11.0.1",
+    "sinon": "^9.0.1"
   },
   "engines": {
     "node": ">=8.0.0"
