@@ -1,4 +1,4 @@
-import {CLIError} from '@oclif/errors'
+import {CLIError} from '../errors'
 
 import {Arg} from './args'
 import {

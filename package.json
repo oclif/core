@@ -5,8 +5,6 @@
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
-    "@oclif/errors": "^1.3.3",
-    "@oclif/parser": "^3.8.0",
     "debug": "^4.1.1",
     "globby": "^11.0.1",
     "is-wsl": "^2.1.1",
@@ -18,8 +16,6 @@
     "wrap-ansi": "^7.0.0",
     "@oclif/linewrap": "^1.0.0",
     "chalk": "^2.4.2",
-    "@oclif/config": "^1.15.1",
-    "@oclif/plugin-help": "^3",
     "semver": "^7.3.2",
     "@oclif/command": "^1.5.20",
     "lodash.template": "^4.4.0",

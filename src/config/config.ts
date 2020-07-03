@@ -1,4 +1,4 @@
-import {CLIError, error, exit, warn} from '@oclif/errors'
+import {CLIError, error, exit, warn} from '../errors'
 import * as Lodash from 'lodash'
 import * as os from 'os'
 import * as path from 'path'
@@ -135,7 +135,7 @@ export namespace IConfig {
   }
 }
 
-const _pjson = require('../package.json')
+const _pjson = require('../../package.json')
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)

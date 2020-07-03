@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-const debug = require('debug')('@oclif/config')
+const debug = require('debug')('../config')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
   return arr.reduce((arr, i) => arr.concat(fn(i)), [] as U[])

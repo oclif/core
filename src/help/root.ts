@@ -1,4 +1,4 @@
-import * as Config from '@oclif/config'
+import * as Config from '../config'
 import chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')

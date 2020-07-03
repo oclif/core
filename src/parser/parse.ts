@@ -20,7 +20,7 @@ try {
   if (process.env.CLI_FLAGS_DEBUG !== '1') debug = () => {}
   else
     // eslint-disable-next-line node/no-extraneous-require
-    debug = require('debug')('@oclif/parser')
+    debug = require('debug')('../parser')
 } catch {
   debug = () => {}
 }

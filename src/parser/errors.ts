@@ -1,4 +1,4 @@
-import {CLIError} from '@oclif/errors'
+import {CLIError} from '../errors'
 
 import {Arg} from './args'
 import Deps from './deps'
@@ -7,7 +7,7 @@ import * as Help from './help'
 import * as List from './list'
 import {ParserInput, ParserOutput} from './parse'
 
-export {CLIError} from '@oclif/errors'
+export {CLIError} from '../errors'
 
 // eslint-disable-next-line new-cap
 const m = Deps()

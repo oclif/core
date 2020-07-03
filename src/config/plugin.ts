@@ -1,4 +1,4 @@
-import {error} from '@oclif/errors'
+import {error} from '../errors'
 import * as Globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
@@ -25,7 +25,7 @@ export interface Options {
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IPlugin {
   /**
-   * @oclif/config version
+   * ../config version
    */
   _base: string;
   /**
@@ -73,7 +73,7 @@ export interface IPlugin {
   load(): Promise<void>;
 }
 
-const _pjson = require('../package.json')
+const _pjson = require('../../package.json')
 
 const hasManifest = function (p: string): boolean {
   try {

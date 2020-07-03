@@ -1,5 +1,5 @@
-import * as Config from '@oclif/config'
-import {error} from '@oclif/errors'
+import * as Config from '../config'
+import {error} from '../errors'
 import chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')

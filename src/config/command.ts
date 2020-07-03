@@ -1,4 +1,4 @@
-import * as Parser from '@oclif/parser'
+import * as Parser from '../parser'
 
 import * as Config from '.'
 import {mapValues} from './util'

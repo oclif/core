@@ -1,6 +1,6 @@
 // tslint:disable no-implicit-dependencies
 
-import * as Chalk from 'chalk'
+import Chalk from 'chalk'
 import Clean = require('clean-stack')
 import Indent = require('indent-string')
 import * as Wrap from 'wrap-ansi'

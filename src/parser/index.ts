@@ -40,4 +40,6 @@ export function parse<TFlags, TArgs extends {[name: string]: string}>(argv: stri
   return output as any
 }
 
-export {OutputFlags, OutputArgs, Output}
+const boolean = flags.boolean
+const integer = flags.integer
+export {OutputFlags, OutputArgs, Output, boolean, integer}
