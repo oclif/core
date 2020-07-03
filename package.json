@@ -20,7 +20,11 @@
     "chalk": "^2.4.2",
     "@oclif/config": "^1.15.1",
     "@oclif/plugin-help": "^3",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "@oclif/command": "^1.5.20",
+    "lodash.template": "^4.4.0",
+    "string-width": "^4.2.0",
+    "widest-line": "^3.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -53,6 +57,10 @@
     "@types/semver": "^7.3.1",
     "cli-ux": "^5.1.0",
     "globby": "^11.0.1",
+    "@oclif/dev-cli": "^1.21.0",
+    "@oclif/plugin-legacy": "^1.1.3",
+    "@oclif/test": "^1.2.2",
+    "@types/lodash.template": "^4.4.4",
     "sinon": "^9.0.1"
   },
   "engines": {
