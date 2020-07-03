@@ -1,0 +1,21 @@
+{
+  "name": "ts-plugin",
+  "private": true,
+  "files": [],
+  "oclif": {
+    "commands": "./lib/commands",
+    "hooks": {
+      "init": "./lib/hooks/init",
+      "prerun": [
+        "./lib/hooks/prerun"
+      ],
+      "postrun": [
+        "./lib/hooks/postrun"
+      ]
+    }
+  },
+  "devDependencies": {
+    "globby": "^8.0.1",
+    "ts-node": "^6.0.2"
+  }
+}

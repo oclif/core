@@ -1,0 +1,37 @@
+---
+version: 2
+jobs:
+  node-latest: &test
+    docker:
+      - image: node:latest
+    working_directory: ~/cli
+    environment:
+      NYC: "yarn exec nyc -- --nycrc-path node_modules/@oclif/nyc-config/.nycrc"
+    steps:
+      - checkout
+      - restore_cache: &restore_cache
+          keys:
+            - v1-yarn-{{checksum ".circleci/config.yml"}}-{{ checksum "yarn.lock"}}
+            - v1-yarn-{{checksum ".circleci/config.yml"}}
+      - run: yarn
+      - run: yarn add -D nyc@13 @oclif/nyc-config@1
+      - run: |
+          $NYC yarn test
+          $NYC report --reporter text-lcov > coverage.lcov
+          curl -s https://codecov.io/bash | bash
+  node-12:
+    <<: *test
+    docker:
+      - image: node:12
+  node-10:
+    <<: *test
+    docker:
+      - image: node:10
+
+workflows:
+  version: 2
+  "@oclif/config":
+    jobs:
+      - node-latest
+      - node-12
+      - node-10

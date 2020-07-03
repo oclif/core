@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "test/fixtures/typescript/package.json"
+      ]
+    }
+  }
+}
