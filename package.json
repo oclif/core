@@ -15,7 +15,9 @@
     "fs-extra": "^9.0.1",
     "indent-string": "^4.0.0",
     "strip-ansi": "^6.0.0",
-    "wrap-ansi": "^7.0.0"
+    "wrap-ansi": "^7.0.0",
+    "@oclif/linewrap": "^1.0.0",
+    "chalk": "^2.4.2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -40,7 +42,10 @@
     "@types/fs-extra": "^9.0.1",
     "@types/strip-ansi": "^5.2.1",
     "chalk": "^4.1.0",
-    "nock": "^13.0.0"
+    "nock": "^13.0.0",
+    "@types/nock": "^11.1.0",
+    "@types/node-notifier": "^6.0.1",
+    "@types/read-pkg": "^5.1.0"
   },
   "engines": {
     "node": ">=8.0.0"
