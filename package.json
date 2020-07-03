@@ -1,9 +1,9 @@
 {
-  "name": "@oclif/config",
-  "description": "base config object and standard interfaces for oclif components",
-  "version": "1.16.0",
+  "name": "@oclif/core",
+  "description": "base library for oclif cli's",
+  "version": "0.0.0",
   "author": "Jeff Dickey @jdxcode",
-  "bugs": "https://github.com/oclif/config/issues",
+  "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
     "@oclif/errors": "^1.3.3",
     "@oclif/parser": "^3.8.0",
@@ -38,13 +38,13 @@
   "files": [
     "/lib"
   ],
-  "homepage": "https://github.com/oclif/config",
+  "homepage": "https://github.com/oclif/core",
   "keywords": [
     "oclif"
   ],
   "license": "MIT",
   "main": "lib/index.js",
-  "repository": "oclif/config",
+  "repository": "oclif/core",
   "scripts": {
     "build": "rm -rf lib && tsc",
     "lint": "eslint . --ext .ts --config .eslintrc",

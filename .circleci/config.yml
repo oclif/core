@@ -11,8 +11,8 @@ jobs:
       - checkout
       - restore_cache: &restore_cache
           keys:
-            - v1-yarn-{{checksum ".circleci/config.yml"}}-{{ checksum "yarn.lock"}}
-            - v1-yarn-{{checksum ".circleci/config.yml"}}
+            - v1-yarn-{{checksum ".circleci/core.yml"}}-{{ checksum "yarn.lock"}}
+            - v1-yarn-{{checksum ".circleci/core.yml"}}
       - run: yarn
       - run: yarn add -D nyc@13 @oclif/nyc-config@1
       - run: |
@@ -30,7 +30,7 @@ jobs:
 
 workflows:
   version: 2
-  "@oclif/config":
+  "@oclif/core":
     jobs:
       - node-latest
       - node-12
