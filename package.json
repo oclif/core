@@ -32,7 +32,7 @@
     "@types/wrap-ansi": "^3.0.0",
     "chai": "^4.2.0",
     "conventional-changelog-cli": "^2.0.21",
-    "eslint": "^7.3.1",
+    "eslint": "^7.7.0",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.2.0",
     "fancy-test": "^1.4.3",
