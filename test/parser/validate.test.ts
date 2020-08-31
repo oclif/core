@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 
-import {validate} from '../src/validate'
+import {validate} from '../../src/parser/validate'
 
 describe('validate', () => {
   const input = {
