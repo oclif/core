@@ -1,8 +1,8 @@
 import {expect} from 'chai'
 import chalk from 'chalk'
 
-import * as flags from '../src/flags'
-import {flagUsages} from '../src/help'
+import * as flags from '../../src/parser/flags'
+import {flagUsages} from '../../src/parser/help'
 
 chalk.enabled = false
 
