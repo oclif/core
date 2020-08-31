@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
-import prettyPrint, {PrettyPrintableError} from '../src/errors/pretty-print'
-import {CLIError} from '../src'
-import {config} from '../src/config'
+import prettyPrint, {PrettyPrintableError} from '../../src/errors/errors/pretty-print'
+import {CLIError} from '../../src/errors'
+import {config} from '../../src/errors/config'
 const stripAnsi = require('strip-ansi')
 
 describe('pretty-print', () => {
