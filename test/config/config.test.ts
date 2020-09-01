@@ -1,8 +1,8 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config, IConfig, load, PJSON} from '../src'
-import * as util from '../src/util'
+import {Config, IConfig, load, PJSON} from '../../src/config'
+import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'
 
@@ -56,19 +56,19 @@ describe('Config', () => {
 
   describe('darwin', () => {
     testConfig()
-    .hasProperty('cacheDir', path.join('/my/home/Library/Caches/@oclif/config'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/config'))
-    .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/config/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/config'))
+    .hasProperty('cacheDir', path.join('/my/home/Library/Caches/@oclif/core'))
+    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
+    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
     .hasProperty('home', path.join('/my/home'))
   })
 
   describe('linux', () => {
     testConfig({platform: 'linux'})
-    .hasProperty('cacheDir', path.join('/my/home/.cache/@oclif/config'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/config'))
-    .hasProperty('errlog', path.join('/my/home/.cache/@oclif/config/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/config'))
+    .hasProperty('cacheDir', path.join('/my/home/.cache/@oclif/core'))
+    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', path.join('/my/home/.cache/@oclif/core/error.log'))
+    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
     .hasProperty('home', path.join('/my/home'))
   })
 
@@ -77,10 +77,10 @@ describe('Config', () => {
       platform: 'win32',
       env: {LOCALAPPDATA: '/my/home/localappdata'},
     })
-    .hasProperty('cacheDir', path.join('/my/home/localappdata/@oclif\\config'))
-    .hasProperty('configDir', path.join('/my/home/localappdata/@oclif\\config'))
-    .hasProperty('errlog', path.join('/my/home/localappdata/@oclif\\config/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/localappdata/@oclif\\config'))
+    .hasProperty('cacheDir', path.join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('configDir', path.join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('errlog', path.join('/my/home/localappdata/@oclif\\core/error.log'))
+    .hasProperty('dataDir', path.join('/my/home/localappdata/@oclif\\core'))
     .hasProperty('home', path.join('/my/home'))
   })
 

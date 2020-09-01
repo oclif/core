@@ -1,6 +1,6 @@
 import {expect, fancy as base, FancyTypes} from 'fancy-test'
 
-import * as Config from '../src'
+import * as Config from '../../src/config'
 
 export const fancy = base
 .register('resetConfig', () => ({
