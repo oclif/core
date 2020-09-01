@@ -1,9 +1,9 @@
-import * as Config from '@oclif/config'
+import * as Config from '../../src/config'
 import {expect, fancy} from 'fancy-test'
 
-import Base, {flags} from '../src'
+import Base, {flags} from '../../src/command'
 import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
-import * as PluginHelp from '@oclif/plugin-help'
+import * as PluginHelp from '../../src/help'
 
 const originalgetHelpClass = PluginHelp.getHelpClass
 
@@ -247,7 +247,7 @@ describe('command', () => {
       expect(ctx.stdout).to.equal(`test command
 
 USAGE
-  $ @oclif/command
+  $ oclif
 
 OPTIONS
   --help  show CLI help
@@ -267,7 +267,7 @@ OPTIONS
       expect(ctx.stdout).to.equal(`test command
 
 USAGE
-  $ @oclif/command
+  $ oclif
 
 `)
     })
@@ -290,9 +290,9 @@ USAGE
 
     fancy
     .stdout()
-    .stub(PluginHelp, 'getHelpClass', function (config: any) {
+    .stub(PluginHelp, 'getHelpClass', ((config: any) => {
       return originalgetHelpClass(config, '')
-    })
+    }) as unknown as () => void)
     .add('config', async () => {
       const config: TestHelpClassConfig = await Config.load()
       config.pjson.oclif.helpClass = undefined
@@ -310,14 +310,14 @@ USAGE
     describe('from a help class', () => {
       fancy
       .stdout()
-      .stub(PluginHelp, 'getHelpClass', function (config: Config.IConfig) {
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
         const patchedConfig = {
           ...config,
           root: `${__dirname}/helpers/test-help-in-lib/`,
         }
 
         return originalgetHelpClass(patchedConfig)
-      })
+      }) as unknown as () => void)
       .add('config', async () => {
         const config: TestHelpClassConfig = await Config.load()
         config.pjson.oclif.helpClass = './lib/test-help-plugin'
@@ -343,17 +343,17 @@ USAGE
 
       fancy
       .stdout()
-      .stub(PluginHelp, 'getHelpClass', function (config: Config.IConfig) {
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
         const patchedConfig = {
           ...config,
           root: `${__dirname}/helpers/test-help-in-src/`,
         }
 
         return originalgetHelpClass(patchedConfig)
-      })
+      }) as unknown as () => void)
       .add('config', async () => {
         const config: TestHelpClassConfig = await Config.load()
-        config.pjson.oclif.helpClass = './lib/test-help-plugin'
+        config.pjson.oclif.helpClass = './src/test-help-plugin'
         return config
       })
       .do(async ({config}) => {
@@ -376,17 +376,17 @@ USAGE
 
       fancy
       .stdout()
-      .stub(PluginHelp, 'getHelpClass', function (config: Config.IConfig) {
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
         const patchedConfig = {
           ...config,
           root: `${__dirname}/helpers/test-help-in-src/`,
         }
 
         return originalgetHelpClass(patchedConfig)
-      })
+      }) as unknown as () => void)
       .add('config', async () => {
         const config: TestHelpClassConfig = await Config.load()
-        config.pjson.oclif.helpClass = './lib/test-help-plugin'
+        config.pjson.oclif.helpClass = './src/test-help-plugin'
         return config
       })
       .do(async ({config}) => {
