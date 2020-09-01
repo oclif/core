@@ -1,10 +1,10 @@
-import * as Config from '@oclif/config'
+import * as Config from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
-import Help from '../src'
+import Help from '../../src/help'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
@@ -16,7 +16,7 @@ class TestHelp extends Help {
 const test = base
 .loadConfig()
 .add('help', ctx => {
-  return new TestHelp(ctx.config)
+  return new TestHelp(ctx.config as any)
 })
 .register('topicHelp', (topic: Config.Topic) => ({
   run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {

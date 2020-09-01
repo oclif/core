@@ -1,11 +1,11 @@
-import {Command as Base, flags} from '@oclif/command'
-import * as Config from '@oclif/config'
+import {Command as Base, flags} from '../../src/command'
+import * as Config from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
-import Help from '../src'
+import Help from '../../src/help'
 
 class Command extends Base {
   async run() {
@@ -22,7 +22,7 @@ class TestHelp extends Help {
 
 const test = base
 .loadConfig()
-.add('help', ctx => new TestHelp(ctx.config))
+.add('help', ctx => new TestHelp(ctx.config as any))
 .register('commandHelp', (command?: any) => ({
   run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
     const cached = Config.Command.toCached(command!, {} as any)
@@ -111,10 +111,10 @@ ALIASES
 ARGUMENTS
   APP_NAME
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
+       useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
-      to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
-      useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
-      to useapp to useapp to useapp to useapp to use
+       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
+      useapp to useapp to useapp to useapp to useapp to use
 
 OPTIONS
   -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
@@ -159,10 +159,10 @@ ALIASES
 ARGUMENTS
   APP_NAME
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
+       useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
-      to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
-      useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
-      to useapp to useapp to useapp to useapp to use
+       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
+      useapp to useapp to useapp to useapp to useapp to use
 
 OPTIONS
   -f, --foo=foo
@@ -173,9 +173,9 @@ OPTIONS
 
   --force
       force  it force  it force  it force  it force  it force  it force  it force
-      it force  it force  it force  it force  it force  it force  it force  it
+       it force  it force  it force  it force  it force  it force  it force  it
       force  it force  it force  it force  it force  it force  it force  it force
-      it force  it force  it force  it force  it force  it force  it
+       it force  it force  it force  it force  it force  it force  it
 
   --ss
       newliney
