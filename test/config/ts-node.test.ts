@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as proxyquire from 'proxyquire'
 import * as tsNode from 'ts-node'
 
-import {TSConfig} from '../src/ts-node'
+import {TSConfig} from '../../src/config/ts-node'
 
 import {expect, fancy} from './test'
 
@@ -15,7 +15,7 @@ const DEFAULT_TS_CONFIG: TSConfig = {
 }
 
 const withMockTsConfig = (config: TSConfig = DEFAULT_TS_CONFIG) => {
-  const tsNodePlugin = proxyquire('../src/ts-node', {fs: {
+  const tsNodePlugin = proxyquire('../../src/config/ts-node', {fs: {
     existsSync: () => true,
     readFileSync: () => JSON.stringify(config),
   }})
@@ -25,9 +25,9 @@ const withMockTsConfig = (config: TSConfig = DEFAULT_TS_CONFIG) => {
 
   return fancy
   .add('tsNodePlugin', () => tsNodePlugin)
-  .stub(tsNode, 'register', (arg: any) => {
+  .stub(tsNode, 'register', ((arg: any) => {
     tsNodeRegisterCallArguments.push(arg)
-  })
+  }) as unknown as () => void)
   .finally(() => {
     tsNodeRegisterCallArguments = []
   })
@@ -35,13 +35,13 @@ const withMockTsConfig = (config: TSConfig = DEFAULT_TS_CONFIG) => {
 
 describe('tsPath', () => {
   withMockTsConfig()
-  .it('should resolve a .ts file', ctx => {
+  .it('should resolve a .ts file', (ctx: any) => {
     const result = ctx.tsNodePlugin.tsPath(root, orig)
     expect(result).to.equal(path.join(root, orig))
   })
 
   withMockTsConfig()
-  .it('should leave esModuleInterop undefined by default', ctx => {
+  .it('should leave esModuleInterop undefined by default', (ctx: any) => {
     ctx.tsNodePlugin.tsPath(root, orig)
     expect(tsNodeRegisterCallArguments.length).is.equal(1)
     expect(tsNodeRegisterCallArguments[0])
@@ -54,7 +54,7 @@ describe('tsPath', () => {
       esModuleInterop: true,
     },
   })
-  .it('should use the provided esModuleInterop option', ctx => {
+  .it('should use the provided esModuleInterop option', (ctx: any) => {
     ctx.tsNodePlugin.tsPath(root, orig)
     expect(tsNodeRegisterCallArguments.length).is.equal(1)
     expect(tsNodeRegisterCallArguments[0])
