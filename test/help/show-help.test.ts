@@ -1,12 +1,12 @@
-import * as Config from '@oclif/config'
+import * as Config from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
 import * as path from 'path'
 
 const g: any = global
 g.columns = 80
-import Help from '../src'
-import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './helpers/fixtures'
+import Help from '../../src/help'
+import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
 
 // extension makes previously protected methods public
 class TestHelp extends Help {
@@ -61,11 +61,11 @@ describe('showHelp for root', () => {
       topics: [],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp([])
   })
   .it('shows a command and topic when the index has siblings', ({stdout, config}) => {
-    expect(stdout.trim()).to.equal(`standard help for oclif
+    expect(stdout.trim()).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -91,11 +91,11 @@ COMMANDS
       topics: [],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp([])
   })
   .it('shows a command only when the topic only contains an index', ({stdout, config}) => {
-    expect(stdout.trim()).to.equal(`standard help for oclif
+    expect(stdout.trim()).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -120,7 +120,7 @@ describe('showHelp for a topic', () => {
       topics: [AppsTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps'])
   })
   .it('shows topic help with commands', ({stdout}) => {
@@ -145,7 +145,7 @@ COMMANDS
       topics: [AppsTopic, AppsAdminTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps'])
   })
   .it('shows topic help with topic and commands', ({stdout}) => {
@@ -173,7 +173,7 @@ COMMANDS
       topics: [AppsTopic, AppsAdminTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps'])
   })
   .it('shows topic help with topic and commands and topic command', ({stdout}) => {
@@ -202,7 +202,7 @@ COMMANDS
       topics: [AppsTopic, AppsAdminTopic, DbTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps'])
   })
   .it('ignores other topics and commands', ({stdout}) => {
@@ -232,7 +232,7 @@ describe('showHelp for a command', () => {
       topics: [AppsTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps:create'])
   })
   .it('shows help for a leaf (or childless) command', ({stdout}) => {
@@ -256,7 +256,7 @@ DESCRIPTION
       topics: [AppsTopic, AppsAdminTopic],
     }]
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     help.showHelp(['apps'])
   })
   .it('shows help for a command that has children topics and commands', ({stdout}) => {

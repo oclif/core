@@ -3,10 +3,10 @@ import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
-import Help from '../src'
+import Help from '../../src/help'
 
-const VERSION = require('../package.json').version
-const UA = `@oclif/plugin-help/${VERSION} ${process.platform}-${process.arch} node-${process.version}`
+const VERSION = require('../../package.json').version
+const UA = `@oclif/core/${VERSION} ${process.platform}-${process.arch} node-${process.version}`
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
@@ -21,7 +21,7 @@ const test = base
   run(ctx: {config: Config.IConfig; help: Help; commandHelp: string; expectation: string}) {
     const config = ctxOverride ? ctxOverride(ctx.config) : ctx.config
 
-    const help = new TestHelp(config)
+    const help = new TestHelp(config as any)
     const root = help.formatRoot()
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
@@ -33,7 +33,7 @@ const test = base
 describe('formatRoot', () => {
   test
   .rootHelp()
-  .it('renders the root help', ctx => expect(ctx.commandHelp).to.equal(`standard help for oclif
+  .it('renders the root help', ctx => expect(ctx.commandHelp).to.equal(`base library for oclif CLIs
 
 VERSION
   ${UA}

@@ -5,8 +5,8 @@ import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
-import Help from '../src'
-import {AppsDestroy, AppsCreate} from './helpers/fixtures'
+import Help from '../../src/help'
+import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
@@ -17,7 +17,7 @@ class TestHelp extends Help {
 
 const test = base
 .loadConfig()
-.add('help', ctx => new TestHelp(ctx.config))
+.add('help', ctx => new TestHelp(ctx.config as any))
 .register('formatCommands', (commands: Config.Command[] = []) => ({
   run(ctx: {help: TestHelp; output: string}) {
     const help = ctx.help.formatCommands(commands)

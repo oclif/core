@@ -1,9 +1,9 @@
 /* eslint-disable max-nested-callbacks */
 import {resolve} from 'path'
-import * as Config from '@oclif/config'
+import * as Config from '../../src/config'
 import {expect, test} from '@oclif/test'
-import {getHelpClass} from '../src/util'
-import configuredHelpClass from  '../src/_test-help-class'
+import {getHelpClass} from '../../src/help/util'
+import configuredHelpClass from  '../../src/help/_test-help-class'
 
 describe('util', () => {
   let config: Config.IConfig
@@ -15,17 +15,18 @@ describe('util', () => {
   describe('#getHelpClass', () => {
     test
     .it('defaults to the class exported', () => {
-      // eslint-disable-next-line node/no-extraneous-require
-      const defaultHelpClass = require('@oclif/plugin-help').default
       delete config.pjson.oclif.helpClass
 
-      expect(defaultHelpClass).not.be.undefined
-      expect(getHelpClass(config)).to.deep.equal(defaultHelpClass)
+      const helpClass = getHelpClass(config)
+      expect(helpClass).not.be.undefined
+      expect(helpClass.prototype.showHelp)
+      expect(helpClass.prototype.showCommandHelp)
+      expect(helpClass.prototype.formatRoot)
     })
 
     test
     .it('loads help class defined in pjson.oclif.helpClass', () => {
-      config.pjson.oclif.helpClass = './lib/_test-help-class'
+      config.pjson.oclif.helpClass = '../src/help/_test-help-class'
       config.root = resolve(__dirname, '..')
 
       expect(configuredHelpClass).to.not.be.undefined
