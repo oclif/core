@@ -46,7 +46,7 @@
     "chai": "^4.2.0",
     "chalk": "^4.1.0",
     "conventional-changelog-cli": "^2.0.21",
-    "eslint": "^7.3.1",
+    "eslint": "^7.8.1",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.2.0",
     "fancy-test": "^1.4.3",
