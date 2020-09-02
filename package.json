@@ -17,7 +17,6 @@
     "@oclif/linewrap": "^1.0.0",
     "chalk": "^2.4.2",
     "semver": "^7.3.2",
-    "@oclif/command": "^1.5.20",
     "lodash.template": "^4.4.0",
     "string-width": "^4.2.0",
     "widest-line": "^3.1.0"
