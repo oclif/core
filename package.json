@@ -5,7 +5,6 @@
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
-    "@oclif/command": "^1.5.20",
     "@oclif/linewrap": "^1.0.0",
     "chalk": "^2.4.2",
     "clean-stack": "^3.0.0",
