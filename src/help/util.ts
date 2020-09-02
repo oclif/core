@@ -1,7 +1,7 @@
 import {tsPath} from '../config'
 import lodashTemplate = require('lodash.template')
 import {IConfig} from '../config'
-import {HelpBase, HelpOptions} from '.'
+import Help, {HelpBase, HelpOptions} from '.'
 
 export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
   return arr.filter((a, i) => {
@@ -63,7 +63,7 @@ function extractClass(exported: any): HelpBaseDerived {
   return exported && exported.default ? exported.default : exported
 }
 
-export function getHelpClass(config: IConfig, defaultClass = '@oclif/plugin-help'): HelpBaseDerived {
+export function getHelpClass(config: IConfig): HelpBaseDerived {
   const pjson = config.pjson
   const configuredClass = pjson && pjson.oclif &&  pjson.oclif.helpClass
 
@@ -76,11 +76,5 @@ export function getHelpClass(config: IConfig, defaultClass = '@oclif/plugin-help
     }
   }
 
-  try {
-    const defaultModulePath = require.resolve(defaultClass, {paths: [config.root]})
-    const exported = require(defaultModulePath)
-    return extractClass(exported) as HelpBaseDerived
-  } catch (error) {
-    throw new Error(`Could not load a help class, consider installing the @oclif/plugin-help package, failed with message:\n${error.message}`)
-  }
+  return Help
 }
