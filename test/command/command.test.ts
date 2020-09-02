@@ -288,25 +288,6 @@ USAGE
     .catch((error: Error) => expect(error.message).to.contain('Unable to load configured help class "help-class-does-not-exist", failed with message:\n'))
     .it('shows useful error message when configured help class cannot be loaded')
 
-    fancy
-    .stdout()
-    .stub(PluginHelp, 'getHelpClass', ((config: any) => {
-      return originalgetHelpClass(config, '')
-    }) as unknown as () => void)
-    .add('config', async () => {
-      const config: TestHelpClassConfig = await Config.load()
-      config.pjson.oclif.helpClass = undefined
-      return config
-    })
-    .do(async ({config}) => {
-      class CMD extends Command {
-        config = config
-      }
-      await CMD.run(['-h'])
-    })
-    .catch((error: Error) => expect(error.message).to.contain('Could not load a help class, consider installing the @oclif/plugin-help package, failed with message:\n'))
-    .it('shows useful error message when no help class has been configured and the default cannot be loaded')
-
     describe('from a help class', () => {
       fancy
       .stdout()
