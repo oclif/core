@@ -85,7 +85,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\" --no-color",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit"
   },
