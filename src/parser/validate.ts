@@ -34,7 +34,7 @@ export function validate(parse: {
       }
 
       if (arg.required) {
-        if (!parse.output.argv[index]) {
+        if (!parse.output.argv[index] && parse.output.argv[index] as any as number !== 0) {
           missingRequiredArgs.push(arg)
         }
       }

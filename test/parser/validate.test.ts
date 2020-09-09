@@ -89,15 +89,20 @@ describe('validate', () => {
           required: true,
         },
       },
-      args: [],
+      args: [
+        {
+          name: 'zero',
+          required: true,
+        },
+      ],
       strict: true,
       context: {},
       '--': true,
     }
 
     const output = {
-      args: {},
-      argv: [],
+      args: {zero: 0},
+      argv: [0],
       flags: {int: 0},
       raw: [],
       metadata: {
