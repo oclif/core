@@ -6,7 +6,7 @@
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
     "@oclif/linewrap": "^1.0.0",
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.0",
     "clean-stack": "^3.0.0",
     "cli-ux": "^5.1.0",
     "debug": "^4.1.1",
