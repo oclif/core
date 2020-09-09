@@ -1,4 +1,4 @@
-import Chalk from 'chalk'
+import * as Chalk from 'chalk'
 
 import Deps from './deps'
 import {IFlag} from './flags'

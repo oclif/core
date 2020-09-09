@@ -1,6 +1,6 @@
 import * as Config from '../config'
 import {error} from '../errors'
-import chalk from 'chalk'
+import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
@@ -14,7 +14,7 @@ import {getHelpClass} from './util'
 const wrap = require('wrap-ansi')
 const {
   bold,
-} = chalk
+} = Chalk
 
 export interface HelpOptions {
   all?: boolean;

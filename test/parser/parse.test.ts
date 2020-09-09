@@ -1,10 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 import {expect} from 'chai'
-import chalk from 'chalk'
 
 import {flags, parse} from '../../src/parser'
-
-chalk.enabled = false
 
 describe('parse', () => {
   it('--bool', () => {
