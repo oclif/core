@@ -8,7 +8,7 @@ const ROOT_INDEX_CMD_ID = ''
 
 export class Main extends Command {
   static run(argv = process.argv.slice(2), options?: Config.LoadOptions) {
-    return super.run(argv, options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
+    return super.run(argv, options || (module.parent && module.parent.parent && module.parent.parent.parent && module.parent.parent.parent.filename) || __dirname)
   }
 
   async init() {
