@@ -6,7 +6,7 @@
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
     "@oclif/linewrap": "^1.0.0",
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.0",
     "clean-stack": "^3.0.0",
     "cli-ux": "^5.1.0",
     "debug": "^4.1.1",
@@ -85,7 +85,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\" --no-color",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit"
   },

@@ -1,5 +1,5 @@
 import * as Config from '../config'
-import chalk from 'chalk'
+import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
@@ -9,7 +9,7 @@ import {compact, template} from './util'
 const wrap = require('wrap-ansi')
 const {
   bold,
-} = chalk
+} = Chalk
 
 export default class RootHelp {
   render: (input: string) => string

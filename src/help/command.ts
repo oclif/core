@@ -1,5 +1,5 @@
 import * as Config from '../config'
-import chalk from 'chalk'
+import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
@@ -10,13 +10,13 @@ import {castArray, compact, sortBy, template} from './util'
 const {
   underline,
   bold,
-} = chalk
+} = Chalk
 let {
   dim,
-} = chalk
+} = Chalk
 
 if (process.env.ConEmuANSI === 'ON') {
-  dim = chalk.gray
+  dim = Chalk.gray
 }
 
 const wrap = require('wrap-ansi')
