@@ -16,6 +16,8 @@ const {
   bold,
 } = chalk
 
+const ROOT_INDEX_CMD_ID = ''
+
 export interface HelpOptions {
   all?: boolean;
   maxWidth: number;
@@ -25,8 +27,8 @@ export interface HelpOptions {
 function getHelpSubject(args: string[]): string | undefined {
   for (const arg of args) {
     if (arg === '--') return
-    if (arg.startsWith('-')) continue
-    if (arg === 'help') continue
+    if (arg === 'help' || arg === '--help' || arg === '-h') continue
+    if (arg.startsWith('-')) return
     return arg
   }
 }
@@ -99,6 +101,8 @@ export default class Help extends HelpBase {
   public showHelp(argv: string[]) {
     const subject = getHelpSubject(argv)
     if (!subject) {
+      const rootCmd = this.config.findCommand(ROOT_INDEX_CMD_ID)
+      if (rootCmd) this.showCommandHelp(rootCmd)
       this.showRootHelp()
       return
     }
@@ -159,6 +163,7 @@ export default class Help extends HelpBase {
     }
 
     if (rootCommands.length > 0) {
+      rootCommands = rootCommands.filter(c => c.id)
       console.log(this.formatCommands(rootCommands))
       console.log('')
     }
