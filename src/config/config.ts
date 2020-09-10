@@ -564,7 +564,7 @@ function isConfig(o: any): o is IConfig {
 }
 
 export type LoadOptions = Options | string | IConfig | undefined
-export async function load(opts: LoadOptions = (module.parent && module.parent && module.parent.parent && module.parent.parent.parent && module.parent.parent.parent.filename) || __dirname) {
+export async function load(opts: LoadOptions = (module.parent && module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
   if (typeof opts === 'string') opts = {root: opts}
   if (isConfig(opts)) return opts
   const config = new Config(opts)
