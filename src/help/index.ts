@@ -1,15 +1,17 @@
-import * as Config from '../config'
-import {error} from '../errors'
 import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
+import * as Config from '../config'
+import {error} from '../errors'
 import CommandHelp from './command'
 import {renderList} from './list'
 import RootHelp from './root'
 import {stdtermwidth} from './screen'
-import {compact, sortBy, template, uniqBy} from './util'
-import {getHelpClass} from './util'
+import {compact, sortBy, uniqBy} from '../util'
+import {template} from './util'
+
+export {getHelpClass} from './util'
 
 const wrap = require('wrap-ansi')
 const {
@@ -57,7 +59,7 @@ export abstract class HelpBase {
   public abstract showCommandHelp(command: Config.Command, topics: Config.Topic[]): void;
 }
 
-export default class Help extends HelpBase {
+export class Help extends HelpBase {
   render: (input: string) => string
 
   /*
@@ -260,9 +262,4 @@ export default class Help extends HelpBase {
   protected command(command: Config.Command) {
     return this.formatCommand(command)
   }
-}
-
-export {
-  Help,
-  getHelpClass,
 }

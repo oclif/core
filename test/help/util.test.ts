@@ -2,7 +2,7 @@
 import {resolve} from 'path'
 import * as Config from '../../src/config'
 import {expect, test} from '@oclif/test'
-import {getHelpClass} from '../../src/help/util'
+import {getHelpClass} from '../../src/help'
 import configuredHelpClass from  '../../src/help/_test-help-class'
 
 describe('util', () => {

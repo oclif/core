@@ -1,9 +1,9 @@
 import {spy, SinonSpy} from 'sinon'
-import {Config, Help} from '../../../../../src'
+import {Config, HelpBase} from '../../../../../src'
 
 export type TestHelpClassConfig = Config.IConfig & { showCommandHelpSpy?: SinonSpy; showHelpSpy?: SinonSpy }
 
-export default class extends Help.HelpBase {
+export default class extends HelpBase {
   constructor(config: any, opts: any) {
     super(config, opts)
     config.showCommandHelpSpy = this.showCommandHelp

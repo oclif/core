@@ -4,7 +4,8 @@ import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
 import {HelpOptions} from '.'
-import {compact, template} from './util'
+import {compact} from '../util'
+import {template} from './util'
 
 const wrap = require('wrap-ansi')
 const {

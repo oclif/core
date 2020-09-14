@@ -2,13 +2,12 @@ import {expect, fancy} from 'fancy-test'
 import path = require('path')
 
 import {Main} from '../../src/main'
-import {Help as PluginHelp, Config} from '../../src'
+import {Config} from '../../src'
 import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 const root = path.resolve(__dirname, '../../package.json')
 const pjson = require(root)
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
-const originalgetHelpClass = PluginHelp.getHelpClass
 
 describe('main', () => {
   fancy
@@ -48,7 +47,7 @@ COMMANDS
   describe('with an alternative help class', async () => {
     const getMainWithHelpClass = async () => {
       const config: TestHelpClassConfig = await Config.load(root)
-      config.pjson.oclif.helpClass = './src/test-help-plugin'
+      config.pjson.oclif.helpClass = './test/command/helpers/test-help-in-src/src/test-help-plugin'
 
       class MainWithHelpClass extends Main {
         config = config
@@ -59,14 +58,6 @@ COMMANDS
 
     fancy
     .stdout()
-    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-      const patchedConfig = {
-        ...config,
-        root: `${__dirname}/helpers/test-help-in-src/`,
-      }
-
-      return originalgetHelpClass(patchedConfig)
-    }) as unknown as () => void)
     .do(async () => (await getMainWithHelpClass()).run(['-h']))
     .catch('EEXIT: 0')
     .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
@@ -74,14 +65,6 @@ COMMANDS
 
     fancy
     .stdout()
-    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) =>  {
-      const patchedConfig = {
-        ...config,
-        root: `${__dirname}/helpers/test-help-in-src/`,
-      }
-
-      return originalgetHelpClass(patchedConfig)
-    }) as unknown as () => void)
     .do(async () => (await getMainWithHelpClass()).run(['--help']))
     .catch('EEXIT: 0')
     .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
@@ -89,14 +72,6 @@ COMMANDS
 
     fancy
     .stdout()
-    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-      const patchedConfig = {
-        ...config,
-        root: `${__dirname}/helpers/test-help-in-src/`,
-      }
-
-      return originalgetHelpClass(patchedConfig)
-    }) as unknown as () => void)
     .do(async () => (await getMainWithHelpClass()).run(['help']))
     .catch('EEXIT: 0')
     .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))

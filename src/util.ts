@@ -31,3 +31,8 @@ export function sortBy<T>(arr: T[], fn: (i: T) => sort.Types | sort.Types[]): T[
 
   return arr.sort((a, b) => compare(fn(a), fn(b)))
 }
+
+export function castArray<T>(input?: T | T[]): T[] {
+  if (input === undefined) return []
+  return Array.isArray(input) ? input : [input]
+}
