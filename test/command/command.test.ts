@@ -1,12 +1,11 @@
 import {expect, fancy} from 'fancy-test'
 import path = require('path')
 
-import {Config, Command as Base, Flags as flags} from '../../src'
+import {Config, Command as Base, Flags as flags, Help as PluginHelp} from '../../src'
 import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
-// import * as PluginHelp from '../../src/help'
-// const originalgetHelpClass = PluginHelp.getHelpClass
 
 // const pjson = require('../package.json')
+const originalgetHelpClass = PluginHelp.getHelpClass
 const root = path.resolve(__dirname, '../../package.json')
 
 class Command extends Base {
@@ -288,108 +287,108 @@ USAGE
     .catch((error: Error) => expect(error.message).to.contain('Unable to load configured help class "help-class-does-not-exist", failed with message:\n'))
     .it('shows useful error message when configured help class cannot be loaded')
 
-    //   describe('from a help class', () => {
-    //     fancy
-    //     .stdout()
-    //     .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-    //       const patchedConfig = {
-    //         ...config,
-    //         root: `${__dirname}/helpers/test-help-in-lib/`,
-    //       }
+    describe('from a help class', () => {
+      fancy
+      .stdout()
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
+        const patchedConfig = {
+          ...config,
+          root: `${__dirname}/helpers/test-help-in-lib/`,
+        }
 
-    //       return originalgetHelpClass(patchedConfig)
-    //     }) as unknown as () => void)
-    //     .add('config', async () => {
-    //       const config: TestHelpClassConfig = await Config.load()
-    //       config.pjson.oclif.helpClass = './lib/test-help-plugin'
-    //       return config
-    //     })
-    //     .do(async ({config}) => {
-    //       class CMD extends Command {
-    //         static id = 'test-command-for-help-plugin'
+        return originalgetHelpClass(patchedConfig)
+      }) as unknown as () => void)
+      .add('config', async () => {
+        const config: TestHelpClassConfig = await Config.load()
+        config.pjson.oclif.helpClass = './lib/test-help-plugin'
+        return config
+      })
+      .do(async ({config}) => {
+        class CMD extends Command {
+              static id = 'test-command-for-help-plugin'
 
-    //         config = config
-    //       }
-    //       await CMD.run(['-h'])
-    //     })
-    //     .catch(/EEXIT: 0/)
-    //     .it('-h via a plugin in lib dir (compiled to js)', ctx => {
-    //       expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp in the lib folder and in compiled javascript\n')
-    //       expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
-    //       expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
-    //       const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
-    //       expect(Command.id).to.deep.equal('test-command-for-help-plugin')
-    //       expect(Topics).to.be.an('array')
-    //     })
+              config = config
+        }
+        await CMD.run(['-h'])
+      })
+      .catch(/EEXIT: 0/)
+      .it('-h via a plugin in lib dir (compiled to js)', ctx => {
+        expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp in the lib folder and in compiled javascript\n')
+        expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
+        expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
+        const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
+        expect(Command.id).to.deep.equal('test-command-for-help-plugin')
+        expect(Topics).to.be.an('array')
+      })
 
-    //     fancy
-    //     .stdout()
-    //     .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-    //       const patchedConfig = {
-    //         ...config,
-    //         root: `${__dirname}/helpers/test-help-in-src/`,
-    //       }
+      fancy
+      .stdout()
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
+        const patchedConfig = {
+          ...config,
+          root: `${__dirname}/helpers/test-help-in-src/`,
+        }
 
-    //       return originalgetHelpClass(patchedConfig)
-    //     }) as unknown as () => void)
-    //     .add('config', async () => {
-    //       const config: TestHelpClassConfig = await Config.load()
-    //       config.pjson.oclif.helpClass = './src/test-help-plugin'
-    //       return config
-    //     })
-    //     .do(async ({config}) => {
-    //       class CMD extends Command {
-    //         static id = 'test-command-for-help-plugin'
+        return originalgetHelpClass(patchedConfig)
+      }) as unknown as () => void)
+      .add('config', async () => {
+        const config: TestHelpClassConfig = await Config.load()
+        config.pjson.oclif.helpClass = './src/test-help-plugin'
+        return config
+      })
+      .do(async ({config}) => {
+        class CMD extends Command {
+              static id = 'test-command-for-help-plugin'
 
-    //         config = config
-    //       }
-    //       await CMD.run(['-h'])
-    //     })
-    //     .catch(/EEXIT: 0/)
-    //     .it('-h via a plugin in src dir (source in ts)', ctx => {
-    //       expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp\n')
-    //       expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
-    //       expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
-    //       const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
-    //       expect(Command.id).to.deep.equal('test-command-for-help-plugin')
-    //       expect(Topics).to.be.an('array')
-    //     })
+              config = config
+        }
+        await CMD.run(['-h'])
+      })
+      .catch(/EEXIT: 0/)
+      .it('-h via a plugin in src dir (source in ts)', ctx => {
+        expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp\n')
+        expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
+        expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
+        const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
+        expect(Command.id).to.deep.equal('test-command-for-help-plugin')
+        expect(Topics).to.be.an('array')
+      })
 
-    //     fancy
-    //     .stdout()
-    //     .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-    //       const patchedConfig = {
-    //         ...config,
-    //         root: `${__dirname}/helpers/test-help-in-src/`,
-    //       }
+      fancy
+      .stdout()
+      .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
+        const patchedConfig = {
+          ...config,
+          root: `${__dirname}/helpers/test-help-in-src/`,
+        }
 
-    //       return originalgetHelpClass(patchedConfig)
-    //     }) as unknown as () => void)
-    //     .add('config', async () => {
-    //       const config: TestHelpClassConfig = await Config.load()
-    //       config.pjson.oclif.helpClass = './src/test-help-plugin'
-    //       return config
-    //     })
-    //     .do(async ({config}) => {
-    //       class CMD extends Command {
-    //         static id = 'test-command-for-help-plugin'
+        return originalgetHelpClass(patchedConfig)
+      }) as unknown as () => void)
+      .add('config', async () => {
+        const config: TestHelpClassConfig = await Config.load()
+        config.pjson.oclif.helpClass = './src/test-help-plugin'
+        return config
+      })
+      .do(async ({config}) => {
+        class CMD extends Command {
+              static id = 'test-command-for-help-plugin'
 
-    //         config = config
+              config = config
 
-  //         static flags = {help: flags.help()}
-  //       }
-  //       return CMD.run(['--help'])
-  //     })
-  //     .catch(/EEXIT: 0/)
-  //     .it('--help via a plugin in src dir (source in ts)', ctx => {
-  //       expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp\n')
-  //       expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
-  //       expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
-  //       const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
-  //       expect(Command.id).to.deep.equal('test-command-for-help-plugin')
-  //       expect(Topics).to.be.an('array')
-  //     })
-  //   })
+              static flags = {help: flags.help()}
+        }
+        return CMD.run(['--help'])
+      })
+      .catch(/EEXIT: 0/)
+      .it('--help via a plugin in src dir (source in ts)', ctx => {
+        expect(ctx.stdout).to.equal('hello from test-help-plugin #showCommandHelp\n')
+        expect(ctx.config.showCommandHelpSpy!.getCalls().length).to.equal(1)
+        expect(ctx.config.showHelpSpy!.getCalls().length).to.equal(0)
+        const [Command, Topics] = ctx.config.showCommandHelpSpy!.firstCall.args
+        expect(Command.id).to.deep.equal('test-command-for-help-plugin')
+        expect(Topics).to.be.an('array')
+      })
+    })
   })
 
   describe('.log()', () => {

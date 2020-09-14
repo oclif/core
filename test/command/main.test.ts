@@ -51,7 +51,7 @@ COMMANDS
       config.pjson.oclif.helpClass = './src/test-help-plugin'
 
       class MainWithHelpClass extends Main {
-          config = config
+        config = config
       }
 
       return MainWithHelpClass
