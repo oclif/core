@@ -14,7 +14,7 @@ const pjson = require('../package.json')
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-.process.stdout.on('error', (err: any) => {
+process.stdout.on('error', (err: any) => {
   if (err && err.code === 'EPIPE')
     return
   throw err
