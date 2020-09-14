@@ -33,11 +33,11 @@ describe('command', () => {
   fancy
   .do(async () => {
     class Command extends Base {
-        static description = 'test command'
+      static description = 'test command'
 
-        async run() {
-          return 101
-        }
+      async run() {
+        return 101
+      }
     }
 
     expect(await Command.run([])).to.equal(101)
@@ -204,14 +204,14 @@ describe('command', () => {
     .stdout()
     .it('has a flag', async ctx => {
       class CMD extends Base {
-          static flags = {
-            foo: flags.string(),
-          }
+        static flags = {
+          foo: flags.string(),
+        }
 
-          async run() {
-            const {flags} = this.parse(CMD)
-            this.log(flags.foo)
-          }
+        async run() {
+          const {flags} = this.parse(CMD)
+          this.log(flags.foo)
+        }
       }
 
       await CMD.run(['--foo=bar'])
@@ -237,7 +237,7 @@ describe('command', () => {
     .stdout()
     .do(() => {
       class CMD extends Command {
-          static flags = {help: flags.help()}
+        static flags = {help: flags.help()}
       }
       return CMD.run(['--help'], root)
     })
@@ -305,9 +305,9 @@ USAGE
       })
       .do(async ({config}) => {
         class CMD extends Command {
-              static id = 'test-command-for-help-plugin'
+          static id = 'test-command-for-help-plugin'
 
-              config = config
+          config = config
         }
         await CMD.run(['-h'])
       })
@@ -338,9 +338,9 @@ USAGE
       })
       .do(async ({config}) => {
         class CMD extends Command {
-              static id = 'test-command-for-help-plugin'
+          static id = 'test-command-for-help-plugin'
 
-              config = config
+          config = config
         }
         await CMD.run(['-h'])
       })
@@ -371,11 +371,11 @@ USAGE
       })
       .do(async ({config}) => {
         class CMD extends Command {
-              static id = 'test-command-for-help-plugin'
+          static id = 'test-command-for-help-plugin'
 
-              config = config
+          config = config
 
-              static flags = {help: flags.help()}
+          static flags = {help: flags.help()}
         }
         return CMD.run(['--help'])
       })
