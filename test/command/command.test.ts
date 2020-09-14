@@ -1,12 +1,9 @@
-import * as Config from '../../src/config'
 import {expect, fancy} from 'fancy-test'
-
-import Base from '../../src/command'
-import * as flags from '../../src/flags'
-import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
-// import * as PluginHelp from '../../src/help'
 import path = require('path')
 
+import {Config, Command as Base, Flags as flags} from '../../src'
+import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
+// import * as PluginHelp from '../../src/help'
 // const originalgetHelpClass = PluginHelp.getHelpClass
 
 // const pjson = require('../package.json')

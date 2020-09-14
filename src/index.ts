@@ -1,6 +1,24 @@
 import * as path from 'path'
 import * as semver from 'semver'
 
+import Command from './command'
+import {run} from './main'
+import * as Config from './config'
+import * as Errors from './errors'
+import * as Flags from './flags'
+import * as Help from './help'
+import * as Parser from './parser'
+
+export {
+  Command,
+  Config,
+  Errors,
+  Flags,
+  Help,
+  Parser,
+  run,
+}
+
 function checkCWD() {
   try {
     process.cwd()
@@ -19,21 +37,3 @@ function checkNodeVersion() {
 }
 checkCWD()
 checkNodeVersion()
-
-import Command from './command'
-import {run} from './main'
-import * as Config from './config'
-import * as Errors from './errors'
-import * as Flags from './flags'
-import * as Help from './help'
-import * as Parser from './parser'
-
-export {
-  Command,
-  Config,
-  Errors,
-  Flags,
-  Help,
-  Parser,
-  run,
-}

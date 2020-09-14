@@ -1,10 +1,10 @@
 import {expect, fancy} from 'fancy-test'
+import path = require('path')
 
 import {Main} from '../../src/main'
 // import * as PluginHelp from '../../src/help'
 // import * as Config from '../../src/config'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
-import path = require('path')
 
 const root = path.resolve(__dirname, '../../package.json')
 const pjson = require(root)

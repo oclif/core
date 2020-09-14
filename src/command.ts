@@ -1,19 +1,20 @@
 import {format, inspect} from 'util'
 
-const pjson = require('../package.json')
 import * as Config from './config'
 import * as Errors from './errors'
+import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {HelpBase, getHelpClass} from './help'
 import * as flags from './flags'
 import {sortBy, uniqBy} from './util'
-import {PrettyPrintableError} from './errors'
+
+const pjson = require('../package.json')
 
 /**
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-process.stdout.on('error', err => {
+.process.stdout.on('error', (err: any) => {
   if (err && err.code === 'EPIPE')
     return
   throw err
