@@ -1,8 +1,6 @@
-import * as Config from '../config'
-import {HelpBase} from '../help'
-
-import {Command} from '.'
-import {getHelpClass} from '../help'
+import * as Config from './config'
+import {HelpBase, getHelpClass} from './help'
+import Command from './command'
 
 const ROOT_INDEX_CMD_ID = ''
 

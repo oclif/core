@@ -1,13 +1,12 @@
-import * as Config from '../../src/config'
 import {expect, fancy} from 'fancy-test'
+import path = require('path')
 
-import Base, {flags} from '../../src/command'
+import {Config, Command as Base, flags, Help as PluginHelp} from '../../src'
 import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
-import * as PluginHelp from '../../src/help'
-
-const originalgetHelpClass = PluginHelp.getHelpClass
 
 // const pjson = require('../package.json')
+const originalgetHelpClass = PluginHelp.getHelpClass
+const root = path.resolve(__dirname, '../../package.json')
 
 class Command extends Base {
   static description = 'test command'
@@ -34,11 +33,11 @@ describe('command', () => {
   fancy
   .do(async () => {
     class Command extends Base {
-        static description = 'test command'
+      static description = 'test command'
 
-        async run() {
-          return 101
-        }
+      async run() {
+        return 101
+      }
     }
 
     expect(await Command.run([])).to.equal(101)
@@ -205,14 +204,14 @@ describe('command', () => {
     .stdout()
     .it('has a flag', async ctx => {
       class CMD extends Base {
-          static flags = {
-            foo: flags.string(),
-          }
+        static flags = {
+          foo: flags.string(),
+        }
 
-          async run() {
-            const {flags} = this.parse(CMD)
-            this.log(flags.foo)
-          }
+        async run() {
+          const {flags} = this.parse(CMD)
+          this.log(flags.foo)
+        }
       }
 
       await CMD.run(['--foo=bar'])
@@ -225,7 +224,7 @@ describe('command', () => {
     .stdout()
     .add('config', () => Config.load())
     .do(async () => {
-      await Command.run(['--version'])
+      await Command.run(['--version'], root)
     })
     .catch(/EEXIT: 0/)
     .it('shows version', ctx => {
@@ -238,9 +237,9 @@ describe('command', () => {
     .stdout()
     .do(() => {
       class CMD extends Command {
-          static flags = {help: flags.help()}
+        static flags = {help: flags.help()}
       }
-      return CMD.run(['--help'])
+      return CMD.run(['--help'], root)
     })
     .catch(/EEXIT: 0/)
     .it('--help', ctx => {
@@ -259,7 +258,7 @@ OPTIONS
     .stdout()
     .do(async () => {
       class CMD extends Command {}
-      await CMD.run(['-h'])
+      await CMD.run(['-h'], root)
     })
     .catch(/EEXIT: 0/)
     .it('-h', ctx => {

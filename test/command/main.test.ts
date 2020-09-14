@@ -1,32 +1,32 @@
 import {expect, fancy} from 'fancy-test'
-
-import {Main} from '../../src/command/main'
-import * as PluginHelp from '../../src/help'
-import * as Config from '../../src/config'
-import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 import path = require('path')
 
-const pjson = require(path.resolve(__dirname, '../../package.json'))
+import {Main} from '../../src/main'
+import {Help as PluginHelp, Config} from '../../src'
+import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
+
+const root = path.resolve(__dirname, '../../package.json')
+const pjson = require(root)
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
 const originalgetHelpClass = PluginHelp.getHelpClass
 
 describe('main', () => {
   fancy
   .stdout()
-  .do(() => Main.run(['plugins']))
+  .do(() => Main.run(['plugins'], root))
   .do((output: any) => expect(output.stdout).to.equal('no plugins installed\n'))
   .it('runs plugins')
 
   fancy
   .stdout()
-  .do(() => Main.run(['-v']))
+  .do(() => Main.run(['-v'], root))
   .catch('EEXIT: 0')
   .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
   .it('runs -v')
 
   fancy
   .stdout()
-  .do(() => Main.run(['-h']))
+  .do(() => Main.run(['-h'], root))
   .catch('EEXIT: 0')
   .do((output: any) => expect(output.stdout).to.equal(`base library for oclif CLIs
 
@@ -47,7 +47,7 @@ COMMANDS
 
   describe('with an alternative help class', async () => {
     const getMainWithHelpClass = async () => {
-      const config: TestHelpClassConfig = await Config.load()
+      const config: TestHelpClassConfig = await Config.load(root)
       config.pjson.oclif.helpClass = './src/test-help-plugin'
 
       class MainWithHelpClass extends Main {

@@ -1,7 +1,6 @@
-import {IConfig} from '../config'
-import * as Parser from '../parser'
-
-import {Command} from '.'
+import {IConfig} from './config'
+import * as Parser from './parser'
+import Command from './command'
 
 export type ICompletionContext = {
   args?: { [name: string]: string };
@@ -56,7 +55,7 @@ export {_enum as enum}
 
 const stringFlag = build({})
 export {stringFlag as string}
-export {boolean, integer} from '../parser'
+export {boolean, integer} from './parser'
 
 export const version = (opts: Partial<Parser.flags.IBooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({
