@@ -24,7 +24,7 @@ import Command from './command'
 import {run} from './main'
 import * as Config from './config'
 import * as Errors from './errors'
-import * as Flags from './errors'
+import * as Flags from './flags'
 import * as Help from './help'
 import * as Parser from './parser'
 
