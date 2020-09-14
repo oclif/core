@@ -1,14 +1,13 @@
-const pjson = require('../../package.json')
-import * as Config from '../config'
-import * as Errors from '../errors'
-import * as Parser from '../parser'
-import {HelpBase} from '../help'
 import {format, inspect} from 'util'
 
+const pjson = require('../package.json')
+import * as Config from './config'
+import * as Errors from './errors'
+import * as Parser from './parser'
+import {HelpBase, getHelpClass} from './help'
 import * as flags from './flags'
 import {sortBy, uniqBy} from './util'
-import {getHelpClass} from '../help'
-import {PrettyPrintableError} from '../errors'
+import {PrettyPrintableError} from './errors'
 
 /**
  * swallows stdout epipe errors
