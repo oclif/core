@@ -2,14 +2,13 @@ import {expect, fancy} from 'fancy-test'
 import path = require('path')
 
 import {Main} from '../../src/main'
-// import * as PluginHelp from '../../src/help'
-// import * as Config from '../../src/config'
-// import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
+import {Help as PluginHelp, Config} from '../../src'
+import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 const root = path.resolve(__dirname, '../../package.json')
 const pjson = require(root)
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
-// const originalgetHelpClass = PluginHelp.getHelpClass
+const originalgetHelpClass = PluginHelp.getHelpClass
 
 describe('main', () => {
   fancy
@@ -46,61 +45,61 @@ COMMANDS
 `))
   .it('runs -h')
 
-  // describe('with an alternative help class', async () => {
-  //   const getMainWithHelpClass = async () => {
-  //     const config: TestHelpClassConfig = await Config.load()
-  //     config.pjson.oclif.helpClass = './src/test-help-plugin'
+  describe('with an alternative help class', async () => {
+    const getMainWithHelpClass = async () => {
+      const config: TestHelpClassConfig = await Config.load(root)
+      config.pjson.oclif.helpClass = './src/test-help-plugin'
 
-  //     class MainWithHelpClass extends Main {
-  //       config = config
-  //     }
+      class MainWithHelpClass extends Main {
+          config = config
+      }
 
-  //     return MainWithHelpClass
-  //   }
+      return MainWithHelpClass
+    }
 
-  //   fancy
-  //   .stdout()
-  //   .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-  //     const patchedConfig = {
-  //       ...config,
-  //       root: `${__dirname}/helpers/test-help-in-src/`,
-  //     }
+    fancy
+    .stdout()
+    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
+      const patchedConfig = {
+        ...config,
+        root: `${__dirname}/helpers/test-help-in-src/`,
+      }
 
-  //     return originalgetHelpClass(patchedConfig)
-  //   }) as unknown as () => void)
-  //   .do(async () => (await getMainWithHelpClass()).run(['-h']))
-  //   .catch('EEXIT: 0')
-  //   .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
-  //   .it('works with -h')
+      return originalgetHelpClass(patchedConfig)
+    }) as unknown as () => void)
+    .do(async () => (await getMainWithHelpClass()).run(['-h']))
+    .catch('EEXIT: 0')
+    .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
+    .it('works with -h')
 
-  //   fancy
-  //   .stdout()
-  //   .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) =>  {
-  //     const patchedConfig = {
-  //       ...config,
-  //       root: `${__dirname}/helpers/test-help-in-src/`,
-  //     }
+    fancy
+    .stdout()
+    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) =>  {
+      const patchedConfig = {
+        ...config,
+        root: `${__dirname}/helpers/test-help-in-src/`,
+      }
 
-  //     return originalgetHelpClass(patchedConfig)
-  //   }) as unknown as () => void)
-  //   .do(async () => (await getMainWithHelpClass()).run(['--help']))
-  //   .catch('EEXIT: 0')
-  //   .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
-  //   .it('works with --help')
+      return originalgetHelpClass(patchedConfig)
+    }) as unknown as () => void)
+    .do(async () => (await getMainWithHelpClass()).run(['--help']))
+    .catch('EEXIT: 0')
+    .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
+    .it('works with --help')
 
-  //   fancy
-  //   .stdout()
-  //   .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
-  //     const patchedConfig = {
-  //       ...config,
-  //       root: `${__dirname}/helpers/test-help-in-src/`,
-  //     }
+    fancy
+    .stdout()
+    .stub(PluginHelp, 'getHelpClass', ((config: Config.IConfig) => {
+      const patchedConfig = {
+        ...config,
+        root: `${__dirname}/helpers/test-help-in-src/`,
+      }
 
-  //     return originalgetHelpClass(patchedConfig)
-  //   }) as unknown as () => void)
-  //   .do(async () => (await getMainWithHelpClass()).run(['help']))
-  //   .catch('EEXIT: 0')
-  //   .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
-  //   .it('works with help')
-  // })
+      return originalgetHelpClass(patchedConfig)
+    }) as unknown as () => void)
+    .do(async () => (await getMainWithHelpClass()).run(['help']))
+    .catch('EEXIT: 0')
+    .do((output: any) => expect(output.stdout).to.equal('hello showHelp\n'))
+    .it('works with help')
+  })
 })
