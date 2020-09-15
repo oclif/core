@@ -1,8 +1,7 @@
 import * as Parser from '../../parser'
 
-import {IConfig, LoadOptions} from './config'
-import {IPlugin} from './plugin'
-// import {mapValues} from './util'
+import {Config, LoadOptions} from './config'
+import {Plugin} from './plugin'
 
 export interface Command {
   id: string;
@@ -66,10 +65,10 @@ export namespace Command {
   }
 
   export interface Class extends Base {
-    plugin?: IPlugin;
+    plugin?: Plugin;
     flags?: Parser.flags.Input<any>;
     args?: Parser.args.Input;
-    new(argv: string[], config: IConfig): Instance;
+    new(argv: string[], config: Config): Instance;
     run(argv?: string[], config?: LoadOptions): PromiseLike<any>;
   }
 

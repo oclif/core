@@ -62,7 +62,7 @@ export default abstract class Command {
   /** An order-dependent array of arguments for the command */
   static args?: Parser.args.Input
 
-  static plugin: Interfaces.IPlugin | undefined
+  static plugin: Interfaces.Plugin | undefined
 
   /** An array of example strings to show at the end of the command's help */
   static examples: string[] | undefined
@@ -87,7 +87,7 @@ export default abstract class Command {
 
   protected debug: (...args: any[]) => void
 
-  constructor(public argv: string[], public config: Interfaces.IConfig) {
+  constructor(public argv: string[], public config: Interfaces.Config) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)

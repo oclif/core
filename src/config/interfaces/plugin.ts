@@ -21,7 +21,7 @@ export interface Options extends PluginOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface IPlugin {
+export interface Plugin {
   /**
    * ../config version
    */

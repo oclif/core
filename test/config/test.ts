@@ -4,7 +4,7 @@ import {Interfaces} from '../../src/config'
 
 export const fancy = base
 .register('resetConfig', () => ({
-  run(ctx: {config: Interfaces.IConfig}) {
+  run(ctx: {config: Interfaces.Config}) {
     delete ctx.config
   },
 }))

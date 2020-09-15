@@ -1,5 +1,5 @@
 import {Command} from './command'
-import {IConfig} from './config'
+import {Config} from './config'
 
 export interface Hooks {
   [event: string]: object;
@@ -32,7 +32,7 @@ export interface Hooks {
 }
 
 export type HookKeyOrOptions<K> = K extends (keyof Hooks) ? Hooks[K] : K
-export type Hook<T> = (this: Hook.Context, options: HookKeyOrOptions<T> & {config: IConfig}) => any
+export type Hook<T> = (this: Hook.Context, options: HookKeyOrOptions<T> & {config: Config}) => any
 
 export namespace Hook {
   export type Init = Hook<Hooks['init']>
@@ -44,7 +44,7 @@ export namespace Hook {
   export type CommandNotFound = Hook<Hooks['command_not_found']>
 
   export interface Context {
-    config: IConfig;
+    config: Config;
     exit(code?: number): void;
     error(message: string | Error, options?: {code?: string; exit?: number}): void;
     warn(message: string): void;

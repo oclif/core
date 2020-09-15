@@ -1,15 +1,14 @@
 import {PJSON} from './pjson'
 import {Hooks} from './hooks'
 import {Command} from './command'
-import {IPlugin, Options} from './plugin'
+import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
 
-export type LoadOptions = Options | string | IConfig | undefined
+export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
 export type ArchTypes = 'arm' | 'arm64' | 'mips' | 'mipsel' | 'ppc' | 'ppc64' | 's390' | 's390x' | 'x32' | 'x64' | 'x86'
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface IConfig {
+export interface Config {
   name: string;
   version: string;
   channel: string;
@@ -86,7 +85,7 @@ export interface IConfig {
    */
   npmRegistry?: string;
   userPJSON?: PJSON.User;
-  plugins: IPlugin[];
+  plugins: Plugin[];
   binPath?: string;
   valid: boolean;
   readonly commands: Command.Plugin[];
@@ -103,11 +102,11 @@ export interface IConfig {
   scopedEnvVarKey(key: string): string;
   scopedEnvVarTrue(key: string): boolean;
   s3Url(key: string): string;
-  s3Key(type: 'versioned' | 'unversioned', ext: '.tar.gz' | '.tar.xz', options?: IConfig.s3Key.Options): string;
-  s3Key(type: keyof PJSON.S3.Templates, options?: IConfig.s3Key.Options): string;
+  s3Key(type: 'versioned' | 'unversioned', ext: '.tar.gz' | '.tar.xz', options?: Config.s3Key.Options): string;
+  s3Key(type: keyof PJSON.S3.Templates, options?: Config.s3Key.Options): string;
 }
 
-export namespace IConfig {
+export namespace Config {
   export namespace s3Key {
     export interface Options {
       platform?: PlatformTypes;

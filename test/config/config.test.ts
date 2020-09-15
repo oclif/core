@@ -41,11 +41,11 @@ describe('Config', () => {
           expect(o).to.equal(expected)
         })
       },
-      hasProperty<K extends keyof Interfaces.IConfig>(k: K | undefined, v: Interfaces.IConfig[K] | undefined) {
+      hasProperty<K extends keyof Interfaces.Config>(k: K | undefined, v: Interfaces.Config[K] | undefined) {
         return this
         .it(`has ${k}=${v}`, config => expect(config).to.have.property(k!, v))
       },
-      it(expectation: string, fn: (config: Interfaces.IConfig) => any) {
+      it(expectation: string, fn: (config: Interfaces.Config) => any) {
         test
         .do(({config}) => fn(config))
         .it(expectation)

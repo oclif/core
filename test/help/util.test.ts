@@ -6,7 +6,7 @@ import {getHelpClass} from '../../src/help'
 import configuredHelpClass from  '../../src/help/_test-help-class'
 
 describe('util', () => {
-  let config: Interfaces.IConfig
+  let config: Interfaces.Config
 
   beforeEach(async () => {
     config = await Config.load()

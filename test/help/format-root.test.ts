@@ -1,9 +1,10 @@
-import {expect, test as base, Config} from '@oclif/test'
+import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
 import {Help} from '../../src/help'
+import {Interfaces} from '../../src'
 
 const VERSION = require('../../package.json').version
 const UA = `@oclif/core/${VERSION} ${process.platform}-${process.arch} node-${process.version}`
@@ -17,8 +18,8 @@ class TestHelp extends Help {
 
 const test = base
 .loadConfig()
-.register('rootHelp', (ctxOverride?: (config: Config.IConfig) => Config.IConfig) => ({
-  run(ctx: {config: Config.IConfig; help: Help; commandHelp: string; expectation: string}) {
+.register('rootHelp', (ctxOverride?: (config: Interfaces.Config) => Interfaces.Config) => ({
+  run(ctx: { config: Interfaces.Config; help: Help; commandHelp: string; expectation: string}) {
     const config = ctxOverride ? ctxOverride(ctx.config) : ctx.config
 
     const help = new TestHelp(config as any)

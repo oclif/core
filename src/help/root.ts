@@ -15,7 +15,7 @@ const {
 export default class RootHelp {
   render: (input: string) => string
 
-  constructor(public config: Config.IConfig, public opts: HelpOptions) {
+  constructor(public config: Config.Config, public opts: HelpOptions) {
     this.render = template(this)
   }
 

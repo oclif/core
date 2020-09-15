@@ -3,7 +3,7 @@ import * as Globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
 
-import {IPlugin, PluginOptions} from './interfaces/plugin'
+import {Plugin as IPlugin, PluginOptions} from './interfaces/plugin'
 import {Command} from './interfaces/command'
 import {toCached} from './config'
 import {Debug} from './util'
