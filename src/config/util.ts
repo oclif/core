@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-const debug = require('debug')('../config')
+const debug = require('debug')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
   return arr.reduce((arr, i) => arr.concat(fn(i)), [] as U[])
@@ -19,7 +19,7 @@ export function exists(path: string): Promise<boolean> {
 }
 
 export function loadJSON(path: string): Promise<any> {
-  debug('loadJSON %s', path)
+  debug('config')('loadJSON %s', path)
   // let loadJSON
   // try { loadJSON = require('load-json-file') } catch {}
   // if (loadJSON) return loadJSON.sync(path)
@@ -43,4 +43,44 @@ export function uniq<T>(arr: T[]): T[] {
   return arr.filter((a, i) => {
     return !arr.find((b, j) => j > i && b === a)
   })
+}
+
+function termwidth(stream: any): number {
+  if (!stream.isTTY) {
+    return 80
+  }
+  const width = stream.getWindowSize()[0]
+  if (width < 1) {
+    return 80
+  }
+  if (width < 40) {
+    return 40
+  }
+  return width
+}
+
+const columns: number | null = (global as any).columns
+
+export const stdtermwidth = columns || termwidth(process.stdout)
+export const errtermwidth = columns || termwidth(process.stderr)
+
+// tslint:disable no-console
+// let debug: any
+// try {
+//   debug = require('debug')
+// } catch { }
+
+function displayWarnings() {
+  if (process.listenerCount('warning') > 1) return
+  process.on('warning', (warning: any) => {
+    console.error(warning.stack)
+    if (warning.detail) console.error(warning.detail)
+  })
+}
+
+export function Debug(...scope: string[]): (..._: any) => void {
+  if (!debug) return (..._: any[]) => { }
+  const d = debug(['config', ...scope].join(':'))
+  if (d.enabled) displayWarnings()
+  return (...args: any[]) => d(...args)
 }

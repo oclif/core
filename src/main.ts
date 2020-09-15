@@ -1,4 +1,4 @@
-import * as Config from './config'
+import {Interfaces as Config} from './config'
 import {HelpBase, getHelpClass} from './help'
 import Command from './command'
 

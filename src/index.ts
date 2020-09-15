@@ -3,7 +3,7 @@ import * as semver from 'semver'
 
 import Command from './command'
 import {run} from './main'
-import * as Config from './config'
+import {Config, Plugin, tsPath, toCached, Interfaces} from './config'
 import * as Errors from './errors'
 import * as flags from './flags'
 import {HelpBase, Help, getHelpClass} from './help'
@@ -17,8 +17,12 @@ export {
   getHelpClass,
   Help,
   HelpBase,
+  Interfaces,
   Parser,
+  Plugin,
   run,
+  toCached,
+  tsPath,
 }
 
 function checkCWD() {

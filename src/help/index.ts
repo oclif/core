@@ -2,7 +2,7 @@ import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
-import * as Config from '../config'
+import {Interfaces as Config} from '../config'
 import {error} from '../errors'
 import CommandHelp from './command'
 import {renderList} from './list'

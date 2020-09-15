@@ -1,6 +1,6 @@
 import {format, inspect} from 'util'
 
-import * as Config from './config'
+import {Interfaces, Config, toCached} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
@@ -62,7 +62,7 @@ export default abstract class Command {
   /** An order-dependent array of arguments for the command */
   static args?: Parser.args.Input
 
-  static plugin: Config.IPlugin | undefined
+  static plugin: Interfaces.IPlugin | undefined
 
   /** An array of example strings to show at the end of the command's help */
   static examples: string[] | undefined
@@ -72,11 +72,11 @@ export default abstract class Command {
   // eslint-disable-next-line valid-jsdoc
   /**
    * instantiate and run the command
-   * @param {Config.Command.Class} this Class
+   * @param {Interfaces.Command.Class} this Class
    * @param {string[]} argv argv
-   * @param {Config.LoadOptions} opts options
+   * @param {Interfaces.LoadOptions} opts options
    */
-  static run: Config.Command.Class['run'] = async function (this: Config.Command.Class, argv?: string[], opts?) {
+  static run: Interfaces.Command.Class['run'] = async function (this: Interfaces.Command.Class, argv?: string[], opts?) {
     if (!argv) argv = process.argv.slice(2)
     const config = await Config.load(opts || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
     const cmd = new this(argv, config)
@@ -87,7 +87,7 @@ export default abstract class Command {
 
   protected debug: (...args: any[]) => void
 
-  constructor(public argv: string[], public config: Config.IConfig) {
+  constructor(public argv: string[], public config: Interfaces.IConfig) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -191,7 +191,7 @@ export default abstract class Command {
   protected _help() {
     const HelpClass = getHelpClass(this.config)
     const help: HelpBase = new HelpClass(this.config)
-    const cmd = Config.Command.toCached(this.ctor as any as Config.Command.Class)
+    const cmd = toCached(this.ctor as any as Interfaces.Command.Class)
     if (!cmd.id) cmd.id = ''
     let topics = this.config.topics
     topics = topics.filter((t: any) => !t.hidden)

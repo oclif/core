@@ -1,4 +1,4 @@
-import {Command as Base, flags, Config} from '../../src'
+import {Command as Base, flags, Interfaces, toCached} from '../../src'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
@@ -14,7 +14,7 @@ class Command extends Base {
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
-  public formatCommand(command: Config.Command) {
+  public formatCommand(command: Interfaces.Command) {
     return super.formatCommand(command)
   }
 }
@@ -24,7 +24,7 @@ const test = base
 .add('help', ctx => new TestHelp(ctx.config as any))
 .register('commandHelp', (command?: any) => ({
   run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = Config.Command.toCached(command!, {} as any)
+    const cached = toCached(command!, {} as any)
     const help = ctx.help.formatCommand(cached)
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)

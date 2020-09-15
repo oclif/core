@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as TSNode from 'ts-node'
 
-import Debug from './debug'
+import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug()
 

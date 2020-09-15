@@ -3,77 +3,17 @@ import * as Globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
 
-import {Command} from './command'
-import Debug from './debug'
-import {Manifest} from './manifest'
-import {PJSON} from './pjson'
-import {Topic} from './topic'
+import {IPlugin, PluginOptions} from './interfaces/plugin'
+import {Command} from './interfaces/command'
+import {toCached} from './config'
+import {Debug} from './util'
+import {Manifest} from './interfaces/manifest'
+import {PJSON} from './interfaces/pjson'
+import {Topic} from './interfaces/topic'
 import {tsPath} from './ts-node'
 import {compact, exists, flatMap, loadJSON, mapValues} from './util'
 
 const ROOT_INDEX_CMD_ID = ''
-
-export interface Options {
-  root: string;
-  name?: string;
-  type?: string;
-  tag?: string;
-  ignoreManifest?: boolean;
-  errorOnManifestCreate?: boolean;
-  parent?: Plugin;
-  children?: Plugin[];
-}
-
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface IPlugin {
-  /**
-   * ../config version
-   */
-  _base: string;
-  /**
-   * name from package.json
-   */
-  name: string;
-  /**
-   * version from package.json
-   *
-   * example: 1.2.3
-   */
-  version: string;
-  /**
-   * full package.json
-   *
-   * parsed with read-pkg
-   */
-  pjson: PJSON.Plugin | PJSON.CLI;
-  /**
-   * used to tell the user how the plugin was installed
-   * examples: core, link, user, dev
-   */
-  type: string;
-  /**
-   * base path of plugin
-   */
-  root: string;
-  /**
-   * npm dist-tag of plugin
-   * only used for user plugins
-   */
-  tag?: string;
-  /**
-   * if it appears to be an npm package but does not look like it's really a CLI plugin, this is set to false
-   */
-  valid: boolean;
-
-  commands: Command.Plugin[];
-  hooks: {[k: string]: string[]};
-  readonly commandIDs: string[];
-  readonly topics: Topic[];
-
-  findCommand(id: string, opts: {must: true}): Command.Class;
-  findCommand(id: string, opts?: {must: boolean}): Command.Class | undefined;
-  load(): Promise<void>;
-}
 
 const _pjson = require('../../package.json')
 
@@ -170,7 +110,7 @@ export class Plugin implements IPlugin {
   protected warned = false
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(public options: Options) {}
+  constructor(public options: PluginOptions) {}
 
   async load() {
     this.type = this.options.type || 'core'
@@ -303,7 +243,7 @@ export class Plugin implements IPlugin {
       // eslint-disable-next-line array-callback-return
       commands: this.commandIDs.map(id => {
         try {
-          return [id, Command.toCached(this.findCommand(id, {must: true}), this)]
+          return [id, toCached(this.findCommand(id, {must: true}), this)]
         } catch (error) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
