@@ -1,10 +1,11 @@
-import {Command as Base, flags, Interfaces, toCached} from '../../src'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
+import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
+import {Help} from '../../src/help'
+
 const g: any = global
 g.columns = 80
-import {Help} from '../../src/help'
 
 class Command extends Base {
   async run() {

@@ -5,7 +5,7 @@ import Command from './command'
 import {run} from './main'
 import {Config, Plugin, tsPath, toCached, Interfaces} from './config'
 import * as Errors from './errors'
-import * as flags from './flags'
+import * as Flags from './flags'
 import {HelpBase, Help, getHelpClass} from './help'
 import * as Parser from './parser'
 
@@ -13,7 +13,7 @@ export {
   Command,
   Config,
   Errors,
-  flags,
+  Flags,
   getHelpClass,
   Help,
   HelpBase,
