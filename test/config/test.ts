@@ -1,10 +1,10 @@
 import {expect, fancy as base, FancyTypes} from 'fancy-test'
 
-import * as Config from '../../src/config'
+import {Interfaces} from '../../src/config'
 
 export const fancy = base
 .register('resetConfig', () => ({
-  run(ctx: {config: Config.IConfig}) {
+  run(ctx: {config: Interfaces.Config}) {
     delete ctx.config
   },
 }))

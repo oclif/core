@@ -1,7 +1,7 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config, IConfig, load, PJSON} from '../../src/config'
+import {Config, Interfaces} from '../../src/config'
 import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'
@@ -23,10 +23,10 @@ describe('Config', () => {
 
     if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
 
-    test = test.add('config', () => load())
+    test = test.add('config', () => Config.load())
 
     return {
-      hasS3Key(k: keyof PJSON.S3.Templates, expected: string, extra: any = {}) {
+      hasS3Key(k: keyof Interfaces.PJSON.S3.Templates, expected: string, extra: any = {}) {
         return this
         .it(`renders ${k} template as ${expected}`, config => {
           // eslint-disable-next-line prefer-const
@@ -41,11 +41,11 @@ describe('Config', () => {
           expect(o).to.equal(expected)
         })
       },
-      hasProperty<K extends keyof IConfig>(k: K | undefined, v: IConfig[K] | undefined) {
+      hasProperty<K extends keyof Interfaces.Config>(k: K | undefined, v: Interfaces.Config[K] | undefined) {
         return this
         .it(`has ${k}=${v}`, config => expect(config).to.have.property(k!, v))
       },
-      it(expectation: string, fn: (config: IConfig) => any) {
+      it(expectation: string, fn: (config: Interfaces.Config) => any) {
         test
         .do(({config}) => fn(config))
         .it(expectation)
