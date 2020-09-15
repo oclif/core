@@ -20,9 +20,6 @@ export function exists(path: string): Promise<boolean> {
 
 export function loadJSON(path: string): Promise<any> {
   debug('config')('loadJSON %s', path)
-  // let loadJSON
-  // try { loadJSON = require('load-json-file') } catch {}
-  // if (loadJSON) return loadJSON.sync(path)
   return new Promise((resolve, reject) => {
     fs.readFile(path, 'utf8', (err, d) => {
       try {
@@ -63,12 +60,6 @@ const columns: number | null = (global as any).columns
 
 export const stdtermwidth = columns || termwidth(process.stdout)
 export const errtermwidth = columns || termwidth(process.stderr)
-
-// tslint:disable no-console
-// let debug: any
-// try {
-//   debug = require('debug')
-// } catch { }
 
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
