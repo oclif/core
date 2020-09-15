@@ -1,4 +1,4 @@
-import {IConfig} from './config'
+import {Config} from './config/interfaces/config'
 import * as Parser from './parser'
 import Command from './command'
 
@@ -6,7 +6,7 @@ export type ICompletionContext = {
   args?: { [name: string]: string };
   flags?: { [name: string]: string };
   argv?: string[];
-  config: IConfig;
+  config: Config;
 }
 
 export type ICompletion = {

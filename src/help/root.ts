@@ -1,4 +1,4 @@
-import * as Config from '../config'
+import {Interfaces as Config} from '../config'
 import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
@@ -15,7 +15,7 @@ const {
 export default class RootHelp {
   render: (input: string) => string
 
-  constructor(public config: Config.IConfig, public opts: HelpOptions) {
+  constructor(public config: Config.Config, public opts: HelpOptions) {
     this.render = template(this)
   }
 

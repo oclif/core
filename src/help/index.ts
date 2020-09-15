@@ -2,7 +2,7 @@ import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
-import * as Config from '../config'
+import {Interfaces as Config} from '../config'
 import {error} from '../errors'
 import CommandHelp from './command'
 import {renderList} from './list'
@@ -36,12 +36,12 @@ function getHelpSubject(args: string[]): string | undefined {
 }
 
 export abstract class HelpBase {
-  constructor(config: Config.IConfig, opts: Partial<HelpOptions> = {}) {
+  constructor(config: Config.Config, opts: Partial<HelpOptions> = {}) {
     this.config = config
     this.opts = {maxWidth: stdtermwidth, ...opts}
   }
 
-  protected config: Config.IConfig
+  protected config: Config.Config
 
   protected opts: HelpOptions
 
@@ -95,7 +95,7 @@ export class Help extends HelpBase {
     return topics
   }
 
-  constructor(config: Config.IConfig, opts: Partial<HelpOptions> = {}) {
+  constructor(config: Config.Config, opts: Partial<HelpOptions> = {}) {
     super(config, opts)
     this.render = template(this)
   }

@@ -1,4 +1,4 @@
-import * as Config from '../../src/config'
+import {Interfaces, Config} from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
 import * as path from 'path'
@@ -16,7 +16,7 @@ class TestHelp extends Help {
     return super.showRootHelp()
   }
 
-  public showTopicHelp(topic: Config.Topic) {
+  public showTopicHelp(topic: Interfaces.Topic) {
     return super.showTopicHelp(topic)
   }
 }

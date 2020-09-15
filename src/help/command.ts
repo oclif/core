@@ -1,4 +1,4 @@
-import * as Config from '../config'
+import {Interfaces as Config} from '../config'
 import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
@@ -25,7 +25,7 @@ const wrap = require('wrap-ansi')
 export default class CommandHelp {
   render: (input: string) => string
 
-  constructor(public command: Config.Command, public config: Config.IConfig, public opts: HelpOptions) {
+  constructor(public command: Config.Command, public config: Config.Config, public opts: HelpOptions) {
     this.render = template(this)
   }
 

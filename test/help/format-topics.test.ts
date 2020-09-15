@@ -1,4 +1,4 @@
-import * as Config from '../../src/config'
+import {Interfaces} from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
@@ -8,7 +8,7 @@ import {Help} from '../../src/help'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
-  public formatTopics(topics: Config.Topic[]) {
+  public formatTopics(topics: Interfaces.Topic[]) {
     return super.formatTopics(topics)
   }
 }
@@ -16,7 +16,7 @@ class TestHelp extends Help {
 const test = base
 .loadConfig()
 .add('help', ctx => new TestHelp(ctx.config as any))
-.register('topicsHelp', (topics: Config.Topic[]) => ({
+.register('topicsHelp', (topics: Interfaces.Topic[]) => ({
   run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
     const topicsHelpOutput = ctx.help.formatTopics(topics) || ''
 
