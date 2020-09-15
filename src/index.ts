@@ -6,7 +6,7 @@ import {run} from './main'
 import * as Config from './config'
 import * as Errors from './errors'
 import * as flags from './flags'
-import * as Help from './help'
+import {HelpBase, Help, getHelpClass} from './help'
 import * as Parser from './parser'
 
 export {
@@ -14,7 +14,9 @@ export {
   Config,
   Errors,
   flags,
+  getHelpClass,
   Help,
+  HelpBase,
   Parser,
   run,
 }

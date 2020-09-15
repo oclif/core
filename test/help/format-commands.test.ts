@@ -5,7 +5,7 @@ import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.columns = 80
-import Help from '../../src/help'
+import {Help} from '../../src/help'
 import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
 
 // extensions to expose method as public for testing

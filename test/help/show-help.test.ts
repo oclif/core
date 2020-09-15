@@ -5,7 +5,7 @@ import * as path from 'path'
 
 const g: any = global
 g.columns = 80
-import Help from '../../src/help'
+import {Help} from '../../src/help'
 import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
 
 // extension makes previously protected methods public

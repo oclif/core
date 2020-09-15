@@ -5,7 +5,8 @@ import stripAnsi = require('strip-ansi')
 
 import {HelpOptions} from '.'
 import {renderList} from './list'
-import {castArray, compact, sortBy, template} from './util'
+import {castArray, compact, sortBy} from '../util'
+import {template} from './util'
 
 const {
   underline,
