@@ -2,7 +2,6 @@ import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
-import {HelpOptions} from '.'
 import {renderList} from './list'
 import {castArray, compact, sortBy} from '../util'
 import {template} from './util'
@@ -25,7 +24,7 @@ const wrap = require('wrap-ansi')
 export default class CommandHelp {
   render: (input: string) => string
 
-  constructor(public command: Interfaces.Command, public config: Interfaces.Config, public opts: HelpOptions) {
+  constructor(public command: Interfaces.Command, public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {
     this.render = template(this)
   }
 
