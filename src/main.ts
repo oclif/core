@@ -1,11 +1,11 @@
-import {Interfaces as Config} from './config'
+import * as Interfaces from './interfaces'
 import {HelpBase, getHelpClass} from './help'
 import Command from './command'
 
 const ROOT_INDEX_CMD_ID = ''
 
 export class Main extends Command {
-  static run(argv = process.argv.slice(2), options?: Config.LoadOptions) {
+  static run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
     return super.run(argv, options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
   }
 
@@ -48,6 +48,6 @@ export class Main extends Command {
   }
 }
 
-export function run(argv = process.argv.slice(2), options?: Config.LoadOptions) {
+export function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
   return Main.run(argv, options)
 }
