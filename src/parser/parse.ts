@@ -1,11 +1,9 @@
 // tslint:disable interface-over-type-literal
 
-import {Arg} from './args'
 import Deps from './deps'
 import * as Errors from './errors'
-import * as Flags from './flags'
-import {Metadata} from './metadata'
 import * as Util from './util'
+import {ParserInput, OutputFlags, ParsingToken, OutputArgs, ArgToken, FlagToken, BooleanFlag, OptionFlag} from '../interfaces'
 
 // eslint-disable-next-line new-cap
 const m = Deps()
@@ -25,41 +23,18 @@ try {
   debug = () => {}
 }
 
-export type OutputArgs<T extends ParserInput['args']> = { [P in keyof T]: any }
-export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
-export type ParserOutput<TFlags extends OutputFlags<any>, TArgs extends OutputArgs<any>> = {
-  flags: TFlags;
-  args: TArgs;
-  argv: string[];
-  raw: ParsingToken[];
-  metadata: Metadata;
-}
-
-export type ArgToken = { type: 'arg'; input: string }
-export type FlagToken = { type: 'flag'; flag: string; input: string }
-export type ParsingToken = ArgToken | FlagToken
-
-export interface ParserInput {
-  argv: string[];
-  flags: Flags.Input<any>;
-  args: Arg<any>[];
-  strict: boolean;
-  context: any;
-  '--'?: boolean;
-}
-
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
 
-  private readonly booleanFlags: { [k: string]: Flags.IBooleanFlag<any> }
+  private readonly booleanFlags: { [k: string]: BooleanFlag<any> }
 
   private readonly context: any
 
   private readonly metaData: any
 
-  private currentFlag?: Flags.IOptionFlag<any>
+  private currentFlag?: OptionFlag<any>
 
   constructor(private readonly input: T) {
     const {pickBy} = m.util

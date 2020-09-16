@@ -1,11 +1,9 @@
 import {CLIError} from '../errors'
 
-import {Arg} from './args'
 import Deps from './deps'
-import * as flags from './flags'
 import * as Help from './help'
 import * as List from './list'
-import {ParserInput, ParserOutput} from './parse'
+import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
 
 export {CLIError} from '../errors'
 
@@ -16,18 +14,10 @@ const m = Deps()
 // eslint-disable-next-line node/no-missing-require
 .add('list', () => require('./list') as typeof List)
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface ICLIParseErrorOptions {
-  parse: {
-    input?: ParserInput;
-    output?: ParserOutput<any, any>;
-  };
-}
-
 export class CLIParseError extends CLIError {
-  public parse: ICLIParseErrorOptions['parse']
+  public parse: CLIParseErrorOptions['parse']
 
-  constructor(options: ICLIParseErrorOptions & { message: string }) {
+  constructor(options: CLIParseErrorOptions & { message: string }) {
     options.message += '\nSee more help with --help'
     super(options.message)
     this.parse = options.parse
@@ -35,9 +25,9 @@ export class CLIParseError extends CLIError {
 }
 
 export class InvalidArgsSpecError extends CLIParseError {
-  public args: Arg<any>[]
+  public args: ParserArg<any>[]
 
-  constructor({args, parse}: ICLIParseErrorOptions & { args: Arg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
     let message = 'Invalid argument spec'
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
@@ -50,9 +40,9 @@ export class InvalidArgsSpecError extends CLIParseError {
 }
 
 export class RequiredArgsError extends CLIParseError {
-  public args: Arg<any>[]
+  public args: ParserArg<any>[]
 
-  constructor({args, parse}: ICLIParseErrorOptions & { args: Arg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
@@ -65,9 +55,9 @@ export class RequiredArgsError extends CLIParseError {
 }
 
 export class RequiredFlagError extends CLIParseError {
-  public flag: flags.IFlag<any>
+  public flag: Flag<any>
 
-  constructor({flag, parse}: ICLIParseErrorOptions & { flag: flags.IFlag<any> }) {
+  constructor({flag, parse}: CLIParseErrorOptions & { flag: Flag<any> }) {
     const usage = m.list.renderList(m.help.flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
     super({parse, message})
@@ -78,7 +68,7 @@ export class RequiredFlagError extends CLIParseError {
 export class UnexpectedArgsError extends CLIParseError {
   public args: string[]
 
-  constructor({parse, args}: ICLIParseErrorOptions & { args: string[] }) {
+  constructor({parse, args}: CLIParseErrorOptions & { args: string[] }) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
     super({parse, message})
     this.args = args
@@ -86,14 +76,14 @@ export class UnexpectedArgsError extends CLIParseError {
 }
 
 export class FlagInvalidOptionError extends CLIParseError {
-  constructor(flag: flags.IOptionFlag<any>, input: string) {
+  constructor(flag: OptionFlag<any>, input: string) {
     const message = `Expected --${flag.name}=${input} to be one of: ${flag.options!.join(', ')}`
     super({parse: {}, message})
   }
 }
 
 export class ArgInvalidOptionError extends CLIParseError {
-  constructor(arg: Arg<any>, input: string) {
+  constructor(arg: ParserArg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
     super({parse: {}, message})
   }

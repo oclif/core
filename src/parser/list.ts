@@ -1,5 +1,6 @@
 import {stdtermwidth} from './screen'
 import {maxBy} from './util'
+import {List} from '../interfaces'
 
 function linewrap(length: number, s: string): string {
   const lw = require('@oclif/linewrap')
@@ -8,9 +9,7 @@ function linewrap(length: number, s: string): string {
   })(s).trim()
 }
 
-export type IListItem = [string, string | undefined]
-export type IList = IListItem[]
-export function renderList(items: IListItem[]): string {
+export function renderList(items: List): string {
   if (items.length === 0) {
     return ''
   }

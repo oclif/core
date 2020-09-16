@@ -17,7 +17,7 @@ export function maxBy<T>(arr: T[], fn: (i: T) => number): T | undefined {
   return max && max.element
 }
 
-export type SortTypes = string | number | undefined | boolean
+type SortTypes = string | number | undefined | boolean
 
 export function sortBy<T>(arr: T[], fn: (i: T) => SortTypes | SortTypes[]): T[] {
   // function castType(t: SortTypes | SortTypes[]): string | number | SortTypes[] {
