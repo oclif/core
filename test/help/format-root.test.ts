@@ -1,10 +1,11 @@
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
-const g: any = global
-g.columns = 80
 import {Help} from '../../src/help'
 import {Interfaces} from '../../src'
+
+const g: any = global
+g.columns = 80
 
 const VERSION = require('../../package.json').version
 const UA = `@oclif/core/${VERSION} ${process.platform}-${process.arch} node-${process.version}`

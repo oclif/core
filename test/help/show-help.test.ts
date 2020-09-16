@@ -1,12 +1,13 @@
-import {Interfaces, Config} from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
 import * as path from 'path'
 
-const g: any = global
-g.columns = 80
 import {Help} from '../../src/help'
 import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
+import {Interfaces, Config} from '../../src'
+
+const g: any = global
+g.columns = 80
 
 // extension makes previously protected methods public
 class TestHelp extends Help {

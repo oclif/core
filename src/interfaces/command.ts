@@ -1,4 +1,4 @@
-import * as Parser from '../../parser'
+import * as Parser from '../parser'
 
 import {Config, LoadOptions} from './config'
 import {Plugin} from './plugin'

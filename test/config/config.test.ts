@@ -1,7 +1,7 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config, Interfaces} from '../../src/config'
+import {Config, Interfaces} from '../../src'
 import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'

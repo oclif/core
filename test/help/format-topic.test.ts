@@ -1,10 +1,11 @@
-import {Interfaces} from '../../src/config'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
+import {Help} from '../../src/help'
+import {Interfaces} from '../../src'
+
 const g: any = global
 g.columns = 80
-import {Help} from '../../src/help'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {

@@ -1,6 +1,7 @@
 import {format, inspect} from 'util'
 
-import {Interfaces, Config, toCached} from './config'
+import {Config, toCached} from './config'
+import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'

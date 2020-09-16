@@ -1,4 +1,4 @@
-import {Config} from './config/interfaces/config'
+import {Config} from './interfaces/config'
 import * as Parser from './parser'
 import Command from './command'
 
