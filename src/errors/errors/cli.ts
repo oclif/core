@@ -6,16 +6,11 @@ import Indent = require('indent-string')
 import * as Wrap from 'wrap-ansi'
 
 import {config} from '../config'
-import {PrettyPrintableError} from './pretty-print'
+import {PrettyPrintableError, OclifError} from '../../interfaces/errors'
 
 /**
  * properties specific to internal oclif error handling
  */
-export interface OclifError {
-  oclif: {
-    exit?: number | false;
-  };
-}
 
 export function addOclifExitCode(error: Record<string, any>, options?: { exit?: number | false }): OclifError {
   if (!('oclif' in error)) {

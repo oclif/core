@@ -1,10 +1,11 @@
 /* eslint-disable no-process-exit */
 /* eslint-disable unicorn/no-process-exit */
 import {config} from './config'
-import prettyPrint, {PrettyPrintableError} from './errors/pretty-print'
+import prettyPrint from './errors/pretty-print'
 import {ExitError} from '.'
 import clean = require('clean-stack')
-import {OclifError, CLIError} from './errors/cli'
+import {CLIError} from './errors/cli'
+import {OclifError, PrettyPrintableError} from '../interfaces'
 
 export const handle = (err: Error & Partial<PrettyPrintableError> & Partial<OclifError>) => {
   try {

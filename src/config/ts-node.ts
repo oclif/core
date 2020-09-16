@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as TSNode from 'ts-node'
 
+import {TSConfig} from '../interfaces/ts-config'
 import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -9,18 +10,6 @@ const debug = Debug()
 const tsconfigs: {[root: string]: TSConfig} = {}
 const rootDirs: string[] = []
 const typeRoots = [`${__dirname}/../node_modules/@types`]
-
-export interface TSConfig {
-  compilerOptions: {
-    rootDir?: string;
-    rootDirs?: string[];
-    outDir?: string;
-    target?: string;
-    esModuleInterop?: boolean;
-    experimentalDecorators?: boolean;
-    emitDecoratorMetadata?: boolean;
-  };
-}
 
 function loadTSConfig(root: string): TSConfig | undefined {
   const tsconfigPath = path.join(root, 'tsconfig.json')

@@ -1,30 +1,9 @@
 import * as wrap from 'wrap-ansi'
 import indent = require('indent-string')
+
 import * as screen from '../screen'
 import {config} from '../config'
-
-export interface PrettyPrintableError {
-  /**
-   * messsage to display related to the error
-   */
-  message?: string;
-
-  /**
-   * a unique error code for this error class
-   */
-  code?: string;
-
-  /**
-   * a url to find out more information related to this error
-   * or fixing the error
-   */
-  ref?: string;
-
-  /**
-   * a suggestion that may be useful or provide additional context
-   */
-  suggestions?: string[];
-}
+import {PrettyPrintableError} from '../../interfaces/errors'
 
 // These exist for backwards compatibility with CLIError
 type CLIErrorDisplayOptions = { name?: string; bang?: string }

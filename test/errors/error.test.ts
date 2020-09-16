@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 import {error} from '../../src/errors'
-import {PrettyPrintableError} from '../../src/errors/errors/pretty-print'
+import {PrettyPrintableError} from '../../src/interfaces/errors'
 
 describe('error', () => {
   fancy
