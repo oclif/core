@@ -1,5 +1,6 @@
 export {Config, ArchTypes, PlatformTypes, LoadOptions} from './config'
 export {Command} from './command'
+export {OclifError, PrettyPrintableError} from './errors'
 export {Hook, HookKeyOrOptions, Hooks} from './hooks'
 export {Manifest} from './manifest'
 export {PJSON} from './pjson'
