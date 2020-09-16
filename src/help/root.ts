@@ -2,7 +2,6 @@ import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
-import {HelpOptions} from '.'
 import {compact} from '../util'
 import {template} from './util'
 import * as Interfaces from '../interfaces'
@@ -15,7 +14,7 @@ const {
 export default class RootHelp {
   render: (input: string) => string
 
-  constructor(public config: Interfaces.Config, public opts: HelpOptions) {
+  constructor(public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {
     this.render = template(this)
   }
 

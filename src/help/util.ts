@@ -1,7 +1,7 @@
 import lodashTemplate = require('lodash.template')
 
-import {Config as IConfig} from '../interfaces/config'
-import {Help, HelpBase, HelpOptions} from '.'
+import {Config as IConfig, HelpOptions} from '../interfaces'
+import {Help, HelpBase} from '.'
 import * as Config from '../config'
 
 interface HelpBaseDerived {
