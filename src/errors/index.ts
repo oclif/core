@@ -7,9 +7,10 @@ export {Logger} from './logger'
 export {config} from './config'
 
 import {config} from './config'
-import {CLIError, addOclifExitCode, OclifError} from './errors/cli'
+import {CLIError, addOclifExitCode} from './errors/cli'
 import {ExitError} from './errors/exit'
-import prettyPrint, {PrettyPrintableError, applyPrettyPrintOptions} from './errors/pretty-print'
+import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
+import {OclifError, PrettyPrintableError} from '../interfaces'
 
 export {PrettyPrintableError}
 
