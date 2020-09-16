@@ -20,12 +20,6 @@ const {
 
 const ROOT_INDEX_CMD_ID = ''
 
-export interface HelpOptions {
-  all?: boolean;
-  maxWidth: number;
-  stripAnsi?: boolean;
-}
-
 function getHelpSubject(args: string[]): string | undefined {
   for (const arg of args) {
     if (arg === '--') return
@@ -36,14 +30,14 @@ function getHelpSubject(args: string[]): string | undefined {
 }
 
 export abstract class HelpBase {
-  constructor(config: Interfaces.Config, opts: Partial<HelpOptions> = {}) {
+  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     this.config = config
     this.opts = {maxWidth: stdtermwidth, ...opts}
   }
 
   protected config: Interfaces.Config
 
-  protected opts: HelpOptions
+  protected opts: Interfaces.HelpOptions
 
   /**
    * Show help, used in multi-command CLIs
@@ -95,7 +89,7 @@ export class Help extends HelpBase {
     return topics
   }
 
-  constructor(config: Interfaces.Config, opts: Partial<HelpOptions> = {}) {
+  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)
     this.render = template(this)
   }
