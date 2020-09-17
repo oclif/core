@@ -3,7 +3,6 @@ import {Config} from './config'
 
 export type ParseFn<T> = (input: string) => T
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface Arg<T = string> {
   name: string;
   description?: string;
