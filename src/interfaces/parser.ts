@@ -38,7 +38,6 @@ export type ParserArg<T> = RequiredArg<T> | OptionalArg<T>
 export interface FlagOutput { [name: string]: any }
 export type ArgInput = Arg<any>[]
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CLIParseErrorOptions {
   parse: {
     input?: ParserInput;
