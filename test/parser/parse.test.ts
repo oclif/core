@@ -2,6 +2,7 @@
 import {expect} from 'chai'
 
 import {flags, parse} from '../../src/parser'
+import {Interfaces} from '../../src'
 
 describe('parse', () => {
   it('--bool', () => {
@@ -484,7 +485,7 @@ See more help with --help`)
     })
 
     it('default has options', () => {
-      const def: flags.Default<string | undefined> = ({options}) =>
+      const def: Interfaces.Default<string | undefined> = ({options}) =>
         options.description
       const out = parse([], {
         // args: [{ name: 'baz', default: () => 'BAZ' }],
@@ -496,7 +497,7 @@ See more help with --help`)
     })
 
     it('can default to a different flag', () => {
-      const def: flags.Default<string | undefined> = opts => opts.flags.foo
+      const def: Interfaces.Default<string | undefined> = opts => opts.flags.foo
       const out = parse(['--foo=bar'], {
         flags: {
           bar: flags.string({

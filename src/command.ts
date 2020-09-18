@@ -6,7 +6,6 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {HelpBase, getHelpClass} from './help'
-import * as flags from './flags'
 import {sortBy, uniqBy} from './util'
 
 const pjson = require('../package.json')
@@ -58,10 +57,10 @@ export default abstract class Command {
   static parse = true
 
   /** A hash of flags for the command */
-  static flags?: flags.Input<any>
+  static flags?: Interfaces.FlagInput<any>
 
   /** An order-dependent array of arguments for the command */
-  static args?: Parser.args.Input
+  static args?: Interfaces.ArgInput
 
   static plugin: Interfaces.Plugin | undefined
 
@@ -158,7 +157,7 @@ export default abstract class Command {
     if (this._helpOverride()) return this._help()
   }
 
-  protected parse<F, A extends {[name: string]: any}>(options?: Parser.Input<F>, argv = this.argv): Parser.Output<F, A> {
+  protected parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Interfaces.ParserOutput<F, A> {
     if (!options) options = this.constructor as any
     return Parser.parse(argv, {context: this, ...options})
   }

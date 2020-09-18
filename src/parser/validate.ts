@@ -1,14 +1,12 @@
 import {CLIError} from '../errors'
 
-import {Arg} from './args'
 import {
   InvalidArgsSpecError,
   RequiredArgsError,
   RequiredFlagError,
   UnexpectedArgsError,
 } from './errors'
-import {ParserInput, ParserOutput} from './parse'
-import {IFlag} from './flags'
+import {ParserArg, ParserInput, ParserOutput, Flag} from '../interfaces'
 
 export function validate(parse: {
   input: ParserInput;
@@ -21,7 +19,7 @@ export function validate(parse: {
       throw new UnexpectedArgsError({parse, args: extras})
     }
 
-    const missingRequiredArgs: Arg<any>[] = []
+    const missingRequiredArgs: ParserArg<any>[] = []
     let hasOptional = false
 
     parse.input.args.forEach((arg, index) => {
@@ -45,7 +43,7 @@ export function validate(parse: {
     }
   }
 
-  function validateAcrossFlags(flag: IFlag<any>) {
+  function validateAcrossFlags(flag: Flag<any>) {
     const intersection = Object.entries(parse.input.flags)
     .map(entry => entry[0]) // array of flag names
     .filter(flagName => parse.output.flags[flagName] !== undefined) // with values
