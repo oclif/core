@@ -6,7 +6,7 @@
     "ts-node/register",
     "source-map-support/register"
   ],
-  "timeout": 5000,
+  "timeout": 0,
   "watch-extensions": [
     "ts"
   ]
