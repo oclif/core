@@ -1466,9 +1466,9 @@ extract-stack@^2.0.0:
   integrity sha512-AEo4zm+TenK7zQorGK1f9mJ8L14hnTDi2ZQPR+Mub1NX8zimka1mXpV5LpH8x9HoUmFSHZCfLHqWvp0Y4FxxzQ==
 
 fancy-test@^1.4.3:
-  version "1.4.9"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-1.4.9.tgz#13dd99dee9872043763bee4ff3e9d84bab6191c6"
-  integrity sha512-Tro3lkXPX438G3t2N9BDgD3ac5iUhNnxIE8tg/KL6z7eZ5GOCexs7fDEMacduqvJWPvsRlmyQ69V1jiTVcqkXQ==
+  version "1.4.10"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-1.4.10.tgz#310be93d4aa45d788bce56a573ae4d1b92b2e1a0"
+  integrity sha512-AaUX6wKS7D5OP2YK2q5G7c8PGx2lgoyLUD7Bbg8z323sb9aebBqzb9UN6phzI73UgO/ViihmNfOxF3kdfZLhew==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
@@ -1476,6 +1476,7 @@ fancy-test@^1.4.3:
     "@types/sinon" "*"
     lodash "^4.17.13"
     mock-stdin "^1.0.0"
+    nock "^13.0.0"
     stdout-stderr "^0.1.9"
 
 fast-deep-equal@^3.1.1:
