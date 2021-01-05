@@ -13,7 +13,6 @@ const log = (message = '', ...args: any[]) => {
 }
 
 const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
-  if (['-h', 'help'].includes(argv[0])) return true
   if (argv.length === 0 && !config.findCommand(ROOT_INDEX_CMD_ID)) return true
   for (const arg of argv) {
     if (arg === '--help') return true
@@ -23,7 +22,7 @@ const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
 }
 
 const versionOverride = (argv: string[]): boolean => {
-  if (['-v', '--version', 'version'].includes(argv[0])) return true
+  if (['--version'].includes(argv[0])) return true
   return false
 }
 
