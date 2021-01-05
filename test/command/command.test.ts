@@ -257,10 +257,10 @@ OPTIONS
     .stdout()
     .do(async () => {
       class CMD extends Command {}
-      await CMD.run(['-h'], root)
+      await CMD.run(['--help'], root)
     })
     .catch(/EEXIT: 0/)
-    .it('-h', ctx => {
+    .it('--help', ctx => {
       // expect(process.exitCode).to.equal(0)
       expect(ctx.stdout).to.equal(`test command
 
@@ -281,7 +281,7 @@ USAGE
       class CMD extends Command {
         config = config
       }
-      await CMD.run(['-h'])
+      await CMD.run(['--help'])
     })
     .catch((error: Error) => expect(error.message).to.contain('Unable to load configured help class "help-class-does-not-exist", failed with message:\n'))
     .it('shows useful error message when configured help class cannot be loaded')
@@ -300,7 +300,7 @@ USAGE
 
           config = config
         }
-        await CMD.run(['-h'])
+        await CMD.run(['--help'])
       })
       .catch(/EEXIT: 0/)
       .it('-h via a plugin in lib dir (compiled to js)', ctx => {
@@ -325,7 +325,7 @@ USAGE
 
           config = config
         }
-        await CMD.run(['-h'])
+        await CMD.run(['--help'])
       })
       .catch(/EEXIT: 0/)
       .it('-h via a plugin in src dir (source in ts)', ctx => {
