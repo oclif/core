@@ -2,7 +2,6 @@ import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
-import {Errors} from '.'
 
 const ROOT_INDEX_CMD_ID = ''
 
@@ -38,7 +37,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // display version if applicable
   if (versionOverride(argv)) {
     log(config.userAgent)
-    return Errors.exit(0)
+    return
   }
 
   // display help version if applicable
