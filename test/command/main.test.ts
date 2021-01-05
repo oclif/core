@@ -17,7 +17,6 @@ describe('main', () => {
   fancy
   .stdout()
   .do(() => run(['-v'], root))
-  .catch('EEXIT: 0')
   .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
   .it('runs -v')
 
