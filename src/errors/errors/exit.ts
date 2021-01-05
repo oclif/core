@@ -6,7 +6,7 @@ export class ExitError extends CLIError implements OclifError {
 
   code = 'EEXIT'
 
-  constructor(exitCode = 0) {
+  constructor(exitCode = 1) {
     super(`EEXIT: ${exitCode}`, {exit: exitCode})
   }
 
