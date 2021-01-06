@@ -74,9 +74,9 @@
   "main": "lib/index.js",
   "repository": "oclif/core",
   "oclif": {
-    "commands": "lib/commands",
     "bin": "oclif",
     "plugins": [
+      "@oclif/plugin-plugins"
     ]
   },
   "scripts": {
