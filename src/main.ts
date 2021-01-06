@@ -33,7 +33,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
 
   // run init hook
   let [id, ...argvSlice] = argv
-  await config.runHook('init', {id, argvSlice})
+  await config.runHook('init', {id, argv: argvSlice})
 
   // display version if applicable
   if (versionOverride(argv)) {
