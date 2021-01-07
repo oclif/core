@@ -159,6 +159,13 @@ export default abstract class Command {
 
   protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
     if (!options) options = this.constructor as any
+
+    // add global flags
+    options!.flags = {
+      ...((options as any).plugin?.flags || {}),
+      ...(options!.flags || {}),
+    }
+
     return Parser.parse(argv, {context: this, ...options})
   }
 

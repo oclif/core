@@ -16,6 +16,7 @@ export namespace PJSON {
       description?: string;
       hooks?: { [name: string]: (string | string[]) };
       commands?: string;
+      flags?: string;
       plugins?: string[];
       devPlugins?: string[];
       helpClass?: string;
