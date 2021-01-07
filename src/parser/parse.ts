@@ -229,10 +229,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       } else if (!arg.ignoreStdin && !stdinRead) {
         // eslint-disable-next-line no-await-in-loop
         let stdin = await readStdin()
-        if (stdin) stdin = stdin.trim()
-        args[i] = stdin
+        if (stdin) {
+          stdin = stdin.trim()
+          args[i] = stdin
+        }
         stdinRead = true
-      } else if ('default' in arg) {
+      }
+      if (!args[i] && 'default' in arg) {
         if (typeof arg.default === 'function') {
           // eslint-disable-next-line no-await-in-loop
           const f = await arg.default()
