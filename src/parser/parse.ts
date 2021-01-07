@@ -23,6 +23,18 @@ try {
   debug = () => {}
 }
 
+const readStdin = async () => {
+  const {stdin} = process
+  let result
+  if (stdin.isTTY) return result
+  result = ''
+  stdin.setEncoding('utf8')
+  for await (const chunk of stdin) {
+    result += chunk
+  }
+  return result
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -45,7 +57,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.metaData = {}
   }
 
-  public parse() {
+  public async parse() {
     this._debugInput()
 
     const findLongFlag = (arg: string) => {
@@ -125,9 +137,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (arg) arg.input = input
       this.raw.push({type: 'arg', input})
     }
-    const argv = this._argv()
+    const argv = await this._argv()
     const args = this._args(argv)
-    const flags = this._flags()
+    const flags = await this._flags()
     this._debugOutput(argv, args, flags)
     return {
       args,
@@ -147,7 +159,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return args
   }
 
-  private _flags(): TFlags {
+  private async _flags(): Promise<TFlags> {
     const flags = {} as any
     this.metaData.flags = {} as any
     for (const token of this._flagTokens) {
@@ -159,13 +171,15 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         } else {
           flags[token.flag] = true
         }
-        flags[token.flag] = flag.parse(flags[token.flag], this.context)
+        // eslint-disable-next-line no-await-in-loop
+        flags[token.flag] = await flag.parse(flags[token.flag], this.context)
       } else {
         const input = token.input
         if (flag.options && !flag.options.includes(input)) {
           throw new m.errors.FlagInvalidOptionError(flag, input)
         }
-        const value = flag.parse ? flag.parse(input, this.context) : input
+        // eslint-disable-next-line no-await-in-loop
+        const value = flag.parse ? await flag.parse(input, this.context) : input
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(value)
@@ -179,12 +193,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (flags[k]) continue
       if (flag.type === 'option' && flag.env) {
         const input = process.env[flag.env]
-        if (input) flags[k] = flag.parse(input, this.context)
+        // eslint-disable-next-line no-await-in-loop
+        if (input) flags[k] = await flag.parse(input, this.context)
       }
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {setFromDefault: true}
         if (typeof flag.default === 'function') {
-          flags[k] = flag.default({options: flag, flags, ...this.context})
+          // eslint-disable-next-line no-await-in-loop
+          flags[k] = await flag.default({options: flag, flags, ...this.context})
         } else {
           flags[k] = flag.default
         }
@@ -193,9 +209,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return flags
   }
 
-  private _argv(): any[] {
+  private async _argv(): Promise<any[]> {
     const args: any[] = []
     const tokens = this._argTokens
+    let stdinRead = false
     for (let i = 0; i < Math.max(this.input.args.length, tokens.length); i++) {
       const token = tokens[i]
       const arg = this.input.args[i]
@@ -204,13 +221,25 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (arg.options && !arg.options.includes(token.input)) {
             throw new m.errors.ArgInvalidOptionError(arg, token.input)
           }
-          args[i] = arg.parse(token.input)
+          // eslint-disable-next-line no-await-in-loop
+          args[i] = await arg.parse(token.input)
         } else {
           args[i] = token.input
         }
-      } else if ('default' in arg) {
+      } else if (!arg.ignoreStdin && !stdinRead) {
+        // eslint-disable-next-line no-await-in-loop
+        let stdin = await readStdin()
+        if (stdin) {
+          stdin = stdin.trim()
+          args[i] = stdin
+        }
+        stdinRead = true
+      }
+      if (!args[i] && 'default' in arg) {
         if (typeof arg.default === 'function') {
-          args[i] = arg.default()
+          // eslint-disable-next-line no-await-in-loop
+          const f = await arg.default()
+          args[i] = f
         } else {
           args[i] = arg.default
         }

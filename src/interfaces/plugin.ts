@@ -63,6 +63,7 @@ export interface Plugin {
 
   commands: Command.Plugin[];
   hooks: { [k: string]: string[] };
+  flags: { [k: string]: any };
   readonly commandIDs: string[];
   readonly topics: Topic[];
 

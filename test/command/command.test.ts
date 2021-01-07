@@ -208,7 +208,7 @@ describe('command', () => {
         }
 
         async run() {
-          const {flags} = this.parse(CMD)
+          const {flags} = await this.parse(CMD)
           this.log(flags.foo)
         }
       }

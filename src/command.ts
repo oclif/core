@@ -157,8 +157,15 @@ export default abstract class Command {
     if (this._helpOverride()) return this._help()
   }
 
-  protected parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Interfaces.ParserOutput<F, A> {
+  protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
     if (!options) options = this.constructor as any
+
+    // add global flags
+    options!.flags = {
+      ...((options as any).plugin?.flags || {}),
+      ...(options!.flags || {}),
+    }
+
     return Parser.parse(argv, {context: this, ...options})
   }
 
@@ -203,7 +210,9 @@ export default abstract class Command {
 
   protected _helpOverride(): boolean {
     for (const arg of this.argv) {
+      if (arg === '--version') return this._version() as any
       if (arg === '--help') return true
+      if (arg === '-h') return true
       if (arg === '--') return false
     }
     return false

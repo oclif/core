@@ -1,7 +1,7 @@
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
 import {Config} from './config'
 
-export type ParseFn<T> = (input: string) => T
+export type ParseFn<T> = (input: string) => Promise<T>
 
 export interface Arg<T = string> {
   name: string;
@@ -11,6 +11,7 @@ export interface Arg<T = string> {
   parse?: ParseFn<T>;
   default?: T | (() => T);
   options?: string[];
+  ignoreStdin?: boolean;
 }
 
 export interface ArgBase<T> {
@@ -18,9 +19,10 @@ export interface ArgBase<T> {
   description?: string;
   hidden?: boolean;
   parse: ParseFn<T>;
-  default?: T | (() => T);
+  default?: T | (() => Promise<T>);
   input?: string;
   options?: string[];
+  ignoreStdin?: boolean;
 }
 
 export type RequiredArg<T> = ArgBase<T> & {
@@ -77,7 +79,7 @@ export type DefaultContext<T> = {
   flags: { [k: string]: string };
 }
 
-export type Default<T> = T | ((context: DefaultContext<T>) => T)
+export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
 
 export type FlagBase<T, I> = {
   name: string;
@@ -93,7 +95,7 @@ export type FlagBase<T, I> = {
    * also accept an environment variable as input
    */
   env?: string;
-  parse(input: I, context: any): T;
+  parse(input: I, context: any): Promise<T>;
 }
 
 export type BooleanFlag<T> = FlagBase<T, boolean> & {

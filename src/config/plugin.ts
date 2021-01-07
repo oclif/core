@@ -96,6 +96,8 @@ export class Plugin implements IPlugin {
 
   hooks!: {[k: string]: string[]}
 
+  flags!: {[k: string]: any}
+
   valid = false
 
   alreadyLoaded = false
@@ -135,6 +137,12 @@ export class Plugin implements IPlugin {
     }
 
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
+
+    this.flags = {}
+    if (this.pjson.oclif.flags) {
+      const globalFlags = require(tsPath(this.root, this.pjson.oclif.flags))
+      this.flags = globalFlags.default
+    }
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object.entries(this.manifest.commands)
