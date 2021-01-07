@@ -203,7 +203,9 @@ export default abstract class Command {
 
   protected _helpOverride(): boolean {
     for (const arg of this.argv) {
+      if (arg === '--version') return this._version() as any
       if (arg === '--help') return true
+      if (arg === '-h') return true
       if (arg === '--') return false
     }
     return false
