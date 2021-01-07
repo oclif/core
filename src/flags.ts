@@ -14,7 +14,7 @@ export function option<T>(options: {parse: OptionFlag<T>['parse']} & Partial<Opt
 
 const _enum = <T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> => {
   return build<T>({
-    parse(input) {
+    async parse(input) {
       if (!opts.options.includes(input)) throw new Error(`Expected --${this.name}=${input} to be one of: ${opts.options.join(', ')}`)
       return input as unknown as T
     },
@@ -33,7 +33,7 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
     // char: 'v',
     description: 'show CLI version',
     ...opts,
-    parse: (_: any, cmd: Command) => {
+    parse: async (_: any, cmd: Command) => {
       cmd.log(cmd.config.userAgent)
       cmd.exit(0)
     },
@@ -45,7 +45,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
     // char: 'h',
     description: 'show CLI help',
     ...opts,
-    parse: (_: any, cmd: Command) => {
+    parse: async (_: any, cmd: Command) => {
       (cmd as any)._help()
     },
   })

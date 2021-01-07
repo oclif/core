@@ -157,7 +157,7 @@ export default abstract class Command {
     if (this._helpOverride()) return this._help()
   }
 
-  protected parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Interfaces.ParserOutput<F, A> {
+  protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
     if (!options) options = this.constructor as any
     return Parser.parse(argv, {context: this, ...options})
   }

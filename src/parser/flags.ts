@@ -11,7 +11,7 @@ export function build(
 export function build<T>(defaults: Partial<OptionFlag<T>>): Definition<T> {
   return (options: any = {}): any => {
     return {
-      parse: (i: string, _: any) => i,
+      parse: async (i: string, _: any) => i,
       ...defaults,
       ...options,
       input: [] as string[],
@@ -25,7 +25,7 @@ export function boolean<T = boolean>(
   options: Partial<BooleanFlag<T>> = {},
 ): BooleanFlag<T> {
   return {
-    parse: (b, _) => b,
+    parse: async (b, _) => b,
     ...options,
     allowNo: Boolean(options.allowNo),
     type: 'boolean',
@@ -33,7 +33,7 @@ export function boolean<T = boolean>(
 }
 
 export const integer = build({
-  parse: input => {
+  parse: async input => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
     return parseInt(input, 10)
