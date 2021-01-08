@@ -1,15 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as TSNode from 'ts-node'
 
 import {TSConfig} from '../interfaces/ts-config'
 import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug()
-
-const tsconfigs: {[root: string]: TSConfig} = {}
-const rootDirs: string[] = []
-const typeRoots = [`${__dirname}/../node_modules/@types`]
 
 function loadTSConfig(root: string): TSConfig | undefined {
   const tsconfigPath = path.join(root, 'tsconfig.json')
@@ -36,46 +31,6 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
-function registerTSNode(root: string) {
-  if (process.env.OCLIF_TS_NODE === '0') return
-  if (tsconfigs[root]) return
-  const tsconfig = loadTSConfig(root)
-  if (!tsconfig) return
-  debug('registering ts-node at', root)
-  const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
-  const tsNode: typeof TSNode = require(tsNodePath)
-  tsconfigs[root] = tsconfig
-  typeRoots.push(`${root}/node_modules/@types`)
-  if (tsconfig.compilerOptions.rootDirs) {
-    rootDirs.push(...tsconfig.compilerOptions.rootDirs.map(r => path.join(root, r)))
-  } else {
-    rootDirs.push(`${root}/src`)
-  }
-  const cwd = process.cwd()
-  try {
-    process.chdir(root)
-    tsNode.register({
-      skipProject: true,
-      transpileOnly: true,
-      // cache: false,
-      // typeCheck: true,
-      compilerOptions: {
-        esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-        target: tsconfig.compilerOptions.target || 'es2017',
-        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
-        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
-        module: 'commonjs',
-        sourceMap: true,
-        rootDirs,
-        typeRoots,
-        jsx: 'react',
-      },
-    })
-  } finally {
-    process.chdir(cwd)
-  }
-}
-
 /**
  * convert a path from the compiled ./lib files to the ./src typescript source
  * this is for developing typescript plugins/CLIs
@@ -87,8 +42,7 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
   if (!orig) return orig
   orig = path.join(root, orig)
   try {
-    registerTSNode(root)
-    const tsconfig = tsconfigs[root]
+    const tsconfig = loadTSConfig(root)
     if (!tsconfig) return orig
     const {rootDir, rootDirs, outDir} = tsconfig.compilerOptions
     const rootDirPath = rootDir || (rootDirs || [])[0]
