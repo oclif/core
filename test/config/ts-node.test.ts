@@ -39,26 +39,4 @@ describe('tsPath', () => {
     const result = ctx.tsNodePlugin.tsPath(root, orig)
     expect(result).to.equal(path.join(root, orig))
   })
-
-  withMockTsConfig()
-  .it('should leave esModuleInterop undefined by default', (ctx: any) => {
-    ctx.tsNodePlugin.tsPath(root, orig)
-    expect(tsNodeRegisterCallArguments.length).is.equal(1)
-    expect(tsNodeRegisterCallArguments[0])
-    .to.have.nested.property('compilerOptions.esModuleInterop')
-    .equal(undefined)
-  })
-
-  withMockTsConfig({
-    compilerOptions: {
-      esModuleInterop: true,
-    },
-  })
-  .it('should use the provided esModuleInterop option', (ctx: any) => {
-    ctx.tsNodePlugin.tsPath(root, orig)
-    expect(tsNodeRegisterCallArguments.length).is.equal(1)
-    expect(tsNodeRegisterCallArguments[0])
-    .to.have.nested.property('compilerOptions.esModuleInterop')
-    .equal(true)
-  })
 })
