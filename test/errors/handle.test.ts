@@ -66,7 +66,7 @@ describe('handle', () => {
   .stderr()
   .finally(() => delete process.exitCode)
   .it('hides an exit error', ctx => {
-    handle(new ExitError())
+    handle(new ExitError(0))
     expect(ctx.stdout).to.equal('')
     expect(ctx.stderr).to.equal('')
     expect(process.exitCode).to.equal(0)
