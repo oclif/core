@@ -75,7 +75,8 @@
   "repository": "oclif/core",
   "oclif": {
     "bin": "oclif",
-    "plugins": [
+    "devPlugins": [
+      "@oclif/plugin-help",
       "@oclif/plugin-plugins"
     ]
   },
