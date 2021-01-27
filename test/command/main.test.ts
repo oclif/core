@@ -16,13 +16,13 @@ describe('main', () => {
 
   fancy
   .stdout()
-  .do(() => run(['-v'], root))
+  .do(() => run(['--version'], root))
   .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
   .it('runs -v')
 
   fancy
   .stdout()
-  .do(() => run(['-h'], root))
+  .do(() => run(['--help'], root))
   .do((output: any) => expect(output.stdout).to.equal(`base library for oclif CLIs
 
 VERSION

@@ -1,12 +1,10 @@
 import {format, inspect} from 'util'
 
-import {Config, toCached} from './config'
+import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
-import {HelpBase, getHelpClass} from './help'
-import {sortBy, uniqBy} from './util'
 
 const pjson = require('../package.json')
 
@@ -154,7 +152,6 @@ export default abstract class Command {
     const g: any = global
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent
-    if (this._helpOverride()) return this._help()
   }
 
   protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
@@ -164,12 +161,6 @@ export default abstract class Command {
 
   protected async catch(err: any): Promise<any> {
     if (!err.message) throw err
-    if (err.message.match(/Unexpected arguments?: (-h|--help|help)(,|\n)/)) {
-      return this._help()
-    }
-    if (err.message.match(/Unexpected arguments?: (-v|--version|version)(,|\n)/)) {
-      return this._version()
-    }
     try {
       const {cli} = require('cli-ux')
       const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
@@ -186,33 +177,5 @@ export default abstract class Command {
     } catch (error) {
       console.error(error)
     }
-  }
-
-  protected _help() {
-    const HelpClass = getHelpClass(this.config)
-    const help: HelpBase = new HelpClass(this.config)
-    const cmd = toCached(this.ctor as any as Interfaces.Command.Class)
-    if (!cmd.id) cmd.id = ''
-    let topics = this.config.topics
-    topics = topics.filter((t: any) => !t.hidden)
-    topics = sortBy(topics, (t: any) => t.name)
-    topics = uniqBy(topics, (t: any) => t.name)
-    help.showCommandHelp(cmd, topics)
-    return this.exit(0)
-  }
-
-  protected _helpOverride(): boolean {
-    for (const arg of this.argv) {
-      if (arg === '--version') return this._version() as any
-      if (arg === '--help') return true
-      if (arg === '-h') return true
-      if (arg === '--') return false
-    }
-    return false
-  }
-
-  protected _version() {
-    this.log(this.config.userAgent)
-    return this.exit(0)
   }
 }
