@@ -23,6 +23,18 @@ try {
   debug = () => {}
 }
 
+const readStdin = async () => {
+  const {stdin} = process
+  let result
+  if (stdin.isTTY) return result
+  result = ''
+  stdin.setEncoding('utf8')
+  for await (const chunk of stdin) {
+    result += chunk
+  }
+  return result
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -200,6 +212,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private async _argv(): Promise<any[]> {
     const args: any[] = []
     const tokens = this._argTokens
+    let stdinRead = false
     for (let i = 0; i < Math.max(this.input.args.length, tokens.length); i++) {
       const token = tokens[i]
       const arg = this.input.args[i]
@@ -213,7 +226,16 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         } else {
           args[i] = token.input
         }
-      } else if ('default' in arg) {
+      } else if (!arg.ignoreStdin && !stdinRead) {
+        // eslint-disable-next-line no-await-in-loop
+        let stdin = await readStdin()
+        if (stdin) {
+          stdin = stdin.trim()
+          args[i] = stdin
+        }
+        stdinRead = true
+      }
+      if (!args[i] && 'default' in arg) {
         if (typeof arg.default === 'function') {
           // eslint-disable-next-line no-await-in-loop
           const f = await arg.default()

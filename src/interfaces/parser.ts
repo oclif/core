@@ -11,6 +11,7 @@ export interface Arg<T = string> {
   parse?: ParseFn<T>;
   default?: T | (() => T);
   options?: string[];
+  ignoreStdin?: boolean;
 }
 
 export interface ArgBase<T> {
@@ -21,6 +22,7 @@ export interface ArgBase<T> {
   default?: T | (() => Promise<T>);
   input?: string;
   options?: string[];
+  ignoreStdin?: boolean;
 }
 
 export type RequiredArg<T> = ArgBase<T> & {
