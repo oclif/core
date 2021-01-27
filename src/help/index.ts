@@ -18,8 +18,6 @@ const {
   bold,
 } = Chalk
 
-const ROOT_INDEX_CMD_ID = ''
-
 function getHelpSubject(args: string[]): string | undefined {
   for (const arg of args) {
     if (arg === '--') return
@@ -97,8 +95,10 @@ export class Help extends HelpBase {
   public showHelp(argv: string[]) {
     const subject = getHelpSubject(argv)
     if (!subject) {
-      const rootCmd = this.config.findCommand(ROOT_INDEX_CMD_ID)
-      if (rootCmd) this.showCommandHelp(rootCmd)
+      if (this.config.pjson.oclif.default) {
+        const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
+        if (rootCmd) this.showCommandHelp(rootCmd)
+      }
       this.showRootHelp()
       return
     }

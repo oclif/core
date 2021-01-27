@@ -4,8 +4,6 @@ import * as Interfaces from './interfaces'
 import {Config} from './config'
 import {getHelpClass} from './help'
 
-const ROOT_INDEX_CMD_ID = ''
-
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
   message = typeof message === 'string' ? message : inspect(message)
@@ -13,7 +11,7 @@ const log = (message = '', ...args: any[]) => {
 }
 
 const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
-  if (argv.length === 0 && !config.findCommand(ROOT_INDEX_CMD_ID)) return true
+  if (argv.length === 0 && !config.pjson.oclif.default) return true
   for (const arg of argv) {
     if (arg === '--help') return true
     if (arg === '--') return false
@@ -48,8 +46,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
     })
     const Help = getHelpClass(config)
     const help = new Help(config)
-    const helpArgv = config.findCommand(ROOT_INDEX_CMD_ID) ? ['', ...argv] : argv
-    help.showHelp(helpArgv)
+    help.showHelp(argv)
     return
   }
 
@@ -57,8 +54,8 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   if (!config.findCommand(id)) {
     const topic = config.findTopic(id)
     if (topic) return config.runCommand('help', [id])
-    if (config.findCommand(ROOT_INDEX_CMD_ID)) {
-      id = ROOT_INDEX_CMD_ID
+    if (config.pjson.oclif.default) {
+      id = config.pjson.oclif.default
       argvSlice = argv
     }
   }
