@@ -43,6 +43,12 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
 
   // display help version if applicable
   if (helpOverride(argv, config)) {
+    argv = argv.filter(arg => {
+      if (arg === 'help') return false
+      if (arg === '--help') return false
+      if (arg === '-h') return false
+      return true
+    })
     const Help = getHelpClass(config)
     const help = new Help(config)
     const helpArgv = config.findCommand(ROOT_INDEX_CMD_ID) ? ['', ...argv] : argv
