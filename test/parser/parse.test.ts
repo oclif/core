@@ -191,7 +191,6 @@ See more help with --help`)
         const out = await parse(['foo'], {
           args: [{name: 'myarg'}, {name: 'myarg2'}],
         })
-        console.dir(out)
         expect(out.argv).to.deep.equal(['foo'])
       })
 
@@ -516,7 +515,6 @@ See more help with --help`)
         args: [{name: 'baz', default: () => 'BAZ'}],
         flags: {foo: flags.string({default: async () => 'bar'})},
       })
-      console.dir(out)
       expect(out.args).to.deep.include({baz: 'BAZ'})
       expect(out.argv).to.deep.equal(['BAZ'])
       expect(out.flags).to.deep.include({foo: 'bar'})
