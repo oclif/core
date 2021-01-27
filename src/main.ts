@@ -46,7 +46,6 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
     })
     const Help = getHelpClass(config)
     const help = new Help(config)
-    const helpArgv = config.findCommand(ROOT_INDEX_CMD_ID) ? ['', ...argv] : argv
     help.showHelp(helpArgv)
     return
   }
