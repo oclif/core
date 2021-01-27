@@ -164,12 +164,6 @@ export default abstract class Command {
 
   protected async catch(err: any): Promise<any> {
     if (!err.message) throw err
-    if (err.message.match(/Unexpected arguments?: (-h|--help|help)(,|\n)/)) {
-      return this._help()
-    }
-    if (err.message.match(/Unexpected arguments?: (-v|--version|version)(,|\n)/)) {
-      return this._version()
-    }
     try {
       const {cli} = require('cli-ux')
       const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
@@ -202,6 +196,7 @@ export default abstract class Command {
   }
 
   protected _helpOverride(): boolean {
+    if (this.argv[0] === '--version') return this._version() as any
     for (const arg of this.argv) {
       if (arg === '--help') return true
       if (arg === '--') return false
