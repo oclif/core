@@ -1,3 +1,23 @@
+# [0.3.0](https://github.com/oclif/core/compare/v0.2.0...v0.3.0) (2021-02-01)
+
+
+### Bug Fixes
+
+* default ExitError to exit error code 1 ([#95](https://github.com/oclif/core/issues/95)) ([2005c5f](https://github.com/oclif/core/commit/2005c5f092dc60c0cfafcb1d5c90fd62c2048dca))
+* filter help argvs before invoking ([#103](https://github.com/oclif/core/issues/103)) ([698125d](https://github.com/oclif/core/commit/698125d602de9bc085b4080768a564a7b01fe27d))
+* only --version & --help are special global flags ([#96](https://github.com/oclif/core/issues/96)) ([364d6dd](https://github.com/oclif/core/commit/364d6dd8fd5a54334a6e77255cd6b3a5e7321632))
+
+
+### Features
+
+* add default command (rm root cmd) ([#97](https://github.com/oclif/core/issues/97)) ([fbf1a0f](https://github.com/oclif/core/commit/fbf1a0f827208da75c77009fedd48b8886a00520))
+* args read stdin ([#100](https://github.com/oclif/core/issues/100)) ([caea554](https://github.com/oclif/core/commit/caea55484c0cdf6803b9fa472f9fa8a622f57a80))
+* parse async ([#99](https://github.com/oclif/core/issues/99)) ([57924df](https://github.com/oclif/core/commit/57924df5c168b677df9d1d1f43155a89e9cb2c98))
+* rm duplicate ts-node registering ([#102](https://github.com/oclif/core/issues/102)) ([b8b5333](https://github.com/oclif/core/commit/b8b5333047eb939e79c8cadf460e3c76ff751460))
+* run single & multi cmd clis with same invoking/runner ([#98](https://github.com/oclif/core/issues/98)) ([8828ca9](https://github.com/oclif/core/commit/8828ca9d05f87bc321bbd2394191b194764bba7a))
+
+
+
 # [0.2.0](https://github.com/oclif/core/compare/v0.1.2...v0.2.0) (2020-09-18)
 
 
