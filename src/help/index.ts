@@ -9,9 +9,9 @@ import {renderList} from './list'
 import RootHelp from './root'
 import {stdtermwidth} from './screen'
 import {compact, sortBy, uniqBy} from '../util'
-import {template} from './util'
+import {standarizeIDFromArgv, template} from './util'
 
-export {getHelpClass} from './util'
+export {standarizeIDFromArgv, getHelpClass} from './util'
 
 const wrap = require('wrap-ansi')
 const {
@@ -29,6 +29,7 @@ function getHelpSubject(args: string[]): string | undefined {
 
 export abstract class HelpBase {
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
+    if (!config.topicSeparator) config.topicSeparator = ':' // back-support @oclif/config
     this.config = config
     this.opts = {maxWidth: stdtermwidth, ...opts}
   }
@@ -93,6 +94,7 @@ export class Help extends HelpBase {
   }
 
   public showHelp(argv: string[]) {
+    if (this.config.topicSeparator !== ':') argv = standarizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv)
     if (!subject) {
       if (this.config.pjson.oclif.default) {
@@ -191,6 +193,10 @@ export class Help extends HelpBase {
   }
 
   protected formatCommand(command: Interfaces.Command): string {
+    if (this.config.topicSeparator !== ':') {
+      command.id = command.id.replace(/:/g, this.config.topicSeparator)
+      command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
+    }
     const help = new CommandHelp(command, this.config, this.opts)
     return help.generate()
   }
@@ -198,10 +204,13 @@ export class Help extends HelpBase {
   protected formatCommands(commands: Interfaces.Command[]): string {
     if (commands.length === 0) return ''
 
-    const body = renderList(commands.map(c => [
-      c.id,
-      c.description && this.render(c.description.split('\n')[0]),
-    ]), {
+    const body = renderList(commands.map(c => {
+      if (this.config.topicSeparator !== ':') c.id = c.id.replace(/:/g, this.config.topicSeparator)
+      return [
+        c.id,
+        c.description && this.render(c.description.split('\n')[0]),
+      ]
+    }), {
       spacer: '\n',
       stripAnsi: this.opts.stripAnsi,
       maxWidth: this.opts.maxWidth - 2,
@@ -217,11 +226,13 @@ export class Help extends HelpBase {
     let description = this.render(topic.description || '')
     const title = description.split('\n')[0]
     description = description.split('\n').slice(1).join('\n')
+    let topicID = `${topic.name}:COMMAND`
+    if (this.config.topicSeparator !== ':') topicID = topicID.replace(/:/g, this.config.topicSeparator)
     let output = compact([
       title,
       [
         bold('USAGE'),
-        indent(wrap(`$ ${this.config.bin} ${topic.name}:COMMAND`, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
+        indent(wrap(`$ ${this.config.bin} ${topicID}`, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
       ].join('\n'),
       description && ([
         bold('DESCRIPTION'),
@@ -234,10 +245,13 @@ export class Help extends HelpBase {
 
   protected formatTopics(topics: Interfaces.Topic[]): string {
     if (topics.length === 0) return ''
-    const body = renderList(topics.map(c => [
-      c.name,
-      c.description && this.render(c.description.split('\n')[0]),
-    ]), {
+    const body = renderList(topics.map(c => {
+      if (this.config.topicSeparator !== ':') c.name = c.name.replace(/:/g, this.config.topicSeparator)
+      return [
+        c.name,
+        c.description && this.render(c.description.split('\n')[0]),
+      ]
+    }), {
       spacer: '\n',
       stripAnsi: this.opts.stripAnsi,
       maxWidth: this.opts.maxWidth - 2,

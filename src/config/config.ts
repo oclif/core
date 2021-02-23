@@ -90,7 +90,15 @@ export class Config implements IConfig {
 
   valid!: boolean
 
+  topicSeparator: ':' | ' ' = ':'
+
   protected warned = false
+
+  private _commands?: Command.Plugin[]
+
+  private _commandIDs?: string[]
+
+  private _topics?: Topic[]
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
@@ -120,6 +128,8 @@ export class Config implements IConfig {
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.dirname = this.pjson.oclif.dirname || this.name
+    // currently, only colons or spaces are valid separators
+    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator)) this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
@@ -294,14 +304,20 @@ export class Config implements IConfig {
   }
 
   get commands(): Command.Plugin[] {
-    return flatMap(this.plugins, p => p.commands)
+    if (this._commands) return this._commands
+    this._commands = flatMap(this.plugins, p => p.commands)
+    return this._commands
   }
 
   get commandIDs() {
-    return uniq(this.commands.map(c => c.id))
+    if (this._commandIDs) return this._commandIDs
+    const ids = Lodash.flattenDeep(this.commands.map(c => [c.id, c.aliases]))
+    this._commandIDs = uniq(ids)
+    return this._commandIDs
   }
 
   get topics(): Topic[] {
+    if (this._topics) return this._topics
     const topics: Topic[] = []
     for (const plugin of this.plugins) {
       for (const topic of compact(plugin.topics)) {
@@ -323,7 +339,8 @@ export class Config implements IConfig {
         parts.pop()
       }
     }
-    return topics
+    this._topics = topics
+    return this._topics
   }
 
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
