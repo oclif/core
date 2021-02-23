@@ -51,7 +51,8 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   }
 
   // find & run command
-  if (!config.findCommand(id)) {
+  const cmd = config.findCommand(id)
+  if (!cmd) {
     const topic = config.findTopic(id)
     if (topic) return config.runCommand('help', [id])
     if (config.pjson.oclif.default) {
@@ -59,5 +60,5 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
       argvSlice = argv
     }
   }
-  await config.runCommand(id, argvSlice)
+  await config.runCommand(id, argvSlice, cmd)
 }

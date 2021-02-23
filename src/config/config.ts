@@ -92,6 +92,12 @@ export class Config implements IConfig {
 
   protected warned = false
 
+  private _commands?: Command.Plugin[]
+
+  private _commandIDs?: string[]
+
+  private _topics?: Topic[]
+
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
 
@@ -243,9 +249,9 @@ export class Config implements IConfig {
     debug('%s hook done', event)
   }
 
-  async runCommand(id: string, argv: string[] = []) {
+  async runCommand(id: string, argv: string[] = [], cachedCommand?: Command.Plugin) {
     debug('runCommand %s %o', id, argv)
-    const c = this.findCommand(id)
+    const c = cachedCommand || this.findCommand(id)
     if (!c) {
       await this.runHook('command_not_found', {id})
       throw new CLIError(`command ${id} not found`)
@@ -294,14 +300,20 @@ export class Config implements IConfig {
   }
 
   get commands(): Command.Plugin[] {
-    return flatMap(this.plugins, p => p.commands)
+    if (this._commands) return this._commands
+    this._commands = flatMap(this.plugins, p => p.commands)
+    return this._commands
   }
 
   get commandIDs() {
-    return uniq(this.commands.map(c => c.id))
+    if (this._commandIDs) return this._commandIDs
+    const ids = Lodash.flattenDeep(this.commands.map(c => [c.id, c.aliases]))
+    this._commandIDs = uniq(ids)
+    return this._commandIDs
   }
 
   get topics(): Topic[] {
+    if (this._topics) return this._topics
     const topics: Topic[] = []
     for (const plugin of this.plugins) {
       for (const topic of compact(plugin.topics)) {
@@ -323,7 +335,8 @@ export class Config implements IConfig {
         parts.pop()
       }
     }
-    return topics
+    this._topics = topics
+    return this._topics
   }
 
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
