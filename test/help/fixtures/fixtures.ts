@@ -1,5 +1,5 @@
-import {Command} from '@oclif/command'
-import {Topic} from '@oclif/config'
+import {Command} from '../../../src'
+import {Topic} from '../../../src/interfaces'
 
 // apps
 
