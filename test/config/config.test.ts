@@ -127,6 +127,9 @@ describe('Config', () => {
   testConfig({
     pjson: {
       name: 'foo',
+      version: '1.0.0',
+      files: [],
+      commands: {},
       oclif: {
         topics: {
           t1: {
