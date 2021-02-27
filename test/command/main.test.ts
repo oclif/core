@@ -72,4 +72,16 @@ COMMANDS
 
 `))
   .it('runs spaced topic help v2')
+
+  fancy
+  .stdout()
+  .do(() => run(['foo', 'baz'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
+  .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
+  .it('runs foo:baz with space separator')
+
+  fancy
+  .stdout()
+  .do(() => run(['foo', 'bar', 'succeed'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
+  .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
+  .it('runs foo:bar:succeed with space separator')
 })
