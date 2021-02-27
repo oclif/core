@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDirs": [
+      "./src"
+    ]
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

@@ -14,6 +14,7 @@ export namespace PJSON {
       schema?: number;
       title?: string;
       description?: string;
+      topicSeparator?: ':' | ' ';
       hooks?: { [name: string]: (string | string[]) };
       commands?: string;
       default?: string;

@@ -88,6 +88,7 @@ export interface Config {
   plugins: Plugin[];
   binPath?: string;
   valid: boolean;
+  topicSeparator: ':' | ' ';
   readonly commands: Command.Plugin[];
   readonly topics: Topic[];
   readonly commandIDs: string[];

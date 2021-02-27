@@ -90,6 +90,8 @@ export class Config implements IConfig {
 
   valid!: boolean
 
+  topicSeparator: ':' | ' ' = ':'
+
   protected warned = false
 
   private _commands?: Command.Plugin[]
@@ -126,6 +128,8 @@ export class Config implements IConfig {
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.dirname = this.pjson.oclif.dirname || this.name
+    // currently, only colons or spaces are valid separators
+    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator)) this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()

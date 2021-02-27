@@ -2,7 +2,7 @@ import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
-import {getHelpClass} from './help'
+import {getHelpClass, standarizeIDFromArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
@@ -29,6 +29,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
 
   // run init hook
+  if (config.topicSeparator !== ':') argv = standarizeIDFromArgv(argv, config)
   let [id, ...argvSlice] = argv
   await config.runHook('init', {id, argv: argvSlice})
 
