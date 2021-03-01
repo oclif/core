@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/oclif/core/compare/v0.3.0...v0.4.0) (2021-03-01)
+
+
+### Features
+
+* add topic separator option ([#111](https://github.com/oclif/core/issues/111)) ([b3ca07f](https://github.com/oclif/core/commit/b3ca07f4e6f7e6e87e675a9de0dbce611a9f1950))
+
+
+
 # [0.3.0](https://github.com/oclif/core/compare/v0.2.0...v0.3.0) (2021-02-01)
 
 
