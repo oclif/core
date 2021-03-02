@@ -10,12 +10,15 @@ import * as Flags from './flags'
 import {HelpBase, Help, getHelpClass} from './help'
 import * as Parser from './parser'
 
+const handle = Errors.handle
+
 export {
   Command,
   Config,
   Errors,
   Flags,
   getHelpClass,
+  handle,
   Help,
   HelpBase,
   Interfaces,
