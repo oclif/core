@@ -181,9 +181,8 @@ export class Config implements IConfig {
   }
 
   async loadDevPlugins() {
-    if (this.options.devPlugins !== false) {
-      // do not load oclif.devPlugins in production
-      if (hasManifest(path.join(this.root, 'oclif.manifest.json'))) return
+    // do not load oclif.devPlugins in production
+    if (this.options.devPlugins !== false && process.env.NODE_ENV === 'development') {
       try {
         const devPlugins = this.pjson.oclif.devPlugins
         if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)

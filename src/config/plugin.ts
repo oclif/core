@@ -15,15 +15,6 @@ import {compact, exists, flatMap, loadJSON, mapValues} from './util'
 
 const _pjson = require('../../package.json')
 
-const hasManifest = function (p: string): boolean {
-  try {
-    require(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
@@ -121,7 +112,7 @@ export class Plugin implements IPlugin {
     this.name = this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
-    const isProd = hasManifest(path.join(root, 'oclif.manifest.json'))
+    const isProd = process.env.NODE_DEV !== 'development'
     if (!isProd && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
