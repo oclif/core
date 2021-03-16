@@ -41,6 +41,7 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
 export function tsPath(root: string, orig: string | undefined): string | undefined {
   if (!orig) return orig
   orig = path.join(root, orig)
+  if (process.env.NODE_ENV !== 'development') return orig
   try {
     const tsconfig = loadTSConfig(root)
     if (!tsconfig) return orig
