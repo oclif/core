@@ -173,13 +173,12 @@ export class Config implements IConfig {
 
   async loadDevPlugins() {
     // do not load oclif.devPlugins in production
-    if (this.options.devPlugins !== false && process.env.NODE_ENV === 'development') {
-      try {
-        const devPlugins = this.pjson.oclif.devPlugins
-        if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-      } catch (error) {
-        process.emitWarning(error)
-      }
+    if (this.isProd) return
+    try {
+      const devPlugins = this.pjson.oclif.devPlugins
+      if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
+    } catch (error) {
+      process.emitWarning(error)
     }
   }
 
@@ -459,6 +458,10 @@ export class Config implements IConfig {
     ]).join('\n')
 
     process.emitWarning(JSON.stringify(err))
+  }
+
+  protected get isProd() {
+    return process.env.NODE_DEV !== 'development'
   }
 }
 

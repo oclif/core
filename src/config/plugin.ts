@@ -112,8 +112,7 @@ export class Plugin implements IPlugin {
     this.name = this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
-    const isProd = process.env.NODE_DEV !== 'development'
-    if (!isProd && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
+    if (process.env.NODE_DEV === 'development' && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
     this.version = this.pjson.version
