@@ -26,15 +26,6 @@ function channelFromVersion(version: string) {
   return (m && m[1]) || 'stable'
 }
 
-function hasManifest(p: string): boolean {
-  try {
-    require(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
 const WSL = require('is-wsl')
 
 function isConfig(o: any): o is IConfig {
