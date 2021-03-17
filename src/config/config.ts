@@ -26,15 +26,6 @@ function channelFromVersion(version: string) {
   return (m && m[1]) || 'stable'
 }
 
-function hasManifest(p: string): boolean {
-  try {
-    require(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
 const WSL = require('is-wsl')
 
 function isConfig(o: any): o is IConfig {
@@ -181,15 +172,13 @@ export class Config implements IConfig {
   }
 
   async loadDevPlugins() {
-    if (this.options.devPlugins !== false) {
-      // do not load oclif.devPlugins in production
-      if (hasManifest(path.join(this.root, 'oclif.manifest.json'))) return
-      try {
-        const devPlugins = this.pjson.oclif.devPlugins
-        if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-      } catch (error) {
-        process.emitWarning(error)
-      }
+    // do not load oclif.devPlugins in production
+    if (this.isProd) return
+    try {
+      const devPlugins = this.pjson.oclif.devPlugins
+      if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
+    } catch (error) {
+      process.emitWarning(error)
     }
   }
 
@@ -469,6 +458,10 @@ export class Config implements IConfig {
     ]).join('\n')
 
     process.emitWarning(JSON.stringify(err))
+  }
+
+  protected get isProd() {
+    return process.env.NODE_ENV !== 'development'
   }
 }
 
