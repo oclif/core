@@ -461,7 +461,7 @@ export class Config implements IConfig {
   }
 
   protected get isProd() {
-    return process.env.NODE_DEV !== 'development'
+    return process.env.NODE_ENV !== 'development'
   }
 }
 
