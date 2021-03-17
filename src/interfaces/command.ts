@@ -76,6 +76,6 @@ export namespace Command {
   }
 
   export interface Plugin extends Command {
-    load(): Class;
+    load(): Promise<Class>;
   }
 }

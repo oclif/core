@@ -43,6 +43,10 @@ export interface Plugin {
    */
   pjson: PJSON.Plugin | PJSON.CLI;
   /**
+   * type from package.json is set to module
+   */
+  isESM: boolean;
+  /**
    * used to tell the user how the plugin was installed
    * examples: core, link, user, dev
    */
@@ -66,7 +70,7 @@ export interface Plugin {
   readonly commandIDs: string[];
   readonly topics: Topic[];
 
-  findCommand(id: string, opts: { must: true }): Command.Class;
-  findCommand(id: string, opts?: { must: boolean }): Command.Class | undefined;
+  findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
+  findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class | undefined>;
   load(): Promise<void>;
 }

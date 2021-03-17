@@ -57,6 +57,10 @@ export interface Config {
    */
   home: string;
   /**
+   * type from package.json is set to module
+   */
+  isESM: boolean;
+  /**
    * process.platform
    */
   platform: PlatformTypes;

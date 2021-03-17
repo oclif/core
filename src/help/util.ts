@@ -2,28 +2,23 @@ import lodashTemplate = require('lodash.template')
 
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
-import * as Config from '../config'
+import ModuleLoader from '../module-loader'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
-}
-
-function extractExport(config: IConfig, classPath: string): HelpBaseDerived {
-  const helpClassPath = Config.tsPath(config.root, classPath)
-  return require(helpClassPath) as HelpBaseDerived
 }
 
 function extractClass(exported: any): HelpBaseDerived {
   return exported && exported.default ? exported.default : exported
 }
 
-export function getHelpClass(config: IConfig): HelpBaseDerived {
+export async function getHelpClass(config: IConfig): Promise<HelpBaseDerived> {
   const pjson = config.pjson
   const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
 
   if (configuredClass) {
     try {
-      const exported = extractExport(config, configuredClass)
+      const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
     } catch (error) {
       throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)

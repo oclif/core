@@ -45,9 +45,9 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
       if (arg === '--help') return false
       return true
     })
-    const Help = getHelpClass(config)
+    const Help = await getHelpClass(config)
     const help = new Help(config)
-    help.showHelp(argv)
+    await help.showHelp(argv)
     return
   }
 

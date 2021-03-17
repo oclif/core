@@ -12,6 +12,7 @@ import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
 import {compact, exists, flatMap, loadJSON, mapValues} from './util'
+import ModuleLoader from '../module-loader'
 
 const _pjson = require('../../package.json')
 
@@ -73,6 +74,8 @@ export class Plugin implements IPlugin {
 
   pjson!: PJSON.Plugin
 
+  isESM = false
+
   type!: string
 
   root!: string
@@ -110,6 +113,7 @@ export class Plugin implements IPlugin {
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json')) as any
     this.name = this.pjson.name
+    this.isESM = this.pjson.type === 'module'
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (process.env.NODE_DEV === 'development' && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
@@ -126,7 +130,7 @@ export class Plugin implements IPlugin {
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object.entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, load: () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => ({...c, load: async () => this.findCommand(id, {must: true})}))
     this.commands.sort((a, b) => {
       if (a.id < b.id) return -1
       if (a.id > b.id) return 1
@@ -168,12 +172,12 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  findCommand(id: string, opts: {must: true}): Command.Class
+  async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
 
-  findCommand(id: string, opts?: {must: boolean}): Command.Class | undefined
+  async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
-  findCommand(id: string, opts: {must?: boolean} = {}): Command.Class | undefined {
-    const fetch = () => {
+  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+    const fetch = async () => {
       if (!this.commandsDir) return
       const search = (cmd: any) => {
         if (typeof cmd.run === 'function') return cmd
@@ -181,10 +185,10 @@ export class Plugin implements IPlugin {
         return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
       }
       const p = require.resolve(path.join(this.commandsDir, ...id.split(':')))
-      this._debug('require', p)
+      this._debug(this.isESM ? '(import)' : '(require)', p)
       let m
       try {
-        m = require(p)
+        m = this.isESM ? await ModuleLoader.importDynamic(p) : require(p)
       } catch (error) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
@@ -195,7 +199,7 @@ export class Plugin implements IPlugin {
       cmd.plugin = this
       return cmd
     }
-    const cmd = fetch()
+    const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
     return cmd
   }
@@ -227,15 +231,15 @@ export class Plugin implements IPlugin {
     return {
       version: this.version,
       // eslint-disable-next-line array-callback-return
-      commands: this.commandIDs.map(id => {
+      commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, toCached(this.findCommand(id, {must: true}), this)]
+          return [id, toCached(await this.findCommand(id, {must: true}), this)]
         } catch (error) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
           else throw this.addErrorScope(error, scope)
         }
-      })
+      })))
       .filter((f): f is [string, Command] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
