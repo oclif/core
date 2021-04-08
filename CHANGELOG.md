@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/oclif/core/compare/v0.4.0...v0.5.0) (2021-04-08)
+
+
+### Bug Fixes
+
+* don't resolve lib to src in development mode ([#129](https://github.com/oclif/core/issues/129)) ([abd10fd](https://github.com/oclif/core/commit/abd10fdbb313c25170f4492cc8dfea8ffa3a9928))
+
+
+
 # [0.4.0](https://github.com/oclif/core/compare/v0.3.0...v0.4.0) (2021-03-01)
 
 
