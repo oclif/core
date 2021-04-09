@@ -46,8 +46,8 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   const ids = config.commandIDs.concat(config.topics.map(t => t.name))
 
   const findId = (id: string, next: string[]): string | undefined => {
-    const idPresnet = (id: string) => ids.includes(id)
-    if (idPresnet(id) && !idPresnet(`${id}:${next[0]}`)) return id
+    const idPresent = (id: string) => ids.includes(id)
+    if (idPresent(id) && !idPresent(`${id}:${next[0]}`)) return id
     if (next.length === 0 || next[0] === '--') return
     return findId(`${id}:${next[0]}`, next.slice(1))
   }
@@ -62,9 +62,17 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   return argv // ID is argv[0]
 }
 
+export function toStandardizedId(commandID: string, config: IConfig): string {
+  return commandID.replace(new RegExp(config.topicSeparator, 'g'), ':')
+}
+
+export function toConfiguredId(commandID: string, config: IConfig): string {
+  return commandID.replace(new RegExp(':', 'g'), config.topicSeparator)
+}
+
 export function standarizeIDFromArgv(argv: string[], config: IConfig): string[] {
   if (argv.length === 0) return argv
   if (config.topicSeparator === ' ') argv = collateSpacedCmdIDFromArgs(argv, config)
-  else if (config.topicSeparator !== ':') argv[0] = argv[0].replace(new RegExp(config.topicSeparator, 'g'), ':')
+  else if (config.topicSeparator !== ':') argv[0] = toStandardizedId(argv[0], config)
   return argv
 }

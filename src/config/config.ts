@@ -246,7 +246,7 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      await this.runHook('command_not_found', {id})
+      await this.runHook('command_not_found', {id, argv})
       throw new CLIError(`command ${id} not found`)
     }
     const command = c.load()

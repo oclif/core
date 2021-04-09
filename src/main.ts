@@ -3,6 +3,7 @@ import {format, inspect} from 'util'
 import * as Interfaces from './interfaces'
 import {Config} from './config'
 import {getHelpClass, standarizeIDFromArgv} from './help'
+import {Arg} from './interfaces'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
@@ -55,7 +56,24 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   const cmd = config.findCommand(id)
   if (!cmd) {
     const topic = config.findTopic(id)
-    if (topic) return config.runCommand('help', [id])
+    if (topic) {
+      const subCommands = config.commands.filter(c => (c.id).startsWith(id))
+      const argsOfSubCommands = subCommands.reduce((x, y) => x.concat(y.args), [] as Arg[])
+
+      if (argsOfSubCommands.length > 0) return config.runCommand('help', [id])
+      if (argvSlice[0].startsWith('--')) return config.runCommand('help', [id])
+
+      const extraBits = []
+      for (const arg of argvSlice) {
+        if (arg.startsWith('--')) {
+          break
+        } else {
+          extraBits.push(arg)
+        }
+      }
+      id = [id, ...extraBits].join(':')
+      argvSlice = argvSlice.slice(extraBits.length)
+    }
     if (config.pjson.oclif.default) {
       id = config.pjson.oclif.default
       argvSlice = argv
