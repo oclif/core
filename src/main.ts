@@ -60,8 +60,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
       const subCommands = config.commands.filter(c => (c.id).startsWith(id))
       const argsOfSubCommands = subCommands.reduce((x, y) => x.concat(y.args), [] as Arg[])
 
-      if (argsOfSubCommands.length > 0) return config.runCommand('help', [id])
-      if (argvSlice[0].startsWith('--')) return config.runCommand('help', [id])
+      if (argsOfSubCommands.length > 0 || argvSlice[0].startsWith('--')) return config.runCommand('help', [id])
 
       const extraBits = []
       for (const arg of argvSlice) {
