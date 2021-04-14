@@ -45,14 +45,29 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
   const ids = config.commandIDs.concat(config.topics.map(t => t.name))
 
-  const findId = (id: string, next: string[]): string | undefined => {
+  const findId = (argv: string[]): string | undefined => {
+    const final: string[] = []
     const idPresent = (id: string) => ids.includes(id)
-    if (idPresent(id) && !idPresent(`${id}:${next[0]}`)) return id
-    if (next.length === 0 || next[0] === '--') return
-    return findId(`${id}:${next[0]}`, next.slice(1))
+    const isFlag = (s: string) => s.startsWith('-')
+    const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
+
+    const hasSubCommandsWithArgs = () => {
+      const subCommands = config.commands.filter(c => (c.id).startsWith(finalizeId()))
+      return Boolean(subCommands.find(cmd => cmd.args.length > 0))
+    }
+
+    for (const arg of argv) {
+      if (idPresent(finalizeId(arg))) final.push(arg)
+      // If the parent topic has a command that expects positional arguments, then we cannot
+      // assume that any subsequent string could be part of the command name
+      else if (isFlag(arg) || hasSubCommandsWithArgs()) break
+      else final.push(arg)
+    }
+
+    return finalizeId()
   }
 
-  const id = findId(argv[0], argv.slice(1))
+  const id = findId(argv)
 
   if (id) {
     const argvSlice = argv.slice(id.split(':').length)
