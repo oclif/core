@@ -45,14 +45,29 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
   const ids = config.commandIDs.concat(config.topics.map(t => t.name))
 
-  const findId = (id: string, next: string[]): string | undefined => {
-    const idPresnet = (id: string) => ids.includes(id)
-    if (idPresnet(id) && !idPresnet(`${id}:${next[0]}`)) return id
-    if (next.length === 0 || next[0] === '--') return
-    return findId(`${id}:${next[0]}`, next.slice(1))
+  const findId = (argv: string[]): string | undefined => {
+    const final: string[] = []
+    const idPresent = (id: string) => ids.includes(id)
+    const isFlag = (s: string) => s.startsWith('-')
+    const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
+
+    const hasSubCommandsWithArgs = () => {
+      const subCommands = config.commands.filter(c => (c.id).startsWith(finalizeId()))
+      return Boolean(subCommands.find(cmd => cmd.args.length > 0))
+    }
+
+    for (const arg of argv) {
+      if (idPresent(finalizeId(arg))) final.push(arg)
+      // If the parent topic has a command that expects positional arguments, then we cannot
+      // assume that any subsequent string could be part of the command name
+      else if (isFlag(arg) || hasSubCommandsWithArgs()) break
+      else final.push(arg)
+    }
+
+    return finalizeId()
   }
 
-  const id = findId(argv[0], argv.slice(1))
+  const id = findId(argv)
 
   if (id) {
     const argvSlice = argv.slice(id.split(':').length)
@@ -62,9 +77,17 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   return argv // ID is argv[0]
 }
 
+export function toStandardizedId(commandID: string, config: IConfig): string {
+  return commandID.replace(new RegExp(config.topicSeparator, 'g'), ':')
+}
+
+export function toConfiguredId(commandID: string, config: IConfig): string {
+  return commandID.replace(new RegExp(':', 'g'), config.topicSeparator)
+}
+
 export function standarizeIDFromArgv(argv: string[], config: IConfig): string[] {
   if (argv.length === 0) return argv
   if (config.topicSeparator === ' ') argv = collateSpacedCmdIDFromArgs(argv, config)
-  else if (config.topicSeparator !== ':') argv[0] = argv[0].replace(new RegExp(config.topicSeparator, 'g'), ':')
+  else if (config.topicSeparator !== ':') argv[0] = toStandardizedId(argv[0], config)
   return argv
 }

@@ -8,7 +8,9 @@ import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import * as Flags from './flags'
 import {HelpBase, Help, getHelpClass} from './help'
+import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
+import {Hook} from './interfaces/hooks'
 
 export {
   Command,
@@ -18,12 +20,15 @@ export {
   getHelpClass,
   Help,
   HelpBase,
+  Hook,
   Interfaces,
   Parser,
   Plugin,
   run,
   toCached,
   tsPath,
+  toStandardizedId,
+  toConfiguredId,
 }
 
 function checkCWD() {

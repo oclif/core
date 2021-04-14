@@ -18,7 +18,7 @@ export interface Hooks {
   };
   preupdate: {channel: string};
   update: {channel: string};
-  'command_not_found': {id: string};
+  'command_not_found': {id: string; argv?: string[]};
   'plugins:preinstall': {
     plugin: {
       name: string;
