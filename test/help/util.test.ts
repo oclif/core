@@ -2,7 +2,7 @@
 import {resolve} from 'path'
 import {Config, Interfaces} from '../../src'
 import {expect, test} from '@oclif/test'
-import {getHelpClass} from '../../src/help'
+import {getHelpClass, standarizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from  '../../src/help/_test-help-class'
 
 describe('util', () => {
@@ -39,6 +39,31 @@ describe('util', () => {
         config.pjson.oclif.helpClass = './lib/does-not-exist-help-class'
         expect(() => getHelpClass(config)).to.throw('Unable to load configured help class "./lib/does-not-exist-help-class", failed with message:')
       })
+    })
+  })
+
+  describe('#standarizeIDFromArgv', () => {
+    test
+    .it('should return standardized id when topic separator is a colon', () => {
+      config.pjson.oclif.topicSeparator = ':'
+      const actual = standarizeIDFromArgv(['foo:bar', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space', () => {
+      config.topicSeparator = ' '
+      const actual = standarizeIDFromArgv(['foo', 'bar', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and command is misspelled', () => {
+      config.topicSeparator = ' '
+      const actual = standarizeIDFromArgv(['foo', 'ba', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:ba', '--baz'])
     })
   })
 })
