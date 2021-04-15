@@ -1,3 +1,14 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.5.1](https://github.com/oclif/core/compare/v0.5.0...v0.5.1) (2021-04-15)
+
+
+### Features
+
+* support misspelled spaced commands ([#143](https://github.com/oclif/core/issues/143)) ([50c1789](https://github.com/oclif/core/commit/50c1789120a4d73703c0ce560a6a312d391f594a))
+
 # [0.5.0](https://github.com/oclif/core/compare/v0.4.0...v0.5.0) (2021-04-08)
 
 
@@ -77,6 +88,3 @@
 
 
 # 0.1.0 (2020-09-02)
-
-
-
