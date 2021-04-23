@@ -3,7 +3,7 @@ import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
-g.columns = 80
+g.oclif.columns = 80
 import {Help} from '../../src/help'
 import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
 

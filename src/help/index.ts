@@ -7,7 +7,7 @@ import {error} from '../errors'
 import CommandHelp from './command'
 import {renderList} from './list'
 import RootHelp from './root'
-import {stdtermwidth} from './screen'
+import {stdtermwidth} from '../screen'
 import {compact, sortBy, uniqBy} from '../util'
 import {standarizeIDFromArgv, template} from './util'
 

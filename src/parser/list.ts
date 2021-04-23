@@ -1,4 +1,4 @@
-import {stdtermwidth} from './screen'
+import {stdtermwidth} from '../screen'
 import {maxBy} from './util'
 import {List} from '../interfaces'
 
@@ -13,7 +13,7 @@ export function renderList(items: List): string {
   if (items.length === 0) {
     return ''
   }
-  const maxLength = (maxBy(items, i => i[0].length))![0].length
+  const maxLength = maxBy(items, i => i[0].length)![0].length
   const lines = items.map(i => {
     let left = i[0]
     let right = i[1]

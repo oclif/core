@@ -1,3 +1,5 @@
+import {settings} from './settings'
+
 function termwidth(stream: any): number {
   if (!stream.isTTY) {
     return 80
@@ -12,7 +14,7 @@ function termwidth(stream: any): number {
   return width
 }
 
-const columns: number | null = (global as any).columns
+const columns = parseInt(process.env.OCLIF_COLUMNS!, 10) || settings.columns
 
 export const stdtermwidth = columns || termwidth(process.stdout)
 export const errtermwidth = columns || termwidth(process.stderr)
