@@ -27,7 +27,7 @@ export type Settings = {
    * require('ts-node').register();
    *
    * Environment Variable:
-   *   NODE_ENV=developement
+   *   NODE_ENV=development
    */
   tsnodeEnabled?: boolean;
 };

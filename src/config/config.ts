@@ -15,6 +15,7 @@ import * as Plugin from './plugin'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
 import {compact, flatMap, loadJSON, uniq} from './util'
+import {isProd} from '../util'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -461,7 +462,7 @@ export class Config implements IConfig {
   }
 
   protected get isProd() {
-    return process.env.NODE_ENV !== 'development'
+    return isProd()
   }
 }
 

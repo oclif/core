@@ -35,3 +35,7 @@ export function castArray<T>(input?: T | T[]): T[] {
   if (input === undefined) return []
   return Array.isArray(input) ? input : [input]
 }
+
+export function isProd() {
+  return process.env.NODE_ENV !== 'development'
+}

@@ -11,6 +11,7 @@ import {HelpBase, Help, getHelpClass} from './help'
 import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
+import {settings, Settings} from './settings'
 
 export {
   Command,
@@ -29,6 +30,8 @@ export {
   tsPath,
   toStandardizedId,
   toConfiguredId,
+  settings,
+  Settings,
 }
 
 function checkCWD() {
