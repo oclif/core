@@ -62,7 +62,8 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
     const lib = path.join(root, outDir) // ./lib
     const src = path.join(root, rootDirPath) // ./src
     const relative = path.relative(lib, orig) // ./commands
-    const out = path.join(src, relative) // ./src/commands
+    // For hooks, it might point to a js file, not a module. Something like "./hooks/myhook.js" which doesn't need the js.
+    const out = path.join(src, relative).replace(/\.js$/, '') // ./src/commands
     // this can be a directory of commands or point to a hook file
     // if it's a directory, we check if the path exists. If so, return the path to the directory.
     // For hooks, it might point to a module, not a file. Something like "./hooks/myhook"
