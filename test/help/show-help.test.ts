@@ -7,7 +7,7 @@ import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdmin
 import {Interfaces, Config} from '../../src'
 
 const g: any = global
-g.columns = 80
+g.oclif.columns = 80
 
 // extension makes previously protected methods public
 class TestHelp extends Help {

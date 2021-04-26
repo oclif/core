@@ -1,7 +1,7 @@
 import * as wrap from 'wrap-ansi'
 import indent = require('indent-string')
 
-import * as screen from '../screen'
+import * as screen from '../../screen'
 import {config} from '../config'
 import {PrettyPrintableError} from '../../interfaces/errors'
 

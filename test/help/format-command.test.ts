@@ -5,7 +5,7 @@ import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
 import {Help} from '../../src/help'
 
 const g: any = global
-g.columns = 80
+g.oclif.columns = 80
 
 class Command extends Base {
   async run() {

@@ -1,6 +1,7 @@
 *-debug.log
 *-error.log
 /.nyc_output
+/.vscode
 /coverage
 /coverage.lcov
 /lib

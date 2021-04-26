@@ -1,7 +1,5 @@
+import {settings} from '../settings'
 import {Logger} from './logger'
-
-// eslint-disable-next-line no-multi-assign
-const g = (global as any).oclif = (global as any).oclif || {}
 
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
@@ -14,18 +12,22 @@ function displayWarnings() {
 export const config = {
   errorLogger: undefined as Logger | undefined,
   get debug(): boolean {
-    return Boolean(g.debug)
+    return Boolean(settings.debug)
   },
   set debug(enabled: boolean) {
-    g.debug = enabled
+    settings.debug = enabled
     if (enabled) displayWarnings()
   },
   get errlog(): string | undefined {
-    return g.errlog
+    return settings.errlog
   },
   set errlog(errlog: string | undefined) {
-    g.errlog = errlog
-    if (errlog) this.errorLogger = new Logger(errlog)
-    else delete this.errorLogger
+    if (errlog) {
+      this.errorLogger = new Logger(errlog)
+      settings.errlog = errlog
+    } else {
+      delete this.errorLogger
+      delete settings.errlog
+    }
   },
 }

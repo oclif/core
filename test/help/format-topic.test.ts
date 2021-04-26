@@ -5,7 +5,7 @@ import {Help} from '../../src/help'
 import {Interfaces} from '../../src'
 
 const g: any = global
-g.columns = 80
+g.oclif.columns = 80
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
