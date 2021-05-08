@@ -29,7 +29,7 @@ export default class ModuleLoader {
    */
   static async load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
     const {isESM, filePath} = ModuleLoader.resolvePath(config, modulePath)
-    return isESM ? ModuleLoader.importDynamic(filePath) : require(filePath)
+    return isESM ? _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
   }
 
   /**
@@ -48,20 +48,8 @@ export default class ModuleLoader {
    */
   static async loadWithData(config: IConfig|IPlugin, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
     const {isESM, filePath} = ModuleLoader.resolvePath(config, modulePath)
-    const module = isESM ? await ModuleLoader.importDynamic(filePath) : require(filePath)
+    const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
     return {isESM, module, filePath}
-  }
-
-  /**
-   * Provides a mechanism to use dynamic import / import() with tsconfig -> module: commonJS as otherwise import() gets
-   * transpiled to require(). Uses `url.pathToFileURL` as this is required on Windows to load ESM.
-   *
-   * @param {string} modulePath - File path to load.
-   *
-   * @returns {Promise<*>} Loaded module.
-   */
-  static async importDynamic(modulePath: string): Promise<any> {
-    return _importDynamic(url.pathToFileURL(modulePath))
   }
 
   /**

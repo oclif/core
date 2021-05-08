@@ -182,14 +182,14 @@ export class Plugin implements IPlugin {
         if (cmd.default && cmd.default.run) return cmd.default
         return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
       }
-      const isESM = this.pjson.type === 'module'
-      const p = require.resolve(path.join(this.commandsDir, ...id.split(':')))
-      this._debug(isESM ? '(import)' : '(require)', p)
       let m
       try {
-        m = isESM ? await ModuleLoader.importDynamic(p) : require(p)
+        const p = path.join(this.pjson.oclif.commands as string, ...id.split(':'))
+        const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
+        this._debug(isESM ? '(import)' : '(require)', filePath)
+        m = module
       } catch (error) {
-        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
+        if (!opts.must && (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND')) return
         throw error
       }
       const cmd = search(m)
