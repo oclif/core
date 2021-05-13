@@ -66,7 +66,7 @@ export interface Plugin {
   readonly commandIDs: string[];
   readonly topics: Topic[];
 
-  findCommand(id: string, opts: { must: true }): Command.Class;
-  findCommand(id: string, opts?: { must: boolean }): Command.Class | undefined;
+  findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
+  findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
   load(): Promise<void>;
 }

@@ -13,9 +13,9 @@ import {Hook} from '../interfaces/hooks'
 import {PJSON} from '../interfaces/pjson'
 import * as Plugin from './plugin'
 import {Topic} from '../interfaces/topic'
-import {tsPath} from './ts-node'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
+import ModuleLoader from '../module-loader'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -202,7 +202,14 @@ export class Config implements IConfig {
 
   async runHook<T>(event: string, opts: T) {
     debug('start %s hook', event)
-    const promises = this.plugins.map(p => {
+
+    const search = (m: any): Hook<T> => {
+      if (typeof m === 'function') return m
+      if (m.default && typeof m.default === 'function') return m.default
+      return Object.values(m).find((m: any) => typeof m === 'function') as Hook<T>
+    }
+
+    for (const p of this.plugins) {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -220,26 +227,27 @@ export class Config implements IConfig {
           warn(message)
         },
       }
-      return Promise.all((p.hooks[event] || [])
-      .map(async hook => {
-        try {
-          const f = tsPath(p.root, hook)
-          debug('start', f)
-          const search = (m: any): Hook<T> => {
-            if (typeof m === 'function') return m
-            if (m.default && typeof m.default === 'function') return m.default
-            return Object.values(m).find((m: any) => typeof m === 'function') as Hook<T>
-          }
 
-          await search(require(f)).call(context, {...opts as any, config: this})
+      const hooks = p.hooks[event] || []
+
+      for (const hook of hooks) {
+        try {
+          /* eslint-disable no-await-in-loop */
+          const {isESM, module, filePath} = await ModuleLoader.loadWithData(p, hook)
+
+          debug('start', isESM ? '(import)' : '(require)', filePath)
+
+          await search(module).call(context, {...opts as any, config: this})
+          /* eslint-enable no-await-in-loop */
+
           debug('done')
         } catch (error) {
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
           this.warn(error, `runHook ${event}`)
         }
-      }))
-    })
-    await Promise.all(promises)
+      }
+    }
+
     debug('%s hook done', event)
   }
 
@@ -250,7 +258,7 @@ export class Config implements IConfig {
       await this.runHook('command_not_found', {id, argv})
       throw new CLIError(`command ${id} not found`)
     }
-    const command = c.load()
+    const command = await c.load()
     await this.runHook('prerun', {Command: command, argv})
     const result = await command.run(argv, this)
     await this.runHook('postrun', {Command: command, result: result, argv})

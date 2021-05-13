@@ -2,6 +2,7 @@
 
 export {handle} from './handle'
 export {ExitError} from './errors/exit'
+export {ModuleLoadError} from './errors/module-load'
 export {CLIError} from './errors/cli'
 export {Logger} from './logger'
 export {config} from './config'
