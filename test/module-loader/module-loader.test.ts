@@ -94,11 +94,11 @@ describe('ModuleLoader:', () => {
         // Must set type manually for ESM config.
         configESM.pjson.type = 'module'
 
-        const result = await ModuleLoader.loadWithData(module.isESM ? configESM : config, module.path)
+        const result = await ModuleLoader.load(module.isESM ? configESM : config, module.path)
 
         // Test that the default module as a string.
         if (module.defaultModule) {
-          assert.strictEqual(module.defaultModule, JSON.stringify(result.module))
+          assert.strictEqual(module.defaultModule, JSON.stringify(result))
         }
       })
     }
