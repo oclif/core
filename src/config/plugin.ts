@@ -189,7 +189,7 @@ export class Plugin implements IPlugin {
         this._debug(isESM ? '(import)' : '(require)', filePath)
         m = module
       } catch (error) {
-        if (!opts.must && (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND')) return
+        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
       }
       const cmd = search(m)

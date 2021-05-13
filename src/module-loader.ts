@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as url from 'url'
 
+import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
 import * as Config from './config'
@@ -22,6 +23,9 @@ export default class ModuleLoader {
    *
    * Uses dynamic import to load ESM files or require for CommonJS.
    *
+   * A unique error, ModuleLoadError, combines both CJS and ESM loader module not found errors into a single error that
+   * provides a consistent stack trace and info.
+   *
    * @param {IConfig|IPlugin} config - Oclif config or plugin config.
    * @param {string} modulePath - File path to load.
    *
@@ -29,7 +33,15 @@ export default class ModuleLoader {
    */
   static async load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
     const {isESM, filePath} = ModuleLoader.resolvePath(config, modulePath)
-    return isESM ? _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+    try {
+      // It is important to await on _importDynamic to catch the error code.
+      return isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+    } catch (error) {
+      if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath}`)
+      }
+      throw error
+    }
   }
 
   /**
@@ -40,6 +52,9 @@ export default class ModuleLoader {
    *
    * Uses dynamic import to load ESM files or require for CommonJS.
    *
+   * A unique error, ModuleLoadError, combines both CJS and ESM loader module not found errors into a single error that
+   * provides a consistent stack trace and info.
+   *
    * @param {IConfig|IPlugin} config - Oclif config or plugin config.
    * @param {string} modulePath - File path to load.
    *
@@ -48,8 +63,15 @@ export default class ModuleLoader {
    */
   static async loadWithData(config: IConfig|IPlugin, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
     const {isESM, filePath} = ModuleLoader.resolvePath(config, modulePath)
-    const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
-    return {isESM, module, filePath}
+    try {
+      const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+      return {isESM, module, filePath}
+    } catch (error) {
+      if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath}`)
+      }
+      throw error
+    }
   }
 
   /**
@@ -93,8 +115,7 @@ export default class ModuleLoader {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch (error) {
-      filePath = isESM ? require.resolve(path.join(config.root, modulePath)) :
-        Config.tsPath(config.root, modulePath)
+      filePath = isESM ? path.resolve(path.join(config.root, modulePath)) : Config.tsPath(config.root, modulePath)
     }
 
     return {isESM, filePath}
