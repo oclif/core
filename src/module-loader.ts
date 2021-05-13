@@ -14,6 +14,12 @@ const getPackageType = require('get-package-type')
  */
 const _importDynamic = new Function('modulePath', 'return import(modulePath)') // eslint-disable-line no-new-func
 
+/**
+ * Provides a static class with several utility methods to work with Oclif config / plugin to load ESM or CJS Node
+ * modules and source files.
+ *
+ * @author Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)
+ */
 export default class ModuleLoader {
   /**
    * Loads and returns a module.
@@ -21,15 +27,15 @@ export default class ModuleLoader {
    * Uses `getPackageType` to determine if `type` is set to 'module. If so loads '.js' files as ESM otherwise uses
    * a bare require to load as CJS. Also loads '.mjs' files as ESM.
    *
-   * Uses dynamic import to load ESM files or require for CommonJS.
+   * Uses dynamic import to load ESM source or require for CommonJS.
    *
    * A unique error, ModuleLoadError, combines both CJS and ESM loader module not found errors into a single error that
    * provides a consistent stack trace and info.
    *
    * @param {IConfig|IPlugin} config - Oclif config or plugin config.
-   * @param {string} modulePath - File path to load.
+   * @param {string} modulePath - NPM module name or file path to load.
    *
-   * @returns {Promise<*>} The imported default ESM export or CJS file by require.
+   * @returns {Promise<*>} The entire ESM module from dynamic import or CJS module by require.
    */
   static async load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
     const {isESM, filePath} = ModuleLoader.resolvePath(config, modulePath)
@@ -47,16 +53,16 @@ export default class ModuleLoader {
   /**
    * Loads a module and returns an object with the module and data about the module.
    *
-   * Uses `getPackageType` to determine if `type` is set to 'module. If so loads '.js' files as ESM otherwise uses
+   * Uses `getPackageType` to determine if `type` is set to `module`. If so loads '.js' files as ESM otherwise uses
    * a bare require to load as CJS. Also loads '.mjs' files as ESM.
    *
-   * Uses dynamic import to load ESM files or require for CommonJS.
+   * Uses dynamic import to load ESM source or require for CommonJS.
    *
    * A unique error, ModuleLoadError, combines both CJS and ESM loader module not found errors into a single error that
    * provides a consistent stack trace and info.
    *
    * @param {IConfig|IPlugin} config - Oclif config or plugin config.
-   * @param {string} modulePath - File path to load.
+   * @param {string} modulePath - NPM module name or file path to load.
    *
    * @returns {Promise<{isESM: boolean, module: *, filePath: string}>} An object with the loaded module & data including
    *                                                                   file path and whether the module is ESM.
@@ -78,16 +84,17 @@ export default class ModuleLoader {
    * For `.js` files uses `getPackageType` to determine if `type` is set to `module` in associated `package.json`. If
    * the `modulePath` provided ends in `.mjs` it is assumed to be ESM.
    *
-   * @param {string} modulePath - File path to load.
+   * @param {string} filePath - File path to test.
    *
    * @returns {boolean} The modulePath is an ES Module.
+   * @see https://www.npmjs.com/package/get-package-type
    */
-  static isPathModule(modulePath: string): boolean {
-    const extension = path.extname(modulePath).toLowerCase()
+  static isPathModule(filePath: string): boolean {
+    const extension = path.extname(filePath).toLowerCase()
 
     switch (extension) {
     case '.js':
-      return getPackageType.sync(modulePath) === 'module'
+      return getPackageType.sync(filePath) === 'module'
 
     case '.mjs':
       return true
@@ -99,7 +106,7 @@ export default class ModuleLoader {
 
   /**
    * Resolves a modulePath first by `require.resolve` to allow Node to resolve an actual module. If this fails then
-   * the `modulePath` is resolved from the root of the provided config. `require.resolve` is used for ESM and `tsPath`
+   * the `modulePath` is resolved from the root of the provided config. `path.resolve` is used for ESM and `tsPath`
    * for non-ESM paths.
    *
    * @param {IConfig|IPlugin} config - Oclif config or plugin config.
