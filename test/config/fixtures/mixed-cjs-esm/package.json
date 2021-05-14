@@ -1,0 +1,21 @@
+{
+  "name": "mixed-cjs-esm-plugin",
+  "description": "CommonJS module, but mixed w/ ESM by .mjs extension",
+  "private": true,
+  "files": [],
+  "oclif": {
+    "commands": "./src/commands",
+    "hooks": {
+      "init": "./src/hooks/init",
+      "prerun": [
+        "./src/hooks/prerun"
+      ],
+      "postrun": [
+        "./src/hooks/postrun"
+      ]
+    }
+  },
+  "devDependencies": {
+    "globby": "^8.0.1"
+  }
+}

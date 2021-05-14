@@ -1,0 +1,22 @@
+{
+  "name": "esm-plugin",
+  "description": "Module type ESM; All ESM source",
+  "private": true,
+  "type": "module",
+  "files": [],
+  "oclif": {
+    "commands": "./src/commands",
+    "hooks": {
+      "init": "./src/hooks/init",
+      "prerun": [
+        "./src/hooks/prerun"
+      ],
+      "postrun": [
+        "./src/hooks/postrun"
+      ]
+    }
+  },
+  "devDependencies": {
+    "globby": "^8.0.1"
+  }
+}
