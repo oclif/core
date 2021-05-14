@@ -20,7 +20,7 @@ describe('mixed-cjs-esm', () => {
 
   withConfig
   .stdout()
-  .it('runs ts command and prerun & postrun hooks', async ctx => {
+  .it('runs mixed-esm-cjs command and prerun & postrun hooks', async ctx => {
     await ctx.config.runCommand('foo:bar:baz')
     expect(ctx.stdout).to.equal('running mixed-esm-cjs prerun hook\nit works!\nrunning mixed-esm-cjs postrun hook\n')
   })

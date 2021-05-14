@@ -20,7 +20,7 @@ describe('esm', () => {
 
   withConfig
   .stdout()
-  .it('runs ts command and prerun & postrun hooks', async ctx => {
+  .it('runs esm command and prerun & postrun hooks', async ctx => {
     await ctx.config.runCommand('foo:bar:baz')
     expect(ctx.stdout).to.equal('running esm prerun hook\nit works!\nrunning esm postrun hook\n')
   })
