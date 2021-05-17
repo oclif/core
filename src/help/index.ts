@@ -9,9 +9,9 @@ import {renderList} from './list'
 import RootHelp from './root'
 import {stdtermwidth} from '../screen'
 import {compact, sortBy, uniqBy} from '../util'
-import {standarizeIDFromArgv, template} from './util'
+import {standardizeIDFromArgv, template} from './util'
 
-export {standarizeIDFromArgv, getHelpClass} from './util'
+export {standardizeIDFromArgv, getHelpClass} from './util'
 
 const wrap = require('wrap-ansi')
 const {
@@ -94,7 +94,7 @@ export class Help extends HelpBase {
   }
 
   public showHelp(argv: string[]) {
-    if (this.config.topicSeparator !== ':') argv = standarizeIDFromArgv(argv, this.config)
+    if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv)
     if (!subject) {
       if (this.config.pjson.oclif.default) {

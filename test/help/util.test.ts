@@ -2,7 +2,7 @@
 import {resolve} from 'path'
 import {Config, Interfaces} from '../../src'
 import {expect, test} from '@oclif/test'
-import {getHelpClass, standarizeIDFromArgv} from '../../src/help'
+import {getHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from  '../../src/help/_test-help-class'
 
 describe('util', () => {
@@ -42,11 +42,11 @@ describe('util', () => {
     })
   })
 
-  describe('#standarizeIDFromArgv', () => {
+  describe('#standardizeIDFromArgv', () => {
     test
     .it('should return standardized id when topic separator is a colon', () => {
       config.pjson.oclif.topicSeparator = ':'
-      const actual = standarizeIDFromArgv(['foo:bar', '--baz'], config)
+      const actual = standardizeIDFromArgv(['foo:bar', '--baz'], config)
       expect(actual).to.deep.equal(['foo:bar', '--baz'])
     })
 
@@ -54,7 +54,7 @@ describe('util', () => {
     .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space', () => {
       config.topicSeparator = ' '
-      const actual = standarizeIDFromArgv(['foo', 'bar', '--baz'], config)
+      const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
       expect(actual).to.deep.equal(['foo:bar', '--baz'])
     })
 
@@ -62,7 +62,7 @@ describe('util', () => {
     .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and command is misspelled', () => {
       config.topicSeparator = ' '
-      const actual = standarizeIDFromArgv(['foo', 'ba', '--baz'], config)
+      const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
       expect(actual).to.deep.equal(['foo:ba', '--baz'])
     })
   })
