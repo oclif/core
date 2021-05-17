@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.7](https://github.com/oclif/core/compare/v0.5.6...v0.5.7) (2021-05-17)
+
+
+### Bug Fixes
+
+* conversion of spaced commands to colon commands ([#164](https://github.com/oclif/core/issues/164)) ([9503d32](https://github.com/oclif/core/commit/9503d323d6e0dffe98a0a7005f676daeebd9ec44))
+
 ### [0.5.6](https://github.com/oclif/core/compare/v0.5.5...v0.5.6) (2021-05-13)
 
 
