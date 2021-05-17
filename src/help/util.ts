@@ -85,7 +85,7 @@ export function toConfiguredId(commandID: string, config: IConfig): string {
   return commandID.replace(new RegExp(':', 'g'), config.topicSeparator)
 }
 
-export function standarizeIDFromArgv(argv: string[], config: IConfig): string[] {
+export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {
   if (argv.length === 0) return argv
   if (config.topicSeparator === ' ') argv = collateSpacedCmdIDFromArgs(argv, config)
   else if (config.topicSeparator !== ':') argv[0] = toStandardizedId(argv[0], config)
