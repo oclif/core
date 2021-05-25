@@ -256,7 +256,7 @@ export class Config implements IConfig {
     debug('%s hook done', event)
   }
 
-  async runCommand(id: string, argv: string[] = [], cachedCommand?: Command.Plugin) {
+  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
@@ -265,8 +265,9 @@ export class Config implements IConfig {
     }
     const command = await c.load()
     await this.runHook('prerun', {Command: command, argv})
-    const result = await command.run(argv, this)
+    const result = (await command.run(argv, this)) as T
     await this.runHook('postrun', {Command: command, result: result, argv})
+    return result
   }
 
   scopedEnvVar(k: string) {
