@@ -111,7 +111,6 @@ export default abstract class Command {
   protected debug: (...args: any[]) => void
 
   constructor(public argv: string[], public config: Interfaces.Config) {
-    console.log('constructor!')
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -179,7 +178,6 @@ export default abstract class Command {
   abstract run(): PromiseLike<any>
 
   protected async init(): Promise<any> {
-    console.log('init!')
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
     if (this.config.debug) Errors.config.debug = true
     if (this.config.errlog) Errors.config.errlog = this.config.errlog
