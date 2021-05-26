@@ -134,7 +134,6 @@ describe('ModuleLoader:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        // const result = await ModuleLoader.load(module.isESM ? configESM : config, module.path)
         const result = await ModuleLoader.load(config, module.path)
 
         // Test that the default module as a string.
@@ -151,7 +150,6 @@ describe('ModuleLoader:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        // const result = await ModuleLoader.loadWithData(module.isESM ? configESM : config, module.path)
         const result = await ModuleLoader.loadWithData(config, module.path)
 
         // Test the exported module as a string.
