@@ -46,7 +46,6 @@ describe('mixed-cjs-esm', () => {
   withConfig
   .stdout()
   .it('runs init hook', async ctx => {
-    // to-do: fix union types
     await (ctx.config.runHook as any)('init', {id: 'myid', argv: ['foo']})
     expect(ctx.stdout).to.equal('running mixed-cjs-esm init hook\n')
   })
