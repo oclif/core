@@ -50,7 +50,7 @@ export interface CLIParseErrorOptions {
 export type OutputArgs<T extends ParserInput['args']> = { [P in keyof T]: any }
 export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
 export type ParserOutput<TFlags extends OutputFlags<any>, TArgs extends OutputArgs<any>> = {
-  flags: TFlags;
+  flags: TFlags & { json: boolean };
   args: TArgs;
   argv: string[];
   raw: ParsingToken[];

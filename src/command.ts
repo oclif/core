@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-
+import {cli} from 'cli-ux'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -67,6 +67,8 @@ export default abstract class Command {
 
   static parserOptions = {}
 
+  static disableJsonFlag: boolean | undefined
+
   // eslint-disable-next-line valid-jsdoc
   /**
    * instantiate and run the command
@@ -88,7 +90,7 @@ export default abstract class Command {
   }
 
   /** A hash of flags for the command */
-  static _flags: Interfaces.FlagInput<any>
+  private static _flags: Interfaces.FlagInput<any>
 
   private static globalFlags = {
     json: Flags.boolean({
@@ -101,7 +103,7 @@ export default abstract class Command {
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    Command._flags = Object.assign({}, flags, Command.globalFlags)
+    Command._flags = this.disableJsonFlag ? flags : Command._flags = Object.assign({}, flags, Command.globalFlags)
   }
 
   id: string | undefined
@@ -109,6 +111,7 @@ export default abstract class Command {
   protected debug: (...args: any[]) => void
 
   constructor(public argv: string[], public config: Interfaces.Config) {
+    console.log('constructor!')
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -137,7 +140,7 @@ export default abstract class Command {
     }
 
     if (result && this.jsonEnabled()) {
-      console.log(result)
+      cli.styledJSON(this.toSuccessJson(result))
     }
     return result
   }
@@ -176,6 +179,7 @@ export default abstract class Command {
   abstract run(): PromiseLike<any>
 
   protected async init(): Promise<any> {
+    console.log('init!')
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
     if (this.config.debug) Errors.config.debug = true
     if (this.config.errlog) Errors.config.errlog = this.config.errlog
@@ -198,10 +202,7 @@ export default abstract class Command {
 
   protected async catch(err: any): Promise<any> {
     if (this.jsonEnabled()) {
-      console.log({
-        status: process.exitCode,
-        err,
-      })
+      cli.styledJSON(this.toErrorJson(err))
     } else {
       if (!err.message) throw err
       try {
@@ -220,6 +221,21 @@ export default abstract class Command {
       // tslint:disable-next-line no-console
     } catch (error) {
       console.error(error)
+    }
+  }
+
+  private toSuccessJson(result: Record<string, any>): Record<string, any> {
+    return {status: 0, result}
+  }
+
+  private toErrorJson(err: any): Record<string, any> {
+    return {
+      status: process.exitCode || err.exitCode || 1,
+      name: err.name,
+      message: err.message,
+      exitCode: err.exitCode,
+      actions: err.actions,
+      cause: err.cause,
     }
   }
 }
