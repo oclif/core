@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.8](https://github.com/oclif/core/compare/v0.5.7...v0.5.8) (2021-05-26)
+
+
+### Features
+
+* strengthened ModuleLoader & unit tests; now supports mixed ESM / CJS plugins ([#163](https://github.com/oclif/core/issues/163)) ([788bf17](https://github.com/oclif/core/commit/788bf175b7e39b7d61fc07279e5cedca2fdbd540))
+
 ### [0.5.7](https://github.com/oclif/core/compare/v0.5.6...v0.5.7) (2021-05-17)
 
 
