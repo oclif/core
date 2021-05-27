@@ -10,11 +10,11 @@ export default class extends HelpBase {
     config.showHelpSpy = this.showHelp
   }
 
-  showCommandHelp = spy(() => {
+  showCommandHelp = spy(async () => {
     console.log('hello from test-help-plugin #showCommandHelp')
   })
 
-  showHelp = spy(() => {
+  showHelp = spy(async () => {
     console.log('hello showHelp')
   })
 

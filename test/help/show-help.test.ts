@@ -13,11 +13,11 @@ g.oclif.columns = 80
 class TestHelp extends Help {
   public config: any;
 
-  public showRootHelp() {
+  public async showRootHelp() {
     return super.showRootHelp()
   }
 
-  public showTopicHelp(topic: Interfaces.Topic) {
+  public async showTopicHelp(topic: Interfaces.Topic) {
     return super.showTopicHelp(topic)
   }
 }
@@ -26,9 +26,9 @@ const test = base
 .register('setupHelp', () => ({
   async run(ctx: { help: TestHelp; stubs: { [k: string]: SinonStub }}) {
     ctx.stubs = {
-      showRootHelp: stub(TestHelp.prototype, 'showRootHelp').returns(),
-      showTopicHelp: stub(TestHelp.prototype, 'showTopicHelp').returns(),
-      showCommandHelp: stub(TestHelp.prototype, 'showCommandHelp').returns(),
+      showRootHelp: stub(TestHelp.prototype, 'showRootHelp').resolves(),
+      showTopicHelp: stub(TestHelp.prototype, 'showTopicHelp').resolves(),
+      showCommandHelp: stub(TestHelp.prototype, 'showCommandHelp').resolves(),
     }
 
     // use devPlugins: true to bring in plugins-plugin with topic commands for testing
@@ -54,7 +54,7 @@ describe('showHelp for root', () => {
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -63,7 +63,7 @@ describe('showHelp for root', () => {
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp([])
+    await help.showHelp([])
   })
   .it('shows a command and topic when the index has siblings', ({stdout, config}) => {
     expect(stdout.trim()).to.equal(`base library for oclif CLIs
@@ -84,7 +84,7 @@ COMMANDS
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -93,7 +93,7 @@ COMMANDS
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp([])
+    await help.showHelp([])
   })
   .it('shows a command only when the topic only contains an index', ({stdout, config}) => {
     expect(stdout.trim()).to.equal(`base library for oclif CLIs
@@ -113,7 +113,7 @@ describe('showHelp for a topic', () => {
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -122,7 +122,7 @@ describe('showHelp for a topic', () => {
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps'])
+    await help.showHelp(['apps'])
   })
   .it('shows topic help with commands', ({stdout}) => {
     expect(stdout.trim()).to.equal(`This topic is for the apps topic
@@ -138,7 +138,7 @@ COMMANDS
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -147,7 +147,7 @@ COMMANDS
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps'])
+    await help.showHelp(['apps'])
   })
   .it('shows topic help with topic and commands', ({stdout}) => {
     expect(stdout.trim()).to.equal(`This topic is for the apps topic
@@ -166,7 +166,7 @@ COMMANDS
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -175,7 +175,7 @@ COMMANDS
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps'])
+    await help.showHelp(['apps'])
   })
   .it('shows topic help with topic and commands and topic command', ({stdout}) => {
     expect(stdout.trim()).to.equal(`This topic is for the apps topic
@@ -195,7 +195,7 @@ COMMANDS
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -204,7 +204,7 @@ COMMANDS
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps'])
+    await help.showHelp(['apps'])
   })
   .it('ignores other topics and commands', ({stdout}) => {
     expect(stdout.trim()).to.equal(`This topic is for the apps topic
@@ -225,7 +225,7 @@ describe('showHelp for a command', () => {
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -234,7 +234,7 @@ describe('showHelp for a command', () => {
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps:create'])
+    await help.showHelp(['apps:create'])
   })
   .it('shows help for a leaf (or childless) command', ({stdout}) => {
     expect(stdout.trim()).to.equal(`Create an app
@@ -249,7 +249,7 @@ DESCRIPTION
   test
   .loadConfig()
   .stdout()
-  .do(ctx => {
+  .do(async ctx => {
     const config = ctx.config;
 
     (config as any).plugins = [{
@@ -258,7 +258,7 @@ DESCRIPTION
     }]
 
     const help = new TestHelp(config as any)
-    help.showHelp(['apps'])
+    await help.showHelp(['apps'])
   })
   .it('shows help for a command that has children topics and commands', ({stdout}) => {
     expect(stdout.trim()).to.equal(`List all apps (app index command)
@@ -281,8 +281,8 @@ describe('showHelp routing', () => {
   describe('shows root help', () => {
     test
     .setupHelp()
-    .it('shows root help when no subject is provided', ({help, stubs}) => {
-      help.showHelp([])
+    .it('shows root help when no subject is provided', async ({help, stubs}) => {
+      await help.showHelp([])
       expect(stubs.showRootHelp.called).to.be.true
 
       expect(stubs.showCommandHelp.called).to.be.false
@@ -291,8 +291,8 @@ describe('showHelp routing', () => {
 
     test
     .setupHelp()
-    .it('shows root help when help is the only arg', ({help, stubs}) => {
-      help.showHelp(['help'])
+    .it('shows root help when help is the only arg', async ({help, stubs}) => {
+      await help.showHelp(['help'])
       expect(stubs.showRootHelp.called).to.be.true
 
       expect(stubs.showCommandHelp.called).to.be.false
@@ -304,8 +304,8 @@ describe('showHelp routing', () => {
     test
     .setupHelp()
     .makeTopicsWithoutCommand()
-    .it('shows the topic help when a topic has no matching command', ({help, stubs}) => {
-      help.showHelp(['plugins'])
+    .it('shows the topic help when a topic has no matching command', async ({help, stubs}) => {
+      await help.showHelp(['plugins'])
       expect(stubs.showTopicHelp.called).to.be.true
 
       expect(stubs.showRootHelp.called).to.be.false
@@ -315,8 +315,8 @@ describe('showHelp routing', () => {
     test
     .setupHelp()
     .makeTopicsWithoutCommand()
-    .it('shows the topic help when a topic has no matching command and is preceded by help', ({help, stubs}) => {
-      help.showHelp(['help', 'plugins'])
+    .it('shows the topic help when a topic has no matching command and is preceded by help', async ({help, stubs}) => {
+      await help.showHelp(['help', 'plugins'])
       expect(stubs.showTopicHelp.called).to.be.true
 
       expect(stubs.showRootHelp.called).to.be.false
@@ -327,8 +327,8 @@ describe('showHelp routing', () => {
   describe('shows command help', () => {
     test
     .setupHelp()
-    .it('calls showCommandHelp when a topic that is also a command is called', ({help, stubs}) => {
-      help.showHelp(['plugins'])
+    .it('calls showCommandHelp when a topic that is also a command is called', async ({help, stubs}) => {
+      await help.showHelp(['plugins'])
       expect(stubs.showCommandHelp.called).to.be.true
 
       expect(stubs.showRootHelp.called).to.be.false
@@ -337,8 +337,8 @@ describe('showHelp routing', () => {
 
     test
     .setupHelp()
-    .it('calls showCommandHelp when a command is called', ({help, stubs}) => {
-      help.showHelp(['plugins:install'])
+    .it('calls showCommandHelp when a command is called', async ({help, stubs}) => {
+      await help.showHelp(['plugins:install'])
       expect(stubs.showCommandHelp.called).to.be.true
 
       expect(stubs.showRootHelp.called).to.be.false
@@ -347,8 +347,8 @@ describe('showHelp routing', () => {
 
     test
     .setupHelp()
-    .it('calls showCommandHelp when a command is preceded by the help arg', ({help, stubs}) => {
-      help.showHelp(['help', 'plugins:install'])
+    .it('calls showCommandHelp when a command is preceded by the help arg', async ({help, stubs}) => {
+      await help.showHelp(['help', 'plugins:install'])
       expect(stubs.showCommandHelp.called).to.be.true
 
       expect(stubs.showRootHelp.called).to.be.false
@@ -359,8 +359,8 @@ describe('showHelp routing', () => {
   describe('errors', () => {
     test
     .setupHelp()
-    .it('shows an error when there is a subject but it does not match a topic or command', ({help}) => {
-      expect(() => help.showHelp(['meow'])).to.throw('command meow not found')
+    .it('shows an error when there is a subject but it does not match a topic or command', async ({help}) => {
+      await expect(help.showHelp(['meow'])).to.be.rejectedWith('command meow not found')
     })
   })
 })
