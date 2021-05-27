@@ -11,7 +11,7 @@ import {stdtermwidth} from '../screen'
 import {compact, sortBy, uniqBy} from '../util'
 import {standardizeIDFromArgv, template} from './util'
 
-export {standardizeIDFromArgv, getHelpClass} from './util'
+export {standardizeIDFromArgv, loadHelpClass} from './util'
 
 const wrap = require('wrap-ansi')
 const {
@@ -42,14 +42,14 @@ export abstract class HelpBase {
    * Show help, used in multi-command CLIs
    * @param args passed into your command, useful for determining which type of help to display
    */
-  public abstract showHelp(argv: string[]): void;
+  public abstract async showHelp(argv: string[]): Promise<void>;
 
   /**
    * Show help for an individual command
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): void;
+  public abstract async showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): Promise<void>;
 }
 
 export class Help extends HelpBase {
@@ -93,34 +93,34 @@ export class Help extends HelpBase {
     this.render = template(this)
   }
 
-  public showHelp(argv: string[]) {
+  public async showHelp(argv: string[]) {
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv)
     if (!subject) {
       if (this.config.pjson.oclif.default) {
         const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
-        if (rootCmd) this.showCommandHelp(rootCmd)
+        if (rootCmd) await this.showCommandHelp(rootCmd)
       }
-      this.showRootHelp()
+      await this.showRootHelp()
       return
     }
 
     const command = this.config.findCommand(subject)
     if (command) {
-      this.showCommandHelp(command)
+      await this.showCommandHelp(command)
       return
     }
 
     const topic = this.config.findTopic(subject)
     if (topic)  {
-      this.showTopicHelp(topic)
+      await this.showTopicHelp(topic)
       return
     }
 
     error(`command ${subject} not found`)
   }
 
-  public showCommandHelp(command: Interfaces.Command) {
+  public async showCommandHelp(command: Interfaces.Command) {
     const name = command.id
     const depth = name.split(':').length
 
@@ -143,7 +143,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected showRootHelp() {
+  protected async showRootHelp() {
     let rootTopics = this.sortedTopics
     let rootCommands = this.sortedCommands
 
@@ -167,7 +167,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected showTopicHelp(topic: Interfaces.Topic) {
+  protected async showTopicHelp(topic: Interfaces.Topic) {
     const name = topic.name
     const depth = name.split(':').length
 
