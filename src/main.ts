@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'url'
+
 import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
@@ -25,6 +27,11 @@ const versionOverride = (argv: string[]): boolean => {
 }
 
 export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
+  // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
+  if ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL) {
+    options = fileURLToPath(options)
+  }
+
   // return Main.run(argv, options)
   const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
 

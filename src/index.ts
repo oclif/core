@@ -13,6 +13,8 @@ import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
 
+const flush = require('../flush')
+
 export {
   Command,
   Config,
@@ -32,6 +34,7 @@ export {
   toConfiguredId,
   settings,
   Settings,
+  flush,
 }
 
 function checkCWD() {

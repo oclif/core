@@ -1,3 +1,4 @@
+import * as url from 'url'
 import * as path from 'path'
 
 import {Config} from '../../src/config'
@@ -7,8 +8,11 @@ import {expect, fancy} from './test'
 const root = path.resolve(__dirname, 'fixtures/esm')
 const p = (p: string) => path.join(root, p)
 
+// This tests file URL / import.meta.url simulation.
+const rootAsFileURL = url.pathToFileURL(root).toString()
+
 const withConfig = fancy
-.add('config', () => Config.load(root))
+.add('config', () => Config.load(rootAsFileURL))
 
 describe('esm', () => {
   withConfig

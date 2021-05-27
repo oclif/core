@@ -2,7 +2,7 @@ import {CLIError, error, exit, warn} from '../errors'
 import * as Lodash from 'lodash'
 import * as os from 'os'
 import * as path from 'path'
-import {URL} from 'url'
+import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
@@ -96,6 +96,11 @@ export class Config implements IConfig {
   constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = (module.parent && module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
+    // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
+    if (typeof opts === 'string' && opts.startsWith('file://')) {
+      opts = fileURLToPath(opts)
+    }
+
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) return opts
     const config = new Config(opts)
