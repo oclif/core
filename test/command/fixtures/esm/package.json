@@ -1,0 +1,26 @@
+{
+  "name": "oclif-esm",
+  "version": "0.0.0",
+  "description": "base library for oclif CLIs w/ ESM",
+  "private": true,
+  "type": "module",
+  "files": [],
+  "oclif": {
+    "commands": "./src/commands",
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topics": {
+      "foo": {
+        "description": "foo topic description",
+        "subtopics": {
+          "bar": {
+            "description": "foo bar topic description"
+          }
+        }
+      }
+    }
+  }
+}

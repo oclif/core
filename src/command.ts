@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'url'
+
 import {format, inspect} from 'util'
 
 import {Config} from './config'
@@ -76,6 +78,12 @@ export default abstract class Command {
    */
   static run: Interfaces.Command.Class['run'] = async function (this: Interfaces.Command.Class, argv?: string[], opts?) {
     if (!argv) argv = process.argv.slice(2)
+
+    // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
+    if (typeof opts === 'string' && opts.startsWith('file://')) {
+      opts = fileURLToPath(opts)
+    }
+
     const config = await Config.load(opts || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
     const cmd = new this(argv, config)
     return cmd._run(argv)
