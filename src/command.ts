@@ -140,7 +140,7 @@ export default abstract class Command {
     }
 
     if (result && this.jsonEnabled()) {
-      cli.styledJSON(this.toSuccessJson(result))
+      cli.styledJSON(this.toSuccessJson<T>(result))
     }
     return result
   }
@@ -223,11 +223,11 @@ export default abstract class Command {
     }
   }
 
-  protected toSuccessJson(result: Record<string, any>): Record<string, any> {
-    return {result}
+  protected toSuccessJson<T>(result: T): T {
+    return result
   }
 
-  protected toErrorJson(err: any): Record<string, any> {
+  protected toErrorJson(err: any): any {
     return {error: err}
   }
 }
