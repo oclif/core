@@ -641,6 +641,49 @@ See more help with --help`)
     })
   })
 
+  describe('url flag', () => {
+    it('accepts valid url', async () => {
+      const out = await parse(['--foo', 'https://example.com'], {
+        flags: {foo: flags.url()},
+      })
+      expect(out.flags.foo).to.be.instanceOf(URL)
+      expect(out.flags.foo?.href).to.equal('https://example.com/')
+    })
+
+    it('fails when invalid', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', 'example'], {
+          flags: {foo: flags.url()},
+        })
+      } catch (error) {
+        message = error.message
+      }
+      expect(message).to.equal('Expected a valid url but received example')
+    })
+  })
+
+  describe('filepath flag', () => {
+    it('accepts valid filepath', async () => {
+      const out = await parse(['--foo', './my/path/to/stuff.txt'], {
+        flags: {foo: flags.filepath()},
+      })
+      expect(out.flags.foo).to.equal('./my/path/to/stuff.txt')
+    })
+
+    it('fails when invalid', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', './my/path/to/stuff?.txt'], {
+          flags: {foo: flags.filepath()},
+        })
+      } catch (error) {
+        message = error.message
+      }
+      expect(message).to.equal('Expected a valid file path but received ./my/path/to/stuff?.txt')
+    })
+  })
+
   describe('arg options', () => {
     it('accepts valid option', async () => {
       const out = await parse(['myotheropt'], {
