@@ -26,7 +26,7 @@ export {_enum as enum}
 
 const stringFlag = build({})
 export {stringFlag as string}
-export {boolean, integer} from './parser'
+export {boolean, filepath, integer, url} from './parser'
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({

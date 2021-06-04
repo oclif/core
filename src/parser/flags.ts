@@ -40,6 +40,25 @@ export const integer = build({
   },
 })
 
+export const url = build({
+  parse: async input => {
+    try {
+      return new URL(input)
+    } catch {
+      throw new Error(`Expected a valid url but received ${input}`)
+    }
+  },
+})
+
+export const filepath = build({
+  parse: async input => {
+    const invalidPathChars = /[["?<>|\]]+/
+    if (invalidPathChars.test(input))
+      throw new Error(`Expected a valid file path but received ${input}`)
+    return input
+  },
+})
+
 export function option<T>(
   options: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
 ) {
