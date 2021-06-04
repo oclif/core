@@ -1,5 +1,6 @@
 import {fileURLToPath} from 'url'
 
+import {settings} from './settings'
 import {format, inspect} from 'util'
 import {cli} from 'cli-ux'
 import {Config} from './config'
@@ -103,7 +104,7 @@ export default abstract class Command {
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = this.disableJsonFlag ? flags : Object.assign({}, Command.globalFlags, flags)
+    this._flags = this.disableJsonFlag || settings.disableJsonFlag ? flags : Object.assign({}, Command.globalFlags, flags)
   }
 
   id: string | undefined
