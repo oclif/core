@@ -223,18 +223,11 @@ export default abstract class Command {
     }
   }
 
-  private toSuccessJson(result: Record<string, any>): Record<string, any> {
-    return {status: 0, result}
+  protected toSuccessJson(result: Record<string, any>): Record<string, any> {
+    return {result}
   }
 
-  private toErrorJson(err: any): Record<string, any> {
-    return {
-      status: process.exitCode || err.exitCode || 1,
-      name: err.name,
-      message: err.message,
-      exitCode: err.exitCode,
-      actions: err.actions,
-      cause: err.cause,
-    }
+  protected toErrorJson(err: any): Record<string, any> {
+    return {error: err}
   }
 }
