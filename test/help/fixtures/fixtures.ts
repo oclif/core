@@ -9,6 +9,8 @@ export class AppsCreate extends Command {
   static description = `Create an app
   this only shows up in command help under DESCRIPTION`;
 
+  static disableJsonFlag = true;
+
   static flags = {};
 
   static args = [];

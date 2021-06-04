@@ -99,11 +99,11 @@ export default abstract class Command {
   }
 
   static get flags(): Interfaces.FlagInput<any> {
-    return Command._flags
+    return this._flags
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    Command._flags = this.disableJsonFlag ? flags : Command._flags = Object.assign({}, flags, Command.globalFlags)
+    this._flags = this.disableJsonFlag ? flags : Object.assign({}, Command.globalFlags, flags)
   }
 
   id: string | undefined
