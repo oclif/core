@@ -45,18 +45,19 @@ export const url = build({
     try {
       return new URL(input)
     } catch {
-      throw new Error(`Expected a valid url but received ${input}`)
+      throw new Error(`Expected a valid url but received: ${input}`)
     }
   },
 })
 
-export const filepath = build({
+export const path = build({
   parse: async input => {
     const invalidPathChars = /[["?<>|\]]+/
     if (invalidPathChars.test(input))
-      throw new Error(`Expected a valid file path but received ${input}`)
+      throw new Error(`Expected a valid file path but received: ${input}`)
     return input
   },
+  default: process.cwd(),
 })
 
 export function option<T>(

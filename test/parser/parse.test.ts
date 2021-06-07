@@ -659,14 +659,14 @@ See more help with --help`)
       } catch (error) {
         message = error.message
       }
-      expect(message).to.equal('Expected a valid url but received example')
+      expect(message).to.equal('Expected a valid url but received: example')
     })
   })
 
-  describe('filepath flag', () => {
-    it('accepts valid filepath', async () => {
+  describe('path flag', () => {
+    it('accepts valid path', async () => {
       const out = await parse(['--foo', './my/path/to/stuff.txt'], {
-        flags: {foo: flags.filepath()},
+        flags: {foo: flags.path()},
       })
       expect(out.flags.foo).to.equal('./my/path/to/stuff.txt')
     })
@@ -675,12 +675,12 @@ See more help with --help`)
       let message = ''
       try {
         await parse(['--foo', './my/path/to/stuff?.txt'], {
-          flags: {foo: flags.filepath()},
+          flags: {foo: flags.path()},
         })
       } catch (error) {
         message = error.message
       }
-      expect(message).to.equal('Expected a valid file path but received ./my/path/to/stuff?.txt')
+      expect(message).to.equal('Expected a valid file path but received: ./my/path/to/stuff?.txt')
     })
   })
 
