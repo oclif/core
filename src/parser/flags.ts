@@ -40,6 +40,10 @@ export const integer = build({
   },
 })
 
+/**
+ * Initializes a string as a URL. Throws an error
+ * if the string is not a valid URL.
+ */
 export const url = build({
   parse: async input => {
     try {
@@ -50,6 +54,10 @@ export const url = build({
   },
 })
 
+/**
+ * Validates that a string does not contain any invalid path characters.
+ * Defaults to the current working directory.
+ */
 export const path = build({
   parse: async input => {
     const invalidPathChars = /[["?<>|\]]+/
