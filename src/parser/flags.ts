@@ -60,12 +60,13 @@ export const url = build({
  */
 export const path = build({
   parse: async input => {
+    if (input === '<cwd>') return process.cwd()
     const invalidPathChars = /[["?<>|\]]+/
     if (invalidPathChars.test(input))
       throw new Error(`Expected a valid file path but received: ${input}`)
     return input
   },
-  default: process.cwd(),
+  default: '<cwd>',
 })
 
 export function option<T>(
