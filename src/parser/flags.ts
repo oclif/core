@@ -54,21 +54,6 @@ export const url = build({
   },
 })
 
-/**
- * Validates that a string does not contain any invalid path characters.
- * Defaults to the current working directory.
- */
-export const path = build({
-  parse: async input => {
-    if (input === '<cwd>') return process.cwd()
-    const invalidPathChars = /[["?<>|\]]+/
-    if (invalidPathChars.test(input))
-      throw new Error(`Expected a valid file path but received: ${input}`)
-    return input
-  },
-  default: '<cwd>',
-})
-
 export function option<T>(
   options: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
 ) {

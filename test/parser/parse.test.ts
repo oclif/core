@@ -663,27 +663,6 @@ See more help with --help`)
     })
   })
 
-  describe('path flag', () => {
-    it('accepts valid path', async () => {
-      const out = await parse(['--foo', './my/path/to/stuff.txt'], {
-        flags: {foo: flags.path()},
-      })
-      expect(out.flags.foo).to.equal('./my/path/to/stuff.txt')
-    })
-
-    it('fails when invalid', async () => {
-      let message = ''
-      try {
-        await parse(['--foo', './my/path/to/stuff?.txt'], {
-          flags: {foo: flags.path()},
-        })
-      } catch (error) {
-        message = error.message
-      }
-      expect(message).to.equal('Expected a valid file path but received: ./my/path/to/stuff?.txt')
-    })
-  })
-
   describe('arg options', () => {
     it('accepts valid option', async () => {
       const out = await parse(['myotheropt'], {

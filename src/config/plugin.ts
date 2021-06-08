@@ -232,7 +232,7 @@ export class Plugin implements IPlugin {
       // eslint-disable-next-line array-callback-return
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, toCached(await this.findCommand(id, {must: true}), this)]
+          return [id, await toCached(await this.findCommand(id, {must: true}), this)]
         } catch (error) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)

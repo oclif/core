@@ -8,7 +8,7 @@ import {format} from 'util'
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command} from '../interfaces/command'
-import {Debug, mapValues} from './util'
+import {Debug} from './util'
 import {Hook} from '../interfaces/hooks'
 import {PJSON} from '../interfaces/pjson'
 import * as Plugin from './plugin'
@@ -479,30 +479,23 @@ export class Config implements IConfig {
   }
 }
 
-export function toCached(c: Command.Class, plugin?: IPlugin): Command {
-  return {
-    id: c.id,
-    description: c.description,
-    usage: c.usage,
-    pluginName: plugin && plugin.name,
-    pluginType: plugin && plugin.type,
-    hidden: c.hidden,
-    aliases: c.aliases || [],
-    examples: c.examples || (c as any).example,
-    flags: mapValues(c.flags || {}, (flag, name) => {
-      if (flag.type === 'boolean') {
-        return {
-          name,
-          type: flag.type,
-          char: flag.char,
-          description: flag.description,
-          hidden: flag.hidden,
-          required: flag.required,
-          helpLabel: flag.helpLabel,
-          allowNo: flag.allowNo,
-        }
+export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command> {
+  const flags = {} as {[k: string]: Command.Flag}
+
+  for (const [name, flag] of Object.entries(c.flags || {})) {
+    if (flag.type === 'boolean') {
+      flags[name] = {
+        name,
+        type: flag.type,
+        char: flag.char,
+        description: flag.description,
+        hidden: flag.hidden,
+        required: flag.required,
+        helpLabel: flag.helpLabel,
+        allowNo: flag.allowNo,
       }
-      return {
+    } else {
+      flags[name] = {
         name,
         type: flag.type,
         char: flag.char,
@@ -512,16 +505,33 @@ export function toCached(c: Command.Class, plugin?: IPlugin): Command {
         helpLabel: flag.helpLabel,
         helpValue: flag.helpValue,
         options: flag.options,
-        default: typeof flag.default === 'function' ? flag.default({options: {}, flags: {}}) : flag.default,
+        // eslint-disable-next-line no-await-in-loop
+        default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
       }
-    }) as {[k: string]: Command.Flag},
-    args: c.args ? c.args.map(a => ({
-      name: a.name,
-      description: a.description,
-      required: a.required,
-      options: a.options,
-      default: typeof a.default === 'function' ? a.default({}) : a.default,
-      hidden: a.hidden,
-    })) : [],
+    }
+  }
+
+  const argsPromise = (c.args || []).map(async a => ({
+    name: a.name,
+    description: a.description,
+    required: a.required,
+    options: a.options,
+    default: typeof a.default === 'function' ? await a.default({}) : a.default,
+    hidden: a.hidden,
+  }))
+
+  const args = await Promise.all(argsPromise)
+
+  return {
+    id: c.id,
+    description: c.description,
+    usage: c.usage,
+    pluginName: plugin && plugin.name,
+    pluginType: plugin && plugin.type,
+    hidden: c.hidden,
+    aliases: c.aliases || [],
+    examples: c.examples || (c as any).example,
+    flags,
+    args,
   }
 }

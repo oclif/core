@@ -24,8 +24,8 @@ const test = base
 .loadConfig()
 .add('help', ctx => new TestHelp(ctx.config as any))
 .register('commandHelp', (command?: any) => ({
-  run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = toCached(command!, {} as any)
+  async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
+    const cached = await toCached(command!, {} as any)
     const help = ctx.help.formatCommand(cached)
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)

@@ -33,6 +33,6 @@ export async function parse<TFlags, TArgs extends { [name: string]: string }>(ar
   return output as any
 }
 
-const {boolean, path, integer, url} = flags
+const {boolean, integer, url} = flags
 
-export {boolean, path, integer, url}
+export {boolean, integer, url}
