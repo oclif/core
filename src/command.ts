@@ -30,27 +30,33 @@ process.stdout.on('error', (err: any) => {
 export default abstract class Command {
   static _base = `${pjson.name}@${pjson.version}`
 
-  /** A command ID, used mostly in error or verbose reporting */
+  /** A command ID, used mostly in error or verbose reporting. */
   static id: string
-
-  // to-do: Confirm unused?
-  static title: string | undefined
 
   /**
    * The tweet-sized description for your class, used in a parent-commands
-   * sub-command listing and as the header for the command help
+   * sub-command listing and as the header for the command help.
+   */
+  static summary?: string;
+
+  /**
+   * A full description of how to use the command.
+   *
+   * If no summary, the first line of the description will be used as the summary.
    */
   static description: string | undefined
 
-  /** hide the command from help? */
+  /** Hide the command from help? */
   static hidden: boolean
 
-  /** An override string (or strings) for the default usage documentation */
+  /**
+   * An override string (or strings) for the default usage documentation.
+   */
   static usage: string | string[] | undefined
 
   static help: string | undefined
 
-  /** An array of aliases for this command */
+  /** An array of aliases for this command. */
   static aliases: string[] = []
 
   /** When set to false, allows a variable amount of arguments */
@@ -63,8 +69,21 @@ export default abstract class Command {
 
   static plugin: Interfaces.Plugin | undefined
 
-  /** An array of example strings to show at the end of the command's help */
-  static examples: string[] | undefined
+  /**
+   * An array of examples to show at the end of the command's help.
+   *
+   * IF only a string is provide, it will try to look for a line that starts
+   * with the cmd.bin as the example command and the rest as the description.
+   * If found, the command will be formatted appropriately.
+   *
+   * ```
+   * EXAMPLES:
+   *   A description of a particular use case.
+   *
+   *     $ <%= config.bin => command flags
+   * ```
+   */
+  static examples: Interfaces.Example[]
 
   static parserOptions = {}
 
@@ -96,6 +115,7 @@ export default abstract class Command {
   private static globalFlags = {
     json: Flags.boolean({
       description: 'format output as json',
+      helpGroup: 'CLI',
     }),
   }
 

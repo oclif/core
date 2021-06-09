@@ -1,3 +1,5 @@
+import {HelpOptions} from './help'
+
 export interface PJSON {
   [k: string]: any;
   dependencies?: {[name: string]: string};
@@ -12,7 +14,6 @@ export namespace PJSON {
     version: string;
     oclif: PJSON['oclif'] & {
       schema?: number;
-      title?: string;
       description?: string;
       topicSeparator?: ':' | ' ';
       hooks?: { [name: string]: (string | string[]) };
@@ -21,6 +22,7 @@ export namespace PJSON {
       plugins?: string[];
       devPlugins?: string[];
       helpClass?: string;
+      helpOptions?: HelpOptions;
       aliases?: { [name: string]: string | null };
       repositoryPrefix?: string;
       update: {

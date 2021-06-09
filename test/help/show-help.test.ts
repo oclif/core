@@ -243,6 +243,8 @@ USAGE
   $ oclif apps:create
 
 DESCRIPTION
+  Create an app
+
   this only shows up in command help under DESCRIPTION`)
   })
 
@@ -267,6 +269,8 @@ USAGE
   $ oclif apps
 
 DESCRIPTION
+  List all apps (app index command)
+
   this only shows up in command help under DESCRIPTION
 
 TOPICS
