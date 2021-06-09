@@ -74,6 +74,8 @@ OPTIONS
                        it force  it force  it force  it force  it force  it
                        force  it force  it force  it force  it
 
+  --json               format output as json
+
   --ss                 newliney
                        newliney
                        newliney
@@ -126,6 +128,8 @@ OPTIONS
                        it force  it force  it force  it force  it force  it
                        force  it force  it force  it force  it
 
+  --json               format output as json
+
   --ss                 newliney
                        newliney
                        newliney
@@ -177,6 +181,9 @@ OPTIONS
       force  it force  it force  it force  it force  it force  it force  it force
        it force  it force  it force  it force  it force  it force  it
 
+  --json
+      format output as json
+
   --ss
       newliney
       newliney
@@ -212,6 +219,7 @@ ARGUMENTS
 
 OPTIONS
   --force  forces
+  --json   format output as json
 
 DESCRIPTION
   these values are after and will show up in the command description
@@ -225,6 +233,8 @@ ALIASES
         static id = 'apps:create'
 
         static description = 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>'
+
+        static disableJsonFlag = true
     })
     .it('renders template string from description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
@@ -237,6 +247,8 @@ DESCRIPTION
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
+
+        static disableJsonFlag = true
 
         static flags = {
           myenum: flags.string({options: ['a', 'b', 'c']}),
@@ -257,6 +269,8 @@ OPTIONS
         {name: 'arg2', default: '.', description: 'arg2 desc'},
         {name: 'arg3', description: 'arg3 desc'},
       ]
+
+      static disableJsonFlag = true
 
       static flags = {
         flag1: flags.string({default: '.'}),
@@ -280,6 +294,8 @@ OPTIONS
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
+        static disableJsonFlag = true
+
         static flags = {
           opt: flags.boolean({allowNo: true}),
         }
@@ -295,6 +311,8 @@ OPTIONS
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
+
+        static disableJsonFlag = true
 
         static args = [
           {name: 'arg1', description: 'Show the options', options: ['option1', 'option2']},
@@ -313,6 +331,8 @@ ARGUMENTS
         static id = 'apps:create'
 
         static usage = '<%= config.bin %> <%= command.id %> usage'
+
+        static disableJsonFlag = true
     })
     .it('outputs usage with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif apps:create usage`))
@@ -332,6 +352,8 @@ ARGUMENTS
       static id = 'apps:create'
 
       static usage = undefined
+
+      static disableJsonFlag = true
     })
     .it('defaults usage when not specified', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create`))
@@ -341,6 +363,8 @@ ARGUMENTS
     test
     .commandHelp(class extends Command {
         static examples = ['it handles a list of examples', 'more example text']
+
+        static disableJsonFlag = true
     })
     .it('outputs multiple examples', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -352,6 +376,8 @@ EXAMPLES
     test
     .commandHelp(class extends Command {
         static examples = ['it handles a single example']
+
+        static disableJsonFlag = true
     })
     .it('outputs a single example', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -364,6 +390,8 @@ EXAMPLE
         static id = 'oclif:command'
 
         static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
+
+        static disableJsonFlag = true
     })
     .it('outputs examples using templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command

@@ -1,12 +1,14 @@
 import {fileURLToPath} from 'url'
 
+import {settings} from './settings'
 import {format, inspect} from 'util'
-
+import {cli} from 'cli-ux'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
+import * as Flags from './flags'
 
 const pjson = require('../package.json')
 
@@ -56,9 +58,6 @@ export default abstract class Command {
 
   static parse = true
 
-  /** A hash of flags for the command */
-  static flags?: Interfaces.FlagInput<any>
-
   /** An order-dependent array of arguments for the command */
   static args?: Interfaces.ArgInput
 
@@ -68,6 +67,8 @@ export default abstract class Command {
   static examples: string[] | undefined
 
   static parserOptions = {}
+
+  static disableJsonFlag: boolean | undefined
 
   // eslint-disable-next-line valid-jsdoc
   /**
@@ -89,6 +90,23 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
+  /** A hash of flags for the command */
+  private static _flags: Interfaces.FlagInput<any>
+
+  private static globalFlags = {
+    json: Flags.boolean({
+      description: 'format output as json',
+    }),
+  }
+
+  static get flags(): Interfaces.FlagInput<any> {
+    return this._flags
+  }
+
+  static set flags(flags: Interfaces.FlagInput<any>) {
+    this._flags = this.disableJsonFlag || settings.disableJsonFlag ? flags : Object.assign({}, Command.globalFlags, flags)
+  }
+
   id: string | undefined
 
   protected debug: (...args: any[]) => void
@@ -108,18 +126,23 @@ export default abstract class Command {
 
   async _run<T>(): Promise<T | undefined> {
     let err: Error | undefined
+    let result
     try {
       // remove redirected env var to allow subsessions to run autoupdated client
       delete process.env[this.config.scopedEnvVarKey('REDIRECTED')]
-
       await this.init()
-      return await this.run()
+      result = await this.run()
     } catch (error) {
       err = error
       await this.catch(error)
     } finally {
       await this.finally(err)
     }
+
+    if (result && this.jsonEnabled()) {
+      cli.styledJSON(this.toSuccessJson<T>(result))
+    }
+    return result
   }
 
   exit(code = 0) {
@@ -139,9 +162,15 @@ export default abstract class Command {
   }
 
   log(message = '', ...args: any[]) {
-    // tslint:disable-next-line strict-type-predicates
-    message = typeof message === 'string' ? message : inspect(message)
-    process.stdout.write(format(message, ...args) + '\n')
+    if (!this.jsonEnabled()) {
+      // tslint:disable-next-line strict-type-predicates
+      message = typeof message === 'string' ? message : inspect(message)
+      process.stdout.write(format(message, ...args) + '\n')
+    }
+  }
+
+  public jsonEnabled(): boolean {
+    return this.argv.includes('--json')
   }
 
   /**
@@ -164,17 +193,24 @@ export default abstract class Command {
 
   protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
     if (!options) options = this.constructor as any
-    return Parser.parse(argv, {context: this, ...options})
+    const opts = {context: this, ...options}
+    // the spread operator doesn't work with getters so we have to manually add it here
+    opts.flags = options?.flags
+    return Parser.parse(argv, opts)
   }
 
   protected async catch(err: any): Promise<any> {
-    if (!err.message) throw err
-    try {
-      const {cli} = require('cli-ux')
-      const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
-      cli.action.stop(chalk.bold.red('!'))
-    } catch {}
-    throw err
+    if (this.jsonEnabled()) {
+      cli.styledJSON(this.toErrorJson(err))
+    } else {
+      if (!err.message) throw err
+      try {
+        const {cli} = require('cli-ux')
+        const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
+        cli.action.stop(chalk.bold.red('!'))
+      } catch {}
+      throw err
+    }
   }
 
   protected async finally(_: Error | undefined): Promise<any> {
@@ -185,5 +221,13 @@ export default abstract class Command {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  protected toSuccessJson<T>(result: T): T {
+    return result
+  }
+
+  protected toErrorJson(err: any): any {
+    return {error: err}
   }
 }
