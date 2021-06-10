@@ -1,5 +1,7 @@
 // tslint:disable interface-over-type-literal
 
+import {URL} from 'url'
+
 import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
 
 export function build<T>(
