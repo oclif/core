@@ -1,5 +1,7 @@
 // tslint:disable interface-over-type-literal
 
+import {URL} from 'url'
+
 import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
 
 export function build<T>(
@@ -37,6 +39,20 @@ export const integer = build({
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
     return parseInt(input, 10)
+  },
+})
+
+/**
+ * Initializes a string as a URL. Throws an error
+ * if the string is not a valid URL.
+ */
+export const url = build({
+  parse: async input => {
+    try {
+      return new URL(input)
+    } catch {
+      throw new Error(`Expected a valid url but received: ${input}`)
+    }
   },
 })
 

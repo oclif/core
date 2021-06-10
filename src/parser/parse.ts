@@ -198,12 +198,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {setFromDefault: true}
-        if (typeof flag.default === 'function') {
+        // eslint-disable-next-line no-await-in-loop
+        const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags, ...this.context}) : flag.default) as string
+        const parsedValue = flag.type === 'option' && flag.parse ?
           // eslint-disable-next-line no-await-in-loop
-          flags[k] = await flag.default({options: flag, flags, ...this.context})
-        } else {
-          flags[k] = flag.default
-        }
+          await flag.parse(defaultValue, this.context) :
+          defaultValue
+        flags[k] = parsedValue
       }
     }
     return flags

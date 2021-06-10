@@ -641,6 +641,28 @@ See more help with --help`)
     })
   })
 
+  describe('url flag', () => {
+    it('accepts valid url', async () => {
+      const out = await parse(['--foo', 'https://example.com'], {
+        flags: {foo: flags.url()},
+      })
+      expect(out.flags.foo).to.be.instanceOf(URL)
+      expect(out.flags.foo?.href).to.equal('https://example.com/')
+    })
+
+    it('fails when invalid', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', 'example'], {
+          flags: {foo: flags.url()},
+        })
+      } catch (error) {
+        message = error.message
+      }
+      expect(message).to.equal('Expected a valid url but received: example')
+    })
+  })
+
   describe('arg options', () => {
     it('accepts valid option', async () => {
       const out = await parse(['myotheropt'], {
