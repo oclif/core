@@ -1,21 +1,12 @@
-import * as Chalk from 'chalk'
-import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
 import {compact} from '../util'
-import {template} from './util'
 import * as Interfaces from '../interfaces'
+import {HelpFormatter} from './formatter'
 
-const wrap = require('wrap-ansi')
-const {
-  bold,
-} = Chalk
-
-export default class RootHelp {
-  render: (input: string) => string
-
+export default class RootHelp extends HelpFormatter {
   constructor(public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {
-    this.render = template(this)
+    super(config, opts)
   }
 
   root(): string {
@@ -33,10 +24,7 @@ export default class RootHelp {
   }
 
   protected usage(): string {
-    return [
-      bold('USAGE'),
-      indent(wrap(`$ ${this.config.bin} [COMMAND]`, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+    return this.section(this.opts.usageHeader || 'USAGE', this.wrap(`$ ${this.config.bin} [COMMAND]`))
   }
 
   protected description(): string | undefined {
@@ -44,16 +32,10 @@ export default class RootHelp {
     description = this.render(description)
     description = description.split('\n').slice(1).join('\n')
     if (!description) return
-    return [
-      bold('DESCRIPTION'),
-      indent(wrap(description, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+    return this.section('DESCRIPTION', this.wrap(description))
   }
 
   protected version(): string {
-    return [
-      bold('VERSION'),
-      indent(wrap(this.config.userAgent, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+    return this.section('VERSION', this.wrap(this.config.userAgent))
   }
 }

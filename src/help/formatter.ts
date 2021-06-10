@@ -163,9 +163,9 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | [string, string | undefined][], render = this.render) {
+  public section(header: string, body: string | [string, string | undefined][]) {
     // Always render template strings with the provided render function before wrapping and indenting
-    body = Array.isArray(body) ? body.map(([left, right]) => ([render(left), right && render(right)])) : render(body)
+    body = Array.isArray(body) ? body.map(([left, right]) => ([this.render(left), right && this.render(right)])) : this.render(body)
 
     const output = [
       bold(header),

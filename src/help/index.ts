@@ -228,8 +228,8 @@ export class Help extends HelpBase {
     if (this.config.topicSeparator !== ':') topicID = topicID.replace(/:/g, this.config.topicSeparator)
     let output = compact([
       summary,
-      this.section('USAGE', `$ ${this.config.bin} ${topicID}`),
-      description && this.section('DESCRIPTION', description),
+      this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
+      description && this.section('DESCRIPTION', this.wrap(description)),
     ]).join('\n\n')
     if (this.opts.stripAnsi) output = stripAnsi(output)
     return output + '\n'

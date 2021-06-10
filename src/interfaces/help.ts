@@ -23,4 +23,9 @@ export interface HelpOptions {
    * not want the duplication.
    */
   hideCommandSummaryInDescription?: boolean;
+  /**
+   * Use USAGE, but some may want to use USAGE as used in gnu man pages. See help recommendations at
+   * http://www.gnu.org/software/help2man/#--help-recommendations
+   */
+  usageHeader?: string;
 }

@@ -49,10 +49,27 @@ export class CommandHelp extends HelpFormatter {
     return output
   }
 
+  protected groupFlags(flags: Interfaces.Command.Flag[]) {
+    const mainFlags: Interfaces.Command.Flag[] = []
+    const flagGroups: {[index: string]: Interfaces.Command.Flag[]} = {}
+
+    for (const flag of flags) {
+      const group = flag.helpGroup
+
+      if (group) {
+        if (!flagGroups[group]) flagGroups[group] = []
+        flagGroups[group].push(flag)
+      } else {
+        mainFlags.push(flag)
+      }
+    }
+    return {mainFlags, flagGroups}
+  }
+
   protected sections(): Array<{header: string; generate: HelpSectionRenderer}> {
     return [
       {
-        header: 'USAGE',
+        header: this.opts.usageHeader || 'USAGE',
         generate: ({flags}) => this.usage(flags),
       },
       {
@@ -62,19 +79,7 @@ export class CommandHelp extends HelpFormatter {
       {
         header: 'FLAGS',
         generate: ({flags}, header) => {
-          const mainFlags: Interfaces.Command.Flag[] = []
-          const flagGroups: {[index: string]: Interfaces.Command.Flag[]} = {}
-
-          for (const flag of flags) {
-            const group = flag.helpGroup
-
-            if (group) {
-              if (!flagGroups[group]) flagGroups[group] = []
-              flagGroups[group].push(flag)
-            } else {
-              mainFlags.push(flag)
-            }
-          }
+          const {mainFlags, flagGroups} = this.groupFlags(flags)
 
           const flagSections: HelpSection[] = []
           const mainFlagBody = this.flags(mainFlags)
