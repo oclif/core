@@ -22,7 +22,7 @@ export class HelpFormatter {
    * `config=Interfaces.Config` or `opts=Interface.HelpOptions`.
    *
    * ```javascript
-   * '<%= config.bin =>` // will resolve to the bin defined in `pjson.oclif`.
+   * `<%= config.bin =>` // will resolve to the bin defined in `pjson.oclif`.
    * ```
    */
   render: (input: string) => string

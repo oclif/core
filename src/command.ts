@@ -115,7 +115,7 @@ export default abstract class Command {
   private static globalFlags = {
     json: Flags.boolean({
       description: 'format output as json',
-      helpGroup: 'CLI',
+      helpGroup: 'GLOBAL',
     }),
   }
 

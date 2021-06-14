@@ -79,7 +79,7 @@ FLAGS
                         newliney
                         newliney
 
-CLI FLAGS
+GLOBAL FLAGS
   --json  format output as json
 
 DESCRIPTION
@@ -136,7 +136,7 @@ FLAGS
                         newliney
                         newliney
 
-CLI FLAGS
+GLOBAL FLAGS
   --json  format output as json
 
 DESCRIPTION
@@ -195,7 +195,7 @@ FLAGS
       newliney
       newliney
 
-CLI FLAGS
+GLOBAL FLAGS
   --json  format output as json
 
 DESCRIPTION
@@ -230,7 +230,7 @@ ARGUMENTS
 FLAGS
   --force  forces
 
-CLI FLAGS
+GLOBAL FLAGS
   --json  format output as json
 
 DESCRIPTION
@@ -345,6 +345,54 @@ FLAGS
 
 FLAGS
   --[no-]opt`))
+
+    test
+    .commandHelp(class extends Command {
+        static id = 'apps:create'
+
+        static disableJsonFlag = true
+
+        static flags = {
+          opt: flags.string({
+            summary: 'one line summary',
+            description: 'multiline\ndescription',
+          }),
+        }
+    })
+    .it('outputs flag summary and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif apps:create
+
+FLAGS
+  --opt=<value>  one line summary
+
+FLAG DESCRIPTIONS
+  --opt=<value>  one line summary
+
+    multiline
+    description`))
+    test
+    .commandHelp(class extends Command {
+        static id = 'apps:create'
+
+        static disableJsonFlag = true
+
+        static flags = {
+          opt: flags.string({
+            summary: 'one line summary',
+            description: 'single line description',
+          }),
+        }
+    })
+    .it('outputs flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif apps:create
+
+FLAGS
+  --opt=<value>  one line summary
+
+FLAG DESCRIPTIONS
+  --opt=<value>  one line summary
+
+    single line description`))
   })
 
   describe('args', () =>  {

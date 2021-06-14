@@ -272,11 +272,11 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected flagsDescriptions(flags: Interfaces.Command.Flag[]): string | undefined {
-    const flagsWithExtendedDescriptions = flags.filter(flag => (flag.summary && flag.description && flag.description.split('\n').length > 1))
+    const flagsWithExtendedDescriptions = flags.filter(flag => flag.summary && flag.description)
     if (flagsWithExtendedDescriptions.length === 0) return
 
     const body = flagsWithExtendedDescriptions.map(flag => {
-      return `${this.flagHelpLabel(flag, true)}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
+      return `${this.flagHelpLabel(flag, true)}  ${flag.summary}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
     }).join('\n\n')
 
     return body
