@@ -72,7 +72,7 @@ export default abstract class Command {
   /**
    * An array of examples to show at the end of the command's help.
    *
-   * IF only a string is provide, it will try to look for a line that starts
+   * IF only a string is provided, it will try to look for a line that starts
    * with the cmd.bin as the example command and the rest as the description.
    * If found, the command will be formatted appropriately.
    *
