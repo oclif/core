@@ -140,8 +140,8 @@ export class CommandHelp extends HelpFormatter {
       description = (cmd.description || '').split('\n').slice(1)
     } else {
       description = [
-        ...(cmd.summary || '').split('\n'),
-        ...(cmd.description || '').split('\n'),
+        ...(cmd.summary || '').split(EOL),
+        ...(cmd.description || '').split(EOL),
       ]
     }
 
