@@ -1,3 +1,4 @@
+import {EOL} from 'os'
 import * as path from 'path'
 
 import {Config} from '../../src/config'
@@ -22,7 +23,7 @@ describe('mixed-cjs-esm', () => {
   .stdout()
   .it('runs mixed-esm-cjs command and prerun & postrun hooks', async ctx => {
     await ctx.config.runCommand('foo:bar:baz')
-    expect(ctx.stdout).to.equal('running mixed-esm-cjs prerun hook\nit works!\nrunning mixed-esm-cjs postrun hook\n')
+    expect(ctx.stdout).to.equal(`running mixed-esm-cjs prerun hook${EOL}it works!${EOL}running mixed-esm-cjs postrun hook${EOL}`)
   })
 
   withConfig
@@ -33,20 +34,20 @@ describe('mixed-cjs-esm', () => {
     } catch {
       console.log('caught error')
     }
-    expect(ctx.stdout).to.equal('running mixed-esm-cjs prerun hook\nit fails!\ncaught error\n')
+    expect(ctx.stdout).to.equal(`running mixed-esm-cjs prerun hook${EOL}it fails!${EOL}caught error${EOL}`)
   })
 
   withConfig
   .stdout()
   .it('runs mixed-esm-cjs command, postrun hook captures command result', async ctx => {
     await ctx.config.runCommand('foo:bar:test-result')
-    expect(ctx.stdout).to.equal('running mixed-esm-cjs prerun hook\nit works!\nrunning mixed-esm-cjs postrun hook\nreturned success!\n')
+    expect(ctx.stdout).to.equal(`running mixed-esm-cjs prerun hook${EOL}it works!${EOL}running mixed-esm-cjs postrun hook${EOL}returned success!${EOL}`)
   })
 
   withConfig
   .stdout()
   .it('runs init hook', async ctx => {
     await (ctx.config.runHook as any)('init', {id: 'myid', argv: ['foo']})
-    expect(ctx.stdout).to.equal('running mixed-esm-cjs init hook\n')
+    expect(ctx.stdout).to.equal('running mixed-esm-cjs init hook' + EOL)
   })
 })

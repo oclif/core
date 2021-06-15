@@ -3,6 +3,7 @@ import stripAnsi = require('strip-ansi')
 
 import {Help} from '../../src/help'
 import {Interfaces} from '../../src'
+import {EOL} from 'os'
 
 const g: any = global
 g.oclif.columns = 80
@@ -25,7 +26,7 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(topicHelpOutput)
     }
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.commandHelp = stripAnsi(topicHelpOutput).split(EOL).map(s => s.trimRight()).join(EOL)
     ctx.expectation = 'has topicHelp'
   },
 }))
@@ -56,9 +57,9 @@ USAGE
   .topicHelp({
     name: 'topic',
     hidden: false,
-    description: 'This is the top level description\nDescription that shows up in the DESCRIPTION section',
+    description: `This is the top level description${EOL}Description that shows up in the DESCRIPTION section`,
   })
-  .it('shows topic descriptions split from \\n for top-level and description section descriptions', ctx => expect(ctx.commandHelp).to.equal(`This is the top level description
+  .it('shows topic descriptions split from EOL for top-level and description section descriptions', ctx => expect(ctx.commandHelp).to.equal(`This is the top level description
 
 USAGE
   $ oclif topic:COMMAND
@@ -70,9 +71,9 @@ DESCRIPTION
   .topicHelp({
     name: 'topic',
     hidden: false,
-    description: '<%= config.bin %>: This is the top level description\n<%= config.bin %>: Description that shows up in the DESCRIPTION section',
+    description: `<%= config.bin %>: This is the top level description${EOL}<%= config.bin %>: Description that shows up in the DESCRIPTION section`,
   })
-  .it('shows topic descriptions split from \\n for top-level and description section descriptions', ctx => expect(ctx.commandHelp).to.equal(`oclif: This is the top level description
+  .it('shows topic descriptions split from EOL for top-level and description section descriptions', ctx => expect(ctx.commandHelp).to.equal(`oclif: This is the top level description
 
 USAGE
   $ oclif topic:COMMAND

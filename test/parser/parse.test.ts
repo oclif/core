@@ -3,6 +3,7 @@ import {expect} from 'chai'
 
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
+import {EOL} from 'os'
 
 describe('parse', () => {
   it('--bool', async () => {
@@ -128,7 +129,7 @@ describe('parse', () => {
         message = error.message
       }
       expect(message).to.equal(
-        'Missing required flag:\n --myflag MYFLAG  flag description\nSee more help with --help',
+        `Missing required flag:${EOL} --myflag MYFLAG  flag description${EOL}See more help with --help`,
       )
     })
 
@@ -178,7 +179,7 @@ See more help with --help`)
         } catch (error) {
           message = error.message
         }
-        expect(message).to.equal('Unexpected argument: arg2\nSee more help with --help')
+        expect(message).to.equal(`Unexpected argument: arg2${EOL}See more help with --help`)
       })
 
       it('parses args', async () => {
@@ -637,7 +638,7 @@ See more help with --help`)
       } catch (error) {
         message = error.message
       }
-      expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+      expect(message).to.equal(`Expected --foo=invalidopt to be one of: myopt, myotheropt${EOL}See more help with --help`)
     })
   })
 
@@ -680,7 +681,7 @@ See more help with --help`)
       } catch (error) {
         message = error.message
       }
-      expect(message).to.equal('Expected invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+      expect(message).to.equal(`Expected invalidopt to be one of: myopt, myotheropt${EOL}See more help with --help`)
     })
   })
 

@@ -3,6 +3,7 @@ import stripAnsi = require('strip-ansi')
 
 import {Help} from '../../src/help'
 import {Interfaces} from '../../src'
+import {EOL} from 'os'
 
 const g: any = global
 g.oclif.columns = 80
@@ -25,7 +26,7 @@ const test = base
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.commandHelp = stripAnsi(topicsHelpOutput).split(EOL).map(s => s.trimRight()).join(EOL)
     ctx.expectation = 'has topicsHelp'
   },
 }))

@@ -5,11 +5,12 @@ import {format, inspect} from 'util'
 import * as Interfaces from './interfaces'
 import {Config} from './config'
 import {loadHelpClass, standardizeIDFromArgv} from './help'
+import {EOL} from 'os'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
   message = typeof message === 'string' ? message : inspect(message)
-  process.stdout.write(format(message, ...args) + '\n')
+  process.stdout.write(format(message, ...args) + EOL)
 }
 
 const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {

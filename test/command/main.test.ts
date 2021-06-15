@@ -1,4 +1,5 @@
 import {expect, fancy} from 'fancy-test'
+import {EOL} from 'os'
 import path = require('path')
 
 import {run} from '../../src/main'
@@ -11,13 +12,13 @@ describe('main', () => {
   fancy
   .stdout()
   .do(() => run(['plugins'], root))
-  .do((output: any) => expect(output.stdout).to.equal('no plugins installed\n'))
+  .do((output: any) => expect(output.stdout).to.equal('no plugins installed' + EOL))
   .it('runs plugins')
 
   fancy
   .stdout()
   .do(() => run(['--version'], root))
-  .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
+  .do((output: any) => expect(output.stdout).to.equal(version + EOL))
   .it('runs --version')
 
   fancy
@@ -76,12 +77,12 @@ COMMANDS
   fancy
   .stdout()
   .do(() => run(['foo', 'baz'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
+  .do((output: any) => expect(output.stdout).to.equal('running Baz' + EOL))
   .it('runs foo:baz with space separator')
 
   fancy
   .stdout()
   .do(() => run(['foo', 'bar', 'succeed'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
+  .do((output: any) => expect(output.stdout).to.equal('it works!' + EOL))
   .it('runs foo:bar:succeed with space separator')
 })

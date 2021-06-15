@@ -1,4 +1,5 @@
 import {expect, test as base} from '@oclif/test'
+import {EOL} from 'os'
 import stripAnsi = require('strip-ansi')
 
 import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
@@ -30,7 +31,7 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.commandHelp = stripAnsi(help).split(EOL).map(s => s.trimRight()).join(EOL)
     ctx.expectation = 'has commandHelp'
   },
 }))
@@ -51,7 +52,7 @@ multiline help`
         app: flags.string({char: 'a', hidden: true}),
         foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
         force: flags.boolean({description: 'force  it '.repeat(15)}),
-        ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+        ss: flags.boolean({description: `newliney${EOL}`.repeat(4)}),
         remote: flags.string({char: 'r'}),
         label: flags.string({char: 'l', helpLabel: '-l'}),
       }
@@ -106,7 +107,7 @@ ALIASES
           app: flags.string({char: 'a', hidden: true}),
           foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
           force: flags.boolean({description: 'force  it '.repeat(15)}),
-          ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+          ss: flags.boolean({description: `newliney${EOL}`.repeat(4)}),
           remote: flags.string({char: 'r'}),
         }
     })
@@ -160,7 +161,7 @@ ALIASES
           app: flags.string({char: 'a', hidden: true}),
           foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
           force: flags.boolean({description: 'force  it '.repeat(29)}),
-          ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
+          ss: flags.boolean({description: `newliney${EOL}`.repeat(5)}),
           remote: flags.string({char: 'r'}),
         }
     })
@@ -211,7 +212,7 @@ ALIASES
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static description = 'description of apps:create\nthese values are after and will show up in the command description'
+        static description = `description of apps:create${EOL}these values are after and will show up in the command description`
 
         static aliases = ['app:init', 'create']
 
@@ -221,7 +222,7 @@ ALIASES
           force: flags.boolean({description: 'forces'}),
         }
     })
-    .it('outputs command description with values after a \\n newline character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    .it('outputs command description with values after a EOL character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [APP_NAME]
 
 ARGUMENTS
@@ -246,7 +247,7 @@ ALIASES
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static description = 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>'
+        static description = `root part of the description${EOL}The <%= config.bin %> CLI has <%= command.id %>`
 
         static disableJsonFlag = true
     })
@@ -355,7 +356,7 @@ FLAGS
         static flags = {
           opt: flags.string({
             summary: 'one line summary',
-            description: 'multiline\ndescription',
+            description: `multiline${EOL}description`,
           }),
         }
     })
@@ -506,7 +507,7 @@ EXAMPLES
     .commandHelp(class extends Command {
         static id = 'oclif:command'
 
-        static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help']
+        static examples = [`Prints out help.${EOL}<%= config.bin %> <%= command.id %> --help`]
     })
     .it('formats if command with description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command

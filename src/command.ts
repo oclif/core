@@ -9,6 +9,7 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
+import {EOL} from 'os'
 
 const pjson = require('../package.json')
 
@@ -185,7 +186,7 @@ export default abstract class Command {
     if (!this.jsonEnabled()) {
       // tslint:disable-next-line strict-type-predicates
       message = typeof message === 'string' ? message : inspect(message)
-      process.stdout.write(format(message, ...args) + '\n')
+      process.stdout.write(format(message, ...args) + EOL)
     }
   }
 

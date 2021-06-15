@@ -4,6 +4,7 @@ import indent = require('indent-string')
 import * as screen from '../../screen'
 import {config} from '../config'
 import {PrettyPrintableError} from '../../interfaces/errors'
+import {EOL} from 'os'
 
 // These exist for backwards compatibility with CLIError
 type CLIErrorDisplayOptions = { name?: string; bang?: string }
@@ -26,8 +27,8 @@ const formatSuggestions = (suggestions?: string[]): string | undefined => {
   if (!suggestions || suggestions.length === 0) return undefined
   if (suggestions.length === 1) return `${label} ${suggestions[0]}`
 
-  const multiple = suggestions.map(suggestion => `* ${suggestion}`).join('\n')
-  return `${label}\n${indent(multiple, 2)}`
+  const multiple = suggestions.map(suggestion => `* ${suggestion}`).join(EOL)
+  return `${label}${EOL}${indent(multiple, 2)}`
 }
 
 export default function prettyPrint(error: Error & PrettyPrintableError & CLIErrorDisplayOptions) {
@@ -46,7 +47,7 @@ export default function prettyPrint(error: Error & PrettyPrintableError & CLIErr
 
   const formatted = [formattedHeader, formattedCode, formattedSuggestions, formattedReference]
   .filter(Boolean)
-  .join('\n')
+  .join(EOL)
 
   let output = wrap(formatted, screen.errtermwidth - 6, {trim: false, hard: true} as any)
   output = indent(output, 3)

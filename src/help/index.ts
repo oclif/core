@@ -7,6 +7,7 @@ import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
 import {standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
+import {EOL} from 'os'
 
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass} from './util'
@@ -114,8 +115,8 @@ export class Help extends HelpBase {
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
 
-    const summary = this.summary(command) // command.description && this.render(command.description).split('\n')[0]
-    if (summary) console.log(summary + '\n')
+    const summary = this.summary(command)
+    if (summary) console.log(summary + EOL)
     console.log(this.formatCommand(command))
     console.log('')
 
@@ -198,7 +199,7 @@ export class Help extends HelpBase {
         this.summary(c),
       ]
     }), {
-      spacer: '\n',
+      spacer: EOL,
       stripAnsi: this.opts.stripAnsi,
       indentation: 2,
     })
@@ -207,9 +208,9 @@ export class Help extends HelpBase {
   }
 
   protected summary(c: Interfaces.Command): string {
-    if (c.summary) return this.render(c.summary.split('\n')[0])
+    if (c.summary) return this.render(c.summary.split(EOL)[0])
 
-    return this.render((c.description || '').split('\n')[0])
+    return this.render((c.description || '').split(EOL)[0])
   }
 
   protected description(c: Interfaces.Command): string {
@@ -217,22 +218,22 @@ export class Help extends HelpBase {
     if (c.summary) {
       return description
     }
-    return description.split('\n').slice(1).join('\n')
+    return description.split(EOL).slice(1).join(EOL)
   }
 
   protected formatTopic(topic: Interfaces.Topic): string {
     let description = this.render(topic.description || '')
-    const summary = description.split('\n')[0]
-    description = description.split('\n').slice(1).join('\n')
+    const summary = description.split(EOL)[0]
+    description = description.split(EOL).slice(1).join(EOL)
     let topicID = `${topic.name}:COMMAND`
     if (this.config.topicSeparator !== ':') topicID = topicID.replace(/:/g, this.config.topicSeparator)
     let output = compact([
       summary,
       this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
       description && this.section('DESCRIPTION', this.wrap(description)),
-    ]).join('\n\n')
+    ]).join(EOL + EOL)
     if (this.opts.stripAnsi) output = stripAnsi(output)
-    return output + '\n'
+    return output + EOL
   }
 
   protected formatTopics(topics: Interfaces.Topic[]): string {
@@ -241,10 +242,10 @@ export class Help extends HelpBase {
       if (this.config.topicSeparator !== ':') c.name = c.name.replace(/:/g, this.config.topicSeparator)
       return [
         c.name,
-        c.description && this.render(c.description.split('\n')[0]),
+        c.description && this.render(c.description.split(EOL)[0]),
       ]
     }), {
-      spacer: '\n',
+      spacer: EOL,
       stripAnsi: this.opts.stripAnsi,
       indentation: 2,
     })
