@@ -27,7 +27,7 @@ describe('command', () => {
   fancy
   .stdout()
   .do(() => Command.run([]))
-  .do(output => expect(output.stdout).to.equal('foo' + EOL))
+  .do(output => expect(output.stdout).to.equal(`foo${EOL}`))
   .it('logs to stdout')
 
   fancy
@@ -215,7 +215,7 @@ describe('command', () => {
       }
 
       await CMD.run(['--foo=bar'])
-      expect(ctx.stdout).to.equal('bar' + EOL)
+      expect(ctx.stdout).to.equal(`bar${EOL}`)
     })
   })
 
@@ -230,7 +230,7 @@ describe('command', () => {
       }
       await CMD.run([])
     })
-    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}' + EOL))
+    .do(ctx => expect(ctx.stdout).to.equal(`json output: {"a":"foobar"}${EOL}`))
     .it('uses util.format()')
   })
 
@@ -259,7 +259,7 @@ describe('command', () => {
       }
       await CMD.run([])
     })
-    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}' + EOL))
+    .do(ctx => expect(ctx.stdout).to.equal(`json output: {"a":"foobar"}${EOL}`))
     .it('test stdout EPIPE swallowed')
   })
 })

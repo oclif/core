@@ -6,7 +6,6 @@ const g: any = global
 g.oclif.columns = 80
 import {Help} from '../../src/help'
 import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
-import {EOL} from 'os'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
@@ -25,7 +24,7 @@ const test = base
       console.log(help)
     }
 
-    ctx.output = stripAnsi(help).split(EOL).map(s => s.trimRight()).join(EOL)
+    ctx.output = stripAnsi(help).split('\n').map(s => s.trimRight()).join('\n')
   },
 }))
 

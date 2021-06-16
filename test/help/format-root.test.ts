@@ -3,7 +3,6 @@ import stripAnsi = require('strip-ansi')
 
 import {Help} from '../../src/help'
 import {Interfaces} from '../../src'
-import {EOL} from 'os'
 
 const g: any = global
 g.oclif.columns = 80
@@ -29,7 +28,7 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
-    ctx.commandHelp = stripAnsi(root).split(EOL).map(s => s.trimRight()).join(EOL)
+    ctx.commandHelp = stripAnsi(root).split('\n').map(s => s.trimRight()).join('\n')
   },
 }))
 
@@ -51,11 +50,11 @@ USAGE
         ...config,
         pjson: {
           ...config.pjson,
-          description: `This is the top-level description that appears in the root${EOL}This appears in the description section after usage`,
+          description: 'This is the top-level description that appears in the root\nThis appears in the description section after usage',
         },
       }
     })
-    .it('splits on EOL for the description into the top-level and description sections', ctx => {
+    .it('splits on \\n for the description into the top-level and description sections', ctx => {
       expect(ctx.commandHelp).to.equal(`This is the top-level description that appears in the root
 
 VERSION
@@ -74,7 +73,7 @@ DESCRIPTION
         ...config,
         pjson: {
           ...config.pjson,
-          description: `This is the top-level description for <%= config.bin %>${EOL}This <%= config.bin %> appears in the description section after usage`,
+          description: 'This is the top-level description for <%= config.bin %>\nThis <%= config.bin %> appears in the description section after usage',
         },
       }
     })

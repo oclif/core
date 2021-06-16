@@ -18,7 +18,7 @@ describe('main-esm', () => {
   fancy
   .stdout()
   .do(() => run(['plugins'], root))
-  .do((output: any) => expect(output.stdout).to.equal('no plugins installed' + EOL))
+  .do((output: any) => expect(output.stdout).to.equal('no plugins installed\n'))
   .it('runs plugins')
 
   fancy
@@ -83,12 +83,12 @@ COMMANDS
   fancy
   .stdout()
   .do(() => run(['foo', 'baz'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
-  .do((output: any) => expect(output.stdout).to.equal('running Baz' + EOL))
+  .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
   .it('runs foo:baz with space separator')
 
   fancy
   .stdout()
   .do(() => run(['foo', 'bar', 'succeed'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
-  .do((output: any) => expect(output.stdout).to.equal('it works!' + EOL))
+  .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
   .it('runs foo:bar:succeed with space separator')
 })

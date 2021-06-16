@@ -1,4 +1,3 @@
-import {EOL} from 'os'
 import * as path from 'path'
 
 import {Config} from '../../src/config'
@@ -23,7 +22,7 @@ describe('typescript', () => {
   .stdout()
   .it('runs ts command and prerun & postrun hooks', async ctx => {
     await ctx.config.runCommand('foo:bar:baz')
-    expect(ctx.stdout).to.equal(`running ts prerun hook${EOL}it works!${EOL}running ts postrun hook${EOL}`)
+    expect(ctx.stdout).to.equal('running ts prerun hook\nit works!\nrunning ts postrun hook\n')
   })
 
   withConfig
@@ -34,14 +33,14 @@ describe('typescript', () => {
     } catch {
       console.log('caught error')
     }
-    expect(ctx.stdout).to.equal(`running ts prerun hook${EOL}it fails!${EOL}caught error${EOL}`)
+    expect(ctx.stdout).to.equal('running ts prerun hook\nit fails!\ncaught error\n')
   })
 
   withConfig
   .stdout()
   .it('runs ts command, postrun hook captures command result', async ctx => {
     await ctx.config.runCommand('foo:bar:test-result')
-    expect(ctx.stdout).to.equal(`running ts prerun hook${EOL}it works!${EOL}running ts postrun hook${EOL}returned success!${EOL}`)
+    expect(ctx.stdout).to.equal('running ts prerun hook\nit works!\nrunning ts postrun hook\nreturned success!\n')
   })
 
   withConfig
@@ -49,6 +48,6 @@ describe('typescript', () => {
   .it('runs init hook', async ctx => {
     // to-do: fix union types
     await (ctx.config.runHook as any)('init', {id: 'myid', argv: ['foo']})
-    expect(ctx.stdout).to.equal('running ts init hook' + EOL)
+    expect(ctx.stdout).to.equal('running ts init hook\n')
   })
 })
