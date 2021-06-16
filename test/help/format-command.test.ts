@@ -257,6 +257,24 @@ DESCRIPTION
   root part of the description
 
   The oclif CLI has apps:create`))
+
+    test
+    .commandHelp(class extends Command {
+        static id = 'apps:create'
+
+        static description = 'root part of the description\r\nusing both carriage \nreturn and new line'
+
+        static disableJsonFlag = true
+    })
+    .it('splits on carriage return and new lines', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif apps:create
+
+DESCRIPTION
+  root part of the description
+
+  using both carriage
+
+  return and new line`))
   })
 
   const myEnumValues = ['a', 'b', 'c']

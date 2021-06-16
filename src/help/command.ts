@@ -5,7 +5,11 @@ import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
 import {HelpFormatter} from './formatter'
-import {EOL} from 'os'
+
+// Don't use os.EOL because we need to ensure that a string
+// written on any platform, that may use \r\n or \n, will be
+// split on any platform, not just the os specific EOL at runtime.
+const POSSIBLE_LINE_FEED = /\r\n|\n/
 
 const {
   underline,
@@ -138,11 +142,11 @@ export class CommandHelp extends HelpFormatter {
     let description: string[]
 
     if (this.opts.hideCommandSummaryInDescription) {
-      description = (cmd.description || '').split(EOL).slice(1)
+      description = (cmd.description || '').split(POSSIBLE_LINE_FEED).slice(1)
     } else {
       description = [
-        ...(cmd.summary || '').split(EOL),
-        ...(cmd.description || '').split(EOL),
+        ...(cmd.summary || '').split(POSSIBLE_LINE_FEED),
+        ...(cmd.description || '').split(POSSIBLE_LINE_FEED),
       ]
     }
 
@@ -174,7 +178,7 @@ export class CommandHelp extends HelpFormatter {
       let command
       if (typeof a === 'string') {
         const lines = a
-        .split('\n')
+        .split(POSSIBLE_LINE_FEED)
         .filter(line => Boolean(line))
         // If the example is <description>\n<command> then format correctly
         if (lines.length === 2 && !isCommand(lines[0]) && isCommand(lines[1])) {
@@ -198,7 +202,7 @@ export class CommandHelp extends HelpFormatter {
       // First indent keeping room for escaped newlines
       const multilineCommand = this.indent(this.wrap(formatIfCommand(command), finalIndentedSpacing + 4))
       // Then add the escaped newline
-      .split('\n').join(` ${multilineSeparator}\n  `)
+      .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
 
       return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommand}`
     }).join('\n\n')
