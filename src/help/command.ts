@@ -5,6 +5,7 @@ import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
 import {HelpFormatter} from './formatter'
+import {EOL} from 'os'
 
 const {
   underline,
