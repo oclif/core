@@ -282,7 +282,15 @@ export class CommandHelp extends HelpFormatter {
     if (flagsWithExtendedDescriptions.length === 0) return
 
     const body = flagsWithExtendedDescriptions.map(flag => {
-      return `${this.flagHelpLabel(flag, true)}  ${flag.summary}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
+      // Guaranteed to be set because of the filter above, but make ts happy
+      const summary = flag.summary || ''
+      let flagHelp = this.flagHelpLabel(flag, true)
+      if (flagHelp.length + summary.length + 2 < this.opts.maxWidth) {
+        flagHelp += '  ' + summary
+      } else {
+        flagHelp += '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
+      }
+      return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
     }).join('\n\n')
 
     return body

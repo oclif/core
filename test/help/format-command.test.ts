@@ -415,6 +415,7 @@ FLAG DESCRIPTIONS
 
     multiline
     description`))
+
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
@@ -436,6 +437,38 @@ FLAGS
 
 FLAG DESCRIPTIONS
   --opt=<value>  one line summary
+
+    single line description`))
+
+    test
+    .commandHelp(class extends Command {
+        static id = 'apps:create'
+
+        static disableJsonFlag = true
+
+        static flags = {
+          opt: flags.string({
+            summary: 'one line summary'.repeat(15),
+            description: 'single line description',
+          }),
+        }
+    })
+    .it('outputs long flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif apps:create
+
+FLAGS
+  --opt=<value>  one line summaryone line summaryone line summaryone line
+                 summaryone line summaryone line summaryone line summaryone line
+                 summaryone line summaryone line summaryone line summaryone line
+                 summaryone line summaryone line summaryone line summary
+
+FLAG DESCRIPTIONS
+  --opt=<value>
+
+    one line summaryone line summaryone line summaryone line summaryone line
+    summaryone line summaryone line summaryone line summaryone line summaryone
+    line summaryone line summaryone line summaryone line summaryone line
+    summaryone line summary
 
     single line description`))
   })

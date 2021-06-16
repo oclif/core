@@ -54,8 +54,8 @@ describe('showHelp for root', () => {
   test
   .loadConfig()
   .stdout()
-  .do(async ctx => {
-    const config = ctx.config;
+  .do(async () => {
+    const config = await Config.load({root: path.resolve(__dirname, '..')});
 
     (config as any).plugins = [{
       commands: [AppsIndex, AppsCreate, AppsDestroy],
