@@ -268,11 +268,6 @@ DESCRIPTION
 USAGE
   $ oclif apps
 
-DESCRIPTION
-  List all apps (app index command)
-
-  this only shows up in command help under DESCRIPTION
-
 TOPICS
   apps:admin  This topic is for the apps topic
 

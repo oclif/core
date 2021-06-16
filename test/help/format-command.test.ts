@@ -206,6 +206,33 @@ ALIASES
   $ oclif create`))
   })
 
+  describe('summary', () => {
+    test
+    .commandHelp(class extends Command {
+      static id = 'test:summary'
+
+      static summary = 'one line summary'
+    })
+    .it('no description header if only a summary', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif test:summary`))
+
+    test
+    .commandHelp(class extends Command {
+      static id = 'test:summary'
+
+      static summary = 'one line summary'
+
+      static description = 'description that is much longer than the summary'
+    })
+    .it('outputs the summary at the top of the help and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif test:summary
+
+DESCRIPTION
+  one line summary
+
+  description that is much longer than the summary`))
+  })
+
   describe('description', () => {
     test
     .commandHelp(class extends Command {

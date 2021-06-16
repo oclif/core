@@ -3,7 +3,7 @@ import {stub, SinonStub} from 'sinon'
 import * as path from 'path'
 
 import {CommandHelp, Help} from '../../src/help'
-import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
+import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
 import {Interfaces, Config} from '../../src'
 
 const g: any = global
@@ -38,6 +38,7 @@ class TestHelp extends Help {
   }
 
   summary(c: Interfaces.Command): string {
+    // This will essentially ignore the summary
     return this.wrap(c.description || '')
   }
 
@@ -86,7 +87,7 @@ describe('showHelp for root', () => {
     const config = ctx.config;
 
     (config as any).plugins = [{
-      commands: [AppsIndex, AppsCreate, AppsDestroy],
+      commands: [AppsIndexWithDesc, AppsCreate, AppsDestroy],
       topics: [],
     }]
 
@@ -117,7 +118,7 @@ COMMANDS
     const config = ctx.config;
 
     (config as any).plugins = [{
-      commands: [AppsIndex],
+      commands: [AppsIndexWithDesc],
       topics: [],
     }]
 
@@ -155,8 +156,7 @@ describe('showHelp for a command', () => {
     await help.showHelp(['apps:create'])
   })
   .it('shows help for a leaf (or childless) command', ({stdout}) => {
-    expect(stdout.trim()).to.equal(`Create an app
-this only shows up in command help under DESCRIPTION
+    expect(stdout.trim()).to.equal(`this only shows up in command help under DESCRIPTION
 
 SYNOPSIS
   $ oclif apps:create
@@ -177,7 +177,7 @@ CUSTOM
     const config = ctx.config;
 
     (config as any).plugins = [{
-      commands: [AppsIndex, AppsCreate, AppsAdminAdd],
+      commands: [AppsIndexWithDesc, AppsCreate, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }]
 
@@ -203,7 +203,6 @@ TOPICS
   apps:admin  This topic is for the apps topic
 
 COMMANDS
-  apps:create  Create an app
-               this only shows up in command help under DESCRIPTION`)
+  apps:create  this only shows up in command help under DESCRIPTION`)
   })
 })

@@ -22,7 +22,7 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
 
   const usage = flag.type === 'option' ? ` ${flag.name.toUpperCase()}` : ''
 
-  let description: string | undefined = flag.description || ''
+  let description: string | undefined = flag.summary || flag.description || ''
   if (options.displayRequired && flag.required) description = `(required) ${description}`
   description = description ? m.chalk.dim(description) : undefined
 

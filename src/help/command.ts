@@ -139,20 +139,21 @@ export class CommandHelp extends HelpFormatter {
   protected description(): string | undefined {
     const cmd = this.command
 
-    let description: string[]
+    let description: string[] | undefined
 
     if (this.opts.hideCommandSummaryInDescription) {
       description = (cmd.description || '').split(POSSIBLE_LINE_FEED).slice(1)
-    } else {
+    } else if (cmd.description) {
       description = [
         ...(cmd.summary || '').split(POSSIBLE_LINE_FEED),
         ...(cmd.description || '').split(POSSIBLE_LINE_FEED),
       ]
     }
-
-    // Lines separated with only one newline or more than 2 can be hard to read in the terminal.
-    // Always separate by two newlines.
-    return this.wrap(compact(description).join('\n\n'))
+    if (description) {
+      // Lines separated with only one newline or more than 2 can be hard to read in the terminal.
+      // Always separate by two newlines.
+      return this.wrap(compact(description).join('\n\n'))
+    }
   }
 
   protected aliases(aliases: string[] | undefined): string | undefined {

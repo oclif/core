@@ -114,7 +114,7 @@ export class Help extends HelpBase {
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
 
-    const summary = this.summary(command) // command.description && this.render(command.description).split('\n')[0]
+    const summary = this.summary(command)
     if (summary) console.log(summary + '\n')
     console.log(this.formatCommand(command))
     console.log('')
@@ -206,10 +206,10 @@ export class Help extends HelpBase {
     return this.section('COMMANDS', body)
   }
 
-  protected summary(c: Interfaces.Command): string {
+  protected summary(c: Interfaces.Command): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
-    return this.render((c.description || '').split('\n')[0])
+    return c.description && this.render(c.description).split('\n')[0]
   }
 
   protected description(c: Interfaces.Command): string {

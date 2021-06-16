@@ -338,7 +338,7 @@ export class Config implements IConfig {
       while (parts.length) {
         const name = parts.join(':')
         if (name && !topics.find(t => t.name === name)) {
-          topics.push({name, description: c.description})
+          topics.push({name, description: c.summary || c.description})
         }
         parts.pop()
       }
@@ -530,6 +530,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
 
   return {
     id: c.id,
+    summary: c.summary,
     description: c.description,
     usage: c.usage,
     pluginName: plugin && plugin.name,
