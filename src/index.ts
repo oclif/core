@@ -12,7 +12,6 @@ import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
-import {EOL} from 'os'
 
 const flush = require('../flush')
 
@@ -43,7 +42,7 @@ function checkCWD() {
     process.cwd()
   } catch (error) {
     if (error.code === 'ENOENT') {
-      process.stderr.write('WARNING: current directory does not exist' + EOL)
+      process.stderr.write('WARNING: current directory does not exist\n')
     }
   }
 }
@@ -51,7 +50,7 @@ function checkNodeVersion() {
   const root = path.join(__dirname, '..')
   const pjson = require(path.join(root, 'package.json'))
   if (!semver.satisfies(process.versions.node, pjson.engines.node)) {
-    process.stderr.write(`WARNING${EOL}WARNING Node version must be ${pjson.engines.node} to use this CLI${EOL}WARNING Current node version: ${process.versions.node}${EOL}WARNING${EOL}`)
+    process.stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
   }
 }
 checkCWD()

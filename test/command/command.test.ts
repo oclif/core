@@ -1,5 +1,4 @@
 import {expect, fancy} from 'fancy-test'
-import {EOL} from 'os'
 // import path = require('path')
 
 import {Command as Base, Flags as flags} from '../../src'
@@ -27,7 +26,7 @@ describe('command', () => {
   fancy
   .stdout()
   .do(() => Command.run([]))
-  .do(output => expect(output.stdout).to.equal('foo' + EOL))
+  .do(output => expect(output.stdout).to.equal('foo\n'))
   .it('logs to stdout')
 
   fancy
@@ -215,7 +214,7 @@ describe('command', () => {
       }
 
       await CMD.run(['--foo=bar'])
-      expect(ctx.stdout).to.equal('bar' + EOL)
+      expect(ctx.stdout).to.equal('bar\n')
     })
   })
 
@@ -230,7 +229,7 @@ describe('command', () => {
       }
       await CMD.run([])
     })
-    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}' + EOL))
+    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
     .it('uses util.format()')
   })
 
@@ -259,7 +258,7 @@ describe('command', () => {
       }
       await CMD.run([])
     })
-    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}' + EOL))
+    .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
     .it('test stdout EPIPE swallowed')
   })
 })

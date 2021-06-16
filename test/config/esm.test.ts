@@ -4,7 +4,6 @@ import * as path from 'path'
 import {Config} from '../../src/config'
 
 import {expect, fancy} from './test'
-import {EOL} from 'os'
 
 const root = path.resolve(__dirname, 'fixtures/esm')
 const p = (p: string) => path.join(root, p)
@@ -27,7 +26,7 @@ describe('esm', () => {
   .stdout()
   .it('runs esm command and prerun & postrun hooks', async ctx => {
     await ctx.config.runCommand('foo:bar:baz')
-    expect(ctx.stdout).to.equal(`running esm prerun hook${EOL}it works!${EOL}running esm postrun hook${EOL}`)
+    expect(ctx.stdout).to.equal('running esm prerun hook\nit works!\nrunning esm postrun hook\n')
   })
 
   withConfig
@@ -38,20 +37,20 @@ describe('esm', () => {
     } catch {
       console.log('caught error')
     }
-    expect(ctx.stdout).to.equal(`running esm prerun hook${EOL}it fails!${EOL}caught error${EOL}`)
+    expect(ctx.stdout).to.equal('running esm prerun hook\nit fails!\ncaught error\n')
   })
 
   withConfig
   .stdout()
   .it('runs esm command, postrun hook captures command result', async ctx => {
     await ctx.config.runCommand('foo:bar:test-result')
-    expect(ctx.stdout).to.equal(`running esm prerun hook${EOL}it works!${EOL}running esm postrun hook${EOL}returned success!${EOL}`)
+    expect(ctx.stdout).to.equal('running esm prerun hook\nit works!\nrunning esm postrun hook\nreturned success!\n')
   })
 
   withConfig
   .stdout()
   .it('runs init hook', async ctx => {
     await (ctx.config.runHook as any)('init', {id: 'myid', argv: ['foo']})
-    expect(ctx.stdout).to.equal('running esm init hook' + EOL)
+    expect(ctx.stdout).to.equal('running esm init hook\n')
   })
 })

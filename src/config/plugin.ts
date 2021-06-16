@@ -14,7 +14,6 @@ import {tsPath} from './ts-node'
 import {compact, exists, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {EOL} from 'os'
 
 const _pjson = require('../../package.json')
 
@@ -210,7 +209,7 @@ export class Plugin implements IPlugin {
         const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
         const manifest: Manifest = await loadJSON(p)
         if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
-          process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}${EOL}This usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
+          process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
         } else {
           this._debug('using manifest from', p)
           return manifest
@@ -256,7 +255,7 @@ export class Plugin implements IPlugin {
 
   private addErrorScope(err: any, scope?: string) {
     err.name = `${err.name} Plugin: ${this.name}`
-    err.detail = compact([err.detail, `module: ${this._base}`, scope && `task: ${scope}`, `plugin: ${this.name}`, `root: ${this.root}`, 'See more details with DEBUG=*']).join(EOL)
+    err.detail = compact([err.detail, `module: ${this._base}`, scope && `task: ${scope}`, `plugin: ${this.name}`, `root: ${this.root}`, 'See more details with DEBUG=*']).join('\n')
     return err
   }
 }

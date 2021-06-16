@@ -5,7 +5,6 @@ import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
 import {HelpFormatter} from './formatter'
-import {EOL} from 'os'
 
 const {
   underline,
@@ -43,10 +42,10 @@ export class CommandHelp extends HelpFormatter {
       const body = generate({cmd, flags, args}, header)
       // Generate can return a list of sections
       if (Array.isArray(body)) {
-        return body.map(helpSection => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body)).join(EOL + EOL)
+        return body.map(helpSection => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body)).join('\n\n')
       }
       return body && this.section(header, body)
-    })).join(EOL + EOL)
+    })).join('\n\n')
     return output
   }
 
@@ -121,7 +120,7 @@ export class CommandHelp extends HelpFormatter {
     const usage = this.command.usage
     const body = (usage ? castArray(usage) : [this.defaultUsage(flags)])
     .map(u => `$ ${this.config.bin} ${u}`.trim())
-    .join(EOL)
+    .join('\n')
     return this.wrap(body)
   }
 
@@ -148,12 +147,12 @@ export class CommandHelp extends HelpFormatter {
 
     // Lines separated with only one newline or more than 2 can be hard to read in the terminal.
     // Always separate by two newlines.
-    return this.wrap(compact(description).join(EOL + EOL))
+    return this.wrap(compact(description).join('\n\n'))
   }
 
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
-    const body = aliases.map(a => ['$', this.config.bin, a].join(' ')).join(EOL)
+    const body = aliases.map(a => ['$', this.config.bin, a].join(' ')).join('\n')
     return body
   }
 
@@ -174,14 +173,14 @@ export class CommandHelp extends HelpFormatter {
       let command
       if (typeof a === 'string') {
         const lines = a
-        .split(EOL)
+        .split('\n')
         .filter(line => Boolean(line))
-        // If the example is <description>${EOL}<command> then format correctly
+        // If the example is <description>\n<command> then format correctly
         if (lines.length === 2 && !isCommand(lines[0]) && isCommand(lines[1])) {
           description = lines[0]
           command = lines[1]
         } else {
-          return lines.map(line => formatIfCommand(line)).join(EOL)
+          return lines.map(line => formatIfCommand(line)).join('\n')
         }
       } else {
         description = a.description
@@ -198,10 +197,10 @@ export class CommandHelp extends HelpFormatter {
       // First indent keeping room for escaped newlines
       const multilineCommand = this.indent(this.wrap(formatIfCommand(command), finalIndentedSpacing + 4))
       // Then add the escaped newline
-      .split(EOL).join(` ${multilineSeparator}${EOL}  `)
+      .split('\n').join(` ${multilineSeparator}\n  `)
 
-      return `${this.wrap(description, finalIndentedSpacing)}${EOL}${EOL}${multilineCommand}`
-    }).join(EOL + EOL)
+      return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommand}`
+    }).join('\n\n')
     return body
   }
 
@@ -265,7 +264,7 @@ export class CommandHelp extends HelpFormatter {
       if (flag.required) right = `(required) ${right}`
 
       if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
-        right += `${EOL}<options: ${flag.options.join('|')}>`
+        right += `\n<options: ${flag.options.join('|')}>`
       }
 
       return [left, dim(right.trim())]
@@ -277,8 +276,8 @@ export class CommandHelp extends HelpFormatter {
     if (flagsWithExtendedDescriptions.length === 0) return
 
     const body = flagsWithExtendedDescriptions.map(flag => {
-      return `${this.flagHelpLabel(flag, true)}  ${flag.summary}${EOL}${EOL}${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
-    }).join(EOL + EOL)
+      return `${this.flagHelpLabel(flag, true)}  ${flag.summary}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
+    }).join('\n\n')
 
     return body
   }

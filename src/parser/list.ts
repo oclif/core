@@ -1,7 +1,6 @@
 import {stdtermwidth} from '../screen'
 import {maxBy} from './util'
 import {List} from '../interfaces'
-import {EOL} from 'os'
 
 function linewrap(length: number, s: string): string {
   const lw = require('@oclif/linewrap')
@@ -25,5 +24,5 @@ export function renderList(items: List): string {
     right = linewrap(maxLength + 2, right)
     return `${left}  ${right}`
   })
-  return lines.join(EOL)
+  return lines.join('\n')
 }

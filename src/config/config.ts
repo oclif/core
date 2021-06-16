@@ -16,7 +16,6 @@ import {Topic} from '../interfaces/topic'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {EOL} from 'os'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -224,7 +223,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          process.stdout.write(format(message, ...args) + EOL)
+          process.stdout.write(format(message, ...args) + '\n')
         },
         error(message, options: {code?: string; exit?: number} = {}) {
           error(message, options)
@@ -456,7 +455,7 @@ export class Config implements IConfig {
         `plugin: ${this.name}`,
         `root: ${this.root}`,
         'See more details with DEBUG=*',
-      ]).join(EOL)
+      ]).join('\n')
       process.emitWarning(err)
       return
     }
@@ -471,7 +470,7 @@ export class Config implements IConfig {
       `plugin: ${this.name}`,
       `root: ${this.root}`,
       'See more details with DEBUG=*',
-    ]).join(EOL)
+    ]).join('\n')
 
     process.emitWarning(JSON.stringify(err))
   }

@@ -1,6 +1,5 @@
 import * as Chalk from 'chalk'
 import indent = require('indent-string')
-import {EOL} from 'os'
 import stripAnsi = require('strip-ansi')
 
 import * as Interfaces from '../interfaces'
@@ -77,9 +76,9 @@ export class HelpFormatter {
    * the number of times the text has been indented. For example.
    *
    * ```javascript
-   * const body = `main line${EOL}${indent(wrap('indented example line', 4))}`
+   * const body = `main line\n${indent(wrap('indented example line', 4))}`
    * const header = 'SECTION'
-   * console.log(`${header}${EOL}${indent(wrap(body))}`
+   * console.log(`${header}\n${indent(wrap(body))}`
    * ```
    * will output
    * ```
@@ -117,17 +116,17 @@ export class HelpFormatter {
         }
         if (right) {
           if (opts.stripAnsi) right = stripAnsi(right)
-          output += EOL
+          output += '\n'
           output += this.indent(this.wrap(right.trim(), opts.indentation + 2), 4)
         }
-        output += EOL + EOL
+        output += '\n\n'
       }
       return output.trim()
     }
     if (opts.multiline) return renderMultiline()
-    const maxLength = widestLine(input.map(i => i[0]).join(EOL))
+    const maxLength = widestLine(input.map(i => i[0]).join('\n'))
     let output = ''
-    let spacer = opts.spacer || EOL
+    let spacer = opts.spacer || '\n'
     let cur = ''
     for (const [left, r] of input) {
       let right = r
@@ -144,7 +143,7 @@ export class HelpFormatter {
       if (opts.stripAnsi) right = stripAnsi(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
-      const [first, ...lines] = right!.split(EOL).map(s => s.trim())
+      const [first, ...lines] = right!.split('\n').map(s => s.trim())
       cur += ' '.repeat(maxLength - width(cur) + 2)
       cur += first
       if (lines.length === 0) {
@@ -153,9 +152,9 @@ export class HelpFormatter {
       // if we start putting too many lines down, render in multiline format
       if (lines.length > 4) return renderMultiline()
       // if spacer is not defined, separate all rows with extra newline
-      if (!opts.spacer) spacer = EOL + EOL
-      cur += EOL
-      cur += this.indent(lines.join(EOL), maxLength + 2)
+      if (!opts.spacer) spacer = '\n\n'
+      cur += '\n'
+      cur += this.indent(lines.join('\n'), maxLength + 2)
     }
     if (cur) {
       output += spacer
@@ -171,7 +170,7 @@ export class HelpFormatter {
     const output = [
       bold(header),
       this.indent(Array.isArray(body) ? this.renderList(body, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : body),
-    ].join(EOL)
+    ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output
   }
 }

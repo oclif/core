@@ -4,7 +4,6 @@ import Deps from './deps'
 import * as Help from './help'
 import * as List from './list'
 import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
-import {EOL} from 'os'
 
 export {CLIError} from '../errors'
 
@@ -19,7 +18,7 @@ export class CLIParseError extends CLIError {
   public parse: CLIParseErrorOptions['parse']
 
   constructor(options: CLIParseErrorOptions & { message: string }) {
-    options.message += EOL + 'See more help with --help'
+    options.message += '\nSee more help with --help'
     super(options.message)
     this.parse = options.parse
   }
@@ -33,7 +32,7 @@ export class InvalidArgsSpecError extends CLIParseError {
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
       const list = m.list.renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
-      message += `:${EOL}${list}`
+      message += `:\n${list}`
     }
     super({parse, message})
     this.args = args
@@ -48,7 +47,7 @@ export class RequiredArgsError extends CLIParseError {
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
       const list = m.list.renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
-      message += `:${EOL}${list}`
+      message += `:\n${list}`
     }
     super({parse, message})
     this.args = args
@@ -60,7 +59,7 @@ export class RequiredFlagError extends CLIParseError {
 
   constructor({flag, parse}: CLIParseErrorOptions & { flag: Flag<any> }) {
     const usage = m.list.renderList(m.help.flagUsages([flag], {displayRequired: false}))
-    const message = `Missing required flag:${EOL}${usage}`
+    const message = `Missing required flag:\n${usage}`
     super({parse, message})
     this.flag = flag
   }

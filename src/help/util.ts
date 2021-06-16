@@ -3,7 +3,6 @@ import lodashTemplate = require('lodash.template')
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
-import {EOL} from 'os'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
@@ -22,7 +21,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
       const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
     } catch (error) {
-      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:${EOL}${error.message}`)
+      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
     }
   }
 

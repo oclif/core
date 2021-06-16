@@ -7,7 +7,6 @@ import * as process from 'process'
 import {CLIError, config, ExitError} from '../../src/errors'
 import {handle} from '../../src/errors/handle'
 import {exit as exitErrorThrower} from '../../src/errors'
-import {EOL} from 'os'
 
 const errlog = path.join(__dirname, '../tmp/mytest/error.log')
 const x = process.platform === 'win32' ? '»' : '›'
@@ -26,6 +25,41 @@ describe('handle', () => {
     (process as any).exit = originalExit;
     (process as any).exitCode = originalExitCode
   })
+
+  // fancy
+  // .stderr()
+  // .finally(() => delete process.exitCode)
+  // .it('displays an error from root handle module', ctx => {
+  //   handle(new Error('x'))
+  //   expect(ctx.stderr).to.contain('Error: x')
+  //   expect(process.exitCode).to.equal(1)
+  // })
+
+  // fancy
+  // .stderr()
+  // .finally(() => delete process.exitCode)
+  // .it('shows an unhandled error', ctx => {
+  //   handle(new Error('x'))
+  //   expect(ctx.stderr).to.contain('Error: x')
+  //   expect(process.exitCode).to.equal(1)
+  // })
+
+  // fancy
+  // .stderr()
+  // .finally(() => delete process.exitCode)
+  // .it('handles a badly formed error object', () => {
+  //   handle({status: 400} as any)
+  //   expect(process.exitCode).to.equal(1)
+  // })
+
+  // fancy
+  // .stderr()
+  // .finally(() => delete process.exitCode)
+  // .it('shows a cli error', ctx => {
+  //   handle(new CLIError('x'))
+  //   expect(ctx.stderr).to.equal(` ${x}   Error: x\n`)
+  //   expect(process.exitCode).to.equal(2)
+  // })
 
   fancy
   .stdout()
@@ -49,7 +83,7 @@ describe('handle', () => {
   .finally(() => delete process.exitCode)
   .it('logs when errlog is set', async ctx => {
     handle(new CLIError('uh oh!'))
-    expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!${EOL}`)
+    expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!\n`)
     await config.errorLogger!.flush()
     expect(fs.readFileSync(errlog, 'utf8')).to.contain('Error: uh oh!')
     expect(process.exitCode).to.equal(2)

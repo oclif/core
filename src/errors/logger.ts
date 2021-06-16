@@ -1,5 +1,4 @@
 import * as FS from 'fs-extra'
-import {EOL} from 'os'
 import * as path from 'path'
 import StripAnsi = require('strip-ansi')
 
@@ -11,7 +10,7 @@ const wait = (ms: number) => new Promise(resolve => {
 })
 
 function chomp(s: string): string {
-  if (s.endsWith(EOL)) return s.replace(new RegExp(EOL + '$'), '')
+  if (s.endsWith('\n')) return s.replace(/\n$/, '')
   return s
 }
 
@@ -26,7 +25,7 @@ export class Logger {
   log(msg: string) {
     const stripAnsi: typeof StripAnsi = require('strip-ansi')
     msg = stripAnsi(chomp(msg))
-    const lines = msg.split(EOL).map(l => `${timestamp()} ${l}`.trimRight())
+    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimRight())
     this.buffer.push(...lines)
     // tslint:disable-next-line no-console
     this.flush(50).catch(console.error)
@@ -40,7 +39,7 @@ export class Logger {
       this.buffer = []
       const fs: typeof FS = require('fs-extra')
       await fs.mkdirp(path.dirname(this.file))
-      await fs.appendFile(this.file, mylines.join(EOL) + EOL)
+      await fs.appendFile(this.file, mylines.join('\n') + '\n')
     })
     await this.flushing
   }
