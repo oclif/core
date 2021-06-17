@@ -1,15 +1,18 @@
 import * as Chalk from 'chalk'
-import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
-import {renderList} from './list'
 import {castArray, compact, sortBy} from '../util'
-import {template} from './util'
 import * as Interfaces from '../interfaces'
+import {Example} from '../interfaces/command'
+import {HelpFormatter} from './formatter'
+
+// Don't use os.EOL because we need to ensure that a string
+// written on any platform, that may use \r\n or \n, will be
+// split on any platform, not just the os specific EOL at runtime.
+const POSSIBLE_LINE_FEED = /\r\n|\n/
 
 const {
   underline,
-  bold,
 } = Chalk
 let {
   dim,
@@ -19,13 +22,15 @@ if (process.env.ConEmuANSI === 'ON') {
   dim = Chalk.gray
 }
 
-const wrap = require('wrap-ansi')
+export type HelpSection = {header: string; body: string | [string, string | undefined][] | undefined} | undefined;
+export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection[] | string | undefined;
 
-export default class CommandHelp {
-  render: (input: string) => string
-
-  constructor(public command: Interfaces.Command, public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {
-    this.render = template(this)
+export class CommandHelp extends HelpFormatter {
+  constructor(
+    public command: Interfaces.Command,
+    public config: Interfaces.Config,
+    public opts: Interfaces.HelpOptions) {
+    super(config, opts)
   }
 
   generate(): string {
@@ -36,17 +41,84 @@ export default class CommandHelp {
       v.name = k
       return v
     }), f => [!f.char, f.char, f.name])
+
     const args = (cmd.args || []).filter(a => !a.hidden)
-    let output = compact([
-      this.usage(flags),
-      this.args(args),
-      this.flags(flags),
-      this.description(),
-      this.aliases(cmd.aliases),
-      this.examples(cmd.examples || (cmd as any).example),
-    ]).join('\n\n')
-    if (this.opts.stripAnsi) output = stripAnsi(output)
+    const output = compact(this.sections().map(({header, generate}) => {
+      const body = generate({cmd, flags, args}, header)
+      // Generate can return a list of sections
+      if (Array.isArray(body)) {
+        return body.map(helpSection => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body)).join('\n\n')
+      }
+      return body && this.section(header, body)
+    })).join('\n\n')
     return output
+  }
+
+  protected groupFlags(flags: Interfaces.Command.Flag[]) {
+    const mainFlags: Interfaces.Command.Flag[] = []
+    const flagGroups: {[index: string]: Interfaces.Command.Flag[]} = {}
+
+    for (const flag of flags) {
+      const group = flag.helpGroup
+
+      if (group) {
+        if (!flagGroups[group]) flagGroups[group] = []
+        flagGroups[group].push(flag)
+      } else {
+        mainFlags.push(flag)
+      }
+    }
+    return {mainFlags, flagGroups}
+  }
+
+  protected sections(): Array<{header: string; generate: HelpSectionRenderer}> {
+    return [
+      {
+        header: this.opts.usageHeader || 'USAGE',
+        generate: ({flags}) => this.usage(flags),
+      },
+      {
+        header: 'ARGUMENTS',
+        generate: ({args}, header) => [{header, body: this.args(args)}],
+      },
+      {
+        header: 'FLAGS',
+        generate: ({flags}, header) => {
+          const {mainFlags, flagGroups} = this.groupFlags(flags)
+
+          const flagSections: HelpSection[] = []
+          const mainFlagBody = this.flags(mainFlags)
+
+          if (mainFlagBody) flagSections.push({header, body: mainFlagBody})
+
+          Object.entries(flagGroups).forEach(([name, flags]) => {
+            const body = this.flags(flags)
+            if (body) flagSections.push({header: `${name.toUpperCase()} ${header}`, body})
+          })
+
+          return compact<HelpSection>(flagSections)
+        },
+      },
+      {
+        header: 'DESCRIPTION',
+        generate: () => this.description(),
+      },
+      {
+        header: 'ALIASES',
+        generate: ({cmd}) => this.aliases(cmd.aliases),
+      },
+      {
+        header: 'EXAMPLES',
+        generate: ({cmd}) => {
+          const examples = cmd.examples || (cmd as any).example
+          return this.examples(examples)
+        },
+      },
+      {
+        header: 'FLAG DESCRIPTIONS',
+        generate: ({flags}) => this.flagsDescriptions(flags),
+      },
+    ]
   }
 
   protected usage(flags: Interfaces.Command.Flag[]): string {
@@ -54,10 +126,7 @@ export default class CommandHelp {
     const body = (usage ? castArray(usage) : [this.defaultUsage(flags)])
     .map(u => `$ ${this.config.bin} ${u}`.trim())
     .join('\n')
-    return [
-      bold('USAGE'),
-      indent(wrap(this.render(body), this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+    return this.wrap(body)
   }
 
   protected defaultUsage(_: Interfaces.Command.Flag[]): string {
@@ -69,45 +138,88 @@ export default class CommandHelp {
 
   protected description(): string | undefined {
     const cmd = this.command
-    const description = cmd.description && this.render(cmd.description).split('\n').slice(1).join('\n')
-    if (!description) return
-    return [
-      bold('DESCRIPTION'),
-      indent(wrap(description.trim(), this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+
+    let description: string[] | undefined
+
+    if (this.opts.hideCommandSummaryInDescription) {
+      description = (cmd.description || '').split(POSSIBLE_LINE_FEED).slice(1)
+    } else if (cmd.description) {
+      description = [
+        ...(cmd.summary || '').split(POSSIBLE_LINE_FEED),
+        ...(cmd.description || '').split(POSSIBLE_LINE_FEED),
+      ]
+    }
+    if (description) {
+      // Lines separated with only one newline or more than 2 can be hard to read in the terminal.
+      // Always separate by two newlines.
+      return this.wrap(compact(description).join('\n\n'))
+    }
   }
 
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
     const body = aliases.map(a => ['$', this.config.bin, a].join(' ')).join('\n')
-    return [
-      bold('ALIASES'),
-      indent(wrap(body, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+    return body
   }
 
-  protected examples(examples: string[] | undefined | string): string | undefined {
+  protected examples(examples: Example[] | undefined | string): string | undefined {
     if (!examples || examples.length === 0) return
-    const body = castArray(examples).map(a => this.render(a)).join('\n')
-    return [
-      bold('EXAMPLE' + (examples.length > 1 ? 'S' : '')),
-      indent(wrap(body, this.opts.maxWidth - 2, {trim: false, hard: true}), 2),
-    ].join('\n')
+
+    const formatIfCommand = (example: string): string => {
+      example = this.render(example)
+      if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
+      if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
+      return example
+    }
+
+    const isCommand = (example: string) => stripAnsi(formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
+
+    const body = castArray(examples).map(a => {
+      let description
+      let command
+      if (typeof a === 'string') {
+        const lines = a
+        .split(POSSIBLE_LINE_FEED)
+        .filter(line => Boolean(line))
+        // If the example is <description>\n<command> then format correctly
+        if (lines.length === 2 && !isCommand(lines[0]) && isCommand(lines[1])) {
+          description = lines[0]
+          command = lines[1]
+        } else {
+          return lines.map(line => formatIfCommand(line)).join('\n')
+        }
+      } else {
+        description = a.description
+        command = a.command
+      }
+
+      const multilineSeparator =
+        this.config.platform === 'win32' ?
+          this.config.shell.includes('powershell') ? '`' : '^' :
+          '\\'
+
+      // The command will be indented in the section, which is also indented
+      const finalIndentedSpacing = this.indentSpacing * 2
+      // First indent keeping room for escaped newlines
+      const multilineCommand = this.indent(this.wrap(formatIfCommand(command), finalIndentedSpacing + 4))
+      // Then add the escaped newline
+      .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
+
+      return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommand}`
+    }).join('\n\n')
+    return body
   }
 
-  protected args(args: Interfaces.Command['args']): string | undefined {
+  protected args(args: Interfaces.Command['args']): [string, string | undefined][] | undefined {
     if (args.filter(a => a.description).length === 0) return
-    const body = renderList(args.map(a => {
+
+    return args.map(a => {
       const name = a.name.toUpperCase()
       let description = a.description || ''
       if (a.default) description = `[default: ${a.default}] ${description}`
       if (a.options) description = `(${a.options.join('|')}) ${description}`
       return [name, description ? dim(description) : undefined]
-    }), {stripAnsi: this.opts.stripAnsi, maxWidth: this.opts.maxWidth - 2})
-    return [
-      bold('ARGUMENTS'),
-      indent(body, 2),
-    ].join('\n')
+    })
   }
 
   protected arg(arg: Interfaces.Command['args'][0]): string {
@@ -116,44 +228,72 @@ export default class CommandHelp {
     return `[${name}]`
   }
 
-  protected flags(flags: Interfaces.Command.Flag[]): string | undefined {
+  protected flagHelpLabel(flag: Interfaces.Command.Flag, showOptions = false) {
+    let label = flag.helpLabel
+
+    if (!label) {
+      const labels = []
+      if (flag.char) labels.push(`-${flag.char[0]}`)
+      if (flag.name) {
+        if (flag.type === 'boolean' && flag.allowNo) {
+          labels.push(`--[no-]${flag.name.trim()}`)
+        } else {
+          labels.push(`--${flag.name.trim()}`)
+        }
+      }
+      label = labels.join(', ')
+    }
+
+    if (flag.type === 'option') {
+      let value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
+      if (!flag.helpValue && flag.options) {
+        if (showOptions || this.opts.showFlagOptionsInTitle) value = `${flag.options.join('|')}`
+        else value = '<option>'
+      }
+      if (flag.multiple) value += '...'
+      if (!value.includes('|')) value = underline(value)
+      label += `=${value}`
+    }
+    return label
+  }
+
+  protected flags(flags: Interfaces.Command.Flag[]): [string, string | undefined][] | undefined {
     if (flags.length === 0) return
-    const body = renderList(flags.map(flag => {
-      let left = flag.helpLabel
 
-      if (!left) {
-        const label = []
-        if (flag.char) label.push(`-${flag.char[0]}`)
-        if (flag.name) {
-          if (flag.type === 'boolean' && flag.allowNo) {
-            label.push(`--[no-]${flag.name.trim()}`)
-          } else {
-            label.push(`--${flag.name.trim()}`)
-          }
-        }
-        left = label.join(', ')
-      }
+    return flags.map(flag => {
+      const left = this.flagHelpLabel(flag)
 
-      if (flag.type === 'option') {
-        let value = flag.helpValue || flag.name
-        if (!flag.helpValue && flag.options) {
-          value = flag.options.join('|')
-        }
-        if (!value.includes('|')) value = underline(value)
-        left += `=${value}`
-      }
-
-      let right = flag.description || ''
+      let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
         right = `[default: ${flag.default}] ${right}`
       }
       if (flag.required) right = `(required) ${right}`
 
+      if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
+        right += `\n<options: ${flag.options.join('|')}>`
+      }
+
       return [left, dim(right.trim())]
-    }), {stripAnsi: this.opts.stripAnsi, maxWidth: this.opts.maxWidth - 2})
-    return [
-      bold('OPTIONS'),
-      indent(body, 2),
-    ].join('\n')
+    })
+  }
+
+  protected flagsDescriptions(flags: Interfaces.Command.Flag[]): string | undefined {
+    const flagsWithExtendedDescriptions = flags.filter(flag => flag.summary && flag.description)
+    if (flagsWithExtendedDescriptions.length === 0) return
+
+    const body = flagsWithExtendedDescriptions.map(flag => {
+      // Guaranteed to be set because of the filter above, but make ts happy
+      const summary = flag.summary || ''
+      let flagHelp = this.flagHelpLabel(flag, true)
+      if (flagHelp.length + summary.length + 2 < this.opts.maxWidth) {
+        flagHelp += '  ' + summary
+      } else {
+        flagHelp += '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
+      }
+      return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
+    }).join('\n\n')
+
+    return body
   }
 }
+export default CommandHelp

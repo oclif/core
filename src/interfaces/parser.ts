@@ -84,13 +84,46 @@ export type DefaultContext<T> = {
 
 export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
 
-export type FlagBase<T, I> = {
+export type FlagProps = {
   name: string;
   char?: AlphabetLowercase | AlphabetUppercase;
+  /**
+   * A short summary of flag usage to show in the flag list.
+   * If not provided, description will be used.
+   */
+  summary?: string;
+  /**
+   * A description of flag usage. If summary is provided, the description
+   * is assumed to be a longer description and will be shown in a separate
+   * section within help.
+   */
   description?: string;
+  /**
+   * The flag label to show in help. Defaults to "[-<char>] --<name>" where -<char> is
+   * only displayed if the char is defined.
+   */
   helpLabel?: string;
+  /**
+   * Shows this flag in a separate list in the help.
+   */
+  helpGroup?: string;
   hidden?: boolean;
   required?: boolean;
+}
+
+export type BooleanFlagProps = FlagProps & {
+  type: 'boolean';
+  allowNo: boolean;
+}
+
+export type OptionFlagProps = FlagProps & {
+  type: 'option';
+  helpValue?: string;
+  options?: string[];
+  multiple: boolean;
+}
+
+export type FlagBase<T, I> = FlagProps & {
   dependsOn?: string[];
   exclusive?: string[];
   exactlyOne?: string[];
@@ -101,22 +134,15 @@ export type FlagBase<T, I> = {
   parse(input: I, context: any): Promise<T>;
 }
 
-export type BooleanFlag<T> = FlagBase<T, boolean> & {
-  type: 'boolean';
-  allowNo: boolean;
+export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
   /**
    * specifying a default of false is the same not specifying a default
    */
-  default?: Default<boolean>;
+   default?: Default<boolean>;
 }
-
-export type OptionFlag<T> = FlagBase<T, string> & {
-  type: 'option';
-  helpValue?: string;
+export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
   default?: Default<T | undefined>;
-  multiple: boolean;
   input: string[];
-  options?: string[];
 }
 
 export type Definition<T> = {

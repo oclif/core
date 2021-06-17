@@ -6,8 +6,9 @@ import {Topic} from '../../../src/interfaces'
 export class AppsCreate extends Command {
   static id = 'apps:create'
 
-  static description = `Create an app
-  this only shows up in command help under DESCRIPTION`;
+  static summary = 'Create an app'
+
+  static description = 'this only shows up in command help under DESCRIPTION';
 
   static disableJsonFlag = true;
 
@@ -38,8 +39,22 @@ export class AppsDestroy extends Command {
 export class AppsIndex extends Command {
   static id = 'apps'
 
+  static summary = 'List all apps (app index command)';
+
+  static flags: {};
+
+  static args = [];
+
+  async run() {
+    'run'
+  }
+}
+
+export class AppsIndexWithDesc extends Command {
+  static id = 'apps'
+
   static description = `List all apps (app index command)
-  this only shows up in command help under DESCRIPTION`;
+this only shows up in command help under DESCRIPTION`;
 
   static flags: {};
 

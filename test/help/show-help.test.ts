@@ -54,8 +54,8 @@ describe('showHelp for root', () => {
   test
   .loadConfig()
   .stdout()
-  .do(async ctx => {
-    const config = ctx.config;
+  .do(async () => {
+    const config = await Config.load({root: path.resolve(__dirname, '..')});
 
     (config as any).plugins = [{
       commands: [AppsIndex, AppsCreate, AppsDestroy],
@@ -243,6 +243,8 @@ USAGE
   $ oclif apps:create
 
 DESCRIPTION
+  Create an app
+
   this only shows up in command help under DESCRIPTION`)
   })
 
@@ -265,9 +267,6 @@ DESCRIPTION
 
 USAGE
   $ oclif apps
-
-DESCRIPTION
-  this only shows up in command help under DESCRIPTION
 
 TOPICS
   apps:admin  This topic is for the apps topic

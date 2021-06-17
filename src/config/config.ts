@@ -338,7 +338,7 @@ export class Config implements IConfig {
       while (parts.length) {
         const name = parts.join(':')
         if (name && !topics.find(t => t.name === name)) {
-          topics.push({name, description: c.description})
+          topics.push({name, description: c.summary || c.description})
         }
         parts.pop()
       }
@@ -489,10 +489,12 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         name,
         type: flag.type,
         char: flag.char,
+        summary: flag.summary,
         description: flag.description,
         hidden: flag.hidden,
         required: flag.required,
         helpLabel: flag.helpLabel,
+        helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
       }
     } else {
@@ -500,11 +502,14 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         name,
         type: flag.type,
         char: flag.char,
+        summary: flag.summary,
         description: flag.description,
         hidden: flag.hidden,
         required: flag.required,
         helpLabel: flag.helpLabel,
         helpValue: flag.helpValue,
+        helpGroup: flag.helpGroup,
+        multiple: flag.multiple,
         options: flag.options,
         // eslint-disable-next-line no-await-in-loop
         default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
@@ -525,6 +530,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
 
   return {
     id: c.id,
+    summary: c.summary,
     description: c.description,
     usage: c.usage,
     pluginName: plugin && plugin.name,

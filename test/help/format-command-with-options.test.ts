@@ -2,19 +2,40 @@ import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
-import {Help} from '../../src/help'
+import {Help, CommandHelp} from '../../src/help'
 
 const g: any = global
 g.oclif.columns = 80
 
 class Command extends Base {
+  static disableJsonFlag = true
+
   async run() {
     return null
   }
 }
 
+// Allow overriding section headers
+class TestCommandHelp extends CommandHelp {
+  protected sections() {
+    const sections = super.sections()
+    const flagSection = sections.find(section => section.header === 'FLAGS')
+    if (flagSection) flagSection.header = 'OPTIONS'
+    return sections
+  }
+}
+
 // extensions to expose method as public for testing
 class TestHelp extends Help {
+  CommandHelpClass = TestCommandHelp
+
+  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
+    super(config, opts)
+    this.opts.showFlagNameInTitle = true
+    this.opts.showFlagOptionsInTitle = true
+    this.opts.hideCommandSummaryInDescription = true
+  }
+
   public formatCommand(command: Interfaces.Command) {
     return super.formatCommand(command)
   }
@@ -62,29 +83,24 @@ multiline help`
 ARGUMENTS
   APP_NAME  app to use
 
-FLAGS
-  -f, --foo=<value>     foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfo
-                        obarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
+OPTIONS
+  -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
+                       barfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 
-  -l=<value>
+  -l=label
 
-  -r, --remote=<value>
+  -r, --remote=remote
 
-  --force               force  it force  it force  it force  it force  it force
-                        it force  it force  it force  it force  it force  it
-                        force  it force  it force  it force  it
+  --force              force  it force  it force  it force  it force  it force
+                       it force  it force  it force  it force  it force  it
+                       force  it force  it force  it force  it
 
-  --ss                  newliney
-                        newliney
-                        newliney
-                        newliney
-
-GLOBAL FLAGS
-  --json  format output as json
+  --ss                 newliney
+                       newliney
+                       newliney
+                       newliney
 
 DESCRIPTION
-  first line
-
   multiline help
 
 ALIASES
@@ -121,26 +137,20 @@ ARGUMENTS
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to use
 
-FLAGS
-  -f, --foo=<value>     foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfo
-                        obarfoobarfoobarfoobarfoobarfoobar
+OPTIONS
+  -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
+                       barfoobarfoobarfoobarfoobarfoobar
 
-  -r, --remote=<value>
+  -r, --remote=remote
 
-  --force               force  it force  it force  it force  it force  it force
-                        it force  it force  it force  it force  it force  it
-                        force  it force  it force  it force  it
+  --force              force  it force  it force  it force  it force  it force
+                       it force  it force  it force  it force  it force  it
+                       force  it force  it force  it force  it
 
-  --ss                  newliney
-                        newliney
-                        newliney
-                        newliney
-
-GLOBAL FLAGS
-  --json  format output as json
-
-DESCRIPTION
-  description of apps:create
+  --ss                 newliney
+                       newliney
+                       newliney
+                       newliney
 
 ALIASES
   $ oclif app:init
@@ -175,12 +185,12 @@ ARGUMENTS
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to use
 
-FLAGS
-  -f, --foo=<value>
+OPTIONS
+  -f, --foo=foo
       foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoob
       arfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 
-  -r, --remote=<value>
+  -r, --remote=remote
 
   --force
       force  it force  it force  it force  it force  it force  it force  it force
@@ -195,42 +205,9 @@ FLAGS
       newliney
       newliney
 
-GLOBAL FLAGS
-  --json  format output as json
-
-DESCRIPTION
-  description of apps:create
-
 ALIASES
   $ oclif app:init
   $ oclif create`))
-  })
-
-  describe('summary', () => {
-    test
-    .commandHelp(class extends Command {
-      static id = 'test:summary'
-
-      static summary = 'one line summary'
-    })
-    .it('no description header if only a summary', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif test:summary`))
-
-    test
-    .commandHelp(class extends Command {
-      static id = 'test:summary'
-
-      static summary = 'one line summary'
-
-      static description = 'description that is much longer than the summary'
-    })
-    .it('outputs the summary at the top of the help and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif test:summary
-
-DESCRIPTION
-  one line summary
-
-  description that is much longer than the summary`))
   })
 
   describe('description', () => {
@@ -254,15 +231,10 @@ DESCRIPTION
 ARGUMENTS
   APP_NAME  app to use
 
-FLAGS
+OPTIONS
   --force  forces
 
-GLOBAL FLAGS
-  --json  format output as json
-
 DESCRIPTION
-  description of apps:create
-
   these values are after and will show up in the command description
 
 ALIASES
@@ -274,75 +246,29 @@ ALIASES
         static id = 'apps:create'
 
         static description = 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>'
-
-        static disableJsonFlag = true
     })
     .it('renders template string from description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
 
 DESCRIPTION
-  root part of the description
-
   The oclif CLI has apps:create`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static description = 'root part of the description\r\nusing both carriage \nreturn and new line'
-
-        static disableJsonFlag = true
-    })
-    .it('splits on carriage return and new lines', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
-
-DESCRIPTION
-  root part of the description
-
-  using both carriage
-
-  return and new line`))
   })
 
-  const myEnumValues = ['a', 'b', 'c']
   describe(('flags'), () => {
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static disableJsonFlag = true
-
         static flags = {
           myenum: flags.string({
-            description: 'the description',
-            options: myEnumValues,
+            options: ['a', 'b', 'c'],
           }),
         }
     })
     .it('outputs flag enum', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
 
-FLAGS
-  --myenum=<option>  the description
-                     <options: a|b|c>`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static disableJsonFlag = true
-
-        static flags = {
-          myenum: flags.string({
-            options: myEnumValues,
-            helpValue: myEnumValues.join('|'),
-          }),
-        }
-    })
-    .it('outputs flag enum with helpValue', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
-
-FLAGS
+OPTIONS
   --myenum=a|b|c`))
 
     test
@@ -354,8 +280,6 @@ FLAGS
         {name: 'arg2', default: '.', description: 'arg2 desc'},
         {name: 'arg3', description: 'arg3 desc'},
       ]
-
-      static disableJsonFlag = true
 
       static flags = {
         flag1: flags.string({default: '.'}),
@@ -370,16 +294,14 @@ ARGUMENTS
   ARG2  [default: .] arg2 desc
   ARG3  arg3 desc
 
-FLAGS
-  --flag1=<value>  [default: .]
-  --flag2=<value>  [default: .] flag2 desc
-  --flag3=<value>  flag3 desc`))
+OPTIONS
+  --flag1=flag1  [default: .]
+  --flag2=flag2  [default: .] flag2 desc
+  --flag3=flag3  flag3 desc`))
 
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
-
-        static disableJsonFlag = true
 
         static flags = {
           opt: flags.boolean({allowNo: true}),
@@ -388,97 +310,14 @@ FLAGS
     .it('outputs with with no options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
 
-FLAGS
+OPTIONS
   --[no-]opt`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static disableJsonFlag = true
-
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary',
-            description: 'multiline\ndescription',
-          }),
-        }
-    })
-    .it('outputs flag summary and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
-
-FLAGS
-  --opt=<value>  one line summary
-
-FLAG DESCRIPTIONS
-  --opt=<value>  one line summary
-
-    multiline
-    description`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static disableJsonFlag = true
-
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary',
-            description: 'single line description',
-          }),
-        }
-    })
-    .it('outputs flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
-
-FLAGS
-  --opt=<value>  one line summary
-
-FLAG DESCRIPTIONS
-  --opt=<value>  one line summary
-
-    single line description`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static disableJsonFlag = true
-
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary'.repeat(15),
-            description: 'single line description',
-          }),
-        }
-    })
-    .it('outputs long flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
-
-FLAGS
-  --opt=<value>  one line summaryone line summaryone line summaryone line
-                 summaryone line summaryone line summaryone line summaryone line
-                 summaryone line summaryone line summaryone line summaryone line
-                 summaryone line summaryone line summaryone line summary
-
-FLAG DESCRIPTIONS
-  --opt=<value>
-
-    one line summaryone line summaryone line summaryone line summaryone line
-    summaryone line summaryone line summaryone line summaryone line summaryone
-    line summaryone line summaryone line summaryone line summaryone line
-    summaryone line summary
-
-    single line description`))
   })
 
   describe('args', () =>  {
     test
     .commandHelp(class extends Command {
         static id = 'apps:create'
-
-        static disableJsonFlag = true
 
         static args = [
           {name: 'arg1', description: 'Show the options', options: ['option1', 'option2']},
@@ -497,8 +336,6 @@ ARGUMENTS
         static id = 'apps:create'
 
         static usage = '<%= config.bin %> <%= command.id %> usage'
-
-        static disableJsonFlag = true
     })
     .it('outputs usage with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif apps:create usage`))
@@ -518,8 +355,6 @@ ARGUMENTS
       static id = 'apps:create'
 
       static usage = undefined
-
-      static disableJsonFlag = true
     })
     .it('defaults usage when not specified', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create`))
@@ -529,8 +364,6 @@ ARGUMENTS
     test
     .commandHelp(class extends Command {
         static examples = ['it handles a list of examples', 'more example text']
-
-        static disableJsonFlag = true
     })
     .it('outputs multiple examples', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -543,8 +376,6 @@ EXAMPLES
     test
     .commandHelp(class extends Command {
         static examples = ['it handles a single example']
-
-        static disableJsonFlag = true
     })
     .it('outputs a single example', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -557,8 +388,6 @@ EXAMPLES
         static id = 'oclif:command'
 
         static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
-
-        static disableJsonFlag = true
     })
     .it('outputs examples using templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -607,42 +436,5 @@ EXAMPLES
   Prints out help.
 
     $ oclif oclif:command --help`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = [{description: 'force  it '.repeat(15), command: '<%= config.bin %> <%= command.id %> --help'}]
-    })
-    .it('formats example object with long description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif oclif:command
-
-EXAMPLES
-  force  it force  it force  it force  it force  it force  it force  it force
-  it force  it force  it force  it force  it force  it force  it force  it
-
-    $ oclif oclif:command --help`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> ' + 'force  it '.repeat(15)}]
-    })
-    .it('formats example object with long command', (ctx: any) => {
-      const multilineSeparator =
-        ctx.config.platform === 'win32' ?
-          ctx.config.shell.includes('powershell') ? '`' : '^' :
-          '\\'
-      expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif oclif:command
-
-EXAMPLES
-  Prints out help.
-
-    $ oclif oclif:command force  it force  it force  it force  it force  it ${multilineSeparator}
-      force  it force  it force  it force  it force  it force  it force  it ${multilineSeparator}
-      force  it force  it force  it`)
-    })
   })
 })
