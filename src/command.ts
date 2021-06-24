@@ -243,7 +243,7 @@ export default abstract class Command {
     }
   }
 
-  protected toSuccessJson<T>(result: T): T {
+  protected toSuccessJson<T>(result: T): any {
     return result
   }
 
