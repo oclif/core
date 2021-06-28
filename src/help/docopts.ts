@@ -9,7 +9,6 @@ type Flags = Flag[]
  * flag.exclusive: groups elements when one of the mutually exclusive cases is a required flag: (--apple | --orange)
  * flag.exclusive: groups elements when none of the mutually exclusive cases is required (optional flags): [--apple | --orange]
  * flag.dependsOn: specifies that if one element is present, then another one is required: (--apple --orange)
- * cmd.variableArgs: produces 'name=value'
  *
  * @example
  *  {
