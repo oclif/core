@@ -95,7 +95,7 @@ export interface Config {
 
   runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Plugin): Promise<T>;
-  runHook<T extends Hooks, K extends Extract<keyof T, string>>(event: K, opts: T[K]): Promise<void>;
+  runHook<T extends Hooks, K extends Extract<keyof T, string>>(event: K, opts: T[K]): Promise<any>;
   findCommand(id: string, opts: { must: true }): Command.Plugin;
   findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined;
   findTopic(id: string, opts: { must: true }): Topic;
