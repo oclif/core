@@ -12,7 +12,7 @@ workflows:
             parameters:
               os:
                 - linux
-                - windows
+                # - windows
               node_version:
                 - latest
                 - lts
