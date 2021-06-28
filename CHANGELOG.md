@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.17](https://github.com/oclif/core/compare/v0.5.16...v0.5.17) (2021-06-28)
+
+
+### Bug Fixes
+
+* simplify toSuccessJson ([442195e](https://github.com/oclif/core/commit/442195eb6ee5e7728fe0bb4e9e1d8ecb5633f105))
+
 ### [0.5.16](https://github.com/oclif/core/compare/v0.5.15...v0.5.16) (2021-06-28)
 
 
