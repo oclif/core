@@ -57,7 +57,8 @@ multiline help`
       }
   })
   .it('handles multi-line help output', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create [APP_NAME]
+  $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
+    [-r <value>] [-l <value>]
 
 ARGUMENTS
   APP_NAME  app to use
@@ -111,7 +112,8 @@ ALIASES
         }
     })
     .it('show args and flags side by side when their output do not exceed 4 lines ', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create [APP_NAME]
+  $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
+    [-r <value>]
 
 ARGUMENTS
   APP_NAME
@@ -165,7 +167,8 @@ ALIASES
         }
     })
     .it('shows stacked args and flags when the lines exceed 4', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create [APP_NAME]
+  $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
+    [-r <value>]
 
 ARGUMENTS
   APP_NAME
@@ -249,7 +252,7 @@ DESCRIPTION
         }
     })
     .it('outputs command description with values after a \\n newline character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create [APP_NAME]
+  $ oclif apps:create [APP_NAME] [--json] [--force]
 
 ARGUMENTS
   APP_NAME  app to use
@@ -320,7 +323,7 @@ DESCRIPTION
         }
     })
     .it('outputs flag enum', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--myenum a|b|c]
 
 FLAGS
   --myenum=<option>  the description
@@ -340,7 +343,7 @@ FLAGS
         }
     })
     .it('outputs flag enum with helpValue', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--myenum a|b|c]
 
 FLAGS
   --myenum=a|b|c`))
@@ -363,7 +366,8 @@ FLAGS
         flag3: flags.string({description: 'flag3 desc'}),
       }
     }).it('outputs with default flag options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create [ARG1] [ARG2] [ARG3]
+  $ oclif apps:create [ARG1] [ARG2] [ARG3] [--flag1 <value>] [--flag2
+    <value>] [--flag3 <value>]
 
 ARGUMENTS
   ARG1  [default: .]
@@ -386,7 +390,7 @@ FLAGS
         }
     })
     .it('outputs with with no options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--opt]
 
 FLAGS
   --[no-]opt`))
@@ -405,7 +409,7 @@ FLAGS
         }
     })
     .it('outputs flag summary and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--opt <value>]
 
 FLAGS
   --opt=<value>  one line summary
@@ -430,7 +434,7 @@ FLAG DESCRIPTIONS
         }
     })
     .it('outputs flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--opt <value>]
 
 FLAGS
   --opt=<value>  one line summary
@@ -454,7 +458,7 @@ FLAG DESCRIPTIONS
         }
     })
     .it('outputs long flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create
+  $ oclif apps:create [--opt <value>]
 
 FLAGS
   --opt=<value>  one line summaryone line summaryone line summaryone line

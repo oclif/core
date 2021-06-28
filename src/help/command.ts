@@ -5,6 +5,7 @@ import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
 import {HelpFormatter} from './formatter'
+import {DocOpts} from './docopts'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be
@@ -75,7 +76,7 @@ export class CommandHelp extends HelpFormatter {
     return [
       {
         header: this.opts.usageHeader || 'USAGE',
-        generate: ({flags}) => this.usage(flags),
+        generate: () => this.usage(),
       },
       {
         header: 'ARGUMENTS',
@@ -121,15 +122,28 @@ export class CommandHelp extends HelpFormatter {
     ]
   }
 
-  protected usage(flags: Interfaces.Command.Flag[]): string {
+  protected usage(): string {
     const usage = this.command.usage
-    const body = (usage ? castArray(usage) : [this.defaultUsage(flags)])
-    .map(u => `$ ${this.config.bin} ${u}`.trim())
+    const body = (usage ? castArray(usage) : [this.defaultUsage()])
+    .map(u => {
+      const allowedSpacing = this.opts.maxWidth - this.indentSpacing
+      const line = `$ ${this.config.bin} ${u}`.trim()
+      if (line.length > allowedSpacing) {
+        const splitIndex = line.substring(0, allowedSpacing).lastIndexOf(' ')
+        return line.substring(0, splitIndex) + '\n' +
+          this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
+      }
+      return this.wrap(line)
+    })
     .join('\n')
-    return this.wrap(body)
+    return body
   }
 
-  protected defaultUsage(_: Interfaces.Command.Flag[]): string {
+  protected defaultUsage(): string {
+    // Docopts by default
+    if (this.opts.docopts === undefined || this.opts.docopts) {
+      return DocOpts.generate(this.command)
+    }
     return compact([
       this.command.id,
       this.command.args.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
