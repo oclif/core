@@ -205,15 +205,14 @@ export class Config implements IConfig {
     }
   }
 
-  async runHook<T>(event: string, opts: T) {
+  async runHook<T>(event: string, opts: T): Promise<any> {
     debug('start %s hook', event)
-
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
       if (m.default && typeof m.default === 'function') return m.default
       return Object.values(m).find((m: any) => typeof m === 'function') as Hook<T>
     }
-
+    const results = []
     for (const p of this.plugins) {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
@@ -242,8 +241,8 @@ export class Config implements IConfig {
 
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
-          await search(module).call(context, {...opts as any, config: this})
-          /* eslint-enable no-await-in-loop */
+          const result = await search(module).call(context, {...opts as any, config: this})
+          results.push(result)
 
           debug('done')
         } catch (error) {
@@ -254,6 +253,7 @@ export class Config implements IConfig {
     }
 
     debug('%s hook done', event)
+    return results
   }
 
   async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {
