@@ -109,6 +109,8 @@ export type FlagProps = {
   helpGroup?: string;
   hidden?: boolean;
   required?: boolean;
+  dependsOn?: string[];
+  exclusive?: string[];
 }
 
 export type BooleanFlagProps = FlagProps & {
@@ -124,8 +126,6 @@ export type OptionFlagProps = FlagProps & {
 }
 
 export type FlagBase<T, I> = FlagProps & {
-  dependsOn?: string[];
-  exclusive?: string[];
   exactlyOne?: string[];
   /**
    * also accept an environment variable as input

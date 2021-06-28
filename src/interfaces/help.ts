@@ -28,4 +28,8 @@ export interface HelpOptions {
    * http://www.gnu.org/software/help2man/#--help-recommendations
    */
   usageHeader?: string;
+  /**
+   * Use docopts as the usage. Defaults to true.
+   */
+  docopts?: boolean;
 }

@@ -496,6 +496,8 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpLabel: flag.helpLabel,
         helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
+        dependsOn: flag.dependsOn,
+        exclusive: flag.exclusive,
       }
     } else {
       flags[name] = {
@@ -511,6 +513,8 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpGroup: flag.helpGroup,
         multiple: flag.multiple,
         options: flag.options,
+        dependsOn: flag.dependsOn,
+        exclusive: flag.exclusive,
         // eslint-disable-next-line no-await-in-loop
         default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
       }
