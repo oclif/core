@@ -160,7 +160,7 @@ export default abstract class Command {
     }
 
     if (result && this.jsonEnabled()) {
-      cli.styledJSON(this.toSuccessJson<T>(result))
+      cli.styledJSON(this.toSuccessJson(result))
     }
     return result
   }
@@ -243,7 +243,7 @@ export default abstract class Command {
     }
   }
 
-  protected toSuccessJson<T>(result: T): any {
+  protected toSuccessJson(result: any): any {
     return result
   }
 
