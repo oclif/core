@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.18](https://github.com/oclif/core/compare/v0.5.17...v0.5.18) (2021-06-28)
+
+
+### Features
+
+* add docopts ([#188](https://github.com/oclif/core/issues/188)) ([4f38877](https://github.com/oclif/core/commit/4f38877b1e9abb1a19a3bcecde17945f80b2d52d))
+
 ### [0.5.17](https://github.com/oclif/core/compare/v0.5.16...v0.5.17) (2021-06-28)
 
 
