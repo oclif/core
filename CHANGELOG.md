@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.19](https://github.com/oclif/core/compare/v0.5.18...v0.5.19) (2021-06-30)
+
+
+### Bug Fixes
+
+* jsonEnabled when json is disabled ([4575be8](https://github.com/oclif/core/commit/4575be87f40622c13ed8060765d341365bc8bd6e))
+
 ### [0.5.18](https://github.com/oclif/core/compare/v0.5.17...v0.5.18) (2021-06-28)
 
 
