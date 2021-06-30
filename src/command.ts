@@ -190,7 +190,7 @@ export default abstract class Command {
   }
 
   public jsonEnabled(): boolean {
-    return this.argv.includes('--json')
+    return !this.ctor.disableJsonFlag && this.argv.includes('--json')
   }
 
   /**
