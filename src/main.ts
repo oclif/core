@@ -35,7 +35,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // return Main.run(argv, options)
   const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
 
-  if (config.topicSeparator !== ':' && !argv[0].includes(':')) argv = standardizeIDFromArgv(argv, config)
+  if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
   let [id, ...argvSlice] = argv
   // run init hook
   await config.runHook('init', {id, argv: argvSlice})
