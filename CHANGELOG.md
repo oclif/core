@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.20](https://github.com/oclif/core/compare/v0.5.19...v0.5.20) (2021-07-01)
+
+
+### Bug Fixes
+
+* allow for no args on top level topic ([1231eae](https://github.com/oclif/core/commit/1231eae78310d0da064ed74b53ad58e10e6905b6))
+
 ### [0.5.19](https://github.com/oclif/core/compare/v0.5.18...v0.5.19) (2021-06-30)
 
 
