@@ -16,7 +16,7 @@ import {Topic} from '../interfaces'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {DirectedAcyclicGraph, Node} from './graph'
+import {DirectedAcyclicGraph, EdgeClass, Node} from './graph'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -308,6 +308,7 @@ export class Config implements IConfig {
     // common parent plugin order from "oclif.plugins"
 
     // const commonParent = this.pluginGraph.lca(...commands.map(command => this.makePluginNode(command))) as PluginNode
+
     return commands[0]
   }
 
@@ -512,7 +513,7 @@ export class Config implements IConfig {
   }
 
   private addCommandsToGraph(fromNode: PluginNode) {
-    const commands = Reflect.get(fromNode.reference!, 'commands') as Command.Plugin[] ?? []
+    const commands = flatMap(this.plugins, p => p.commands)
     commands.forEach(command => {
       const toNode = this.makePluginNode(command)
       this.pluginGraph.setEdge(fromNode, toNode)

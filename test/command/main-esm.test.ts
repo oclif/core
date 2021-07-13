@@ -22,6 +22,12 @@ describe('main-esm', () => {
 
   fancy
   .stdout()
+  .do(() => run(['plugins:install --help'], root))
+  .do((output: any) => expect(output.stdout).to.equal('no plugins installed\n'))
+  .it('runs plugins')
+
+  fancy
+  .stdout()
   .do(() => run(['--version'], root))
   .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
   .it('runs --version')
