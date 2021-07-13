@@ -34,8 +34,8 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-export interface ConfigNode extends Node {
-  data?: Config | Plugin.Plugin | string;
+interface PluginNode extends Node {
+  reference?: Config | Plugin.Plugin | Command.Plugin;
 }
 
 export class Config implements IConfig {
@@ -299,9 +299,16 @@ export class Config implements IConfig {
   findCommand(id: string, opts?: {must: boolean}): Command.Plugin | undefined
 
   findCommand(id: string, opts: {must?: boolean} = {}): Command.Plugin | undefined {
-    const command = this.commands.find(c => c.id === id || c.aliases.includes(id))
-    if (command) return command
-    if (opts.must) error(`command ${id} not found`)
+    const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
+    if (opts.must && commands.length === 0) error(`command ${id} not found`)
+    if (commands.length === 1) return commands[0]
+
+    // more than one plugin has presented command with same id
+    // determine which plugin presented the command first based on
+    // common parent plugin order from "oclif.plugins"
+
+    // const commonParent = this.pluginGraph.lca(...commands.map(command => this.makePluginNode(command))) as PluginNode
+    return commands[0]
   }
 
   findTopic(id: string, opts: {must: true}): Topic
@@ -437,6 +444,7 @@ export class Config implements IConfig {
           if (!parent.children) parent.children = []
           parent.children.push(instance)
         }
+        this.setEdge(parent ?? this, instance)
         await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
       } catch (error) {
         this.warn(error, 'loadPlugins')
@@ -484,6 +492,31 @@ export class Config implements IConfig {
 
   protected get isProd() {
     return isProd()
+  }
+
+  private setEdge(from: Config | Plugin.Plugin | Command.Plugin, to: Config | Plugin.Plugin | Command.Plugin): void {
+    const fromNode = this.makePluginNode(from)
+    const toNode = this.makePluginNode(to)
+    this.pluginGraph.setEdge(fromNode, toNode)
+    // check from/to for the presence of commands and if present add nodes/edges for each command
+    this.addCommandsToGraph(fromNode)
+    this.addCommandsToGraph(toNode)
+  }
+
+  private makePluginNode(from: Config | Plugin.Plugin | Command.Plugin): PluginNode {
+    const id = Reflect.get(from, 'name') ?? Reflect.get(from, 'id')
+    return {
+      id,
+      reference: from,
+    }
+  }
+
+  private addCommandsToGraph(fromNode: PluginNode) {
+    const commands = Reflect.get(fromNode.reference!, 'commands') as Command.Plugin[] ?? []
+    commands.forEach(command => {
+      const toNode = this.makePluginNode(command)
+      this.pluginGraph.setEdge(fromNode, toNode)
+    })
   }
 }
 
