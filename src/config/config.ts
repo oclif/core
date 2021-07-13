@@ -7,15 +7,16 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command} from '../interfaces/command'
+import {Command} from '../interfaces'
 import {Debug} from './util'
-import {Hook} from '../interfaces/hooks'
-import {PJSON} from '../interfaces/pjson'
+import {Hook} from '../interfaces'
+import {PJSON} from '../interfaces'
 import * as Plugin from './plugin'
-import {Topic} from '../interfaces/topic'
+import {Topic} from '../interfaces'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import {Graph, Node} from './graph'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -31,6 +32,10 @@ const WSL = require('is-wsl')
 
 function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
+}
+
+export interface ConfigNode extends Node {
+  data?: Config | Plugin.Plugin | string;
 }
 
 export class Config implements IConfig {
@@ -91,6 +96,8 @@ export class Config implements IConfig {
   private _commandIDs?: string[]
 
   private _topics?: Topic[]
+
+  private pluginGraph = new Graph()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
