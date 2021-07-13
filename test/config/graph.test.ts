@@ -1,23 +1,22 @@
-import {Graph, Node, Edge} from '../../src/config/graph'
+import {DirectedAcyclicGraph, Node, Edge, EdgeClass} from '../../src/config/graph'
 import {expect} from './test'
-import {EdgeClass} from '../../lib/config/config'
 
 describe('graph', () => {
   it('should construct a new graph', () => {
-    const graph = new Graph()
+    const graph = new DirectedAcyclicGraph()
     expect(graph).to.be.ok
     expect(graph.edges()).to.have.lengthOf(0)
     expect(graph.nodes()).to.have.lengthOf(0)
   })
   it('should add nodes without edges', () => {
-    const graph = new Graph()
+    const graph = new DirectedAcyclicGraph()
     graph.setNode('a', {id: 'a'})
     graph.setNode('b', {id: 'b'})
     expect(graph.edges()).to.have.lengthOf(0)
     expect(graph.nodes()).to.have.lengthOf(2)
   })
   it('should add nodes and edges', () => {
-    const graph = new Graph()
+    const graph = new DirectedAcyclicGraph()
     graph.setEdge({id: 'a'}, {id: 'b'})
     const edges = graph.edges()
     expect(edges).to.have.lengthOf(1)
@@ -26,7 +25,7 @@ describe('graph', () => {
     expect(graph.nodes()).to.have.lengthOf(2)
   })
   it('should filter nodes', () => {
-    const graph = new Graph()
+    const graph = new DirectedAcyclicGraph()
     graph.setNode('a', {id: 'a'})
     graph.setNode('b', {id: 'b'})
     expect(graph.edges()).to.have.lengthOf(0)
@@ -34,7 +33,7 @@ describe('graph', () => {
     expect(graph.nodes(node => node.id === 'a')).to.have.lengthOf(1)
   })
   it('should filter edges', () => {
-    const graph = new Graph()
+    const graph = new DirectedAcyclicGraph()
     graph.setEdge({id: 'a'}, {id: 'b'})
     graph.setEdge({id: 'a'}, {id: 'c'})
     const edges = graph.edges()
@@ -42,7 +41,7 @@ describe('graph', () => {
     expect(graph.edges(edge => edge.sink.id === 'c')).to.have.lengthOf(1)
   })
   it('should remove nodes and edges', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     graph.setEdge({id: 'a'}, {id: 'b'})
     graph.setEdge({id: 'a'}, {id: 'c'})
     let edges = graph.edges()
@@ -62,7 +61,7 @@ describe('lowest common ancestor', () => {
   *       -> nodeC
    */
   it('should find a lca', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeB = {id: 'b'} as Node
     const nodeC = {id: 'c'} as Node
@@ -76,7 +75,7 @@ describe('lowest common ancestor', () => {
   *       -> nodeC -> nodeE
    */
   it('should find a lca with different leaf nodes having more than one parent', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeB = {id: 'b'} as Node
     const nodeC = {id: 'c'} as Node
@@ -94,7 +93,7 @@ describe('lowest common ancestor', () => {
   *       -> nodeC -> nodeD
    */
   it('should find a lca with different paths to same leaf node', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeB = {id: 'b'} as Node
     const nodeC = {id: 'c'} as Node
@@ -111,7 +110,7 @@ describe('lowest common ancestor', () => {
   *                         -> nodeC -> nodeD
    */
   it('should find a non-root lca with different paths to same leaf node', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeNonRootLCA = {id: 'nodeNonRootLCA'} as Node
     const nodeB = {id: 'b'} as Node
@@ -130,7 +129,7 @@ describe('lowest common ancestor', () => {
   *                         -> nodeD
    */
   it('should find a non-root lca with different path lengths to same leaf node', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeNonRootLCA = {id: 'nodeNonRootLCA'} as Node
     const nodeB = {id: 'b'} as Node
@@ -147,14 +146,14 @@ describe('lowest common ancestor', () => {
 * nodeC -> nodeD
  */
   it('should not find a non-root lca with disjoint paths', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeB = {id: 'b'} as Node
     const nodeC = {id: 'c'} as Node
     const nodeD = {id: 'd'} as Node
     graph.setEdge(nodeA, nodeB)
     graph.setEdge(nodeC, nodeD)
-    const lca = graph.lca(nodeC, nodeD)
+    const lca = graph.lca(nodeB, nodeD)
     expect(lca).to.not.be.ok
   })
   /*
@@ -162,7 +161,7 @@ describe('lowest common ancestor', () => {
   *                         -> nodeD
    */
   it('should find a non-root lca with different path lengths to same leaf node with non linear node/edge creation', () => {
-    const graph = new Graph<Node, EdgeClass<Node, Edge>>()
+    const graph = new DirectedAcyclicGraph<Node, EdgeClass<Node, Edge>>()
     const nodeA = {id: 'a'} as Node
     const nodeNonRootLCA = {id: 'nodeNonRootLCA'} as Node
     const nodeB = {id: 'b'} as Node

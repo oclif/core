@@ -16,7 +16,7 @@ import {Topic} from '../interfaces'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {Graph, Node} from './graph'
+import {DirectedAcyclicGraph, Node} from './graph'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -97,7 +97,7 @@ export class Config implements IConfig {
 
   private _topics?: Topic[]
 
-  private pluginGraph = new Graph()
+  private pluginGraph = new DirectedAcyclicGraph()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
