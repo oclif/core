@@ -46,8 +46,9 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
     this.setNode(sink.id, sink)
 
     const edge = new EdgeClass<N, E>(source, sink)
-    if (this._edges.has(edge)) {
-      return edge
+    const foundEdge = this.findEdge(e => edge.source.id === e.source.id && edge.sink.id === e.sink.id)
+    if (foundEdge) {
+      return foundEdge
     }
     this._edges.add(edge)
     return edge
@@ -55,6 +56,10 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
 
   edges(fn = (e: EdgeClass<N, E>) => Boolean(e)): EdgeClass<N, E>[] {
     return [...this._edges.values()].filter(fn)
+  }
+
+  findEdge(fn = (e: EdgeClass<N, E>) => Boolean(e)): EdgeClass<N, E> | undefined {
+    return [...this._edges.values()].find(fn)
   }
 
   nodes(fn = (n: N) => Boolean(n)): N[] {
@@ -71,7 +76,10 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
   }
 
   removeEdge(edge: EdgeClass<N, E>) {
-    this._edges.delete(edge)
+    const foundEdge = this.findEdge(e => edge.source.id === e.source.id && edge.sink.id === e.sink.id)
+    if (foundEdge) {
+      this._edges.delete(foundEdge)
+    }
   }
 
   lca(...nodes: N[]): N | undefined {
