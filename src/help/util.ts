@@ -48,7 +48,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
     const hasSubCommandsWithArgs = () => {
       const subCommands = config.commands.filter(c => (c.id).startsWith(finalizeId()))
-      return Boolean(subCommands.find(cmd => cmd.args.length > 0))
+      return Boolean(subCommands.find(cmd => !cmd.strict || cmd.args.length > 0))
     }
 
     for (const arg of argv) {

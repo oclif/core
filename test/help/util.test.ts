@@ -65,5 +65,42 @@ describe('util', () => {
       const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
       expect(actual).to.deep.equal(['foo:ba', '--baz'])
     })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has args', () => {
+      config.topicSeparator = ' '
+      config.commands.push({
+        id: 'foo:bar',
+        args: [{name: 'first'}],
+      } as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has variable arguments', () => {
+      config.topicSeparator = ' '
+      config.commands.push({
+        id: 'foo:bar',
+        strict: false,
+      } as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return full id when topic separator is a space and does not have arguments', () => {
+      config.topicSeparator = ' '
+      config.commands.push({
+        id: 'foo:bar',
+        args: [],
+        strict: true,
+      } as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar:baz'])
+    })
   })
 })
