@@ -536,6 +536,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     id: c.id,
     summary: c.summary,
     description: c.description,
+    strict: c.strict,
     usage: c.usage,
     pluginName: plugin && plugin.name,
     pluginType: plugin && plugin.type,

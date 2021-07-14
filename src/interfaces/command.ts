@@ -57,6 +57,7 @@ export interface Command extends CommandProps {
   pluginType?: string;
   flags: {[name: string]: Command.Flag};
   args: Command.Arg[];
+  strict: boolean;
 }
 
 export namespace Command {
@@ -89,6 +90,7 @@ export namespace Command {
     plugin?: Plugin;
     flags?: FlagInput<any>;
     args?: ArgInput;
+    strict: boolean;
     new(argv: string[], config: Config): Instance;
     run(argv?: string[], config?: LoadOptions): PromiseLike<any>;
   }
