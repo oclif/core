@@ -16,7 +16,7 @@ import {Topic} from '../interfaces'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {DirectedAcyclicGraph, EdgeClass, Node} from './graph'
+import {DirectedAcyclicGraph, Edge, EdgeClass, Node} from './graph'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -34,8 +34,14 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-interface PluginNode extends Node {
-  reference?: Config | Plugin.Plugin | Command.Plugin;
+export interface PluginNode extends Node {
+  reference: Config | IPlugin | Command.Plugin;
+  type: string;
+}
+
+interface ConfigPluginNode extends Node {
+  reference: Config | Plugin.Plugin;
+  type: string;
 }
 
 export class Config implements IConfig {
@@ -97,7 +103,7 @@ export class Config implements IConfig {
 
   private _topics?: Topic[]
 
-  private pluginGraph = new DirectedAcyclicGraph()
+  private _pluginGraph = new DirectedAcyclicGraph<PluginNode, EdgeClass<PluginNode, Edge>>()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
@@ -307,9 +313,13 @@ export class Config implements IConfig {
     // determine which plugin presented the command first based on
     // common parent plugin order from "oclif.plugins"
 
-    // const commonParent = this.pluginGraph.lca(...commands.map(command => this.makePluginNode(command))) as PluginNode
-
-    return commands[0]
+    if (commands.length > 1) {
+      const lca = this._pluginGraph.lca(...commands.map(command => this.makePluginNode(command, command.type!))) as ConfigPluginNode
+      // get the first lca.oclif.plugins entry and match it against the commands array
+      const oclifPlugins = lca.reference!.pjson!.oclif.plugins ?? []
+      const foundCommandPlugins = commands.filter(command => oclifPlugins.includes(command.pluginName!))
+      return foundCommandPlugins[0] ?? commands[0]
+    }
   }
 
   findTopic(id: string, opts: {must: true}): Topic
@@ -360,6 +370,10 @@ export class Config implements IConfig {
     }
     this._topics = topics
     return this._topics
+  }
+
+  get pluginGraph(): DirectedAcyclicGraph<PluginNode, EdgeClass<PluginNode, Edge>> {
+    return this._pluginGraph
   }
 
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
@@ -445,7 +459,7 @@ export class Config implements IConfig {
           if (!parent.children) parent.children = []
           parent.children.push(instance)
         }
-        this.setEdge(parent ?? this, instance)
+        this.setEdge(parent ?? this, instance, type)
         await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
       } catch (error) {
         this.warn(error, 'loadPlugins')
@@ -495,28 +509,29 @@ export class Config implements IConfig {
     return isProd()
   }
 
-  private setEdge(from: Config | Plugin.Plugin | Command.Plugin, to: Config | Plugin.Plugin | Command.Plugin): void {
-    const fromNode = this.makePluginNode(from)
-    const toNode = this.makePluginNode(to)
-    this.pluginGraph.setEdge(fromNode, toNode)
+  public setEdge(from: Config | IPlugin | Command.Plugin, to: Config | IPlugin | Command.Plugin, pluginType: string): void {
+    const fromNode = this.makePluginNode(from, pluginType)
+    const toNode = this.makePluginNode(to, pluginType)
+    this._pluginGraph.setEdge(fromNode, toNode)
     // check from/to for the presence of commands and if present add nodes/edges for each command
     this.addCommandsToGraph(fromNode)
     this.addCommandsToGraph(toNode)
   }
 
-  private makePluginNode(from: Config | Plugin.Plugin | Command.Plugin): PluginNode {
+  private makePluginNode(from: Config | IPlugin | Command.Plugin, type: string): PluginNode {
     const id = Reflect.get(from, 'name') ?? Reflect.get(from, 'id')
     return {
       id,
       reference: from,
+      type: type,
     }
   }
 
   private addCommandsToGraph(fromNode: PluginNode) {
     const commands = flatMap(this.plugins, p => p.commands)
     commands.forEach(command => {
-      const toNode = this.makePluginNode(command)
-      this.pluginGraph.setEdge(fromNode, toNode)
+      const toNode = this.makePluginNode(command, command.type!)
+      this._pluginGraph.setEdge(fromNode, toNode)
     })
   }
 }

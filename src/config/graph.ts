@@ -97,6 +97,7 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
       }
       return this.lca(...sourceNodes)
     }
+    this.resetVisited()
     // lca
     // for each node do a BFS and color each node when visited
     nodes.forEach((node, visitedColor) => {
@@ -110,14 +111,15 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
     return lcaNodes[lcaNodes.length - 1]
   }
 
-  private resetVisited() {
+  resetVisited() {
     this._nodes.forEach(node => {
       node.color = VisitedColor.NONE
       node.visitCnt = undefined
     })
   }
 
-  backtrackSearch(node: N, visitedColor = VisitedColor.NONE): void {
+  backtrackSearch(node: N, visitedColor = VisitedColor.NONE): N[][] {
+    const paths: N[][] = []
     const queue = new Array<N>(node)
     do {
       const currentNode = queue.pop()
@@ -125,8 +127,11 @@ export class DirectedAcyclicGraph<N extends Node, E extends EdgeClass<N, E>> {
         this.colorNodes([currentNode], visitedColor)
         const sourceNodes = this.getSourceNodesFromEdges(currentNode, e => e.sink.id === currentNode.id)
         queue.unshift(...sourceNodes)
+        paths.push(sourceNodes)
       }
     } while (queue.length > 0)
+    paths.unshift([node])
+    return paths.filter(p => p.length > 0)
   }
 
   private getSourceNodesFromEdges(node: N, fn = (e: EdgeClass<N, E>) => Boolean(e)): N[] {

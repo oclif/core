@@ -172,5 +172,8 @@ describe('lowest common ancestor', () => {
     graph.setEdge(nodeNonRootLCA, nodeD)
     const lca = graph.lca(nodeD)
     expect(lca).to.be.equal(nodeNonRootLCA)
+    graph.resetVisited()
+    const paths = graph.backtrackSearch(nodeD)
+    expect(paths).to.have.length.gt(1)
   })
 })
