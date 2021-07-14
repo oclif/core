@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.22](https://github.com/oclif/core/compare/v0.5.21...v0.5.22) (2021-07-14)
+
+
+### Bug Fixes
+
+* respect variable args when using spaces ([#203](https://github.com/oclif/core/issues/203)) ([d458dfd](https://github.com/oclif/core/commit/d458dfd602bcdd8bfdf0ee920ff710a59b5d831a))
+
 ### [0.5.21](https://github.com/oclif/core/compare/v0.5.20...v0.5.21) (2021-07-07)
 
 
