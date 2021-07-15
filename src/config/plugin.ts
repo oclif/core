@@ -14,6 +14,8 @@ import {tsPath} from './ts-node'
 import {compact, exists, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import {Alias} from '../interfaces/alias'
+import * as util from './util'
 
 const _pjson = require('../../package.json')
 
@@ -79,6 +81,8 @@ export class Plugin implements IPlugin {
 
   root!: string
 
+  aliases!: Alias[]
+
   tag?: string
 
   manifest!: Manifest
@@ -112,6 +116,7 @@ export class Plugin implements IPlugin {
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json')) as any
     this.name = this.pjson.name
+    this.aliases = util.resolvePluginAliasNames(this.pjson)
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)

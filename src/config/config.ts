@@ -16,6 +16,8 @@ import {Topic} from '../interfaces/topic'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import {Alias} from '../interfaces/alias'
+import * as util from './util'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -33,14 +35,12 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-type Alias = {
-  alias: string;
-  name: string;
-}
 export class Config implements IConfig {
   _base = `${_pjson.name}@${_pjson.version}`
 
   name!: string
+
+  aliases!: Alias[]
 
   version!: string
 
@@ -97,7 +97,8 @@ export class Config implements IConfig {
   private _topics?: Topic[]
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(public options: Options) {}
+  constructor(public options: Options) {
+  }
 
   static async load(opts: LoadOptions = (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -120,6 +121,7 @@ export class Config implements IConfig {
     this.root = plugin.root
     this.pjson = plugin.pjson
     this.name = this.pjson.name
+    this.aliases = util.resolvePluginAliasNames(this.pjson)
     this.version = this.options.version || this.pjson.version || '0.0.0'
     this.channel = this.options.channel || channelFromVersion(this.version)
     this.valid = plugin.valid
@@ -228,7 +230,7 @@ export class Config implements IConfig {
         log(message?: any, ...args: any[]) {
           process.stdout.write(format(message, ...args) + '\n')
         },
-        error(message, options: {code?: string; exit?: number} = {}) {
+        error(message, options: { code?: string; exit?: number } = {}) {
           error(message, options)
         },
         warn(message: string) {
@@ -291,22 +293,21 @@ export class Config implements IConfig {
     .toUpperCase()
   }
 
-  findCommand(id: string, opts: {must: true}): Command.Plugin
+  findCommand(id: string, opts: { must: true }): Command.Plugin
 
-  findCommand(id: string, opts?: {must: boolean}): Command.Plugin | undefined
+  findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined
 
-  findCommand(id: string, opts: {must?: boolean} = {}): Command.Plugin | undefined {
+  findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
     if (opts.must && commands.length === 0) error(`command ${id} not found`)
     if (commands.length === 1) return commands[0]
     // more than one command found across available plugins
 
     // this.pjson.oclif?.plugins may contain aliases so these need to be resolved against this.pjson.dependencies to get the actual plugin name
-    const resolvedNames = this.resolvePluginAliasNames()
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
     const commandPlugins = commands.sort((a, b) => {
-      const pluginAliasA = resolvedNames.find(alias => alias.name === a.pluginName)!.alias
-      const pluginAliasB = resolvedNames.find(alias => alias.name === b.pluginName)!.alias
+      const pluginAliasA = this.aliases.find(alias => alias.name === a.pluginName)?.alias ?? 'A-Cannot-Find-This'
+      const pluginAliasB = this.aliases.find(alias => alias.name === b.pluginName)?.alias ?? 'B-Cannot-Find-This'
       const aIndex = oclifPlugins.indexOf(pluginAliasA) ?? -1
       const bIndex = oclifPlugins.indexOf(pluginAliasB) ?? oclifPlugins.length
       return aIndex - bIndex
@@ -314,11 +315,11 @@ export class Config implements IConfig {
     return commandPlugins[0]
   }
 
-  findTopic(id: string, opts: {must: true}): Topic
+  findTopic(id: string, opts: { must: true }): Topic
 
-  findTopic(id: string, opts?: {must: boolean}): Topic | undefined
+  findTopic(id: string, opts?: { must: boolean }): Topic | undefined
 
-  findTopic(name: string, opts: {must?: boolean} = {}) {
+  findTopic(name: string, opts: { must?: boolean } = {}) {
     const topic = this.topics.find(t => t.name === name)
     if (topic) return topic
     if (opts.must) throw new Error(`topic ${name} not found`)
@@ -420,11 +421,12 @@ export class Config implements IConfig {
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1
-    } catch {}
+    } catch {
+    }
     return 0
   }
 
-  protected async loadPlugins(root: string, type: string, plugins: (string | {root?: string; name?: string; tag?: string})[], parent?: Plugin.Plugin) {
+  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin) {
     if (!plugins || plugins.length === 0) return
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
@@ -454,7 +456,7 @@ export class Config implements IConfig {
     }))
   }
 
-  protected warn(err: string | Error | {name: string; detail: string}, scope?: string) {
+  protected warn(err: string | Error | { name: string; detail: string }, scope?: string) {
     if (this.warned) return
 
     if (typeof err === 'string') {
@@ -494,25 +496,6 @@ export class Config implements IConfig {
 
   protected get isProd() {
     return isProd()
-  }
-
-  /**
-   * npm dependency name (key of the map) can be an alias ("foo": "npm:some-module-name@0.0.0")
-   * this function takes a list of command plugins instances and then matches those against
-   * the resolved set of npm dependency names
-   * @private
-   * @returns {Alias[]}
-   */
-  private resolvePluginAliasNames(): Alias[] {
-    return (this.pjson.oclif.plugins ?? [])
-    .map(name => {
-      if (this.pjson.dependencies) {
-        const dep = this.pjson.dependencies[name]
-        const match = dep.match(/^npm:(@?.*?)@.+$/)
-        return {alias: name, name: match && match[1] ? match[1] : name}
-      }
-      return {alias: name, name}
-    })
   }
 }
 
@@ -575,6 +558,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     strict: c.strict,
     usage: c.usage,
     pluginName: plugin && plugin.name,
+    pluginAlias: plugin && plugin.aliases,
     pluginType: plugin && plugin.type,
     hidden: c.hidden,
     aliases: c.aliases || [],

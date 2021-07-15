@@ -1,16 +1,46 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config, Interfaces} from '../../src'
+import {Config} from '../../src/config/config'
+import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
+import {Command as ICommand} from '../../src/interfaces'
 
 import {expect, fancy} from './test'
+import {Interfaces} from '../../src'
 
 interface Options {
   pjson?: any;
   homedir?: string;
   platform?: string;
   env?: {[k: string]: string};
+}
+
+const pjson = {
+  name: 'foo',
+  version: '1.0.0',
+  files: [],
+  commands: {},
+  oclif: {
+    topics: {
+      t1: {
+        description: 'desc for t1',
+        subtopics: {
+          't1-1': {
+            description: 'desc for t1-1',
+            subtopics: {
+              't1-1-1': {
+                description: 'desc for t1-1-1',
+              },
+              't1-1-2': {
+                description: 'desc for t1-1-2',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 }
 
 describe('Config', () => {
@@ -125,34 +155,116 @@ describe('Config', () => {
   })
 
   testConfig({
-    pjson: {
-      name: 'foo',
-      version: '1.0.0',
-      files: [],
-      commands: {},
-      oclif: {
-        topics: {
-          t1: {
-            description: 'desc for t1',
-            subtopics: {
-              't1-1': {
-                description: 'desc for t1-1',
-                subtopics: {
-                  't1-1-1': {
-                    description: 'desc for t1-1-1',
-                  },
-                  't1-1-2': {
-                    description: 'desc for t1-1-2',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    pjson,
   })
   .it('has subtopics', config => {
     expect(config.topics.map(t => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
+  })
+
+  const findCommandTestConfig = ({pjson, homedir = '/my/home', platform = 'darwin', env = {}}: Options = {}) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    class MyComandClass implements ICommand.Class {
+      _base = ''
+
+      aliases: string[] = []
+
+      hidden = false
+
+      id = 'foo:bar'
+
+      new(): ICommand.Instance {
+        return {_run(): Promise<any> {
+          return Promise.resolve()
+        }}
+      }
+
+      run(): PromiseLike<any> {
+        return Promise.resolve(undefined)
+      }
+    }
+    const load = async (): Promise<void>  => {}
+    const findCommand = async (): Promise<ICommand.Class> => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      return new MyComandClass()
+    }
+    const commandPluginA: ICommand.Plugin = {
+      strict: false,
+      aliases: [], args: [], flags: {}, hidden: false, id: 'foo:bar', async load(): Promise<ICommand.Class> {
+        return new MyComandClass() as unknown as ICommand.Class
+      },
+    }
+    const commandPluginB: ICommand.Plugin = {
+      strict: false,
+      aliases: [], args: [], flags: {}, hidden: false, id: 'foo:bar', async load(): Promise<ICommand.Class> {
+        return new MyComandClass() as unknown as ICommand.Class
+      },
+    }
+    const hooks = {}
+    const pluginA: IPlugin = {load,
+      findCommand,
+      name: '@My/plugina',
+      aliases: [],
+      commands: [commandPluginA],
+      _base: '',
+      pjson,
+      commandIDs: ['foo:bar'] as string[],
+      root: '',
+      version: '0.0.0',
+      type: 'core',
+      hooks,
+      topics: [],
+      valid: true,
+      tag: 'tag',
+    }
+    commandPluginA
+    const pluginB: IPlugin = {
+      load,
+      findCommand,
+      name: '@My/pluginb',
+      aliases: [],
+      commands: [commandPluginB],
+      _base: '',
+      pjson,
+      commandIDs: ['foo:bar'] as string[],
+      root: '',
+      version: '0.0.0',
+      type: 'core',
+      hooks,
+      topics: [],
+      valid: true,
+      tag: 'tag',
+    }
+    const plugins: IPlugin[] = [pluginA, pluginB]
+    let test = fancy
+    .resetConfig()
+    .env(env, {clear: true})
+    .stub(os, 'homedir', () => path.join(homedir))
+    .stub(os, 'platform', () => platform)
+
+    if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+    test = test.add('config', async () => {
+      const config = await Config.load()
+      config.plugins = plugins
+      config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
+      config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
+      return config
+    })
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    return {
+      it(expectation: string, fn: (config: Interfaces.Config) => any) {
+        test
+        .do(({config}) => fn(config))
+        .it(expectation)
+        return this
+      },
+    }
+  }
+
+  findCommandTestConfig()
+  .it('find command with no duplicates', config => {
+    expect(config.findCommand('foo:bar', {must: true}))
   })
 })

@@ -1,4 +1,6 @@
 import * as fs from 'fs'
+import {Alias} from '../interfaces/alias'
+import {PJSON} from '../interfaces'
 
 const debug = require('debug')
 
@@ -55,4 +57,16 @@ export function Debug(...scope: string[]): (..._: any) => void {
   const d = debug(['config', ...scope].join(':'))
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)
+}
+
+export function resolvePluginAliasNames(pjson: PJSON.CLI): Alias[] {
+  return (pjson.oclif.plugins ?? [])
+  .map(name => {
+    if (pjson.dependencies) {
+      const dep = pjson.dependencies[name]
+      const match = dep.match(/^npm:(@?.*?)@.+$/)
+      return {alias: name, name: match && match[1] ? match[1] : name}
+    }
+    return {alias: name, name}
+  })
 }
