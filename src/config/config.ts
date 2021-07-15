@@ -33,6 +33,10 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
+type Alias = {
+  alias: string;
+  name: string;
+}
 export class Config implements IConfig {
   _base = `${_pjson.name}@${_pjson.version}`
 
@@ -292,9 +296,22 @@ export class Config implements IConfig {
   findCommand(id: string, opts?: {must: boolean}): Command.Plugin | undefined
 
   findCommand(id: string, opts: {must?: boolean} = {}): Command.Plugin | undefined {
-    const command = this.commands.find(c => c.id === id || c.aliases.includes(id))
-    if (command) return command
-    if (opts.must) error(`command ${id} not found`)
+    const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
+    if (opts.must && commands.length === 0) error(`command ${id} not found`)
+    if (commands.length === 1) return commands[0]
+    // more than one command found across available plugins
+
+    // this.pjson.oclif?.plugins may contain aliases so these need to be resolved against this.pjson.dependencies to get the actual plugin name
+    const resolvedNames = this.resolvePluginAliasNames()
+    const oclifPlugins = this.pjson.oclif?.plugins ?? []
+    const commandPlugins = commands.sort((a, b) => {
+      const pluginAliasA = resolvedNames.find(alias => alias.name === a.pluginName)!.alias
+      const pluginAliasB = resolvedNames.find(alias => alias.name === b.pluginName)!.alias
+      const aIndex = oclifPlugins.indexOf(pluginAliasA) ?? -1
+      const bIndex = oclifPlugins.indexOf(pluginAliasB) ?? oclifPlugins.length
+      return aIndex - bIndex
+    })
+    return commandPlugins[0]
   }
 
   findTopic(id: string, opts: {must: true}): Topic
@@ -477,6 +494,25 @@ export class Config implements IConfig {
 
   protected get isProd() {
     return isProd()
+  }
+
+  /**
+   * npm dependency name (key of the map) can be an alias ("foo": "npm:some-module-name@0.0.0")
+   * this function takes a list of command plugins instances and then matches those against
+   * the resolved set of npm dependency names
+   * @private
+   * @returns {Alias[]}
+   */
+  private resolvePluginAliasNames(): Alias[] {
+    return (this.pjson.oclif.plugins ?? [])
+    .map(name => {
+      if (this.pjson.dependencies) {
+        const dep = this.pjson.dependencies[name]
+        const match = dep.match(/^npm:(@?.*?)@.+$/)
+        return {alias: name, name: match && match[1] ? match[1] : name}
+      }
+      return {alias: name, name}
+    })
   }
 }
 
