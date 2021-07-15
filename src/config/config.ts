@@ -306,8 +306,9 @@ export class Config implements IConfig {
    * is present, this function defers to the core plugin.
    *
    * If there is not a core plugin command present
-   * @param id
-   * @param opts
+   * @param id raw command id or command alias
+   * @param opts options to control if the command must be found
+   * @retuns {Command.Plugin}
    */
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
