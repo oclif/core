@@ -33,7 +33,7 @@ export interface Plugin {
   /**
    * aliases from package.json dependencies
    */
-  pluginAlias: string;
+  alias: string;
   /**
    * version from package.json
    *

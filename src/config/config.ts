@@ -292,6 +292,23 @@ export class Config implements IConfig {
 
   findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined
 
+  /**
+   * This function is responsible for locating the correct plugin to use for a named command id
+   * It searches the {Config} registered commands to match either the raw command id or the command alias
+   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
+   * create the same command or command alias.
+   *
+   * In the case of more than one found command, the function will select the command based on the order in which
+   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
+   * is selected as the command to run.
+   *
+   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
+   * is present, this function defers to the core plugin.
+   *
+   * If there is not a core plugin command present
+   * @param id
+   * @param opts
+   */
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
     if (opts.must && commands.length === 0) error(`command ${id} not found`)
@@ -304,6 +321,9 @@ export class Config implements IConfig {
       const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
       const aIndex = oclifPlugins.indexOf(pluginAliasA)
       const bIndex = oclifPlugins.indexOf(pluginAliasB)
+      // both plugin types are equal
+      // when both are not equal core, i.e. a is 'user' and b is 'user'
+      // both indexes will be -1
       if (a.pluginType === b.pluginType) {
         if (aIndex === bIndex) {
           return 0
@@ -313,10 +333,16 @@ export class Config implements IConfig {
         }
         return 1
       }
+      // always defer to core when one side is not a core plugin
       if (a.pluginType === 'core' && b.pluginType !== 'core') {
         return -1
       }
-      return 1
+      if (a.pluginType !== 'core' && b.pluginType === 'core') {
+        return 1
+      }
+      // this is really an indeterminate selection, both plugins are not core but are differnt, i.e. a is 'user'
+      // and b is 'link' so treat these as equal
+      return 0
     })
     return commandPlugins[0]
   }
@@ -564,7 +590,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     strict: c.strict,
     usage: c.usage,
     pluginName: plugin && plugin.name,
-    pluginAlias: plugin && plugin.pluginAlias,
+    pluginAlias: plugin && plugin.alias,
     pluginType: plugin && plugin.type,
     hidden: c.hidden,
     aliases: c.aliases || [],

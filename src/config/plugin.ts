@@ -79,7 +79,7 @@ export class Plugin implements IPlugin {
 
   root!: string
 
-  pluginAlias!: string
+  alias!: string
 
   tag?: string
 
@@ -114,7 +114,7 @@ export class Plugin implements IPlugin {
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json')) as any
     this.name = this.pjson.name
-    this.pluginAlias = this.options.name ?? this.pjson.name
+    this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
@@ -131,7 +131,7 @@ export class Plugin implements IPlugin {
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object.entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, pluginAlias: this.pluginAlias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
     this.commands.sort((a, b) => {
       if (a.id < b.id) return -1
       if (a.id > b.id) return 1
