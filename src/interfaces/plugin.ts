@@ -1,7 +1,6 @@
 import {Command} from './command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
-import {Alias} from './alias'
 
 export interface PluginOptions {
   root: string;
@@ -34,7 +33,7 @@ export interface Plugin {
   /**
    * aliases from package.json dependencies
    */
-  aliases: Alias[];
+  pluginAlias: string;
   /**
    * version from package.json
    *

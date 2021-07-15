@@ -3,7 +3,6 @@ import {Hooks} from './hooks'
 import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
-import {Alias} from './alias'
 
 export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
@@ -11,7 +10,6 @@ export type ArchTypes = 'arm' | 'arm64' | 'mips' | 'mipsel' | 'ppc' | 'ppc64' | 
 
 export interface Config {
   name: string;
-  aliases: Alias[];
   version: string;
   channel: string;
   pjson: PJSON.CLI;

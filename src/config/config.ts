@@ -16,8 +16,6 @@ import {Topic} from '../interfaces/topic'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {Alias} from '../interfaces/alias'
-import * as util from './util'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -39,8 +37,6 @@ export class Config implements IConfig {
   _base = `${_pjson.name}@${_pjson.version}`
 
   name!: string
-
-  aliases!: Alias[]
 
   version!: string
 
@@ -121,7 +117,6 @@ export class Config implements IConfig {
     this.root = plugin.root
     this.pjson = plugin.pjson
     this.name = this.pjson.name
-    this.aliases = util.resolvePluginAliasNames(this.pjson)
     this.version = this.options.version || this.pjson.version || '0.0.0'
     this.channel = this.options.channel || channelFromVersion(this.version)
     this.valid = plugin.valid
@@ -301,16 +296,27 @@ export class Config implements IConfig {
     const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
     if (opts.must && commands.length === 0) error(`command ${id} not found`)
     if (commands.length === 1) return commands[0]
-    // more than one command found across available plugins
 
-    // this.pjson.oclif?.plugins may contain aliases so these need to be resolved against this.pjson.dependencies to get the actual plugin name
+    // more than one command found across available plugins
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
     const commandPlugins = commands.sort((a, b) => {
-      const pluginAliasA = this.aliases.find(alias => alias.name === a.pluginName)?.alias ?? 'A-Cannot-Find-This'
-      const pluginAliasB = this.aliases.find(alias => alias.name === b.pluginName)?.alias ?? 'B-Cannot-Find-This'
-      const aIndex = oclifPlugins.indexOf(pluginAliasA) ?? -1
-      const bIndex = oclifPlugins.indexOf(pluginAliasB) ?? oclifPlugins.length
-      return aIndex - bIndex
+      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
+      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
+      const aIndex = oclifPlugins.indexOf(pluginAliasA)
+      const bIndex = oclifPlugins.indexOf(pluginAliasB)
+      if (a.pluginType === b.pluginType) {
+        if (aIndex === bIndex) {
+          return 0
+        }
+        if (aIndex < bIndex) {
+          return -1
+        }
+        return 1
+      }
+      if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+      return 1
     })
     return commandPlugins[0]
   }
@@ -558,7 +564,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     strict: c.strict,
     usage: c.usage,
     pluginName: plugin && plugin.name,
-    pluginAlias: plugin && plugin.aliases,
+    pluginAlias: plugin && plugin.pluginAlias,
     pluginType: plugin && plugin.type,
     hidden: c.hidden,
     aliases: c.aliases || [],

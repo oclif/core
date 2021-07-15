@@ -14,8 +14,6 @@ import {tsPath} from './ts-node'
 import {compact, exists, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {Alias} from '../interfaces/alias'
-import * as util from './util'
 
 const _pjson = require('../../package.json')
 
@@ -81,7 +79,7 @@ export class Plugin implements IPlugin {
 
   root!: string
 
-  aliases!: Alias[]
+  pluginAlias!: string
 
   tag?: string
 
@@ -116,7 +114,7 @@ export class Plugin implements IPlugin {
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json')) as any
     this.name = this.pjson.name
-    this.aliases = util.resolvePluginAliasNames(this.pjson)
+    this.pluginAlias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
@@ -133,7 +131,7 @@ export class Plugin implements IPlugin {
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object.entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, load: async () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => ({...c, pluginAlias: this.pluginAlias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
     this.commands.sort((a, b) => {
       if (a.id < b.id) return -1
       if (a.id > b.id) return 1

@@ -1,6 +1,5 @@
 import {Config, LoadOptions} from './config'
 import {ArgInput, BooleanFlagProps, FlagInput, OptionFlagProps} from './parser'
-import {Alias} from './alias'
 
 export type Example = string | {
   description: string;
@@ -55,8 +54,8 @@ export interface CommandProps {
 export interface Command extends CommandProps {
   type?: string;
   pluginName?: string;
-  pluginAlias?: Alias[];
   pluginType?: string;
+  pluginAlias?: string;
   flags: {[name: string]: Command.Flag};
   args: Command.Arg[];
   strict: boolean;
