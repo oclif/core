@@ -211,6 +211,7 @@ describe('Config', () => {
         return new MyComandClass() as unknown as ICommand.Class
       },
       pluginType: types[1] ?? 'core',
+      pluginAlias: '@My/pluginb'
     }
     const hooks = {}
     const pluginA: IPlugin = {load,
