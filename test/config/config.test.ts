@@ -203,6 +203,7 @@ describe('Config', () => {
         return new MyComandClass() as unknown as ICommand.Class
       },
       pluginType: types[0] ?? 'core',
+      pluginAlias: '@My/plugina'
     }
     const commandPluginB: ICommand.Plugin = {
       strict: false,
