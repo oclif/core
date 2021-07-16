@@ -7,12 +7,9 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command} from '../interfaces/command'
+import {Command, Hook, PJSON, Topic} from '../interfaces'
 import {Debug} from './util'
-import {Hook} from '../interfaces/hooks'
-import {PJSON} from '../interfaces/pjson'
 import * as Plugin from './plugin'
-import {Topic} from '../interfaces/topic'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
@@ -308,7 +305,7 @@ export class Config implements IConfig {
    * If there is not a core plugin command present
    * @param id raw command id or command alias
    * @param opts options to control if the command must be found
-   * @retuns {Command.Plugin}
+   * @returns command instance {Command.Plugin} or undefined
    */
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
@@ -341,7 +338,7 @@ export class Config implements IConfig {
       if (a.pluginType !== 'core' && b.pluginType === 'core') {
         return 1
       }
-      // this is really an indeterminate selection, both plugins are not core but are differnt, i.e. a is 'user'
+      // this is really an indeterminate selection, both plugins are not core but are different, i.e. a is 'user'
       // and b is 'link' so treat these as equal
       return 0
     })

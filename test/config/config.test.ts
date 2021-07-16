@@ -14,6 +14,8 @@ interface Options {
   homedir?: string;
   platform?: string;
   env?: {[k: string]: string};
+  commandIds?: string[];
+  types?: string[];
 }
 
 const pjson = {
@@ -161,7 +163,13 @@ describe('Config', () => {
     expect(config.topics.map(t => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
   })
 
-  const findCommandTestConfig = ({pjson, homedir = '/my/home', platform = 'darwin', env = {}}: Options = {}) => {
+  const findCommandTestConfig = ({pjson,
+    homedir = '/my/home',
+    platform = 'darwin',
+    env = {},
+    commandIds = ['foo:bar', 'foo:baz'],
+    types = [],
+  }: Options = {}) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     class MyComandClass implements ICommand.Class {
@@ -191,15 +199,17 @@ describe('Config', () => {
     }
     const commandPluginA: ICommand.Plugin = {
       strict: false,
-      aliases: [], args: [], flags: {}, hidden: false, id: 'foo:bar', async load(): Promise<ICommand.Class> {
+      aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
         return new MyComandClass() as unknown as ICommand.Class
       },
+      pluginType: types[0] ?? 'core',
     }
     const commandPluginB: ICommand.Plugin = {
       strict: false,
-      aliases: [], args: [], flags: {}, hidden: false, id: 'foo:bar', async load(): Promise<ICommand.Class> {
+      aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
         return new MyComandClass() as unknown as ICommand.Class
       },
+      pluginType: types[1] ?? 'core',
     }
     const hooks = {}
     const pluginA: IPlugin = {load,
@@ -209,10 +219,10 @@ describe('Config', () => {
       commands: [commandPluginA],
       _base: '',
       pjson,
-      commandIDs: ['foo:bar'] as string[],
+      commandIDs: [commandIds[0]] as string[],
       root: '',
       version: '0.0.0',
-      type: 'core',
+      type: types[0] ?? 'core',
       hooks,
       topics: [],
       valid: true,
@@ -227,10 +237,10 @@ describe('Config', () => {
       commands: [commandPluginB],
       _base: '',
       pjson,
-      commandIDs: ['foo:bar'] as string[],
+      commandIDs: [commandIds[1]] as string[],
       root: '',
       version: '0.0.0',
-      type: 'core',
+      type: types[1] ?? 'core',
       hooks,
       topics: [],
       valid: true,
@@ -266,5 +276,33 @@ describe('Config', () => {
   findCommandTestConfig()
   .it('find command with no duplicates', config => {
     expect(config.findCommand('foo:bar', {must: true}))
+  })
+  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']})
+  .it('find command with duplicates', config => {
+    expect(config.findCommand('foo:bar', {must: true}))
+  })
+  findCommandTestConfig({types: ['core', 'user']})
+  .it('find command with no duplicates core/user', config => {
+    const command = config.findCommand('foo:bar', {must: true})
+    expect(command).to.have.property('id', 'foo:bar')
+    expect(command).to.have.property('pluginType', 'core')
+  })
+  findCommandTestConfig({types: ['user', 'core']})
+  .it('find command with no duplicates core/user', config => {
+    const command = config.findCommand('foo:bar', {must: true})
+    expect(command).to.have.property('id', 'foo:bar')
+    expect(command).to.have.property('pluginType', 'user')
+  })
+  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
+  .it('find command with duplicates core/user', config => {
+    const command = config.findCommand('foo:bar', {must: true})
+    expect(command).to.have.property('id', 'foo:bar')
+    expect(command).to.have.property('pluginType', 'core')
+  })
+  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
+  .it('find command with duplicates core/user', config => {
+    const command = config.findCommand('foo:bar', {must: true})
+    expect(command).to.have.property('id', 'foo:bar')
+    expect(command).to.have.property('pluginType', 'core')
   })
 })
