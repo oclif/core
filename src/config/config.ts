@@ -302,7 +302,8 @@ export class Config implements IConfig {
    * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
    * is present, this function defers to the core plugin.
    *
-   * If there is not a core plugin command present
+   * If there is not a core plugin command present, this function will return the first
+   * plugin as discovered (will not change the order)
    * @param id raw command id or command alias
    * @param opts options to control if the command must be found
    * @returns command instance {Command.Plugin} or undefined
@@ -328,7 +329,12 @@ export class Config implements IConfig {
       if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
-      return -1
+      // if a is a core plugin and b is not sort a first
+      if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+      // neither plugin is core, so do not change the order
+      return 0
     })
     return commandPlugins[0]
   }

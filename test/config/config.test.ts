@@ -163,16 +163,17 @@ describe('Config', () => {
     expect(config.topics.map(t => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
   })
 
-  const findCommandTestConfig = ({pjson,
-    homedir = '/my/home',
-    platform = 'darwin',
-    env = {},
-    commandIds = ['foo:bar', 'foo:baz'],
-    types = [],
-  }: Options = {}) => {
+  describe('findCommand', () => {
+    const findCommandTestConfig = ({pjson,
+      homedir = '/my/home',
+      platform = 'darwin',
+      env = {},
+      commandIds = ['foo:bar', 'foo:baz'],
+      types = [],
+    }: Options = {}) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
-    class MyComandClass implements ICommand.Class {
+      class MyComandClass implements ICommand.Class {
       _base = ''
 
       aliases: string[] = []
@@ -190,124 +191,132 @@ describe('Config', () => {
       run(): PromiseLike<any> {
         return Promise.resolve(undefined)
       }
-    }
-    const load = async (): Promise<void>  => {}
-    const findCommand = async (): Promise<ICommand.Class> => {
+      }
+      const load = async (): Promise<void>  => {}
+      const findCommand = async (): Promise<ICommand.Class> => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
-      return new MyComandClass()
-    }
-    const commandPluginA: ICommand.Plugin = {
-      strict: false,
-      aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
-        return new MyComandClass() as unknown as ICommand.Class
-      },
-      pluginType: types[0] ?? 'core',
-      pluginAlias: '@My/plugina'
-    }
-    const commandPluginB: ICommand.Plugin = {
-      strict: false,
-      aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
-        return new MyComandClass() as unknown as ICommand.Class
-      },
-      pluginType: types[1] ?? 'core',
-      pluginAlias: '@My/pluginb'
-    }
-    const hooks = {}
-    const pluginA: IPlugin = {load,
-      findCommand,
-      name: '@My/plugina',
-      alias: '@My/plugina',
-      commands: [commandPluginA],
-      _base: '',
-      pjson,
-      commandIDs: [commandIds[0]] as string[],
-      root: '',
-      version: '0.0.0',
-      type: types[0] ?? 'core',
-      hooks,
-      topics: [],
-      valid: true,
-      tag: 'tag',
-    }
-    commandPluginA
-    const pluginB: IPlugin = {
-      load,
-      findCommand,
-      name: '@My/pluginb',
-      alias: '@My/pluginb',
-      commands: [commandPluginB],
-      _base: '',
-      pjson,
-      commandIDs: [commandIds[1]] as string[],
-      root: '',
-      version: '0.0.0',
-      type: types[1] ?? 'core',
-      hooks,
-      topics: [],
-      valid: true,
-      tag: 'tag',
-    }
-    const plugins: IPlugin[] = [pluginA, pluginB]
-    let test = fancy
-    .resetConfig()
-    .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
-    .stub(os, 'platform', () => platform)
+        return new MyComandClass()
+      }
+      const commandPluginA: ICommand.Plugin = {
+        strict: false,
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
+          return new MyComandClass() as unknown as ICommand.Class
+        },
+        pluginType: types[0] ?? 'core',
+        pluginAlias: '@My/plugina',
+      }
+      const commandPluginB: ICommand.Plugin = {
+        strict: false,
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
+          return new MyComandClass() as unknown as ICommand.Class
+        },
+        pluginType: types[1] ?? 'core',
+        pluginAlias: '@My/pluginb',
+      }
+      const hooks = {}
+      const pluginA: IPlugin = {load,
+        findCommand,
+        name: '@My/plugina',
+        alias: '@My/plugina',
+        commands: [commandPluginA],
+        _base: '',
+        pjson,
+        commandIDs: [commandIds[0]] as string[],
+        root: '',
+        version: '0.0.0',
+        type: types[0] ?? 'core',
+        hooks,
+        topics: [],
+        valid: true,
+        tag: 'tag',
+      }
+      commandPluginA
+      const pluginB: IPlugin = {
+        load,
+        findCommand,
+        name: '@My/pluginb',
+        alias: '@My/pluginb',
+        commands: [commandPluginB],
+        _base: '',
+        pjson,
+        commandIDs: [commandIds[1]] as string[],
+        root: '',
+        version: '0.0.0',
+        type: types[1] ?? 'core',
+        hooks,
+        topics: [],
+        valid: true,
+        tag: 'tag',
+      }
+      const plugins: IPlugin[] = [pluginA, pluginB]
+      let test = fancy
+      .resetConfig()
+      .env(env, {clear: true})
+      .stub(os, 'homedir', () => path.join(homedir))
+      .stub(os, 'platform', () => platform)
 
-    if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
-    test = test.add('config', async () => {
-      const config = await Config.load()
-      config.plugins = plugins
-      config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
-      config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
-      return config
+      if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+      test = test.add('config', async () => {
+        const config = await Config.load()
+        config.plugins = plugins
+        config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
+        config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
+        return config
+      })
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      return {
+        it(expectation: string, fn: (config: Interfaces.Config) => any) {
+          test
+          .do(({config}) => fn(config))
+          .it(expectation)
+          return this
+        },
+      }
+    }
+
+    findCommandTestConfig()
+    .it('find command with no duplicates', config => {
+      expect(config.findCommand('foo:bar', {must: true}))
     })
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore
-    return {
-      it(expectation: string, fn: (config: Interfaces.Config) => any) {
-        test
-        .do(({config}) => fn(config))
-        .it(expectation)
-        return this
-      },
-    }
-  }
-
-  findCommandTestConfig()
-  .it('find command with no duplicates', config => {
-    expect(config.findCommand('foo:bar', {must: true}))
-  })
-  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']})
-  .it('find command with duplicates', config => {
-    expect(config.findCommand('foo:bar', {must: true}))
-  })
-  findCommandTestConfig({types: ['core', 'user']})
-  .it('find command with no duplicates core/user', config => {
-    const command = config.findCommand('foo:bar', {must: true})
-    expect(command).to.have.property('id', 'foo:bar')
-    expect(command).to.have.property('pluginType', 'core')
-    expect(command).to.have.property('pluginAlias', '@My/plugina')
-  })
-  findCommandTestConfig({types: ['user', 'core']})
-  .it('find command with no duplicates user/core', config => {
-    const command = config.findCommand('foo:bar', {must: true})
-    expect(command).to.have.property('id', 'foo:bar')
-    expect(command).to.have.property('pluginType', 'user')
-  })
-  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
-  .it('find command with duplicates core/user', config => {
-    const command = config.findCommand('foo:bar', {must: true})
-    expect(command).to.have.property('id', 'foo:bar')
-    expect(command).to.have.property('pluginType', 'core')
-    expect(command).to.have.property('pluginAlias', '@My/plugina')
-  })
-  findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
-  .it('find command with duplicates user/core', config => {
-    const command = config.findCommand('foo:bar', {must: true})
-    expect(command).to.have.property('id', 'foo:bar')
-    expect(command).to.have.property('pluginType', 'core')
-    expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']})
+    .it('find command with duplicates', config => {
+      expect(config.findCommand('foo:bar', {must: true}))
+    })
+    findCommandTestConfig({types: ['core', 'user']})
+    .it('find command with no duplicates core/user', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
+    findCommandTestConfig({types: ['user', 'core']})
+    .it('find command with no duplicates user/core', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'user')
+    })
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
+    .it('find command with duplicates core/user', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
+    .it('find command with duplicates user/core', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    })
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
+    .it('find command with duplicates user/user', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'user')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
   })
 })
