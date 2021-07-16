@@ -300,6 +300,7 @@ describe('Config', () => {
     const command = config.findCommand('foo:bar', {must: true})
     expect(command).to.have.property('id', 'foo:bar')
     expect(command).to.have.property('pluginType', 'core')
+    expect(command).to.have.property('pluginAlias', '@My/plugina')
   })
   findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
   .it('find command with duplicates core/user', config => {
