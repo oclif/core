@@ -308,5 +308,6 @@ describe('Config', () => {
     const command = config.findCommand('foo:bar', {must: true})
     expect(command).to.have.property('id', 'foo:bar')
     expect(command).to.have.property('pluginType', 'core')
+    expect(command).to.have.property('pluginAlias', '@My/pluginb')
   })
 })
