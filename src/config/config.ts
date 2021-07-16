@@ -319,28 +319,16 @@ export class Config implements IConfig {
       const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
       const aIndex = oclifPlugins.indexOf(pluginAliasA)
       const bIndex = oclifPlugins.indexOf(pluginAliasB)
-      // both plugin types are equal
-      // when both are not equal core, i.e. a is 'user' and b is 'user'
-      // both indexes will be -1
-      if (a.pluginType === b.pluginType) {
-        if (aIndex === bIndex) {
-          return 0
-        }
-        if (aIndex < bIndex) {
-          return -1
-        }
+      // When both plugin types are 'core' plugins sort based on index
+      if (a.pluginType === 'core' && b.pluginType === 'core') {
+        // If b appears first in the pjson.plugins sort it first
+        return aIndex - bIndex
+      }
+      // if b is a core plugin and a is not sort b first
+      if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
-      // always defer to core when one side is not a core plugin
-      if (a.pluginType === 'core' && b.pluginType !== 'core') {
-        return -1
-      }
-      if (a.pluginType !== 'core' && b.pluginType === 'core') {
-        return 1
-      }
-      // this is really an indeterminate selection, both plugins are not core but are different, i.e. a is 'user'
-      // and b is 'link' so treat these as equal
-      return 0
+      return -1
     })
     return commandPlugins[0]
   }
