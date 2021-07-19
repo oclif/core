@@ -31,6 +31,10 @@ export interface Plugin {
    */
   name: string;
   /**
+   * aliases from package.json dependencies
+   */
+  alias: string;
+  /**
    * version from package.json
    *
    * example: 1.2.3

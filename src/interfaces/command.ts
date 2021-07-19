@@ -55,6 +55,7 @@ export interface Command extends CommandProps {
   type?: string;
   pluginName?: string;
   pluginType?: string;
+  pluginAlias?: string;
   flags: {[name: string]: Command.Flag};
   args: Command.Arg[];
   strict: boolean;

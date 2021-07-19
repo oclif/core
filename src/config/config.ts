@@ -7,12 +7,9 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command} from '../interfaces/command'
+import {Command, Hook, PJSON, Topic} from '../interfaces'
 import {Debug} from './util'
-import {Hook} from '../interfaces/hooks'
-import {PJSON} from '../interfaces/pjson'
 import * as Plugin from './plugin'
-import {Topic} from '../interfaces/topic'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
@@ -93,7 +90,8 @@ export class Config implements IConfig {
   private _topics?: Topic[]
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(public options: Options) {}
+  constructor(public options: Options) {
+  }
 
   static async load(opts: LoadOptions = (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -224,7 +222,7 @@ export class Config implements IConfig {
         log(message?: any, ...args: any[]) {
           process.stdout.write(format(message, ...args) + '\n')
         },
-        error(message, options: {code?: string; exit?: number} = {}) {
+        error(message, options: { code?: string; exit?: number } = {}) {
           error(message, options)
         },
         warn(message: string) {
@@ -287,21 +285,65 @@ export class Config implements IConfig {
     .toUpperCase()
   }
 
-  findCommand(id: string, opts: {must: true}): Command.Plugin
+  findCommand(id: string, opts: { must: true }): Command.Plugin
 
-  findCommand(id: string, opts?: {must: boolean}): Command.Plugin | undefined
+  findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined
 
-  findCommand(id: string, opts: {must?: boolean} = {}): Command.Plugin | undefined {
-    const command = this.commands.find(c => c.id === id || c.aliases.includes(id))
-    if (command) return command
-    if (opts.must) error(`command ${id} not found`)
+  /**
+   * This function is responsible for locating the correct plugin to use for a named command id
+   * It searches the {Config} registered commands to match either the raw command id or the command alias
+   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
+   * create the same command or command alias.
+   *
+   * In the case of more than one found command, the function will select the command based on the order in which
+   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
+   * is selected as the command to run.
+   *
+   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
+   * is present, this function defers to the core plugin.
+   *
+   * If there is not a core plugin command present, this function will return the first
+   * plugin as discovered (will not change the order)
+   * @param id raw command id or command alias
+   * @param opts options to control if the command must be found
+   * @returns command instance {Command.Plugin} or undefined
+   */
+  findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
+    const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
+    if (opts.must && commands.length === 0) error(`command ${id} not found`)
+    if (commands.length === 1) return commands[0]
+
+    // more than one command found across available plugins
+    const oclifPlugins = this.pjson.oclif?.plugins ?? []
+    const commandPlugins = commands.sort((a, b) => {
+      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
+      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
+      const aIndex = oclifPlugins.indexOf(pluginAliasA)
+      const bIndex = oclifPlugins.indexOf(pluginAliasB)
+      // When both plugin types are 'core' plugins sort based on index
+      if (a.pluginType === 'core' && b.pluginType === 'core') {
+        // If b appears first in the pjson.plugins sort it first
+        return aIndex - bIndex
+      }
+      // if b is a core plugin and a is not sort b first
+      if (b.pluginType === 'core' && a.pluginType !== 'core') {
+        return 1
+      }
+      // if a is a core plugin and b is not sort a first
+      if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+      // neither plugin is core, so do not change the order
+      return 0
+    })
+    return commandPlugins[0]
   }
 
-  findTopic(id: string, opts: {must: true}): Topic
+  findTopic(id: string, opts: { must: true }): Topic
 
-  findTopic(id: string, opts?: {must: boolean}): Topic | undefined
+  findTopic(id: string, opts?: { must: boolean }): Topic | undefined
 
-  findTopic(name: string, opts: {must?: boolean} = {}) {
+  findTopic(name: string, opts: { must?: boolean } = {}) {
     const topic = this.topics.find(t => t.name === name)
     if (topic) return topic
     if (opts.must) throw new Error(`topic ${name} not found`)
@@ -403,11 +445,12 @@ export class Config implements IConfig {
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1
-    } catch {}
+    } catch {
+    }
     return 0
   }
 
-  protected async loadPlugins(root: string, type: string, plugins: (string | {root?: string; name?: string; tag?: string})[], parent?: Plugin.Plugin) {
+  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin) {
     if (!plugins || plugins.length === 0) return
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
@@ -437,7 +480,7 @@ export class Config implements IConfig {
     }))
   }
 
-  protected warn(err: string | Error | {name: string; detail: string}, scope?: string) {
+  protected warn(err: string | Error | { name: string; detail: string }, scope?: string) {
     if (this.warned) return
 
     if (typeof err === 'string') {
@@ -539,6 +582,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     strict: c.strict,
     usage: c.usage,
     pluginName: plugin && plugin.name,
+    pluginAlias: plugin && plugin.alias,
     pluginType: plugin && plugin.type,
     hidden: c.hidden,
     aliases: c.aliases || [],
