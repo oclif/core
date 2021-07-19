@@ -278,11 +278,13 @@ describe('Config', () => {
 
     findCommandTestConfig()
     .it('find command with no duplicates', config => {
-      expect(config.findCommand('foo:bar', {must: true}))
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
     findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']})
-    .it('find command with duplicates', config => {
-      expect(config.findCommand('foo:bar', {must: true}))
+    .it('find command with duplicates and choose the one that appears first in oclif.plugins', config => {
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
     })
     findCommandTestConfig({types: ['core', 'user']})
     .it('find command with no duplicates core/user', config => {
@@ -296,6 +298,7 @@ describe('Config', () => {
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'user')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
     findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
     .it('find command with duplicates core/user', config => {
