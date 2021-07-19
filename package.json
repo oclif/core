@@ -45,7 +45,7 @@
     "@types/read-pkg": "^5.1.0",
     "@types/semver": "^7.3.1",
     "@types/strip-ansi": "^5.2.1",
-    "@types/wrap-ansi": "^3.0.0",
+    "@types/wrap-ansi": "^8.0.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "commitlint": "^12.1.1",
