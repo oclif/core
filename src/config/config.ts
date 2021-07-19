@@ -329,8 +329,12 @@ export class Config implements IConfig {
       if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
-      // indeterminate, do not change order
-      return -1
+      // if a is a core plugin and b is not sort a first
+      if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+      // neither plugin is core, so do not change the order
+      return 0
     })
     return commandPlugins[0]
   }
