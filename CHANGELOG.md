@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.23](https://github.com/oclif/core/compare/v0.5.22...v0.5.23) (2021-07-19)
+
+
+### Bug Fixes
+
+* make findCommand deterministic ([#204](https://github.com/oclif/core/issues/204)) ([3a37a8c](https://github.com/oclif/core/commit/3a37a8c7c5ab20da781a6682e41952b482622413))
+
 ### [0.5.22](https://github.com/oclif/core/compare/v0.5.21...v0.5.22) (2021-07-14)
 
 
