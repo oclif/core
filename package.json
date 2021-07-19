@@ -18,7 +18,7 @@
     "lodash.template": "^4.4.0",
     "semver": "^7.3.2",
     "string-width": "^4.2.0",
-    "strip-ansi": "^6.0.0",
+    "strip-ansi": "^7.0.0",
     "tslib": "^2.0.0",
     "widest-line": "^3.1.0",
     "wrap-ansi": "^7.0.0"
