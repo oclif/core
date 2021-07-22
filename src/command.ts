@@ -220,6 +220,7 @@ export default abstract class Command {
   }
 
   protected async catch(err: any): Promise<any> {
+    process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       cli.styledJSON(this.toErrorJson(err))
     } else {
