@@ -110,7 +110,7 @@ export default abstract class Command {
   }
 
   /** A hash of flags for the command */
-  private static _flags: Interfaces.FlagInput<any>
+  private static _flags: Interfaces.FlagInput<any> = {};
 
   private static globalFlags = {
     json: Flags.boolean({
