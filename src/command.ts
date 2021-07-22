@@ -109,15 +109,15 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  /** A hash of flags for the command */
-  private static _flags: Interfaces.FlagInput<any> = {};
-
   private static globalFlags = {
     json: Flags.boolean({
       description: 'format output as json',
       helpGroup: 'GLOBAL',
     }),
   }
+
+  /** A hash of flags for the command */
+  private static _flags: Interfaces.FlagInput<any>
 
   static get flags(): Interfaces.FlagInput<any> {
     return this._flags
