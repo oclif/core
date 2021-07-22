@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.26](https://github.com/oclif/core/compare/v0.5.25...v0.5.26) (2021-07-22)
+
+
+### Bug Fixes
+
+* set exitCode on --json errors ([67f5eea](https://github.com/oclif/core/commit/67f5eea6e43345203ba7a79f5d27aeb65e7c2bab))
+
 ### [0.5.25](https://github.com/oclif/core/compare/v0.5.24...v0.5.25) (2021-07-22)
 
 
