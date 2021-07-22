@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.25](https://github.com/oclif/core/compare/v0.5.24...v0.5.25) (2021-07-22)
+
+
+### Bug Fixes
+
+* remove default flags ([403e5d8](https://github.com/oclif/core/commit/403e5d89351d2f9bc2494179e1514f0ed7500384))
+
 ### [0.5.24](https://github.com/oclif/core/compare/v0.5.23...v0.5.24) (2021-07-22)
 
 
