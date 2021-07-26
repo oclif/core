@@ -30,7 +30,7 @@ export {boolean, integer, url} from './parser'
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({
-    // char: 'v',
+    char: 'v',
     description: 'show CLI version',
     ...opts,
     parse: async (_: any, cmd: Command) => {
@@ -42,7 +42,7 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
 
 export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({
-    // char: 'h',
+    char: 'h',
     description: 'show CLI help',
     ...opts,
     parse: async (_: any, cmd: Command) => {

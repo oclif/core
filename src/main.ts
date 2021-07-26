@@ -12,17 +12,19 @@ const log = (message = '', ...args: any[]) => {
   process.stdout.write(format(message, ...args) + '\n')
 }
 
+const helpFlags = ['--help', '-h']
+
 const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.pjson.oclif.default) return true
   for (const arg of argv) {
-    if (arg === '--help') return true
+    if (helpFlags.includes(arg)) return true
     if (arg === '--') return false
   }
   return false
 }
 
 const versionOverride = (argv: string[]): boolean => {
-  if (['--version'].includes(argv[0])) return true
+  if (['--version', '-v', 'version'].includes(argv[0])) return true
   return false
 }
 
@@ -48,10 +50,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
 
   // display help version if applicable
   if (helpOverride(argv, config)) {
-    argv = argv.filter(arg => {
-      if (arg === '--help') return false
-      return true
-    })
+    argv = argv.filter(arg => !helpFlags.includes(arg))
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
     await help.showHelp(argv)

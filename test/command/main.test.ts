@@ -22,6 +22,18 @@ describe('main', () => {
 
   fancy
   .stdout()
+  .do(() => run(['-v'], root))
+  .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
+  .it('runs -v')
+
+  fancy
+  .stdout()
+  .do(() => run(['version'], root))
+  .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
+  .it('runs version')
+
+  fancy
+  .stdout()
   .do(() => run(['--help'], root))
   .do((output: any) => expect(output.stdout).to.equal(`base library for oclif CLIs
 
@@ -40,6 +52,27 @@ COMMANDS
 
 `))
   .it('runs --help')
+
+  fancy
+  .stdout()
+  .do(() => run(['-h'], root))
+  .do((output: any) => expect(output.stdout).to.equal(`base library for oclif CLIs
+
+VERSION
+  ${version}
+
+USAGE
+  $ oclif [COMMAND]
+
+TOPICS
+  plugins  list installed plugins
+
+COMMANDS
+  help     display help for oclif
+  plugins  list installed plugins
+
+`))
+  .it('runs -h')
 
   fancy
   .stdout()
