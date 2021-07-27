@@ -22,10 +22,10 @@ describe('esm', () => {
     expect(config.pjson.oclif.additionalHelpFlags).to.have.lengthOf(2)
     expect(config.pjson.oclif.additionalVersionFlags).to.have.lengthOf(3)
     const mergedHelpFlags = getHelpFlagOverride(config)
-    expect(mergedHelpFlags).to.deep.equal(['--help', 'help', ...config.pjson.oclif.additionalHelpFlags as string[]])
+    expect(mergedHelpFlags).to.deep.equal(['--help', ...config.pjson.oclif.additionalHelpFlags as string[]])
     expect(helpOverride(['-h'], config)).to.be.true
-    expect(helpOverride(['help'], config)).to.be.true
-    expect(helpOverride(['mycommandhelp'], config)).to.be.true
+    expect(helpOverride(['help'], config)).to.be.false
+    expect(helpOverride(['--mycommandhelp'], config)).to.be.true
     expect(helpOverride(['foobar'], config)).to.be.false
     expect(versionOverride(['-v'], config)).to.be.true
     expect(versionOverride(['version'], config)).to.be.true
@@ -39,9 +39,9 @@ describe('esm', () => {
     expect(config.pjson.oclif.additionalHelpFlags).to.not.be.ok
     expect(config.pjson.oclif.additionalVersionFlags).to.have.lengthOf(3)
     const mergedHelpFlags = getHelpFlagOverride(config)
-    expect(mergedHelpFlags).to.deep.equal(['--help', 'help'])
+    expect(mergedHelpFlags).to.deep.equal(['--help'])
     expect(helpOverride(['-h'], config)).to.be.false
-    expect(helpOverride(['help'], config)).to.be.true
+    expect(helpOverride(['help'], config)).to.be.false
     expect(helpOverride(['mycommandhelp'], config)).to.be.false
     expect(versionOverride(['-v'], config)).to.be.true
     expect(versionOverride(['version'], config)).to.be.true

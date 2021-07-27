@@ -15,15 +15,7 @@ const helpFlags = ['--help']
 
 export function getHelpFlagOverride(config: Interfaces.Config): string[] {
   const configOverride = config.pjson.oclif.additionalHelpFlags ?? []
-  const combinedHelpFlags = [...helpFlags, ...configOverride]
-  const mergedHelpFlags = [...new Set(combinedHelpFlags.map(flag => {
-    if (flag.startsWith('--')) return [flag, flag.replace(/^--/, '')]
-    return flag
-  }).reduce((a: string[], f) => {
-    return a.concat(f)
-  }, [])).values()]
-
-  return mergedHelpFlags
+  return [...new Set([...helpFlags, ...configOverride]).values()]
 }
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
@@ -31,7 +23,7 @@ function getHelpSubject(args: string[], config: Interfaces.Config): string | und
   const mergedHelpFlags = getHelpFlagOverride(config)
   for (const arg of args) {
     if (arg === '--') return
-    if (mergedHelpFlags.includes(arg)) continue
+    if (mergedHelpFlags.includes(arg) || arg === 'help') continue
     if (arg.startsWith('-')) return
     return arg
   }
