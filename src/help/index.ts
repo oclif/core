@@ -11,10 +11,27 @@ import {HelpFormatter} from './formatter'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass} from './util'
 
-function getHelpSubject(args: string[]): string | undefined {
+const helpFlags = ['--help']
+
+export function getHelpFlagOverride(config: Interfaces.Config): string[] {
+  const configOverride = config.pjson.oclif.helpOverride ?? []
+  const combinedHelpFlags = [...helpFlags, ...configOverride]
+  const mergedHelpFlags = [...new Set(combinedHelpFlags.map(flag => {
+    if (flag.startsWith('--')) return [flag, flag.replace(/^--/, '')]
+    return flag
+  }).reduce((a: string[], f) => {
+    return a.concat(f)
+  }, [])).values()]
+
+  return mergedHelpFlags
+}
+
+function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
+  // for each help flag that starts with '--' create a new flag with same name sans '--'
+  const mergedHelpFlags = getHelpFlagOverride(config)
   for (const arg of args) {
     if (arg === '--') return
-    if (arg === 'help' || arg === '--help') continue
+    if (mergedHelpFlags.includes(arg)) continue
     if (arg.startsWith('-')) return
     return arg
   }
@@ -82,7 +99,7 @@ export class Help extends HelpBase {
 
   public async showHelp(argv: string[]) {
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
-    const subject = getHelpSubject(argv)
+    const subject = getHelpSubject(argv, this.config)
     if (!subject) {
       if (this.config.pjson.oclif.default) {
         const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)

@@ -4,7 +4,7 @@ import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
-import {loadHelpClass, standardizeIDFromArgv} from './help'
+import {getHelpFlagOverride, loadHelpClass, standardizeIDFromArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
@@ -12,19 +12,20 @@ const log = (message = '', ...args: any[]) => {
   process.stdout.write(format(message, ...args) + '\n')
 }
 
-const helpFlags = ['--help', '-h']
-
-const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
+export const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.pjson.oclif.default) return true
+  const mergedHelpFlags = getHelpFlagOverride(config)
   for (const arg of argv) {
-    if (helpFlags.includes(arg)) return true
+    if (mergedHelpFlags.includes(arg)) return true
     if (arg === '--') return false
   }
   return false
 }
 
-const versionOverride = (argv: string[]): boolean => {
-  if (['--version', '-v', 'version'].includes(argv[0])) return true
+export const versionOverride = (argv: string[], config?: Interfaces.Config): boolean => {
+  const configOverride = config?.pjson.oclif.versionOverride ?? []
+  const mergedVersionFlags = [...new Set([...['--version'], ...configOverride]).values()]
+  if (mergedVersionFlags.includes(argv[0])) return true
   return false
 }
 
@@ -43,14 +44,14 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   await config.runHook('init', {id, argv: argvSlice})
 
   // display version if applicable
-  if (versionOverride(argv)) {
+  if (versionOverride(argv, config)) {
     log(config.userAgent)
     return
   }
 
   // display help version if applicable
   if (helpOverride(argv, config)) {
-    argv = argv.filter(arg => !helpFlags.includes(arg))
+    argv = argv.filter(arg => !getHelpFlagOverride(config).includes(arg))
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
     await help.showHelp(argv)

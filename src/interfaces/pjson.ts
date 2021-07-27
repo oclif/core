@@ -43,6 +43,8 @@ export namespace PJSON {
           hidden?: boolean;
         };
       };
+      helpOverride?: string[];
+      versionOverride?: string[];
     };
   }
 
