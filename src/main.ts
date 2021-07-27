@@ -23,7 +23,7 @@ export const helpOverride = (argv: string[], config: Interfaces.Config): boolean
 }
 
 export const versionOverride = (argv: string[], config?: Interfaces.Config): boolean => {
-  const configOverride = config?.pjson.oclif.versionOverride ?? []
+  const configOverride = config?.pjson.oclif.additionalVersionFlags ?? []
   const mergedVersionFlags = [...new Set([...['--version'], ...configOverride]).values()]
   if (mergedVersionFlags.includes(argv[0])) return true
   return false

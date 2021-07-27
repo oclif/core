@@ -14,7 +14,7 @@ export {standardizeIDFromArgv, loadHelpClass} from './util'
 const helpFlags = ['--help']
 
 export function getHelpFlagOverride(config: Interfaces.Config): string[] {
-  const configOverride = config.pjson.oclif.helpOverride ?? []
+  const configOverride = config.pjson.oclif.additionalHelpFlags ?? []
   const combinedHelpFlags = [...helpFlags, ...configOverride]
   const mergedHelpFlags = [...new Set(combinedHelpFlags.map(flag => {
     if (flag.startsWith('--')) return [flag, flag.replace(/^--/, '')]
