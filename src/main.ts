@@ -4,7 +4,7 @@ import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
-import {getHelpFlagOverride, loadHelpClass, standardizeIDFromArgv} from './help'
+import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
@@ -12,9 +12,9 @@ const log = (message = '', ...args: any[]) => {
   process.stdout.write(format(message, ...args) + '\n')
 }
 
-export const helpOverride = (argv: string[], config: Interfaces.Config): boolean => {
+export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.pjson.oclif.default) return true
-  const mergedHelpFlags = getHelpFlagOverride(config)
+  const mergedHelpFlags = getHelpFlagAdditions(config)
   for (const arg of argv) {
     if (mergedHelpFlags.includes(arg)) return true
     if (arg === '--') return false
@@ -22,9 +22,9 @@ export const helpOverride = (argv: string[], config: Interfaces.Config): boolean
   return false
 }
 
-export const versionOverride = (argv: string[], config?: Interfaces.Config): boolean => {
-  const configOverride = config?.pjson.oclif.additionalVersionFlags ?? []
-  const mergedVersionFlags = [...new Set([...['--version'], ...configOverride]).values()]
+export const versionAddition = (argv: string[], config?: Interfaces.Config): boolean => {
+  const additionalVersionFlags = config?.pjson.oclif.additionalVersionFlags ?? []
+  const mergedVersionFlags = [...new Set([...['--version'], ...additionalVersionFlags]).values()]
   if (mergedVersionFlags.includes(argv[0])) return true
   return false
 }
@@ -44,14 +44,14 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   await config.runHook('init', {id, argv: argvSlice})
 
   // display version if applicable
-  if (versionOverride(argv, config)) {
+  if (versionAddition(argv, config)) {
     log(config.userAgent)
     return
   }
 
   // display help version if applicable
-  if (helpOverride(argv, config)) {
-    argv = argv.filter(arg => !getHelpFlagOverride(config).includes(arg))
+  if (helpAddition(argv, config)) {
+    argv = argv.filter(arg => !getHelpFlagAdditions(config).includes(arg))
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
     await help.showHelp(argv)

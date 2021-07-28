@@ -13,14 +13,14 @@ export {standardizeIDFromArgv, loadHelpClass} from './util'
 
 const helpFlags = ['--help']
 
-export function getHelpFlagOverride(config: Interfaces.Config): string[] {
-  const configOverride = config.pjson.oclif.additionalHelpFlags ?? []
-  return [...new Set([...helpFlags, ...configOverride]).values()]
+export function getHelpFlagAdditions(config: Interfaces.Config): string[] {
+  const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
+  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
 }
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
-  const mergedHelpFlags = getHelpFlagOverride(config)
+  const mergedHelpFlags = getHelpFlagAdditions(config)
   for (const arg of args) {
     if (arg === '--') return
     if (mergedHelpFlags.includes(arg) || arg === 'help') continue
