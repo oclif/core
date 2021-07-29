@@ -1,0 +1,12 @@
+{
+  "name": "help-plugin",
+  "description": "Module type ESM; Configure help and version flag overrides",
+  "private": true,
+  "type": "module",
+  "files": [],
+  "oclif": {
+    "commands": "./src/commands",
+    "additionalHelpFlags": ["-h", "--mycommandhelp"],
+    "additionalVersionFlags": ["-v", "myversion", "version"]
+  }
+}
