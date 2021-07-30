@@ -123,7 +123,7 @@ export class Help extends HelpBase {
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
     const plugin = this.config.plugins.find(p => p.name === command.pluginName)
-    console.log(this.config.pjson?.oclif?.state, plugin?.pjson?.oclif?.state, command.state)
+
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
     if (state) console.log(`This command is in ${state}.\n`)
 
