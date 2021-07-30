@@ -49,6 +49,9 @@ export default abstract class Command {
   /** Hide the command from help? */
   static hidden: boolean
 
+  /** Mark the command as a given state (e.g. beta) in help? */
+  static state?: string;
+
   /**
    * An override string (or strings) for the default usage documentation.
    */
@@ -111,7 +114,7 @@ export default abstract class Command {
 
   private static globalFlags = {
     json: Flags.boolean({
-      description: 'format output as json',
+      description: 'Format output as json.',
       helpGroup: 'GLOBAL',
     }),
   }

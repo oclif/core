@@ -81,7 +81,7 @@ FLAGS
                         newliney
 
 GLOBAL FLAGS
-  --json  format output as json
+  --json  Format output as json.
 
 DESCRIPTION
   first line
@@ -139,7 +139,7 @@ FLAGS
                         newliney
 
 GLOBAL FLAGS
-  --json  format output as json
+  --json  Format output as json.
 
 DESCRIPTION
   description of apps:create
@@ -199,7 +199,7 @@ FLAGS
       newliney
 
 GLOBAL FLAGS
-  --json  format output as json
+  --json  Format output as json.
 
 DESCRIPTION
   description of apps:create
@@ -261,7 +261,7 @@ FLAGS
   --force  forces
 
 GLOBAL FLAGS
-  --json  format output as json
+  --json  Format output as json.
 
 DESCRIPTION
   description of apps:create

@@ -39,14 +39,14 @@ export abstract class HelpBase extends HelpFormatter {
    * Show help, used in multi-command CLIs
    * @param args passed into your command, useful for determining which type of help to display
    */
-  public abstract async showHelp(argv: string[]): Promise<void>;
+  public abstract showHelp(argv: string[]): Promise<void>;
 
   /**
    * Show help for an individual command
    * @param command
    * @param topics
    */
-  public abstract async showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): Promise<void>;
+  public abstract showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): Promise<void>;
 }
 
 export class Help extends HelpBase {
@@ -108,7 +108,7 @@ export class Help extends HelpBase {
     }
 
     const topic = this.config.findTopic(subject)
-    if (topic)  {
+    if (topic) {
       await this.showTopicHelp(topic)
       return
     }
@@ -122,6 +122,10 @@ export class Help extends HelpBase {
 
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
+    const plugin = this.config.plugins.find(p => p.name === command.pluginName)
+    console.log(this.config.pjson?.oclif?.state, plugin?.pjson?.oclif?.state, command.state)
+    const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
+    if (state) console.log(`This command is in ${state}.\n`)
 
     const summary = this.summary(command)
     if (summary) console.log(summary + '\n')
@@ -143,6 +147,8 @@ export class Help extends HelpBase {
     let rootTopics = this.sortedTopics
     let rootCommands = this.sortedCommands
 
+    const state = this.config.pjson?.oclif?.state
+    if (state) console.log(`${this.config.bin} is in ${state}.\n`)
     console.log(this.formatRoot())
     console.log('')
 
@@ -169,6 +175,9 @@ export class Help extends HelpBase {
 
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const commands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
+
+    const state = this.config.pjson?.oclif?.state
+    if (state) console.log(`This topic is in ${state}.\n`)
 
     console.log(this.formatTopic(topic))
 
