@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.28](https://github.com/oclif/core/compare/v0.5.27...v0.5.28) (2021-08-03)
+
+
+### Features
+
+* add state property ([#206](https://github.com/oclif/core/issues/206)) ([07f9092](https://github.com/oclif/core/commit/07f9092128f979e3e4e22aeee07bf4d4caa3024c))
+
 ### [0.5.27](https://github.com/oclif/core/compare/v0.5.26...v0.5.27) (2021-07-29)
 
 
