@@ -13,6 +13,9 @@ export interface CommandProps {
   /** Hide the command from help? */
   hidden: boolean;
 
+  /** Mark the command as a given state (e.g. beta) in help? */
+  state?: string;
+
   /** An array of aliases for this command. */
   aliases: string[];
 

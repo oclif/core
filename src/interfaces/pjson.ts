@@ -45,6 +45,7 @@ export namespace PJSON {
       };
       additionalHelpFlags?: string[];
       additionalVersionFlags?: string[];
+      state?: string;
     };
   }
 
