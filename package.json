@@ -96,7 +96,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\" --no-color",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit"
   },
   "types": "lib/index.d.ts"

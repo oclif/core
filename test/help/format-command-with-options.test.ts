@@ -87,15 +87,11 @@ ARGUMENTS
 OPTIONS
   -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
                        barfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
-
   -l=label
-
   -r, --remote=remote
-
   --force              force  it force  it force  it force  it force  it force
                        it force  it force  it force  it force  it force  it
                        force  it force  it force  it force  it
-
   --ss                 newliney
                        newliney
                        newliney
@@ -142,13 +138,10 @@ ARGUMENTS
 OPTIONS
   -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
                        barfoobarfoobarfoobarfoobarfoobar
-
   -r, --remote=remote
-
   --force              force  it force  it force  it force  it force  it force
                        it force  it force  it force  it force  it force  it
                        force  it force  it force  it force  it
-
   --ss                 newliney
                        newliney
                        newliney
