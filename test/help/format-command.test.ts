@@ -66,15 +66,11 @@ ARGUMENTS
 FLAGS
   -f, --foo=<value>     foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfo
                         obarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
-
   -l=<value>
-
   -r, --remote=<value>
-
   --force               force  it force  it force  it force  it force  it force
                         it force  it force  it force  it force  it force  it
                         force  it force  it force  it force  it
-
   --ss                  newliney
                         newliney
                         newliney
@@ -126,13 +122,10 @@ ARGUMENTS
 FLAGS
   -f, --foo=<value>     foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfo
                         obarfoobarfoobarfoobarfoobarfoobar
-
   -r, --remote=<value>
-
   --force               force  it force  it force  it force  it force  it force
                         it force  it force  it force  it force  it force  it
                         force  it force  it force  it force  it
-
   --ss                  newliney
                         newliney
                         newliney

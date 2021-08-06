@@ -3,6 +3,7 @@ import {expect} from 'chai'
 
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
+const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
   it('--bool', async () => {
@@ -125,7 +126,7 @@ describe('parse', () => {
           },
         })
       } catch (error) {
-        message = error.message
+        message = stripAnsi(error.message)
       }
       expect(message).to.equal(
         'Missing required flag:\n --myflag MYFLAG  flag description\nSee more help with --help',

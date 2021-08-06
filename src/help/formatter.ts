@@ -151,8 +151,8 @@ export class HelpFormatter {
       }
       // if we start putting too many lines down, render in multiline format
       if (lines.length > 4) return renderMultiline()
-      // if spacer is not defined, separate all rows with extra newline
-      if (!opts.spacer) spacer = '\n\n'
+      // if spacer is not defined, separate all rows with a newline
+      if (!opts.spacer) spacer = '\n'
       cur += '\n'
       cur += this.indent(lines.join('\n'), maxLength + 2)
     }
