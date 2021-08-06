@@ -21,7 +21,7 @@
     "strip-ansi": "^6.0.0",
     "tslib": "^2.0.0",
     "widest-line": "^3.1.0",
-    "wrap-ansi": "^7.0.0"
+    "wrap-ansi": "^8.0.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^12.1.1",
