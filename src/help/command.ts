@@ -190,21 +190,21 @@ export class CommandHelp extends HelpFormatter {
 
     const body = castArray(examples).map(a => {
       let description
-      let command
+      let commands
       if (typeof a === 'string') {
         const lines = a
         .split(POSSIBLE_LINE_FEED)
         .filter(line => Boolean(line))
         // If the example is <description>\n<command> then format correctly
-        if (lines.length === 2 && !isCommand(lines[0]) && isCommand(lines[1])) {
+        if (lines.length >= 2 && !isCommand(lines[0]) && lines.slice(1).every(isCommand)) {
           description = lines[0]
-          command = lines[1]
+          commands = lines.slice(1)
         } else {
           return lines.map(line => formatIfCommand(line)).join('\n')
         }
       } else {
         description = a.description
-        command = a.command
+        commands = [a.command]
       }
 
       const multilineSeparator =
@@ -214,12 +214,14 @@ export class CommandHelp extends HelpFormatter {
 
       // The command will be indented in the section, which is also indented
       const finalIndentedSpacing = this.indentSpacing * 2
-      // First indent keeping room for escaped newlines
-      const multilineCommand = this.indent(this.wrap(formatIfCommand(command), finalIndentedSpacing + 4))
-      // Then add the escaped newline
-      .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
+      const multilineCommands = commands.map(c => {
+        // First indent keeping room for escaped newlines
+        return this.indent(this.wrap(formatIfCommand(c), finalIndentedSpacing + 4))
+        // Then add the escaped newline
+        .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
+      }).join('\n')
 
-      return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommand}`
+      return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
     }).join('\n\n')
     return body
   }
