@@ -595,6 +595,21 @@ EXAMPLES
     .commandHelp(class extends Command {
         static id = 'oclif:command'
 
+        static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help\n<%= config.bin %> <%= command.id %> --help']
+    })
+    .it('formats if multiple command with description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  $ oclif oclif:command
+
+EXAMPLES
+  Prints out help.
+
+    $ oclif oclif:command --help
+    $ oclif oclif:command --help`))
+
+    test
+    .commandHelp(class extends Command {
+        static id = 'oclif:command'
+
         static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}]
     })
     .it('formats example object', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
