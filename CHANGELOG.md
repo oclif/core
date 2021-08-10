@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.29](https://github.com/oclif/core/compare/v0.5.28...v0.5.29) (2021-08-10)
+
+
+### Features
+
+* support multiple examples commands under a single description ([#229](https://github.com/oclif/core/issues/229)) ([b7ad583](https://github.com/oclif/core/commit/b7ad5838adcc2e3f274a563b302090b697afc96a))
+
+
+### Bug Fixes
+
+* don't put multiple newlines between flag summaries in help output ([#225](https://github.com/oclif/core/issues/225)) ([bfbd15c](https://github.com/oclif/core/commit/bfbd15c7c60f663b9a17f02d4f5a1e8798b4d613))
+* switch ci to main ([849aeee](https://github.com/oclif/core/commit/849aeee378761f2edf52e7e9f44d4a0deab9cb3b))
+
 ### [0.5.28](https://github.com/oclif/core/compare/v0.5.27...v0.5.28) (2021-08-03)
 
 
