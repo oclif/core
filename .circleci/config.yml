@@ -28,4 +28,4 @@ workflows:
             - release-management/test-package
           filters:
             branches:
-              only: master
+              only: main
