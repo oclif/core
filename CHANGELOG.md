@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.30](https://github.com/oclif/core/compare/v0.5.29...v0.5.30) (2021-08-16)
+
+
+### Bug Fixes
+
+* update collateSpacedCmdIDFromArgs ([#230](https://github.com/oclif/core/issues/230)) ([4687287](https://github.com/oclif/core/commit/46872871cb8c7e8749298344a575751638ab2c04))
+
 ### [0.5.29](https://github.com/oclif/core/compare/v0.5.28...v0.5.29) (2021-08-10)
 
 
