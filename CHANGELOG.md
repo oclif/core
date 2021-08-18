@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.31](https://github.com/oclif/core/compare/v0.5.30...v0.5.31) (2021-08-18)
+
+
+### Bug Fixes
+
+* command name parsing when flag=value present ([#231](https://github.com/oclif/core/issues/231)) ([6497514](https://github.com/oclif/core/commit/64975145085b6a9e287dd146a7fda8d3accfab58))
+
 ### [0.5.30](https://github.com/oclif/core/compare/v0.5.29...v0.5.30) (2021-08-16)
 
 
