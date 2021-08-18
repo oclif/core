@@ -44,18 +44,19 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
     const final: string[] = []
     const idPresent = (id: string) => ids.includes(id)
     const isFlag = (s: string) => s.startsWith('-')
+    const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
 
     const hasSubCommandsWithArgs = () => {
       const subCommands = config.commands.filter(c => (c.id).startsWith(finalizeId()))
-      return Boolean(subCommands.find(cmd => cmd.strict === false || cmd.args.length > 0))
+      return Boolean(subCommands.find(cmd => cmd.strict === false || cmd.args?.length > 0))
     }
 
     for (const arg of argv) {
       if (idPresent(finalizeId(arg))) final.push(arg)
       // If the parent topic has a command that expects positional arguments, then we cannot
       // assume that any subsequent string could be part of the command name
-      else if (isFlag(arg) || hasSubCommandsWithArgs()) break
+      else if (isArgWithValue(arg) || isFlag(arg) || hasSubCommandsWithArgs()) break
       else final.push(arg)
     }
 
