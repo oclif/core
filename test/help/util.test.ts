@@ -92,6 +92,18 @@ describe('util', () => {
 
     test
     .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
+      config.topicSeparator = ' '
+      config.commands.push({
+        id: 'foo:bar',
+        strict: false,
+      } as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz', '--hello'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz', '--hello'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
     .it('should return full id when topic separator is a space and does not have arguments', () => {
       config.topicSeparator = ' '
       config.commands.push({
@@ -105,6 +117,24 @@ describe('util', () => {
 
     test
     .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has arg with value', () => {
+      config.topicSeparator = ' '
+      config.commands.push({id: 'foo:bar'} as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'hello=world'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has variable args with value', () => {
+      config.topicSeparator = ' '
+      config.commands.push({id: 'foo:bar', strict: false} as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world', 'my-arg=value'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'hello=world', 'my-arg=value'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has flags', () => {
       config.topicSeparator = ' '
       config.commands.push({id: 'foo:bar'} as any)
@@ -114,11 +144,15 @@ describe('util', () => {
 
     test
     .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
-    .it('should return standardized id when topic separator is a space and has flags with =', () => {
+    .it('should return standardized id when topic separator is a space and has flags, arg, and arg with value', () => {
       config.topicSeparator = ' '
-      config.commands.push({id: 'foo:bar'} as any)
-      const actual = standardizeIDFromArgv(['foo', 'bar', '--hello=world'], config)
-      expect(actual).to.deep.equal(['foo:bar', '--hello=world'])
+      config.commands.push({
+        id: 'foo:bar',
+        args: [{name: 'my-arg'}],
+        strict: true,
+      } as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'my-arg', 'hello=world', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'my-arg', 'hello=world', '--baz'])
     })
   })
 })
