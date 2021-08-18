@@ -102,5 +102,23 @@ describe('util', () => {
       const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
       expect(actual).to.deep.equal(['foo:bar:baz'])
     })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has flags', () => {
+      config.topicSeparator = ' '
+      config.commands.push({id: 'foo:bar'} as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has flags with =', () => {
+      config.topicSeparator = ' '
+      config.commands.push({id: 'foo:bar'} as any)
+      const actual = standardizeIDFromArgv(['foo', 'bar', '--hello=world'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--hello=world'])
+    })
   })
 })

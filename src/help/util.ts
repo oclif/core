@@ -43,7 +43,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
     const idPresent = (id: string) => ids.includes(id)
-    const isFlag = (s: string) => s.startsWith('-')
+    const isFlag = (s: string) => s.startsWith('-') || s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
 
     const hasSubCommandsWithArgs = () => {
