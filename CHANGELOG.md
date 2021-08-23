@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.32](https://github.com/oclif/core/compare/v0.5.31...v0.5.32) (2021-08-23)
+
+
+### Bug Fixes
+
+* account for aliases when converting spaced commands to commandID ([#232](https://github.com/oclif/core/issues/232)) ([b8ee9b2](https://github.com/oclif/core/commit/b8ee9b209ddacdf95f164a05473a05d1b6c53d6b))
+
 ### [0.5.31](https://github.com/oclif/core/compare/v0.5.30...v0.5.31) (2021-08-18)
 
 
