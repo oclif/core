@@ -6,6 +6,11 @@ export type Example = string | {
   command: string;
 }
 
+export type ErrorCode = {
+  description: string;
+  errorCode: number;
+}
+
 export interface CommandProps {
   /** A command ID, used mostly in error or verbose reporting. */
   id: string;
@@ -52,6 +57,10 @@ export interface CommandProps {
    * ```
    */
   examples?: Example[];
+  /**
+   * An array of error codes that a given command can emit.
+   */
+  errorCodes?: ErrorCode[];
 }
 
 export interface Command extends CommandProps {

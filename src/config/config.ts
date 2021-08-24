@@ -588,6 +588,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     state: c.state,
     aliases: c.aliases || [],
     examples: c.examples || (c as any).example,
+    errorCodes: c.errorCodes || (c as any).errorCodes,
     flags,
     args,
   }
