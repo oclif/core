@@ -9,8 +9,6 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
-import {HelpSection} from './help/command'
-import {ErrorCode} from './interfaces/command'
 
 const pjson = require('../package.json')
 
@@ -93,8 +91,6 @@ export default abstract class Command {
   static parserOptions = {}
 
   static disableJsonFlag: boolean | undefined
-
-  static errorCodes?: ErrorCode[];
 
   // eslint-disable-next-line valid-jsdoc
   /**

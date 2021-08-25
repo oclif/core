@@ -14,6 +14,8 @@ import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 
+import {CommandProps} from '../interfaces/command'
+
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
@@ -575,7 +577,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
 
   const args = await Promise.all(argsPromise)
 
-  return {
+  const stdProperties = {
     id: c.id,
     summary: c.summary,
     description: c.description,
@@ -588,8 +590,14 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     state: c.state,
     aliases: c.aliases || [],
     examples: c.examples || (c as any).example,
-    errorCodes: c.errorCodes || (c as any).errorCodes,
     flags,
     args,
   }
+
+  const additionalProperties = {} as CommandProps
+  if (c.additionalPropertiesForManifest && c.additionalPropertiesForManifest.length > 0) {
+    c.additionalPropertiesForManifest.filter(property => c[property]).reduce((a, b) => Object.assign(additionalProperties, {[b]: Reflect.get(c, b)}), {})
+  }
+
+  return {...stdProperties, ...additionalProperties}
 }
