@@ -92,6 +92,17 @@ export default abstract class Command {
 
   static disableJsonFlag: boolean | undefined
 
+  /**
+   * Provides a list of command properties that need to be included in the manifest file, which then makes the
+   * properties available to command help.
+   */
+  additionalPropertiesForManifest?: string[];
+
+  /**
+   * Remaining properties defined by developer
+   */
+  [name: string]: unknown;
+
   // eslint-disable-next-line valid-jsdoc
   /**
    * instantiate and run the command
