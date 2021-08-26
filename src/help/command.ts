@@ -329,7 +329,8 @@ export class CommandHelp extends HelpFormatter {
   }
 
   private helpSectionTable(body: HelpSectionTable): string {
-    const nameColumnMaxLength = body.map(row => row.name.length + 1).reduce((a, b) => Math.max(a, b), 0)
+    // we want 2 spaces between name and description - padEnd will take care of column alignment
+    const nameColumnMaxLength = body.map(row => row.name.length + 2).reduce((a, b) => Math.max(a, b), 0)
     return body.map((entry: {name: string; description: string}) => (`${entry.name.padEnd(nameColumnMaxLength, ' ')}${entry.description}`)).join(('\n'))
   }
 }
