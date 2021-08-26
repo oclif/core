@@ -330,9 +330,7 @@ export class CommandHelp extends HelpFormatter {
 
   private helpSectionTable(body: HelpSectionTable): string {
     const nameColumnMaxLength = body.map(row => row.name.length + 1).reduce((a, b) => Math.max(a, b), 0)
-    const x = body.map((entry: {name: string; description: string}) => (`${entry.name.padEnd(nameColumnMaxLength, ' ')}${entry.description}`)).join(('\n'))
-    console.log(x)
-    return x
+    return body.map((entry: {name: string; description: string}) => (`${entry.name.padEnd(nameColumnMaxLength, ' ')}${entry.description}`)).join(('\n'))
   }
 }
 export default CommandHelp
