@@ -3,7 +3,6 @@ import lodashTemplate = require('lodash.template')
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
-import {HelpSectionTable} from './command'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
