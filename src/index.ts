@@ -12,7 +12,7 @@ import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
-import {HelpSection, HelpSectionRenderer} from './help/command'
+import {HelpSection, HelpSectionTable, HelpSectionRenderer} from './help/command'
 
 const flush = require('../flush')
 
@@ -26,6 +26,7 @@ export {
   Help,
   HelpBase,
   HelpSection,
+  HelpSectionTable,
   HelpSectionRenderer,
   Hook,
   Interfaces,

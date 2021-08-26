@@ -53,6 +53,10 @@ export interface CommandProps {
    */
   examples?: Example[];
 
+  /**
+   * Provides a list of command properties that need to be included in the manifest file, which then makes the
+   * properties available to command help.
+   */
   additionalPropertiesForManifest?: string[];
 
   /**

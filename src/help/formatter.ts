@@ -5,6 +5,7 @@ import stripAnsi = require('strip-ansi')
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
 import {template} from './util'
+import {HelpSectionTable} from './command'
 
 const width = require('string-width')
 const widestLine = require('widest-line')
@@ -163,13 +164,20 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | [string, string | undefined][]) {
+  public section(header: string, body: string | HelpSectionTable | [string, string | undefined][]) {
     // Always render template strings with the provided render function before wrapping and indenting
-    body = Array.isArray(body) ? body.map(([left, right]) => ([this.render(left), right && this.render(right)])) : this.render(body)
+    let newBody: any
+    if (typeof body === 'string') {
+      newBody = this.render(body)
+    } else if (Array.isArray(body)) {
+      newBody = (body as [string, string | undefined][]).map(([left, right]) => ([this.render(left), right && this.render(right)]))
+    } else {
+      newBody = (body as HelpSectionTable).map((entry: {name: string; description: string}) => ([entry.name, entry.description]))
+    }
 
     const output = [
       bold(header),
-      this.indent(Array.isArray(body) ? this.renderList(body, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : body),
+      this.indent(Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody),
     ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output
   }

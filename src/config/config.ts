@@ -592,6 +592,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     examples: c.examples || (c as any).example,
     flags,
     args,
+    additionalPropertiesForManifest: c.additionalPropertiesForManifest,
   }
 
   const additionalProperties = {} as CommandProps

@@ -22,8 +22,8 @@ let {
 if (process.env.ConEmuANSI === 'ON') {
   dim = Chalk.gray
 }
-
-export type HelpSection = {header: string; body: string | [string, string | undefined][] | undefined} | undefined;
+export type HelpSectionTable = {name: string; description: string}[]
+export type HelpSection = {header: string; body: string | HelpSectionTable | [string, string | undefined][] | undefined} | undefined;
 export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection[] | string | undefined;
 
 export class CommandHelp extends HelpFormatter {
@@ -119,6 +119,7 @@ export class CommandHelp extends HelpFormatter {
         header: 'FLAG DESCRIPTIONS',
         generate: ({flags}) => this.flagsDescriptions(flags),
       },
+      ...this.additionalCommandSections(),
     ]
   }
 
@@ -310,6 +311,28 @@ export class CommandHelp extends HelpFormatter {
     }).join('\n\n')
 
     return body
+  }
+
+  private additionalCommandSections(): Array<{header: string; generate: () => string}> {
+    if (this.command.additionalPropertiesForManifest && this.command.additionalPropertiesForManifest.length > 0) {
+      const sections = this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
+      .filter(helpSection => helpSection && helpSection.header && helpSection.body)
+      .map((helpSection: HelpSection) => (
+        {
+          header: helpSection!.header,
+          generate: () => this.helpSectionTable(helpSection!.body as HelpSectionTable),
+        }
+      ))
+      return sections
+    }
+    return []
+  }
+
+  private helpSectionTable(body: HelpSectionTable): string {
+    const nameColumnMaxLength = body.map(row => row.name.length + 1).reduce((a, b) => Math.max(a, b), 0)
+    const x = body.map((entry: {name: string; description: string}) => (`${entry.name.padEnd(nameColumnMaxLength, ' ')}${entry.description}`)).join(('\n'))
+    console.log(x)
+    return x
   }
 }
 export default CommandHelp
