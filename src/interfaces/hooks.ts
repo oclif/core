@@ -1,47 +1,60 @@
 import {Command} from './command'
 import {Config} from './config'
+import {Plugin} from './plugin'
+
+interface HookMeta {
+  options: Record<string, unknown>;
+  return: any;
+}
 
 export interface Hooks {
-  [event: string]: object;
+  [event: string]: HookMeta;
   init: {
-    id: string | undefined;
-    argv: string[];
+    options: { id: string | undefined; argv: string[] };
+    return: void;
   };
   prerun: {
-    Command: Command.Class;
-    argv: string[];
+    options: { Command: Command.Class; argv: string[] };
+    return: void;
   };
   postrun: {
-    Command: Command.Class;
-    result?: any;
-    argv: string[];
-  };
-  preupdate: {channel: string};
-  update: {channel: string};
-  'command_not_found': {id: string; argv?: string[]};
-  'plugins:preinstall': {
-    plugin: {
-      name: string;
-      tag: string;
-      type: 'npm';
-    } | {
-      url: string;
-      type: 'repo';
+    options: {
+      Command: Command.Class;
+      result?: any;
+      argv: string[];
     };
+    return: void;
+  };
+  preupdate: {
+    options: {channel: string};
+    return: void;
+  };
+  update: {
+    options: {channel: string};
+    return: void;
+  };
+  'command_not_found': {
+    options: {id: string; argv?: string[]};
+    return: void;
+  };
+  'plugins:preinstall': {
+    options: {
+      plugin: { name: string; tag: string; type: 'npm' } | { url: string; type: 'repo' };
+    };
+    return: void;
   };
 }
 
-export type HookKeyOrOptions<K> = K extends (keyof Hooks) ? Hooks[K] : K
-export type Hook<T> = (this: Hook.Context, options: HookKeyOrOptions<T> & {config: Config}) => any
+export type Hook<T extends keyof P, P extends Hooks = Hooks> = (this: Hook.Context, options: P[T]['options'] & {config: Config}) => Promise<P[T]['return']>
 
 export namespace Hook {
-  export type Init = Hook<Hooks['init']>
-  export type PluginsPreinstall = Hook<Hooks['plugins:preinstall']>
-  export type Prerun = Hook<Hooks['prerun']>
-  export type Postrun = Hook<Hooks['postrun']>
-  export type Preupdate = Hook<Hooks['preupdate']>
-  export type Update = Hook<Hooks['update']>
-  export type CommandNotFound = Hook<Hooks['command_not_found']>
+  export type Init = Hook<'init'>
+  export type PluginsPreinstall = Hook<'plugins:preinstall'>
+  export type Prerun = Hook<'prerun'>
+  export type Postrun = Hook<'postrun'>
+  export type Preupdate = Hook<'preupdate'>
+  export type Update = Hook<'update'>
+  export type CommandNotFound = Hook<'command_not_found'>
 
   export interface Context {
     config: Config;
@@ -51,4 +64,10 @@ export namespace Hook {
     log(message?: any, ...args: any[]): void;
     debug(...args: any[]): void;
   }
+
+  export interface Result<T> {
+    successes: Array<{ result: T; plugin: Plugin }>;
+    failures: Array<{ error: typeof Error; plugin: Plugin }>;
+  }
 }
+

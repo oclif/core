@@ -1,5 +1,5 @@
 import {PJSON} from './pjson'
-import {Hooks} from './hooks'
+import {Hooks, Hook} from './hooks'
 import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
@@ -95,7 +95,7 @@ export interface Config {
 
   runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Plugin): Promise<T>;
-  runHook<T extends Hooks, K extends Extract<keyof T, string>>(event: K, opts: T[K]): Promise<any>;
+  runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
   findCommand(id: string, opts: { must: true }): Command.Plugin;
   findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined;
   findTopic(id: string, opts: { must: true }): Topic;
