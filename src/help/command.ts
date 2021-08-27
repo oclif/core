@@ -40,8 +40,7 @@ export class CommandHelp extends HelpFormatter {
     }), f => [!f.char, f.char, f.name])
 
     const args = (cmd.args || []).filter(a => !a.hidden)
-    const sections = this.sections()
-    const output = compact(sections.map(({header, generate}) => {
+    const output = compact(this.sections().map(({header, generate}) => {
       const body = generate({cmd, flags, args}, header)
       // Generate can return a list of sections
       if (Array.isArray(body)) {
@@ -312,7 +311,7 @@ export class CommandHelp extends HelpFormatter {
 
   private additionalCommandSections(): Array<{header: string; generate: () => string | HelpSection | HelpSection[] | undefined}> {
     if (this.command.additionalPropertiesForManifest && this.command.additionalPropertiesForManifest.length > 0) {
-      const r = this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
+      return this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
       .filter(helpSection => helpSection && helpSection.header && helpSection.body)
       .map((helpSection: HelpSection) => (
         {
@@ -321,24 +320,8 @@ export class CommandHelp extends HelpFormatter {
         }
       ))
       .reduce((a: {header: string; generate: () => string | HelpSection | HelpSection[] | undefined}[], b) => a.concat(b), [])
-      return r
     }
     return []
   }
-
-  // private helpSectionBody(body: string | HelpSectionTable | [string, string | undefined][] | undefined): string | HelpSection[] | undefined {
-  //   if (typeof body === 'string') {
-  //     return body
-  //   }
-  //   if (Array.isArray(body)) {
-  //     return (body as [string, string | undefined][]).map(([left, right]) => ([this.render(left), right && this.render(right)].join(' '))).join('\n')
-  //   }
-  //   if (body) {
-  //     const tableBody = body as HelpSectionTable
-  //     // we want 2 spaces between name and description - padEnd will take care of column alignment
-  //     // const nameColumnMaxLength = tableBody.map(row => row.name.length + 2).reduce((a, b) => Math.max(a, b), 0)
-  //     return tableBody.map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
-  //   }
-  // }
 }
 export default CommandHelp

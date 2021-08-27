@@ -27,7 +27,6 @@ export {
   HelpBase,
   HelpSection,
   HelpSectionTable,
-  HelpSectionRenderer,
   Hook,
   Interfaces,
   Parser,
