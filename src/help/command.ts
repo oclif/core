@@ -4,7 +4,7 @@ import stripAnsi = require('strip-ansi')
 import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
-import {HelpFormatter} from './formatter'
+import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 import {DocOpts} from './docopts'
 
 // Don't use os.EOL because we need to ensure that a string
@@ -22,10 +22,6 @@ let {
 if (process.env.ConEmuANSI === 'ON') {
   dim = Chalk.gray
 }
-export type HelpSectionTable = {name: string; description: string}[]
-export type HelpSection = {header: string; body: string | HelpSectionTable | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection[] | string | undefined;
-
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Interfaces.Command,
@@ -44,7 +40,8 @@ export class CommandHelp extends HelpFormatter {
     }), f => [!f.char, f.char, f.name])
 
     const args = (cmd.args || []).filter(a => !a.hidden)
-    const output = compact(this.sections().map(({header, generate}) => {
+    const sections = this.sections()
+    const output = compact(sections.map(({header, generate}) => {
       const body = generate({cmd, flags, args}, header)
       // Generate can return a list of sections
       if (Array.isArray(body)) {
@@ -313,25 +310,35 @@ export class CommandHelp extends HelpFormatter {
     return body
   }
 
-  private additionalCommandSections(): Array<{header: string; generate: () => string}> {
+  private additionalCommandSections(): Array<{header: string; generate: () => string | HelpSection | HelpSection[] | undefined}> {
     if (this.command.additionalPropertiesForManifest && this.command.additionalPropertiesForManifest.length > 0) {
-      const sections = this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
+      const r = this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
       .filter(helpSection => helpSection && helpSection.header && helpSection.body)
       .map((helpSection: HelpSection) => (
         {
           header: helpSection!.header,
-          generate: () => this.helpSectionTable(helpSection!.body as HelpSectionTable),
+          generate: () => helpSection,
         }
       ))
-      return sections
+      .reduce((a: {header: string; generate: () => string | HelpSection | HelpSection[] | undefined}[], b) => a.concat(b), [])
+      return r
     }
     return []
   }
 
-  private helpSectionTable(body: HelpSectionTable): string {
-    // we want 2 spaces between name and description - padEnd will take care of column alignment
-    const nameColumnMaxLength = body.map(row => row.name.length + 2).reduce((a, b) => Math.max(a, b), 0)
-    return body.map((entry: {name: string; description: string}) => (`${entry.name.padEnd(nameColumnMaxLength, ' ')}${entry.description}`)).join(('\n'))
-  }
+  // private helpSectionBody(body: string | HelpSectionTable | [string, string | undefined][] | undefined): string | HelpSection[] | undefined {
+  //   if (typeof body === 'string') {
+  //     return body
+  //   }
+  //   if (Array.isArray(body)) {
+  //     return (body as [string, string | undefined][]).map(([left, right]) => ([this.render(left), right && this.render(right)].join(' '))).join('\n')
+  //   }
+  //   if (body) {
+  //     const tableBody = body as HelpSectionTable
+  //     // we want 2 spaces between name and description - padEnd will take care of column alignment
+  //     // const nameColumnMaxLength = tableBody.map(row => row.name.length + 2).reduce((a, b) => Math.max(a, b), 0)
+  //     return tableBody.map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
+  //   }
+  // }
 }
 export default CommandHelp

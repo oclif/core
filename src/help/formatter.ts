@@ -5,7 +5,6 @@ import stripAnsi = require('strip-ansi')
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
 import {template} from './util'
-import {HelpSectionTable} from './command'
 
 const width = require('string-width')
 const widestLine = require('widest-line')
@@ -14,6 +13,10 @@ const wrap = require('wrap-ansi')
 const {
   bold,
 } = Chalk
+
+export type HelpSectionTable = {name: string; description: string}[]
+export type HelpSection = {header: string; body: string | HelpSectionTable | [string, string | undefined][] | undefined} | undefined;
+export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
 
 export class HelpFormatter {
   indentSpacing = 2
@@ -164,15 +167,26 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | HelpSectionTable | [string, string | undefined][]) {
+  public section(header: string, body: string | HelpSection | HelpSectionTable | [string, string | undefined][]): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
-    if (typeof body === 'string') {
-      newBody = this.render(body)
+    if (typeof body! === 'string') {
+      newBody = this.render(body!)
     } else if (Array.isArray(body)) {
-      newBody = (body as [string, string | undefined][]).map(([left, right]) => ([this.render(left), right && this.render(right)]))
+      newBody = (body! as [string, string | undefined | HelpSectionTable][]).map(entry => {
+        if (Reflect.has(entry, 'name')) {
+          const tableEntry = entry as unknown as {name: string; description: string}
+          return ([this.render(tableEntry.name), this.render(tableEntry.description)])
+        }
+        const [left, right] = entry
+        return ([this.render(left), right && this.render(right as string)])
+      })
+    } else if (Reflect.has(body!, 'header')) {
+      return this.section(body!.header, body!.body)
     } else {
-      newBody = (body as HelpSectionTable).map((entry: {name: string; description: string}) => ([entry.name, entry.description]))
+      newBody = (body! as unknown as HelpSectionTable)
+      .map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
+      .map(([left, right]) => ([this.render(left), right && this.render(right)]))
     }
 
     const output = [
