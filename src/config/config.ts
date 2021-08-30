@@ -608,7 +608,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   const additionalProperties = {}
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  keysToAdd.reduce((a, b) => Object.assign(additionalProperties, {[b]: Reflect.get(c, b)}), {})
+  keysToAdd.forEach((key) => { additionalProperties[key] = c[key] });
 
   return {...stdProperties, ...additionalProperties}
 }
