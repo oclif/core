@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command, Hook, PJSON, Topic} from '../interfaces'
+import {Command, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Debug} from './util'
 import * as Plugin from './plugin'
 import {compact, flatMap, loadJSON, uniq} from './util'
@@ -203,14 +203,22 @@ export class Config implements IConfig {
     }
   }
 
-  async runHook<T>(event: string, opts: T): Promise<any> {
+  async runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>> {
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
       if (m.default && typeof m.default === 'function') return m.default
       return Object.values(m).find((m: any) => typeof m === 'function') as Hook<T>
     }
-    const results = []
+
+    const withTimeout = async (ms: number, promise: any) => {
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms} ms.`)), ms))
+      return Promise.race([promise, timeout])
+    }
+
+    const successes = []
+    const failures = []
+
     for (const p of this.plugins) {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
@@ -239,11 +247,14 @@ export class Config implements IConfig {
 
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
-          const result = await search(module).call(context, {...opts as any, config: this})
-          results.push(result)
+          const result = timeout ?
+            await withTimeout(timeout, search(module).call(context, {...opts as any, config: this})) :
+            await search(module).call(context, {...opts as any, config: this})
+          successes.push({plugin: p, result})
 
           debug('done')
         } catch (error) {
+          failures.push({plugin: p, error})
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
           this.warn(error, `runHook ${event}`)
         }
@@ -251,7 +262,7 @@ export class Config implements IConfig {
     }
 
     debug('%s hook done', event)
-    return results
+    return {successes, failures}
   }
 
   async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.33](https://github.com/oclif/core/compare/v0.5.32...v0.5.33) (2021-08-30)
+
+
+### Bug Fixes
+
+* improve Hooks interface ([#234](https://github.com/oclif/core/issues/234)) ([32d0d62](https://github.com/oclif/core/commit/32d0d62ed30c65cdbca7c6da630b5542b38ab3b1))
+
 ### [0.5.32](https://github.com/oclif/core/compare/v0.5.31...v0.5.32) (2021-08-23)
 
 
