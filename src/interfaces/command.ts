@@ -54,16 +54,6 @@ export interface CommandProps {
    */
   examples?: Example[];
 
-  /**
-   * Provide a list of HelpSections that will be added to this command's help output.
-   * The order in which these are defined will be the order by which these will be displayed.
-   */
-  additionalHelpSections?: HelpSection[];
-
-  /**
-   * Remaining properties defined by developer
-   */
-  [name: string]: unknown;
 }
 
 export interface Command extends CommandProps {

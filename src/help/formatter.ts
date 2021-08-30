@@ -174,14 +174,14 @@ export class HelpFormatter {
       newBody = this.render(body!)
     } else if (Array.isArray(body)) {
       newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map(entry => {
-        if (Reflect.has(entry, 'name')) {
+        if ('name' in entry) {
           const tableEntry = entry as unknown as {name: string; description: string}
           return ([this.render(tableEntry.name), this.render(tableEntry.description)])
         }
         const [left, right] = entry
         return ([this.render(left), right && this.render(right as string)])
       })
-    } else if (Reflect.has(body!, 'header')) {
+    } else if ('header' in body!) {
       return this.section(body!.header, body!.body)
     } else {
       newBody = (body! as unknown as HelpSectionKeyValueTable)

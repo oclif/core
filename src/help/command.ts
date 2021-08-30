@@ -53,7 +53,7 @@ export class CommandHelp extends HelpFormatter {
 
   protected groupFlags(flags: Interfaces.Command.Flag[]) {
     const mainFlags: Interfaces.Command.Flag[] = []
-    const flagGroups: {[index: string]: Interfaces.Command.Flag[]} = {}
+    const flagGroups: { [index: string]: Interfaces.Command.Flag[] } = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup
@@ -68,7 +68,7 @@ export class CommandHelp extends HelpFormatter {
     return {mainFlags, flagGroups}
   }
 
-  protected sections(): Array<{header: string; generate: HelpSectionRenderer}> {
+  protected sections(): Array<{ header: string; generate: HelpSectionRenderer }> {
     return [
       {
         header: this.opts.usageHeader || 'USAGE',
@@ -115,7 +115,6 @@ export class CommandHelp extends HelpFormatter {
         header: 'FLAG DESCRIPTIONS',
         generate: ({flags}) => this.flagsDescriptions(flags),
       },
-      ...this.additionalCommandSections(),
     ]
   }
 
@@ -128,7 +127,7 @@ export class CommandHelp extends HelpFormatter {
       if (line.length > allowedSpacing) {
         const splitIndex = line.substring(0, allowedSpacing).lastIndexOf(' ')
         return line.substring(0, splitIndex) + '\n' +
-          this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
+            this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
       }
       return this.wrap(line)
     })
@@ -307,20 +306,6 @@ export class CommandHelp extends HelpFormatter {
     }).join('\n\n')
 
     return body
-  }
-
-  private additionalCommandSections(): Array<{header: string; generate: () => string | HelpSection | HelpSection[] | undefined}> {
-    if (this.command.additionalHelpSections && this.command.additionalHelpSections.length > 0) {
-      return this.command.additionalHelpSections.filter(helpSection => helpSection && helpSection.header && helpSection.body)
-      .map((helpSection: HelpSection) => (
-        {
-          header: helpSection!.header,
-          generate: () => helpSection,
-        }
-      ))
-      .reduce((a: {header: string; generate: () => string | HelpSection | HelpSection[] | undefined}[], b) => a.concat(b), [])
-    }
-    return []
   }
 }
 export default CommandHelp

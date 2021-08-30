@@ -93,17 +93,6 @@ export default abstract class Command {
 
   static disableJsonFlag: boolean | undefined
 
-  /**
-   * Provide a list of HelpSections that will be added to this command's help output.
-   * The order in which these are defined will be the order by which these will be displayed.
-   */
-  readonly additionalHelpSections?: HelpSection[];
-
-  /**
-   * Remaining properties defined by developer
-   */
-  [name: string]: unknown;
-
   // eslint-disable-next-line valid-jsdoc
   /**
    * instantiate and run the command
