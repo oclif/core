@@ -605,10 +605,12 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
 
   // do not include these properties in manifest
   const ignoreCommandProperties = ['plugin', '_flags']
-  const additionalProperties = {}
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  keysToAdd.forEach((key) => { additionalProperties[key] = c[key] });
+  const additionalProperties: any = {}
+  keysToAdd.forEach(key => {
+    additionalProperties[key] = (c as any)[key]
+  })
 
   return {...stdProperties, ...additionalProperties}
 }
