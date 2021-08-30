@@ -14,8 +14,8 @@ const {
   bold,
 } = Chalk
 
-export type HelpSectionTable = {name: string; description: string}[]
-export type HelpSection = {header: string; body: string | HelpSectionTable | [string, string | undefined][] | undefined} | undefined;
+export type HelpSectionKeyValueTable = {name: string; description: string}[]
+export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
 export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
 
 export class HelpFormatter {
@@ -167,13 +167,13 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | HelpSection | HelpSectionTable | [string, string | undefined][]): string {
+  public section(header: string, body: string | HelpSection | HelpSectionKeyValueTable | [string, string | undefined][]): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
     if (typeof body! === 'string') {
       newBody = this.render(body!)
     } else if (Array.isArray(body)) {
-      newBody = (body! as [string, string | undefined | HelpSectionTable][]).map(entry => {
+      newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map(entry => {
         if (Reflect.has(entry, 'name')) {
           const tableEntry = entry as unknown as {name: string; description: string}
           return ([this.render(tableEntry.name), this.render(tableEntry.description)])
@@ -184,7 +184,7 @@ export class HelpFormatter {
     } else if (Reflect.has(body!, 'header')) {
       return this.section(body!.header, body!.body)
     } else {
-      newBody = (body! as unknown as HelpSectionTable)
+      newBody = (body! as unknown as HelpSectionKeyValueTable)
       .map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
       .map(([left, right]) => ([this.render(left), right && this.render(right)]))
     }

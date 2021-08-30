@@ -1,5 +1,6 @@
 import {Config, LoadOptions} from './config'
 import {ArgInput, BooleanFlagProps, FlagInput, OptionFlagProps} from './parser'
+import {HelpSection} from '../help/formatter'
 
 export type Example = string | {
   description: string;
@@ -54,10 +55,10 @@ export interface CommandProps {
   examples?: Example[];
 
   /**
-   * Provides a list of command properties that need to be included in the manifest file, which then makes the
-   * properties available to command help.
+   * Provide a list of HelpSections that will be added to this command's help output.
+   * The order in which these are defined will be the order by which these will be displayed.
    */
-  additionalPropertiesForManifest?: string[];
+  additionalHelpSections?: HelpSection[];
 
   /**
    * Remaining properties defined by developer

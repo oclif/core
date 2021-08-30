@@ -592,13 +592,15 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     examples: c.examples || (c as any).example,
     flags,
     args,
-    additionalPropertiesForManifest: c.additionalPropertiesForManifest,
+    additionalHelpSections: c.additionalHelpSections ?? [],
   }
 
+  // do not include these properties in manifest
+  const ignoreCommandProperties = ['plugin', '_flags']
   const additionalProperties = {} as CommandProps
-  if (c.additionalPropertiesForManifest && c.additionalPropertiesForManifest.length > 0) {
-    c.additionalPropertiesForManifest.filter(property => c[property]).reduce((a, b) => Object.assign(additionalProperties, {[b]: Reflect.get(c, b)}), {})
-  }
+  const stdKeys = Object.keys(stdProperties)
+  const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
+  keysToAdd.reduce((a, b) => Object.assign(additionalProperties, {[b]: Reflect.get(c, b)}), {})
 
   return {...stdProperties, ...additionalProperties}
 }

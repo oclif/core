@@ -9,6 +9,7 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
+import {HelpSection} from './help/formatter'
 
 const pjson = require('../package.json')
 
@@ -93,10 +94,10 @@ export default abstract class Command {
   static disableJsonFlag: boolean | undefined
 
   /**
-   * Provides a list of command properties that need to be included in the manifest file, which then makes the
-   * properties available to command help.
+   * Provide a list of HelpSections that will be added to this command's help output.
+   * The order in which these are defined will be the order by which these will be displayed.
    */
-  additionalPropertiesForManifest?: string[];
+  readonly additionalHelpSections?: HelpSection[];
 
   /**
    * Remaining properties defined by developer

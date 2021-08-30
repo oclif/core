@@ -310,9 +310,8 @@ export class CommandHelp extends HelpFormatter {
   }
 
   private additionalCommandSections(): Array<{header: string; generate: () => string | HelpSection | HelpSection[] | undefined}> {
-    if (this.command.additionalPropertiesForManifest && this.command.additionalPropertiesForManifest.length > 0) {
-      return this.command.additionalPropertiesForManifest.map(property => (this.command[property]) as HelpSection)
-      .filter(helpSection => helpSection && helpSection.header && helpSection.body)
+    if (this.command.additionalHelpSections && this.command.additionalHelpSections.length > 0) {
+      return this.command.additionalHelpSections.filter(helpSection => helpSection && helpSection.header && helpSection.body)
       .map((helpSection: HelpSection) => (
         {
           header: helpSection!.header,
