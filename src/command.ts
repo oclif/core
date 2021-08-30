@@ -9,7 +9,6 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
-import {HelpSection} from './help/formatter'
 
 const pjson = require('../package.json')
 

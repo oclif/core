@@ -1,6 +1,5 @@
 import {Config, LoadOptions} from './config'
 import {ArgInput, BooleanFlagProps, FlagInput, OptionFlagProps} from './parser'
-import {HelpSection} from '../help/formatter'
 
 export type Example = string | {
   description: string;

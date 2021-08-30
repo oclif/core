@@ -14,8 +14,6 @@ import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 
-import {CommandProps} from '../interfaces/command'
-
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
