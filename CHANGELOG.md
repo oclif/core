@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.34](https://github.com/oclif/core/compare/v0.5.33...v0.5.34) (2021-08-30)
+
+
+### Bug Fixes
+
+* add support all properties for a command class in manifest ([deb0765](https://github.com/oclif/core/commit/deb0765f81dbea54c831beba0b608b1a8cd0ecdb))
+
 ### [0.5.33](https://github.com/oclif/core/compare/v0.5.32...v0.5.33) (2021-08-30)
 
 
