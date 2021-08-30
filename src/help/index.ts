@@ -50,7 +50,7 @@ export abstract class HelpBase extends HelpFormatter {
 }
 
 export class Help extends HelpBase {
-  public CommandHelpClass: typeof CommandHelp = CommandHelp
+  protected CommandHelpClass: typeof CommandHelp = CommandHelp
 
   /*
    * _topics is to work around Interfaces.topics mistakenly including commands that do
