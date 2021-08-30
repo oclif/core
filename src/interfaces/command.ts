@@ -52,6 +52,7 @@ export interface CommandProps {
    * ```
    */
   examples?: Example[];
+
 }
 
 export interface Command extends CommandProps {

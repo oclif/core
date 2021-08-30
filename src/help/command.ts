@@ -4,7 +4,7 @@ import stripAnsi = require('strip-ansi')
 import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
-import {HelpFormatter} from './formatter'
+import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 import {DocOpts} from './docopts'
 
 // Don't use os.EOL because we need to ensure that a string
@@ -22,10 +22,6 @@ let {
 if (process.env.ConEmuANSI === 'ON') {
   dim = Chalk.gray
 }
-
-export type HelpSection = {header: string; body: string | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection[] | string | undefined;
-
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Interfaces.Command,
@@ -57,7 +53,7 @@ export class CommandHelp extends HelpFormatter {
 
   protected groupFlags(flags: Interfaces.Command.Flag[]) {
     const mainFlags: Interfaces.Command.Flag[] = []
-    const flagGroups: {[index: string]: Interfaces.Command.Flag[]} = {}
+    const flagGroups: { [index: string]: Interfaces.Command.Flag[] } = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup
@@ -72,7 +68,7 @@ export class CommandHelp extends HelpFormatter {
     return {mainFlags, flagGroups}
   }
 
-  protected sections(): Array<{header: string; generate: HelpSectionRenderer}> {
+  protected sections(): Array<{ header: string; generate: HelpSectionRenderer }> {
     return [
       {
         header: this.opts.usageHeader || 'USAGE',
@@ -131,7 +127,7 @@ export class CommandHelp extends HelpFormatter {
       if (line.length > allowedSpacing) {
         const splitIndex = line.substring(0, allowedSpacing).lastIndexOf(' ')
         return line.substring(0, splitIndex) + '\n' +
-          this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
+            this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
       }
       return this.wrap(line)
     })

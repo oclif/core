@@ -34,12 +34,16 @@ describe('formatCommand', () => {
   .it('outputs an empty string when no commands are given', (ctx: any) => expect(ctx.output).to.equal(''))
 
   test
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   .formatCommands([AppsDestroy, AppsCreate])
   .it('shows a list of the provided commands', (ctx: any) => expect(ctx.output).to.equal(`COMMANDS
   apps:destroy  Destroy an app
   apps:create   Create an app`))
 
   test
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   .formatCommands([class extends Command {
     static id = 'hello:world'
 
