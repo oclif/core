@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "0.5.34",
+  "version": "0.5.35",
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {

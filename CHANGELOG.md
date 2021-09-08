@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.35](https://github.com/oclif/core/compare/v0.5.34...v0.5.35) (2021-09-08)
+
+
+### Bug Fixes
+
+* clear hook timeout ([#243](https://github.com/oclif/core/issues/243)) ([0c32c65](https://github.com/oclif/core/commit/0c32c65c5c30b02bc3ea6e36b0598adfc5b23ec1))
+
 ### [0.5.34](https://github.com/oclif/core/compare/v0.5.33...v0.5.34) (2021-08-30)
 
 
