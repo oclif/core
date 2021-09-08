@@ -212,8 +212,17 @@ export class Config implements IConfig {
     }
 
     const withTimeout = async (ms: number, promise: any) => {
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms} ms.`)), ms))
-      return Promise.race([promise, timeout])
+      let id: NodeJS.Timeout
+      const timeout = new Promise((_, reject) => {
+        id = setTimeout(() => {
+          reject(new Error(`Timed out after ${ms} ms.`))
+        }, ms)
+      })
+
+      return Promise.race([promise, timeout]).then(result => {
+        clearTimeout(id)
+        return result
+      })
     }
 
     const successes = []
@@ -254,7 +263,7 @@ export class Config implements IConfig {
 
           debug('done')
         } catch (error) {
-          failures.push({plugin: p, error})
+          failures.push({plugin: p, error: error as Error})
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
           this.warn(error, `runHook ${event}`)
         }

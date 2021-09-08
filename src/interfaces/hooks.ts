@@ -67,7 +67,7 @@ export namespace Hook {
 
   export interface Result<T> {
     successes: Array<{ result: T; plugin: Plugin }>;
-    failures: Array<{ error: typeof Error; plugin: Plugin }>;
+    failures: Array<{ error: Error; plugin: Plugin }>;
   }
 }
 
