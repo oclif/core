@@ -30,6 +30,7 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
 }
 
 export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
+  const originalArgv = [...argv]
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL) {
     options = fileURLToPath(options)
@@ -54,6 +55,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
     argv = argv.filter(arg => !getHelpFlagAdditions(config).includes(arg))
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
+    help.originalArgv = originalArgv
     await help.showHelp(argv)
     return
   }
