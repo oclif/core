@@ -51,7 +51,6 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
 
   // display help version if applicable
   if (helpAddition(argv, config)) {
-    argv = argv.filter(arg => !getHelpFlagAdditions(config).includes(arg))
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
     await help.showHelp(argv)

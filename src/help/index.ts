@@ -90,6 +90,8 @@ export class Help extends HelpBase {
   }
 
   public async showHelp(argv: string[]) {
+    argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
+
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv, this.config)
     if (!subject) {
@@ -202,8 +204,12 @@ export class Help extends HelpBase {
       command.id = command.id.replace(/:/g, this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
     }
-    const help = new this.CommandHelpClass(command, this.config, this.opts)
+    const help = this.getCommandHelpClass(command)
     return help.generate()
+  }
+
+  protected getCommandHelpClass(command: Interfaces.Command) {
+    return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
   protected formatCommands(commands: Interfaces.Command[]): string {
