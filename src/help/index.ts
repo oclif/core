@@ -30,19 +30,9 @@ function getHelpSubject(args: string[], config: Interfaces.Config): string | und
 }
 
 export abstract class HelpBase extends HelpFormatter {
-  private argvCopy: string[] = []
-
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)
     if (!config.topicSeparator) config.topicSeparator = ':' // back-support @oclif/config
-  }
-
-  public get originalArgv(): string[] {
-    return this.argvCopy
-  }
-
-  public set originalArgv(argv: string[]) {
-    this.argvCopy = argv
   }
 
   /**
@@ -100,6 +90,8 @@ export class Help extends HelpBase {
   }
 
   public async showHelp(argv: string[]) {
+    argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
+
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv, this.config)
     if (!subject) {
