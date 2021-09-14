@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.36](https://github.com/oclif/core/compare/v0.5.35...v0.5.36) (2021-09-14)
+
+
+### Bug Fixes
+
+* move ctor for command help class to its own function ([#244](https://github.com/oclif/core/issues/244)) ([26f2445](https://github.com/oclif/core/commit/26f24457c71276c38f86821c2b1498ecb8e4e2a4))
+
 ### [0.5.35](https://github.com/oclif/core/compare/v0.5.34...v0.5.35) (2021-09-08)
 
 
