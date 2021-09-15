@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.38](https://github.com/oclif/core/compare/v0.5.37...v0.5.38) (2021-09-15)
+
+
+### Features
+
+* have --json global flag disabled by default ([#252](https://github.com/oclif/core/issues/252)) ([c2a7799](https://github.com/oclif/core/commit/c2a7799ce036697c77917a830a12bce5db6c68a7))
+
 ### [0.5.37](https://github.com/oclif/core/compare/v0.5.36...v0.5.37) (2021-09-15)
 
 
