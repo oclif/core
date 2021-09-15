@@ -90,7 +90,7 @@ export default abstract class Command {
 
   static parserOptions = {}
 
-  static disableJsonFlag: boolean | undefined
+  static enableJsonFlag = false
 
   // eslint-disable-next-line valid-jsdoc
   /**
@@ -127,7 +127,7 @@ export default abstract class Command {
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = this.disableJsonFlag || settings.disableJsonFlag ? flags : Object.assign({}, Command.globalFlags, flags)
+    this._flags = this.enableJsonFlag || settings.enableJsonFlag ? Object.assign({}, Command.globalFlags, flags) : flags
   }
 
   id: string | undefined
@@ -193,7 +193,7 @@ export default abstract class Command {
   }
 
   public jsonEnabled(): boolean {
-    return !this.ctor.disableJsonFlag && this.argv.includes('--json')
+    return this.ctor.enableJsonFlag && this.argv.includes('--json')
   }
 
   /**
