@@ -216,7 +216,7 @@ export class Config implements IConfig {
       const timeout = new Promise((_, reject) => {
         id = setTimeout(() => {
           reject(new Error(`Timed out after ${ms} ms.`))
-        }, ms)
+        }, ms).unref()
       })
 
       return Promise.race([promise, timeout]).then(result => {
@@ -265,7 +265,6 @@ export class Config implements IConfig {
         } catch (error) {
           failures.push({plugin: p, error: error as Error})
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
-          this.warn(error, `runHook ${event}`)
         }
       }
     }
