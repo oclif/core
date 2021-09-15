@@ -265,7 +265,6 @@ export class Config implements IConfig {
         } catch (error) {
           failures.push({plugin: p, error: error as Error})
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
-          this.warn(error, `runHook ${event}`)
         }
       }
     }
