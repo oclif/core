@@ -216,7 +216,7 @@ export class Config implements IConfig {
       const timeout = new Promise((_, reject) => {
         id = setTimeout(() => {
           reject(new Error(`Timed out after ${ms} ms.`))
-        }, ms)
+        }, ms).unref()
       })
 
       return Promise.race([promise, timeout]).then(result => {
