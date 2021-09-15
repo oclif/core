@@ -31,9 +31,9 @@ export type Settings = {
    */
   tsnodeEnabled?: boolean;
   /**
-   * Disable the --json flag for all commands
+   * Enable the --json flag for all commands
    */
-  disableJsonFlag?: boolean;
+  enableJsonFlag?: boolean;
 };
 
 // Set global.oclif to the new object if it wasn't set before

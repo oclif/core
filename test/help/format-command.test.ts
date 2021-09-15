@@ -45,6 +45,8 @@ describe('formatCommand', () => {
       static description = `first line
 multiline help`
 
+      static enableJsonFlag = true
+
       static args = [{name: 'app_name', description: 'app to use'}]
 
       static flags = {
@@ -97,6 +99,8 @@ ALIASES
 
         static aliases = ['app:init', 'create']
 
+        static enableJsonFlag = true
+
         static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
 
         static flags = {
@@ -148,6 +152,8 @@ ALIASES
         static description = 'description of apps:create'
 
         static aliases = ['app:init', 'create']
+
+        static enableJsonFlag = true
 
         static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
 
@@ -237,6 +243,8 @@ DESCRIPTION
         static description = 'description of apps:create\nthese values are after and will show up in the command description'
 
         static aliases = ['app:init', 'create']
+
+        static enableJsonFlag = true
 
         static args = [{name: 'app_name', description: 'app to use'}]
 
