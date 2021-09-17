@@ -265,7 +265,7 @@ export class Config implements IConfig {
           debug('done')
         } catch (error) {
           final.failures.push({plugin: p, error: error as Error})
-          if (error && error.oclif && error.oclif.exit !== undefined) throw error
+          debug(error)
         }
       }
     })
