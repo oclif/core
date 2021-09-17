@@ -225,10 +225,11 @@ export class Config implements IConfig {
       })
     }
 
-    const successes = []
-    const failures = []
-
-    for (const p of this.plugins) {
+    const final = {
+      successes: [],
+      failures: [],
+    } as Hook.Result<Hooks[T]['return']>
+    const promises = this.plugins.map(async p => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -259,18 +260,21 @@ export class Config implements IConfig {
           const result = timeout ?
             await withTimeout(timeout, search(module).call(context, {...opts as any, config: this})) :
             await search(module).call(context, {...opts as any, config: this})
-          successes.push({plugin: p, result})
+          final.successes.push({plugin: p, result})
 
           debug('done')
         } catch (error) {
-          failures.push({plugin: p, error: error as Error})
+          final.failures.push({plugin: p, error: error as Error})
           if (error && error.oclif && error.oclif.exit !== undefined) throw error
         }
       }
-    }
+    })
+
+    await Promise.all(promises)
 
     debug('%s hook done', event)
-    return {successes, failures}
+    // return {successes, failures}
+    return final
   }
 
   async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {
