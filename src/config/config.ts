@@ -273,7 +273,7 @@ export class Config implements IConfig {
     await Promise.all(promises)
 
     debug('%s hook done', event)
-    // return {successes, failures}
+
     return final
   }
 
