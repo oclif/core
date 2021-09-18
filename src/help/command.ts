@@ -1,4 +1,4 @@
-import * as Chalk from 'chalk'
+import * as NanoColors from 'nanocolors'
 import stripAnsi = require('strip-ansi')
 
 import {castArray, compact, sortBy} from '../util'
@@ -14,13 +14,13 @@ const POSSIBLE_LINE_FEED = /\r\n|\n/
 
 const {
   underline,
-} = Chalk
+} = NanoColors
 let {
   dim,
-} = Chalk
+} = NanoColors
 
 if (process.env.ConEmuANSI === 'ON') {
-  dim = Chalk.gray
+  dim = NanoColors.gray
 }
 export class CommandHelp extends HelpFormatter {
   constructor(

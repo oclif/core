@@ -1,6 +1,6 @@
 // tslint:disable no-implicit-dependencies
 
-import * as Chalk from 'chalk'
+import {red, yellow} from 'nanocolors'
 import Clean = require('clean-stack')
 import Indent = require('indent-string')
 import * as Wrap from 'wrap-ansi'
@@ -58,10 +58,6 @@ export class CLIError extends Error implements OclifError {
   }
 
   get bang() {
-    let red: typeof Chalk.red = ((s: string) => s) as any
-    try {
-      red = require('chalk').red
-    } catch { }
     return red(process.platform === 'win32' ? '»' : '›')
   }
 }
@@ -74,10 +70,6 @@ export namespace CLIError {
     }
 
     get bang() {
-      let yellow: typeof Chalk.yellow = ((s: string) => s) as any
-      try {
-        yellow = require('chalk').yellow
-      } catch { }
       return yellow(process.platform === 'win32' ? '»' : '›')
     }
   }

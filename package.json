@@ -6,7 +6,6 @@
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
     "@oclif/linewrap": "^1.0.0",
-    "chalk": "^4.1.0",
     "clean-stack": "^3.0.0",
     "cli-ux": "^5.1.0",
     "debug": "^4.1.1",
@@ -16,6 +15,7 @@
     "indent-string": "^4.0.0",
     "is-wsl": "^2.1.1",
     "lodash.template": "^4.4.0",
+    "nanocolors": "^0.2.2",
     "semver": "^7.3.2",
     "string-width": "^4.2.0",
     "strip-ansi": "^6.0.0",

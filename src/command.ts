@@ -230,8 +230,8 @@ export default abstract class Command {
       if (!err.message) throw err
       try {
         const {cli} = require('cli-ux')
-        const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
-        cli.action.stop(chalk.bold.red('!'))
+        const {bold, red} = require('nanocolors') // eslint-disable-line node/no-extraneous-require
+        cli.action.stop(bold(red('!')))
       } catch {}
       throw err
     }

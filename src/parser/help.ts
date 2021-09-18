@@ -1,4 +1,4 @@
-import * as Chalk from 'chalk'
+import {Colors} from 'nanocolors'
 
 import Deps from './deps'
 import * as Util from './util'
@@ -6,7 +6,7 @@ import {FlagUsageOptions, Flag} from '../interfaces'
 
 // eslint-disable-next-line new-cap
 const m = Deps()
-.add('chalk', () => require('chalk') as typeof Chalk)
+.add('nanocolors', () => require('nanocolors') as Colors)
 // eslint-disable-next-line node/no-missing-require
 .add('util', () => require('./util') as typeof Util)
 
@@ -24,7 +24,7 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
 
   let description: string | undefined = flag.summary || flag.description || ''
   if (options.displayRequired && flag.required) description = `(required) ${description}`
-  description = description ? m.chalk.dim(description) : undefined
+  description = description ? m.nanocolors.dim(description) : undefined
 
   return [` ${label.join(',').trim()}${usage}`, description] as [string, string | undefined]
 }
