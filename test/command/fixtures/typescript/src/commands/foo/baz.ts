@@ -1,7 +1,7 @@
-export class Command {
-  static description = 'foo baz description'
+export const Command = {
+  description: 'foo baz description',
 
-  static run() {
+  run() {
     console.log('running Baz')
-  }
+  },
 }

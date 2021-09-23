@@ -1,8 +1,8 @@
-export class Command {
-  static description = 'fail description'
+export const Command = {
+  description: 'fail description',
 
-  static run() {
+  run() {
     console.log('it fails!')
     throw new Error('random error')
-  }
+  },
 }

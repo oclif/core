@@ -84,9 +84,10 @@ export class DocOpts {
     if (this.cmd.args) {
       opts.push(...this.cmd.args?.map(arg => `[${arg.name.toUpperCase()}]`))
     }
+
     try {
       opts.push(...Object.values(this.groupFlagElements()))
-    } catch (error: any) {
+    } catch {
       // If there is an error, just return no usage so we don't fail command help.
       opts.push(...this.flagList.map(flag => {
         const name = flag.char ? `-${flag.char}` : `--${flag.name}`
@@ -94,6 +95,7 @@ export class DocOpts {
         return `${name}=<value>`
       }))
     }
+
     return opts.join(' ')
   }
 
@@ -125,6 +127,7 @@ export class DocOpts {
         elementMap[remainingFlag.name] = `[${elementMap[remainingFlag.name] || ''}]`
       }
     }
+
     return elementMap
   }
 
@@ -137,6 +140,7 @@ export class DocOpts {
     if (!this.flagMap[flagName]) {
       return
     }
+
     let isRequired = this.flagMap[flagName]?.required
     if (typeof isRequired !== 'boolean' || !isRequired) {
       isRequired = flagNames.reduce(
@@ -151,11 +155,13 @@ export class DocOpts {
       delete elementMap[toCombine]
       delete this.flagMap[toCombine]
     }
+
     if (isRequired) {
       elementMap[flagName] = `(${elementMap[flagName] || ''})`
     } else {
       elementMap[flagName] = `[${elementMap[flagName] || ''}]`
     }
+
     // We handled this flag, don't handle it again
     delete this.flagMap[flagName]
   }
@@ -169,10 +175,12 @@ export class DocOpts {
       if (flag.type === 'option') {
         type = flag.options ? ` ${flag.options.join('|')}` : ' <value>'
       }
+
       const element = `${flagName}${type}`
       elementMap[flag.name] = element
       elementStrs.push(element)
     }
+
     return elementStrs
   }
 }

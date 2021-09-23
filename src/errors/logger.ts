@@ -1,5 +1,5 @@
 import * as FS from 'fs-extra'
-import * as path from 'path'
+import * as path from 'node:path'
 import StripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
@@ -25,7 +25,7 @@ export class Logger {
   log(msg: string) {
     const stripAnsi: typeof StripAnsi = require('strip-ansi')
     msg = stripAnsi(chomp(msg))
-    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimRight())
+    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
     // tslint:disable-next-line no-console
     this.flush(50).catch(console.error)

@@ -1,6 +1,6 @@
 import {expect, test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
-import * as path from 'path'
+import * as path from 'node:path'
 
 import {Help} from '../../src/help'
 import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
@@ -36,14 +36,14 @@ const test = base
     ctx.help = new TestHelp(config)
   },
   finally(ctx) {
-    Object.values(ctx.stubs).forEach(stub  => stub.restore())
+    for (const stub of Object.values(ctx.stubs))  stub.restore()
   },
 }))
 .register('makeTopicsWithoutCommand', () => ({
   async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
     // by returning no matching command for a subject, it becomes a topic only
     // with no corresponding command (in which case the showCommandHelp is shown)
-    ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns(undefined)
+    ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns()
   },
   finally(ctx) {
     ctx.makeTopicOnlyStub.restore()

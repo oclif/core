@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
 import {TSConfig} from '../interfaces/ts-config'
 import {settings} from '../settings'
@@ -16,7 +16,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
   } catch {
     try {
       typescript = require(root + '/node_modules/typescript')
-    } catch { }
+    } catch {}
   }
 
   if (fs.existsSync(tsconfigPath) && typescript) {
@@ -29,6 +29,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
         `Could not read and parse tsconfig.json at ${tsconfigPath}, or it ` +
         'did not contain a "compilerOptions" section.')
     }
+
     return tsconfig
   }
 }

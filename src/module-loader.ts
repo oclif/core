@@ -1,5 +1,5 @@
-import * as path from 'path'
-import * as url from 'url'
+import * as path from 'node:path'
+import * as url from 'node:url'
 import * as fs from 'fs-extra'
 
 import {ModuleLoadError} from './errors'
@@ -54,6 +54,7 @@ export default class ModuleLoader {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
+
       throw error
     }
   }
@@ -86,6 +87,7 @@ export default class ModuleLoader {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
+
       throw error
     }
   }
@@ -132,7 +134,7 @@ export default class ModuleLoader {
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
-    } catch (error: any) {
+    } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
       // Try all supported extensions.

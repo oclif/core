@@ -24,7 +24,7 @@ const test = base
       console.log(help)
     }
 
-    ctx.output = stripAnsi(help).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.output = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
   },
 }))
 

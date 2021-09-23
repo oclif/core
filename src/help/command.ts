@@ -22,6 +22,7 @@ let {
 if (process.env.ConEmuANSI === 'ON') {
   dim = Chalk.gray
 }
+
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Interfaces.Command,
@@ -46,6 +47,7 @@ export class CommandHelp extends HelpFormatter {
       if (Array.isArray(body)) {
         return body.map(helpSection => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body)).join('\n\n')
       }
+
       return body && this.section(header, body)
     })).join('\n\n')
     return output
@@ -65,6 +67,7 @@ export class CommandHelp extends HelpFormatter {
         mainFlags.push(flag)
       }
     }
+
     return {mainFlags, flagGroups}
   }
 
@@ -88,10 +91,10 @@ export class CommandHelp extends HelpFormatter {
 
           if (mainFlagBody) flagSections.push({header, body: mainFlagBody})
 
-          Object.entries(flagGroups).forEach(([name, flags]) => {
+          for (const [name, flags] of Object.entries(flagGroups)) {
             const body = this.flags(flags)
             if (body) flagSections.push({header: `${name.toUpperCase()} ${header}`, body})
-          })
+          }
 
           return compact<HelpSection>(flagSections)
         },
@@ -125,10 +128,11 @@ export class CommandHelp extends HelpFormatter {
       const allowedSpacing = this.opts.maxWidth - this.indentSpacing
       const line = `$ ${this.config.bin} ${u}`.trim()
       if (line.length > allowedSpacing) {
-        const splitIndex = line.substring(0, allowedSpacing).lastIndexOf(' ')
-        return line.substring(0, splitIndex) + '\n' +
-            this.indent(this.wrap(line.substring(splitIndex), this.indentSpacing * 2))
+        const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
+        return line.slice(0, Math.max(0, splitIndex)) + '\n' +
+            this.indent(this.wrap(line.slice(Math.max(0, splitIndex)), this.indentSpacing * 2))
       }
+
       return this.wrap(line)
     })
     .join('\n')
@@ -140,6 +144,7 @@ export class CommandHelp extends HelpFormatter {
     if (this.opts.docopts === undefined || this.opts.docopts) {
       return DocOpts.generate(this.command)
     }
+
     return compact([
       this.command.id,
       this.command.args.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
@@ -159,6 +164,7 @@ export class CommandHelp extends HelpFormatter {
         ...(cmd.description || '').split(POSSIBLE_LINE_FEED),
       ]
     }
+
     if (description) {
       // Lines separated with only one newline or more than 2 can be hard to read in the terminal.
       // Always separate by two newlines.
@@ -205,7 +211,7 @@ export class CommandHelp extends HelpFormatter {
 
       const multilineSeparator =
         this.config.platform === 'win32' ?
-          this.config.shell.includes('powershell') ? '`' : '^' :
+          (this.config.shell.includes('powershell') ? '`' : '^') :
           '\\'
 
       // The command will be indented in the section, which is also indented
@@ -253,19 +259,21 @@ export class CommandHelp extends HelpFormatter {
           labels.push(`--${flag.name.trim()}`)
         }
       }
+
       label = labels.join(', ')
     }
 
     if (flag.type === 'option') {
       let value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
       if (!flag.helpValue && flag.options) {
-        if (showOptions || this.opts.showFlagOptionsInTitle) value = `${flag.options.join('|')}`
-        else value = '<option>'
+        value = showOptions || this.opts.showFlagOptionsInTitle ? `${flag.options.join('|')}` : '<option>'
       }
+
       if (flag.multiple) value += '...'
       if (!value.includes('|')) value = underline(value)
       label += `=${value}`
     }
+
     return label
   }
 
@@ -279,6 +287,7 @@ export class CommandHelp extends HelpFormatter {
       if (flag.type === 'option' && flag.default) {
         right = `[default: ${flag.default}] ${right}`
       }
+
       if (flag.required) right = `(required) ${right}`
 
       if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
@@ -297,11 +306,7 @@ export class CommandHelp extends HelpFormatter {
       // Guaranteed to be set because of the filter above, but make ts happy
       const summary = flag.summary || ''
       let flagHelp = this.flagHelpLabel(flag, true)
-      if (flagHelp.length + summary.length + 2 < this.opts.maxWidth) {
-        flagHelp += '  ' + summary
-      } else {
-        flagHelp += '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
-      }
+      flagHelp += flagHelp.length + summary.length + 2 < this.opts.maxWidth ? '  ' + summary : '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
       return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
     }).join('\n\n')
 

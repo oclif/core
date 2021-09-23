@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
-import * as path from 'path'
-import * as url from 'url'
+import * as path from 'node:path'
+import * as url from 'node:url'
 
 import {run} from '../../src/main'
 

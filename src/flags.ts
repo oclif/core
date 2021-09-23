@@ -22,6 +22,7 @@ const _enum = <T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> => {
     ...opts,
   })() as OptionFlag<T>
 }
+
 export {_enum as enum}
 
 const stringFlag = build({})

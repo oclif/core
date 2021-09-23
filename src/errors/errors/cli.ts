@@ -45,6 +45,7 @@ export class CLIError extends Error implements OclifError {
     if (config.debug) {
       return this.stack
     }
+
     const wrap: typeof Wrap = require('wrap-ansi')
     const indent: typeof Indent = require('indent-string')
 
@@ -61,7 +62,8 @@ export class CLIError extends Error implements OclifError {
     let red: typeof Chalk.red = ((s: string) => s) as any
     try {
       red = require('chalk').red
-    } catch { }
+    } catch {}
+
     return red(process.platform === 'win32' ? '»' : '›')
   }
 }
@@ -77,7 +79,8 @@ export namespace CLIError {
       let yellow: typeof Chalk.yellow = ((s: string) => s) as any
       try {
         yellow = require('chalk').yellow
-      } catch { }
+      } catch {}
+
       return yellow(process.platform === 'win32' ? '»' : '›')
     }
   }

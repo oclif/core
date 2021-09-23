@@ -1,7 +1,7 @@
-import {fileURLToPath} from 'url'
+import {fileURLToPath} from 'node:url'
 
 import {settings} from './settings'
-import {format, inspect} from 'util'
+import {format, inspect} from 'node:util'
 import {cli} from 'cli-ux'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
@@ -165,6 +165,7 @@ export default abstract class Command {
     if (result && this.jsonEnabled()) {
       cli.styledJSON(this.toSuccessJson(result))
     }
+
     return result
   }
 
@@ -233,6 +234,7 @@ export default abstract class Command {
         const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
         cli.action.stop(chalk.bold.red('!'))
       } catch {}
+
       throw err
     }
   }

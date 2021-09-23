@@ -32,17 +32,18 @@ export function template(context: any): (t: string) => string {
   function render(t: string): string {
     return lodashTemplate(t)(context)
   }
+
   return render
 }
 
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = config.commandIDs.concat(config.topics.map(t => t.name))
+  const ids = new Set(config.commandIDs.concat(config.topics.map(t => t.name)))
 
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
-    const idPresent = (id: string) => ids.includes(id)
+    const idPresent = (id: string) => ids.has(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')

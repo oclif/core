@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import {resolve} from 'path'
+import {resolve} from 'node:path'
 import {Config, Interfaces} from '../../src'
 import {expect, test} from '@oclif/test'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'

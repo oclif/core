@@ -1,9 +1,9 @@
 import {CLIError, error, exit, warn} from '../errors'
 import * as Lodash from 'lodash'
-import * as os from 'os'
-import * as path from 'path'
-import {fileURLToPath, URL} from 'url'
-import {format} from 'util'
+import * as os from 'node:os'
+import * as path from 'node:path'
+import {fileURLToPath, URL} from 'node:url'
+import {format} from 'node:util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
@@ -90,8 +90,7 @@ export class Config implements IConfig {
   private _topics?: Topic[]
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(public options: Options) {
-  }
+  constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -284,6 +283,7 @@ export class Config implements IConfig {
       await this.runHook('command_not_found', {id, argv})
       throw new CLIError(`command ${id} not found`)
     }
+
     const command = await c.load()
     await this.runHook('prerun', {Command: command, argv})
     const result = (await command.run(argv, this)) as T
@@ -303,7 +303,7 @@ export class Config implements IConfig {
   scopedEnvVarKey(k: string) {
     return [this.bin, k]
     // eslint-disable-next-line no-useless-escape
-    .map(p => p.replace(/@/g, '').replace(/[-\/]/g, '_'))
+    .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
   }
@@ -348,14 +348,17 @@ export class Config implements IConfig {
         // If b appears first in the pjson.plugins sort it first
         return aIndex - bIndex
       }
+
       // if b is a core plugin and a is not sort b first
       if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
+
       // if a is a core plugin and b is not sort a first
       if (a.pluginType === 'core' && b.pluginType !== 'core') {
         return -1
       }
+
       // neither plugin is core, so do not change the order
       return 0
     })
@@ -397,17 +400,20 @@ export class Config implements IConfig {
         } else topics.push(topic)
       }
     }
+
     // add missing topics
     for (const c of this.commands.filter(c => !c.hidden)) {
       const parts = c.id.split(':')
-      while (parts.length) {
+      while (parts.length > 0) {
         const name = parts.join(':')
         if (name && !topics.find(t => t.name === name)) {
           topics.push({name, description: c.summary || c.description})
         }
+
         parts.pop()
       }
     }
+
     this._topics = topics
     return this._topics
   }
@@ -460,6 +466,7 @@ export class Config implements IConfig {
     } else {
       shellPath = ['unknown']
     }
+
     return shellPath[shellPath.length - 1]
   }
 
@@ -468,8 +475,8 @@ export class Config implements IConfig {
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1
-    } catch {
-    }
+    } catch {}
+
     return 0
   }
 
@@ -486,6 +493,7 @@ export class Config implements IConfig {
           opts.tag = plugin.tag || opts.tag
           opts.root = plugin.root || opts.root
         }
+
         const instance = new Plugin.Plugin(opts)
         await instance.load()
         if (this.plugins.find(p => p.name === instance.name)) return
@@ -496,6 +504,7 @@ export class Config implements IConfig {
           if (!parent.children) parent.children = []
           parent.children.push(instance)
         }
+
         await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
       } catch (error: any) {
         this.warn(error, 'loadPlugins')
@@ -620,9 +629,9 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: any = {}
-  keysToAdd.forEach(key => {
+  for (const key of keysToAdd) {
     additionalProperties[key] = (c as any)[key]
-  })
+  }
 
   return {...stdProperties, ...additionalProperties}
 }

@@ -25,7 +25,8 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(topicHelpOutput)
     }
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimRight()).join('\n')
+
+    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
     ctx.expectation = 'has topicHelp'
   },
 }))

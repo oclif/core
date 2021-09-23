@@ -1,6 +1,6 @@
-import {fileURLToPath} from 'url'
+import {fileURLToPath} from 'node:url'
 
-import {format, inspect} from 'util'
+import {format, inspect} from 'node:util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
@@ -19,12 +19,13 @@ export const helpAddition = (argv: string[], config: Interfaces.Config): boolean
     if (mergedHelpFlags.includes(arg)) return true
     if (arg === '--') return false
   }
+
   return false
 }
 
 export const versionAddition = (argv: string[], config?: Interfaces.Config): boolean => {
   const additionalVersionFlags = config?.pjson.oclif.additionalVersionFlags ?? []
-  const mergedVersionFlags = [...new Set([...['--version'], ...additionalVersionFlags]).values()]
+  const mergedVersionFlags = [...new Set(['--version', ...additionalVersionFlags]).values()]
   if (mergedVersionFlags.includes(argv[0])) return true
   return false
 }
@@ -67,5 +68,6 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
       argvSlice = argv
     }
   }
+
   await config.runCommand(id, argvSlice, cmd)
 }

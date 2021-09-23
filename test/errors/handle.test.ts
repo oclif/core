@@ -1,8 +1,8 @@
 /* eslint-disable no-import-assign */
 import {expect, fancy} from 'fancy-test'
 import * as fs from 'fs-extra'
-import * as path from 'path'
-import * as process from 'process'
+import * as path from 'node:path'
+import * as process from 'node:process'
 
 import {CLIError, config, ExitError} from '../../src/errors'
 import {handle} from '../../src/errors/handle'

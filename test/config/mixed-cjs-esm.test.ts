@@ -1,4 +1,4 @@
-import * as path from 'path'
+import * as path from 'node:path'
 
 import {Config} from '../../src/config'
 
@@ -33,6 +33,7 @@ describe('mixed-cjs-esm', () => {
     } catch {
       console.log('caught error')
     }
+
     expect(ctx.stdout).to.equal('running mixed-cjs-esm prerun hook\nit fails!\ncaught error\n')
   })
 

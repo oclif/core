@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 
 const debug = require('debug')
 
@@ -51,7 +51,7 @@ function displayWarnings() {
 }
 
 export function Debug(...scope: string[]): (..._: any) => void {
-  if (!debug) return (..._: any[]) => { }
+  if (!debug) return (..._: any[]) => {}
   const d = debug(['config', ...scope].join(':'))
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)

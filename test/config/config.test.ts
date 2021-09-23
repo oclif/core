@@ -1,5 +1,5 @@
-import * as os from 'os'
-import * as path from 'path'
+import * as os from 'node:os'
+import * as path from 'node:path'
 
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
@@ -189,7 +189,7 @@ describe('Config', () => {
       }
 
       run(): PromiseLike<any> {
-        return Promise.resolve(undefined)
+        return Promise.resolve()
       }
       }
       const load = async (): Promise<void>  => {}
@@ -198,6 +198,7 @@ describe('Config', () => {
       // @ts-ignore
         return new MyComandClass()
       }
+
       const commandPluginA: ICommand.Plugin = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
