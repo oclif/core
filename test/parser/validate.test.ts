@@ -48,7 +48,6 @@ describe('validate', () => {
       },
     }
 
-    // eslint-disable-next-line
     // @ts-ignore
     expect(validate.bind({input, output})).to.throw()
   })
@@ -75,7 +74,6 @@ describe('validate', () => {
       },
     }
 
-    // eslint-disable-next-line
     // @ts-ignore
     validate({input, output})
   })
@@ -110,7 +108,6 @@ describe('validate', () => {
       },
     }
 
-    // eslint-disable-next-line
     // @ts-ignore
     validate({input, output})
   })
@@ -140,7 +137,6 @@ describe('validate', () => {
       },
     }
 
-    // eslint-disable-next-line
     // @ts-ignore
     expect(validate.bind({input, output})).to.throw()
   })

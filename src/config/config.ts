@@ -1,9 +1,9 @@
 import {CLIError, error, exit, warn} from '../errors'
 import * as Lodash from 'lodash'
-import * as os from 'node:os'
-import * as path from 'node:path'
-import {fileURLToPath, URL} from 'node:url'
-import {format} from 'node:util'
+import * as os from 'os'
+import * as path from 'path'
+import {fileURLToPath, URL} from 'url'
+import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
@@ -276,6 +276,7 @@ export class Config implements IConfig {
     return final
   }
 
+  // eslint-disable-next-line default-param-last
   async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
@@ -302,7 +303,6 @@ export class Config implements IConfig {
 
   scopedEnvVarKey(k: string) {
     return [this.bin, k]
-    // eslint-disable-next-line no-useless-escape
     .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
@@ -499,7 +499,6 @@ export class Config implements IConfig {
         if (this.plugins.find(p => p.name === instance.name)) return
         this.plugins.push(instance)
         if (parent) {
-          // eslint-disable-next-line require-atomic-updates
           instance.parent = parent
           if (!parent.children) parent.children = []
           parent.children.push(instance)
@@ -590,7 +589,6 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         options: flag.options,
         dependsOn: flag.dependsOn,
         exclusive: flag.exclusive,
-        // eslint-disable-next-line no-await-in-loop
         default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
       }
     }

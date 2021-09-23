@@ -97,8 +97,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        let input
-        input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
+        const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
         if (typeof input !== 'string') {
           throw new m.errors.CLIError(`Flag --${name} expects a value`)
         }

@@ -86,7 +86,8 @@ export function toStandardizedId(commandID: string, config: IConfig): string {
 }
 
 export function toConfiguredId(commandID: string, config: IConfig): string {
-  return commandID.replace(new RegExp(':', 'g'), config.topicSeparator)
+  const defaultTopicSeperator = ':'
+  return commandID.replace(new RegExp(defaultTopicSeperator, 'g'), config.topicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {

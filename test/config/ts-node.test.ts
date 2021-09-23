@@ -1,4 +1,4 @@
-import * as path from 'node:path'
+import * as path from 'path'
 import * as proxyquire from 'proxyquire'
 import * as tsNode from 'ts-node'
 

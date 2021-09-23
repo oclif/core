@@ -1,7 +1,7 @@
 import {error} from '../errors'
 import * as Globby from 'globby'
-import * as path from 'node:path'
-import {inspect} from 'node:util'
+import * as path from 'path'
+import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Command} from '../interfaces/command'
@@ -240,7 +240,6 @@ export class Plugin implements IPlugin {
 
     return {
       version: this.version,
-      // eslint-disable-next-line array-callback-return
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
           return [id, await toCached(await this.findCommand(id, {must: true}), this)]

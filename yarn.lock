@@ -1559,10 +1559,10 @@ eslint-config-oclif-typescript@^1.0.2:
     eslint-plugin-mocha "^9.0.0"
     eslint-plugin-node "^11.1.0"
 
-eslint-config-oclif@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-3.1.1.tgz#cea4aee5a75a5ac008f6eb1e6a263edeaa1c1001"
-  integrity sha512-INIOtkIQ4cylNFLOCcz7GPvQxZQdpR6qtGE1e9DAx3FNqNZ0MmvG3h+YPn3nNlf3xiaXECUU8Gi+S1oi60bvqQ==
+eslint-config-oclif@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-4.0.0.tgz#90a07587f7be7c92ae3ce750ae11cf1e864239eb"
+  integrity sha512-5tkUQeC33rHAhJxaGeBGYIflDLumeV2qD/4XLBdXhB/6F/+Jnwdce9wYHSvkx0JUqUQShpQv8JEVkBp/zzD7hg==
   dependencies:
     eslint-config-xo-space "^0.27.0"
     eslint-plugin-mocha "^9.0.0"

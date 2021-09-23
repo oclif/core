@@ -1,6 +1,6 @@
 // tslint:disable interface-over-type-literal
 
-import {URL} from 'node:url'
+import {URL} from 'url'
 
 import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
 

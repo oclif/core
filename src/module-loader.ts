@@ -1,5 +1,5 @@
-import * as path from 'node:path'
-import * as url from 'node:url'
+import * as path from 'path'
+import * as url from 'url'
 import * as fs from 'fs-extra'
 
 import {ModuleLoadError} from './errors'
@@ -12,6 +12,7 @@ const getPackageType = require('get-package-type')
 /**
  * Defines file extension resolution when source files do not have an extension.
  */
+// eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.js', '.mjs', '.cjs']
 
 /**
@@ -26,6 +27,7 @@ const _importDynamic = new Function('modulePath', 'return import(modulePath)') /
  *
  * @author Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)
  */
+// eslint-disable-next-line unicorn/no-static-only-class
 export default class ModuleLoader {
   /**
    * Loads and returns a module.
@@ -139,6 +141,7 @@ export default class ModuleLoader {
 
       // Try all supported extensions.
       if (!fs.existsSync(filePath)) {
+        // eslint-disable-next-line camelcase
         for (const extension of s_EXTENSIONS) {
           const testPath = `${filePath}${extension}`
 

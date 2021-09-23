@@ -1,6 +1,6 @@
-import {fileURLToPath} from 'node:url'
+import {fileURLToPath} from 'url'
 
-import {format, inspect} from 'node:util'
+import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {Config} from './config'
@@ -30,6 +30,7 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
+// eslint-disable-next-line default-param-last
 export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL) {

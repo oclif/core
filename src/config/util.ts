@@ -1,4 +1,4 @@
-import * as fs from 'node:fs'
+import * as fs from 'fs'
 
 const debug = require('debug')
 
@@ -6,7 +6,7 @@ export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
   return arr.reduce((arr, i) => arr.concat(fn(i)), [] as U[])
 }
 
-export function mapValues<T extends object, TResult>(obj: {[P in keyof T]: T[P]}, fn: (i: T[keyof T], k: keyof T) => TResult): {[P in keyof T]: TResult} {
+export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in keyof T]: T[P]}, fn: (i: T[keyof T], k: keyof T) => TResult): {[P in keyof T]: TResult} {
   return Object.entries(obj)
   .reduce((o, [k, v]) => {
     o[k] = fn(v as any, k as any)
@@ -15,13 +15,14 @@ export function mapValues<T extends object, TResult>(obj: {[P in keyof T]: T[P]}
 }
 
 export function exists(path: string): Promise<boolean> {
+  // eslint-disable-next-line no-promise-executor-return
   return new Promise(resolve => resolve(fs.existsSync(path)))
 }
 
 export function loadJSON(path: string): Promise<any> {
   debug('config')('loadJSON %s', path)
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, d) => {
+    fs.readFile(path, 'utf8', (err: any, d: any) => {
       try {
         if (err) reject(err)
         else resolve(JSON.parse(d))

@@ -1,6 +1,6 @@
 import {expect, test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
-import * as path from 'node:path'
+import * as path from 'path'
 
 import {CommandHelp, Help} from '../../src/help'
 import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
@@ -72,7 +72,8 @@ const test = base
   async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
     // by returning no matching command for a subject, it becomes a topic only
     // with no corresponding command (in which case the showCommandHelp is shown)
-    ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns()
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns(undefined)
   },
   finally(ctx) {
     ctx.makeTopicOnlyStub.restore()

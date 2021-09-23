@@ -1,5 +1,5 @@
-import * as os from 'node:os'
-import * as path from 'node:path'
+import * as os from 'os'
+import * as path from 'path'
 
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
@@ -171,7 +171,6 @@ describe('Config', () => {
       commandIds = ['foo:bar', 'foo:baz'],
       types = [],
     }: Options = {}) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
       class MyComandClass implements ICommand.Class {
       _base = ''
@@ -194,7 +193,6 @@ describe('Config', () => {
       }
       const load = async (): Promise<void>  => {}
       const findCommand = async (): Promise<ICommand.Class> => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
         return new MyComandClass()
       }
@@ -265,7 +263,6 @@ describe('Config', () => {
         config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
         return config
       })
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       return {
         it(expectation: string, fn: (config: Interfaces.Config) => any) {

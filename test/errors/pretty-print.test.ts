@@ -78,7 +78,7 @@ describe('pretty-print', () => {
 
     fancy
     .it('shows the stack for an error', async () => {
-      const error = new Error()
+      const error = new Error('oh no!')
       error.stack = 'this is the error stack property'
       expect(prettyPrint(error)).to.equal('this is the error stack property')
     })

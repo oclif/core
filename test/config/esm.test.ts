@@ -1,5 +1,5 @@
-import * as url from 'node:url'
-import * as path from 'node:path'
+import * as url from 'url'
+import * as path from 'path'
 
 import {Config} from '../../src/config'
 

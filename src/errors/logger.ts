@@ -1,5 +1,5 @@
 import * as FS from 'fs-extra'
-import * as path from 'node:path'
+import * as path from 'path'
 import StripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()

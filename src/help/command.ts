@@ -20,6 +20,7 @@ let {
 } = Chalk
 
 if (process.env.ConEmuANSI === 'ON') {
+  // eslint-disable-next-line unicorn/consistent-destructuring
   dim = Chalk.gray
 }
 
@@ -198,6 +199,7 @@ export class CommandHelp extends HelpFormatter {
         .split(POSSIBLE_LINE_FEED)
         .filter(line => Boolean(line))
         // If the example is <description>\n<command> then format correctly
+        // eslint-disable-next-line unicorn/no-array-callback-reference
         if (lines.length >= 2 && !isCommand(lines[0]) && lines.slice(1).every(isCommand)) {
           description = lines[0]
           commands = lines.slice(1)

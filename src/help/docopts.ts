@@ -82,7 +82,8 @@ export class DocOpts {
   public toString(): string {
     const opts = ['<%= command.id %>']
     if (this.cmd.args) {
-      opts.push(...this.cmd.args?.map(arg => `[${arg.name.toUpperCase()}]`))
+      const a = this.cmd.args?.map(arg => `[${arg.name.toUpperCase()}]`) || []
+      opts.push(...a)
     }
 
     try {
@@ -166,6 +167,7 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
+  // eslint-disable-next-line default-param-last
   private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flags): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
