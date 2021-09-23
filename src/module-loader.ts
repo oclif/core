@@ -50,7 +50,7 @@ export default class ModuleLoader {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       // It is important to await on _importDynamic to catch the error code.
       return isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
@@ -82,7 +82,7 @@ export default class ModuleLoader {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
       return {isESM, module, filePath}
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
@@ -132,7 +132,7 @@ export default class ModuleLoader {
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
-    } catch (error) {
+    } catch (error: any) {
       filePath = Config.tsPath(config.root, modulePath)
 
       // Try all supported extensions.

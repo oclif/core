@@ -96,7 +96,7 @@ describe('handle', () => {
     .it('exits without displaying anything', ctx => {
       try {
         exitErrorThrower(9000)
-      } catch (error) {
+      } catch (error: any) {
         handle(error)
       }
 

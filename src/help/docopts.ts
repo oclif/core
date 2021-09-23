@@ -86,7 +86,7 @@ export class DocOpts {
     }
     try {
       opts.push(...Object.values(this.groupFlagElements()))
-    } catch (error) {
+    } catch (error: any) {
       // If there is an error, just return no usage so we don't fail command help.
       opts.push(...this.flagList.map(flag => {
         const name = flag.char ? `-${flag.char}` : `--${flag.name}`

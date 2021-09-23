@@ -20,7 +20,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
     try {
       const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
     }
   }

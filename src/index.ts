@@ -45,7 +45,7 @@ export {
 function checkCWD() {
   try {
     process.cwd()
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       process.stderr.write('WARNING: current directory does not exist\n')
     }

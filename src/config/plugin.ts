@@ -153,7 +153,7 @@ export class Plugin implements IPlugin {
     try {
       const globbyPath = require.resolve('globby', {paths: [this.root, __dirname]})
       globby = require(globbyPath)
-    } catch (error) {
+    } catch (error: any) {
       this.warn(error, 'not loading commands, globby not found')
       return []
     }
@@ -191,7 +191,7 @@ export class Plugin implements IPlugin {
         const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
         this._debug(isESM ? '(import)' : '(require)', filePath)
         m = module
-      } catch (error) {
+      } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
       }
@@ -217,7 +217,7 @@ export class Plugin implements IPlugin {
           this._debug('using manifest from', p)
           return manifest
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.code === 'ENOENT') {
           if (!dotfile) return readManifest(true)
         } else {
@@ -236,7 +236,7 @@ export class Plugin implements IPlugin {
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
           return [id, await toCached(await this.findCommand(id, {must: true}), this)]
-        } catch (error) {
+        } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
           else throw this.addErrorScope(error, scope)

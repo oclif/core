@@ -25,7 +25,7 @@ export function loadJSON(path: string): Promise<any> {
       try {
         if (err) reject(err)
         else resolve(JSON.parse(d))
-      } catch (error) {
+      } catch (error: any) {
         reject(error)
       }
     })

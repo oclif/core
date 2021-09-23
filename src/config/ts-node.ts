@@ -71,7 +71,7 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
     // In that case we attempt to resolve to the filename. If it fails it will revert back to the lib path
     if (fs.existsSync(out) || fs.existsSync(out + '.ts')) return out
     return orig
-  } catch (error) {
+  } catch (error: any) {
     debug(error)
     return orig
   }

@@ -181,7 +181,7 @@ export class Config implements IConfig {
     try {
       const devPlugins = this.pjson.oclif.devPlugins
       if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-    } catch (error) {
+    } catch (error: any) {
       process.emitWarning(error)
     }
   }
@@ -197,7 +197,7 @@ export class Config implements IConfig {
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
         await this.loadPlugins(userPJSONPath, 'link', pjson.oclif.plugins.filter((p: any) => p.type === 'link'))
-      } catch (error) {
+      } catch (error: any) {
         if (error.code !== 'ENOENT') process.emitWarning(error)
       }
     }
@@ -263,7 +263,7 @@ export class Config implements IConfig {
           final.successes.push({plugin: p, result})
 
           debug('done')
-        } catch (error) {
+        } catch (error: any) {
           final.failures.push({plugin: p, error: error as Error})
           debug(error)
         }
@@ -497,7 +497,7 @@ export class Config implements IConfig {
           parent.children.push(instance)
         }
         await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
-      } catch (error) {
+      } catch (error: any) {
         this.warn(error, 'loadPlugins')
       }
     }))

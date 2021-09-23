@@ -6,7 +6,7 @@ const timestamp = () => new Date().toISOString()
 let timer: any
 const wait = (ms: number) => new Promise(resolve => {
   if (timer) timer.unref()
-  timer = setTimeout(() => resolve(), ms)
+  timer = setTimeout(() => resolve(null), ms)
 })
 
 function chomp(s: string): string {

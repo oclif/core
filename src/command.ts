@@ -155,7 +155,7 @@ export default abstract class Command {
       delete process.env[this.config.scopedEnvVarKey('REDIRECTED')]
       await this.init()
       result = await this.run()
-    } catch (error) {
+    } catch (error: any) {
       err = error
       await this.catch(error)
     } finally {
@@ -242,7 +242,7 @@ export default abstract class Command {
       const config = Errors.config
       if (config.errorLogger) await config.errorLogger.flush()
       // tslint:disable-next-line no-console
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
     }
   }
