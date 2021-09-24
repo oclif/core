@@ -27,7 +27,7 @@ export class AppsDestroy extends Command {
   static description = `Destroy an app
   this only shows up in command help under DESCRIPTION`;
 
-  static flags: {};
+  static flags: Record<string, never> = {};
 
   static args = [];
 
@@ -41,7 +41,7 @@ export class AppsIndex extends Command {
 
   static summary = 'List all apps (app index command)';
 
-  static flags: {};
+  static flags: Record<string, never> = {};
 
   static args = [];
 
@@ -56,7 +56,7 @@ export class AppsIndexWithDesc extends Command {
   static description = `List all apps (app index command)
 this only shows up in command help under DESCRIPTION`;
 
-  static flags: {};
+  static flags: Record<string, never> = {};
 
   static args = [];
 
@@ -83,7 +83,7 @@ export class AppsAdminIndex extends Command {
   static description = `List of admins for an app
   this only shows up in command help under DESCRIPTION`;
 
-  static flags: {};
+  static flags: Record<string, never> = {};
 
   static args = [];
 
@@ -98,7 +98,7 @@ export class AppsAdminAdd extends Command {
   static description = `Add user to an app
   this only shows up in command help under DESCRIPTION`;
 
-  static flags: {};
+  static flags: Record<string, never> = {};
 
   static args = [];
 

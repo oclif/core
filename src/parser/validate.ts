@@ -22,7 +22,7 @@ export function validate(parse: {
     const missingRequiredArgs: ParserArg<any>[] = []
     let hasOptional = false
 
-    parse.input.args.forEach((arg, index) => {
+    for (const [index, arg] of parse.input.args.entries()) {
       if (!arg.required) {
         hasOptional = true
       } else if (hasOptional) {
@@ -31,12 +31,10 @@ export function validate(parse: {
         throw new InvalidArgsSpecError({parse, args: parse.input.args})
       }
 
-      if (arg.required) {
-        if (!parse.output.argv[index] && parse.output.argv[index] as any as number !== 0) {
-          missingRequiredArgs.push(arg)
-        }
+      if (arg.required && !parse.output.argv[index] && parse.output.argv[index] as any as number !== 0) {
+        missingRequiredArgs.push(arg)
       }
-    })
+    }
 
     if (missingRequiredArgs.length > 0) {
       throw new RequiredArgsError({parse, args: missingRequiredArgs})
@@ -66,6 +64,7 @@ export function validate(parse: {
             )
           }
         }
+
         for (const also of flag.exclusive || []) {
           // do not enforce exclusivity for flags that were defaulted
           if (
@@ -84,6 +83,7 @@ export function validate(parse: {
             )
           }
         }
+
         for (const also of flag.exactlyOne || []) {
           if (also !== name && parse.output.flags[also]) {
             throw new CLIError(

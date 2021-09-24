@@ -107,6 +107,7 @@ export default abstract class Command {
       opts = fileURLToPath(opts)
     }
 
+    // to-do: update in node-14 to module.main
     const config = await Config.load(opts || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
     const cmd = new this(argv, config)
     return cmd._run(argv)
@@ -134,7 +135,7 @@ export default abstract class Command {
 
   protected debug: (...args: any[]) => void
 
-  constructor(public argv: string[], public config: Interfaces.Config) {
+  constructor(public argv: string[], public config: Config) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -155,7 +156,7 @@ export default abstract class Command {
       delete process.env[this.config.scopedEnvVarKey('REDIRECTED')]
       await this.init()
       result = await this.run()
-    } catch (error) {
+    } catch (error: any) {
       err = error
       await this.catch(error)
     } finally {
@@ -165,14 +166,15 @@ export default abstract class Command {
     if (result && this.jsonEnabled()) {
       cli.styledJSON(this.toSuccessJson(result))
     }
+
     return result
   }
 
-  exit(code = 0) {
+  exit(code = 0): void {
     return Errors.exit(code)
   }
 
-  warn(input: string | Error) {
+  warn(input: string | Error): void {
     Errors.warn(input)
   }
 
@@ -180,11 +182,11 @@ export default abstract class Command {
 
   error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
 
-  error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}) {
+  error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
     return Errors.error(input, options as any)
   }
 
-  log(message = '', ...args: any[]) {
+  log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       // tslint:disable-next-line strict-type-predicates
       message = typeof message === 'string' ? message : inspect(message)
@@ -222,7 +224,7 @@ export default abstract class Command {
     return Parser.parse(argv, opts)
   }
 
-  protected async catch(err: any): Promise<any> {
+  protected async catch(err: Record<string, any>): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       cli.styledJSON(this.toErrorJson(err))
@@ -230,9 +232,10 @@ export default abstract class Command {
       if (!err.message) throw err
       try {
         const {cli} = require('cli-ux')
-        const chalk = require('chalk') // eslint-disable-line node/no-extraneous-require
+        const chalk = require('chalk')
         cli.action.stop(chalk.bold.red('!'))
       } catch {}
+
       throw err
     }
   }
@@ -242,16 +245,16 @@ export default abstract class Command {
       const config = Errors.config
       if (config.errorLogger) await config.errorLogger.flush()
       // tslint:disable-next-line no-console
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
     }
   }
 
-  protected toSuccessJson(result: any): any {
+  protected toSuccessJson(result: unknown): any {
     return result
   }
 
-  protected toErrorJson(err: any): any {
+  protected toErrorJson(err: unknown): any {
     return {error: err}
   }
 }

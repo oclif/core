@@ -36,13 +36,14 @@ const test = base
     ctx.help = new TestHelp(config)
   },
   finally(ctx) {
-    Object.values(ctx.stubs).forEach(stub  => stub.restore())
+    for (const stub of Object.values(ctx.stubs))  stub.restore()
   },
 }))
 .register('makeTopicsWithoutCommand', () => ({
   async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
     // by returning no matching command for a subject, it becomes a topic only
     // with no corresponding command (in which case the showCommandHelp is shown)
+    // eslint-disable-next-line unicorn/no-useless-undefined
     ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns(undefined)
   },
   finally(ctx) {

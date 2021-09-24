@@ -90,8 +90,7 @@ export class Config implements IConfig {
   private _topics?: Topic[]
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(public options: Options) {
-  }
+  constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -181,7 +180,7 @@ export class Config implements IConfig {
     try {
       const devPlugins = this.pjson.oclif.devPlugins
       if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-    } catch (error) {
+    } catch (error: any) {
       process.emitWarning(error)
     }
   }
@@ -197,7 +196,7 @@ export class Config implements IConfig {
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
         await this.loadPlugins(userPJSONPath, 'link', pjson.oclif.plugins.filter((p: any) => p.type === 'link'))
-      } catch (error) {
+      } catch (error: any) {
         if (error.code !== 'ENOENT') process.emitWarning(error)
       }
     }
@@ -263,7 +262,7 @@ export class Config implements IConfig {
           final.successes.push({plugin: p, result})
 
           debug('done')
-        } catch (error) {
+        } catch (error: any) {
           final.failures.push({plugin: p, error: error as Error})
           debug(error)
         }
@@ -277,6 +276,7 @@ export class Config implements IConfig {
     return final
   }
 
+  // eslint-disable-next-line default-param-last
   async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Plugin): Promise<T> {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
@@ -284,6 +284,7 @@ export class Config implements IConfig {
       await this.runHook('command_not_found', {id, argv})
       throw new CLIError(`command ${id} not found`)
     }
+
     const command = await c.load()
     await this.runHook('prerun', {Command: command, argv})
     const result = (await command.run(argv, this)) as T
@@ -302,8 +303,7 @@ export class Config implements IConfig {
 
   scopedEnvVarKey(k: string) {
     return [this.bin, k]
-    // eslint-disable-next-line no-useless-escape
-    .map(p => p.replace(/@/g, '').replace(/[-\/]/g, '_'))
+    .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
   }
@@ -348,14 +348,17 @@ export class Config implements IConfig {
         // If b appears first in the pjson.plugins sort it first
         return aIndex - bIndex
       }
+
       // if b is a core plugin and a is not sort b first
       if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
+
       // if a is a core plugin and b is not sort a first
       if (a.pluginType === 'core' && b.pluginType !== 'core') {
         return -1
       }
+
       // neither plugin is core, so do not change the order
       return 0
     })
@@ -397,17 +400,20 @@ export class Config implements IConfig {
         } else topics.push(topic)
       }
     }
+
     // add missing topics
     for (const c of this.commands.filter(c => !c.hidden)) {
       const parts = c.id.split(':')
-      while (parts.length) {
+      while (parts.length > 0) {
         const name = parts.join(':')
         if (name && !topics.find(t => t.name === name)) {
           topics.push({name, description: c.summary || c.description})
         }
+
         parts.pop()
       }
     }
+
     this._topics = topics
     return this._topics
   }
@@ -460,6 +466,7 @@ export class Config implements IConfig {
     } else {
       shellPath = ['unknown']
     }
+
     return shellPath[shellPath.length - 1]
   }
 
@@ -468,8 +475,8 @@ export class Config implements IConfig {
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1
-    } catch {
-    }
+    } catch {}
+
     return 0
   }
 
@@ -486,18 +493,19 @@ export class Config implements IConfig {
           opts.tag = plugin.tag || opts.tag
           opts.root = plugin.root || opts.root
         }
+
         const instance = new Plugin.Plugin(opts)
         await instance.load()
         if (this.plugins.find(p => p.name === instance.name)) return
         this.plugins.push(instance)
         if (parent) {
-          // eslint-disable-next-line require-atomic-updates
           instance.parent = parent
           if (!parent.children) parent.children = []
           parent.children.push(instance)
         }
+
         await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
-      } catch (error) {
+      } catch (error: any) {
         this.warn(error, 'loadPlugins')
       }
     }))
@@ -581,7 +589,6 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         options: flag.options,
         dependsOn: flag.dependsOn,
         exclusive: flag.exclusive,
-        // eslint-disable-next-line no-await-in-loop
         default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
       }
     }
@@ -620,9 +627,9 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: any = {}
-  keysToAdd.forEach(key => {
+  for (const key of keysToAdd) {
     additionalProperties[key] = (c as any)[key]
-  })
+  }
 
   return {...stdProperties, ...additionalProperties}
 }

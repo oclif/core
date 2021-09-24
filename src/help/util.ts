@@ -20,7 +20,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
     try {
       const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
     }
   }
@@ -32,17 +32,18 @@ export function template(context: any): (t: string) => string {
   function render(t: string): string {
     return lodashTemplate(t)(context)
   }
+
   return render
 }
 
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = config.commandIDs.concat(config.topics.map(t => t.name))
+  const ids = new Set(config.commandIDs.concat(config.topics.map(t => t.name)))
 
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
-    const idPresent = (id: string) => ids.includes(id)
+    const idPresent = (id: string) => ids.has(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
@@ -85,7 +86,8 @@ export function toStandardizedId(commandID: string, config: IConfig): string {
 }
 
 export function toConfiguredId(commandID: string, config: IConfig): string {
-  return commandID.replace(new RegExp(':', 'g'), config.topicSeparator)
+  const defaultTopicSeperator = ':'
+  return commandID.replace(new RegExp(defaultTopicSeperator, 'g'), config.topicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {

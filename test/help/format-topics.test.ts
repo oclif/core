@@ -25,7 +25,7 @@ const test = base
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
     ctx.expectation = 'has topicsHelp'
   },
 }))
