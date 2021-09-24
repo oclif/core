@@ -37,7 +37,7 @@ function topicsToArray(input: any, base?: string): Topic[] {
  *
  * This is needed because of the deduping npm does
  */
-async function findRoot(name: string | undefined, root: string) {
+export async function findRoot(name: string | undefined, root: string) {
   // essentially just "cd .."
   function * up(from: string) {
     while (path.dirname(from) !== from) {
@@ -102,6 +102,8 @@ export class Plugin implements IPlugin {
 
   protected warned = false
 
+  protected _commandIDs?: string[]
+
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: PluginOptions) {}
 
@@ -131,7 +133,7 @@ export class Plugin implements IPlugin {
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object.entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => this.makeCommand(id, c))
     this.commands.sort((a, b) => {
       if (a.id < b.id) return -1
       if (a.id > b.id) return 1
@@ -148,6 +150,9 @@ export class Plugin implements IPlugin {
   }
 
   get commandIDs() {
+    if (this._commandIDs) {
+      return this._commandIDs
+    }
     if (!this.commandsDir) return []
     let globby: typeof Globby
     try {
@@ -170,6 +175,7 @@ export class Plugin implements IPlugin {
       return [...topics, command].filter(f => f).join(':')
     })
     this._debug('found commands', ids)
+    this._commandIDs = ids
     return ids
   }
 
@@ -204,6 +210,14 @@ export class Plugin implements IPlugin {
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
     return cmd
+  }
+
+  makeCommand(id: string, c: Command): Command.Plugin {
+    return {...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}
+  }
+
+  getAllCommands(): Command.Plugin[] {
+    return [...this.commands, ...[this.children.map(child => child.getAllCommands())].reduce((a, b) => a.concat(b), [])] as Command.Plugin[]
   }
 
   protected async _manifest(ignoreManifest: boolean, errorOnManifestCreate = false): Promise<Manifest> {
@@ -260,6 +274,26 @@ export class Plugin implements IPlugin {
     err.name = `${err.name} Plugin: ${this.name}`
     err.detail = compact([err.detail, `module: ${this._base}`, scope && `task: ${scope}`, `plugin: ${this.name}`, `root: ${this.root}`, 'See more details with DEBUG=*']).join('\n')
     return err
+  }
+
+  static storePluginsToCache(plugins: IPlugin[]): IPlugin[] {
+    plugins = plugins.map(plugin => {
+      let tweakedPlugin = plugin as Plugin
+      tweakedPlugin = Object.assign(tweakedPlugin, {_commandIDs: tweakedPlugin.commandIDs, commands: tweakedPlugin.commands})
+      tweakedPlugin.children = Plugin.storePluginsToCache((plugin as Plugin).children) as Plugin[]
+      return tweakedPlugin
+    })
+    return plugins
+  }
+
+  static loadPluginsFromCache(plugins: IPlugin[]): IPlugin[] {
+    plugins = plugins.map(plugin => {
+      const tweakedPlugin: Plugin = Object.assign(new Plugin({root: plugin.root}), plugin)
+      tweakedPlugin.commands = tweakedPlugin.commands.map(command => tweakedPlugin.makeCommand(command.id, command))
+      tweakedPlugin.children = Plugin.loadPluginsFromCache(tweakedPlugin.children) as Plugin[]
+      return tweakedPlugin
+    })
+    return plugins
   }
 }
 

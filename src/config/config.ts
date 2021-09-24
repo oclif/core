@@ -13,6 +13,8 @@ import * as Plugin from './plugin'
 import {compact, flatMap, loadJSON, uniq} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import * as fs from 'fs'
+import {findRoot} from './plugin'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -101,6 +103,17 @@ export class Config implements IConfig {
 
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) return opts
+    // lets try seeing if cache is available
+    const pkgPath = await findRoot(undefined, opts!.root)
+    const pjson = JSON.parse(fs.readFileSync(path.join(pkgPath!, 'package.json'), 'utf8'))
+    pjson.root = pjson.root || pkgPath
+
+    try {
+      const cachedConfig = Config.loadFromCache(pjson)
+      if (isConfig(cachedConfig)) return cachedConfig
+    } catch (error) {
+      throw error
+    }
     const config = new Config(opts)
     await config.load()
     return config
@@ -166,6 +179,7 @@ export class Config implements IConfig {
     await this.loadUserPlugins()
     await this.loadDevPlugins()
     await this.loadCorePlugins()
+    await this.cacheConfig()
     debug('config done')
   }
 
@@ -447,7 +461,7 @@ export class Config implements IConfig {
   }
 
   protected macosCacheDir(): string | undefined {
-    return (this.platform === 'darwin' && path.join(this.home, 'Library', 'Caches', this.dirname)) || undefined
+    return (process.platform === 'darwin' && path.join(this.home, 'Library', 'Caches', this.dirname)) || undefined
   }
 
   protected _shell(): string {
@@ -543,6 +557,29 @@ export class Config implements IConfig {
 
   protected get isProd() {
     return isProd()
+  }
+
+  private async cacheConfig(): Promise<void> {
+    const filePath = Config.getCacheFilename(this.name)
+    const plugins = Plugin.Plugin.storePluginsToCache(this.plugins)
+    const tweakedConfig = {...this, ...{_commandIDs: this.commandIDs, _commands: this.commands, _topics: this.topics, plugins}}
+    return fs.writeFileSync(filePath, JSON.stringify(tweakedConfig, undefined, 2), {encoding: 'utf8'})
+  }
+
+  private static getCacheFilename(name: string) {
+    const base = path.basename(name)
+    const filename = `${base}.json`
+    const filePath = path.join(`${process.platform === 'darwin' ? path.join(os.homedir(), 'Library', 'Caches') : path.join(os.homedir(), 'cache')}`, name, filename)
+    return filePath
+  }
+
+  private static loadFromCache(pjson: any): Config {
+    let config = new Config({root: pjson.root})
+    const cachedConfig = JSON.parse(fs.readFileSync(Config.getCacheFilename(pjson.name), 'utf8'))
+    config = Object.assign(config, cachedConfig)
+    config.plugins = Plugin.Plugin.loadPluginsFromCache(config.plugins)
+    config._commands = config.plugins.map(plugin => plugin.getAllCommands()).reduce((a, b) => a.concat(b), [])
+    return config
   }
 }
 

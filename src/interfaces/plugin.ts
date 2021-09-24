@@ -73,4 +73,6 @@ export interface Plugin {
   findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
   load(): Promise<void>;
+  makeCommand(id: string, command: Command): Command.Plugin;
+  getAllCommands(): Command.Plugin[];
 }
