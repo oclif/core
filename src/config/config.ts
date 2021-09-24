@@ -561,9 +561,18 @@ export class Config implements IConfig {
 
   private async cacheConfig(): Promise<void> {
     const filePath = Config.getCacheFilename(this.name)
-    const plugins = Plugin.Plugin.storePluginsToCache(this.plugins)
-    const tweakedConfig = {...this, ...{_commandIDs: this.commandIDs, _commands: this.commands, _topics: this.topics, plugins}}
-    return fs.writeFileSync(filePath, JSON.stringify(tweakedConfig, undefined, 2), {encoding: 'utf8'})
+    if (fs.existsSync(path.dirname(filePath))) {
+      const plugins = Plugin.Plugin.storePluginsToCache(this.plugins)
+      const tweakedConfig = {
+        ...this, ...{
+          _commandIDs: this.commandIDs,
+          _commands: this.commands,
+          _topics: this.topics,
+          plugins,
+        },
+      }
+      fs.writeFileSync(filePath, JSON.stringify(tweakedConfig, undefined, 2), {encoding: 'utf8'})
+    }
   }
 
   private static getCacheFilename(name: string) {
@@ -575,11 +584,15 @@ export class Config implements IConfig {
 
   private static loadFromCache(pjson: any): Config {
     let config = new Config({root: pjson.root})
-    const cachedConfig = JSON.parse(fs.readFileSync(Config.getCacheFilename(pjson.name), 'utf8'))
-    config = Object.assign(config, cachedConfig)
-    config.plugins = Plugin.Plugin.loadPluginsFromCache(config.plugins)
-    config._commands = config.plugins.map(plugin => plugin.getAllCommands()).reduce((a, b) => a.concat(b), [])
-    return config
+    const cachedConfigFilename = Config.getCacheFilename(pjson.name)
+    if (fs.existsSync(cachedConfigFilename)) {
+      const cachedConfig = JSON.parse(fs.readFileSync(Config.getCacheFilename(pjson.name), 'utf8'))
+      config = Object.assign(config, cachedConfig)
+      config.plugins = Plugin.Plugin.loadPluginsFromCache(config.plugins)
+      config._commands = config.plugins.map(plugin => plugin.getAllCommands()).reduce((a, b) => a.concat(b), [])
+      return config
+    }
+    return {} as Config
   }
 }
 

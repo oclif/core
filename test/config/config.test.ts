@@ -2,7 +2,7 @@ import * as os from 'os'
 import * as path from 'path'
 
 import {Config} from '../../src/config/config'
-import {Plugin as IPlugin} from '../../src/interfaces'
+import {Command, Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
 import {Command as ICommand} from '../../src/interfaces'
 
@@ -215,7 +215,12 @@ describe('Config', () => {
         pluginAlias: '@My/pluginb',
       }
       const hooks = {}
-      const pluginA: IPlugin = {load,
+      const pluginA: IPlugin = {
+        getAllCommands(): Command.Plugin[] {
+          return this.commands
+        }, makeCommand(): Command.Plugin {
+          return this.commands[0]
+        }, load,
         findCommand,
         name: '@My/plugina',
         alias: '@My/plugina',
@@ -233,6 +238,11 @@ describe('Config', () => {
       }
       commandPluginA
       const pluginB: IPlugin = {
+        getAllCommands(): Command.Plugin[] {
+          return this.commands
+        }, makeCommand(): Command.Plugin {
+          return this.commands[0]
+        },
         load,
         findCommand,
         name: '@My/pluginb',
