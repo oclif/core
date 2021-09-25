@@ -1,4 +1,4 @@
-import * as NanoColors from 'nanocolors'
+import * as Colorette from 'colorette'
 import stripAnsi = require('strip-ansi')
 
 import {castArray, compact, sortBy} from '../util'
@@ -14,14 +14,14 @@ const POSSIBLE_LINE_FEED = /\r\n|\n/
 
 const {
   underline,
-} = NanoColors
+} = Colorette
 let {
   dim,
-} = NanoColors
+} = Colorette
 
 if (process.env.ConEmuANSI === 'ON') {
   // eslint-disable-next-line unicorn/consistent-destructuring
-  dim = NanoColors.gray
+  dim = Colorette.gray
 }
 
 export class CommandHelp extends HelpFormatter {

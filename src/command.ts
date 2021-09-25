@@ -232,7 +232,7 @@ export default abstract class Command {
       if (!err.message) throw err
       try {
         const {cli} = require('cli-ux')
-        const {bold, red} = require('nanocolors')
+        const {bold, red} = require('colorette')
         cli.action.stop(bold(red('!')))
       } catch {}
 

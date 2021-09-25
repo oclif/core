@@ -1,4 +1,4 @@
-import * as NanoColors from 'nanocolors'
+import * as Colorette from 'colorette'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 
@@ -12,7 +12,7 @@ const widestLine = require('widest-line')
 const wrap = require('wrap-ansi')
 const {
   bold,
-} = NanoColors
+} = Colorette
 
 export type HelpSectionKeyValueTable = {name: string; description: string}[]
 export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;

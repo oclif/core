@@ -1,6 +1,6 @@
 // tslint:disable no-implicit-dependencies
 
-import {red, yellow} from 'nanocolors'
+import {red, yellow} from 'colorette'
 import Clean = require('clean-stack')
 import Indent = require('indent-string')
 import * as Wrap from 'wrap-ansi'
