@@ -28,7 +28,8 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
-    ctx.commandHelp = stripAnsi(root).split('\n').map(s => s.trimRight()).join('\n')
+
+    ctx.commandHelp = stripAnsi(root).split('\n').map(s => s.trimEnd()).join('\n')
   },
 }))
 

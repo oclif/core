@@ -45,6 +45,7 @@ export class CLIError extends Error implements OclifError {
     if (config.debug) {
       return this.stack
     }
+
     const wrap: typeof Wrap = require('wrap-ansi')
     const indent: typeof Indent = require('indent-string')
 

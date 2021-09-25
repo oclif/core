@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.39](https://github.com/oclif/core/compare/v0.5.38...v0.5.39) (2021-09-17)
+
+
+### Features
+
+* parallelize runHook ([#253](https://github.com/oclif/core/issues/253)) ([34abf7c](https://github.com/oclif/core/commit/34abf7cd80f2f8825682ca782e42f62002215ebb))
+
 ### [0.5.38](https://github.com/oclif/core/compare/v0.5.37...v0.5.38) (2021-09-15)
 
 

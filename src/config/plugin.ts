@@ -23,6 +23,7 @@ function topicsToArray(input: any, base?: string): Topic[] {
   if (Array.isArray(input)) {
     return input.concat(flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`)))
   }
+
   return flatMap(Object.keys(input), k => {
     input[k].name = k
     return [{...input[k], name: `${base}${k}`}].concat(topicsToArray(input[k].subtopics, `${base}${input[k].name}`))
@@ -44,8 +45,10 @@ async function findRoot(name: string | undefined, root: string) {
       yield from
       from = path.dirname(from)
     }
+
     yield from
   }
+
   for (const next of up(root)) {
     let cur
     if (name) {
@@ -56,7 +59,7 @@ async function findRoot(name: string | undefined, root: string) {
         // eslint-disable-next-line no-await-in-loop
         const pkg = await loadJSON(path.join(next, 'package.json'))
         if (pkg.name === name) return next
-      } catch { }
+      } catch {}
     } else {
       cur = path.join(next, 'package.json')
       // eslint-disable-next-line no-await-in-loop
@@ -153,10 +156,11 @@ export class Plugin implements IPlugin {
     try {
       const globbyPath = require.resolve('globby', {paths: [this.root, __dirname]})
       globby = require(globbyPath)
-    } catch (error) {
+    } catch (error: any) {
       this.warn(error, 'not loading commands, globby not found')
       return []
     }
+
     this._debug(`loading IDs from ${this.commandsDir}`)
     const patterns = [
       '**/*.+(js|cjs|mjs|ts|tsx)',
@@ -185,22 +189,25 @@ export class Plugin implements IPlugin {
         if (cmd.default && cmd.default.run) return cmd.default
         return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
       }
+
       let m
       try {
         const p = path.join(this.pjson.oclif.commands as string, ...id.split(':'))
         const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
         this._debug(isESM ? '(import)' : '(require)', filePath)
         m = module
-      } catch (error) {
+      } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
       }
+
       const cmd = search(m)
       if (!cmd) return
       cmd.id = id
       cmd.plugin = this
       return cmd
     }
+
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
     return cmd
@@ -217,7 +224,7 @@ export class Plugin implements IPlugin {
           this._debug('using manifest from', p)
           return manifest
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.code === 'ENOENT') {
           if (!dotfile) return readManifest(true)
         } else {
@@ -225,6 +232,7 @@ export class Plugin implements IPlugin {
         }
       }
     }
+
     if (!ignoreManifest) {
       const manifest = await readManifest()
       if (manifest) return manifest
@@ -232,11 +240,10 @@ export class Plugin implements IPlugin {
 
     return {
       version: this.version,
-      // eslint-disable-next-line array-callback-return
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
           return [id, await toCached(await this.findCommand(id, {must: true}), this)]
-        } catch (error) {
+        } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
           else throw this.addErrorScope(error, scope)

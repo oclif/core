@@ -45,12 +45,13 @@ export {
 function checkCWD() {
   try {
     process.cwd()
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       process.stderr.write('WARNING: current directory does not exist\n')
     }
   }
 }
+
 function checkNodeVersion() {
   const root = path.join(__dirname, '..')
   const pjson = require(path.join(root, 'package.json'))
@@ -58,5 +59,6 @@ function checkNodeVersion() {
     process.stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
   }
 }
+
 checkCWD()
 checkNodeVersion()

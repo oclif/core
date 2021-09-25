@@ -81,7 +81,6 @@ export namespace Command {
     // We can't use "export OptionFlagProps as Option" in the namespace export.
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
     export interface Boolean extends BooleanFlagProps {}
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     export interface Option extends OptionFlagProps {
       default?: string;
     }

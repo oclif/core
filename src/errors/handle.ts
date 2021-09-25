@@ -31,7 +31,7 @@ export const handle = (err: Error & Partial<PrettyPrintableError> & Partial<Ocli
       .then(() => process.exit(exitCode))
       .catch(console.error)
     } else process.exit(exitCode)
-  } catch (error) {
+  } catch (error: any) {
     console.error(err.stack)
     console.error(error.stack)
     process.exit(1)

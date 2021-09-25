@@ -11,12 +11,12 @@ type CLIErrorDisplayOptions = { name?: string; bang?: string }
 export function applyPrettyPrintOptions(error: Error, options: PrettyPrintableError): PrettyPrintableError {
   const prettyErrorKeys: (keyof PrettyPrintableError)[] = ['message', 'code', 'ref', 'suggestions']
 
-  prettyErrorKeys.forEach(key => {
+  for (const key of prettyErrorKeys) {
     const applyOptionsKey = !(key in error) && options[key]
     if (applyOptionsKey) {
       (error as any)[key] = options[key]
     }
-  })
+  }
 
   return error
 }

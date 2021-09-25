@@ -6,7 +6,7 @@ const timestamp = () => new Date().toISOString()
 let timer: any
 const wait = (ms: number) => new Promise(resolve => {
   if (timer) timer.unref()
-  timer = setTimeout(() => resolve(), ms)
+  timer = setTimeout(() => resolve(null), ms)
 })
 
 function chomp(s: string): string {
@@ -25,7 +25,7 @@ export class Logger {
   log(msg: string) {
     const stripAnsi: typeof StripAnsi = require('strip-ansi')
     msg = stripAnsi(chomp(msg))
-    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimRight())
+    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
     // tslint:disable-next-line no-console
     this.flush(50).catch(console.error)

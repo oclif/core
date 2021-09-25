@@ -38,7 +38,7 @@ export const integer = build({
   parse: async input => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
-    return parseInt(input, 10)
+    return Number.parseInt(input, 10)
   },
 })
 

@@ -110,6 +110,7 @@ export class HelpFormatter {
     if (input.length === 0) {
       return ''
     }
+
     const renderMultiline = () => {
       let output = ''
       for (let [left, right] of input) {
@@ -118,15 +119,19 @@ export class HelpFormatter {
           if (opts.stripAnsi) left = stripAnsi(left)
           output += this.wrap(left.trim(), opts.indentation)
         }
+
         if (right) {
           if (opts.stripAnsi) right = stripAnsi(right)
           output += '\n'
           output += this.indent(this.wrap(right.trim(), opts.indentation + 2), 4)
         }
+
         output += '\n\n'
       }
+
       return output.trim()
     }
+
     if (opts.multiline) return renderMultiline()
     const maxLength = widestLine(input.map(i => i[0]).join('\n'))
     let output = ''
@@ -138,12 +143,14 @@ export class HelpFormatter {
         output += spacer
         output += cur
       }
+
       cur = left || ''
       if (opts.stripAnsi) cur = stripAnsi(cur)
       if (!right) {
         cur = cur.trim()
         continue
       }
+
       if (opts.stripAnsi) right = stripAnsi(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
@@ -153,6 +160,7 @@ export class HelpFormatter {
       if (lines.length === 0) {
         continue
       }
+
       // if we start putting too many lines down, render in multiline format
       if (lines.length > 4) return renderMultiline()
       // if spacer is not defined, separate all rows with a newline
@@ -160,10 +168,12 @@ export class HelpFormatter {
       cur += '\n'
       cur += this.indent(lines.join('\n'), maxLength + 2)
     }
+
     if (cur) {
       output += spacer
       output += cur
     }
+
     return output.trim()
   }
 
@@ -178,6 +188,7 @@ export class HelpFormatter {
           const tableEntry = entry as unknown as {name: string; description: string}
           return ([this.render(tableEntry.name), this.render(tableEntry.description)])
         }
+
         const [left, right] = entry
         return ([this.render(left), right && this.render(right as string)])
       })
