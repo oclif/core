@@ -3,6 +3,8 @@ import {expect} from 'chai'
 
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
+import {URL} from 'url'
+
 const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
