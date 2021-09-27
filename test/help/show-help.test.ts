@@ -360,7 +360,7 @@ describe('showHelp routing', () => {
     test
     .setupHelp()
     .it('shows an error when there is a subject but it does not match a topic or command', async ({help}) => {
-      await expect(help.showHelp(['meow'])).to.be.rejectedWith('command meow not found')
+      await expect(help.showHelp(['meow'])).to.be.rejectedWith('Command meow not found')
     })
   })
 })
