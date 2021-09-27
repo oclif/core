@@ -3,6 +3,7 @@ import {fileURLToPath} from 'url'
 import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
+import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
 
@@ -33,7 +34,7 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
 // eslint-disable-next-line default-param-last
 export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
-  if ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL) {
+  if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)
   }
 

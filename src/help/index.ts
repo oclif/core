@@ -116,7 +116,7 @@ export class Help extends HelpBase {
       return
     }
 
-    error(`command ${subject} not found`)
+    error(`Command ${subject} not found.`)
   }
 
   public async showCommandHelp(command: Interfaces.Command) {

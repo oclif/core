@@ -31,7 +31,7 @@ export {boolean, integer, url} from './parser'
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({
-    description: 'show CLI version',
+    description: 'Show CLI version.',
     ...opts,
     parse: async (_: any, cmd: Command) => {
       cmd.log(cmd.config.userAgent)
@@ -42,7 +42,7 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
 
 export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   return Parser.flags.boolean({
-    description: 'show CLI help',
+    description: 'Show CLI help.',
     ...opts,
     parse: async (_: any, cmd: Command) => {
       (cmd as any)._help()
