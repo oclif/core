@@ -176,7 +176,7 @@ export default abstract class Command {
 
   warn(input: string | Error): string | Error {
     if (!this.jsonEnabled()) Errors.warn(input)
-    return input;
+    return input
   }
 
   error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
