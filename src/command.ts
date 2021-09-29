@@ -175,7 +175,7 @@ export default abstract class Command {
   }
 
   warn(input: string | Error): void {
-    Errors.warn(input)
+    if (!this.jsonEnabled()) Errors.warn(input)
   }
 
   error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
