@@ -1,3 +1,4 @@
+---
 version: 2.1
 
 orbs:
@@ -23,9 +24,11 @@ workflows:
               - os: windows
                 node_version: maintenance
       - release-management/release-package:
-          github-release: true
-          requires:
-            - release-management/test-package
+          context: SF-CLI-RELEASE-PROCESS
           filters:
             branches:
               only: main
+          github-release: true
+          requires:
+            - release-management/test-package
+          tag: latest
