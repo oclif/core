@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/oclif/core/compare/v1.0.1...v1.0.2) (2021-10-13)
+
+
+### Bug Fixes
+
+* remove ability to enable json flag globally ([#272](https://github.com/oclif/core/issues/272)) ([3c754e7](https://github.com/oclif/core/commit/3c754e7eee04ef078ff4ab08849191e6a5779ee0))
+
 ### [1.0.1](https://github.com/oclif/core/compare/v1.0.0...v1.0.1) (2021-10-08)
 
 
