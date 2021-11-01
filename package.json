@@ -47,7 +47,7 @@
     "@types/wrap-ansi": "^3.0.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "commitlint": "^12.1.1",
+    "commitlint": "^13.2.1",
     "eslint": "^7.3.1",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "^1.0.2",
