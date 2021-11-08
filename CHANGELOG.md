@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/oclif/core/compare/v1.0.2...v1.0.3) (2021-11-08)
+
+
+### Bug Fixes
+
+* remove module lodash.template in favor of lodash ([#286](https://github.com/oclif/core/issues/286)) ([caaff0b](https://github.com/oclif/core/commit/caaff0b4918ab2e01bc01cad2c0d8158c2fcc1c5))
+
 ### [1.0.2](https://github.com/oclif/core/compare/v1.0.1...v1.0.2) (2021-10-13)
 
 
