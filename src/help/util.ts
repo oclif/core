@@ -1,5 +1,4 @@
-import lodashTemplate = require('lodash.template')
-
+import * as _ from 'lodash'
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
@@ -30,7 +29,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
 
 export function template(context: any): (t: string) => string {
   function render(t: string): string {
-    return lodashTemplate(t)(context)
+    return _.template(t)(context)
   }
 
   return render

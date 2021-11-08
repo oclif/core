@@ -41,7 +41,7 @@ TOPICS
   plugins  list installed plugins
 
 COMMANDS
-  help     display help for oclif
+  help     Display help for oclif.
   plugins  list installed plugins
 
 `))
