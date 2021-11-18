@@ -42,7 +42,7 @@ class LS extends Command {
 }
 
 LS.run()
-.catch(require('@oclif/errors/handle'))
+.catch(require('@oclif/core/handle'))
 ```
 
 Then run either of these with:

@@ -30,7 +30,7 @@ export async function parse<TFlags, TArgs extends { [name: string]: string }>(ar
   const parser = new Parser(input)
   const output = await parser.parse()
   m.validate({input, output})
-  return output as any
+  return output as ParserOutput<TFlags, TArgs>
 }
 
 const {boolean, integer, url} = flags
