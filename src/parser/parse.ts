@@ -33,7 +33,7 @@ const readStdin = async () => {
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
