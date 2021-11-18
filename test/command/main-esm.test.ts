@@ -17,7 +17,7 @@ describe('main-esm', () => {
   fancy
   .stdout()
   .do(() => run(['plugins'], root))
-  .do((output: any) => expect(output.stdout).to.equal('no plugins installed\n'))
+  .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
   .it('runs plugins')
 
   fancy
@@ -38,11 +38,11 @@ USAGE
   $ oclif [COMMAND]
 
 TOPICS
-  plugins  list installed plugins
+  plugins  List installed plugins.
 
 COMMANDS
   help     Display help for oclif.
-  plugins  list installed plugins
+  plugins  List installed plugins.
 
 `))
   .it('runs --help')
