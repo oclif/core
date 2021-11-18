@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/oclif/core/compare/v1.0.3...v1.0.4) (2021-11-18)
+
+
+### Bug Fixes
+
+* resolve typescript compilation errors ([#290](https://github.com/oclif/core/issues/290)) ([7079932](https://github.com/oclif/core/commit/70799324b19e36c3cff5618de49083c68d0d9fc6))
+
 ### [1.0.3](https://github.com/oclif/core/compare/v1.0.2...v1.0.3) (2021-11-08)
 
 
