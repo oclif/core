@@ -24,7 +24,7 @@ const test = base
       console.log(help)
     }
 
-    ctx.output = stripAnsi(help).split('\n').map(s => s.trimRight()).join('\n')
+    ctx.output = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
   },
 }))
 
@@ -34,7 +34,6 @@ describe('formatCommand', () => {
   .it('outputs an empty string when no commands are given', (ctx: any) => expect(ctx.output).to.equal(''))
 
   test
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   .formatCommands([AppsDestroy, AppsCreate])
   .it('shows a list of the provided commands', (ctx: any) => expect(ctx.output).to.equal(`COMMANDS
@@ -42,7 +41,6 @@ describe('formatCommand', () => {
   apps:create   Create an app`))
 
   test
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   .formatCommands([class extends Command {
     static id = 'hello:world'

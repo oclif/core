@@ -3,6 +3,8 @@ import {expect} from 'chai'
 
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
+import {URL} from 'url'
+
 const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
@@ -125,9 +127,10 @@ describe('parse', () => {
             }),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = stripAnsi(error.message)
       }
+
       expect(message).to.equal(
         'Missing required flag:\n --myflag MYFLAG  flag description\nSee more help with --help',
       )
@@ -161,9 +164,10 @@ describe('parse', () => {
               },
             ],
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal(`Missing 2 required args:
 arg2  arg2 desc
 arg3  arg3 desc
@@ -176,9 +180,10 @@ See more help with --help`)
           await parse(['arg1', 'arg2'], {
             args: [{name: 'arg1', required: true}],
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal('Unexpected argument: arg2\nSee more help with --help')
       })
 
@@ -230,9 +235,10 @@ See more help with --help`)
               {name: 'arg2', required: false, default: 'some_default'},
             ],
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal(`Missing 1 required arg:
 arg1
 See more help with --help`)
@@ -271,9 +277,10 @@ See more help with --help`)
               {name: 'arg2', required: true, default: 'some_default'},
             ],
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal(`Invalid argument spec:
 arg1 (optional)
 arg2 (required)
@@ -291,9 +298,10 @@ See more help with --help`)
               {name: 'arg4', required: true},
             ],
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal(`Invalid argument spec:
 arg1 (optional)
 arg2 (optional)
@@ -377,9 +385,10 @@ See more help with --help`)
           await parse(['--int', '3.14'], {
             flags: {int: flags.integer()},
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal('Expected an integer but received: 3.14')
       })
 
@@ -389,9 +398,10 @@ See more help with --help`)
           await parse(['--int', '3/4'], {
             flags: {int: flags.integer()},
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal('Expected an integer but received: 3/4')
       })
 
@@ -401,9 +411,10 @@ See more help with --help`)
           await parse(['--int', 's10'], {
             flags: {int: flags.integer()},
           })
-        } catch (error) {
+        } catch (error: any) {
           message = error.message
         }
+
         expect(message).to.equal('Expected an integer but received: s10')
       })
     })
@@ -417,7 +428,7 @@ See more help with --help`)
   describe('parse', () => {
     it('parse', async () => {
       const out = await parse(['--foo=bar', '100'], {
-        args: [{name: 'num', parse: async i => parseInt(i, 10)}],
+        args: [{name: 'num', parse: async i => Number.parseInt(i, 10)}],
         flags: {foo: flags.string({parse: async input => input.toUpperCase()})},
       })
       expect(out.flags).to.deep.include({foo: 'BAR'})
@@ -635,9 +646,10 @@ See more help with --help`)
         await parse(['--foo', 'invalidopt'], {
           flags: {foo: flags.string({options: ['myopt', 'myotheropt']})},
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
     })
   })
@@ -657,9 +669,10 @@ See more help with --help`)
         await parse(['--foo', 'example'], {
           flags: {foo: flags.url()},
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('Expected a valid url but received: example')
     })
   })
@@ -678,9 +691,10 @@ See more help with --help`)
         await parse(['invalidopt'], {
           args: [{name: 'foo', options: ['myopt', 'myotheropt']}],
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('Expected invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
     })
   })
@@ -747,9 +761,10 @@ See more help with --help`)
             bar: flags.string({char: 'b'}),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('--bar= must also be provided when using --foo=')
     })
   })
@@ -783,9 +798,10 @@ See more help with --help`)
             bar: flags.string({char: 'b'}),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('--bar= cannot also be provided when using --foo=')
     })
   })
@@ -800,9 +816,10 @@ See more help with --help`)
             bar: flags.string({char: 'b', exactlyOne: ['foo']}),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('Exactly one of the following must be provided: b,a,r')
     })
 
@@ -815,9 +832,10 @@ See more help with --help`)
             bar: flags.string({char: 'b', exactlyOne: ['foo']}),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('--bar= cannot also be provided when using --foo=')
     })
 
@@ -875,9 +893,10 @@ See more help with --help`)
             else: flags.string({char: 'e', exactlyOne: ['foo', 'bar']}),
           },
         })
-      } catch (error) {
+      } catch (error: any) {
         message = error.message
       }
+
       expect(message).to.equal('--else= cannot also be provided when using --foo=')
     })
 
@@ -892,9 +911,10 @@ See more help with --help`)
         await parse(['--foo', 'a', '--bar', '4'], {
           flags: crazyFlags,
         })
-      } catch (error) {
+      } catch (error: any) {
         message1 = error.message
       }
+
       expect(message1).to.equal('--bar= cannot also be provided when using --foo=')
 
       let message2 = ''
@@ -902,9 +922,10 @@ See more help with --help`)
         await parse(['--bar', 'a', '--else', '4'], {
           flags: crazyFlags,
         })
-      } catch (error) {
+      } catch (error: any) {
         message2 = error.message
       }
+
       expect(message2).to.equal('--else= cannot also be provided when using --bar=')
 
       const out = await parse(['--foo', 'a', '--else', '4'], {

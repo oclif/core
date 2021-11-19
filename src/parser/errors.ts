@@ -34,6 +34,7 @@ export class InvalidArgsSpecError extends CLIParseError {
       const list = m.list.renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
       message += `:\n${list}`
     }
+
     super({parse, message})
     this.args = args
   }
@@ -49,6 +50,7 @@ export class RequiredArgsError extends CLIParseError {
       const list = m.list.renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
       message += `:\n${list}`
     }
+
     super({parse, message})
     this.args = args
   }

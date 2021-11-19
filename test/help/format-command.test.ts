@@ -30,7 +30,8 @@ const test = base
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimRight()).join('\n')
+
+    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
     ctx.expectation = 'has commandHelp'
   },
 }))
@@ -652,7 +653,7 @@ EXAMPLES
     .it('formats example object with long command', (ctx: any) => {
       const multilineSeparator =
         ctx.config.platform === 'win32' ?
-          ctx.config.shell.includes('powershell') ? '`' : '^' :
+          (ctx.config.shell.includes('powershell') ? '`' : '^') :
           '\\'
       expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command

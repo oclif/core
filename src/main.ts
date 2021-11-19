@@ -3,6 +3,7 @@ import {fileURLToPath} from 'url'
 import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
+import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
 
@@ -19,19 +20,21 @@ export const helpAddition = (argv: string[], config: Interfaces.Config): boolean
     if (mergedHelpFlags.includes(arg)) return true
     if (arg === '--') return false
   }
+
   return false
 }
 
 export const versionAddition = (argv: string[], config?: Interfaces.Config): boolean => {
   const additionalVersionFlags = config?.pjson.oclif.additionalVersionFlags ?? []
-  const mergedVersionFlags = [...new Set([...['--version'], ...additionalVersionFlags]).values()]
+  const mergedVersionFlags = [...new Set(['--version', ...additionalVersionFlags]).values()]
   if (mergedVersionFlags.includes(argv[0])) return true
   return false
 }
 
+// eslint-disable-next-line default-param-last
 export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
-  if ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL) {
+  if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)
   }
 
@@ -67,5 +70,6 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
       argvSlice = argv
     }
   }
+
   await config.runCommand(id, argvSlice, cmd)
 }

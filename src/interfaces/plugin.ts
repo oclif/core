@@ -19,8 +19,6 @@ export interface Options extends PluginOptions {
   channel?: string;
   version?: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface Plugin {
   /**
    * ../config version

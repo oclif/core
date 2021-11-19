@@ -33,6 +33,7 @@ describe('mixed-cjs-esm', () => {
     } catch {
       console.log('caught error')
     }
+
     expect(ctx.stdout).to.equal('running mixed-esm-cjs prerun hook\nit fails!\ncaught error\n')
   })
 

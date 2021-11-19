@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 import {resolve} from 'path'
 import {Config, Interfaces} from '../../src'
 import {expect, test} from '@oclif/test'

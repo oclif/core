@@ -1,8 +1,8 @@
-export class Command {
-  static description = 'succeed description'
+export const Command = {
+  description: 'succeed description',
 
-  static run() {
+  run() {
     console.log('it works!')
     return 'returned success!'
-  }
+  },
 }

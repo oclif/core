@@ -14,6 +14,7 @@ export function maxBy<T>(arr: T[], fn: (i: T) => number): T | undefined {
       max = {i, element: cur}
     }
   }
+
   return max && max.element
 }
 

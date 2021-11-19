@@ -99,6 +99,7 @@ export class Help extends HelpBase {
         const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
         if (rootCmd) await this.showCommandHelp(rootCmd)
       }
+
       await this.showRootHelp()
       return
     }
@@ -115,7 +116,7 @@ export class Help extends HelpBase {
       return
     }
 
-    error(`command ${subject} not found`)
+    error(`Command ${subject} not found.`)
   }
 
   public async showCommandHelp(command: Interfaces.Command) {
@@ -204,6 +205,7 @@ export class Help extends HelpBase {
       command.id = command.id.replace(/:/g, this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
     }
+
     const help = this.getCommandHelpClass(command)
     return help.generate()
   }
@@ -241,6 +243,7 @@ export class Help extends HelpBase {
     if (c.summary) {
       return description
     }
+
     return description.split('\n').slice(1).join('\n')
   }
 

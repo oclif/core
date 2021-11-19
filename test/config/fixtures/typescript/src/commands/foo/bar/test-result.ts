@@ -1,6 +1,6 @@
-export class Command {
-  static run() {
+export const Command = {
+  run() {
     console.log('it works!')
     return 'returned success!'
-  }
+  },
 }

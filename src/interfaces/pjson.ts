@@ -63,10 +63,10 @@ export namespace PJSON {
 
   export namespace S3 {
     export interface Templates {
-      baseDir: string;
-      versioned: string;
-      unversioned: string;
-      manifest: string;
+      baseDir?: string;
+      versioned?: string;
+      unversioned?: string;
+      manifest?: string;
     }
   }
 

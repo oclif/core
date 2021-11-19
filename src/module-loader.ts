@@ -12,6 +12,7 @@ const getPackageType = require('get-package-type')
 /**
  * Defines file extension resolution when source files do not have an extension.
  */
+// eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.js', '.mjs', '.cjs']
 
 /**
@@ -26,6 +27,7 @@ const _importDynamic = new Function('modulePath', 'return import(modulePath)') /
  *
  * @author Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)
  */
+// eslint-disable-next-line unicorn/no-static-only-class
 export default class ModuleLoader {
   /**
    * Loads and returns a module.
@@ -50,10 +52,11 @@ export default class ModuleLoader {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       // It is important to await on _importDynamic to catch the error code.
       return isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
+
       throw error
     }
   }
@@ -82,10 +85,11 @@ export default class ModuleLoader {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
       return {isESM, module, filePath}
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
       }
+
       throw error
     }
   }
@@ -132,11 +136,12 @@ export default class ModuleLoader {
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
-    } catch (error) {
+    } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
       // Try all supported extensions.
       if (!fs.existsSync(filePath)) {
+        // eslint-disable-next-line camelcase
         for (const extension of s_EXTENSIONS) {
           const testPath = `${filePath}${extension}`
 

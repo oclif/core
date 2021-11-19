@@ -1,4 +1,3 @@
-/* eslint-disable no-import-assign */
 import {expect, fancy} from 'fancy-test'
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -96,7 +95,7 @@ describe('handle', () => {
     .it('exits without displaying anything', ctx => {
       try {
         exitErrorThrower(9000)
-      } catch (error) {
+      } catch (error: any) {
         handle(error)
       }
 

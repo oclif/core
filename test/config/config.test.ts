@@ -171,7 +171,6 @@ describe('Config', () => {
       commandIds = ['foo:bar', 'foo:baz'],
       types = [],
     }: Options = {}) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
       class MyComandClass implements ICommand.Class {
       _base = ''
@@ -189,15 +188,15 @@ describe('Config', () => {
       }
 
       run(): PromiseLike<any> {
-        return Promise.resolve(undefined)
+        return Promise.resolve()
       }
       }
       const load = async (): Promise<void>  => {}
       const findCommand = async (): Promise<ICommand.Class> => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
         return new MyComandClass()
       }
+
       const commandPluginA: ICommand.Plugin = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
@@ -274,7 +273,6 @@ describe('Config', () => {
         config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
         return config
       })
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       return {
         it(expectation: string, fn: (config: Interfaces.Config) => any) {

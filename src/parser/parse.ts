@@ -15,10 +15,7 @@ const m = Deps()
 let debug: any
 try {
   // eslint-disable-next-line no-negated-condition
-  if (process.env.CLI_FLAGS_DEBUG !== '1') debug = () => {}
-  else
-    // eslint-disable-next-line node/no-extraneous-require
-    debug = require('debug')('../parser')
+  debug = process.env.CLI_FLAGS_DEBUG !== '1' ? () => {} : require('debug')('../parser')
 } catch {
   debug = () => {}
 }
@@ -32,10 +29,11 @@ const readStdin = async () => {
   for await (const chunk of stdin) {
     result += chunk
   }
+
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
@@ -51,7 +49,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   constructor(private readonly input: T) {
     const {pickBy} = m.util
     this.context = input.context || {}
-    this.argv = input.argv.slice(0)
+    this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
     this.metaData = {}
@@ -65,6 +63,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (this.input.flags[name]) {
         return name
       }
+
       if (arg.startsWith('--no-')) {
         const flag = this.booleanFlags[arg.slice(5)]
         if (flag && flag.allowNo) return flag.name
@@ -88,22 +87,21 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (!equalsParsed) {
             this.argv.shift()
           }
+
           return equalsParsed
         }
+
         return false
       }
+
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        let input
-        if (long || arg.length < 3) {
-          input = this.argv.shift()
-        } else {
-          input = arg.slice(arg[2] === '=' ? 3 : 2)
-        }
+        const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
         if (typeof input !== 'string') {
           throw new m.errors.CLIError(`Flag --${name} expects a value`)
         }
+
         this.raw.push({type: 'flag', flag: flag.name, input})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
@@ -112,10 +110,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           this.argv.unshift(`-${arg.slice(2)}`)
         }
       }
+
       return true
     }
+
     let parsingFlags = true
-    while (this.argv.length) {
+    while (this.argv.length > 0) {
       const input = this.argv.shift() as string
       if (parsingFlags && input.startsWith('-') && input !== '-') {
         // attempt to parse as arg
@@ -123,20 +123,24 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           parsingFlags = false
           continue
         }
+
         if (parseFlag(input)) {
           continue
         }
         // not actually a flag if it reaches here so parse as an arg
       }
+
       if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
         this.raw.push({type: 'flag', flag: this.currentFlag.name, input})
         continue
       }
+
       // not a flag, parse as arg
       const arg = this.input.args[this._argTokens.length]
       if (arg) arg.input = input
       this.raw.push({type: 'arg', input})
     }
+
     const argv = await this._argv()
     const args = this._args(argv)
     const flags = await this._flags()
@@ -156,6 +160,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const arg = this.input.args[i]
       args[arg.name!] = argv[i]
     }
+
     return args
   }
 
@@ -171,6 +176,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         } else {
           flags[token.flag] = true
         }
+
         // eslint-disable-next-line no-await-in-loop
         flags[token.flag] = await flag.parse(flags[token.flag], this.context)
       } else {
@@ -178,6 +184,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (flag.options && !flag.options.includes(input)) {
           throw new m.errors.FlagInvalidOptionError(flag, input)
         }
+
         // eslint-disable-next-line no-await-in-loop
         const value = flag.parse ? await flag.parse(input, this.context) : input
         if (flag.multiple) {
@@ -188,6 +195,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
       }
     }
+
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
       if (flags[k]) continue
@@ -196,6 +204,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         // eslint-disable-next-line no-await-in-loop
         if (input) flags[k] = await flag.parse(input, this.context)
       }
+
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {setFromDefault: true}
         // eslint-disable-next-line no-await-in-loop
@@ -207,6 +216,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         flags[k] = parsedValue
       }
     }
+
     return flags
   }
 
@@ -222,6 +232,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (arg.options && !arg.options.includes(token.input)) {
             throw new m.errors.ArgInvalidOptionError(arg, token.input)
           }
+
           // eslint-disable-next-line no-await-in-loop
           args[i] = await arg.parse(token.input)
         } else {
@@ -234,8 +245,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           stdin = stdin.trim()
           args[i] = stdin
         }
+
         stdinRead = true
       }
+
       if (!args[i] && 'default' in arg) {
         if (typeof arg.default === 'function') {
           // eslint-disable-next-line no-await-in-loop
@@ -246,6 +259,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
       }
     }
+
     return args
   }
 
@@ -253,9 +267,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     if (argv.length > 0) {
       debug('argv: %o', argv)
     }
+
     if (Object.keys(args).length > 0) {
       debug('args: %o', args)
     }
+
     if (Object.keys(flags).length > 0) {
       debug('flags: %o', flags)
     }
@@ -266,6 +282,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     if (this.input.args.length > 0) {
       debug('available args: %s', this.input.args.map(a => a.name).join(' '))
     }
+
     if (Object.keys(this.input.flags).length === 0) return
     debug(
       'available flags: %s',

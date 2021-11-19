@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/oclif/core/compare/v1.0.3...v1.0.4) (2021-11-18)
+
+
+### Bug Fixes
+
+* resolve typescript compilation errors ([#290](https://github.com/oclif/core/issues/290)) ([7079932](https://github.com/oclif/core/commit/70799324b19e36c3cff5618de49083c68d0d9fc6))
+
+### [1.0.3](https://github.com/oclif/core/compare/v1.0.2...v1.0.3) (2021-11-08)
+
+
+### Bug Fixes
+
+* remove module lodash.template in favor of lodash ([#286](https://github.com/oclif/core/issues/286)) ([caaff0b](https://github.com/oclif/core/commit/caaff0b4918ab2e01bc01cad2c0d8158c2fcc1c5))
+
+### [1.0.2](https://github.com/oclif/core/compare/v1.0.1...v1.0.2) (2021-10-13)
+
+
+### Bug Fixes
+
+* remove ability to enable json flag globally ([#272](https://github.com/oclif/core/issues/272)) ([3c754e7](https://github.com/oclif/core/commit/3c754e7eee04ef078ff4ab08849191e6a5779ee0))
+
+### [1.0.1](https://github.com/oclif/core/compare/v1.0.0...v1.0.1) (2021-10-08)
+
+
+### Bug Fixes
+
+* use default separator if none is configured ([#271](https://github.com/oclif/core/issues/271)) ([602cf12](https://github.com/oclif/core/commit/602cf121ec676182a71a7e87b37714670cee0bf0))
+
+## [1.0.0](https://github.com/oclif/core/compare/v0.6.0...v1.0.0) (2021-09-29)
+
+## [0.6.0](https://github.com/oclif/core/compare/v0.5.41...v0.6.0) (2021-09-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* release v1 (#261)
+
+### readme
+
+* release v1 ([#261](https://github.com/oclif/core/issues/261)) ([115d7ae](https://github.com/oclif/core/commit/115d7ae820afb574b1765f3f4df54322e991df69))
+
+### [0.5.41](https://github.com/oclif/core/compare/v0.5.40...v0.5.41) (2021-09-29)
+
+
+### Bug Fixes
+
+* only show warnings when json is not enabled ([#260](https://github.com/oclif/core/issues/260)) ([0890917](https://github.com/oclif/core/commit/0890917f79c671c4635dc577c6821d544eef3c69))
+
+### [0.5.40](https://github.com/oclif/core/compare/v0.5.39...v0.5.40) (2021-09-27)
+
+
+### Bug Fixes
+
+* adjust help text to new style guide ([#259](https://github.com/oclif/core/issues/259)) ([28d9d78](https://github.com/oclif/core/commit/28d9d78f5118886632a200e51cb34f7896210304))
+
 ### [0.5.39](https://github.com/oclif/core/compare/v0.5.38...v0.5.39) (2021-09-17)
 
 
