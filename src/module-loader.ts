@@ -7,13 +7,12 @@ import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
 import * as Config from './config'
 
-const getPackageType = require('get-package-type')
 
 /**
  * Defines file extension resolution when source files do not have an extension.
  */
 // eslint-disable-next-line camelcase
-const s_EXTENSIONS: string[] = ['.js', '.mjs', '.cjs']
+const s_EXTENSIONS: string[] = ['.js', '.mjs', '.cjs', '.ts']
 
 /**
  * Provides a mechanism to use dynamic import / import() with tsconfig -> module: commonJS as otherwise import() gets
@@ -99,17 +98,18 @@ export default class ModuleLoader {
    * the `modulePath` provided ends in `.mjs` it is assumed to be ESM.
    *
    * @param {string} filePath - File path to test.
+   * @param {IConfig|IPlugin} config - Oclif config or plugin config.
    *
    * @returns {boolean} The modulePath is an ES Module.
    * @see https://www.npmjs.com/package/get-package-type
    */
-  static isPathModule(filePath: string): boolean {
+  static isPathModule(filePath: string, config: IConfig|IPlugin): boolean {
     const extension = path.extname(filePath).toLowerCase()
 
     switch (extension) {
+    case '.ts':
     case '.js':
-      return getPackageType.sync(filePath) === 'module'
-
+      return config.pjson?.type === 'module'
     case '.mjs':
       return true
 
@@ -135,7 +135,7 @@ export default class ModuleLoader {
 
     try {
       filePath = require.resolve(modulePath)
-      isESM = ModuleLoader.isPathModule(filePath)
+      isESM = ModuleLoader.isPathModule(filePath, config)
     } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
@@ -152,7 +152,7 @@ export default class ModuleLoader {
         }
       }
 
-      isESM = ModuleLoader.isPathModule(filePath)
+      isESM = ModuleLoader.isPathModule(filePath, config)
     }
 
     return {isESM, filePath}
