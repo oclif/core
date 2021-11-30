@@ -1,5 +1,5 @@
 @oclif/core
-==============
+===========
 
 base library for oclif CLIs
 
@@ -8,6 +8,11 @@ base library for oclif CLIs
 [![Downloads/week](https://img.shields.io/npm/dw/@oclif/core.svg)](https://npmjs.org/package/@oclif/core)
 [![License](https://img.shields.io/npm/l/@oclif/core.svg)](https://github.com/oclif/core/blob/main/package.json)
 
+
+Mirgating
+=====
+
+If you're migrating from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`) please see the [migration guide](./MIGRATION.md).
 
 Usage
 =====
