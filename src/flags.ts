@@ -49,3 +49,20 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
     },
   })
 }
+
+export const table = () => {
+  return {
+    columns: Parser.flags.string({exclusive: ['extended'], description: 'Only show provided columns (comma-separated).'}),
+    sort: Parser.flags.string({description: 'Property to sort by (prepend \'-\' for descending).'}),
+    filter: Parser.flags.string({description: 'Filter property by partial string matching, ex: name=foo.'}),
+    csv: Parser.flags.boolean({exclusive: ['no-truncate'], description: 'Output is csv format [alias: --output=csv].'}),
+    output: Parser.flags.string({
+      exclusive: ['no-truncate', 'csv'],
+      description: 'Output in a more machine friendly format.',
+      options: ['csv', 'json', 'yaml'],
+    }),
+    extended: Parser.flags.boolean({exclusive: ['columns'], char: 'x', description: 'Show extra columns.'}),
+    'no-truncate': Parser.flags.boolean({exclusive: ['csv'], description: 'Do not truncate output to fit screen.'}),
+    'no-header': Parser.flags.boolean({exclusive: ['csv'], description: 'Hide table header from output.'}),
+  }
+}
