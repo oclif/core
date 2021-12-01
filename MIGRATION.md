@@ -37,7 +37,22 @@ You just need to add the `additionalHelpFlags` and `additionalVersionFlags` prop
 {
   "oclif": {
     "additionalHelpFlags": ["-h"],
-    "additionalVersionFlags": ["-v", "version"]
+    "additionalVersionFlags": ["-v"]
+  }
+}
+```
+
+To get the `version` command, you'll need to install `@oclif/plugin-version` into your CLI:
+
+```json
+{
+  "dependencies": {
+    "@oclif/plugin-version": "^1"
+  },
+  "oclif": {
+    "plugins": [
+      "@oclif/plugin-version"
+    ]
   }
 }
 ```
