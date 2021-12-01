@@ -13,7 +13,7 @@
     "fs-extra": "^9.1.0",
     "get-package-type": "^0.1.0",
     "globby": "^11.0.4",
-    "indent-string": "^4.0.0",
+    "indent-string": "^5.0.0",
     "is-wsl": "^2.2.0",
     "lodash": "^4.17.21",
     "semver": "^7.3.5",
