@@ -467,10 +467,10 @@
     widest-line "^3.1.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.0.2.tgz#f8f4eb12ff5adceb0a7ed262e9f5d46bbef1bf4f"
-  integrity sha512-5Qd4D+OkhCPLNML8S/LEu78CPbnd4hfsF+/7fzAnyUD4U3P+F+/Lnx/b/AnaXw6U8CPjSNO+sod0C+QpqTN13A==
+"@oclif/core@^1.0.3":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.0.4.tgz#79ba3ed554441c3c08de38c3109275f3d9a1c188"
+  integrity sha512-6WBFFb9WnSxvfXPkQa1NLbEBL6tgEpsinAao/CSP/c5yeLrDCHIEn0+0HFKJzaZcYFG+puTelai6cU2A2sTyOw==
   dependencies:
     "@oclif/linewrap" "^1.0.0"
     chalk "^4.1.0"
@@ -482,7 +482,7 @@
     globby "^11.0.1"
     indent-string "^4.0.0"
     is-wsl "^2.1.1"
-    lodash.template "^4.4.0"
+    lodash "^4.17.21"
     semver "^7.3.2"
     string-width "^4.2.0"
     strip-ansi "^6.0.0"
@@ -533,11 +533,11 @@
     wrap-ansi "^4.0.0"
 
 "@oclif/plugin-help@^5.1.2":
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.2.tgz#109744f001fa1b4c55aa9d76a5490ba18f468fed"
-  integrity sha512-zxI+zJb2KdTjhnSEIY2wGl+hc++sVb0VH6UeBtxsZPRCQREwv0GjVt7sjwd93ODG1KYOsPGIyfsVLZbldTBvLA==
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.3.tgz#79e6cab9867541d11bfe95aaa2801820e16e8d83"
+  integrity sha512-iAfw47eFrHssr7qiuQBwv+NZilrkrBO6XaPzPuIMQtArgqnLU33bgQy9rMoPFkrP/LeC+r8SXZ1FVOLjXdMfnQ==
   dependencies:
-    "@oclif/core" "^1.0.2"
+    "@oclif/core" "^1.0.3"
 
 "@oclif/plugin-plugins@^2.0.1":
   version "2.0.1"
