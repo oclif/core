@@ -5,7 +5,7 @@ Migrating to `@oclif/core` from the old oclif libraries (`@oclif/config`, `@ocli
 
 ## Update Imports
 
-Any imports from the old libraries can be replaced with `@oclif/core`. For example,
+Replace imports from the old libraries with `@oclif/core`. For example,
 
 ```typescript
 import Help from '@oclif/plugin-help';
