@@ -9,10 +9,10 @@ base library for oclif CLIs
 [![License](https://img.shields.io/npm/l/@oclif/core.svg)](https://github.com/oclif/core/blob/main/package.json)
 
 
-Mirgating
+Migrating
 =====
 
-If you're migrating from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`) please see the [migration guide](./MIGRATION.md).
+If you're migrating from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`), see the [migration guide](./MIGRATION.md).
 
 Usage
 =====

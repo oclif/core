@@ -13,7 +13,7 @@ import {Topic} from '@oclif/config';
 import {Command, flags} from '@oclif/command'
 ```
 
-Can be changed to:
+With this import:
 
 ```typescript
 import {Command, flags, Topic, Help} from '@oclif/core';
@@ -23,15 +23,15 @@ import {Command, flags, Topic, Help} from '@oclif/core';
 
 `@oclif/core` now supports separate bin scripts for production and development.
 
-These new bin scripts can be copied directly from our [example repository](https://github.com/oclif/hello-world/tree/main/bin).
+You can copy these new bin scripts directly from our [example repository](https://github.com/oclif/hello-world/tree/main/bin).
 
 ## Restore `-h`, `-v`, and `version`
 
 `@oclif/config` automatically added `-h` as a short flag for `--help`, `-v` as a short flag for `--version`, and `version` as an alias for `--version`.
 
-`@oclif/core` removes these so that you're able to use those flags for whatever you want! However, we've added a way to restore that functionality if you would like to keep it.
+`@oclif/core` removes these so you can now use the flags for whatever you want! However, we've added a way to restore that functionality if you want to keep it.
 
-You just need to add the `additionalHelpFlags` and `additionalVersionFlags` properties to the oclif section of your package.json:
+Simply add the `additionalHelpFlags` and `additionalVersionFlags` properties to the oclif section of your package.json:
 
 ```json
 {
@@ -42,7 +42,7 @@ You just need to add the `additionalHelpFlags` and `additionalVersionFlags` prop
 }
 ```
 
-To get the `version` command, you'll need to install `@oclif/plugin-version` into your CLI:
+To get the `version` command, install `@oclif/plugin-version` into your CLI:
 
 ```json
 {
@@ -59,7 +59,7 @@ To get the `version` command, you'll need to install `@oclif/plugin-version` int
 
 ## Configure the `topicSeparator`
 
-By default the `topicSeparator` is set to a colon (`:`) to maintain backwards compatibility with exiting CLIs. However, you can now set this to a space if you would like.
+By default, the `topicSeparator` is set to a colon (`:`) to maintain backwards compatibility with exiting CLIs. If you prefer, you can now set it to a space.
 
 For colons:
 ```json
@@ -79,4 +79,4 @@ For spaces:
 }
 ```
 
-**Note that using colons will always work even if you set the `topicSeparator` to spaces.** This means that you can enable spaces in your CLI without introducing a breaking change to your users.
+**NOTE: Using colons always works, even if you set the `topicSeparator` to spaces.** This means that you can enable spaces in your CLI without introducing a breaking change to your users.
