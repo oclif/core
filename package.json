@@ -52,7 +52,7 @@
     "eslint-config-oclif-typescript": "^1.0.2",
     "fancy-test": "^1.4.10",
     "globby": "^11.0.4",
-    "husky": "6",
+    "husky": "7",
     "mocha": "^8.4.0",
     "nock": "^13.2.1",
     "proxyquire": "^2.1.3",
