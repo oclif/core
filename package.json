@@ -35,7 +35,7 @@
     "@types/indent-string": "^4.0.1",
     "@types/lodash": "^4.14.177",
     "@types/lodash.template": "^4.5.0",
-    "@types/mocha": "^8.2.3",
+    "@types/mocha": "^9.0.0",
     "@types/nock": "^11.1.0",
     "@types/node": "^15.14.9",
     "@types/node-notifier": "^8.0.1",
