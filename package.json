@@ -8,7 +8,7 @@
     "@oclif/linewrap": "^1.0.0",
     "chalk": "^4.1.2",
     "clean-stack": "^3.0.1",
-    "cli-ux": "^6.0.1",
+    "cli-ux": "^6.0.2",
     "debug": "^4.3.3",
     "fs-extra": "^9.1.0",
     "get-package-type": "^0.1.0",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^12.1.4",
-    "@oclif/plugin-help": "^5.1.4",
+    "@oclif/plugin-help": "^5.1.5",
     "@oclif/plugin-plugins": "^2.0.2",
     "@oclif/test": "^1.2.8",
     "@types/chai": "^4.2.22",

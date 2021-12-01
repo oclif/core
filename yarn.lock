@@ -467,6 +467,29 @@
     widest-line "^3.1.0"
     wrap-ansi "^7.0.0"
 
+"@oclif/core@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.0.5.tgz#a0fd253c84227346f692dba8e673364bd1506af6"
+  integrity sha512-90E0FzkC8Xn3JN6dn7NNH9TOsPLUoynt3qQ3HhkfvA+LRf0nYTXY1ZdvCSjXgPuDXO05tTsJdy1b7t1oQvJRmQ==
+  dependencies:
+    "@oclif/linewrap" "^1.0.0"
+    chalk "^4.1.2"
+    clean-stack "^3.0.1"
+    cli-ux "^6.0.1"
+    debug "^4.3.3"
+    fs-extra "^9.1.0"
+    get-package-type "^0.1.0"
+    globby "^11.0.4"
+    indent-string "^4.0.0"
+    is-wsl "^2.2.0"
+    lodash "^4.17.21"
+    semver "^7.3.5"
+    string-width "^4.2.3"
+    strip-ansi "^6.0.1"
+    tslib "^2.3.1"
+    widest-line "^3.1.0"
+    wrap-ansi "^7.0.0"
+
 "@oclif/errors@^1.2.1", "@oclif/errors@^1.2.2", "@oclif/errors@^1.3.3", "@oclif/errors@^1.3.5":
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/@oclif/errors/-/errors-1.3.5.tgz#a1e9694dbeccab10fe2fe15acb7113991bed636c"
@@ -509,12 +532,12 @@
     widest-line "^3.1.0"
     wrap-ansi "^4.0.0"
 
-"@oclif/plugin-help@^5.1.4":
-  version "5.1.4"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.4.tgz#0a87a537d81d5d0ca6418d05c5955d61a97e13ad"
-  integrity sha512-B/xx5jeis69RViSzhd/jrAuHkfct3763pHaAwsp99gR+QmM/SfsXvLUjA7GE+itXcRi1Aogdxm6B5psq89W9bQ==
+"@oclif/plugin-help@^5.1.5":
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.5.tgz#11a4cb6db8bc0333d8bd3ee796bfd079e5a6d1d8"
+  integrity sha512-HzsXyf2Yf/dUNqIKXNx9KyGLerEdennV3cUGrwhmJRsCQEmFFEdTIsly9AhTprD/MeEbMw0HEZ3RVK5YgvmSYA==
   dependencies:
-    "@oclif/core" "^1.0.4"
+    "@oclif/core" "^1.0.5"
 
 "@oclif/plugin-plugins@^2.0.2":
   version "2.0.2"
@@ -1130,6 +1153,14 @@ cli-progress@^3.4.0:
     colors "^1.1.2"
     string-width "^4.2.0"
 
+cli-progress@^3.9.1:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/cli-progress/-/cli-progress-3.9.1.tgz#a22eba6a20f53289fdd05d5ee8cb2cc8c28f866e"
+  integrity sha512-AXxiCe2a0Lm0VN+9L0jzmfQSkcZm5EYspfqXKaSIQKqIk+0hnkZ3/v1E9B39mkD6vYhKih3c/RPsJBSwq9O99Q==
+  dependencies:
+    colors "^1.1.2"
+    string-width "^4.2.0"
+
 cli-ux@^5.1.0, cli-ux@^5.2.1:
   version "5.6.3"
   resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-5.6.3.tgz#eecdb2e0261171f2b28f2be6b18c490291c3a287"
@@ -1176,6 +1207,37 @@ cli-ux@^6.0.1:
     chalk "^4.1.0"
     clean-stack "^3.0.0"
     cli-progress "^3.4.0"
+    extract-stack "^2.0.0"
+    fs-extra "^8.1"
+    hyperlinker "^1.0.0"
+    indent-string "^4.0.0"
+    is-wsl "^2.2.0"
+    js-yaml "^3.13.1"
+    lodash "^4.17.21"
+    natural-orderby "^2.0.1"
+    object-treeify "^1.1.4"
+    password-prompt "^1.1.2"
+    semver "^7.3.2"
+    string-width "^4.2.0"
+    strip-ansi "^6.0.0"
+    supports-color "^8.1.0"
+    supports-hyperlinks "^2.1.0"
+    tslib "^2.0.0"
+
+cli-ux@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-6.0.2.tgz#58d97a2e597698fc8652bd3b6846dbdd3be4a966"
+  integrity sha512-uLVfxABvq0mSoTbMWXrZwcq87Lj1nz3w8mbZaJSx0VPltmTZi5M16qTbr27Rjka/02x6WCWVMwU9dGp1GLp4dg==
+  dependencies:
+    "@oclif/core" "^1.0.5"
+    "@oclif/linewrap" "^1.0.0"
+    "@oclif/screen" "^1.0.3"
+    ansi-escapes "^4.3.0"
+    ansi-styles "^4.2.0"
+    cardinal "^2.1.1"
+    chalk "^4.1.0"
+    clean-stack "^3.0.0"
+    cli-progress "^3.9.1"
     extract-stack "^2.0.0"
     fs-extra "^8.1"
     hyperlinker "^1.0.0"
