@@ -1224,10 +1224,10 @@ cli-ux@^6.0.1:
     supports-hyperlinks "^2.1.0"
     tslib "^2.0.0"
 
-cli-ux@^6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-6.0.2.tgz#58d97a2e597698fc8652bd3b6846dbdd3be4a966"
-  integrity sha512-uLVfxABvq0mSoTbMWXrZwcq87Lj1nz3w8mbZaJSx0VPltmTZi5M16qTbr27Rjka/02x6WCWVMwU9dGp1GLp4dg==
+cli-ux@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.npmjs.org/cli-ux/-/cli-ux-6.0.3.tgz#11de25d7db31669c231899d39da3e75d1471bc85"
+  integrity sha512-XAzXgDDpFZZlDifxbP82ZICeY9KTnYE+xMKcxH2lPJzi/JEPoqG0OxnrS06kcJrSKsxyGAlh7rVaIeW9afKhcA==
   dependencies:
     "@oclif/core" "^1.0.5"
     "@oclif/linewrap" "^1.0.0"
