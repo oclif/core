@@ -25,11 +25,23 @@ import {Command, flags, Topic, Help} from '@oclif/core';
 
 You can copy these new bin scripts directly from our [example repository](https://github.com/oclif/hello-world/tree/main/bin).
 
+## Add `main` to your package.json
+
+We recommend that all oclif plugins specify the `main` field in their package.json so that we can begin working on supporting Yarn v2.
+
+```json
+{
+  "main": "lib/index.js"
+}
+```
+
+All plugins will be required to have this field in the next major version of `@oclif/core`.
+
 ## Restore `-h`, `-v`, and `version`
 
 `@oclif/config` automatically added `-h` as a short flag for `--help`, `-v` as a short flag for `--version`, and `version` as an alias for `--version`.
 
-`@oclif/core` removes these so you can now use the flags for whatever you want! However, we've added a way to restore that functionality if you want to keep it.
+`@oclif/core` removes these so you can now use those flags for whatever you want! However, we've added a way to restore that functionality if you want to keep it.
 
 Simply add the `additionalHelpFlags` and `additionalVersionFlags` properties to the oclif section of your package.json:
 
@@ -59,7 +71,7 @@ To get the `version` command, install `@oclif/plugin-version` into your CLI:
 
 ## Configure the `topicSeparator`
 
-By default, the `topicSeparator` is set to a colon (`:`) to maintain backwards compatibility with exiting CLIs. If you prefer, you can now set it to a space.
+By default, the `topicSeparator` is set to a colon (`:`) to maintain backwards compatibility with existing CLIs. If you prefer, you can now set it to a space.
 
 For colons:
 ```json
