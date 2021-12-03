@@ -19,6 +19,10 @@ export function exists(path: string): Promise<boolean> {
   return new Promise(resolve => resolve(fs.existsSync(path)))
 }
 
+export function resolvePackage(id: string, paths: { paths: string[] }): string {
+  return require.resolve(id, paths)
+}
+
 export function loadJSON(path: string): Promise<any> {
   debug('config')('loadJSON %s', path)
   return new Promise((resolve, reject) => {
