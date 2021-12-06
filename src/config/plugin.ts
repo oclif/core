@@ -36,6 +36,7 @@ function * up(from: string) {
     yield from
     from = path.dirname(from)
   }
+
   yield from
 }
 
@@ -69,7 +70,7 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
         // eslint-disable-next-line no-await-in-loop
         const pkg = await loadJSON(path.join(next, 'package.json'))
         if (pkg.name === name) return next
-      } catch { }
+      } catch {}
     } else {
       cur = path.join(next, 'package.json')
       // eslint-disable-next-line no-await-in-loop
@@ -83,9 +84,11 @@ async function findRoot(name: string | undefined, root: string) {
     let pkgPath
     try {
       pkgPath = resolvePackage(name, {paths: [__dirname, root]})
-    } catch (error) {}
+    } catch {}
+
     return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
   }
+
   return findSourcesRoot(root)
 }
 
