@@ -11,7 +11,7 @@ import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
-import {compact, exists, flatMap, loadJSON, mapValues} from './util'
+import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 
@@ -30,25 +30,36 @@ function topicsToArray(input: any, base?: string): Topic[] {
   })
 }
 
-// eslint-disable-next-line valid-jsdoc
+// essentially just "cd .."
+function * up(from: string) {
+  while (path.dirname(from) !== from) {
+    yield from
+    from = path.dirname(from)
+  }
+
+  yield from
+}
+
+async function findSourcesRoot(root: string) {
+  for (const next of up(root)) {
+    const cur = path.join(next, 'package.json')
+    // eslint-disable-next-line no-await-in-loop
+    if (await exists(cur)) return path.dirname(cur)
+  }
+}
+
 /**
+ * @returns string
+ * @param name string
+ * @param root string
  * find package root
  * for packages installed into node_modules this will go up directories until
  * it finds a node_modules directory with the plugin installed into it
  *
- * This is needed because of the deduping npm does
+ * This is needed because some oclif plugins do not declare the `main` field in their package.json
+ * https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
-async function findRoot(name: string | undefined, root: string) {
-  // essentially just "cd .."
-  function * up(from: string) {
-    while (path.dirname(from) !== from) {
-      yield from
-      from = path.dirname(from)
-    }
-
-    yield from
-  }
-
+async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
   for (const next of up(root)) {
     let cur
     if (name) {
@@ -66,6 +77,19 @@ async function findRoot(name: string | undefined, root: string) {
       if (await exists(cur)) return path.dirname(cur)
     }
   }
+}
+
+async function findRoot(name: string | undefined, root: string) {
+  if (name) {
+    let pkgPath
+    try {
+      pkgPath = resolvePackage(name, {paths: [__dirname, root]})
+    } catch {}
+
+    return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
+  }
+
+  return findSourcesRoot(root)
 }
 
 export class Plugin implements IPlugin {
