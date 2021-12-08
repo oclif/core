@@ -8,7 +8,7 @@
     "@oclif/linewrap": "^1.0.0",
     "chalk": "^4.1.2",
     "clean-stack": "^3.0.1",
-    "cli-ux": "^6.0.4",
+    "cli-ux": "6.0.5",
     "debug": "^4.3.3",
     "fs-extra": "^9.1.0",
     "get-package-type": "^0.1.0",
