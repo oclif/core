@@ -143,7 +143,7 @@ export default class ModuleLoader {
       if (fs.existsSync(filePath)) {
           if (fs.lstatSync(filePath).isDirectory()) {
               // filePath is a folder. Look for index.js file.
-              filePath += '/index';
+              filePath = path.join(filePath, 'index');
           } else {
               fileExists = true;
           }
