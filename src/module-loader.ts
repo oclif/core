@@ -139,8 +139,18 @@ export default class ModuleLoader {
     } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
+      let fileExists = false;
+      if (fs.existsSync(filePath)) {
+          if (fs.lstatSync(filePath).isDirectory()) {
+              // filePath is a folder. Look for index.js file.
+              filePath += '/index';
+          } else {
+              fileExists = true;
+          }
+      }
+
       // Try all supported extensions.
-      if (!fs.existsSync(filePath)) {
+      if (!fileExists) {
         // eslint-disable-next-line camelcase
         for (const extension of s_EXTENSIONS) {
           const testPath = `${filePath}${extension}`
