@@ -713,10 +713,10 @@
   dependencies:
     nock "*"
 
-"@types/node-notifier@^8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@types/node-notifier/-/node-notifier-8.0.1.tgz#5cf3fb1c67732bfc487e051492de688dd362edbc"
-  integrity sha512-oEaec3j6vw1u0xT/rEniM0yarkV5dZsZvjgTX3IlgekpjDGlv8EGD+Pnpbt3D9IMkoosprPeRtvYc/1t9XBduw==
+"@types/node-notifier@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@types/node-notifier/-/node-notifier-8.0.2.tgz#77c5de29c6e8adb915222b01864128cc3e78d553"
+  integrity sha512-5v0PhPv0AManpxT7W25Zipmj/Lxp1WqfkcpZHyqSloB+gGoAHRBuzhrCelFKrPvNF5ki3gAcO4kxaGO2/21u8g==
   dependencies:
     "@types/node" "*"
 
