@@ -383,11 +383,7 @@ export class Config implements IConfig {
 
   get commandIDs() {
     if (this._commandIDs) return this._commandIDs
-    const ids: string[] = []
-    for (const c of this.commands) {
-      ids.push(c.id, ...c.aliases)
-    }
-
+    const ids = this.commands.flatMap(c => [c.id, ...c.aliases])
     this._commandIDs = uniq(ids)
     return this._commandIDs
   }
