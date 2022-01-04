@@ -5,7 +5,19 @@ import {Executor, Result, setup} from './util'
 describe('oclif plugins', () => {
   let executor: Executor
   before(async () => {
-    executor = await setup(__filename)
+    executor = await setup(__filename, {
+      repo: 'git@github.com:oclif/hello-world.git',
+      plugins: [
+        '@oclif/plugin-autocomplete',
+        '@oclif/plugin-commands',
+        '@oclif/plugin-help',
+        '@oclif/plugin-not-found',
+        '@oclif/plugin-plugins',
+        '@oclif/plugin-update',
+        '@oclif/plugin-version',
+        '@oclif/plugin-which',
+      ],
+    })
   })
 
   describe('plugin-help', () => {

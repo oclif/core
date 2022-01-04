@@ -7,19 +7,6 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 
-const HELLO_WORLD_REPO = 'git@github.com:oclif/hello-world.git'
-const PLUGINS = [
-  '@oclif/plugin-autocomplete',
-  '@oclif/plugin-commands',
-  '@oclif/plugin-help',
-  '@oclif/plugin-not-found',
-  '@oclif/plugin-plugins',
-  '@oclif/plugin-update',
-  '@oclif/plugin-version',
-  '@oclif/plugin-which',
-]
-const OPTIONS = {repo: HELLO_WORLD_REPO, plugins: PLUGINS} as Options
-
 export type ExecError = cp.ExecException & { stderr: string; stdout: string };
 
 export interface Result {
@@ -87,7 +74,7 @@ export class Executor {
  * - OCLIF_CORE_E2E_TEST_DIR: the directory that you want the setup to happen in
  * - OCLIF_CORE_E2E_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
  */
-export async function setup(testFile: string, options = OPTIONS): Promise<Executor> {
+export async function setup(testFile: string, options: Options): Promise<Executor> {
   const testFileName = path.basename(testFile)
   const location = path.join(process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir(), testFileName)
   const [name] = options.repo.match(/(?<=\/).+?(?=\.)/) ?? ['hello-world']
