@@ -8,7 +8,7 @@ describe('Salesforce CLI (sf)', () => {
   })
 
   it('should show custom help', async () => {
-    const help = await executor.executeCommand('deploy:metadata --help')
+    const help = await executor.executeCommand('deploy metadata --help')
     /**
      * Regex matches that the help output matches this form:
      *
