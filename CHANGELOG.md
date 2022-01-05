@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/oclif/core/compare/v1.0.11...v1.1.0) (2022-01-05)
+
+
+### Features
+
+* add integration tests ([#339](https://github.com/oclif/core/issues/339)) ([2159c0b](https://github.com/oclif/core/commit/2159c0b970a0090f8bf21ff59e63dea1e788b5f9))
+
 ### [1.0.11](https://github.com/oclif/core/compare/v1.0.10...v1.0.11) (2021-12-17)
 
 
