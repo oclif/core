@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {Executor, setup} from './util'
 
-describe('Salesforce CLI (sf)', () => {
+describe.only('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
     executor = await setup(__filename, {repo: 'git@github.com:salesforcecli/cli.git'})
@@ -45,6 +45,7 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should have formatted json success output', async () => {
     const config = await executor.executeCommand('config list --json')
+    console.log(config)
     const result = JSON.parse(config.output!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('result')
