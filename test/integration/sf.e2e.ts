@@ -42,4 +42,22 @@ describe('Salesforce CLI (sf)', () => {
     const regex = /^[A-Z].*\n\nUSAGE[\S\s]*\n\nFLAGS[\S\s]*\n\nGLOBAL FLAGS[\S\s]*\n\nDESCRIPTION[\S\s]*\n\nEXAMPLES[\S\s]*\n\nFLAG DESCRIPTIONS[\S\s]*\n\nCONFIGURATION VARIABLES[\S\s]*\n\nENVIRONMENT VARIABLES[\S\s]*$/g
     expect(regex.test(help.output!)).to.be.true
   })
+
+  it('should have formatted json success output', async () => {
+    const config = await executor.executeCommand('config list --json')
+    const result = JSON.parse(config.output!)
+    expect(result).to.have.property('status')
+    expect(result).to.have.property('result')
+    expect(result).to.have.property('warnings')
+  })
+
+  it('should have formatted json error output', async () => {
+    const config = await executor.executeCommand('config set DOES_NOT_EXIST --json')
+    const result = JSON.parse(config.output!)
+    expect(result).to.have.property('status')
+    expect(result).to.have.property('stack')
+    expect(result).to.have.property('name')
+    expect(result).to.have.property('message')
+    expect(result).to.have.property('warnings')
+  })
 })
