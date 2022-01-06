@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/oclif/core/compare/v1.1.0...v1.1.1) (2022-01-06)
+
+
+### Bug Fixes
+
+* regenerate yarn.lock ([#340](https://github.com/oclif/core/issues/340)) ([75bf208](https://github.com/oclif/core/commit/75bf20819f2af574004cb7fe698938b51c6f2e44))
+
 ## [1.1.0](https://github.com/oclif/core/compare/v1.0.11...v1.1.0) (2022-01-05)
 
 
