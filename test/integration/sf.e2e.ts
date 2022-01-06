@@ -1,7 +1,8 @@
+import * as os from 'os'
 import {expect} from 'chai'
 import {Executor, setup} from './util'
 
-describe.only('Salesforce CLI (sf)', () => {
+describe('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
@@ -42,6 +43,35 @@ describe.only('Salesforce CLI (sf)', () => {
      */
     const regex = /^[A-Z].*\n\nUSAGE[\S\s]*\n\nFLAGS[\S\s]*\n\nGLOBAL FLAGS[\S\s]*\n\nDESCRIPTION[\S\s]*\n\nEXAMPLES[\S\s]*\n\nFLAG DESCRIPTIONS[\S\s]*\n\nCONFIGURATION VARIABLES[\S\s]*\n\nENVIRONMENT VARIABLES[\S\s]*$/g
     expect(regex.test(help.output!)).to.be.true
+  })
+
+  it('should show custom short help', async () => {
+    const help = await executor.executeCommand('deploy metadata -h')
+    /**
+     * Regex matches that the short help output matches this form:
+     *
+     * @example
+     * <summary>
+     *
+     * USAGE
+     *   <usage>
+     *
+     * FLAGS
+     *   <flags>
+     *
+     * GLOBAL FLAGS
+     *   <global flags>
+     */
+    const regex = /^[A-Z].*\n\nUSAGE[\S\s]*\n\nFLAGS[\S\s]*\n\nGLOBAL FLAGS[\S\s]*$/g
+    expect(regex.test(help.output!)).to.be.true
+  })
+
+  it('should show version using -v', async () => {
+    const version = await executor.executeCommand('-v')
+    expect(version.output).to.include('@salesforce/cli')
+    expect(version.output).to.include(process.platform)
+    expect(version.output).to.include(os.arch())
+    expect(version.output).to.include(process.version)
   })
 
   it('should have formatted json success output', async () => {
