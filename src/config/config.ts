@@ -1,5 +1,5 @@
 import {CLIError, error, exit, warn} from '../errors'
-import * as Lodash from 'lodash'
+import * as ejs from 'ejs'
 import * as os from 'os'
 import * as path from 'path'
 import {fileURLToPath, URL} from 'url'
@@ -383,7 +383,7 @@ export class Config implements IConfig {
 
   get commandIDs() {
     if (this._commandIDs) return this._commandIDs
-    const ids = Lodash.flattenDeep(this.commands.map(c => [c.id, c.aliases]))
+    const ids = this.commands.flatMap(c => [c.id, ...c.aliases])
     this._commandIDs = uniq(ids)
     return this._commandIDs
   }
@@ -421,8 +421,8 @@ export class Config implements IConfig {
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const _: typeof Lodash = require('lodash')
-    return _.template(this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type])({...this as any, ...options})
+    const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    return ejs.render(template, {...this as any, ...options})
   }
 
   s3Url(key: string) {
