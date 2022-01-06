@@ -18,6 +18,20 @@ workflows:
                 - latest
                 - lts
                 - maintenance
+            alias: unit-tests
+      # - release-management/test-package:
+      #     matrix:
+      #       parameters:
+      #         os:
+      #           - linux
+      #           - windows
+      #         node_version:
+      #           - latest
+      #           - lts
+      #           - maintenance
+      #         command:
+      #           - yarn test:e2e
+      #       alias: integration-tests
       - release-management/release-package:
           context: SF-CLI-RELEASE-PROCESS
           filters:
@@ -25,7 +39,8 @@ workflows:
               only: main
           github-release: true
           requires:
-            - release-management/test-package
+            - unit-tests
+            # - integration-tests
   dependabot-automerge:
     triggers:
       - schedule:

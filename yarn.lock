@@ -444,6 +444,29 @@
     is-wsl "^2.1.1"
     tslib "^2.0.0"
 
+"@oclif/core@1.0.10":
+  version "1.0.10"
+  resolved "https://registry.npmjs.org/@oclif/core/-/core-1.0.10.tgz#5fd01d572e44d372b7279ee0f49b4860e14b6e4e"
+  integrity sha512-L+IcNU3NoYxwz5hmHfcUlOJ3dpgHRsIj1kAmI9CKEJHq5gBVKlP44Ot179Jke1jKRKX2g9N42izbmlh0SNpkkw==
+  dependencies:
+    "@oclif/linewrap" "^1.0.0"
+    chalk "^4.1.2"
+    clean-stack "^3.0.1"
+    cli-ux "6.0.5"
+    debug "^4.3.3"
+    fs-extra "^9.1.0"
+    get-package-type "^0.1.0"
+    globby "^11.0.4"
+    indent-string "^4.0.0"
+    is-wsl "^2.2.0"
+    lodash "^4.17.21"
+    semver "^7.3.5"
+    string-width "^4.2.3"
+    strip-ansi "^6.0.1"
+    tslib "^2.3.1"
+    widest-line "^3.1.0"
+    wrap-ansi "^7.0.0"
+
 "@oclif/core@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.0.4.tgz#79ba3ed554441c3c08de38c3109275f3d9a1c188"
@@ -679,6 +702,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/glob@*":
+  version "7.2.0"
+  resolved "https://registry.npmjs.org/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"
+  integrity sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==
+  dependencies:
+    "@types/minimatch" "*"
+    "@types/node" "*"
+
 "@types/indent-string@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/indent-string/-/indent-string-4.0.1.tgz#fb4e6b8cdd8e94f70c105e78fb5d357a767b7193"
@@ -713,10 +744,10 @@
   dependencies:
     nock "*"
 
-"@types/node-notifier@^8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@types/node-notifier/-/node-notifier-8.0.1.tgz#5cf3fb1c67732bfc487e051492de688dd362edbc"
-  integrity sha512-oEaec3j6vw1u0xT/rEniM0yarkV5dZsZvjgTX3IlgekpjDGlv8EGD+Pnpbt3D9IMkoosprPeRtvYc/1t9XBduw==
+"@types/node-notifier@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@types/node-notifier/-/node-notifier-8.0.2.tgz#77c5de29c6e8adb915222b01864128cc3e78d553"
+  integrity sha512-5v0PhPv0AManpxT7W25Zipmj/Lxp1WqfkcpZHyqSloB+gGoAHRBuzhrCelFKrPvNF5ki3gAcO4kxaGO2/21u8g==
   dependencies:
     "@types/node" "*"
 
@@ -749,6 +780,14 @@
   version "7.3.9"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.9.tgz#152c6c20a7688c30b967ec1841d31ace569863fc"
   integrity sha512-L/TMpyURfBkf+o/526Zb6kd/tchUP3iBDEPjqjb+U2MAJhVRxxrmr2fwpe08E7QsV7YLcpq0tUaQ9O9x97ZIxQ==
+
+"@types/shelljs@^0.8.10":
+  version "0.8.10"
+  resolved "https://registry.npmjs.org/@types/shelljs/-/shelljs-0.8.10.tgz#c33079c9b41a9d6f788f98f1d8a68f880a14f454"
+  integrity sha512-nhBdUA/n0nRo1B6E4BuRnUvllYAqal4T9zd91ZDnBh+qQMQTwvxmJHx6xEn/0vdjP2kqEA5eVeLazs4nMxeuFg==
+  dependencies:
+    "@types/glob" "*"
+    "@types/node" "*"
 
 "@types/sinon@*":
   version "10.0.2"
@@ -1331,6 +1370,37 @@ cli-ux@^6.0.4:
     "@oclif/core" "^1.0.7"
     "@oclif/linewrap" "^1.0.0"
     "@oclif/screen" "^1.0.3"
+    ansi-escapes "^4.3.0"
+    ansi-styles "^4.2.0"
+    cardinal "^2.1.1"
+    chalk "^4.1.0"
+    clean-stack "^3.0.0"
+    cli-progress "^3.9.1"
+    extract-stack "^2.0.0"
+    fs-extra "^8.1"
+    hyperlinker "^1.0.0"
+    indent-string "^4.0.0"
+    is-wsl "^2.2.0"
+    js-yaml "^3.13.1"
+    lodash "^4.17.21"
+    natural-orderby "^2.0.1"
+    object-treeify "^1.1.4"
+    password-prompt "^1.1.2"
+    semver "^7.3.2"
+    string-width "^4.2.0"
+    strip-ansi "^6.0.0"
+    supports-color "^8.1.0"
+    supports-hyperlinks "^2.1.0"
+    tslib "^2.0.0"
+
+cli-ux@^6.0.6:
+  version "6.0.6"
+  resolved "https://registry.npmjs.org/cli-ux/-/cli-ux-6.0.6.tgz#00536bf6038f195b0a1a2589f61ce5e625e75870"
+  integrity sha512-CvL4qmV78VhnbyHTswGjpDSQtU+oj3hT9DP9L6yMOwiTiNv0nMjMEV/8zou4CSqO6PtZ2A8qnlZDgAc07Js+aw==
+  dependencies:
+    "@oclif/core" "1.0.10"
+    "@oclif/linewrap" "^1.0.0"
+    "@oclif/screen" "^1.0.4 "
     ansi-escapes "^4.3.0"
     ansi-styles "^4.2.0"
     cardinal "^2.1.1"
@@ -3148,7 +3218,7 @@ shebang-regex@^3.0.0:
 
 shelljs@^0.8.4:
   version "0.8.4"
-  resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.4.tgz#de7684feeb767f8716b326078a8a00875890e3c2"
+  resolved "https://registry.npmjs.org/shelljs/-/shelljs-0.8.4.tgz#de7684feeb767f8716b326078a8a00875890e3c2"
   integrity sha512-7gk3UZ9kOfPLIAbslLzyWeGiEqx9e3rxwZM0KE6EL8GlGwjym9Mrlx5/p33bWTu9YG6vcS4MBxYZDHYr5lr8BQ==
   dependencies:
     glob "^7.0.0"
