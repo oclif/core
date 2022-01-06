@@ -113,7 +113,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     })
   }
 
-  const install = 'yarn'
+  const install = 'yarn install --force'
   console.log(chalk.cyan(`${testFileName}:`), install)
   await executor.executeInTestDir(install)
 
