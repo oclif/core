@@ -39,7 +39,7 @@ class LS extends Command {
 
   async run() {
     const {flags} = await this.parse(LS)
-    let files = fs.readdirSync(Flags.dir)
+    let files = fs.readdirSync(flags.dir)
     for (let f of files) {
       this.log(f)
     }
