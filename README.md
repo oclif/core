@@ -24,14 +24,14 @@ Without the generator, you can create a simple CLI like this:
 #!/usr/bin/env ts-node
 
 import * as fs from 'fs'
-import {Command, flags} from '@oclif/core'
+import {Command, Flags} from '@oclif/core'
 
 class LS extends Command {
   static flags = {
-    version: flags.version(),
-    help: flags.help(),
+    version: Flags.version(),
+    help: Flags.help(),
     // run with --dir= or -d=
-    dir: flags.string({
+    dir: Flags.string({
       char: 'd',
       default: process.cwd(),
     }),
