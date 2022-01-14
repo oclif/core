@@ -9,3 +9,4 @@ chai.use(chaiAsPromised)
 
 global.oclif = global.oclif || {}
 global.oclif.columns = 80
+global.columns = '80'

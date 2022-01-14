@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-import {cli} from 'cli-ux'
+import {cli} from './cli-ux'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -231,7 +231,6 @@ export default abstract class Command {
     } else {
       if (!err.message) throw err
       try {
-        const {cli} = require('cli-ux')
         const chalk = require('chalk')
         cli.action.stop(chalk.bold.red('!'))
       } catch {}
