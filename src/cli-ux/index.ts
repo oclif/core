@@ -1,4 +1,4 @@
-import * as Errors from '../../src/errors'
+import * as Errors from '../errors'
 import * as util from 'util'
 
 import {ActionBase} from './action/base'

@@ -1,5 +1,5 @@
-import * as Interfaces from '../../../src/interfaces'
-import * as F from '../../../src/flags'
+import * as Interfaces from '../../interfaces'
+import * as F from '../../flags'
 import {stdtermwidth} from '@oclif/screen'
 import * as chalk from 'chalk'
 import {capitalize, sumBy} from 'lodash'
