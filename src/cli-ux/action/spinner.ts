@@ -1,6 +1,6 @@
 // tslint:disable restrict-plus-operands
 
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
 
 import deps from '../deps'

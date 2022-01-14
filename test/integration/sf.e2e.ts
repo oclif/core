@@ -1,6 +1,15 @@
 import * as os from 'os'
 import {expect} from 'chai'
 import {Executor, setup} from './util'
+import StripAnsi = require('strip-ansi')
+const stripAnsi: typeof StripAnsi = require('strip-ansi')
+
+const chalk = require('chalk')
+chalk.level = 0
+
+function parseJson(json: string) {
+  return JSON.parse(stripAnsi(json))
+}
 
 describe('Salesforce CLI (sf)', () => {
   let executor: Executor
@@ -41,7 +50,7 @@ describe('Salesforce CLI (sf)', () => {
      * ENVIRONMENT VARIABLES
      *   <environment variables>
      */
-    const regex = /^[A-Z].*\n\nUSAGE[\S\s]*\n\nFLAGS[\S\s]*\n\nGLOBAL FLAGS[\S\s]*\n\nDESCRIPTION[\S\s]*\n\nEXAMPLES[\S\s]*\n\nFLAG DESCRIPTIONS[\S\s]*\n\nCONFIGURATION VARIABLES[\S\s]*\n\nENVIRONMENT VARIABLES[\S\s]*$/g
+    const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?DESCRIPTION.*?EXAMPLES.*?FLAG DESCRIPTIONS.*?CONFIGURATION VARIABLES.*?ENVIRONMENT VARIABLES.*$/gs
     expect(regex.test(help.output!)).to.be.true
   })
 
@@ -62,7 +71,7 @@ describe('Salesforce CLI (sf)', () => {
      * GLOBAL FLAGS
      *   <global flags>
      */
-    const regex = /^[A-Z].*\n\nUSAGE[\S\s]*\n\nFLAGS[\S\s]*\n\nGLOBAL FLAGS[\S\s]*$/g
+    const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?(?!DESCRIPTION).*?(?!EXAMPLES).*?(?!FLAG DESCRIPTIONS).*?(?!CONFIGURATION VARIABLES).*?(?!ENVIRONMENT VARIABLES).*$/gs
     expect(regex.test(help.output!)).to.be.true
   })
 
@@ -76,7 +85,8 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should have formatted json success output', async () => {
     const config = await executor.executeCommand('config list --json')
-    const result = JSON.parse(config.output!)
+    console.log(config.output!)
+    const result = parseJson(config.output!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('result')
     expect(result).to.have.property('warnings')
@@ -84,7 +94,7 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should have formatted json error output', async () => {
     const config = await executor.executeCommand('config set DOES_NOT_EXIST --json')
-    const result = JSON.parse(config.output!)
+    const result = parseJson(config.output!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('stack')
     expect(result).to.have.property('name')
@@ -94,7 +104,7 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should handle varags', async () => {
     const config = await executor.executeCommand('config set disableTelemetry=true restDeploy=true --global --json')
-    const parsed = JSON.parse(config.output!)
+    const parsed = parseJson(config.output!)
     expect(parsed.status).to.equal(0)
     const results = parsed.result as Array<{success: boolean}>
     for (const result of results) {
