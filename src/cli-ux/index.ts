@@ -2,7 +2,7 @@ import * as Errors from '../errors'
 import * as util from 'util'
 
 import {ActionBase} from './action/base'
-import {config, Config} from './config'
+import {config, UxConfig} from './config'
 import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
@@ -127,13 +127,12 @@ export const ux = {
     await timeout(flush(), 10_000)
   },
 }
-export default ux
 export const cli = ux
 
 export {
   config,
   ActionBase,
-  Config,
+  UxConfig,
   ExitError,
   IPromptOptions,
   Table,

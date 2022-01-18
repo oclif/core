@@ -27,7 +27,7 @@ const Action = actionType === 'spinner' ? require('./action/spinner').default : 
 const PrideAction = actionType === 'spinner' ? require('./action/pride-spinner').default : require('./action/simple').default
 /* eslint-enable node/no-missing-require */
 
-export class Config {
+export class UxConfig {
   outputLevel: Levels = 'info'
 
   action: ActionBase = new Action()
@@ -57,9 +57,9 @@ export class Config {
 
 function fetch() {
   if (globals[version.major]) return globals[version.major]
-  globals[version.major] = new Config()
+  globals[version.major] = new UxConfig()
   return globals[version.major]
 }
 
-export const config: Config = fetch()
+export const config: UxConfig = fetch()
 export default config

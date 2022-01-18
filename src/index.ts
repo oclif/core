@@ -42,7 +42,7 @@ export {
   flush,
 }
 
-export * from './cli-ux/index'
+export * from './cli-ux'
 
 function checkCWD() {
   try {
