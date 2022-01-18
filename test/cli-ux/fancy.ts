@@ -2,7 +2,7 @@ import {expect, fancy as base, FancyTypes} from 'fancy-test'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import {cli} from '../../src/cli-ux'
+import {CliUx} from '../../src/cli-ux'
 
 export {
   expect,
@@ -20,5 +20,5 @@ export const fancy = base
   chalk.level = 0
 })
 .finally(async () => {
-  await cli.done()
+  await CliUx.cli.done()
 })

@@ -1,7 +1,7 @@
-import {ActionBase, ActionType} from './base'
+import {CliUx} from './base'
 
-export default class SimpleAction extends ActionBase {
-  public type: ActionType = 'simple'
+export default class SimpleAction extends CliUx.ActionBase {
+  public type: CliUx.ActionType = 'simple'
 
   protected _start() {
     const task = this.task

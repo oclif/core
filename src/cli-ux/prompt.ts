@@ -1,18 +1,19 @@
 import * as Errors from '../../src/errors'
 import * as chalk from 'chalk'
-
-import config from './config'
+import * as config from './config'
 import deps from './deps'
 
-export interface IPromptOptions {
-  prompt?: string;
-  type?: 'normal' | 'mask' | 'hide' | 'single';
-  timeout?: number;
-  /**
-   * Requires user input if true, otherwise allows empty input
-   */
-  required?: boolean;
-  default?: string;
+export namespace CliUx {
+  export interface IPromptOptions {
+    prompt?: string;
+    type?: 'normal' | 'mask' | 'hide' | 'single';
+    timeout?: number;
+    /**
+     * Requires user input if true, otherwise allows empty input
+     */
+    required?: boolean;
+    default?: string;
+  }
 }
 
 interface IPromptConfig {
@@ -80,7 +81,7 @@ function replacePrompt(prompt: string) {
     deps.ansiEscapes.cursorDown(1) + deps.ansiEscapes.cursorLeft + deps.ansiEscapes.cursorShow)
 }
 
-function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
+function _prompt(name: string, inputOptions: Partial<CliUx.IPromptOptions> = {}): Promise<string> {
   const prompt = getPrompt(name, inputOptions.type, inputOptions.default)
   const options: IPromptConfig = {
     isTTY: Boolean(process.env.TERM !== 'dumb' && process.stdin.isTTY),
@@ -116,52 +117,54 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
   }
 }
 
-/**
- * prompt for input
- * @param name - prompt text
- * @param options - @see IPromptOptions
- * @returns void
- */
-export function prompt(name: string, options: IPromptOptions = {}) {
-  return config.action.pauseAsync(() => {
-    return _prompt(name, options)
-  }, chalk.cyan('?'))
-}
-
-/**
- * confirmation prompt (yes/no)
- * @param message - confirmation text
- * @returns Promise<boolean>
- */
-export function confirm(message: string): Promise<boolean> {
-  return config.action.pauseAsync(async () => {
-    const confirm = async (): Promise<boolean> => {
-      const response = (await _prompt(message)).toLowerCase()
-      if (['n', 'no'].includes(response)) return false
-      if (['y', 'yes'].includes(response)) return true
-      return confirm()
-    }
-
-    return confirm()
-  }, chalk.cyan('?'))
-}
-
-/**
- * "press anykey to continue"
- * @param message - optional message to display to user
- * @returns Promise<void>
- */
-export async function anykey(message?: string): Promise<void> {
-  const tty = Boolean(process.stdin.setRawMode)
-  if (!message) {
-    message = tty ?
-      `Press any key to continue or ${chalk.yellow('q')} to exit` :
-      `Press enter to continue or ${chalk.yellow('q')} to exit`
+export namespace CliUx {
+  /**
+   * prompt for input
+   * @param name - prompt text
+   * @param options - @see IPromptOptions
+   * @returns void
+   */
+  export function prompt(name: string, options: CliUx.IPromptOptions = {}) {
+    return config.CliUx.config.action.pauseAsync(() => {
+      return _prompt(name, options)
+    }, chalk.cyan('?'))
   }
 
-  const char = await prompt(message, {type: 'single', required: false})
-  if (tty) process.stderr.write('\n')
-  if (char === 'q') Errors.error('quit')
-  if (char === '\u0003') Errors.error('ctrl-c')
-  return char
+  /**
+   * confirmation prompt (yes/no)
+   * @param message - confirmation text
+   * @returns Promise<boolean>
+   */
+  export function confirm(message: string): Promise<boolean> {
+    return config.CliUx.config.action.pauseAsync(async () => {
+      const confirm = async (): Promise<boolean> => {
+        const response = (await _prompt(message)).toLowerCase()
+        if (['n', 'no'].includes(response)) return false
+        if (['y', 'yes'].includes(response)) return true
+        return confirm()
+      }
+
+      return confirm()
+    }, chalk.cyan('?'))
+  }
+
+  /**
+   * "press anykey to continue"
+   * @param message - optional message to display to user
+   * @returns Promise<void>
+   */
+  export async function anykey(message?: string): Promise<void> {
+    const tty = Boolean(process.stdin.setRawMode)
+    if (!message) {
+      message = tty ?
+        `Press any key to continue or ${chalk.yellow('q')} to exit` :
+        `Press enter to continue or ${chalk.yellow('q')} to exit`
+    }
+
+    const char = await prompt(message, {type: 'single', required: false})
+    if (tty) process.stderr.write('\n')
+    if (char === 'q') Errors.error('quit')
+    if (char === '\u0003') Errors.error('ctrl-c')
+    return char
+  }
 }
