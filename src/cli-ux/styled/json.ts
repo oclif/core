@@ -2,7 +2,7 @@
 
 import * as chalk from 'chalk'
 
-import cli from '..'
+import {cli} from '..'
 
 export default function styledJSON(obj: any) {
   const json = JSON.stringify(obj, null, 2)
