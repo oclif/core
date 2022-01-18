@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 
 // import {BarType, Progress} from '../../src/progress'
-import cli from '../../../src/cli-ux'
+import {cli} from '../../../src/cli-ux'
 
 describe('progress', () => {
   // single bar

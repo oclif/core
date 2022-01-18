@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 
-import cli from '../../../src/cli-ux'
+import {cli} from '../../../src/cli-ux'
 
 /* eslint-disable camelcase */
 const apps = [
