@@ -4,7 +4,6 @@ import * as util from 'util'
 import * as uxConfig from './config'
 import deps from './deps'
 import * as Table from './styled/table'
-import {CliUx as BaseCliUx} from './action/base'
 
 const hyperlinker = require('hyperlinker')
 
