@@ -1,12 +1,12 @@
 import {expect, fancy} from 'fancy-test'
 
-import {cli} from '../../../src/cli-ux'
+import {CliUx} from '../../../src'
 
 describe('styled/object', () => {
   fancy
   .stdout()
   .end('shows a table', output => {
-    cli.styledObject([
+    CliUx.ux.styledObject([
       {foo: 1, bar: 1},
       {foo: 2, bar: 2},
       {foo: 3, bar: 3},

@@ -13,6 +13,8 @@ import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
+import * as cliUx from './cli-ux'
+import {IPromptOptions as _IPromptOptions} from './cli-ux'
 
 const flush = require('../flush')
 
@@ -42,7 +44,16 @@ export {
   flush,
 }
 
-export * from './cli-ux'
+export namespace CliUx {
+  export const ux = cliUx.ux
+  export const Config = cliUx.Config
+  export const config = cliUx.config
+  export const ExitError = cliUx.ExitError
+  export const ActionBase = cliUx.ActionBase
+  export const Table = cliUx.Table
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface IPromptOptions extends _IPromptOptions {}
+}
 
 function checkCWD() {
   try {
