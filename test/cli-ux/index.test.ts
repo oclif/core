@@ -1,4 +1,4 @@
-import {CliUx} from '../../src/cli-ux'
+import {ux} from '../../src/cli-ux'
 
 import {expect, fancy} from './fancy'
 const hyperlinker = require('hyperlinker')
@@ -7,7 +7,7 @@ describe('url', () => {
   fancy
   .env({FORCE_HYPERLINK: '1'}, {clear: true})
   .stdout()
-  .do(() => CliUx.ux.url('sometext', 'https://google.com'))
+  .do(() => ux.url('sometext', 'https://google.com'))
   .it('renders hyperlink', async ({stdout}) => {
     expect(stdout).to.equal('sometext\n')
   })

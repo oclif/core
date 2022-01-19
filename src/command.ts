@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-import {CliUx} from './'
+import {cli} from './cli-ux'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -163,7 +163,7 @@ export default abstract class Command {
     }
 
     if (result && this.jsonEnabled()) {
-      CliUx.cli.styledJSON(this.toSuccessJson(result))
+      cli.styledJSON(this.toSuccessJson(result))
     }
 
     return result
@@ -227,12 +227,12 @@ export default abstract class Command {
   protected async catch(err: Record<string, any>): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
-      CliUx.cli.styledJSON(this.toErrorJson(err))
+      cli.styledJSON(this.toErrorJson(err))
     } else {
       if (!err.message) throw err
       try {
         const chalk = require('chalk')
-        CliUx.cli.action.stop(chalk.bold.red('!'))
+        cli.action.stop(chalk.bold.red('!'))
       } catch {}
 
       throw err

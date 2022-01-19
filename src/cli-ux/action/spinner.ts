@@ -5,17 +5,18 @@ import * as supportsColor from 'supports-color'
 
 import deps from '../deps'
 
-import {CliUx} from './base'
+import {ActionBase, ActionType} from './base'
 /* eslint-disable-next-line node/no-missing-require */
 const spinners = require('./spinners')
+
 function color(s: string): string {
   if (!supportsColor) return s
   const has256 = supportsColor.stdout ? supportsColor.stdout.has256 : (process.env.TERM || '').includes('256')
   return has256 ? `\u001B[38;5;104m${s}${deps.ansiStyles.reset.open}` : chalk.magenta(s)
 }
 
-export default class SpinnerAction extends CliUx.ActionBase {
-  public type: CliUx.ActionType = 'spinner'
+export default class SpinnerAction extends ActionBase {
+  public type: ActionType = 'spinner'
 
   spinner?: NodeJS.Timeout
 

@@ -2,7 +2,7 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-import {CliUx} from '../../src/cli-ux'
+import {cli} from '../../src/cli-ux'
 
 import {fancy} from './fancy'
 
@@ -11,11 +11,11 @@ describe('prompt', () => {
   .stdout()
   .stderr()
   .end('requires input', async () => {
-    const promptPromise = CliUx.cli.prompt('Require input?')
+    const promptPromise = cli.prompt('Require input?')
     process.stdin.emit('data', '')
     process.stdin.emit('data', 'answer')
     const answer = await promptPromise
-    await CliUx.cli.done()
+    await cli.done()
     expect(answer).to.equal('answer')
   })
 
@@ -24,9 +24,9 @@ describe('prompt', () => {
   .stderr()
   .stdin('y')
   .end('confirm', async () => {
-    const promptPromise = CliUx.cli.confirm('yes/no?')
+    const promptPromise = cli.confirm('yes/no?')
     const answer = await promptPromise
-    await CliUx.cli.done()
+    await cli.done()
     expect(answer).to.equal(true)
   })
 
@@ -35,9 +35,9 @@ describe('prompt', () => {
   .stderr()
   .stdin('n')
   .end('confirm', async () => {
-    const promptPromise = CliUx.cli.confirm('yes/no?')
+    const promptPromise = cli.confirm('yes/no?')
     const answer = await promptPromise
-    await CliUx.cli.done()
+    await cli.done()
     expect(answer).to.equal(false)
   })
 
@@ -46,9 +46,9 @@ describe('prompt', () => {
   .stderr()
   .stdin('x')
   .end('gets anykey', async () => {
-    const promptPromise = CliUx.cli.anykey()
+    const promptPromise = cli.anykey()
     const answer = await promptPromise
-    await CliUx.cli.done()
+    await cli.done()
     expect(answer).to.equal('x')
   })
 
@@ -56,12 +56,12 @@ describe('prompt', () => {
   .stdout()
   .stderr()
   .end('does not require input', async () => {
-    const promptPromise = CliUx.cli.prompt('Require input?', {
+    const promptPromise = cli.prompt('Require input?', {
       required: false,
     })
     process.stdin.emit('data', '')
     const answer = await promptPromise
-    await CliUx.cli.done()
+    await cli.done()
     expect(answer).to.equal('')
   })
 
@@ -69,7 +69,7 @@ describe('prompt', () => {
   .stdout()
   .stderr()
   .it('timeouts with no input', async () => {
-    await expect(CliUx.cli.prompt('Require input?', {timeout: 1}))
+    await expect(cli.prompt('Require input?', {timeout: 1}))
     .to.eventually.be.rejectedWith('Prompt timeout')
   })
 })

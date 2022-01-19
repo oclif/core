@@ -1,16 +1,16 @@
 import {expect, fancy} from 'fancy-test'
 
-import {CliUx} from '../../../src/cli-ux'
+import {cli} from '../../../src/cli-ux'
 
 describe('styled/tree', () => {
   fancy
   .stdout()
   .end('shows the tree', output => {
-    const tree = CliUx.cli.tree()
+    const tree = cli.tree()
     tree.insert('foo')
     tree.insert('bar')
 
-    const subtree = CliUx.cli.tree()
+    const subtree = cli.tree()
     subtree.insert('qux')
     tree.nodes.bar.insert('baz', subtree)
 
