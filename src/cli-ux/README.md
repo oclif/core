@@ -322,7 +322,7 @@ $ ts-node examples/progress.ts
 ```
 
 This example extends [cli-progress](https://www.npmjs.com/package/cli-progress).
-see all of the options and customizations there, which can be passed in with the options object.
+See the cli-progress module for all the options and the customizations that can be passed in with the options object.
 Only the single bar variant of cli-progress is currently supported.
 
 
