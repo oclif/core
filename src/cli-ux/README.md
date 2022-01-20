@@ -1,14 +1,14 @@
-# Migrating from cli-ux module to use the ux components now present in @oclif/core
+# How to migrate from the `cli-ux` module and use the `ux` components now contained in `@oclif/core`
 
-The capability of `cli-ux` has been retained in `@oclif/core`, but the code has been reorganized to expose the exported members via a namespace.
-The exported member `cli` had been removed, since it is equivalent to exported member `ux`.
+We've retained the capabilities of `cli-ux` in `@oclif/core`, but we've reorganized the code to expose the exported members via a namespace.
+We've removed the exported member `cli`, because it's equivalent to the exported member `ux`.
 Updating your project to use cli IO utilities should be straight forward.
 
-- Remove the `cli-ux` dependency
-- Change imports that reference `cli-ux` to `@oclif/core`
-- Add namespace member `CliUx` to your `@oclif/core` import
-- Preface previous `cli-ux` members with namespace `CliUx`
-- Replace references to member `cli` with `ux`
+1. Remove the `cli-ux` dependency.
+1. Change all imports that reference `cli-ux` to `@oclif/core`.
+1. Add the namespace member `CliUx` to your `@oclif/core` import.
+1. Preface previous `cli-ux` members with the namespace `CliUx`.
+1. Replace all references to member `cli` with `ux`.
 
 cli-ux
 ======
@@ -17,7 +17,7 @@ cli IO utilities
 
 # Usage
 
-The following assumes you have installed `@oclif/core` to your project with `npm install @oclif/core` or `yarn add @oclif/core` and have it required in your script (TypeScript example):
+The following example assumes you've installed `@oclif/core` to your project with `npm install @oclif/core` or `yarn add @oclif/core` and have it required in your script (TypeScript example):
 
 ```typescript
 import {CliUx} from '@oclif/core'
@@ -141,7 +141,7 @@ Where:
 }
 ```
 
-Passing `{only: ['columns']}` or `{except: ['columns']}` as an argument into `CliUx.ux.table.flags()` will allow/block those flags from the returned object.
+Passing `{only: ['columns']}` or `{except: ['columns']}` as an argument into `CliUx.ux.table.flags()` allows or blocks, respectively, those flags from the returned object.
 
 `Table.Columns` defines the table columns and their display options.
 
@@ -322,7 +322,7 @@ To see a more detailed example, run
 $ ts-node examples/progress.ts
 ```
 
-This extends [cli-progress](https://www.npmjs.com/package/cli-progress)
+This example extends [cli-progress](https://www.npmjs.com/package/cli-progress).
 see all of the options and customizations there, which can be passed in with the options object.
 Only the single bar variant of cli-progress is currently supported.
 
