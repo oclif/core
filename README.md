@@ -14,6 +14,10 @@ Migrating
 
 If you're migrating from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`), see the [migration guide](./MIGRATION.md).
 
+The @oclif/core module now includes the cli-ux module. The merge of cli-ux into core resolves a circular dependency between @oclif/core and cli-ux.
+Please see the [cli-ux README](./src/cli-ux/README.md) for instructions on how to replace module cli-ux with @oclif/core.
+The [cli-ux README](./src/cli-ux/README.md) also contains detail usage examples.
+
 Usage
 =====
 
