@@ -146,7 +146,7 @@ Passing `{only: ['columns']}` or `{except: ['columns']}` as an argument into `Cl
 `Table.Columns` defines the table columns and their display options.
 
 ```typescript
-const columns: Table.Columns = {
+const columns: CliUx.Table.Columns = {
   // where `.name` is a property of a data object
   name: {}, // "Name" inferred as the column header
   id: {
@@ -161,7 +161,7 @@ const columns: Table.Columns = {
 `Table.Options` defines the table options, most of which are the parsed flags from the user for display customization, all of which are optional.
 
 ```typescript
-const options: Table.Options = {
+const options: CliUx.Table.Options = {
   printLine: myLogger, // custom logger
   columns: flags.columns,
   sort: flags.sort,
@@ -176,8 +176,7 @@ const options: Table.Options = {
 Example class:
 
 ```typescript
-import {Command} from '@oclif/core'
-import {cli} from '@oclif/core'
+import {Command, CliUx} from '@oclif/core'
 import axios from 'axios'
 
 export default class Users extends Command {
