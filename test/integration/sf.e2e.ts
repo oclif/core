@@ -85,7 +85,6 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should have formatted json success output', async () => {
     const config = await executor.executeCommand('config list --json')
-    console.log(config.output!)
     const result = parseJson(config.output!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('result')
