@@ -812,15 +812,15 @@ See more help with --help`)
       try {
         await parse([], {
           flags: {
-            foo: flags.string({exactlyOne: ['bar']}),
-            bar: flags.string({char: 'b', exactlyOne: ['foo']}),
+            foo: flags.string({exactlyOne: ['bar', 'foo']}),
+            bar: flags.string({char: 'b', exactlyOne: ['bar', 'foo']}),
           },
         })
       } catch (error: any) {
         message = error.message
       }
 
-      expect(message).to.equal('Exactly one of the following must be provided: b,a,r')
+      expect(message).to.equal('Exactly one of the following must be provided: bar, foo')
     })
 
     it('throws if multiple are set', async () => {
