@@ -2,8 +2,8 @@ import {CliUx} from '../../src'
 import {expect} from 'chai'
 
 type MyColumns = Record<string, unknown>
-const options: CliUx.Table.Options = {}
-const columns: CliUx.Table.Columns<MyColumns> = {}
+const options: CliUx.Table.table.Options = {}
+const columns: CliUx.Table.table.Columns<MyColumns> = {}
 const iPromptOptions: CliUx.IPromptOptions = {}
 
 describe('cli-ux exports', () => {
