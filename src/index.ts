@@ -50,7 +50,15 @@ export namespace CliUx {
   export const config = cliUx.config
   export const ExitError = cliUx.ExitError
   export const ActionBase = cliUx.ActionBase
-  export const Table = cliUx.Table
+  export namespace Table {
+    export const table = cliUx.Table.table
+    // @ts-ignore
+    export type Column<T extends Record<string, unknown>> = cliUx.Table.table.Column<T>
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    export type Columns<T extends Record<string, unknown>> = cliUx.Table.table.Columns<T>
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    export interface Options extends cliUx.Table.table.Options {}
+  }
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface IPromptOptions extends _IPromptOptions {}
 }
