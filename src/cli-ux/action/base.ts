@@ -1,5 +1,5 @@
-import castArray from 'lodash/castArray'
 import {inspect} from 'util'
+import {castArray} from '../../util'
 
 export interface ITask {
   action: string;
