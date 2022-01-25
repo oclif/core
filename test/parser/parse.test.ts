@@ -820,7 +820,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Exactly one of the following must be provided: bar, foo')
+      expect(message).to.equal('Exactly one of the following must be provided: --bar, --foo')
     })
 
     it('throws if multiple are set', async () => {
