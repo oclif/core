@@ -10,13 +10,13 @@ Replace imports from the old libraries with `@oclif/core`. For example,
 ```typescript
 import Help from '@oclif/plugin-help';
 import {Topic} from '@oclif/config';
-import {Command, flags} from '@oclif/command'
+import {Command, Flags} from '@oclif/command'
 ```
 
 With this import:
 
 ```typescript
-import {Command, flags, Topic, Help} from '@oclif/core';
+import {Command, Flags, Topic, Help} from '@oclif/core';
 ```
 
 ## Update your bin scirpts

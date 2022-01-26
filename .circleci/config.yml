@@ -18,8 +18,13 @@ workflows:
                 - latest
                 - lts
                 - maintenance
+            exclude:
+              - os: windows
+                node_version: latest
             alias: unit-tests
       - release-management/test-package:
+          name: release-management/test-package-yarn test:e2e-<< matrix.node_version >>-<< matrix.os >>
+          command: yarn test:e2e
           matrix:
             parameters:
               os:
@@ -29,8 +34,9 @@ workflows:
                 - latest
                 - lts
                 - maintenance
-              command:
-                - yarn test:e2e
+            exclude:
+              - os: windows
+                node_version: latest
             alias: integration-tests
       - release-management/release-package:
           context: SF-CLI-RELEASE-PROCESS

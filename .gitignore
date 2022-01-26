@@ -8,3 +8,4 @@
 /node_modules
 /tmp
 /test/tmp
+.DS_Store
