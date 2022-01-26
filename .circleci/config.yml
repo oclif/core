@@ -23,6 +23,7 @@ workflows:
                 node_version: latest
             alias: unit-tests
       - release-management/test-package:
+          command: yarn test:e2e
           matrix:
             parameters:
               os:
@@ -32,8 +33,6 @@ workflows:
                 - latest
                 - lts
                 - maintenance
-              command:
-                - yarn test:e2e
             exclude:
               - os: windows
                 node_version: latest
