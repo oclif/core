@@ -18,6 +18,9 @@ workflows:
                 - latest
                 - lts
                 - maintenance
+            exclude:
+              - os: windows
+                node_version: latest
             alias: unit-tests
       - release-management/test-package:
           matrix:
@@ -31,6 +34,9 @@ workflows:
                 - maintenance
               command:
                 - yarn test:e2e
+            exclude:
+              - os: windows
+                node_version: latest
             alias: integration-tests
       - release-management/release-package:
           context: SF-CLI-RELEASE-PROCESS
