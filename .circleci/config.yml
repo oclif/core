@@ -23,6 +23,7 @@ workflows:
                 node_version: latest
             alias: unit-tests
       - release-management/test-package:
+          name: release-management/test-package-yarn test:e2e-<< matrix.node_version >>-<< matrix.os >>
           command: yarn test:e2e
           matrix:
             parameters:
