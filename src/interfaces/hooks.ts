@@ -35,7 +35,7 @@ export interface Hooks {
   };
   'command_not_found': {
     options: {id: string; argv?: string[]};
-    return: void;
+    return: unknown;
   };
   'plugins:preinstall': {
     options: {
