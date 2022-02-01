@@ -1,4 +1,4 @@
-import * as Errors from '../../src/errors'
+import * as Errors from '../errors'
 import * as chalk from 'chalk'
 
 import config from './config'
