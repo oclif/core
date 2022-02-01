@@ -26,11 +26,11 @@ export interface Hooks {
     return: void;
   };
   preupdate: {
-    options: {channel: string};
+    options: {channel: string, version: string};
     return: void;
   };
   update: {
-    options: {channel: string};
+    options: {channel: string, version: string};
     return: void;
   };
   'command_not_found': {
