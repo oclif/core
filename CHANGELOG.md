@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/oclif/core/compare/v1.2.1...v1.3.0) (2022-02-01)
+
+
+### Features
+
+* add S3Manifest ([#354](https://github.com/oclif/core/issues/354)) ([ea5585d](https://github.com/oclif/core/commit/ea5585db6361f12c3c0608b05d1e33e16bc0b4b6))
+
 ### [1.2.1](https://github.com/oclif/core/compare/v1.2.0...v1.2.1) (2022-01-28)
 
 
