@@ -23,7 +23,7 @@ try {
 const readStdin = async () => {
   const {stdin} = process
   let result
-  if (stdin.isTTY) return result
+  if (stdin.isTTY || stdin.isTTY === undefined) return result
   result = ''
   stdin.setEncoding('utf8')
   for await (const chunk of stdin) {
