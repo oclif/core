@@ -1,6 +1,6 @@
 // this code is largely taken from opn
 import * as childProcess from 'child_process'
-import _ from 'lodash'
+import * as _ from 'lodash'
 const isWsl = require('is-wsl')
 
 export namespace open {
