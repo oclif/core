@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/oclif/core/compare/v1.3.1...v1.3.2) (2022-02-08)
+
+
+### Bug Fixes
+
+* fix default import of lodash ([#366](https://github.com/oclif/core/issues/366)) ([99fc7d1](https://github.com/oclif/core/commit/99fc7d1fdddbcd1509f649723057cd0ba7ee414c))
+
 ### [1.3.1](https://github.com/oclif/core/compare/v1.3.0...v1.3.1) (2022-02-07)
 
 
