@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/oclif/core/compare/v1.3.2...v1.3.3) (2022-02-09)
+
+
+### Bug Fixes
+
+* update isProd utility ([#368](https://github.com/oclif/core/issues/368)) ([a58315d](https://github.com/oclif/core/commit/a58315dc401071675c0f1b08a7ab82c35846ce6d))
+
 ### [1.3.2](https://github.com/oclif/core/compare/v1.3.1...v1.3.2) (2022-02-08)
 
 
