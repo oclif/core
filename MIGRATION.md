@@ -5,7 +5,7 @@ Migrating to `@oclif/core` from the old oclif libraries (`@oclif/config`, `@ocli
 
 - [Migrating to @oclif/core](#migrating-to-oclifcore)
   - [Update Imports](#update-imports)
-  - [Update your bin scirpts](#update-your-bin-scirpts)
+  - [Update your bin scripts](#update-your-bin-scripts)
   - [Add `main` to your package.json](#add-main-to-your-packagejson)
   - [Restore `-h`, `-v`, and `version`](#restore--h--v-and-version)
   - [Configure the `topicSeparator`](#configure-the-topicseparator)
@@ -29,7 +29,7 @@ With this import:
 import {Command, Flags, Topic, Help} from '@oclif/core';
 ```
 
-## Update your bin scirpts
+## Update your bin scripts
 
 `@oclif/core` now supports separate bin scripts for production and development.
 
@@ -109,7 +109,7 @@ The `parse` method on `Command` is now asynchronous (more [here](https://oclif.i
 
 `const { args, flags } = this.parse(MyCommand)` => `const { args, flags } = await this.parse(MyCommand)`
 
-## Update `default` property on flag defintions
+## Update `default` property on flag definitions
 
 The `default` property on flag definitions is now asynchronous. So you'll now need to await those.
 
