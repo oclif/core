@@ -61,3 +61,27 @@ export function Debug(...scope: string[]): (..._: any) => void {
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)
 }
+
+// Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js
+export function permutations(arr: string[]): Array<string[]> {
+  if (arr.length === 0) return []
+  if (arr.length === 1) return [arr]
+
+  const output = []
+  const partialPermutations = permutations(arr.slice(1))
+  const first = arr[0]
+
+  for (let i = 0, len = partialPermutations.length; i < len; i++) {
+    const partial = partialPermutations[i]
+
+    for (let j = 0, len2 = partial.length; j <= len2; j++) {
+      const start = partial.slice(0, j)
+      const end = partial.slice(j)
+      const merged = start.concat(first, end)
+
+      output.push(merged)
+    }
+  }
+
+  return output
+}

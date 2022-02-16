@@ -8,9 +8,8 @@ import {format} from 'util'
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {Debug} from './util'
 import * as Plugin from './plugin'
-import {compact, flatMap, loadJSON, uniq} from './util'
+import {Debug, compact, flatMap, loadJSON, uniq, permutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 
@@ -81,6 +80,8 @@ export class Config implements IConfig {
 
   topicSeparator: ':' | ' ' = ':'
 
+  flexibleTaxonomy!: boolean
+
   protected warned = false
 
   private _commands?: Command.Plugin[]
@@ -122,6 +123,7 @@ export class Config implements IConfig {
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.dirname = this.pjson.oclif.dirname || this.name
+    this.flexibleTaxonomy = this.pjson.oclif.flexibleTaxonomy || false
     // currently, only colons or spaces are valid separators
     if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator)) this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
@@ -383,7 +385,20 @@ export class Config implements IConfig {
 
   get commands(): Command.Plugin[] {
     if (this._commands) return this._commands
-    this._commands = flatMap(this.plugins, p => p.commands)
+    if (this.flexibleTaxonomy) {
+      const commands = flatMap(this.plugins, p => p.commands)
+      this._commands = [...commands]
+      for (const cmd of commands) {
+        const parts = cmd.id.split(':')
+        const combos = permutations(parts).flatMap(c => c.join(':'))
+        for (const combo of combos) {
+          this._commands.push({...cmd, id: combo})
+        }
+      }
+    } else {
+      this._commands = flatMap(this.plugins, p => p.commands)
+    }
+
     return this._commands
   }
 
