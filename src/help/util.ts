@@ -38,11 +38,10 @@ export function template(context: any): (t: string) => string {
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = new Set(config.commandIDs.concat(config.topics.map(t => t.name)))
-
+  const ids = config.collectUsableIds()
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
-    const idPresent = (id: string) => ids.has(id)
+    const idPresent = (id: string) => ids.includes(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')

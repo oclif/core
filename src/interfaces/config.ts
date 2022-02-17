@@ -88,6 +88,7 @@ export interface Config {
   plugins: Plugin[];
   binPath?: string;
   valid: boolean;
+  flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
   readonly commands: Command.Plugin[];
   readonly topics: Topic[];
@@ -100,6 +101,8 @@ export interface Config {
   findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined;
   findTopic(id: string, opts: { must: true }): Topic;
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined;
+  findMatches(id: string): string[];
+  collectUsableIds(): string[];
   scopedEnvVar(key: string): string | undefined;
   scopedEnvVarKey(key: string): string;
   scopedEnvVarTrue(key: string): boolean;

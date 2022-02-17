@@ -90,6 +90,8 @@ export class Config implements IConfig {
 
   private _topics?: Topic[]
 
+  private flexibleTaxonomyMap = new Map<string, string>()
+
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
 
@@ -283,7 +285,9 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      const hookResult = await this.runHook('command_not_found', {id, argv})
+      const hookResult = this.flexibleTaxonomy ?
+        await this.runHook('command_incomplete', {id, argv, matches: this.findMatches(id)}) :
+        await this.runHook('command_not_found', {id, argv})
 
       if (hookResult.successes[0]) {
         const cmdResult = hookResult.successes[0].result
@@ -383,15 +387,59 @@ export class Config implements IConfig {
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
 
+  public findMatches(name: string): string[] {
+    const matches = this.commandIDs.filter(id => {
+      const parts = name.split(':')
+      return parts.every(p => id.includes(p))
+    }).map(id => {
+      return this.flexibleTaxonomyMap.get(id) || id
+    })
+    return [...new Set(matches)]
+  }
+
+  /**
+   * Return an array of ids that represent all the usable combinations that a user
+   * could enter.
+   *
+   * For example, if the command ids are:
+   * - foo:bar:baz
+   * - one:two:three
+   * Then the usable ids would be:
+   * - foo
+   * - foo:bar
+   * - foo:bar:baz
+   * - one
+   * - one:two
+   * - one:two:three
+   *
+   * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
+   *
+   * @returns Set<string>
+   */
+  public collectUsableIds(): string[] {
+    const ids: string[] = []
+    for (const c of this.commands.filter(c => !c.hidden)) {
+      const parts = c.id.split(':')
+      while (parts.length > 0) {
+        const name = parts.join(':')
+        if (name) ids.push(name)
+        parts.pop()
+      }
+    }
+
+    return [...new Set(ids)]
+  }
+
   get commands(): Command.Plugin[] {
     if (this._commands) return this._commands
     if (this.flexibleTaxonomy) {
       const commands = flatMap(this.plugins, p => p.commands)
-      this._commands = [...commands]
+      this._commands = []
       for (const cmd of commands) {
         const parts = cmd.id.split(':')
         const combos = permutations(parts).flatMap(c => c.join(':'))
         for (const combo of combos) {
+          this.flexibleTaxonomyMap.set(combo, cmd.id)
           this._commands.push({...cmd, id: combo})
         }
       }
@@ -422,16 +470,21 @@ export class Config implements IConfig {
       }
     }
 
-    // add missing topics
-    for (const c of this.commands.filter(c => !c.hidden)) {
-      const parts = c.id.split(':')
-      while (parts.length > 0) {
-        const name = parts.join(':')
-        if (name && !topics.find(t => t.name === name)) {
-          topics.push({name, description: c.summary || c.description})
-        }
+    // Add missing topics if flexible taxonomy is not enabled.
+    // "Missing topics" are used for displaying help when partial
+    // commands are entered. When flexible taxonomy is enabled, we
+    // want the help to be missing so that we can enter "partial mode".
+    if (!this.flexibleTaxonomy) {
+      for (const c of this.commands.filter(c => !c.hidden)) {
+        const parts = c.id.split(':')
+        while (parts.length > 0) {
+          const name = parts.join(':')
+          if (name && !topics.find(t => t.name === name)) {
+            topics.push({name, description: c.summary || c.description})
+          }
 
-        parts.pop()
+          parts.pop()
+        }
       }
     }
 

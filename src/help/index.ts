@@ -91,6 +91,7 @@ export class Help extends HelpBase {
   }
 
   public async showHelp(argv: string[]) {
+    const originalArgv = argv.slice(1)
     argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
 
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
@@ -121,6 +122,14 @@ export class Help extends HelpBase {
     if (topic) {
       await this.showTopicHelp(topic)
       return
+    }
+
+    if (this.config.flexibleTaxonomy) {
+      const matches = this.config.findMatches(subject)
+      if (matches.length > 0) {
+        this.config.runHook('command_incomplete', {id: subject, argv: originalArgv, matches})
+        return
+      }
     }
 
     error(`Command ${subject} not found.`)

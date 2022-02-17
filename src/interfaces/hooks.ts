@@ -37,6 +37,10 @@ export interface Hooks {
     options: {id: string; argv?: string[]};
     return: unknown;
   };
+  'command_incomplete': {
+    options: {id: string; argv: string[], matches: string[]};
+    return: unknown;
+  };
   'plugins:preinstall': {
     options: {
       plugin: { name: string; tag: string; type: 'npm' } | { url: string; type: 'repo' };
@@ -55,6 +59,7 @@ export namespace Hook {
   export type Preupdate = Hook<'preupdate'>
   export type Update = Hook<'update'>
   export type CommandNotFound = Hook<'command_not_found'>
+  export type CommandIncomplete = Hook<'command_incomplete'>
 
   export interface Context {
     config: Config;
