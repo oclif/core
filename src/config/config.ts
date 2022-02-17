@@ -12,6 +12,7 @@ import * as Plugin from './plugin'
 import {Debug, compact, flatMap, loadJSON, uniq, permutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import {getHelpFlagAdditions} from '../help'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -87,6 +88,8 @@ export class Config implements IConfig {
   private _commands?: Command.Plugin[]
 
   private _commandIDs?: string[]
+
+  private _commandAliases?: Command.Plugin[]
 
   private _topics?: Topic[]
 
@@ -285,7 +288,7 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      const matches = this.findMatches(id)
+      const matches = this.findMatches(id, argv)
       const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
         await this.runHook('command_incomplete', {id, argv, matches}) :
         await this.runHook('command_not_found', {id, argv})
@@ -345,7 +348,7 @@ export class Config implements IConfig {
    * @returns command instance {Command.Plugin} or undefined
    */
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
-    const commands = this.commands.filter(c => c.id === id || c.aliases.includes(id))
+    const commands = [...this.commands, ...this.commandAliases].filter(c => c.id === id)
     if (opts.must && commands.length === 0) error(`command ${id} not found`)
     if (commands.length === 1) return commands[0]
 
@@ -388,12 +391,18 @@ export class Config implements IConfig {
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
 
-  findMatches(name: string): string[] {
-    const matches = this.commandIDs.filter(id => {
+  findMatches(name: string, argv: string[]): string[] {
+    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
+    const commands = [...this.commands, ...this.commandAliases]
+    const matches = commands.filter(command => {
+      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
+        return def.char ? [def.char, flag] : [flag]
+      }) as string[]
+
       const parts = name.split(':')
-      return parts.every(p => id.includes(p))
-    }).map(id => {
-      return this.commandIndex.get(id) || id
+      return parts.every(p => command.id.includes(p)) && flags.every(f => cmdFlags.includes(f))
+    }).map(command => {
+      return this.commandIndex.get(command.id) || command.id
     })
     return [...new Set(matches)]
   }
@@ -415,12 +424,12 @@ export class Config implements IConfig {
    *
    * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
    *
-   * @returns Set<string>
+   * @returns string[]
    */
   collectUsableIds(): string[] {
     const ids: string[] = []
-    for (const c of this.commands.filter(c => !c.hidden)) {
-      const parts = c.id.split(':')
+    for (const id of this.commandIDs) {
+      const parts = id.split(':')
       while (parts.length > 0) {
         const name = parts.join(':')
         if (name) ids.push(name)
@@ -456,6 +465,26 @@ export class Config implements IConfig {
     const ids = this.commands.flatMap(c => [c.id, ...c.aliases])
     this._commandIDs = uniq(ids)
     return this._commandIDs
+  }
+
+  get commandAliases(): Command.Plugin[] {
+    if (this._commandAliases) return this._commandAliases
+    this._commandAliases = []
+    for (const command of this.commands) {
+      for (const alias of command.aliases ?? []) {
+        if (this.flexibleTaxonomy) {
+          const combos = permutations(alias.split(':')).flatMap(c => c.join(':'))
+          for (const combo of combos) {
+            this.commandIndex.set(combo, alias)
+            this._commandAliases.push({...command, id: combo})
+          }
+        } else {
+          this._commandAliases.push({...command, id: alias})
+        }
+      }
+    }
+
+    return this._commandAliases
   }
 
   get topics(): Topic[] {
