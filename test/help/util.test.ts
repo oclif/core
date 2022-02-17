@@ -50,7 +50,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space', () => {
       config.topicSeparator = ' '
       const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
@@ -58,7 +58,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and command is misspelled', () => {
       config.topicSeparator = ' '
       const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
@@ -66,7 +66,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has args', () => {
       config.topicSeparator = ' '
       config.commands.push({
@@ -78,7 +78,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has variable arguments', () => {
       config.topicSeparator = ' '
       config.commands.push({
@@ -90,7 +90,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
       config.topicSeparator = ' '
       config.commands.push({
@@ -102,7 +102,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return full id when topic separator is a space and does not have arguments', () => {
       config.topicSeparator = ' '
       config.commands.push({
@@ -115,7 +115,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has arg with value', () => {
       config.topicSeparator = ' '
       config.commands.push({id: 'foo:bar'} as any)
@@ -124,7 +124,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has variable args with value', () => {
       config.topicSeparator = ' '
       config.commands.push({id: 'foo:bar', strict: false} as any)
@@ -133,7 +133,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has flags', () => {
       config.topicSeparator = ' '
       config.commands.push({id: 'foo:bar'} as any)
@@ -142,7 +142,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'commandIDs', () => ['foo', 'foo:bar'])
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has flags, arg, and arg with value', () => {
       config.topicSeparator = ' '
       config.commands.push({
