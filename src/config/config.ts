@@ -285,8 +285,9 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      const hookResult = this.flexibleTaxonomy ?
-        await this.runHook('command_incomplete', {id, argv, matches: this.findMatches(id)}) :
+      const matches = this.findMatches(id)
+      const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
+        await this.runHook('command_incomplete', {id, argv, matches}) :
         await this.runHook('command_not_found', {id, argv})
 
       if (hookResult.successes[0]) {
