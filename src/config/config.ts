@@ -90,7 +90,7 @@ export class Config implements IConfig {
 
   private _topics?: Topic[]
 
-  private flexibleTaxonomyMap = new Map<string, string>()
+  private commandIndex = new Map<string, string>()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
@@ -387,12 +387,12 @@ export class Config implements IConfig {
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
 
-  public findMatches(name: string): string[] {
+  findMatches(name: string): string[] {
     const matches = this.commandIDs.filter(id => {
       const parts = name.split(':')
       return parts.every(p => id.includes(p))
     }).map(id => {
-      return this.flexibleTaxonomyMap.get(id) || id
+      return this.commandIndex.get(id) || id
     })
     return [...new Set(matches)]
   }
@@ -416,7 +416,7 @@ export class Config implements IConfig {
    *
    * @returns Set<string>
    */
-  public collectUsableIds(): string[] {
+  collectUsableIds(): string[] {
     const ids: string[] = []
     for (const c of this.commands.filter(c => !c.hidden)) {
       const parts = c.id.split(':')
@@ -439,7 +439,7 @@ export class Config implements IConfig {
         const parts = cmd.id.split(':')
         const combos = permutations(parts).flatMap(c => c.join(':'))
         for (const combo of combos) {
-          this.flexibleTaxonomyMap.set(combo, cmd.id)
+          this.commandIndex.set(combo, cmd.id)
           this._commands.push({...cmd, id: combo})
         }
       }
@@ -473,7 +473,8 @@ export class Config implements IConfig {
     // Add missing topics if flexible taxonomy is not enabled.
     // "Missing topics" are used for displaying help when partial
     // commands are entered. When flexible taxonomy is enabled, we
-    // want the help to be missing so that we can enter "partial mode".
+    // want the help to be missing so that we can run the command_incomplete
+    // hook instead.
     if (!this.flexibleTaxonomy) {
       for (const c of this.commands.filter(c => !c.hidden)) {
         const parts = c.id.split(':')
