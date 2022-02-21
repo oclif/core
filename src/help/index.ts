@@ -5,19 +5,12 @@ import {error} from '../errors'
 import CommandHelp from './command'
 import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
-import {standardizeIDFromArgv} from './util'
+import {getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
 import {Plugin} from '../config/plugin'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, loadHelpClass} from './util'
-
-const helpFlags = ['--help']
-
-export function getHelpFlagAdditions(config: Interfaces.Config): string[] {
-  const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
-  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
-}
+export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
@@ -127,8 +120,8 @@ export class Help extends HelpBase {
     if (this.config.flexibleTaxonomy) {
       const matches = this.config.findMatches(subject, originalArgv)
       if (matches.length > 0) {
-        this.config.runHook('command_incomplete', {id: subject, argv: originalArgv, matches})
-        return
+        const result = await this.config.runHook('command_incomplete', {id: subject, argv: originalArgv, matches})
+        if (result.successes.length > 0) return
       }
     }
 

@@ -12,7 +12,7 @@ import * as Plugin from './plugin'
 import {Debug, compact, flatMap, loadJSON, uniq, permutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {getHelpFlagAdditions} from '../help'
+import {getHelpFlagAdditions} from '../help/util'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()

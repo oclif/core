@@ -94,3 +94,9 @@ export function standardizeIDFromArgv(argv: string[], config: IConfig): string[]
   else if (config.topicSeparator !== ':') argv[0] = toStandardizedId(argv[0], config)
   return argv
 }
+
+export function getHelpFlagAdditions(config: IConfig): string[] {
+  const helpFlags = ['--help']
+  const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
+  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
+}
