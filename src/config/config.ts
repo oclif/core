@@ -391,7 +391,20 @@ export class Config implements IConfig {
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
 
-  findMatches(name: string, argv: string[]): string[] {
+  /**
+   * Find all command ids that include the provided command id.
+   *
+   ** For example, if the command ids are:
+   * - foo:bar:baz
+   * - one:two:three
+   *
+   * `bar` would return `foo:bar:baz`
+   *
+   * @param partialCmdId string
+   * @param argv string[]
+   * @returns string[]
+   */
+  findMatches(partialCmdId: string, argv: string[]): string[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const commands = [...this.commands, ...this.commandAliases]
     const matches = commands.filter(command => {
@@ -399,7 +412,7 @@ export class Config implements IConfig {
         return def.char ? [def.char, flag] : [flag]
       }) as string[]
 
-      const parts = name.split(':')
+      const parts = partialCmdId.split(':')
       return parts.every(p => command.id.includes(p)) && flags.every(f => cmdFlags.includes(f))
     }).map(command => {
       return this.commandIndex.get(command.id) || command.id
@@ -472,14 +485,10 @@ export class Config implements IConfig {
     this._commandAliases = []
     for (const command of this.commands) {
       for (const alias of command.aliases ?? []) {
-        if (this.flexibleTaxonomy) {
-          const combos = permutations(alias.split(':')).flatMap(c => c.join(':'))
-          for (const combo of combos) {
-            this.commandIndex.set(combo, alias)
-            this._commandAliases.push({...command, id: combo})
-          }
-        } else {
-          this._commandAliases.push({...command, id: alias})
+        const ids = this.flexibleTaxonomy ? permutations(alias.split(':')).flatMap(c => c.join(':')) : [alias]
+        for (const id of ids) {
+          this.commandIndex.set(id, alias)
+          this._commandAliases.push({...command, id})
         }
       }
     }
