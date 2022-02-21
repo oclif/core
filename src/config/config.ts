@@ -394,7 +394,7 @@ export class Config implements IConfig {
   /**
    * Find all command ids that include the provided command id.
    *
-   ** For example, if the command ids are:
+   * For example, if the command ids are:
    * - foo:bar:baz
    * - one:two:three
    *
@@ -412,8 +412,10 @@ export class Config implements IConfig {
         return def.char ? [def.char, flag] : [flag]
       }) as string[]
 
-      const parts = partialCmdId.split(':')
-      return parts.every(p => command.id.includes(p)) && flags.every(f => cmdFlags.includes(f))
+      // A command is a match if:
+      // 1. the partial command id is included by the full command
+      // 2. the provided flags belong to the full command
+      return partialCmdId.split(':').every(p => command.id.includes(p)) && flags.every(f => cmdFlags.includes(f))
     }).map(command => {
       return this.commandIndex.get(command.id) || command.id
     })
