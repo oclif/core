@@ -9,7 +9,7 @@ import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, flatMap, loadJSON, uniq, getPerumtations, collectUsableParts} from './util'
+import {Debug, compact, loadJSON, uniq, getPerumtations, collectUsableParts} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -30,25 +30,29 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-class PermutationIndex extends Map<string, Set<Command.Plugin>> {
-  public add(permutation: string, command: Command.Plugin): this {
+class PermutationIndex extends Map<string, Set<string>> {
+  private commandIndex = new Map<string, Command.Plugin>()
+
+  public add(permutation: string, command: Command.Plugin): void {
     for (const part of collectUsableParts([permutation])) {
       if (this.has(part)) {
-        this.set(part, this.get(part).add(command))
+        this.set(part, this.get(part).add(command.id))
       } else {
-        this.set(part, new Set([command]))
+        this.set(part, new Set([command.id]))
       }
     }
 
-    return this
+    if (!this.commandIndex.has(command.id)) {
+      this.commandIndex.set(command.id, command)
+    }
   }
 
-  public get(key: string): Set<Command.Plugin> {
+  public get(key: string): Set<string> {
     return super.get(key) ?? new Set()
   }
 
-  public getArray(key: string): Command.Plugin[] {
-    return [...this.get(key)]
+  public findMatches(key: string): Command.Plugin[] {
+    return [...this.get(key)].map(k => this.commandIndex.get(k)!)
   }
 }
 
@@ -428,7 +432,8 @@ export class Config implements IConfig {
    */
   findMatches(partialCmdId: string, argv: string[]): string[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
-    const possibleMatches = this.permutationIndex.getArray(partialCmdId)
+    const possibleMatches = this.permutationIndex.findMatches(partialCmdId)
+
     const matches = possibleMatches.filter(command => {
       const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
         return def.char ? [def.char, flag] : [flag]
@@ -469,7 +474,7 @@ export class Config implements IConfig {
   get commands(): Command.Plugin[] {
     if (this._commands) return this._commands
     if (this.flexibleTaxonomy) {
-      const commands = flatMap(this.plugins, p => p.commands)
+      const commands = this.plugins.flatMap(p => p.commands)
       this._commands = []
       for (const cmd of commands) {
         const parts = cmd.id.split(':')
@@ -480,7 +485,7 @@ export class Config implements IConfig {
         }
       }
     } else {
-      this._commands = flatMap(this.plugins, p => p.commands)
+      this._commands = this.plugins.flatMap(p => p.commands)
     }
 
     return this._commands
