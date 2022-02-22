@@ -9,7 +9,7 @@ import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, flatMap, loadJSON, uniq, permutations} from './util'
+import {Debug, compact, flatMap, loadJSON, uniq, getPerumtations, collectUsableParts} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -28,6 +28,28 @@ const WSL = require('is-wsl')
 
 function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
+}
+
+class PermutationIndex extends Map<string, Set<Command.Plugin>> {
+  public add(permutation: string, command: Command.Plugin): this {
+    for (const part of collectUsableParts([permutation])) {
+      if (this.has(part)) {
+        this.set(part, this.get(part).add(command))
+      } else {
+        this.set(part, new Set([command]))
+      }
+    }
+
+    return this
+  }
+
+  public get(key: string): Set<Command.Plugin> {
+    return super.get(key) ?? new Set()
+  }
+
+  public getArray(key: string): Command.Plugin[] {
+    return [...this.get(key)]
+  }
 }
 
 export class Config implements IConfig {
@@ -93,7 +115,7 @@ export class Config implements IConfig {
 
   private _topics?: Topic[]
 
-  private commandIndex = new Map<string, string>()
+  private permutationIndex = new PermutationIndex()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
@@ -288,7 +310,7 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      const matches = this.findMatches(id, argv)
+      const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
       const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
         await this.runHook('command_incomplete', {id, argv, matches}) :
         await this.runHook('command_not_found', {id, argv})
@@ -406,20 +428,18 @@ export class Config implements IConfig {
    */
   findMatches(partialCmdId: string, argv: string[]): string[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
-    const commands = [...this.commands, ...this.commandAliases]
-    const matches = commands.filter(command => {
+    const possibleMatches = this.permutationIndex.getArray(partialCmdId)
+    const matches = possibleMatches.filter(command => {
       const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
         return def.char ? [def.char, flag] : [flag]
       }) as string[]
 
-      // A command is a match if:
-      // 1. the partial command id is included by the full command
-      // 2. the provided flags belong to the full command
-      return partialCmdId.split(':').every(p => command.id.includes(p)) && flags.every(f => cmdFlags.includes(f))
-    }).map(command => {
-      return this.commandIndex.get(command.id) || command.id
+      // A command is a match if the provided flags belong to the full command
+      return flags.every(f => cmdFlags.includes(f))
     })
-    return [...new Set(matches)]
+    .map(command => command.id)
+
+    return uniq(matches)
   }
 
   /**
@@ -439,20 +459,11 @@ export class Config implements IConfig {
    *
    * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
    *
+   * @param commandIDs: string[]
    * @returns string[]
    */
   collectUsableIds(): string[] {
-    const ids: string[] = []
-    for (const id of this.commandIDs) {
-      const parts = id.split(':')
-      while (parts.length > 0) {
-        const name = parts.join(':')
-        if (name) ids.push(name)
-        parts.pop()
-      }
-    }
-
-    return [...new Set(ids)]
+    return collectUsableParts(this.commandIDs)
   }
 
   get commands(): Command.Plugin[] {
@@ -462,10 +473,10 @@ export class Config implements IConfig {
       this._commands = []
       for (const cmd of commands) {
         const parts = cmd.id.split(':')
-        const combos = permutations(parts).flatMap(c => c.join(':'))
-        for (const combo of combos) {
-          this.commandIndex.set(combo, cmd.id)
-          this._commands.push({...cmd, id: combo})
+        const permutations = getPerumtations(parts).flatMap(c => c.join(':'))
+        for (const permutation of permutations) {
+          this._commands.push({...cmd, id: permutation})
+          this.permutationIndex.add(permutation, cmd)
         }
       }
     } else {
@@ -477,7 +488,7 @@ export class Config implements IConfig {
 
   get commandIDs() {
     if (this._commandIDs) return this._commandIDs
-    const ids = this.commands.flatMap(c => [c.id, ...c.aliases])
+    const ids = [...this.commands, ...this.commandAliases].map(c => c.id)
     this._commandIDs = uniq(ids)
     return this._commandIDs
   }
@@ -487,10 +498,10 @@ export class Config implements IConfig {
     this._commandAliases = []
     for (const command of this.commands) {
       for (const alias of command.aliases ?? []) {
-        const ids = this.flexibleTaxonomy ? permutations(alias.split(':')).flatMap(c => c.join(':')) : [alias]
+        const ids = this.flexibleTaxonomy ? getPerumtations(alias.split(':')).flatMap(c => c.join(':')) : [alias]
         for (const id of ids) {
-          this.commandIndex.set(id, alias)
           this._commandAliases.push({...command, id})
+          this.permutationIndex.add(id, command)
         }
       }
     }

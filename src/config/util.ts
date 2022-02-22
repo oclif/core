@@ -42,9 +42,7 @@ export function compact<T>(a: (T | undefined)[]): T[] {
 }
 
 export function uniq<T>(arr: T[]): T[] {
-  return arr.filter((a, i) => {
-    return !arr.find((b, j) => j > i && b === a)
-  })
+  return [...new Set(arr)].sort()
 }
 
 function displayWarnings() {
@@ -63,12 +61,12 @@ export function Debug(...scope: string[]): (..._: any) => void {
 }
 
 // Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js
-export function permutations(arr: string[]): Array<string[]> {
+export function getPerumtations(arr: string[]): Array<string[]> {
   if (arr.length === 0) return []
   if (arr.length === 1) return [arr]
 
   const output = []
-  const partialPermutations = permutations(arr.slice(1))
+  const partialPermutations = getPerumtations(arr.slice(1))
   const first = arr[0]
 
   for (let i = 0, len = partialPermutations.length; i < len; i++) {
@@ -84,4 +82,18 @@ export function permutations(arr: string[]): Array<string[]> {
   }
 
   return output
+}
+
+export function collectUsableParts(items: string[]): string[] {
+  const final: string[] = []
+  for (const item of items) {
+    const parts = item.split(':')
+    while (parts.length > 0) {
+      const name = parts.join(':')
+      if (name) final.push(name)
+      parts.pop()
+    }
+  }
+
+  return uniq(final).sort()
 }
