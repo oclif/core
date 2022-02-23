@@ -48,8 +48,10 @@ class PermutationIndex extends Map<string, Set<string>> {
     return super.get(key) ?? new Set()
   }
 
-  public getValid(key: string): string | undefined {
-    return this.validPermutations.get(key)
+  public getValid(): string[]
+  public getValid(key: string): string | undefined
+  public getValid(key?: string): string | string[] | undefined {
+    return key ? this.validPermutations.get(key) : [...this.validPermutations.keys()]
   }
 
   public hasValid(key: string): boolean {
@@ -117,6 +119,10 @@ export class Config implements IConfig {
   private commandIndex = new Map<string, Command.Plugin>()
 
   private topicIndex = new Map<string, Topic>()
+
+  private _commands!: Command.Plugin[]
+
+  private _commandIDs!: string[]
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
@@ -429,11 +435,24 @@ export class Config implements IConfig {
   }
 
   get commands(): Command.Plugin[] {
-    return [...this.commandIndex.values()]
+    if (this._commands) return this._commands
+
+    this._commands = [...this.commandIndex.values()]
+    const validPermutations = [...this.permutationIndex.getValid()]
+    for (const permutation of validPermutations) {
+      if (!this.commandIndex.has(permutation)) {
+        const cmd = this.commandIndex.get(this.getLookupId(permutation))!
+        this._commands.push({...cmd, id: permutation})
+      }
+    }
+
+    return this._commands
   }
 
-  get commandIDs() {
-    return [...this.commandIndex.keys()]
+  get commandIDs(): string[] {
+    if (this._commandIDs) return this._commandIDs
+    this._commandIDs = this._commands.map(c => c.id)
+    return this._commandIDs
   }
 
   get topics(): Topic[] {
