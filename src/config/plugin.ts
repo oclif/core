@@ -157,9 +157,10 @@ export class Plugin implements IPlugin {
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
 
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
-    this.commands = Object.entries(this.manifest.commands)
+    this.commands = Object
+    .entries(this.manifest.commands)
     .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
-    this.commands.sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => a.id.localeCompare(b.id))
   }
 
   get topics(): Topic[] {
