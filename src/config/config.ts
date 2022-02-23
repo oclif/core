@@ -451,7 +451,7 @@ export class Config implements IConfig {
 
   get commandIDs(): string[] {
     if (this._commandIDs) return this._commandIDs
-    this._commandIDs = this._commands.map(c => c.id)
+    this._commandIDs = this.commands.map(c => c.id)
     return this._commandIDs
   }
 
