@@ -359,8 +359,6 @@ export class Config implements IConfig {
 
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const lookupId = this.getLookupId(id)
-    if (opts.must && !lookupId) error(`command ${id} not found`)
-
     const command = this.commandIndex.get(lookupId)
     if (opts.must && !command) error(`command ${id} not found`)
     return command
