@@ -120,8 +120,6 @@ export class Config implements IConfig {
 
   private topicIndex = new Map<string, Topic>()
 
-  private _commands!: Command.Plugin[]
-
   private _commandIDs!: string[]
 
   // eslint-disable-next-line no-useless-constructor
@@ -435,18 +433,16 @@ export class Config implements IConfig {
   }
 
   get commands(): Command.Plugin[] {
-    if (this._commands) return this._commands
-
-    this._commands = [...this.commandIndex.values()]
+    const commands = [...this.commandIndex.values()]
     const validPermutations = [...this.permutationIndex.getValid()]
     for (const permutation of validPermutations) {
       if (!this.commandIndex.has(permutation)) {
         const cmd = this.commandIndex.get(this.getLookupId(permutation))!
-        this._commands.push({...cmd, id: permutation})
+        commands.push({...cmd, id: permutation})
       }
     }
 
-    return this._commands
+    return commands
   }
 
   get commandIDs(): string[] {
