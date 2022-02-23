@@ -9,7 +9,7 @@ import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, uniq, getPerumtations, collectUsableParts} from './util'
+import {Debug, compact, loadJSON, uniq, collectUsableParts, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -474,14 +474,14 @@ export class Config implements IConfig {
   get commands(): Command.Plugin[] {
     if (this._commands) return this._commands
     if (this.flexibleTaxonomy) {
-      const commands = this.plugins.flatMap(p => p.commands)
       this._commands = []
-      for (const cmd of commands) {
-        const parts = cmd.id.split(':')
-        const permutations = getPerumtations(parts).flatMap(c => c.join(':'))
-        for (const permutation of permutations) {
-          this._commands.push({...cmd, id: permutation})
-          this.permutationIndex.add(permutation, cmd)
+      for (const {commands} of this.plugins) {
+        for (const cmd of commands) {
+          const permutations = getCommandIdPermutations(cmd.id)
+          for (const permutation of permutations) {
+            this._commands.push({...cmd, id: permutation})
+            this.permutationIndex.add(permutation, cmd)
+          }
         }
       }
     } else {
@@ -501,12 +501,14 @@ export class Config implements IConfig {
   get commandAliases(): Command.Plugin[] {
     if (this._commandAliases) return this._commandAliases
     this._commandAliases = []
-    for (const command of this.commands) {
-      for (const alias of command.aliases ?? []) {
-        const ids = this.flexibleTaxonomy ? getPerumtations(alias.split(':')).flatMap(c => c.join(':')) : [alias]
-        for (const id of ids) {
-          this._commandAliases.push({...command, id})
-          this.permutationIndex.add(id, command)
+    for (const {commands} of this.plugins) {
+      for (const command of commands) {
+        for (const alias of command.aliases ?? []) {
+          const ids = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
+          for (const id of ids) {
+            this._commandAliases.push({...command, id})
+            this.permutationIndex.add(id, {...command, id})
+          }
         }
       }
     }

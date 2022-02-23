@@ -84,6 +84,10 @@ export function getPerumtations(arr: string[]): Array<string[]> {
   return output
 }
 
+export function getCommandIdPermutations(commandId: string): string[] {
+  return getPerumtations(commandId.split(':')).flatMap(c => c.join(':'))
+}
+
 export function collectUsableParts(items: string[]): string[] {
   const final: string[] = []
   for (const item of items) {
