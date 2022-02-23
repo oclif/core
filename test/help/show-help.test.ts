@@ -62,6 +62,12 @@ describe('showHelp for root', () => {
       commands: [AppsIndex, AppsCreate, AppsDestroy],
       topics: [],
     }]
+    for (const plugin of config.plugins) {
+      // @ts-expect-error private method
+      config.loadCommands(plugin)
+      // @ts-expect-error private method
+      config.loadTopics(plugin)
+    }
 
     const help = new TestHelp(config as any)
     await help.showHelp([])
@@ -76,10 +82,13 @@ USAGE
   $ oclif [COMMAND]
 
 TOPICS
-  apps  List all apps (app index command)
+  apps     List all apps (app index command)
+  plugins  List installed plugins.
 
 COMMANDS
-  apps  List all apps (app index command)`)
+  apps     List all apps (app index command)
+  help     Display help for oclif.
+  plugins  List installed plugins.`)
   })
 
   test
