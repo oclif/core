@@ -48,13 +48,10 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
     const hasSubCommandsWithArgs = () => {
       const id = finalizeId()
-      /**
-       * Get a list of sub commands for the current command id. A command is returned as a subcommand under either
-       * of these conditions:
-       * 1. the `id` start with the current command id.
-       * 2. any of the aliases start with the current command id.
-       */
-      const subCommands = config.commands.filter(c => (c.id).startsWith(id) || c.aliases.some(a => a.startsWith(id)))
+      if (!id) return false
+      // Get a list of sub commands for the current command id. A command is returned as a subcommand if the `id` starts with the current command id.
+      // e.g. `foo:bar` is a subcommand of `foo`
+      const subCommands = config.commands.filter(c => (c.id).startsWith(id))
       return Boolean(subCommands.find(cmd => cmd.strict === false || cmd.args?.length > 0))
     }
 
