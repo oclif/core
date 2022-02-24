@@ -78,10 +78,6 @@
     "ts-node": "^9.1.1",
     "typescript": "4.5.5"
   },
-  "resolutions": {
-    "@oclif/command": "1.8.16",
-    "@oclif/parser": "3.8.6"
-  },
   "engines": {
     "node": ">=12.0.0"
   },
