@@ -10,7 +10,8 @@
     ],
     "strict": true,
     "target": "es2019",
-    "lib": ["es2019"]
+    "lib": ["es2019"],
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "./src/**/*"

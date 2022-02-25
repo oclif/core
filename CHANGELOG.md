@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.4](https://github.com/oclif/core/compare/v1.3.3...v1.3.4) (2022-02-11)
+
+
+### Bug Fixes
+
+* use error type instead of record ([#371](https://github.com/oclif/core/issues/371)) ([136ffe0](https://github.com/oclif/core/commit/136ffe06fe3dc3ddb6d018ced2b2cfaa9399d943))
+
+### [1.3.3](https://github.com/oclif/core/compare/v1.3.2...v1.3.3) (2022-02-09)
+
+
+### Bug Fixes
+
+* update isProd utility ([#368](https://github.com/oclif/core/issues/368)) ([a58315d](https://github.com/oclif/core/commit/a58315dc401071675c0f1b08a7ab82c35846ce6d))
+
+### [1.3.2](https://github.com/oclif/core/compare/v1.3.1...v1.3.2) (2022-02-08)
+
+
+### Bug Fixes
+
+* fix default import of lodash ([#366](https://github.com/oclif/core/issues/366)) ([99fc7d1](https://github.com/oclif/core/commit/99fc7d1fdddbcd1509f649723057cd0ba7ee414c))
+
+### [1.3.1](https://github.com/oclif/core/compare/v1.3.0...v1.3.1) (2022-02-07)
+
+
+### Bug Fixes
+
+* Command parsing hangs under unit test ([#363](https://github.com/oclif/core/issues/363)) ([cb88427](https://github.com/oclif/core/commit/cb88427be5c1d5303b5cd7ef2d671f25ac6e91e6))
+
+## [1.3.0](https://github.com/oclif/core/compare/v1.2.1...v1.3.0) (2022-02-01)
+
+
+### Features
+
+* add S3Manifest ([#354](https://github.com/oclif/core/issues/354)) ([ea5585d](https://github.com/oclif/core/commit/ea5585db6361f12c3c0608b05d1e33e16bc0b4b6))
+
+### [1.2.1](https://github.com/oclif/core/compare/v1.2.0...v1.2.1) (2022-01-28)
+
+
+### Bug Fixes
+
+* module resolution of linked plugins ([#352](https://github.com/oclif/core/issues/352)) ([c7f5d34](https://github.com/oclif/core/commit/c7f5d3439e7e60b6562362c87fe0d16a99a42a08))
+
+## [1.2.0](https://github.com/oclif/core/compare/v1.1.2...v1.2.0) (2022-01-26)
+
+
+### Features
+
+* merge cli-ux library with oclif/core ([#345](https://github.com/oclif/core/issues/345)) ([27175d6](https://github.com/oclif/core/commit/27175d6f0693533b7cfbf57de65da626168d872f)), closes [npm/cli#4234](https://github.com/npm/cli/issues/4234)
+
 ### [1.1.2](https://github.com/oclif/core/compare/v1.1.1...v1.1.2) (2022-01-10)
 
 ### [1.1.1](https://github.com/oclif/core/compare/v1.1.0...v1.1.1) (2022-01-06)
