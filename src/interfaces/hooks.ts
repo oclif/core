@@ -38,7 +38,7 @@ export interface Hooks {
     return: unknown;
   };
   'command_incomplete': {
-    options: {id: string; argv: string[], matches: string[]};
+    options: {id: string; argv: string[], matches: Command.Plugin[]};
     return: unknown;
   };
   'plugins:preinstall': {

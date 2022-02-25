@@ -9,7 +9,7 @@ import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, uniq, collectUsableParts, getCommandIdPermutations} from './util'
+import {Debug, compact, loadJSON, collectUsableParts, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -391,7 +391,7 @@ export class Config implements IConfig {
    * @param argv string[]
    * @returns string[]
    */
-  findMatches(partialCmdId: string, argv: string[]): string[] {
+  findMatches(partialCmdId: string, argv: string[]): Command.Plugin[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const possibleMatches = [...this.permutationIndex.get(partialCmdId)].map(k => this.commandIndex.get(k)!)
 
@@ -403,9 +403,8 @@ export class Config implements IConfig {
       // A command is a match if the provided flags belong to the full command
       return flags.every(f => cmdFlags.includes(f))
     })
-    .map(command => command.id)
 
-    return uniq(matches)
+    return matches
   }
 
   /**
@@ -430,6 +429,14 @@ export class Config implements IConfig {
    */
   collectUsableIds(): string[] {
     return collectUsableParts(this.commandIDs)
+  }
+
+  getDefinedCommands(): Command.Plugin[] {
+    return [...this.commandIndex.values()]
+  }
+
+  getDefinedCommandIDs(): string[] {
+    return this.getDefinedCommands().map(c => c.id)
   }
 
   get commands(): Command.Plugin[] {
@@ -627,6 +634,7 @@ export class Config implements IConfig {
   }
 
   private loadTopics(plugin: IPlugin) {
+    if (this.flexibleTaxonomy) return
     for (const topic of compact(plugin.topics)) {
       const existing = this.topicIndex.get(topic.name)
       if (existing) {
