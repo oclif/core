@@ -431,15 +431,11 @@ export class Config implements IConfig {
     return collectUsableParts(this.commandIDs)
   }
 
-  getDefinedCommands(): Command.Plugin[] {
-    return [...this.commandIndex.values()]
-  }
-
-  getDefinedCommandIDs(): string[] {
-    return this.getDefinedCommands().map(c => c.id)
-  }
-
-  get commands(): Command.Plugin[] {
+  /**
+   * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
+   * @returns Command.Plugin[]
+   */
+  getAllCommands(): Command.Plugin[] {
     const commands = [...this.commandIndex.values()]
     const validPermutations = [...this.permutationIndex.getValid()]
     for (const permutation of validPermutations) {
@@ -450,6 +446,18 @@ export class Config implements IConfig {
     }
 
     return commands
+  }
+
+  /**
+   * Returns an array of all command ids. If flexible taxonomy is enabled then all permutations will be appended to the array.
+   * @returns string[]
+   */
+  getAllCommandIDs(): string[] {
+    return this.getAllCommands().map(c => c.id)
+  }
+
+  get commands(): Command.Plugin[] {
+    return [...this.commandIndex.values()]
   }
 
   get commandIDs(): string[] {
