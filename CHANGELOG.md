@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.6](https://github.com/oclif/core/compare/v1.3.5...v1.3.6) (2022-02-28)
+
+
+### Bug Fixes
+
+* parsing the default is wrong types ([ba08723](https://github.com/oclif/core/commit/ba087237773e6f4b3649d03dc88f693a22681de9))
+
 ### [1.3.5](https://github.com/oclif/core/compare/v1.3.4...v1.3.5) (2022-02-25)
 
 
