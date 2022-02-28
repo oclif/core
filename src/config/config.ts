@@ -9,7 +9,7 @@ import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, collectUsableParts, getCommandIdPermutations} from './util'
+import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -35,7 +35,7 @@ class PermutationIndex extends Map<string, Set<string>> {
 
   public add(permutation: string, commandId: string): void {
     this.validPermutations.set(permutation, commandId)
-    for (const part of collectUsableParts([permutation])) {
+    for (const part of collectUsableIds([permutation])) {
       if (this.has(part)) {
         this.set(part, this.get(part).add(commandId))
       } else {
@@ -428,7 +428,7 @@ export class Config implements IConfig {
    * @returns string[]
    */
   collectUsableIds(): string[] {
-    return collectUsableParts(this.commandIDs)
+    return collectUsableIds(this.commandIDs)
   }
 
   /**

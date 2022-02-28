@@ -88,7 +88,26 @@ export function getCommandIdPermutations(commandId: string): string[] {
   return getPerumtations(commandId.split(':')).flatMap(c => c.join(':'))
 }
 
-export function collectUsableParts(items: string[]): string[] {
+/**
+ * Return an array of ids that represent all the usable combinations that a user could enter.
+ *
+ * For example, if the command ids are:
+ * - foo:bar:baz
+ * - one:two:three
+ * Then the usable ids would be:
+ * - foo
+ * - foo:bar
+ * - foo:bar:baz
+ * - one
+ * - one:two
+ * - one:two:three
+ *
+ * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
+ *
+ * @param items string[]
+ * @returns string[]
+ */
+export function collectUsableIds(items: string[]): string[] {
   const final: string[] = []
   for (const item of items) {
     const parts = item.split(':')
