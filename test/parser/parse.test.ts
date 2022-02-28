@@ -436,6 +436,55 @@ See more help with --help`)
       expect(out.argv).to.deep.equal([100])
     })
 
+    it('parse with a default does not parse default', async () => {
+      const out = await parse([], {
+        flags: {foo: flags.string({parse: async input => input.toUpperCase(), default: 'baz'})},
+      })
+      expect(out.flags).to.deep.include({foo: 'baz'})
+    })
+
+    describe('parse with a default/value of another type (class)', async () => {
+      class TestClass {
+        public prop: string;
+        constructor(input: string) {
+          this.prop = input
+        }
+      }
+      it('uses default via value', async () => {
+        const out = await parse([], {
+          flags: {
+            foo: flags.build<TestClass>({
+              parse: async input => new TestClass(input),
+              default: new TestClass('baz'),
+            })(),
+          },
+        })
+        expect(out.flags.foo?.prop).to.equal('baz')
+      })
+      it('uses default via function', async () => {
+        const out = await parse([], {
+          flags: {
+            foo: flags.build<TestClass>({
+              parse: async input => new TestClass(input),
+              default: async () => new TestClass('baz'),
+            })(),
+          },
+        })
+        expect(out.flags.foo?.prop).to.equal('baz')
+      })
+      it('uses parser when value provided', async () => {
+        const out = await parse(['--foo=bar'], {
+          flags: {
+            foo: flags.build<TestClass>({
+              parse: async input => new TestClass(input),
+              default: new TestClass('baz'),
+            })(),
+          },
+        })
+        expect(out.flags.foo?.prop).to.equal('bar')
+      })
+    })
+
     // it('gets arg/flag in context', async () => {
     //   const out = await parse({
     //     args: [{ name: 'num', parse: (_, ctx) => ctx.arg.name!.toUpperCase() }],
