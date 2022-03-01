@@ -119,7 +119,7 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  protected static _globalFlags = {}
+  protected static _globalFlags: Interfaces.FlagInput<any>
 
   static get globalFlags(): Interfaces.FlagInput<any> {
     return this._globalFlags
