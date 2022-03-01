@@ -1,9 +1,12 @@
 /* eslint-disable max-nested-callbacks */
 import {expect} from 'chai'
+import * as fs from 'fs'
 
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
 import {URL} from 'url'
+import {existingDirectory, existingFile} from '../../src/parser/flags'
+import * as sinon from 'sinon'
 
 const stripAnsi = require('strip-ansi')
 
@@ -1010,6 +1013,98 @@ See more help with --help`)
         },
       })
       expect(out.flags.foo).to.equal(true)
+    })
+  })
+
+  describe('fs flags', () => {
+    const sandbox = sinon.createSandbox()
+    let existsStub: sinon.SinonStub
+    let statStub: sinon.SinonStub
+
+    beforeEach(() => {
+      existsStub = sandbox.stub(fs, 'existsSync')
+      statStub = sandbox.stub(fs.promises, 'stat')
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    describe('directory', () => {
+      const testDir = 'some/dir'
+      it('passes when dir exists', async () => {
+        existsStub.returns(true)
+        statStub.returns({isDirectory: () => true})
+        const out = await parse([`--dir=${testDir}`], {
+          flags: {dir: existingDirectory()},
+        })
+        expect(out.flags).to.deep.include({dir: testDir})
+      })
+      it("fails when dir doesn't exist", async () => {
+        existsStub.returns(false)
+        try {
+          const out = await parse([`--dir=${testDir}`], {
+            flags: {dir: existingDirectory()},
+          })
+          throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error_) {
+          const error = error_ as Error
+          expect(error.message).to.equal(
+            `No directory found at ${testDir}`,
+          )
+        }
+      })
+      it('fails when dir exists but is not a dir', async () => {
+        existsStub.returns(true)
+        statStub.returns({isDirectory: () => false})
+        try {
+          const out = await parse([`--dir=${testDir}`], {
+            flags: {dir: existingDirectory()},
+          })
+          throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error_) {
+          const error = error_ as Error
+          expect(error.message).to.equal(
+            `${testDir} exists but is not a directory`)
+        }
+      })
+    })
+
+    describe('file', () => {
+      const testFile = 'some/file.ext'
+      it('passes when file exists', async () => {
+        existsStub.returns(true)
+        statStub.returns({isFile: () => true})
+        const out = await parse([`--file=${testFile}`], {
+          flags: {file: existingFile()},
+        })
+        expect(out.flags).to.deep.include({file: testFile})
+      })
+      it("fails when dir doesn't exist", async () => {
+        existsStub.returns(false)
+        try {
+          const out = await parse([`--file=${testFile}`], {
+            flags: {file: existingFile()},
+          })
+          throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error_) {
+          const error = error_ as Error
+          expect(error.message).to.equal(`No file found at ${testFile}`)
+        }
+      })
+      it('fails when file exists but is not a file', async () => {
+        existsStub.returns(true)
+        statStub.returns({isFile: () => false})
+        try {
+          const out = await parse([`--file=${testFile}`], {
+            flags: {file: existingFile()},
+          })
+          throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error_) {
+          const error = error_ as Error
+          expect(error.message).to.equal(`${testFile} exists but is not a file`)
+        }
+      })
     })
   })
 })

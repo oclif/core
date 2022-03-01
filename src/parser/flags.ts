@@ -3,6 +3,7 @@
 import {URL} from 'url'
 
 import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
+import * as fs from 'fs'
 
 export function build<T>(
   defaults: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
@@ -43,6 +44,20 @@ export const integer = build({
 })
 
 /**
+ * Accepts a directory path.  Validates that the directory exists and is a directory.
+ */
+export const existingDirectory = build<string>({
+  parse: async (input: string) => dirExists(input),
+})
+
+/**
+ * Accepts a file path.  Validates that the file exists and is a file.
+ */
+export const existingFile = build<string>({
+  parse: async (input: string) => fileExists(input),
+})
+
+/**
  * Initializes a string as a URL. Throws an error
  * if the string is not a valid URL.
  */
@@ -67,4 +82,28 @@ export {stringFlag as string}
 
 export const defaultFlags = {
   color: boolean({allowNo: true}),
+}
+
+const dirExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No directory found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isDirectory()) {
+    throw new Error(`${input} exists but is not a directory`)
+  }
+
+  return input
+}
+
+const fileExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No file found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isFile()) {
+    throw new Error(`${input} exists but is not a file`)
+  }
+
+  return input
 }
