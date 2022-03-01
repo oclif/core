@@ -46,14 +46,14 @@ export const integer = build({
 /**
  * Accepts a directory path.  Validates that the directory exists and is a directory.
  */
-export const existingDirectory = build<string>({
+export const existingDirectory = build({
   parse: async (input: string) => dirExists(input),
 })
 
 /**
  * Accepts a file path.  Validates that the file exists and is a file.
  */
-export const existingFile = build<string>({
+export const existingFile = build({
   parse: async (input: string) => fileExists(input),
 })
 
