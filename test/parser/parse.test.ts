@@ -5,7 +5,7 @@ import * as fs from 'fs'
 import {flags, parse} from '../../src/parser'
 import {Interfaces} from '../../src'
 import {URL} from 'url'
-import {existingDirectory, existingFile} from '../../src/parser/flags'
+import {directory, file} from '../../src/parser/flags'
 import * as sinon from 'sinon'
 
 const stripAnsi = require('strip-ansi')
@@ -1032,11 +1032,25 @@ See more help with --help`)
 
     describe('directory', () => {
       const testDir = 'some/dir'
+      it('passes if dir !exists but exists:false', async () => {
+        const out = await parse([`--dir=${testDir}`], {
+          flags: {dir: directory({exists: false})},
+        })
+        expect(existsStub.callCount).to.equal(0)
+        expect(out.flags).to.deep.include({dir: testDir})
+      })
+      it('passes if dir !exists but exists not defined', async () => {
+        const out = await parse([`--dir=${testDir}`], {
+          flags: {dir: directory()},
+        })
+        expect(existsStub.callCount).to.equal(0)
+        expect(out.flags).to.deep.include({dir: testDir})
+      })
       it('passes when dir exists', async () => {
         existsStub.returns(true)
         statStub.returns({isDirectory: () => true})
         const out = await parse([`--dir=${testDir}`], {
-          flags: {dir: existingDirectory()},
+          flags: {dir: directory({exists: true})},
         })
         expect(out.flags).to.deep.include({dir: testDir})
       })
@@ -1044,7 +1058,7 @@ See more help with --help`)
         existsStub.returns(false)
         try {
           const out = await parse([`--dir=${testDir}`], {
-            flags: {dir: existingDirectory()},
+            flags: {dir: directory({exists: true})},
           })
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
@@ -1059,7 +1073,7 @@ See more help with --help`)
         statStub.returns({isDirectory: () => false})
         try {
           const out = await parse([`--dir=${testDir}`], {
-            flags: {dir: existingDirectory()},
+            flags: {dir: directory({exists: true})},
           })
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
@@ -1072,11 +1086,25 @@ See more help with --help`)
 
     describe('file', () => {
       const testFile = 'some/file.ext'
+      it('passes if file doesn\'t exist but not exists:true', async () => {
+        const out = await parse([`--file=${testFile}`], {
+          flags: {file: file({exists: false})},
+        })
+        expect(out.flags).to.deep.include({file: testFile})
+        expect(existsStub.callCount).to.equal(0)
+      })
+      it('passes if file doesn\'t exist but not exists not defined', async () => {
+        const out = await parse([`--file=${testFile}`], {
+          flags: {file: file()},
+        })
+        expect(out.flags).to.deep.include({file: testFile})
+        expect(existsStub.callCount).to.equal(0)
+      })
       it('passes when file exists', async () => {
         existsStub.returns(true)
         statStub.returns({isFile: () => true})
         const out = await parse([`--file=${testFile}`], {
-          flags: {file: existingFile()},
+          flags: {file: file({exists: true})},
         })
         expect(out.flags).to.deep.include({file: testFile})
       })
@@ -1084,7 +1112,7 @@ See more help with --help`)
         existsStub.returns(false)
         try {
           const out = await parse([`--file=${testFile}`], {
-            flags: {file: existingFile()},
+            flags: {file: file({exists: true})},
           })
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
@@ -1097,7 +1125,7 @@ See more help with --help`)
         statStub.returns({isFile: () => false})
         try {
           const out = await parse([`--file=${testFile}`], {
-            flags: {file: existingFile()},
+            flags: {file: file({exists: true})},
           })
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {

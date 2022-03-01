@@ -43,19 +43,19 @@ export const integer = build({
   },
 })
 
-/**
- * Accepts a directory path.  Validates that the directory exists and is a directory.
- */
-export const existingDirectory = build({
-  parse: async (input: string) => dirExists(input),
-})
+export const directory = (opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string | undefined> => {
+  return build<string>({
+    ...opts,
+    parse: async (input: string) => opts.exists ? dirExists(input) : input,
+  })()
+}
 
-/**
- * Accepts a file path.  Validates that the file exists and is a file.
- */
-export const existingFile = build({
-  parse: async (input: string) => fileExists(input),
-})
+export const file = (opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string | undefined> => {
+  return build<string>({
+    ...opts,
+    parse: async (input: string) => opts.exists ? fileExists(input) : input,
+  })()
+}
 
 /**
  * Initializes a string as a URL. Throws an error
