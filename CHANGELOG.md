@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.6](https://github.com/oclif/core/compare/v1.3.5...v1.3.6) (2022-02-28)
+
+
+### Bug Fixes
+
+* parsing the default is wrong types ([ba08723](https://github.com/oclif/core/commit/ba087237773e6f4b3649d03dc88f693a22681de9))
+
+### [1.3.5](https://github.com/oclif/core/compare/v1.3.4...v1.3.5) (2022-02-25)
+
+
+### Bug Fixes
+
+* print valid flag values in error message when using `exactlyOne` ([#349](https://github.com/oclif/core/issues/349)) ([ddcaeb2](https://github.com/oclif/core/commit/ddcaeb2f9b690d9b92dd0ac4937b6399f606adfa))
+
 ### [1.3.4](https://github.com/oclif/core/compare/v1.3.3...v1.3.4) (2022-02-11)
 
 
