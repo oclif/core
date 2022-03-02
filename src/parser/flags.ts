@@ -3,6 +3,7 @@
 import {URL} from 'url'
 
 import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
+import * as fs from 'fs'
 
 export function build<T>(
   defaults: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
@@ -42,6 +43,20 @@ export const integer = build({
   },
 })
 
+export const directory = (opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string | undefined> => {
+  return build<string>({
+    ...opts,
+    parse: async (input: string) => opts.exists ? dirExists(input) : input,
+  })()
+}
+
+export const file = (opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string | undefined> => {
+  return build<string>({
+    ...opts,
+    parse: async (input: string) => opts.exists ? fileExists(input) : input,
+  })()
+}
+
 /**
  * Initializes a string as a URL. Throws an error
  * if the string is not a valid URL.
@@ -67,4 +82,28 @@ export {stringFlag as string}
 
 export const defaultFlags = {
   color: boolean({allowNo: true}),
+}
+
+const dirExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No directory found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isDirectory()) {
+    throw new Error(`${input} exists but is not a directory`)
+  }
+
+  return input
+}
+
+const fileExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No file found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isFile()) {
+    throw new Error(`${input} exists but is not a file`)
+  }
+
+  return input
 }
