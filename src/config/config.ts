@@ -30,16 +30,16 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-class PermutationIndex extends Map<string, Set<string>> {
+class CommandPermutations extends Map<string, Set<string>> {
   private validPermutations = new Map<string, string>()
 
   public add(permutation: string, commandId: string): void {
     this.validPermutations.set(permutation, commandId)
-    for (const part of collectUsableIds([permutation])) {
-      if (this.has(part)) {
-        this.set(part, this.get(part).add(commandId))
+    for (const id of collectUsableIds([permutation])) {
+      if (this.has(id)) {
+        this.set(id, this.get(id).add(commandId))
       } else {
-        this.set(part, new Set([commandId]))
+        this.set(id, new Set([commandId]))
       }
     }
   }
@@ -48,10 +48,12 @@ class PermutationIndex extends Map<string, Set<string>> {
     return super.get(key) ?? new Set()
   }
 
-  public getValid(): string[]
-  public getValid(key: string): string | undefined
-  public getValid(key?: string): string | string[] | undefined {
-    return key ? this.validPermutations.get(key) : [...this.validPermutations.keys()]
+  public getValid(key: string): string | undefined {
+    return this.validPermutations.get(key)
+  }
+
+  public getAllValid(): string[] {
+    return  [...this.validPermutations.keys()]
   }
 
   public hasValid(key: string): boolean {
@@ -114,7 +116,7 @@ export class Config implements IConfig {
 
   protected warned = false
 
-  private permutationIndex = new PermutationIndex()
+  private commandPermutations = new CommandPermutations()
 
   private commandIndex = new Map<string, Command.Plugin>()
 
@@ -388,12 +390,12 @@ export class Config implements IConfig {
    * `bar` would return `foo:bar:baz`
    *
    * @param partialCmdId string
-   * @param argv string[]
+   * @param argv string[] process.argv containing the flags and arguments provided by the user
    * @returns string[]
    */
   findMatches(partialCmdId: string, argv: string[]): Command.Plugin[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
-    const possibleMatches = [...this.permutationIndex.get(partialCmdId)].map(k => this.commandIndex.get(k)!)
+    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this.commandIndex.get(k)!)
 
     const matches = possibleMatches.filter(command => {
       const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
@@ -408,36 +410,12 @@ export class Config implements IConfig {
   }
 
   /**
-   * Return an array of ids that represent all the usable combinations that a user
-   * could enter.
-   *
-   * For example, if the command ids are:
-   * - foo:bar:baz
-   * - one:two:three
-   * Then the usable ids would be:
-   * - foo
-   * - foo:bar
-   * - foo:bar:baz
-   * - one
-   * - one:two
-   * - one:two:three
-   *
-   * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
-   *
-   * @param commandIDs: string[]
-   * @returns string[]
-   */
-  collectUsableIds(): string[] {
-    return collectUsableIds(this.commandIDs)
-  }
-
-  /**
    * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
    * @returns Command.Plugin[]
    */
   getAllCommands(): Command.Plugin[] {
     const commands = [...this.commandIndex.values()]
-    const validPermutations = [...this.permutationIndex.getValid()]
+    const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
       if (!this.commandIndex.has(permutation)) {
         const cmd = this.commandIndex.get(this.getLookupId(permutation))!
@@ -607,35 +585,35 @@ export class Config implements IConfig {
 
   private getLookupId(id: string): string {
     if (this.commandIndex.has(id)) return id
-    if (this.permutationIndex.hasValid(id)) return this.permutationIndex.getValid(id)!
+    if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
     return id
   }
 
   private loadCommands(plugin: IPlugin) {
     for (const command of plugin.commands) {
       if (this.commandIndex.has(command.id)) {
-        const priotitized = this.determinePriority([this.commandIndex.get(command.id)!, command])
-        this.commandIndex.set(priotitized.id, priotitized)
+        const prioritizedCommand = this.determinePriority([this.commandIndex.get(command.id)!, command])
+        this.commandIndex.set(prioritizedCommand.id, prioritizedCommand)
       } else {
         this.commandIndex.set(command.id, command)
       }
 
       const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(command.id) : [command.id]
       for (const permutation of permutations) {
-        this.permutationIndex.add(permutation, command.id)
+        this.commandPermutations.add(permutation, command.id)
       }
 
       for (const alias of command.aliases ?? []) {
         if (this.commandIndex.has(alias)) {
-          const priotitized = this.determinePriority([this.commandIndex.get(alias)!, command])
-          this.commandIndex.set(priotitized.id, priotitized)
+          const prioritizedCommand = this.determinePriority([this.commandIndex.get(alias)!, command])
+          this.commandIndex.set(prioritizedCommand.id, prioritizedCommand)
         } else {
           this.commandIndex.set(alias, command)
         }
 
         const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
         for (const permutation of aliasPermutations) {
-          this.permutationIndex.add(permutation, command.id)
+          this.commandPermutations.add(permutation, command.id)
         }
       }
     }

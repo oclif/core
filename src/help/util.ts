@@ -2,6 +2,7 @@ import * as ejs from 'ejs'
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
+import {collectUsableIds} from '../config/util'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
@@ -38,7 +39,7 @@ export function template(context: any): (t: string) => string {
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = config.collectUsableIds()
+  const ids = collectUsableIds(config.commandIDs)
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
     const idPresent = (id: string) => ids.includes(id)

@@ -160,14 +160,14 @@ describe('Config with flexible taxonomy', () => {
   })
   .it('has populated permutation index', config => {
     // @ts-expect-error because private member
-    const permutationIndex = config.permutationIndex
-    expect(permutationIndex.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
-    expect(permutationIndex.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
-    expect(permutationIndex.get('bar')).to.deep.equal(new Set(['foo:bar']))
-    expect(permutationIndex.get('bar:foo')).to.deep.equal(new Set(['foo:bar']))
-    expect(permutationIndex.get('foo:baz')).to.deep.equal(new Set(['foo:baz']))
-    expect(permutationIndex.get('baz')).to.deep.equal(new Set(['foo:baz']))
-    expect(permutationIndex.get('baz:foo')).to.deep.equal(new Set(['foo:baz']))
+    const commandPermutations = config.commandPermutations
+    expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
+    expect(commandPermutations.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('bar')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('bar:foo')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('foo:baz')).to.deep.equal(new Set(['foo:baz']))
+    expect(commandPermutations.get('baz')).to.deep.equal(new Set(['foo:baz']))
+    expect(commandPermutations.get('baz:foo')).to.deep.equal(new Set(['foo:baz']))
   })
   .it('has populated command index', config => {
     // @ts-expect-error because private member

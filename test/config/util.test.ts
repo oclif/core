@@ -30,7 +30,7 @@ describe('util', () => {
         'baz:bar:foo',
       ])
     })
-    
+
     // This is just calculating the factorial (n!) of the number of elements passed in.
     const numberOfPermutations = (commandID: string): number => {
       const num = commandID.split(':').length

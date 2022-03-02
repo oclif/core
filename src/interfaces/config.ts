@@ -104,7 +104,6 @@ export interface Config {
   findTopic(id: string, opts: { must: true }): Topic;
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined;
   findMatches(id: string, argv: string[]): Command.Plugin[];
-  collectUsableIds(): string[];
   scopedEnvVar(key: string): string | undefined;
   scopedEnvVarKey(key: string): string;
   scopedEnvVarTrue(key: string): boolean;

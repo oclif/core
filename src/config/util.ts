@@ -61,12 +61,12 @@ export function Debug(...scope: string[]): (..._: any) => void {
 }
 
 // Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js
-export function getPerumtations(arr: string[]): Array<string[]> {
+export function getPermutations(arr: string[]): Array<string[]> {
   if (arr.length === 0) return []
   if (arr.length === 1) return [arr]
 
   const output = []
-  const partialPermutations = getPerumtations(arr.slice(1))
+  const partialPermutations = getPermutations(arr.slice(1))
   const first = arr[0]
 
   for (let i = 0, len = partialPermutations.length; i < len; i++) {
@@ -85,7 +85,7 @@ export function getPerumtations(arr: string[]): Array<string[]> {
 }
 
 export function getCommandIdPermutations(commandId: string): string[] {
-  return getPerumtations(commandId.split(':')).flatMap(c => c.join(':'))
+  return getPermutations(commandId.split(':')).flatMap(c => c.join(':'))
 }
 
 /**
@@ -104,19 +104,19 @@ export function getCommandIdPermutations(commandId: string): string[] {
  *
  * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
  *
- * @param items string[]
+ * @param commandIds string[]
  * @returns string[]
  */
-export function collectUsableIds(items: string[]): string[] {
-  const final: string[] = []
-  for (const item of items) {
-    const parts = item.split(':')
+export function collectUsableIds(commandIds: string[]): string[] {
+  const usuableIds: string[] = []
+  for (const id of commandIds) {
+    const parts = id.split(':')
     while (parts.length > 0) {
       const name = parts.join(':')
-      if (name) final.push(name)
+      if (name) usuableIds.push(name)
       parts.pop()
     }
   }
 
-  return uniq(final).sort()
+  return uniq(usuableIds).sort()
 }
