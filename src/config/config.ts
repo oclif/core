@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Debug} from './util'
 import * as Plugin from './plugin'
 import {compact, flatMap, loadJSON, uniq} from './util'
@@ -560,6 +560,27 @@ export class Config implements IConfig {
   }
 }
 
+// when no manifest exists, the default is calculated.  This may throw, so we need to catch it
+const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
+  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+  if (typeof flag.defaultHelp === 'function') {
+    try {
+      return await flag.defaultHelp()
+    } catch {
+      return
+    }
+  }
+
+  // if not specified, try the default function
+  if (typeof flag.default === 'function') {
+    try {
+      return await flag.default({options: {}, flags: {}})
+    } catch {}
+  } else {
+    return flag.default
+  }
+}
+
 export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command> {
   const flags = {} as {[k: string]: Command.Flag}
 
@@ -595,7 +616,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         options: flag.options,
         dependsOn: flag.dependsOn,
         exclusive: flag.exclusive,
-        default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
+        default: await defaultToCached(flag),
       }
     }
   }
