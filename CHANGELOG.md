@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/oclif/core/compare/v1.4.0...v1.5.0) (2022-03-02)
+
+
+### Features
+
+* dir and file flags that validate existence and type ([#384](https://github.com/oclif/core/issues/384)) ([44dff41](https://github.com/oclif/core/commit/44dff41c5a3ffcdcbf2f10dcefb7c1ab233bfc4f))
+
 ## [1.4.0](https://github.com/oclif/core/compare/v1.3.6...v1.4.0) (2022-03-01)
 
 
