@@ -171,9 +171,9 @@ describe('Config with flexible taxonomy', () => {
   })
   .it('has populated command index', config => {
     // @ts-expect-error because private member
-    const commandIndex = config.commandIndex
-    expect(commandIndex.has('foo:bar')).to.be.true
-    expect(commandIndex.has('foo:baz')).to.be.true
+    const commands = config._commands
+    expect(commands.has('foo:bar')).to.be.true
+    expect(commands.has('foo:baz')).to.be.true
   })
   .it('has all command id permutations', config => {
     expect(config.getAllCommandIDs()).to.deep.equal([

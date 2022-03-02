@@ -118,9 +118,9 @@ export class Config implements IConfig {
 
   private commandPermutations = new CommandPermutations()
 
-  private commandIndex = new Map<string, Command.Plugin>()
+  private _commands = new Map<string, Command.Plugin>()
 
-  private topicIndex = new Map<string, Topic>()
+  private _topics = new Map<string, Topic>()
 
   private _commandIDs!: string[]
 
@@ -365,7 +365,7 @@ export class Config implements IConfig {
 
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
     const lookupId = this.getLookupId(id)
-    const command = this.commandIndex.get(lookupId)
+    const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
     return command
   }
@@ -375,7 +375,7 @@ export class Config implements IConfig {
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined
 
   findTopic(name: string, opts: { must?: boolean } = {}) {
-    const topic = this.topicIndex.get(name)
+    const topic = this._topics.get(name)
     if (topic) return topic
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
@@ -395,7 +395,7 @@ export class Config implements IConfig {
    */
   findMatches(partialCmdId: string, argv: string[]): Command.Plugin[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
-    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this.commandIndex.get(k)!)
+    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
     const matches = possibleMatches.filter(command => {
       const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
@@ -414,11 +414,11 @@ export class Config implements IConfig {
    * @returns Command.Plugin[]
    */
   getAllCommands(): Command.Plugin[] {
-    const commands = [...this.commandIndex.values()]
+    const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
-      if (!this.commandIndex.has(permutation)) {
-        const cmd = this.commandIndex.get(this.getLookupId(permutation))!
+      if (!this._commands.has(permutation)) {
+        const cmd = this._commands.get(this.getLookupId(permutation))!
         commands.push({...cmd, id: permutation})
       }
     }
@@ -435,7 +435,7 @@ export class Config implements IConfig {
   }
 
   get commands(): Command.Plugin[] {
-    return [...this.commandIndex.values()]
+    return [...this._commands.values()]
   }
 
   get commandIDs(): string[] {
@@ -445,7 +445,7 @@ export class Config implements IConfig {
   }
 
   get topics(): Topic[] {
-    return [...this.topicIndex.values()]
+    return [...this._topics.values()]
   }
 
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
@@ -584,18 +584,18 @@ export class Config implements IConfig {
   }
 
   private getLookupId(id: string): string {
-    if (this.commandIndex.has(id)) return id
+    if (this._commands.has(id)) return id
     if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
     return id
   }
 
   private loadCommands(plugin: IPlugin) {
     for (const command of plugin.commands) {
-      if (this.commandIndex.has(command.id)) {
-        const prioritizedCommand = this.determinePriority([this.commandIndex.get(command.id)!, command])
-        this.commandIndex.set(prioritizedCommand.id, prioritizedCommand)
+      if (this._commands.has(command.id)) {
+        const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
+        this._commands.set(prioritizedCommand.id, prioritizedCommand)
       } else {
-        this.commandIndex.set(command.id, command)
+        this._commands.set(command.id, command)
       }
 
       const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(command.id) : [command.id]
@@ -604,11 +604,11 @@ export class Config implements IConfig {
       }
 
       for (const alias of command.aliases ?? []) {
-        if (this.commandIndex.has(alias)) {
-          const prioritizedCommand = this.determinePriority([this.commandIndex.get(alias)!, command])
-          this.commandIndex.set(prioritizedCommand.id, prioritizedCommand)
+        if (this._commands.has(alias)) {
+          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
+          this._commands.set(prioritizedCommand.id, prioritizedCommand)
         } else {
-          this.commandIndex.set(alias, command)
+          this._commands.set(alias, command)
         }
 
         const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
@@ -622,12 +622,12 @@ export class Config implements IConfig {
   private loadTopics(plugin: IPlugin) {
     if (this.flexibleTaxonomy) return
     for (const topic of compact(plugin.topics)) {
-      const existing = this.topicIndex.get(topic.name)
+      const existing = this._topics.get(topic.name)
       if (existing) {
         existing.description = topic.description || existing.description
         existing.hidden = existing.hidden || topic.hidden
       } else {
-        this.topicIndex.set(topic.name, topic)
+        this._topics.set(topic.name, topic)
       }
     }
 
@@ -636,8 +636,8 @@ export class Config implements IConfig {
       const parts = c.id.split(':')
       while (parts.length > 0) {
         const name = parts.join(':')
-        if (name && !this.topicIndex.has(name)) {
-          this.topicIndex.set(name, {name, description: c.summary || c.description})
+        if (name && !this._topics.has(name)) {
+          this._topics.set(name, {name, description: c.summary || c.description})
         }
 
         parts.pop()
