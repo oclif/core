@@ -7,7 +7,8 @@ import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
 import {standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
-
+import {Plugin} from '../config/plugin'
+import {toCached} from '../config/config'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass} from './util'
 
@@ -106,7 +107,13 @@ export class Help extends HelpBase {
 
     const command = this.config.findCommand(subject)
     if (command) {
-      await this.showCommandHelp(command)
+      if (command.hasDynamicHelp) {
+        const dynamicCommand = await toCached(await this.getDynamicCommand(command.id))
+        await this.showCommandHelp(dynamicCommand)
+      } else {
+        await this.showCommandHelp(command)
+      }
+
       return
     }
 
@@ -117,6 +124,17 @@ export class Help extends HelpBase {
     }
 
     error(`Command ${subject} not found.`)
+  }
+
+  private async getDynamicCommand(cmdName: string): Promise<Interfaces.Command.Class> {
+    const plugin = new Plugin({ignoreManifest: true, root: this.config.root})
+    await plugin.load()
+    const cmd = await plugin.findCommand(cmdName)
+    if (!cmd) {
+      throw new Error(`Command ${cmdName} not found.`)
+    }
+
+    return cmd
   }
 
   public async showCommandHelp(command: Interfaces.Command) {
@@ -131,7 +149,10 @@ export class Help extends HelpBase {
     if (state) console.log(`This command is in ${state}.\n`)
 
     const summary = this.summary(command)
-    if (summary) console.log(summary + '\n')
+    if (summary) {
+      console.log(summary + '\n')
+    }
+
     console.log(this.formatCommand(command))
     console.log('')
 
