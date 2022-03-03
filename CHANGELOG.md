@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/oclif/core/compare/v1.4.0...v1.5.0) (2022-03-02)
+
+
+### Features
+
+* dir and file flags that validate existence and type ([#384](https://github.com/oclif/core/issues/384)) ([44dff41](https://github.com/oclif/core/commit/44dff41c5a3ffcdcbf2f10dcefb7c1ab233bfc4f))
+
+## [1.4.0](https://github.com/oclif/core/compare/v1.3.6...v1.4.0) (2022-03-01)
+
+
+### Features
+
+* make global flags settable ([#385](https://github.com/oclif/core/issues/385)) ([e14061c](https://github.com/oclif/core/commit/e14061ca7e6a4c288eb50e0e9954b38e042682df))
+
 ### [1.3.6](https://github.com/oclif/core/compare/v1.3.5...v1.3.6) (2022-02-28)
 
 
