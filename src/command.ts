@@ -21,6 +21,13 @@ process.stdout.on('error', (err: any) => {
   throw err
 })
 
+const jsonFlag = {
+  json: Flags.boolean({
+    description: 'Format output as json.',
+    helpGroup: 'GLOBAL',
+  }),
+}
+
 /**
  * An abstract class which acts as the base for each command
  * in your project.
@@ -112,22 +119,28 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  private static globalFlags = {
-    json: Flags.boolean({
-      description: 'Format output as json.',
-      helpGroup: 'GLOBAL',
-    }),
+  protected static _globalFlags: Interfaces.FlagInput<any>
+
+  static get globalFlags(): Interfaces.FlagInput<any> {
+    return this._globalFlags
+  }
+
+  static set globalFlags(flags: Interfaces.FlagInput<any>) {
+    this._globalFlags = this.enableJsonFlag ?
+      Object.assign({}, jsonFlag, this.globalFlags, flags) :
+      Object.assign({}, this.globalFlags, flags)
   }
 
   /** A hash of flags for the command */
-  private static _flags: Interfaces.FlagInput<any>
+  protected static _flags: Interfaces.FlagInput<any>
 
   static get flags(): Interfaces.FlagInput<any> {
     return this._flags
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = this.enableJsonFlag ? Object.assign({}, Command.globalFlags, flags) : flags
+    this.globalFlags = {}
+    this._flags = Object.assign({}, this.globalFlags, flags)
   }
 
   id: string | undefined
@@ -224,7 +237,7 @@ export default abstract class Command {
     return Parser.parse(argv, opts)
   }
 
-  protected async catch(err: Record<string, any>): Promise<any> {
+  protected async catch(err: Error & {exitCode?: number}): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       CliUx.ux.styledJSON(this.toErrorJson(err))

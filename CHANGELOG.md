@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/oclif/core/compare/v1.4.0...v1.5.0) (2022-03-02)
+
+
+### Features
+
+* dir and file flags that validate existence and type ([#384](https://github.com/oclif/core/issues/384)) ([44dff41](https://github.com/oclif/core/commit/44dff41c5a3ffcdcbf2f10dcefb7c1ab233bfc4f))
+
+## [1.4.0](https://github.com/oclif/core/compare/v1.3.6...v1.4.0) (2022-03-01)
+
+
+### Features
+
+* make global flags settable ([#385](https://github.com/oclif/core/issues/385)) ([e14061c](https://github.com/oclif/core/commit/e14061ca7e6a4c288eb50e0e9954b38e042682df))
+
+### [1.3.6](https://github.com/oclif/core/compare/v1.3.5...v1.3.6) (2022-02-28)
+
+
+### Bug Fixes
+
+* parsing the default is wrong types ([ba08723](https://github.com/oclif/core/commit/ba087237773e6f4b3649d03dc88f693a22681de9))
+
+### [1.3.5](https://github.com/oclif/core/compare/v1.3.4...v1.3.5) (2022-02-25)
+
+
+### Bug Fixes
+
+* print valid flag values in error message when using `exactlyOne` ([#349](https://github.com/oclif/core/issues/349)) ([ddcaeb2](https://github.com/oclif/core/commit/ddcaeb2f9b690d9b92dd0ac4937b6399f606adfa))
+
+### [1.3.4](https://github.com/oclif/core/compare/v1.3.3...v1.3.4) (2022-02-11)
+
+
+### Bug Fixes
+
+* use error type instead of record ([#371](https://github.com/oclif/core/issues/371)) ([136ffe0](https://github.com/oclif/core/commit/136ffe06fe3dc3ddb6d018ced2b2cfaa9399d943))
+
 ### [1.3.3](https://github.com/oclif/core/compare/v1.3.2...v1.3.3) (2022-02-09)
 
 
