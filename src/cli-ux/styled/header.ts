@@ -1,7 +1,6 @@
-// tslint:disable restrict-plus-operands
-
 import * as chalk from 'chalk'
+import {CliUx} from '../../index'
 
 export default function styledHeader(header: string) {
-  process.stdout.write(chalk.dim('=== ') + chalk.bold(header) + '\n')
+  CliUx.ux.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
 }
