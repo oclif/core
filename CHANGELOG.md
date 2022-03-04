@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.2](https://github.com/oclif/core/compare/v1.5.1...v1.5.2) (2022-03-04)
+
+
+### Bug Fixes
+
+* direct styled header text thru cliux.ux.info ([#387](https://github.com/oclif/core/issues/387)) ([5ebe8de](https://github.com/oclif/core/commit/5ebe8de3adcf2e45c952dd5aeaf5b2848b928e94))
+
 ### [1.5.1](https://github.com/oclif/core/compare/v1.5.0...v1.5.1) (2022-03-03)
 
 ## [1.5.0](https://github.com/oclif/core/compare/v1.4.0...v1.5.0) (2022-03-02)
