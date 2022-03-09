@@ -139,25 +139,26 @@ export default class ModuleLoader {
     } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
-      let fileExists = false;
-      let isDirectory = false;
+      let fileExists = false
+      let isDirectory = false
       if (fs.existsSync(filePath)) {
         if (fs.lstatSync(filePath).isDirectory()) {
-          isDirectory = true;
+          isDirectory = true
         } else {
-          fileExists = true;
+          fileExists = true
         }
       }
 
       if (!fileExists) {
         // Try all supported extensions.
-        let foundPath = ModuleLoader.findFile(filePath);
+        let foundPath = ModuleLoader.findFile(filePath)
         if (!foundPath && isDirectory) {
           // Since filePath is a directory, try looking for index.js file.
-          foundPath = ModuleLoader.findFile(path.join(filePath, 'index'));
+          foundPath = ModuleLoader.findFile(path.join(filePath, 'index'))
         }
+
         if (foundPath) {
-          filePath = foundPath;
+          filePath = foundPath
         }
       }
 
@@ -177,11 +178,13 @@ export default class ModuleLoader {
   static findFile(filePath: string) : string | null {
     // eslint-disable-next-line camelcase
     for (const extension of s_EXTENSIONS) {
-      const testPath = `${filePath}${extension}`;
+      const testPath = `${filePath}${extension}`
+
       if (fs.existsSync(testPath)) {
-        return testPath;
+        return testPath
       }
     }
-    return null;
+
+    return null
   }
 }
