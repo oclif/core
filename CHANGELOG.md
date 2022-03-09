@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.3](https://github.com/oclif/core/compare/v1.5.2...v1.5.3) (2022-03-09)
+
+
+### Bug Fixes
+
+* rid core of transient refs to cli-ux ([#379](https://github.com/oclif/core/issues/379)) ([a593a27](https://github.com/oclif/core/commit/a593a2751dbdd4bcd9cf05349154d0fa6e4d7e2d))
+
 ### [1.5.2](https://github.com/oclif/core/compare/v1.5.1...v1.5.2) (2022-03-04)
 
 
