@@ -63,7 +63,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // find & run command
   const cmd = config.findCommand(id)
   if (!cmd) {
-    const topic = config.findTopic(id)
+    const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) return config.runCommand('help', [id])
     if (config.pjson.oclif.default) {
       id = config.pjson.oclif.default

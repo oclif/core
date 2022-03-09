@@ -30,7 +30,7 @@ function isConfig(o: any): o is IConfig {
   return o && Boolean(o._base)
 }
 
-class CommandPermutations extends Map<string, Set<string>> {
+class Permutations extends Map<string, Set<string>> {
   private validPermutations = new Map<string, string>()
 
   public add(permutation: string, commandId: string): void {
@@ -53,7 +53,7 @@ class CommandPermutations extends Map<string, Set<string>> {
   }
 
   public getAllValid(): string[] {
-    return  [...this.validPermutations.keys()]
+    return [...this.validPermutations.keys()]
   }
 
   public hasValid(key: string): boolean {
@@ -116,7 +116,9 @@ export class Config implements IConfig {
 
   protected warned = false
 
-  private commandPermutations = new CommandPermutations()
+  private commandPermutations = new Permutations()
+
+  private topicPermutations = new Permutations()
 
   private _commands = new Map<string, Command.Plugin>()
 
@@ -364,7 +366,7 @@ export class Config implements IConfig {
   findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined
 
   findCommand(id: string, opts: { must?: boolean } = {}): Command.Plugin | undefined {
-    const lookupId = this.getLookupId(id)
+    const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
     return command
@@ -375,7 +377,8 @@ export class Config implements IConfig {
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined
 
   findTopic(name: string, opts: { must?: boolean } = {}) {
-    const topic = this._topics.get(name)
+    const lookupId = this.getTopicLookupId(name)
+    const topic = this._topics.get(lookupId)
     if (topic) return topic
     if (opts.must) throw new Error(`topic ${name} not found`)
   }
@@ -418,7 +421,7 @@ export class Config implements IConfig {
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
       if (!this._commands.has(permutation)) {
-        const cmd = this._commands.get(this.getLookupId(permutation))!
+        const cmd = this._commands.get(this.getCmdLookupId(permutation))!
         commands.push({...cmd, id: permutation})
       }
     }
@@ -583,9 +586,15 @@ export class Config implements IConfig {
     return isProd()
   }
 
-  private getLookupId(id: string): string {
+  private getCmdLookupId(id: string): string {
     if (this._commands.has(id)) return id
     if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
+    return id
+  }
+
+  private getTopicLookupId(id: string): string {
+    if (this._topics.has(id)) return id
+    if (this.topicPermutations.hasValid(id)) return this.topicPermutations.getValid(id)!
     return id
   }
 
@@ -620,7 +629,6 @@ export class Config implements IConfig {
   }
 
   private loadTopics(plugin: IPlugin) {
-    if (this.flexibleTaxonomy) return
     for (const topic of compact(plugin.topics)) {
       const existing = this._topics.get(topic.name)
       if (existing) {
@@ -628,6 +636,11 @@ export class Config implements IConfig {
         existing.hidden = existing.hidden || topic.hidden
       } else {
         this._topics.set(topic.name, topic)
+      }
+
+      const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(topic.name) : [topic.name]
+      for (const permutation of permutations) {
+        this.topicPermutations.add(permutation, topic.name)
       }
     }
 

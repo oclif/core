@@ -78,6 +78,7 @@ export namespace PJSON {
       npmRegistry?: string;
       scope?: string;
       dirname?: string;
+      flexibleTaxonomy?: boolean;
     };
   }
 

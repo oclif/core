@@ -155,10 +155,14 @@ describe('Config with flexible taxonomy', () => {
   }
 
   testConfig()
-  .it('has no subtopics', config => {
-    expect(config.topics.length).to.equal(0)
+  .it('has populated topic index', config => {
+    // @ts-expect-error because private member
+    const topics = config._topics
+    expect(topics.has('foo')).to.be.true
+    expect(topics.has('foo:bar')).to.be.true
+    expect(topics.has('foo:baz')).to.be.true
   })
-  .it('has populated permutation index', config => {
+  .it('has populated command permutation index', config => {
     // @ts-expect-error because private member
     const commandPermutations = config.commandPermutations
     expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
