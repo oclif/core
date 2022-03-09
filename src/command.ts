@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-import {cli} from 'cli-ux'
+import {CliUx} from './index'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -20,6 +20,13 @@ process.stdout.on('error', (err: any) => {
     return
   throw err
 })
+
+const jsonFlag = {
+  json: Flags.boolean({
+    description: 'Format output as json.',
+    helpGroup: 'GLOBAL',
+  }),
+}
 
 /**
  * An abstract class which acts as the base for each command
@@ -112,22 +119,28 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  private static globalFlags = {
-    json: Flags.boolean({
-      description: 'Format output as json.',
-      helpGroup: 'GLOBAL',
-    }),
+  protected static _globalFlags: Interfaces.FlagInput<any>
+
+  static get globalFlags(): Interfaces.FlagInput<any> {
+    return this._globalFlags
+  }
+
+  static set globalFlags(flags: Interfaces.FlagInput<any>) {
+    this._globalFlags = this.enableJsonFlag ?
+      Object.assign({}, jsonFlag, this.globalFlags, flags) :
+      Object.assign({}, this.globalFlags, flags)
   }
 
   /** A hash of flags for the command */
-  private static _flags: Interfaces.FlagInput<any>
+  protected static _flags: Interfaces.FlagInput<any>
 
   static get flags(): Interfaces.FlagInput<any> {
     return this._flags
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = this.enableJsonFlag ? Object.assign({}, Command.globalFlags, flags) : flags
+    this.globalFlags = {}
+    this._flags = Object.assign({}, this.globalFlags, flags)
   }
 
   id: string | undefined
@@ -163,7 +176,7 @@ export default abstract class Command {
     }
 
     if (result && this.jsonEnabled()) {
-      cli.styledJSON(this.toSuccessJson(result))
+      CliUx.ux.styledJSON(this.toSuccessJson(result))
     }
 
     return result
@@ -224,16 +237,15 @@ export default abstract class Command {
     return Parser.parse(argv, opts)
   }
 
-  protected async catch(err: Record<string, any>): Promise<any> {
+  protected async catch(err: Error & {exitCode?: number}): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
-      cli.styledJSON(this.toErrorJson(err))
+      CliUx.ux.styledJSON(this.toErrorJson(err))
     } else {
       if (!err.message) throw err
       try {
-        const {cli} = require('cli-ux')
         const chalk = require('chalk')
-        cli.action.stop(chalk.bold.red('!'))
+        CliUx.ux.action.stop(chalk.bold.red('!'))
       } catch {}
 
       throw err

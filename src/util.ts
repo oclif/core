@@ -37,5 +37,5 @@ export function castArray<T>(input?: T | T[]): T[] {
 }
 
 export function isProd() {
-  return process.env.NODE_ENV !== 'development'
+  return !['development', 'test'].includes(process.env.NODE_ENV ?? '')
 }

@@ -1,5 +1,5 @@
 import {CLIError, error, exit, warn} from '../errors'
-import * as Lodash from 'lodash'
+import * as ejs from 'ejs'
 import * as os from 'os'
 import * as path from 'path'
 import {fileURLToPath, URL} from 'url'
@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Debug} from './util'
 import * as Plugin from './plugin'
 import {compact, flatMap, loadJSON, uniq} from './util'
@@ -281,7 +281,13 @@ export class Config implements IConfig {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
-      await this.runHook('command_not_found', {id, argv})
+      const hookResult = await this.runHook('command_not_found', {id, argv})
+
+      if (hookResult.successes[0]) {
+        const cmdResult = hookResult.successes[0].result
+        return cmdResult as T
+      }
+
       throw new CLIError(`command ${id} not found`)
     }
 
@@ -383,7 +389,7 @@ export class Config implements IConfig {
 
   get commandIDs() {
     if (this._commandIDs) return this._commandIDs
-    const ids = Lodash.flattenDeep(this.commands.map(c => [c.id, c.aliases]))
+    const ids = this.commands.flatMap(c => [c.id, ...c.aliases])
     this._commandIDs = uniq(ids)
     return this._commandIDs
   }
@@ -421,8 +427,8 @@ export class Config implements IConfig {
   s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const _: typeof Lodash = require('lodash')
-    return _.template(this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type])({...this as any, ...options})
+    const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    return ejs.render(template, {...this as any, ...options})
   }
 
   s3Url(key: string) {
@@ -554,6 +560,27 @@ export class Config implements IConfig {
   }
 }
 
+// when no manifest exists, the default is calculated.  This may throw, so we need to catch it
+const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
+  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+  if (typeof flag.defaultHelp === 'function') {
+    try {
+      return await flag.defaultHelp()
+    } catch {
+      return
+    }
+  }
+
+  // if not specified, try the default function
+  if (typeof flag.default === 'function') {
+    try {
+      return await flag.default({options: {}, flags: {}})
+    } catch {}
+  } else {
+    return flag.default
+  }
+}
+
 export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command> {
   const flags = {} as {[k: string]: Command.Flag}
 
@@ -589,7 +616,11 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         options: flag.options,
         dependsOn: flag.dependsOn,
         exclusive: flag.exclusive,
-        default: typeof flag.default === 'function' ? await flag.default({options: {}, flags: {}}) : flag.default,
+        default: await defaultToCached(flag),
+      }
+      // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
+      if (typeof flag.defaultHelp === 'function') {
+        c.hasDynamicHelp = true
       }
     }
   }

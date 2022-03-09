@@ -52,7 +52,6 @@ export interface CommandProps {
    * ```
    */
   examples?: Example[];
-
 }
 
 export interface Command extends CommandProps {
@@ -63,6 +62,7 @@ export interface Command extends CommandProps {
   flags: {[name: string]: Command.Flag};
   args: Command.Arg[];
   strict: boolean;
+  hasDynamicHelp?: boolean;
 }
 
 export namespace Command {
@@ -83,6 +83,7 @@ export namespace Command {
     export interface Boolean extends BooleanFlagProps {}
     export interface Option extends OptionFlagProps {
       default?: string;
+      defaultHelp?: () => Promise<string>
     }
   }
 
@@ -95,6 +96,8 @@ export namespace Command {
     flags?: FlagInput<any>;
     args?: ArgInput;
     strict: boolean;
+    hasDynamicHelp?: boolean;
+
     new(argv: string[], config: Config): Instance;
     run(argv?: string[], config?: LoadOptions): PromiseLike<any>;
   }

@@ -13,6 +13,7 @@ import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
+import * as cliUx from './cli-ux'
 
 const flush = require('../flush')
 
@@ -40,6 +41,7 @@ export {
   settings,
   Settings,
   flush,
+  cliUx as CliUx,
 }
 
 function checkCWD() {

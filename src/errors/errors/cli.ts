@@ -1,10 +1,9 @@
-// tslint:disable no-implicit-dependencies
+import * as chalk from 'chalk'
+import * as indent from 'indent-string'
+import * as cs from 'clean-stack'
+import * as wrap from 'wrap-ansi'
 
-import * as Chalk from 'chalk'
-import Clean = require('clean-stack')
-import Indent = require('indent-string')
-import * as Wrap from 'wrap-ansi'
-
+import * as screen from '../../screen'
 import {config} from '../config'
 import {PrettyPrintableError, OclifError} from '../../interfaces/errors'
 
@@ -33,8 +32,7 @@ export class CLIError extends Error implements OclifError {
   }
 
   get stack(): string {
-    const clean: typeof Clean = require('clean-stack')
-    return clean(super.stack!, {pretty: true})
+    return cs(super.stack!, {pretty: true})
   }
 
   /**
@@ -46,12 +44,8 @@ export class CLIError extends Error implements OclifError {
       return this.stack
     }
 
-    const wrap: typeof Wrap = require('wrap-ansi')
-    const indent: typeof Indent = require('indent-string')
-
     let output = `${this.name}: ${this.message}`
-    // eslint-disable-next-line node/no-missing-require
-    output = wrap(output, require('../screen').errtermwidth - 6, {trim: false, hard: true} as any)
+    output = wrap(output, screen.errtermwidth - 6, {trim: false, hard: true} as any)
     output = indent(output, 3)
     output = indent(output, 1, {indent: this.bang, includeEmptyLines: true} as any)
     output = indent(output, 1)
@@ -59,12 +53,9 @@ export class CLIError extends Error implements OclifError {
   }
 
   get bang() {
-    let red: typeof Chalk.red = ((s: string) => s) as any
     try {
-      red = require('chalk').red
+      return chalk.red(process.platform === 'win32' ? '»' : '›')
     } catch {}
-
-    return red(process.platform === 'win32' ? '»' : '›')
   }
 }
 
@@ -76,12 +67,9 @@ export namespace CLIError {
     }
 
     get bang() {
-      let yellow: typeof Chalk.yellow = ((s: string) => s) as any
       try {
-        yellow = require('chalk').yellow
+        return chalk.yellow(process.platform === 'win32' ? '»' : '›')
       } catch {}
-
-      return yellow(process.platform === 'win32' ? '»' : '›')
     }
   }
 }

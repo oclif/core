@@ -5,6 +5,7 @@ export {OclifError, PrettyPrintableError} from './errors'
 export {HelpOptions} from './help'
 export {Hook, Hooks} from './hooks'
 export {Manifest} from './manifest'
+export {S3Manifest} from './s3-manifest'
 export {
   ParserArg, Arg, ParseFn, ParserOutput, ParserInput, ArgToken,
   OptionalArg, FlagOutput, OutputArgs, OutputFlags, FlagUsageOptions,
@@ -12,7 +13,7 @@ export {
   FlagToken, List, ListItem, BooleanFlag, Flag, FlagBase, OptionFlag,
   Input, EnumFlagOptions, DefaultContext, Default, Definition,
   CompletableOptionFlag, Completion, CompletionContext, FlagInput,
-  CompletableFlag,
+  CompletableFlag, OptionFlagProps,
 } from './parser'
 export {PJSON} from './pjson'
 export {Plugin, PluginOptions, Options} from './plugin'
