@@ -83,6 +83,7 @@ export type DefaultContext<T> = {
 }
 
 export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
+export type DefaultHelp<T> = T | ((context: DefaultContext<T>) => Promise<string | undefined>)
 
 export type FlagProps = {
   name: string;
@@ -142,6 +143,7 @@ export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
 }
 export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
   default?: Default<T | undefined>;
+  defaultHelp?: DefaultHelp<T>;
   input: string[];
 }
 
