@@ -142,11 +142,13 @@ export default class ModuleLoader {
       let fileExists = false
       let isDirectory = false
       if (fs.existsSync(filePath)) {
-        if (fs.lstatSync(filePath).isDirectory()) {
-          isDirectory = true
-        } else {
-          fileExists = true
-        }
+        fileExists = true
+        try {
+          if (fs.lstatSync(filePath)?.isDirectory?.()) {
+            fileExists = false
+            isDirectory = true
+          }
+        } catch {}
       }
 
       if (!fileExists) {
