@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/oclif/core/compare/v1.5.3...v1.6.0) (2022-03-14)
+
+
+### Features
+
+* POC for allowing flexible command taxonomy ([#376](https://github.com/oclif/core/issues/376)) ([c47c6c6](https://github.com/oclif/core/commit/c47c6c6fb689a92f66d40aacfa146d885f08d962))
+
 ### [1.5.3](https://github.com/oclif/core/compare/v1.5.2...v1.5.3) (2022-03-09)
 
 
