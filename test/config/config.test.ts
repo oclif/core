@@ -191,7 +191,7 @@ describe('Config', () => {
         return Promise.resolve()
       }
       }
-      const load = async (): Promise<void>  => {}
+      const load = async (): Promise<void> => {}
       const findCommand = async (): Promise<ICommand.Class> => {
       // @ts-ignore
         return new MyComandClass()
@@ -230,7 +230,7 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
       }
-      commandPluginA
+
       const pluginB: IPlugin = {
         load,
         findCommand,
@@ -261,6 +261,13 @@ describe('Config', () => {
         config.plugins = plugins
         config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
         config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
+        for (const plugin of config.plugins) {
+          // @ts-expect-error private method
+          config.loadCommands(plugin)
+          // @ts-expect-error private method
+          config.loadTopics(plugin)
+        }
+
         return config
       })
       // @ts-ignore

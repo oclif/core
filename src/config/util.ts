@@ -42,9 +42,7 @@ export function compact<T>(a: (T | undefined)[]): T[] {
 }
 
 export function uniq<T>(arr: T[]): T[] {
-  return arr.filter((a, i) => {
-    return !arr.find((b, j) => j > i && b === a)
-  })
+  return [...new Set(arr)].sort()
 }
 
 function displayWarnings() {
@@ -60,4 +58,65 @@ export function Debug(...scope: string[]): (..._: any) => void {
   const d = debug(['config', ...scope].join(':'))
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)
+}
+
+// Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js
+export function getPermutations(arr: string[]): Array<string[]> {
+  if (arr.length === 0) return []
+  if (arr.length === 1) return [arr]
+
+  const output = []
+  const partialPermutations = getPermutations(arr.slice(1))
+  const first = arr[0]
+
+  for (let i = 0, len = partialPermutations.length; i < len; i++) {
+    const partial = partialPermutations[i]
+
+    for (let j = 0, len2 = partial.length; j <= len2; j++) {
+      const start = partial.slice(0, j)
+      const end = partial.slice(j)
+      const merged = start.concat(first, end)
+
+      output.push(merged)
+    }
+  }
+
+  return output
+}
+
+export function getCommandIdPermutations(commandId: string): string[] {
+  return getPermutations(commandId.split(':')).flatMap(c => c.join(':'))
+}
+
+/**
+ * Return an array of ids that represent all the usable combinations that a user could enter.
+ *
+ * For example, if the command ids are:
+ * - foo:bar:baz
+ * - one:two:three
+ * Then the usable ids would be:
+ * - foo
+ * - foo:bar
+ * - foo:bar:baz
+ * - one
+ * - one:two
+ * - one:two:three
+ *
+ * This allows us to determine which parts of the argv array belong to the command id whenever the topicSeparator is a space.
+ *
+ * @param commandIds string[]
+ * @returns string[]
+ */
+export function collectUsableIds(commandIds: string[]): string[] {
+  const usuableIds: string[] = []
+  for (const id of commandIds) {
+    const parts = id.split(':')
+    while (parts.length > 0) {
+      const name = parts.join(':')
+      if (name) usuableIds.push(name)
+      parts.pop()
+    }
+  }
+
+  return uniq(usuableIds).sort()
 }

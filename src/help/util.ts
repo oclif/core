@@ -2,6 +2,7 @@ import * as ejs from 'ejs'
 import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
+import {collectUsableIds} from '../config/util'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
@@ -38,24 +39,20 @@ export function template(context: any): (t: string) => string {
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = new Set(config.commandIDs.concat(config.topics.map(t => t.name)))
-
+  const ids = collectUsableIds(config.commandIDs)
   const findId = (argv: string[]): string | undefined => {
     const final: string[] = []
-    const idPresent = (id: string) => ids.has(id)
+    const idPresent = (id: string) => ids.includes(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
 
     const hasSubCommandsWithArgs = () => {
       const id = finalizeId()
-      /**
-       * Get a list of sub commands for the current command id. A command is returned as a subcommand under either
-       * of these conditions:
-       * 1. the `id` start with the current command id.
-       * 2. any of the aliases start with the current command id.
-       */
-      const subCommands = config.commands.filter(c => (c.id).startsWith(id) || c.aliases.some(a => a.startsWith(id)))
+      if (!id) return false
+      // Get a list of sub commands for the current command id. A command is returned as a subcommand if the `id` starts with the current command id.
+      // e.g. `foo:bar` is a subcommand of `foo`
+      const subCommands = config.commands.filter(c => (c.id).startsWith(id))
       return Boolean(subCommands.find(cmd => cmd.strict === false || cmd.args?.length > 0))
     }
 
@@ -94,4 +91,10 @@ export function standardizeIDFromArgv(argv: string[], config: IConfig): string[]
   if (config.topicSeparator === ' ') argv = collateSpacedCmdIDFromArgs(argv, config)
   else if (config.topicSeparator !== ':') argv[0] = toStandardizedId(argv[0], config)
   return argv
+}
+
+export function getHelpFlagAdditions(config: IConfig): string[] {
+  const helpFlags = ['--help']
+  const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
+  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
 }
