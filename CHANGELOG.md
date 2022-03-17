@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.1](https://github.com/oclif/core/compare/v1.6.0...v1.6.1) (2022-03-17)
+
+
+### Bug Fixes
+
+* set id to alias when adding commands ([#390](https://github.com/oclif/core/issues/390)) ([84ab722](https://github.com/oclif/core/commit/84ab7223a2196c6a33f64a3e4ba75a050b02d1c3))
+
 ## [1.6.0](https://github.com/oclif/core/compare/v1.5.3...v1.6.0) (2022-03-14)
 
 
