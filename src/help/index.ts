@@ -102,7 +102,7 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp) {
-        const dynamicCommand = await toCached(await this.getDynamicCommand(command.id))
+        const dynamicCommand = await toCached(await this.getDynamicCommand(command))
         await this.showCommandHelp(dynamicCommand)
       } else {
         await this.showCommandHelp(command)
@@ -128,12 +128,12 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
-  private async getDynamicCommand(cmdName: string): Promise<Interfaces.Command.Class> {
-    const plugin = new Plugin({ignoreManifest: true, root: this.config.root})
+  private async getDynamicCommand(command: Interfaces.Command.Plugin): Promise<Interfaces.Command.Class> {
+    const plugin = new Plugin({ignoreManifest: true, root: this.config.root, name: command.pluginName})
     await plugin.load()
-    const cmd = await plugin.findCommand(cmdName)
+    const cmd = await plugin.findCommand(command.id)
     if (!cmd) {
-      throw new Error(`Command ${cmdName} not found.`)
+      throw new Error(`Command ${command.id} not found.`)
     }
 
     return cmd
