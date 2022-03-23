@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.2](https://github.com/oclif/core/compare/v1.6.1...v1.6.2) (2022-03-23)
+
+
+### Bug Fixes
+
+* load correct plugin when using dynamic help ([#394](https://github.com/oclif/core/issues/394)) ([15c1fbe](https://github.com/oclif/core/commit/15c1fbe1e870b6da1372a5786a9ffb09746ce8f6))
+
 ### [1.6.1](https://github.com/oclif/core/compare/v1.6.0...v1.6.1) (2022-03-17)
 
 
