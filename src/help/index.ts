@@ -129,7 +129,7 @@ export class Help extends HelpBase {
   }
 
   private async getDynamicCommand(command: Interfaces.Command.Plugin): Promise<Interfaces.Command.Class> {
-    const plugin = new Plugin({ignoreManifest: true, root: this.config.root, name: command.pluginName})
+    const plugin = new Plugin({ignoreManifest: true, root: this.config.root, name: command.pluginAlias ?? command.pluginName})
     await plugin.load()
     const cmd = await plugin.findCommand(command.id)
     if (!cmd) {
