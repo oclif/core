@@ -7,7 +7,6 @@ import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
 import {getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
-import {Plugin} from '../config/plugin'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
@@ -102,7 +101,7 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp) {
-        const dynamicCommand = await toCached(await this.getDynamicCommand(command))
+        const dynamicCommand = await toCached(await command.load())
         await this.showCommandHelp(dynamicCommand)
       } else {
         await this.showCommandHelp(command)
@@ -126,17 +125,6 @@ export class Help extends HelpBase {
     }
 
     error(`Command ${subject} not found.`)
-  }
-
-  private async getDynamicCommand(command: Interfaces.Command.Plugin): Promise<Interfaces.Command.Class> {
-    const plugin = new Plugin({ignoreManifest: true, root: this.config.root, name: command.pluginAlias ?? command.pluginName})
-    await plugin.load()
-    const cmd = await plugin.findCommand(command.id)
-    if (!cmd) {
-      throw new Error(`Command ${command.id} not found.`)
-    }
-
-    return cmd
   }
 
   public async showCommandHelp(command: Interfaces.Command) {
