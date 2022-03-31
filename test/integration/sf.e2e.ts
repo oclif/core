@@ -102,7 +102,7 @@ describe('Salesforce CLI (sf)', () => {
   })
 
   it('should handle varags', async () => {
-    const config = await executor.executeCommand('config set disableTelemetry=true restDeploy=true --global --json')
+    const config = await executor.executeCommand('config set disable-telemetry=true org-api-version=54.0 --global --json')
     const parsed = parseJson(config.output!)
     expect(parsed.status).to.equal(0)
     const results = parsed.result as Array<{success: boolean}>
