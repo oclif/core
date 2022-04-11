@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.4](https://github.com/oclif/core/compare/v1.6.3...v1.6.4) (2022-03-31)
+
+
+### Bug Fixes
+
+* dynamic help ([#395](https://github.com/oclif/core/issues/395)) ([8ecc8f4](https://github.com/oclif/core/commit/8ecc8f41ec62ef5b05bdb70a79dce09b5913d14b))
+
+### [1.6.3](https://github.com/oclif/core/compare/v1.6.2...v1.6.3) (2022-03-23)
+
+
+### Bug Fixes
+
+* use plugin alias if available ([245d841](https://github.com/oclif/core/commit/245d84197a64e55b17524c22cbc17ec025a07c08))
+
+### [1.6.2](https://github.com/oclif/core/compare/v1.6.1...v1.6.2) (2022-03-23)
+
+
+### Bug Fixes
+
+* load correct plugin when using dynamic help ([#394](https://github.com/oclif/core/issues/394)) ([15c1fbe](https://github.com/oclif/core/commit/15c1fbe1e870b6da1372a5786a9ffb09746ce8f6))
+
+### [1.6.1](https://github.com/oclif/core/compare/v1.6.0...v1.6.1) (2022-03-17)
+
+
+### Bug Fixes
+
+* set id to alias when adding commands ([#390](https://github.com/oclif/core/issues/390)) ([84ab722](https://github.com/oclif/core/commit/84ab7223a2196c6a33f64a3e4ba75a050b02d1c3))
+
 ## [1.6.0](https://github.com/oclif/core/compare/v1.5.3...v1.6.0) (2022-03-14)
 
 
