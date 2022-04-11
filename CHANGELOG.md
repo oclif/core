@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/oclif/core/compare/v1.6.4...v1.7.0) (2022-04-11)
+
+
+### Features
+
+* move console.log to single class method ([#400](https://github.com/oclif/core/issues/400)) ([2ccb274](https://github.com/oclif/core/commit/2ccb2740912dba3b81c4d36712fbb20fd6a03c23))
+
 ### [1.6.4](https://github.com/oclif/core/compare/v1.6.3...v1.6.4) (2022-03-31)
 
 
