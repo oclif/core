@@ -136,24 +136,24 @@ export class Help extends HelpBase {
     const plugin = this.config.plugins.find(p => p.name === command.pluginName)
 
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
-    if (state) console.log(`This command is in ${state}.\n`)
+    if (state) this.log(`This command is in ${state}.\n`)
 
     const summary = this.summary(command)
     if (summary) {
-      console.log(summary + '\n')
+      this.log(summary + '\n')
     }
 
-    console.log(this.formatCommand(command))
-    console.log('')
+    this.log(this.formatCommand(command))
+    this.log('')
 
     if (subTopics.length > 0) {
-      console.log(this.formatTopics(subTopics))
-      console.log('')
+      this.log(this.formatTopics(subTopics))
+      this.log('')
     }
 
     if (subCommands.length > 0) {
-      console.log(this.formatCommands(subCommands))
-      console.log('')
+      this.log(this.formatCommands(subCommands))
+      this.log('')
     }
   }
 
@@ -162,9 +162,9 @@ export class Help extends HelpBase {
     let rootCommands = this.sortedCommands
 
     const state = this.config.pjson?.oclif?.state
-    if (state) console.log(`${this.config.bin} is in ${state}.\n`)
-    console.log(this.formatRoot())
-    console.log('')
+    if (state) this.log(`${this.config.bin} is in ${state}.\n`)
+    this.log(this.formatRoot())
+    this.log('')
 
     if (!this.opts.all) {
       rootTopics = rootTopics.filter(t => !t.name.includes(':'))
@@ -172,14 +172,14 @@ export class Help extends HelpBase {
     }
 
     if (rootTopics.length > 0) {
-      console.log(this.formatTopics(rootTopics))
-      console.log('')
+      this.log(this.formatTopics(rootTopics))
+      this.log('')
     }
 
     if (rootCommands.length > 0) {
       rootCommands = rootCommands.filter(c => c.id)
-      console.log(this.formatCommands(rootCommands))
-      console.log('')
+      this.log(this.formatCommands(rootCommands))
+      this.log('')
     }
   }
 
@@ -191,18 +191,18 @@ export class Help extends HelpBase {
     const commands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
 
     const state = this.config.pjson?.oclif?.state
-    if (state) console.log(`This topic is in ${state}.\n`)
+    if (state) this.log(`This topic is in ${state}.\n`)
 
-    console.log(this.formatTopic(topic))
+    this.log(this.formatTopic(topic))
 
     if (subTopics.length > 0) {
-      console.log(this.formatTopics(subTopics))
-      console.log('')
+      this.log(this.formatTopics(subTopics))
+      this.log('')
     }
 
     if (commands.length > 0) {
-      console.log(this.formatCommands(commands))
-      console.log('')
+      this.log(this.formatCommands(commands))
+      this.log('')
     }
   }
 
@@ -296,5 +296,9 @@ export class Help extends HelpBase {
    */
   protected command(command: Interfaces.Command) {
     return this.formatCommand(command)
+  }
+
+  protected log(...args: string[]) {
+    console.log(...args)
   }
 }
