@@ -108,11 +108,11 @@
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "posttest": "yarn lint",
-    "prepack": "yarn run build",
+    "posttest": "$npm_execpath run lint",
+    "prepack": "$npm_execpath run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 600000",
-    "pretest": "yarn build --noEmit && tsc -p test --noEmit"
+    "pretest": "$npm_execpath run build --noEmit && tsc -p test --noEmit"
   },
   "types": "lib/index.d.ts"
 }
