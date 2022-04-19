@@ -19,6 +19,9 @@ export interface CommandProps {
   /** An array of aliases for this command. */
   aliases: string[];
 
+  /** Specifies whether the command is an alias or not */
+  isAlias?: boolean;
+
   /**
    * The tweet-sized description for your class, used in a parent-commands
    * sub-command listing and as the header for the command help.

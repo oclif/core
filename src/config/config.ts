@@ -615,9 +615,9 @@ export class Config implements IConfig {
       for (const alias of command.aliases ?? []) {
         if (this._commands.has(alias)) {
           const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
-          this._commands.set(prioritizedCommand.id, {...prioritizedCommand, id: alias})
+          this._commands.set(prioritizedCommand.id, {...prioritizedCommand, id: alias, isAlias: true})
         } else {
-          this._commands.set(alias, {...command, id: alias})
+          this._commands.set(alias, {...command, id: alias, isAlias: true})
         }
 
         const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]

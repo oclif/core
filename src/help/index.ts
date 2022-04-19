@@ -176,9 +176,23 @@ export class Help extends HelpBase {
       this.log('')
     }
 
+    const aliases: Interfaces.Command.Plugin[] = []
     if (rootCommands.length > 0) {
       rootCommands = rootCommands.filter(c => c.id)
-      this.log(this.formatCommands(rootCommands))
+      this.log(this.formatCommands(rootCommands.filter(
+        c => {
+          if (c.isAlias) {
+            aliases.push(c)
+            return false
+          }
+
+          return true
+        })))
+      this.log('')
+    }
+
+    if (aliases.length > 0) {
+      this.log(this.formatCommands(aliases).replace(/COMMANDS/, 'ALIASES'))
       this.log('')
     }
   }
