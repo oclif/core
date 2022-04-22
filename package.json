@@ -13,7 +13,7 @@
     "chalk": "^4.1.2",
     "clean-stack": "^3.0.1",
     "cli-progress": "^3.10.0",
-    "debug": "^4.3.3",
+    "debug": "^4.3.4",
     "ejs": "^3.1.6",
     "fs-extra": "^9.1.0",
     "get-package-type": "^0.1.0",
