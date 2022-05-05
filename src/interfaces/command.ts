@@ -1,5 +1,6 @@
 import {Config, LoadOptions} from './config'
 import {ArgInput, BooleanFlagProps, FlagInput, OptionFlagProps} from './parser'
+import {Plugin as IPlugin} from './plugin'
 
 export type Example = string | {
   description: string;
@@ -92,7 +93,7 @@ export namespace Command {
   }
 
   export interface Class extends Base {
-    plugin?: Plugin;
+    plugin?: IPlugin;
     flags?: FlagInput<any>;
     args?: ArgInput;
     strict: boolean;
@@ -106,6 +107,13 @@ export namespace Command {
     _run(argv: string[]): Promise<any>;
   }
 
+  export interface Loadable extends Command {
+    load(): Promise<Class>;
+  }
+
+  /**
+   * @deprecated use Command.Loadable instead.
+   */
   export interface Plugin extends Command {
     load(): Promise<Class>;
   }
