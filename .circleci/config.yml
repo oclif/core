@@ -19,11 +19,11 @@ workflows:
                 - lts
                 - maintenance
             alias: unit-tests
-          exclude:
-            - os: windows
-              node_version: latest
-            - os: windows
-              node_version: maintenance
+            exclude:
+              - os: windows
+                node_version: latest
+              - os: windows
+                node_version: maintenance
       - release-management/test-package:
           name: release-management/test-package-yarn test:e2e-<< matrix.node_version >>-<< matrix.os >>
           command: yarn test:e2e
@@ -37,11 +37,11 @@ workflows:
                 - lts
                 - maintenance
             alias: integration-tests
-          exclude:
-            - os: windows
-              node_version: latest
-            - os: windows
-              node_version: maintenance
+            exclude:
+              - os: windows
+                node_version: latest
+              - os: windows
+                node_version: maintenance
       - release-management/release-package:
           context: SF-CLI-RELEASE-PROCESS
           filters:
