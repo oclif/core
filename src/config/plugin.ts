@@ -112,7 +112,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: Command.Plugin[]
+  commands!: Command.Loadable[]
 
   hooks!: {[k: string]: string[]}
 
