@@ -26,7 +26,7 @@
     "natural-orderby": "^2.0.3",
     "object-treeify": "^1.1.33",
     "password-prompt": "^1.1.2",
-    "semver": "^7.3.5",
+    "semver": "^7.3.7",
     "string-width": "^4.2.3",
     "strip-ansi": "^6.0.1",
     "supports-color": "^8.1.1",
