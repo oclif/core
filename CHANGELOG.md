@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/oclif/core/compare/v1.8.0...v1.8.1) (2022-05-10)
+
+
+### Bug Fixes
+
+* improve algo for collating command id ([#415](https://github.com/oclif/core/issues/415)) ([1a9bfdb](https://github.com/oclif/core/commit/1a9bfdb810e13506ed8fc4138cde1912981b97e3))
+
 ## [1.8.0](https://github.com/oclif/core/compare/v1.7.0...v1.8.0) (2022-05-06)
 
 
