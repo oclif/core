@@ -139,16 +139,28 @@ export default class ModuleLoader {
     } catch {
       filePath = Config.tsPath(config.root, modulePath)
 
-      // Try all supported extensions.
-      if (!fs.existsSync(filePath)) {
-        // eslint-disable-next-line camelcase
-        for (const extension of s_EXTENSIONS) {
-          const testPath = `${filePath}${extension}`
-
-          if (fs.existsSync(testPath)) {
-            filePath = testPath
-            break
+      let fileExists = false
+      let isDirectory = false
+      if (fs.existsSync(filePath)) {
+        fileExists = true
+        try {
+          if (fs.lstatSync(filePath)?.isDirectory?.()) {
+            fileExists = false
+            isDirectory = true
           }
+        } catch {}
+      }
+
+      if (!fileExists) {
+        // Try all supported extensions.
+        let foundPath = ModuleLoader.findFile(filePath)
+        if (!foundPath && isDirectory) {
+          // Since filePath is a directory, try looking for index.js file.
+          foundPath = ModuleLoader.findFile(path.join(filePath, 'index'))
+        }
+
+        if (foundPath) {
+          filePath = foundPath
         }
       }
 
@@ -156,5 +168,25 @@ export default class ModuleLoader {
     }
 
     return {isESM, filePath}
+  }
+
+  /**
+   * Try adding the different extensions from `s_EXTENSIONS` to find the file.
+   *
+   * @param {string} filePath - File path to load.
+   *
+   * @returns {string | null} Modified file path including extension or null if file is not found.
+   */
+  static findFile(filePath: string) : string | null {
+    // eslint-disable-next-line camelcase
+    for (const extension of s_EXTENSIONS) {
+      const testPath = `${filePath}${extension}`
+
+      if (fs.existsSync(testPath)) {
+        return testPath
+      }
+    }
+
+    return null
   }
 }
