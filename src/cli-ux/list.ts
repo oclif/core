@@ -1,7 +1,6 @@
 // tslint:disable
 
-import maxBy from 'lodash/maxBy'
-
+import {maxBy} from '../util'
 import deps from './deps'
 
 function linewrap(length: number, s: string): string {
@@ -18,7 +17,7 @@ export function renderList(items: IListItem[]): string {
     return ''
   }
 
-  const maxLength = (maxBy(items, '[0].length') as any)[0].length
+  const maxLength = maxBy(items, item => item[0].length)?.[0].length ?? 0
   const lines = items.map(i => {
     let left = i[0]
     let right = i[1]
