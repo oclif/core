@@ -67,6 +67,19 @@ describe('util', () => {
 
     test
     .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .it('should return standardized id when topic separator is a space and has args and command is misspelled', () => {
+      config.topicSeparator = ' '
+      // @ts-expect-error private member
+      config._commands.set('foo:bar', {
+        id: 'foo:bar',
+        args: [{name: 'first'}],
+      })
+      const actual = standardizeIDFromArgv(['foo', 'ba', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:ba:baz'])
+    })
+
+    test
+    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
     .it('should return standardized id when topic separator is a space and has args', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member

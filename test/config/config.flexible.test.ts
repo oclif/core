@@ -60,7 +60,7 @@ describe('Config with flexible taxonomy', () => {
       return new MyComandClass() as unknown as ICommand.Class
     }
 
-    const commandPluginA: ICommand.Plugin = {
+    const commandPluginA: ICommand.Loadable = {
       strict: false,
       aliases: [],
       args: [],
@@ -75,7 +75,7 @@ describe('Config with flexible taxonomy', () => {
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
     }
-    const commandPluginB: ICommand.Plugin = {
+    const commandPluginB: ICommand.Loadable = {
       strict: false,
       aliases: [],
       args: [],

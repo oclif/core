@@ -19,6 +19,7 @@ export interface Options extends PluginOptions {
   channel?: string;
   version?: string;
 }
+
 export interface Plugin {
   /**
    * ../config version
@@ -63,7 +64,7 @@ export interface Plugin {
    */
   valid: boolean;
 
-  commands: Command.Plugin[];
+  commands: Command.Loadable[];
   hooks: { [k: string]: string[] };
   readonly commandIDs: string[];
   readonly topics: Topic[];
