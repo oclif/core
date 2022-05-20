@@ -13,7 +13,7 @@ const getPackageType = require('get-package-type')
  * Defines file extension resolution when source files do not have an extension.
  */
 // eslint-disable-next-line camelcase
-const s_EXTENSIONS: string[] = ['.js', '.mjs', '.cjs']
+const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
 
 /**
  * Provides a mechanism to use dynamic import / import() with tsconfig -> module: commonJS as otherwise import() gets
@@ -110,6 +110,9 @@ export default class ModuleLoader {
     case '.js':
       return getPackageType.sync(filePath) === 'module'
 
+    case '.ts':
+      return getPackageType.sync(filePath) === 'module'
+
     case '.mjs':
       return true
 
@@ -155,7 +158,7 @@ export default class ModuleLoader {
         // Try all supported extensions.
         let foundPath = ModuleLoader.findFile(filePath)
         if (!foundPath && isDirectory) {
-          // Since filePath is a directory, try looking for index.js file.
+          // Since filePath is a directory, try looking for index file.
           foundPath = ModuleLoader.findFile(path.join(filePath, 'index'))
         }
 
