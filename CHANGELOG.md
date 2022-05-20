@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/oclif/core/compare/v1.8.2...v1.9.0) (2022-05-20)
+
+
+### Features
+
+* support TS directory imports for ESM ([#422](https://github.com/oclif/core/issues/422)) ([4c58e78](https://github.com/oclif/core/commit/4c58e782e86dd7ecf91294bac0d2c759b4454596))
+
 ### [1.8.2](https://github.com/oclif/core/compare/v1.8.1...v1.8.2) (2022-05-18)
 
 
