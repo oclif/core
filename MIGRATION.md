@@ -166,3 +166,16 @@ CliUx.ux.log('hello world')
 CliUx.ux.action.start('doing things')
 CliUx.ux.action.stop()
 ```
+
+## Single command CLIs
+
+Single command CLIs now are configured in a different way. To ensure your migrated CLI work as before, you have to add the following to your `oclif` configuration in the `package.json`:
+
+```json
+"oclif": {
+  "default": ".",
+  "commands": "./lib"
+}
+```
+
+Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located at.
