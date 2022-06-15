@@ -323,6 +323,7 @@ describe('styled/table', () => {
     const bigRows = 150_000
     fancy
     .stdout()
+    .timeout(600_000)
     .end('very tall tables don\'t exceed stack depth', output => {
       const data = Array.from({length: bigRows}).fill({id: '123', name: 'foo', value: 'bar'}) as Record<string, unknown>[]
       const tallColumns = {
@@ -337,6 +338,7 @@ describe('styled/table', () => {
 
     fancy
     .stdout()
+    .timeout(600_000)
     .end('very tall, wide tables don\'t exceed stack depth', output => {
       const columns = 100
       const row = Object.fromEntries(Array.from({length: columns}).map((_, i) => [`col${i}`, 'foo']))
