@@ -15,7 +15,7 @@ describe('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
-    executor = await setup(__filename, {repo: 'git@github.com:salesforcecli/cli.git'})
+    executor = await setup(__filename, {repo: 'https://github.com/salesforcecli/cli'})
   })
 
   it('should show custom help', async () => {
