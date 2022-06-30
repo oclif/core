@@ -2,7 +2,7 @@ import * as Interfaces from '../../interfaces'
 import * as F from '../../flags'
 import {stdtermwidth} from '@oclif/screen'
 import * as chalk from 'chalk'
-import {capitalize, sumBy} from 'lodash'
+import {capitalize, sumBy} from '../../util'
 import {safeDump} from 'js-yaml'
 import {inspect} from 'util'
 
@@ -18,10 +18,11 @@ class Table<T extends Record<string, unknown>> {
     // assign columns
     this.columns = Object.keys(columns).map((key: string) => {
       const col = columns[key]
-      const extended = col.extended || false
-      const get = col.get || ((row: any) => row[key])
+      const extended = col.extended ?? false
+      // turn null and undefined into empty strings by default
+      const get = col.get ?? ((row: any) => row[key] ?? '')
       const header = typeof col.header === 'string' ? col.header : capitalize(key.replace(/_/g, ' '))
-      const minWidth = Math.max(col.minWidth || 0, sw(header) + 1)
+      const minWidth = Math.max(col.minWidth ?? 0, sw(header) + 1)
 
       return {
         extended,
@@ -39,9 +40,9 @@ class Table<T extends Record<string, unknown>> {
       output: csv ? 'csv' : output,
       extended,
       filter,
-      'no-header': options['no-header'] || false,
-      'no-truncate': options['no-truncate'] || false,
-      printLine: printLine || ((s: any) => process.stdout.write(s + '\n')),
+      'no-header': options['no-header'] ?? false,
+      'no-truncate': options['no-truncate'] ?? false,
+      printLine: printLine ?? ((s: any) => process.stdout.write(s + '\n')),
       rowStart: ' ',
       sort,
       title,
@@ -144,7 +145,7 @@ class Table<T extends Record<string, unknown>> {
       return columns.reduce((obj, col) => {
         return {
           ...obj,
-          [col.key]: d[col.key] || '',
+          [col.key]: d[col.key] ?? '',
         }
       }, {})
     })
@@ -174,27 +175,18 @@ class Table<T extends Record<string, unknown>> {
 
   private outputTable() {
     // tslint:disable-next-line:no-this-assignment
-    const {data, columns, options} = this
-
+    const {data, options} = this
     // column truncation
     //
     // find max width for each column
-    for (const col of columns) {
-      // convert multi-line cell to single longest line
-      // for width calculations
-      const widthData = data.map((row: any) => {
-        const d = row[col.key]
-        const manyLines = d.split('\n')
-        if (manyLines.length > 1) {
-          return '*'.repeat(Math.max(...manyLines.map((r: string) => sw(r))))
-        }
-
-        return d
-      })
-      const widths = ['.'.padEnd(col.minWidth! - 1), col.header, ...widthData.map((row: any) => row)].map(r => sw(r))
-      col.maxWidth = Math.max(...widths) + 1
-      col.width = col.maxWidth!
-    }
+    const columns = this.columns.map(c => {
+      const maxWidth = Math.max(sw('.'.padEnd(c.minWidth! - 1)), sw(c.header), getWidestColumnWith(data, c.key)) + 1
+      return {
+        ...c,
+        maxWidth,
+        width: maxWidth,
+      }
+    })
 
     // terminal width
     const maxWidth = stdtermwidth - 2
@@ -381,4 +373,14 @@ export namespace table {
     'no-header'?: boolean;
     printLine?(s: any): any;
   }
+}
+
+const getWidestColumnWith = (data: any[], columnKey: string): number => {
+  return data.reduce((previous, current) => {
+    const d = current[columnKey]
+    // convert multi-line cell to single longest line
+    // for width calculations
+    const manyLines = (d as string).split('\n')
+    return Math.max(previous, manyLines.length > 1 ? Math.max(...manyLines.map((r: string) => sw(r))) : sw(d))
+  }, 0)
 }

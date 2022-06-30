@@ -91,7 +91,10 @@ export class Help extends HelpBase {
     if (!subject) {
       if (this.config.pjson.oclif.default) {
         const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
-        if (rootCmd) await this.showCommandHelp(rootCmd)
+        if (rootCmd) {
+          await this.showCommandHelp(rootCmd)
+          return
+        }
       }
 
       await this.showRootHelp()

@@ -90,20 +90,20 @@ export interface Config {
   valid: boolean;
   flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
-  readonly commands: Command.Plugin[];
+  readonly commands: Command.Loadable[];
   readonly topics: Topic[];
   readonly commandIDs: string[];
 
   runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
-  runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Plugin): Promise<T>;
+  runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
   runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]
-  getAllCommands(): Command.Plugin[]
-  findCommand(id: string, opts: { must: true }): Command.Plugin;
-  findCommand(id: string, opts?: { must: boolean }): Command.Plugin | undefined;
+  getAllCommands(): Command.Loadable[]
+  findCommand(id: string, opts: { must: true }): Command.Loadable;
+  findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined;
   findTopic(id: string, opts: { must: true }): Topic;
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined;
-  findMatches(id: string, argv: string[]): Command.Plugin[];
+  findMatches(id: string, argv: string[]): Command.Loadable[];
   scopedEnvVar(key: string): string | undefined;
   scopedEnvVarKey(key: string): string;
   scopedEnvVarTrue(key: string): boolean;

@@ -197,7 +197,7 @@ describe('Config', () => {
         return new MyComandClass()
       }
 
-      const commandPluginA: ICommand.Plugin = {
+      const commandPluginA: ICommand.Loadable = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
           return new MyComandClass() as unknown as ICommand.Class
@@ -205,7 +205,7 @@ describe('Config', () => {
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: ICommand.Plugin = {
+      const commandPluginB: ICommand.Loadable = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
           return new MyComandClass() as unknown as ICommand.Class

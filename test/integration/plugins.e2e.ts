@@ -6,7 +6,7 @@ describe('oclif plugins', () => {
   let executor: Executor
   before(async () => {
     executor = await setup(__filename, {
-      repo: 'git@github.com:oclif/hello-world.git',
+      repo: 'https://github.com/oclif/hello-world',
       plugins: [
         '@oclif/plugin-autocomplete',
         '@oclif/plugin-commands',

@@ -39,28 +39,27 @@ export function template(context: any): (t: string) => string {
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
-  const ids = collectUsableIds(config.commandIDs)
   const findId = (argv: string[]): string | undefined => {
+    const ids = collectUsableIds(config.commandIDs)
+
     const final: string[] = []
     const idPresent = (id: string) => ids.includes(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
 
-    const hasSubCommandsWithArgs = () => {
+    const hasArgs = () => {
       const id = finalizeId()
       if (!id) return false
-      // Get a list of sub commands for the current command id. A command is returned as a subcommand if the `id` starts with the current command id.
-      // e.g. `foo:bar` is a subcommand of `foo`
-      const subCommands = config.commands.filter(c => (c.id).startsWith(id))
-      return Boolean(subCommands.find(cmd => cmd.strict === false || cmd.args?.length > 0))
+      const cmd = config.findCommand(id)
+      return Boolean(cmd && (cmd.strict === false || cmd.args?.length > 0))
     }
 
     for (const arg of argv) {
       if (idPresent(finalizeId(arg))) final.push(arg)
       // If the parent topic has a command that expects positional arguments, then we cannot
       // assume that any subsequent string could be part of the command name
-      else if (isArgWithValue(arg) || isFlag(arg) || hasSubCommandsWithArgs()) break
+      else if (isArgWithValue(arg) || isFlag(arg) || hasArgs()) break
       else final.push(arg)
     }
 
