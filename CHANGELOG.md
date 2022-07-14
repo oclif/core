@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.5](https://github.com/oclif/core/compare/v1.9.4...v1.9.5) (2022-06-23)
+
+### [1.9.4](https://github.com/oclif/core/compare/v1.9.3...v1.9.4) (2022-06-23)
+
+### [1.9.3](https://github.com/oclif/core/compare/v1.9.2...v1.9.3) (2022-06-16)
+
+### [1.9.2](https://github.com/oclif/core/compare/v1.9.1...v1.9.2) (2022-06-14)
+
+### [1.9.1](https://github.com/oclif/core/compare/v1.9.0...v1.9.1) (2022-06-14)
+
+
+### Bug Fixes
+
+* support CLIs with single top level command ([#426](https://github.com/oclif/core/issues/426)) ([44adb4d](https://github.com/oclif/core/commit/44adb4d387695548a017b38249b0bc3453aedbdf))
+
+## [1.9.0](https://github.com/oclif/core/compare/v1.8.2...v1.9.0) (2022-05-20)
+
+
+### Features
+
+* support TS directory imports for ESM ([#422](https://github.com/oclif/core/issues/422)) ([4c58e78](https://github.com/oclif/core/commit/4c58e782e86dd7ecf91294bac0d2c759b4454596))
+
+### [1.8.2](https://github.com/oclif/core/compare/v1.8.1...v1.8.2) (2022-05-18)
+
+
+### Bug Fixes
+
+* properly load index.js ES modules (cont) ([#417](https://github.com/oclif/core/issues/417)) ([77ba8b8](https://github.com/oclif/core/commit/77ba8b891f941e371bacd0dbedb32be25d6d2599))
+
+### [1.8.1](https://github.com/oclif/core/compare/v1.8.0...v1.8.1) (2022-05-10)
+
+
+### Bug Fixes
+
+* improve algo for collating command id ([#415](https://github.com/oclif/core/issues/415)) ([1a9bfdb](https://github.com/oclif/core/commit/1a9bfdb810e13506ed8fc4138cde1912981b97e3))
+
+## [1.8.0](https://github.com/oclif/core/compare/v1.7.0...v1.8.0) (2022-05-06)
+
+
+### Features
+
+* improve Command interface ([#416](https://github.com/oclif/core/issues/416)) ([ed625e1](https://github.com/oclif/core/commit/ed625e1554a09e578e645ddd7aa2ddb1b368c03f))
+
 ## [1.7.0](https://github.com/oclif/core/compare/v1.6.4...v1.7.0) (2022-04-11)
 
 

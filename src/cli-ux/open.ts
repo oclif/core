@@ -1,6 +1,5 @@
 // this code is largely taken from opn
 import * as childProcess from 'child_process'
-import * as _ from 'lodash'
 const isWsl = require('is-wsl')
 
 export namespace open {
@@ -77,7 +76,7 @@ export default function open(target: string, opts: open.Options = {}) {
     cp.once('error', reject)
 
     cp.once('close', code => {
-      if (_.isNumber(code) && code! > 0) {
+      if (Number.isInteger(code) && code! > 0) {
         reject(new Error('Exited with code ' + code))
         return
       }

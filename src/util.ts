@@ -39,3 +39,23 @@ export function castArray<T>(input?: T | T[]): T[] {
 export function isProd() {
   return !['development', 'test'].includes(process.env.NODE_ENV ?? '')
 }
+
+export function maxBy<T>(arr: T[], fn: (i: T) => number): T | undefined {
+  if (arr.length === 0) {
+    return undefined
+  }
+
+  return arr.reduce((maxItem, i) => {
+    const curr = fn(i)
+    const max = fn(maxItem)
+    return curr > max ? i : maxItem
+  })
+}
+
+export function sumBy<T>(arr: T[], fn: (i: T) => number): number {
+  return arr.reduce((sum, i) => sum + fn(i), 0)
+}
+
+export function capitalize(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
+}

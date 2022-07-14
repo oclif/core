@@ -118,6 +118,23 @@ const data = {
       isESM: false,
     },
 
+    // Directory / ESM source file with .js extension. Loads package.json in './test/module-loader/fixtures/esm/' for getPackageType check.
+    {
+      path: './test/module-loader/fixtures/esm/index/js',
+      defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
+      filePath: `${path.resolve('./test/module-loader/fixtures/esm/index/js/index.js')}`,
+      isESM: true,
+      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+    },
+    // Directory / ESM source file with .mjs extension. Loads package.json in './test/module-loader/fixtures/esm/' for getPackageType check.
+    {
+      path: './test/module-loader/fixtures/esm/index/mjs',
+      defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
+      filePath: `${path.resolve('./test/module-loader/fixtures/esm/index/mjs/index.mjs')}`,
+      isESM: true,
+      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+    },
+
     // CJS NPM module; just check that it loads as CJS.
     {
       path: 'eslint',
