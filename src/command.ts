@@ -199,12 +199,22 @@ export default abstract class Command {
     return Errors.error(input, options as any)
   }
 
-  log(message = '', ...args: any[]): void {
+  stdout(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
-      // tslint:disable-next-line strict-type-predicates
       message = typeof message === 'string' ? message : inspect(message)
       process.stdout.write(format(message, ...args) + '\n')
     }
+  }
+
+  stderr(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      process.stderr.write(format(message, ...args) + '\n')
+    }
+  }
+
+  log(message = '', ...args: any[]): void {
+    this.stdout(message, args)
   }
 
   public jsonEnabled(): boolean {
