@@ -9,5 +9,9 @@
   "timeout": 60000,
   "watch-extensions": [
     "ts"
+  ],
+  "watch-files": [
+    "src",
+    "test"
   ]
 }

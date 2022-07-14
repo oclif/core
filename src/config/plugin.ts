@@ -192,7 +192,8 @@ export class Plugin implements IPlugin {
       const p = path.parse(file)
       const topics = p.dir.split('/')
       const command = p.name !== 'index' && p.name
-      return [...topics, command].filter(f => f).join(':')
+      const id = [...topics, command].filter(f => f).join(':')
+      return id === '' ? '.' : id
     })
     this._debug('found commands', ids)
     return ids

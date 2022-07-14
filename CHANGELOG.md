@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.5](https://github.com/oclif/core/compare/v1.9.4...v1.9.5) (2022-06-23)
+
+### [1.9.4](https://github.com/oclif/core/compare/v1.9.3...v1.9.4) (2022-06-23)
+
+### [1.9.3](https://github.com/oclif/core/compare/v1.9.2...v1.9.3) (2022-06-16)
+
+### [1.9.2](https://github.com/oclif/core/compare/v1.9.1...v1.9.2) (2022-06-14)
+
+### [1.9.1](https://github.com/oclif/core/compare/v1.9.0...v1.9.1) (2022-06-14)
+
+
+### Bug Fixes
+
+* support CLIs with single top level command ([#426](https://github.com/oclif/core/issues/426)) ([44adb4d](https://github.com/oclif/core/commit/44adb4d387695548a017b38249b0bc3453aedbdf))
+
 ## [1.9.0](https://github.com/oclif/core/compare/v1.8.2...v1.9.0) (2022-05-20)
 
 
