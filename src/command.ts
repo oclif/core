@@ -214,7 +214,7 @@ export default abstract class Command {
   }
 
   log(message = '', ...args: any[]): void {
-    this.stdout(message, args)
+    this.stdout(message, ...args)
   }
 
   public jsonEnabled(): boolean {
