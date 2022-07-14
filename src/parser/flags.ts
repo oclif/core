@@ -18,7 +18,7 @@ export function build<T>(defaults: Partial<OptionFlag<T>>): Definition<T> {
       ...defaults,
       ...options,
       input: [] as string[],
-      multiple: Boolean(options.multiple),
+      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
       type: 'option',
     } as any
   }
