@@ -15,7 +15,7 @@ import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
 import * as cliUx from './cli-ux'
 
-const flush = require('../flush')
+const flush = cliUx.ux.flush
 
 export {
   Command,
