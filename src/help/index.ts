@@ -5,7 +5,7 @@ import {error} from '../errors'
 import CommandHelp from './command'
 import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
-import {getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
+import {getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
@@ -215,8 +215,10 @@ export class Help extends HelpBase {
   }
 
   protected formatCommand(command: Interfaces.Command): string {
-    command.id = toConfiguredId(command.id, this.config)
-    command.aliases = command.aliases && command.aliases.map(a => toConfiguredId(a, this.config))
+    if (this.config.topicSeparator !== ':') {
+      command.id = command.id.replace(/:/g, this.config.topicSeparator)
+      command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
+    }
 
     const help = this.getCommandHelpClass(command)
     return help.generate()
