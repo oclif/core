@@ -5,19 +5,11 @@ import {error} from '../errors'
 import CommandHelp from './command'
 import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
-import {standardizeIDFromArgv} from './util'
+import {getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 import {HelpFormatter} from './formatter'
-import {Plugin} from '../config/plugin'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, loadHelpClass} from './util'
-
-const helpFlags = ['--help']
-
-export function getHelpFlagAdditions(config: Interfaces.Config): string[] {
-  const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
-  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
-}
+export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
@@ -91,6 +83,7 @@ export class Help extends HelpBase {
   }
 
   public async showHelp(argv: string[]) {
+    const originalArgv = argv.slice(1)
     argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
 
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
@@ -98,7 +91,10 @@ export class Help extends HelpBase {
     if (!subject) {
       if (this.config.pjson.oclif.default) {
         const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
-        if (rootCmd) await this.showCommandHelp(rootCmd)
+        if (rootCmd) {
+          await this.showCommandHelp(rootCmd)
+          return
+        }
       }
 
       await this.showRootHelp()
@@ -108,7 +104,7 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp) {
-        const dynamicCommand = await toCached(await this.getDynamicCommand(command.id))
+        const dynamicCommand = await toCached(await command.load())
         await this.showCommandHelp(dynamicCommand)
       } else {
         await this.showCommandHelp(command)
@@ -123,18 +119,15 @@ export class Help extends HelpBase {
       return
     }
 
-    error(`Command ${subject} not found.`)
-  }
-
-  private async getDynamicCommand(cmdName: string): Promise<Interfaces.Command.Class> {
-    const plugin = new Plugin({ignoreManifest: true, root: this.config.root})
-    await plugin.load()
-    const cmd = await plugin.findCommand(cmdName)
-    if (!cmd) {
-      throw new Error(`Command ${cmdName} not found.`)
+    if (this.config.flexibleTaxonomy) {
+      const matches = this.config.findMatches(subject, originalArgv)
+      if (matches.length > 0) {
+        const result = await this.config.runHook('command_incomplete', {id: subject, argv: originalArgv, matches})
+        if (result.successes.length > 0) return
+      }
     }
 
-    return cmd
+    error(`Command ${subject} not found.`)
   }
 
   public async showCommandHelp(command: Interfaces.Command) {
@@ -146,24 +139,24 @@ export class Help extends HelpBase {
     const plugin = this.config.plugins.find(p => p.name === command.pluginName)
 
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
-    if (state) console.log(`This command is in ${state}.\n`)
+    if (state) this.log(`This command is in ${state}.\n`)
 
     const summary = this.summary(command)
     if (summary) {
-      console.log(summary + '\n')
+      this.log(summary + '\n')
     }
 
-    console.log(this.formatCommand(command))
-    console.log('')
+    this.log(this.formatCommand(command))
+    this.log('')
 
     if (subTopics.length > 0) {
-      console.log(this.formatTopics(subTopics))
-      console.log('')
+      this.log(this.formatTopics(subTopics))
+      this.log('')
     }
 
     if (subCommands.length > 0) {
-      console.log(this.formatCommands(subCommands))
-      console.log('')
+      this.log(this.formatCommands(subCommands))
+      this.log('')
     }
   }
 
@@ -172,9 +165,9 @@ export class Help extends HelpBase {
     let rootCommands = this.sortedCommands
 
     const state = this.config.pjson?.oclif?.state
-    if (state) console.log(`${this.config.bin} is in ${state}.\n`)
-    console.log(this.formatRoot())
-    console.log('')
+    if (state) this.log(`${this.config.bin} is in ${state}.\n`)
+    this.log(this.formatRoot())
+    this.log('')
 
     if (!this.opts.all) {
       rootTopics = rootTopics.filter(t => !t.name.includes(':'))
@@ -182,14 +175,14 @@ export class Help extends HelpBase {
     }
 
     if (rootTopics.length > 0) {
-      console.log(this.formatTopics(rootTopics))
-      console.log('')
+      this.log(this.formatTopics(rootTopics))
+      this.log('')
     }
 
     if (rootCommands.length > 0) {
       rootCommands = rootCommands.filter(c => c.id)
-      console.log(this.formatCommands(rootCommands))
-      console.log('')
+      this.log(this.formatCommands(rootCommands))
+      this.log('')
     }
   }
 
@@ -201,18 +194,18 @@ export class Help extends HelpBase {
     const commands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
 
     const state = this.config.pjson?.oclif?.state
-    if (state) console.log(`This topic is in ${state}.\n`)
+    if (state) this.log(`This topic is in ${state}.\n`)
 
-    console.log(this.formatTopic(topic))
+    this.log(this.formatTopic(topic))
 
     if (subTopics.length > 0) {
-      console.log(this.formatTopics(subTopics))
-      console.log('')
+      this.log(this.formatTopics(subTopics))
+      this.log('')
     }
 
     if (commands.length > 0) {
-      console.log(this.formatCommands(commands))
-      console.log('')
+      this.log(this.formatCommands(commands))
+      this.log('')
     }
   }
 
@@ -306,5 +299,9 @@ export class Help extends HelpBase {
    */
   protected command(command: Interfaces.Command) {
     return this.formatCommand(command)
+  }
+
+  protected log(...args: string[]) {
+    console.log(...args)
   }
 }

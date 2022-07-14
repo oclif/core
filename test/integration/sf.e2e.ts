@@ -15,7 +15,7 @@ describe('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
-    executor = await setup(__filename, {repo: 'git@github.com:salesforcecli/cli.git'})
+    executor = await setup(__filename, {repo: 'https://github.com/salesforcecli/cli'})
   })
 
   it('should show custom help', async () => {
@@ -102,7 +102,7 @@ describe('Salesforce CLI (sf)', () => {
   })
 
   it('should handle varags', async () => {
-    const config = await executor.executeCommand('config set disableTelemetry=true restDeploy=true --global --json')
+    const config = await executor.executeCommand('config set disable-telemetry=true org-api-version=54.0 --global --json')
     const parsed = parseJson(config.output!)
     expect(parsed.status).to.equal(0)
     const results = parsed.result as Array<{success: boolean}>

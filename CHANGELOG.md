@@ -2,6 +2,116 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.7](https://github.com/oclif/core/compare/v1.9.6...v1.9.7) (2022-07-14)
+
+
+### Bug Fixes
+
+* can not find module 'cli-ux' ([#403](https://github.com/oclif/core/issues/403)) ([f16b67f](https://github.com/oclif/core/commit/f16b67f8b6cd3eaaf24c26d4e7c4d490c0937ff3))
+
+### [1.9.6](https://github.com/oclif/core/compare/v1.9.5...v1.9.6) (2022-07-14)
+
+### [1.9.5](https://github.com/oclif/core/compare/v1.9.4...v1.9.5) (2022-06-23)
+
+### [1.9.4](https://github.com/oclif/core/compare/v1.9.3...v1.9.4) (2022-06-23)
+
+### [1.9.3](https://github.com/oclif/core/compare/v1.9.2...v1.9.3) (2022-06-16)
+
+### [1.9.2](https://github.com/oclif/core/compare/v1.9.1...v1.9.2) (2022-06-14)
+
+### [1.9.1](https://github.com/oclif/core/compare/v1.9.0...v1.9.1) (2022-06-14)
+
+
+### Bug Fixes
+
+* support CLIs with single top level command ([#426](https://github.com/oclif/core/issues/426)) ([44adb4d](https://github.com/oclif/core/commit/44adb4d387695548a017b38249b0bc3453aedbdf))
+
+## [1.9.0](https://github.com/oclif/core/compare/v1.8.2...v1.9.0) (2022-05-20)
+
+
+### Features
+
+* support TS directory imports for ESM ([#422](https://github.com/oclif/core/issues/422)) ([4c58e78](https://github.com/oclif/core/commit/4c58e782e86dd7ecf91294bac0d2c759b4454596))
+
+### [1.8.2](https://github.com/oclif/core/compare/v1.8.1...v1.8.2) (2022-05-18)
+
+
+### Bug Fixes
+
+* properly load index.js ES modules (cont) ([#417](https://github.com/oclif/core/issues/417)) ([77ba8b8](https://github.com/oclif/core/commit/77ba8b891f941e371bacd0dbedb32be25d6d2599))
+
+### [1.8.1](https://github.com/oclif/core/compare/v1.8.0...v1.8.1) (2022-05-10)
+
+
+### Bug Fixes
+
+* improve algo for collating command id ([#415](https://github.com/oclif/core/issues/415)) ([1a9bfdb](https://github.com/oclif/core/commit/1a9bfdb810e13506ed8fc4138cde1912981b97e3))
+
+## [1.8.0](https://github.com/oclif/core/compare/v1.7.0...v1.8.0) (2022-05-06)
+
+
+### Features
+
+* improve Command interface ([#416](https://github.com/oclif/core/issues/416)) ([ed625e1](https://github.com/oclif/core/commit/ed625e1554a09e578e645ddd7aa2ddb1b368c03f))
+
+## [1.7.0](https://github.com/oclif/core/compare/v1.6.4...v1.7.0) (2022-04-11)
+
+
+### Features
+
+* move console.log to single class method ([#400](https://github.com/oclif/core/issues/400)) ([2ccb274](https://github.com/oclif/core/commit/2ccb2740912dba3b81c4d36712fbb20fd6a03c23))
+
+### [1.6.4](https://github.com/oclif/core/compare/v1.6.3...v1.6.4) (2022-03-31)
+
+
+### Bug Fixes
+
+* dynamic help ([#395](https://github.com/oclif/core/issues/395)) ([8ecc8f4](https://github.com/oclif/core/commit/8ecc8f41ec62ef5b05bdb70a79dce09b5913d14b))
+
+### [1.6.3](https://github.com/oclif/core/compare/v1.6.2...v1.6.3) (2022-03-23)
+
+
+### Bug Fixes
+
+* use plugin alias if available ([245d841](https://github.com/oclif/core/commit/245d84197a64e55b17524c22cbc17ec025a07c08))
+
+### [1.6.2](https://github.com/oclif/core/compare/v1.6.1...v1.6.2) (2022-03-23)
+
+
+### Bug Fixes
+
+* load correct plugin when using dynamic help ([#394](https://github.com/oclif/core/issues/394)) ([15c1fbe](https://github.com/oclif/core/commit/15c1fbe1e870b6da1372a5786a9ffb09746ce8f6))
+
+### [1.6.1](https://github.com/oclif/core/compare/v1.6.0...v1.6.1) (2022-03-17)
+
+
+### Bug Fixes
+
+* set id to alias when adding commands ([#390](https://github.com/oclif/core/issues/390)) ([84ab722](https://github.com/oclif/core/commit/84ab7223a2196c6a33f64a3e4ba75a050b02d1c3))
+
+## [1.6.0](https://github.com/oclif/core/compare/v1.5.3...v1.6.0) (2022-03-14)
+
+
+### Features
+
+* POC for allowing flexible command taxonomy ([#376](https://github.com/oclif/core/issues/376)) ([c47c6c6](https://github.com/oclif/core/commit/c47c6c6fb689a92f66d40aacfa146d885f08d962))
+
+### [1.5.3](https://github.com/oclif/core/compare/v1.5.2...v1.5.3) (2022-03-09)
+
+
+### Bug Fixes
+
+* rid core of transient refs to cli-ux ([#379](https://github.com/oclif/core/issues/379)) ([a593a27](https://github.com/oclif/core/commit/a593a2751dbdd4bcd9cf05349154d0fa6e4d7e2d))
+
+### [1.5.2](https://github.com/oclif/core/compare/v1.5.1...v1.5.2) (2022-03-04)
+
+
+### Bug Fixes
+
+* direct styled header text thru cliux.ux.info ([#387](https://github.com/oclif/core/issues/387)) ([5ebe8de](https://github.com/oclif/core/commit/5ebe8de3adcf2e45c952dd5aeaf5b2848b928e94))
+
+### [1.5.1](https://github.com/oclif/core/compare/v1.5.0...v1.5.1) (2022-03-03)
+
 ## [1.5.0](https://github.com/oclif/core/compare/v1.4.0...v1.5.0) (2022-03-02)
 
 

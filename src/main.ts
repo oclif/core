@@ -63,7 +63,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // find & run command
   const cmd = config.findCommand(id)
   if (!cmd) {
-    const topic = config.findTopic(id)
+    const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) return config.runCommand('help', [id])
     if (config.pjson.oclif.default) {
       id = config.pjson.oclif.default
@@ -71,5 +71,9 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
     }
   }
 
+  // If the the default command is '.' (signifying that the CLI is a single command CLI) and '.' is provided
+  // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
+  // command id.
+  if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
   await config.runCommand(id, argvSlice, cmd)
 }

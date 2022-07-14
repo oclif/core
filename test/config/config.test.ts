@@ -191,13 +191,13 @@ describe('Config', () => {
         return Promise.resolve()
       }
       }
-      const load = async (): Promise<void>  => {}
+      const load = async (): Promise<void> => {}
       const findCommand = async (): Promise<ICommand.Class> => {
       // @ts-ignore
         return new MyComandClass()
       }
 
-      const commandPluginA: ICommand.Plugin = {
+      const commandPluginA: ICommand.Loadable = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
           return new MyComandClass() as unknown as ICommand.Class
@@ -205,7 +205,7 @@ describe('Config', () => {
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: ICommand.Plugin = {
+      const commandPluginB: ICommand.Loadable = {
         strict: false,
         aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
           return new MyComandClass() as unknown as ICommand.Class
@@ -230,7 +230,7 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
       }
-      commandPluginA
+
       const pluginB: IPlugin = {
         load,
         findCommand,
@@ -261,6 +261,13 @@ describe('Config', () => {
         config.plugins = plugins
         config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
         config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
+        for (const plugin of config.plugins) {
+          // @ts-expect-error private method
+          config.loadCommands(plugin)
+          // @ts-expect-error private method
+          config.loadTopics(plugin)
+        }
+
         return config
       })
       // @ts-ignore
