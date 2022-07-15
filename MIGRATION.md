@@ -10,7 +10,7 @@ Migrating to `@oclif/core` from the old oclif libraries (`@oclif/config`, `@ocli
   - [Restore `-h`, `-v`, and `version`](#restore--h--v-and-version)
   - [Configure the `topicSeparator`](#configure-the-topicseparator)
   - [Update `this.parse` to `await this.parse`](#update-thisparse-to-await-thisparse)
-  - [Update `default` property on flag defintions](#update-default-property-on-flag-defintions)
+  - [Update `default` property on flag definitions](#update-default-property-on-flag-definitions)
   - [Replace cli-ux library with `CliUx`](#replace-cli-ux-library-with-cliux)
 
 ## Update Imports
@@ -178,4 +178,4 @@ Single command CLIs now are configured in a different way. To ensure your migrat
 }
 ```
 
-Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located at.
+Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located.
