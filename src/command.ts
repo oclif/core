@@ -201,9 +201,15 @@ export default abstract class Command {
 
   log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
-      // tslint:disable-next-line strict-type-predicates
       message = typeof message === 'string' ? message : inspect(message)
       process.stdout.write(format(message, ...args) + '\n')
+    }
+  }
+
+  logToStderr(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      process.stderr.write(format(message, ...args) + '\n')
     }
   }
 
