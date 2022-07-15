@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/oclif/core/compare/v1.9.10...v1.10.0) (2022-07-15)
+
+
+### Features
+
+* add stderr method ([#441](https://github.com/oclif/core/issues/441)) ([d9490f7](https://github.com/oclif/core/commit/d9490f77ff4cac0ee9767f1386f18c7357e0666e))
+
 ### [1.9.10](https://github.com/oclif/core/compare/v1.9.9...v1.9.10) (2022-07-15)
 
 ### [1.9.9](https://github.com/oclif/core/compare/v1.9.8...v1.9.9) (2022-07-14)
