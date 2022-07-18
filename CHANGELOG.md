@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/oclif/core/compare/v1.9.10...v1.10.0) (2022-07-15)
+
+
+### Features
+
+* add stderr method ([#441](https://github.com/oclif/core/issues/441)) ([d9490f7](https://github.com/oclif/core/commit/d9490f77ff4cac0ee9767f1386f18c7357e0666e))
+
+### [1.9.10](https://github.com/oclif/core/compare/v1.9.9...v1.9.10) (2022-07-15)
+
+### [1.9.9](https://github.com/oclif/core/compare/v1.9.8...v1.9.9) (2022-07-14)
+
+
+### Bug Fixes
+
+* help for single command CLIs ([#442](https://github.com/oclif/core/issues/442)) ([44aacc1](https://github.com/oclif/core/commit/44aacc12fbc68f9909796c4ad2a1c9d45f47e653))
+
+### [1.9.8](https://github.com/oclif/core/compare/v1.9.7...v1.9.8) (2022-07-14)
+
+### [1.9.7](https://github.com/oclif/core/compare/v1.9.6...v1.9.7) (2022-07-14)
+
+
+### Bug Fixes
+
+* can not find module 'cli-ux' ([#403](https://github.com/oclif/core/issues/403)) ([f16b67f](https://github.com/oclif/core/commit/f16b67f8b6cd3eaaf24c26d4e7c4d490c0937ff3))
+
+### [1.9.6](https://github.com/oclif/core/compare/v1.9.5...v1.9.6) (2022-07-14)
+
+### [1.9.5](https://github.com/oclif/core/compare/v1.9.4...v1.9.5) (2022-06-23)
+
+### [1.9.4](https://github.com/oclif/core/compare/v1.9.3...v1.9.4) (2022-06-23)
+
 ### [1.9.3](https://github.com/oclif/core/compare/v1.9.2...v1.9.3) (2022-06-16)
 
 ### [1.9.2](https://github.com/oclif/core/compare/v1.9.1...v1.9.2) (2022-06-14)

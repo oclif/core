@@ -2,6 +2,19 @@ import {expect, fancy} from 'fancy-test'
 import {CliUx} from '../../../src'
 
 describe('styled/table', () => {
+  describe('null/undefined handling', () => {
+    fancy
+    .stdout()
+    .end('omits nulls and undefined by default', output => {
+      const data = [{a: 1, b: '2', c: null, d: undefined}]
+      CliUx.ux.table(data, {a: {}, b: {}, c: {}, d: {}})
+      expect(output.stdout).to.include('1')
+      expect(output.stdout).to.include('2')
+      expect(output.stdout).to.not.include('null')
+      expect(output.stdout).to.not.include('undefined')
+    })
+  })
+
   describe('scale tests', () => {
     const bigRows = 150_000
     fancy

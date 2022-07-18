@@ -19,7 +19,8 @@ class Table<T extends Record<string, unknown>> {
     this.columns = Object.keys(columns).map((key: string) => {
       const col = columns[key]
       const extended = col.extended ?? false
-      const get = col.get ?? ((row: any) => row[key])
+      // turn null and undefined into empty strings by default
+      const get = col.get ?? ((row: any) => row[key] ?? '')
       const header = typeof col.header === 'string' ? col.header : capitalize(key.replace(/_/g, ' '))
       const minWidth = Math.max(col.minWidth ?? 0, sw(header) + 1)
 

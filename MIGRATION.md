@@ -5,12 +5,12 @@ Migrating to `@oclif/core` from the old oclif libraries (`@oclif/config`, `@ocli
 
 - [Migrating to @oclif/core](#migrating-to-oclifcore)
   - [Update Imports](#update-imports)
-  - [Update your bin scirpts](#update-your-bin-scirpts)
+  - [Update your bin scripts](#update-your-bin-scripts)
   - [Add `main` to your package.json](#add-main-to-your-packagejson)
   - [Restore `-h`, `-v`, and `version`](#restore--h--v-and-version)
   - [Configure the `topicSeparator`](#configure-the-topicseparator)
   - [Update `this.parse` to `await this.parse`](#update-thisparse-to-await-thisparse)
-  - [Update `default` property on flag defintions](#update-default-property-on-flag-defintions)
+  - [Update `default` property on flag definitions](#update-default-property-on-flag-definitions)
   - [Replace cli-ux library with `CliUx`](#replace-cli-ux-library-with-cliux)
 
 ## Update Imports
@@ -29,7 +29,7 @@ With this import:
 import {Command, Flags, Topic, Help} from '@oclif/core';
 ```
 
-## Update your bin scirpts
+## Update your bin scripts
 
 `@oclif/core` now supports separate bin scripts for production and development.
 
@@ -109,7 +109,7 @@ The `parse` method on `Command` is now asynchronous (more [here](https://oclif.i
 
 `const { args, flags } = this.parse(MyCommand)` => `const { args, flags } = await this.parse(MyCommand)`
 
-## Update `default` property on flag defintions
+## Update `default` property on flag definitions
 
 The `default` property on flag definitions is now asynchronous. So you'll now need to await those.
 
@@ -178,4 +178,4 @@ Single command CLIs now are configured in a different way. To ensure your migrat
 }
 ```
 
-Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located at.
+Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located.

@@ -327,6 +327,14 @@ See more help with --help`)
         expect(out.flags.baz.toUpperCase()).to.equal('D')
         expect(out.flags.bar.join('|')).to.equal('a|b')
       })
+      it('parses multiple flags on custom flags', async () => {
+        const out = await parse(['--foo', 'a', '--foo=b'], {
+          flags: {
+            foo: flags.option({multiple: true, parse: async i => i}),
+          },
+        })
+        expect(out.flags).to.deep.include({foo: ['a', 'b']})
+      })
     })
 
     describe('strict: false', () => {
