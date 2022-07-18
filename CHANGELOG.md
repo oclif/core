@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/oclif/core/compare/v1.10.0...v1.11.0) (2022-07-18)
+
+
+### Features
+
+* print error info when module not found ([#427](https://github.com/oclif/core/issues/427)) ([223e79b](https://github.com/oclif/core/commit/223e79b363ad01da327e264244daf23810849d70))
+
 ## [1.10.0](https://github.com/oclif/core/compare/v1.9.10...v1.10.0) (2022-07-15)
 
 
