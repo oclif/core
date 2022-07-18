@@ -87,7 +87,7 @@ export default class ModuleLoader {
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
+        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`)
       }
 
       throw error
