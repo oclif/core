@@ -164,6 +164,7 @@ export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 
 export type Input<TFlags extends FlagOutput> = {
   flags?: FlagInput<TFlags>;
+  globalFlags?: FlagInput<TFlags>;
   args?: ArgInput;
   strict?: boolean;
   context?: any;

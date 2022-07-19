@@ -96,7 +96,16 @@ export default abstract class Command {
 
   static parserOptions = {}
 
-  static enableJsonFlag = false
+  static _enableJsonFlag = false
+
+  static get enableJsonFlag(): boolean {
+    return this._enableJsonFlag
+  }
+
+  static set enableJsonFlag(value: boolean) {
+    this._enableJsonFlag = value
+    this.globalFlags = jsonFlag
+  }
 
   // eslint-disable-next-line valid-jsdoc
   /**
@@ -126,9 +135,8 @@ export default abstract class Command {
   }
 
   static set globalFlags(flags: Interfaces.FlagInput<any>) {
-    this._globalFlags = this.enableJsonFlag ?
-      Object.assign({}, jsonFlag, this.globalFlags, flags) :
-      Object.assign({}, this.globalFlags, flags)
+    this._globalFlags = Object.assign({}, this.globalFlags, flags)
+    this.flags = this.globalFlags
   }
 
   /** A hash of flags for the command */
@@ -139,7 +147,6 @@ export default abstract class Command {
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this.globalFlags = {}
     this._flags = Object.assign({}, this.globalFlags, flags)
   }
 
@@ -239,7 +246,7 @@ export default abstract class Command {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
+    opts.flags = Object.assign({}, options?.flags, options?.globalFlags)
     return Parser.parse(argv, opts)
   }
 
