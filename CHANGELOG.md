@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/oclif/core/compare/v1.11.0...v1.12.0) (2022-07-20)
+
+
+### Features
+
+* improve the instantiation of global flags ([#445](https://github.com/oclif/core/issues/445)) ([d264535](https://github.com/oclif/core/commit/d2645358ccf1cddd0bb65d236e73ecf4c5ac7c0c))
+
 ## [1.11.0](https://github.com/oclif/core/compare/v1.10.0...v1.11.0) (2022-07-18)
 
 
