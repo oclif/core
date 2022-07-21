@@ -35,18 +35,18 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export const integer = (opts: { min?: number; max?: number } & Partial<OptionFlag<number>> = {}): OptionFlag<number | undefined> => {
+export const integer = (opts: { min?: bigint; max?: bigint } & Partial<OptionFlag<number>> = {}): OptionFlag<number | undefined> => {
   return build<number>({
     ...opts,
     parse: async input => {
       if (!/^-?\d+$/.test(input))
         throw new Error(`Expected an integer but received: ${input}`)
-      const num = Number.parseInt(input, 10)
-      if (typeof opts.min === 'number' && Number(input) < opts.min)
+      const inputInt = BigInt(input)
+      if (typeof opts.min === 'bigint' && inputInt < opts.min)
         throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
-      if (typeof opts.max === 'number' && Number(input) > opts.max)
+      if (typeof opts.max === 'bigint' && inputInt > opts.max)
         throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
-      return num
+      return Number(inputInt)
     },
   })()
 }
