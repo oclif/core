@@ -136,7 +136,7 @@ export default abstract class Command {
 
   static set globalFlags(flags: Interfaces.FlagInput<any>) {
     this._globalFlags = Object.assign({}, this.globalFlags, flags)
-    this.flags = this.globalFlags
+    this.flags = {} // force the flags setter to run
   }
 
   /** A hash of flags for the command */
@@ -147,7 +147,7 @@ export default abstract class Command {
   }
 
   static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = Object.assign({}, this.globalFlags, flags)
+    this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 
   id: string | undefined

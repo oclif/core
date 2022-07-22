@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.1](https://github.com/oclif/core/compare/v1.12.0...v1.12.1) (2022-07-21)
+
+
+### Bug Fixes
+
+* flag setter order ([#450](https://github.com/oclif/core/issues/450)) ([a02f86c](https://github.com/oclif/core/commit/a02f86cb1094a86ba0cd8689fd82908ff3d46386))
+
 ## [1.12.0](https://github.com/oclif/core/compare/v1.11.0...v1.12.0) (2022-07-20)
 
 
