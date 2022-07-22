@@ -35,7 +35,7 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export const integer = (opts: { min?: bigint; max?: bigint } & Partial<OptionFlag<number>> = {}): OptionFlag<number | undefined> => {
+export const integer = (opts: { min?: int; max?: int} & Partial<OptionFlag<number>> = {}): OptionFlag<number | undefined> => {
   return build<number>({
     ...opts,
     parse: async input => {
