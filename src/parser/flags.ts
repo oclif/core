@@ -42,9 +42,9 @@ export const integer = (opts: { min?: number; max?: number } & Partial<OptionFla
       if (!/^-?\d+$/.test(input))
         throw new Error(`Expected an integer but received: ${input}`)
       const num = Number.parseInt(input, 10)
-      if (typeof opts.min === 'number' && Number(input) < opts.min)
+      if (typeof opts.min === 'number' && num < opts.min)
         throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
-      if (typeof opts.max === 'number' && Number(input) > opts.max)
+      if (typeof opts.max === 'number' && num > opts.max)
         throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
       return num
     },
