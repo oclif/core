@@ -30,6 +30,7 @@ async function flush() {
   if (flushed) {
     return Promise.resolve()
   }
+
   return p
 }
 
