@@ -22,9 +22,12 @@ function timeout(p: Promise<any>, ms: number) {
 }
 
 async function flush() {
-  const p = new Promise(resolve => process.stdout.once('drain', () => resolve(null)))
+  const p = new Promise(resolve => {
+    process.stdout.once('drain', () => resolve(null))
+  })
   const flushed = process.stdout.write('')
-  if(flushed) {
+
+  if (flushed) {
     return Promise.resolve()
   }
   return p
