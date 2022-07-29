@@ -246,7 +246,7 @@ export default abstract class Command {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = Object.assign({}, options?.flags, options?.globalFlags)
+    opts.flags = options?.flags
     return Parser.parse(argv, opts)
   }
 
