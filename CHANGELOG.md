@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/oclif/core/compare/v1.12.1...v1.13.0) (2022-07-28)
+
+
+### Features
+
+* drop node12, use es2020 ([ac749e3](https://github.com/oclif/core/commit/ac749e32917400386f0ee4056aa5b66a52f3d0e0))
+* min/max for integer flag ([7e05ef7](https://github.com/oclif/core/commit/7e05ef7195269012055f30095552e61359fad47e))
+* node14/es2020 for bigint, pr feedback ([03a50b8](https://github.com/oclif/core/commit/03a50b874a8e7ef621c23d846e63864e3850ee4a))
+
 ### [1.12.1](https://github.com/oclif/core/compare/v1.12.0...v1.12.1) (2022-07-21)
 
 

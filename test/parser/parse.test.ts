@@ -428,6 +428,58 @@ See more help with --help`)
 
         expect(message).to.equal('Expected an integer but received: s10')
       })
+
+      describe('min/max', () => {
+        it('min pass equal', async () => {
+          const out = await parse(['--int', '10'], {
+            flags: {int: flags.integer({min: 10, max: 20})},
+          })
+          expect(out.flags).to.deep.include({int: 10})
+        })
+        it('min pass gt', async () => {
+          const out = await parse(['--int', '11'], {
+            flags: {int: flags.integer({min: 10, max: 20})},
+          })
+          expect(out.flags).to.deep.include({int: 11})
+        })
+        it('max pass lt', async () => {
+          const out = await parse(['--int', '19'], {
+            flags: {int: flags.integer({min: 10, max: 20})},
+          })
+          expect(out.flags).to.deep.include({int: 19})
+        })
+        it('max pass equal', async () => {
+          const out = await parse(['--int', '20'], {
+            flags: {int: flags.integer({min: 10, max: 20})},
+          })
+          expect(out.flags).to.deep.include({int: 20})
+        })
+
+        it('min fail lt', async () => {
+          let message = ''
+          try {
+            await parse(['--int', '9'], {
+              flags: {int: flags.integer({min: 10, max: 20})},
+            })
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.equal('Expected an integer greater than or equal to 10 but received: 9')
+        })
+        it('max fail gt', async () => {
+          let message = ''
+          try {
+            await parse(['--int', '21'], {
+              flags: {int: flags.integer({min: 10, max: 20})},
+            })
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.equal('Expected an integer less than or equal to 20 but received: 21')
+        })
+      })
     })
   })
 
