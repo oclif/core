@@ -15,7 +15,7 @@ const m = Deps()
 // eslint-disable-next-line node/no-missing-require
 .add('validate', () => require('./validate').validate as typeof Validate.validate)
 
-export async function parse<TFlags, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags>): Promise<ParserOutput<TFlags, TArgs>> {
+export async function parse<TFlags, GFlags, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags, GFlags>): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
   const input = {
     argv,
     context: options.context,
@@ -30,7 +30,7 @@ export async function parse<TFlags, TArgs extends { [name: string]: string }>(ar
   const parser = new Parser(input)
   const output = await parser.parse()
   m.validate({input, output})
-  return output as ParserOutput<TFlags, TArgs>
+  return output as ParserOutput<TFlags, GFlags, TArgs>
 }
 
 const {boolean, integer, url, directory, file} = flags
