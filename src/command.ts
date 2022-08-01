@@ -148,7 +148,6 @@ export default abstract class Command {
 
   static set flags(flags: Interfaces.FlagInput<any>) {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
-    // this._flags = Object.assign({}, this._flags ?? {}, flags)
   }
 
   id: string | undefined
