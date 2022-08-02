@@ -335,6 +335,10 @@ export class Config implements IConfig {
         return cmdResult as T
       }
 
+      if (hookResult.failures[0]) {
+        throw hookResult.failures[0].error
+      }
+
       throw new CLIError(`command ${id} not found`)
     }
 
