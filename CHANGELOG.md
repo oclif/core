@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.1](https://github.com/oclif/core/compare/v1.13.0...v1.13.1) (2022-08-02)
+
+
+### Bug Fixes
+
+* throw appropriate error in runCommand ([#455](https://github.com/oclif/core/issues/455)) ([66e9bbc](https://github.com/oclif/core/commit/66e9bbca08f9e1f4a08e1c8c144bf85c274b7f82))
+
 ## [1.13.0](https://github.com/oclif/core/compare/v1.12.1...v1.13.0) (2022-07-28)
 
 
