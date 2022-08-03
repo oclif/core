@@ -49,6 +49,7 @@ export interface CLIParseErrorOptions {
 
 export type OutputArgs = { [name: string]: any }
 export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
+
 export type ParserOutput<TFlags extends OutputFlags<any> = any, GFlags extends OutputFlags<any> = any, TArgs extends OutputArgs = any> = {
   // Add in global flags so that they show up in the types
   // This is necessary because there's no easy way to optionally return
@@ -200,4 +201,4 @@ export type CompletableOptionFlag<T> = OptionFlag<T> & {
 
 export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
 
-export type FlagInput<T extends FlagOutput> = { [P in keyof T]: CompletableFlag<T[P]> }
+export type FlagInput<T extends FlagOutput = {[name: string]: unknown}> = { [P in keyof T]: CompletableFlag<T[P]> }

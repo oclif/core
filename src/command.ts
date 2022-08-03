@@ -128,25 +128,25 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  protected static _globalFlags: Interfaces.FlagInput<any>
+  protected static _globalFlags: Interfaces.FlagInput
 
-  static get globalFlags(): Interfaces.FlagInput<any> {
+  static get globalFlags(): Interfaces.FlagInput {
     return this._globalFlags
   }
 
-  static set globalFlags(flags: Interfaces.FlagInput<any>) {
+  static set globalFlags(flags: Interfaces.FlagInput) {
     this._globalFlags = Object.assign({}, this.globalFlags, flags)
     this.flags = {} // force the flags setter to run
   }
 
   /** A hash of flags for the command */
-  protected static _flags: Interfaces.FlagInput<any>
+  protected static _flags: Interfaces.FlagInput
 
-  static get flags(): Interfaces.FlagInput<any> {
+  static get flags(): Interfaces.FlagInput {
     return this._flags
   }
 
-  static set flags(flags: Interfaces.FlagInput<any>) {
+  static set flags(flags: Interfaces.FlagInput) {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 

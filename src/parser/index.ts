@@ -1,10 +1,8 @@
-// tslint:disable interface-over-type-literal
-
 import * as args from './args'
 import Deps from './deps'
 import * as flags from './flags'
 import {Parser} from './parse'
-import {Input, ParserOutput} from '../interfaces'
+import {FlagInput, Input, ParserOutput} from '../interfaces'
 import * as Validate from './validate'
 export {args}
 export {flags}
@@ -23,8 +21,8 @@ export async function parse<TFlags, GFlags, TArgs extends { [name: string]: stri
     '--': options['--'],
     flags: {
       color: flags.defaultFlags.color,
-      ...((options.flags || {})) as any,
-    },
+      ...options.flags,
+    } as FlagInput<any>,
     strict: options.strict !== false,
   }
   const parser = new Parser(input)
