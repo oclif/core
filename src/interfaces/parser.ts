@@ -201,4 +201,4 @@ export type CompletableOptionFlag<T> = OptionFlag<T> & {
 
 export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
 
-export type FlagInput<T extends FlagOutput = {[name: string]: unknown}> = { [P in keyof T]: CompletableFlag<T[P]> }
+export type FlagInput<T extends FlagOutput = {[flag: string]: unknown}> = { [P in keyof T]: CompletableFlag<T[P]> }
