@@ -128,25 +128,25 @@ export default abstract class Command {
     return cmd._run(argv)
   }
 
-  protected static _globalFlags: Interfaces.FlagInput<any>
+  protected static _globalFlags: Interfaces.FlagInput
 
-  static get globalFlags(): Interfaces.FlagInput<any> {
+  static get globalFlags(): Interfaces.FlagInput {
     return this._globalFlags
   }
 
-  static set globalFlags(flags: Interfaces.FlagInput<any>) {
+  static set globalFlags(flags: Interfaces.FlagInput) {
     this._globalFlags = Object.assign({}, this.globalFlags, flags)
     this.flags = {} // force the flags setter to run
   }
 
   /** A hash of flags for the command */
-  protected static _flags: Interfaces.FlagInput<any>
+  protected static _flags: Interfaces.FlagInput
 
-  static get flags(): Interfaces.FlagInput<any> {
+  static get flags(): Interfaces.FlagInput {
     return this._flags
   }
 
-  static set flags(flags: Interfaces.FlagInput<any>) {
+  static set flags(flags: Interfaces.FlagInput) {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 
@@ -242,11 +242,11 @@ export default abstract class Command {
     g['http-call']!.userAgent = this.config.userAgent
   }
 
-  protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
+  protected async parse<F, G, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = Object.assign({}, options?.flags, options?.globalFlags)
+    opts.flags = options?.flags
     return Parser.parse(argv, opts)
   }
 
