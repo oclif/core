@@ -32,11 +32,11 @@ describe('command', () => {
   fancy
   .do(async () => {
     class Command extends Base {
-      static description = 'test command'
+        static description = 'test command'
 
-      async run() {
-        return 101
-      }
+        async run() {
+          return 101
+        }
     }
 
     expect(await Command.run([])).to.equal(101)
@@ -64,6 +64,7 @@ describe('command', () => {
         this.exit(0)
       }
     }
+
     return Command.run([])
   })
   .catch(/EEXIT: 0/)
@@ -203,14 +204,14 @@ describe('command', () => {
     .stdout()
     .it('has a flag', async ctx => {
       class CMD extends Base {
-        static flags = {
-          foo: flags.string(),
-        }
+          static flags = {
+            foo: flags.string(),
+          }
 
-        async run() {
-          const {flags} = await this.parse(CMD)
-          this.log(flags.foo)
-        }
+          async run() {
+            const {flags} = await this.parse(CMD)
+            this.log(flags.foo)
+          }
       }
 
       await CMD.run(['--foo=bar'])
@@ -227,6 +228,7 @@ describe('command', () => {
           this.log('json output: %j', {a: 'foobar'})
         }
       }
+
       await CMD.run([])
     })
     .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
@@ -242,6 +244,7 @@ describe('command', () => {
           process.stdout.emit('error', new CodeError('dd'))
         }
       }
+
       await CMD.run([])
     })
     .catch(/dd/)
@@ -256,9 +259,107 @@ describe('command', () => {
           this.log('json output: %j', {a: 'foobar'})
         }
       }
+
       await CMD.run([])
     })
     .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
     .it('test stdout EPIPE swallowed')
+  })
+
+  describe('enableJsonFlag', () => {
+    fancy
+    .stdout()
+    .it('enableJsonFlag = true, --json flag', async ctx => {
+      const result = {
+        a: 'b',
+      }
+      abstract class SuperCmd extends Base {
+        static enableJsonFlag = true
+      }
+      class CMD extends SuperCmd {
+          static enableJsonFlag = true
+          static flags = {}
+
+          async run(): Promise<{ a: string }> {
+            await this.parse(CMD)
+            return result
+          }
+      }
+
+      await CMD.run(['--json'])
+      expect(JSON.parse(ctx.stdout)).to.deep.equal(result)
+    })
+    fancy
+    .stdout()
+    .it('enableJsonFlag = true, No --json flag', async ctx => {
+      const result = {
+        a: 'b',
+      }
+
+      abstract class SuperCmd extends Base {
+        static enableJsonFlag = true
+      }
+      class CMD extends SuperCmd {
+          static enableJsonFlag = true
+          static flags = {}
+
+          async run(): Promise<{ a: string }> {
+            await this.parse(CMD)
+            return result
+          }
+      }
+
+      await CMD.run([])
+      expect(ctx.stdout).to.equal('')
+    })
+    fancy
+    .stdout()
+    .do(async () => {
+      const result = {
+        a: 'b',
+      }
+      abstract class SuperCmd extends Base {
+        static enableJsonFlag = true
+      }
+      class CMD extends SuperCmd {
+          static enableJsonFlag = false
+          static flags = {}
+
+          async run(): Promise<{ a: string }> {
+            await this.parse(CMD)
+            return result
+          }
+      }
+
+      try {
+        await CMD.run(['--json'])
+      } catch (error) {
+        expect((error as Error).message).to.include('Unexpected argument: --json')
+      }
+    })
+    .it('test enableJsonFlag = false, --json flag')
+
+    fancy
+    .stdout()
+    .it('enableJsonFlag = false, No --json flag', async ctx => {
+      const result = {
+        a: 'b',
+      }
+      abstract class SuperCmd extends Base {
+        static enableJsonFlag = true
+      }
+      class CMD extends SuperCmd {
+          static enableJsonFlag = false
+          static flags = {}
+
+          async run(): Promise<{ a: string }> {
+            await this.parse(CMD)
+            return result
+          }
+      }
+
+      await CMD.run([])
+      expect(ctx.stdout).to.equal('')
+    })
   })
 })

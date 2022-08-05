@@ -104,7 +104,13 @@ export default abstract class Command {
 
   static set enableJsonFlag(value: boolean) {
     this._enableJsonFlag = value
-    if (value) this.globalFlags = jsonFlag
+    if (value) {
+      this.globalFlags = jsonFlag
+      delete this._flags.json
+    } else {
+      delete this._globalFlags?.json
+      delete this._flags?.json
+    }
   }
 
   // eslint-disable-next-line valid-jsdoc
