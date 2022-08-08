@@ -104,7 +104,14 @@ export default abstract class Command {
 
   static set enableJsonFlag(value: boolean) {
     this._enableJsonFlag = value
-    if (value) this.globalFlags = jsonFlag
+    if (value === true) {
+      this.globalFlags = jsonFlag
+    } else {
+      // @ts-ignore
+      delete this.globalFlags.json
+      // @ts-ignore
+      delete this.flags.json
+    }
   }
 
   // eslint-disable-next-line valid-jsdoc
@@ -246,7 +253,7 @@ export default abstract class Command {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = (this.ctor.enableJsonFlag ? {...options?.flags, ...jsonFlag} : options?.flags) as Interfaces.FlagInput<F>
+    opts.flags = options?.flags
     return Parser.parse(argv, opts)
   }
 
