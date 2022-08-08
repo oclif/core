@@ -219,13 +219,15 @@ export class Config implements IConfig {
   }
 
   async loadDevPlugins() {
-    // do not load oclif.devPlugins in production
-    if (this.isProd) return
-    try {
-      const devPlugins = this.pjson.oclif.devPlugins
-      if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-    } catch (error: any) {
-      process.emitWarning(error)
+    if (this.options.devPlugins !== false) {
+      // do not load oclif.devPlugins in production
+      if (this.isProd) return
+      try {
+        const devPlugins = this.pjson.oclif.devPlugins
+        if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
+      } catch (error: any) {
+        process.emitWarning(error)
+      }
     }
   }
 
