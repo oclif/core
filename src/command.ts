@@ -246,7 +246,7 @@ export default abstract class Command {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
+    opts.flags = (this.ctor.enableJsonFlag ? {...options?.flags, ...jsonFlag} : options?.flags) as Interfaces.FlagInput<F>
     return Parser.parse(argv, opts)
   }
 
