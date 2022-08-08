@@ -2,7 +2,7 @@
 
 import {URL} from 'url'
 
-import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
+import {Definition, OptionFlag, BooleanFlag, Default} from '../interfaces'
 import * as fs from 'fs'
 
 export function build<T>(
@@ -35,9 +35,9 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & ({required: true} | { default: number })): OptionFlag<number>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number> | OptionFlag<number | undefined> {
+export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & ({required: true} | { default: Default<number> })): OptionFlag<number>
+export function integer(opts?: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number | undefined>
+export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } = {}): OptionFlag<number> | OptionFlag<number | undefined> {
   return build({
     ...opts,
     parse: async input => {
@@ -53,8 +53,8 @@ export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?:
   })()
 }
 
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: number })): OptionFlag<string>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
+export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
+export function directory(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
 export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string | undefined> {
   return build<string>({
     ...opts,
@@ -62,8 +62,8 @@ export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string
   })()
 }
 
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: number })): OptionFlag<string>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
+export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: string })): OptionFlag<string>
+export function file(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
 export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string | undefined>  {
   return build<string>({
     ...opts,
