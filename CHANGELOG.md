@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.6](https://github.com/oclif/core/compare/v1.13.5...v1.13.6) (2022-08-08)
+
+
+### Bug Fixes
+
+* flush not hitting drain condition ([#448](https://github.com/oclif/core/issues/448)) ([05dd5fe](https://github.com/oclif/core/commit/05dd5fe08b57aa716c07cc51e8ed407c9e7b6aa5))
+
 ### [1.13.5](https://github.com/oclif/core/compare/v1.13.4...v1.13.5) (2022-08-08)
 
 
