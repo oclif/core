@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.4](https://github.com/oclif/core/compare/v1.13.3...v1.13.4) (2022-08-08)
+
+
+### Bug Fixes
+
+* retain enable json flag get/set apply flag at parse ([#460](https://github.com/oclif/core/issues/460)) ([9812937](https://github.com/oclif/core/commit/9812937e43a573cf4a10d4b03fca47555de5a1d9))
+
 ### [1.13.3](https://github.com/oclif/core/compare/v1.13.2...v1.13.3) (2022-08-06)
 
 
