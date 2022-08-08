@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.5](https://github.com/oclif/core/compare/v1.13.4...v1.13.5) (2022-08-08)
+
+
+### Bug Fixes
+
+* skip loadDevPlugins ([#459](https://github.com/oclif/core/issues/459)) ([21c948c](https://github.com/oclif/core/commit/21c948cd41b08b3aad4df5c3439d33e235f6979e))
+
+### [1.13.4](https://github.com/oclif/core/compare/v1.13.3...v1.13.4) (2022-08-08)
+
+
+### Bug Fixes
+
+* retain enable json flag get/set apply flag at parse ([#460](https://github.com/oclif/core/issues/460)) ([9812937](https://github.com/oclif/core/commit/9812937e43a573cf4a10d4b03fca47555de5a1d9))
+
+### [1.13.3](https://github.com/oclif/core/compare/v1.13.2...v1.13.3) (2022-08-06)
+
+
+### Bug Fixes
+
+* improve flag types ([6d0b4e1](https://github.com/oclif/core/commit/6d0b4e1f1761baba0e085ea8d342a7bc913e7e5d))
+
+### [1.13.2](https://github.com/oclif/core/compare/v1.13.1...v1.13.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* flag types ([#454](https://github.com/oclif/core/issues/454)) ([2938ba4](https://github.com/oclif/core/commit/2938ba4082d1b0c603a55678fe47f5beed9acbb5))
+
 ### [1.13.1](https://github.com/oclif/core/compare/v1.13.0...v1.13.1) (2022-08-02)
 
 

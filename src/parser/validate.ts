@@ -10,7 +10,7 @@ import {ParserArg, ParserInput, ParserOutput, Flag} from '../interfaces'
 
 export function validate(parse: {
   input: ParserInput;
-  output: ParserOutput<any, any>;
+  output: ParserOutput;
 }) {
   function validateArgs() {
     const maxArgs = parse.input.args.length
