@@ -96,22 +96,7 @@ export default abstract class Command {
 
   static parserOptions = {}
 
-  static _enableJsonFlag = false
-
-  static get enableJsonFlag(): boolean {
-    return this._enableJsonFlag
-  }
-
-  static set enableJsonFlag(value: boolean) {
-    this._enableJsonFlag = value
-    if (value) {
-      this.globalFlags = jsonFlag
-      delete this._flags.json
-    } else {
-      delete this._globalFlags?.json
-      delete this._flags?.json
-    }
-  }
+  static enableJsonFlag = false
 
   // eslint-disable-next-line valid-jsdoc
   /**
@@ -137,7 +122,7 @@ export default abstract class Command {
   protected static _globalFlags: Interfaces.FlagInput
 
   static get globalFlags(): Interfaces.FlagInput {
-    return this._globalFlags
+    return Object.assign(this._globalFlags ?? {}, this.enableJsonFlag ? {...jsonFlag} : {})
   }
 
   static set globalFlags(flags: Interfaces.FlagInput) {
