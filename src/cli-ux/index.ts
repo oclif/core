@@ -128,8 +128,8 @@ export const ux = {
     }
   },
 
-  async flush() {
-    await timeout(flush(), 10_000)
+  async flush(ms = 10_000) {
+    await timeout(flush(), ms)
   },
 }
 
