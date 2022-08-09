@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.9](https://github.com/oclif/core/compare/v1.13.8...v1.13.9) (2022-08-09)
+
+
+### Bug Fixes
+
+* remove json flag if subclass overrides enableJsonFlag ([#467](https://github.com/oclif/core/issues/467)) ([05dd12a](https://github.com/oclif/core/commit/05dd12ad114f37d0512df2d89a8e51d0984fa3d4))
+
 ### [1.13.8](https://github.com/oclif/core/compare/v1.13.7...v1.13.8) (2022-08-09)
 
 
