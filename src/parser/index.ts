@@ -27,7 +27,7 @@ export async function parse<TFlags, GFlags, TArgs extends { [name: string]: stri
   }
   const parser = new Parser(input)
   const output = await parser.parse()
-  m.validate({input, output})
+  await m.validate({input, output})
   return output as ParserOutput<TFlags, GFlags, TArgs>
 }
 

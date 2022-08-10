@@ -8,7 +8,7 @@ import {
 } from './errors'
 import {ParserArg, ParserInput, ParserOutput, Flag, CompletableFlag} from '../interfaces'
 
-export function validate(parse: {
+export async function validate(parse: {
   input: ParserInput;
   output: ParserOutput;
 }) {
@@ -110,50 +110,42 @@ export function validate(parse: {
     }
   }
 
-  function validateRelationships(name: string, flag: CompletableFlag<any>) {
-    if (!flag.relationships) return
-
-    if (flag.relationships?.dependsOn) {
-      const dependsOnFlags = flag.relationships.dependsOn.flags ?? []
-      if (flag.relationships?.dependsOn.type === 'all') {
-        validateDependsOn(name, dependsOnFlags)
-      }
-
-      if (flag.relationships.dependsOn.type === 'atLeastOne') {
-        let foundAtLeastOne = false
-        for (const flag of dependsOnFlags) {
-          if (parse.output.flags[flag]) {
-            foundAtLeastOne = true
-            break
-          }
-        }
-
-        if (!foundAtLeastOne) {
-          const flags = (dependsOnFlags ?? []).map(f => `--${f}`).join(', ')
-          throw new CLIError(`One of the following must be provided when using --${name}: ${flags}`)
-        }
+  function validateSome(flags: string[], errorMessage: string) {
+    let foundAtLeastOne = false
+    for (const flag of flags) {
+      if (parse.output.flags[flag]) {
+        foundAtLeastOne = true
+        break
       }
     }
 
-    if (flag.relationships?.exclusive) {
-      const exclusiveFlags = flag.relationships.exclusive.flags ?? []
+    if (!foundAtLeastOne) {
+      throw new CLIError(errorMessage)
+    }
+  }
 
-      if (flag.relationships.exclusive.type === 'all') {
-        validateExclusive(name, exclusiveFlags)
-      }
-
-      if (flag.relationships.exclusive.type === 'atLeastOne') {
-        let foundAtLeastOne = false
-        for (const flag of exclusiveFlags) {
-          if (parse.output.flags[flag]) {
-            foundAtLeastOne = true
-            break
-          }
+  function validateRelationships(name: string, flag: CompletableFlag<any>) {
+    if (!flag.relationships) return
+    for (const relationship of flag.relationships) {
+      const flags = relationship.flags ?? []
+      const formattedFlags = (flags ?? []).map(f => `--${f}`).join(', ')
+      if (relationship.type === 'dependency') {
+        if (relationship.method === 'all') {
+          validateDependsOn(name, flags)
         }
 
-        if (!foundAtLeastOne) {
-          const flags = (exclusiveFlags ?? []).map(f => `--${f}`).join(', ')
-          throw new CLIError(`The following cannot be provided when using --${name}: ${flags}`)
+        if (relationship.method === 'some') {
+          validateSome(flags, `One of the following must be provided when using --${name}: ${formattedFlags}`)
+        }
+      }
+
+      if (relationship.type === 'exclusive') {
+        if (relationship.method === 'all') {
+          validateExclusive(name, flags)
+        }
+
+        if (relationship.method === 'some') {
+          validateSome(flags, `The following cannot be provided when using --${name}: ${formattedFlags}`)
         }
       }
     }
