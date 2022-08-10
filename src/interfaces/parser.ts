@@ -112,6 +112,16 @@ export type FlagProps = {
   hidden?: boolean;
   required?: boolean;
   dependsOn?: string[];
+  relationships?: {
+    dependsOn?: {
+      type: 'all' | 'atLeastOne';
+      flags: string[];
+    };
+    exclusive?: {
+      type: 'all' | 'atLeastOne';
+      flags: string[];
+    }
+  };
   exclusive?: string[];
 }
 

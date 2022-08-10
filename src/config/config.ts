@@ -751,6 +751,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
         dependsOn: flag.dependsOn,
+        relationships: flag.relationships,
         exclusive: flag.exclusive,
       }
     } else {
@@ -768,6 +769,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         multiple: flag.multiple,
         options: flag.options,
         dependsOn: flag.dependsOn,
+        relationships: flag.relationships,
         exclusive: flag.exclusive,
         default: await defaultToCached(flag),
       }
