@@ -877,7 +877,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= must also be provided when using --foo=')
+      expect(message).to.equal('All of the following must be provided when using --foo: --bar')
     })
   })
 
@@ -914,7 +914,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message).to.equal('--bar=b cannot also be provided when using --foo')
     })
   })
 
@@ -948,7 +948,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message).to.equal('--bar cannot also be provided when using --foo')
     })
 
     it('succeeds if exactly one', async () => {
@@ -1009,7 +1009,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--else= cannot also be provided when using --foo=')
+      expect(message).to.equal('--else cannot also be provided when using --foo')
     })
 
     it('handles cross-references/pairings that don\'t make sense', async () => {
@@ -1027,7 +1027,7 @@ See more help with --help`)
         message1 = error.message
       }
 
-      expect(message1).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message1).to.equal('--bar cannot also be provided when using --foo')
 
       let message2 = ''
       try {
@@ -1038,7 +1038,7 @@ See more help with --help`)
         message2 = error.message
       }
 
-      expect(message2).to.equal('--else= cannot also be provided when using --bar=')
+      expect(message2).to.equal('--else cannot also be provided when using --bar')
 
       const out = await parse(['--foo', 'a', '--else', '4'], {
         flags: crazyFlags,

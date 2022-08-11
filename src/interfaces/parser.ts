@@ -86,11 +86,10 @@ export type DefaultContext<T> = {
 export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
 export type DefaultHelp<T> = T | ((context: DefaultContext<T>) => Promise<string | undefined>)
 
-type Relationship = {
-  type: 'dependency' | 'exclusive';
-  method: 'all' | 'some';
-  flags: string[];
-  // | Array<{name: string; value: () => Promise<unknown>}>;
+export type FlagRelationship = string | {name: string; when: (value: string) => Promise<boolean>};
+export type Relationship = {
+  type: 'all' | 'some' | 'never';
+  flags: FlagRelationship[];
 }
 
 export type FlagProps = {
@@ -119,18 +118,6 @@ export type FlagProps = {
   hidden?: boolean;
   required?: boolean;
   dependsOn?: string[];
-  // relationships?: Array<{
-  //   dependsOn?: {
-  //     type: 'all' | 'atLeastOne';
-  //     flags: string[]
-  //     // | Array<{name: string; value: () => Promise<unknown>}>;
-  //   };
-  //   exclusive?: {
-  //     type: 'all' | 'atLeastOne';
-  //     flags: string[]
-  //     // | Array<{name: string; value: () => Promise<unknown>}>;
-  //   }
-  // }>;
   relationships?: Relationship[];
   exclusive?: string[];
 }

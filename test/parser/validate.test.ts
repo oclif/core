@@ -1,3 +1,4 @@
+import assert from 'assert'
 import {expect} from 'chai'
 
 import {validate} from '../../src/parser/validate'
@@ -26,7 +27,7 @@ describe('validate', () => {
     '--': true,
   }
 
-  it('enforces exclusivity for flags', () => {
+  it('enforces exclusivity for flags', async () => {
     const output = {
       args: {},
       argv: [],
@@ -48,11 +49,16 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    expect(validate.bind({input, output})).to.throw()
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      assert.fail('should have thrown')
+    } catch {
+      expect(true).to.be.true
+    }
   })
 
-  it('ignores exclusivity for defaulted flags', () => {
+  it('ignores exclusivity for defaulted flags', async () => {
     const output = {
       args: {},
       argv: [],
@@ -74,11 +80,11 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    validate({input, output})
+    // @ts-expect-error
+    await validate({input, output})
   })
 
-  it('allows zero for integer', () => {
+  it('allows zero for integer', async () => {
     const input = {
       argv: [],
       flags: {
@@ -108,11 +114,11 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    validate({input, output})
+    // @ts-expect-error
+    await validate({input, output})
   })
 
-  it('throws when required flag is undefined', () => {
+  it('throws when required flag is undefined', async () => {
     const input = {
       argv: [],
       flags: {
@@ -137,7 +143,12 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    expect(validate.bind({input, output})).to.throw()
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      assert.fail('should have thrown')
+    } catch {
+      expect(true).to.be.true
+    }
   })
 })

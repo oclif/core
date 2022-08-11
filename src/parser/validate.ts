@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {CLIError} from '../errors'
 
 import {
@@ -7,6 +8,7 @@ import {
   UnexpectedArgsError,
 } from './errors'
 import {ParserArg, ParserInput, ParserOutput, Flag, CompletableFlag} from '../interfaces'
+import {FlagRelationship} from '../interfaces/parser'
 
 export async function validate(parse: {
   input: ParserInput;
@@ -54,12 +56,12 @@ export async function validate(parse: {
     }
   }
 
-  function validateFlags() {
+  async function validateFlags() {
     for (const [name, flag] of Object.entries(parse.input.flags)) {
       if (parse.output.flags[name] !== undefined) {
-        validateRelationships(name, flag)
-        validateDependsOn(name, flag.dependsOn ?? [])
-        validateExclusive(name, flag.exclusive ?? [])
+        await validateRelationships(name, flag)
+        await validateDependsOn(name, flag.dependsOn ?? [])
+        await validateExclusive(name, flag.exclusive ?? [])
         validateExactlyOne(name, flag.exactlyOne ?? [])
       } else if (flag.required) {
         throw new RequiredFlagError({parse, flag})
@@ -69,12 +71,26 @@ export async function validate(parse: {
     }
   }
 
-  function validateExclusive(name: string, exclusive: string[]) {
-    for (const also of exclusive) {
+  async function validateExclusive(name: string, flags: FlagRelationship[]) {
+    const promises = flags.map(async flag => {
+      if (typeof flag === 'string') {
+        return parse.output.flags[flag] ? flag : false
+      }
+
+      if (await flag.when(parse.output.flags[flag.name])) {
+        return parse.output.flags[flag.name] ? flag.name : false
+      }
+
+      return flag.name
+    })
+
+    const results = (await Promise.all(promises)).filter(Boolean) as string[]
+
+    for (const flag of results) {
       // do not enforce exclusivity for flags that were defaulted
       if (
-        parse.output.metadata.flags[also] &&
-        parse.output.metadata.flags[also].setFromDefault
+        parse.output.metadata.flags[flag] &&
+        parse.output.metadata.flags[flag].setFromDefault
       )
         continue
       if (
@@ -82,75 +98,84 @@ export async function validate(parse: {
         parse.output.metadata.flags[name].setFromDefault
       )
         continue
-      if (parse.output.flags[also]) {
-        throw new CLIError(
-          `--${also}= cannot also be provided when using --${name}=`,
-        )
-      }
-    }
-  }
-
-  function validateExactlyOne(name: string, exactlyOne: string[]) {
-    for (const also of exactlyOne || []) {
-      if (also !== name && parse.output.flags[also]) {
-        throw new CLIError(
-          `--${also}= cannot also be provided when using --${name}=`,
-        )
-      }
-    }
-  }
-
-  function validateDependsOn(name: string, dependsOn: string[]) {
-    for (const also of dependsOn || []) {
-      if (!parse.output.flags[also]) {
-        throw new CLIError(
-          `--${also}= must also be provided when using --${name}=`,
-        )
-      }
-    }
-  }
-
-  function validateSome(flags: string[], errorMessage: string) {
-    let foundAtLeastOne = false
-    for (const flag of flags) {
       if (parse.output.flags[flag]) {
-        foundAtLeastOne = true
-        break
+        throw new CLIError(
+          `--${flag}=${parse.output.flags[flag]} cannot also be provided when using --${name}`,
+        )
       }
     }
+  }
 
+  function validateExactlyOne(name: string, exactlyOne: FlagRelationship[]) {
+    for (const flag of exactlyOne || []) {
+      const flagName = typeof flag === 'string' ? flag : flag.name
+      if (flagName !== name && parse.output.flags[flagName]) {
+        throw new CLIError(
+          `--${flagName} cannot also be provided when using --${name}`,
+        )
+      }
+    }
+  }
+
+  async function validateDependsOn(name: string, flags: FlagRelationship[]) {
+    const promises = flags.map(async flag => {
+      if (typeof flag === 'string') {
+        return parse.output.flags[flag]
+      }
+
+      if (await flag.when(parse.output.flags[flag.name])) {
+        return parse.output.flags[flag.name]
+      }
+
+      return true
+    })
+    const foundAll = (await Promise.all(promises)).every(Boolean)
+    if (!foundAll) {
+      const formattedFlags = (flags ?? []).map(f => typeof f === 'string' ? `--${f}` : `--${f.name}`).join(', ')
+      throw new CLIError(
+        `All of the following must be provided when using --${name}: ${formattedFlags}`,
+      )
+    }
+  }
+
+  async function validateSome(flags: FlagRelationship[], errorMessage: string) {
+    const promises = flags.map(async flag => {
+      if (typeof flag === 'string') {
+        return parse.output.flags[flag]
+      }
+
+      if (await flag.when(parse.output.flags[flag.name])) {
+        return parse.output.flags[flag.name]
+      }
+
+      return true
+    })
+
+    const foundAtLeastOne = (await Promise.all(promises)).some(Boolean)
     if (!foundAtLeastOne) {
       throw new CLIError(errorMessage)
     }
   }
 
-  function validateRelationships(name: string, flag: CompletableFlag<any>) {
+  async function validateRelationships(name: string, flag: CompletableFlag<any>) {
     if (!flag.relationships) return
     for (const relationship of flag.relationships) {
       const flags = relationship.flags ?? []
-      const formattedFlags = (flags ?? []).map(f => `--${f}`).join(', ')
-      if (relationship.type === 'dependency') {
-        if (relationship.method === 'all') {
-          validateDependsOn(name, flags)
-        }
-
-        if (relationship.method === 'some') {
-          validateSome(flags, `One of the following must be provided when using --${name}: ${formattedFlags}`)
-        }
+      const formattedFlags = (flags ?? []).map(f => typeof f === 'string' ? `--${f}` : `--${f.name}`).join(', ')
+      if (relationship.type === 'all') {
+        await validateDependsOn(name, flags)
       }
 
-      if (relationship.type === 'exclusive') {
-        if (relationship.method === 'all') {
-          validateExclusive(name, flags)
-        }
+      if (relationship.type === 'some') {
+        await validateSome(flags, `One of the following must be provided when using --${name}: ${formattedFlags}`)
+      }
 
-        if (relationship.method === 'some') {
-          validateSome(flags, `The following cannot be provided when using --${name}: ${formattedFlags}`)
-        }
+      if (relationship.type === 'never') {
+        await validateExclusive(name, flags)
       }
     }
   }
 
   validateArgs()
-  validateFlags()
+  await validateFlags()
 }
