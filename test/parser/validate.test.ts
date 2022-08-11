@@ -196,6 +196,47 @@ describe('validate', () => {
         await validate({input, output})
       })
 
+      it('should exclude any flags whose when property resolves to false', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: [
+                    'cookies',
+                    {name: 'sprinkles', when: async () => Promise.resolve(false)},
+                  ],
+                },
+              ],
+            },
+          },
+          args: [],
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', cookies: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'cookies', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
       it('should require all specified flags', async () => {
         const input = {
           argv: [],
