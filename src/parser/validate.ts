@@ -71,23 +71,21 @@ export async function validate(parse: {
     }
   }
 
-  async function resolveFlags(flags: FlagRelationship[], defaultValue = true): Promise<Record<string, boolean | string>> {
+  async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
     const promises = flags.map(async flag => {
       if (typeof flag === 'string') {
         return [flag, parse.output.flags[flag]]
       }
 
-      if (await flag.when(parse.output.flags)) {
-        return [flag.name, parse.output.flags[flag.name]]
-      }
-
-      return [flag.name, defaultValue]
+      const result = await flag.when(parse.output.flags)
+      return result ? [flag.name, parse.output.flags[flag.name]] : null
     })
-    return Object.fromEntries(await Promise.all(promises))
+    const resolved = await Promise.all(promises)
+    return Object.fromEntries(resolved.filter(r => r !== null) as [string, unknown][])
   }
 
   async function validateExclusive(name: string, flags: FlagRelationship[]) {
-    const resolved = await resolveFlags(flags, false)
+    const resolved = await resolveFlags(flags)
     const keys = Object.keys(resolved).reduce((acc, key) => {
       if (resolved[key]) acc.push(key)
       return acc
@@ -128,22 +126,19 @@ export async function validate(parse: {
     const resolved = await resolveFlags(flags)
     const foundAll = Object.values(resolved).every(Boolean)
     if (!foundAll) {
-      const required = Object.keys(resolved).reduce((acc, key) => {
-        if (!resolved[key]) acc.push(key)
-        return acc
-      }, [] as string[])
-      const formattedFlags = required.map(f => `--${f}`).join(', ')
+      const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
       throw new CLIError(
         `All of the following must be provided when using --${name}: ${formattedFlags}`,
       )
     }
   }
 
-  async function validateSome(flags: FlagRelationship[], errorMessage: string) {
+  async function validateSome(name: string, flags: FlagRelationship[]) {
     const resolved = await resolveFlags(flags)
     const foundAtLeastOne = Object.values(resolved).some(Boolean)
     if (!foundAtLeastOne) {
-      throw new CLIError(errorMessage)
+      const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
+      throw new CLIError(`One of the following must be provided when using --${name}: ${formattedFlags}`)
     }
   }
 
@@ -151,13 +146,13 @@ export async function validate(parse: {
     if (!flag.relationships) return
     for (const relationship of flag.relationships) {
       const flags = relationship.flags ?? []
-      const formattedFlags = (flags ?? []).map(f => typeof f === 'string' ? `--${f}` : `--${f.name}`).join(', ')
+
       if (relationship.type === 'all') {
         await validateDependsOn(name, flags)
       }
 
       if (relationship.type === 'some') {
-        await validateSome(flags, `One of the following must be provided when using --${name}: ${formattedFlags}`)
+        await validateSome(name, flags)
       }
 
       if (relationship.type === 'never') {
