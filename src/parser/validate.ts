@@ -77,7 +77,7 @@ export async function validate(parse: {
         return [flag, parse.output.flags[flag]]
       }
 
-      if (await flag.when(parse.output.flags[flag.name])) {
+      if (await flag.when(parse.output.flags)) {
         return [flag.name, parse.output.flags[flag.name]]
       }
 
