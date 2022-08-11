@@ -86,7 +86,7 @@ export type DefaultContext<T> = {
 export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
 export type DefaultHelp<T> = T | ((context: DefaultContext<T>) => Promise<string | undefined>)
 
-export type FlagRelationship = string | {name: string; when: (value: string) => Promise<boolean>};
+export type FlagRelationship = string | {name: string; when: (value: unknown) => Promise<boolean>};
 export type Relationship = {
   type: 'all' | 'some' | 'never';
   flags: FlagRelationship[];
