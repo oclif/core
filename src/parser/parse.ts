@@ -181,9 +181,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         flags[token.flag] = await flag.parse(flags[token.flag], this.context)
       } else {
         const input = token.input
-        if (flag.options && !flag.options.includes(input)) {
-          throw new m.errors.FlagInvalidOptionError(flag, input)
-        }
+        this._validateOptions(flag, input)
 
         // eslint-disable-next-line no-await-in-loop
         const value = flag.parse ? await flag.parse(input, this.context) : input
@@ -201,8 +199,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (flags[k]) continue
       if (flag.type === 'option' && flag.env) {
         const input = process.env[flag.env]
-        // eslint-disable-next-line no-await-in-loop
-        if (input) flags[k] = await flag.parse(input, this.context)
+        if (input) {
+          this._validateOptions(flag, input)
+
+          // eslint-disable-next-line no-await-in-loop
+          flags[k] = await flag.parse(input, this.context)
+        }
       }
 
       if (!(k in flags) && flag.default !== undefined) {
@@ -214,6 +216,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     return flags
+  }
+
+  private _validateOptions(flag: OptionFlag<any>, input: string) {
+    if (flag.options && !flag.options.includes(input))
+      throw new m.errors.FlagInvalidOptionError(flag, input)
   }
 
   private async _argv(): Promise<any[]> {
