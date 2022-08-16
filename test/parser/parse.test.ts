@@ -319,7 +319,7 @@ See more help with --help`)
         const out = await parse(['--bar', 'a', '--bar=b', '--foo=c', '--baz=d'], {
           flags: {
             foo: flags.string(),
-            bar: flags.string({multiple: true}),
+            bar: flags.string({multiple: true, required: true}),
             baz: flags.string({required: true}),
           },
         })
