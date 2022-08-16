@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github.com/oclif/core/compare/v1.13.11...v1.14.0) (2022-08-16)
+
+
+### Features
+
+* all oclif flag types support custom parsers ([ad86faf](https://github.com/oclif/core/commit/ad86faf08f7a6d7984afe356819df458aaf04674))
+
 ### [1.13.11](https://github.com/oclif/core/compare/v1.13.10...v1.13.11) (2022-08-16)
 
 
