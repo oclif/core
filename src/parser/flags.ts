@@ -58,13 +58,13 @@ export function directory(opts?: { exists?: boolean } & Partial<OptionFlag<strin
 export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string | undefined> {
   return build<string>({
     ...opts,
-    // parse: async (input: string) => opts.exists ? dirExists(input) : input,
     parse: async (input: string) => {
       if (opts.exists) {
-        return opts.parse ? opts.parse(await dirExists(input), 1) : dirExists(input)
+        // 2nd "context" arg is required but unused
+        return opts.parse ? opts.parse(await dirExists(input), true) : dirExists(input)
       }
 
-      return opts.parse ? opts.parse(input, 1) : input
+      return opts.parse ? opts.parse(input, true) : input
     },
   })()
 }
@@ -76,10 +76,11 @@ export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = 
     ...opts,
     parse: async (input: string) => {
       if (opts.exists) {
-        return opts.parse ? opts.parse(await fileExists(input), 1) : fileExists(input)
+        // 2nd "context" arg is required but unused
+        return opts.parse ? opts.parse(await fileExists(input), true) : fileExists(input)
       }
 
-      return opts.parse ? opts.parse(input, 1) : input
+      return opts.parse ? opts.parse(input, true) : input
     },
   })()
 }
