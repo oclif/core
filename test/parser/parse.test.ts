@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import {expect} from 'chai'
+import {assert, expect} from 'chai'
 import * as fs from 'fs'
 
 import {flags, parse} from '../../src/parser'
@@ -319,7 +319,7 @@ See more help with --help`)
         const out = await parse(['--bar', 'a', '--bar=b', '--foo=c', '--baz=d'], {
           flags: {
             foo: flags.string(),
-            bar: flags.string({multiple: true}),
+            bar: flags.string({multiple: true, required: true}),
             baz: flags.string({required: true}),
           },
         })
@@ -479,6 +479,32 @@ See more help with --help`)
 
           expect(message).to.equal('Expected an integer less than or equal to 20 but received: 21')
         })
+      })
+    })
+
+    describe('custom parse functions', () => {
+      const testIntPass = 6
+      const testIntFail = 7
+      const customParseException = 'NOT_OK'
+      const validateEvenNumberString =  async (input:string) => Number.parseInt(input, 10) % 2 === 0 ? Number.parseInt(input, 10) : assert.fail(customParseException)
+      it('accepts custom parse that passes', async () => {
+        const out = await parse([`--int=${testIntPass}`], {
+          flags: {int: flags.integer({parse: validateEvenNumberString})},
+        })
+        expect(out.flags).to.deep.include({int: testIntPass})
+      })
+
+      it('accepts custom parse that fails', async () => {
+        try {
+          const out = await parse([`--int=${testIntFail}`], {
+            flags: {int: flags.integer({parse: validateEvenNumberString})},
+          })
+          throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error_) {
+          const error = error_ as Error
+          expect(error.message).to.equal(
+            customParseException)
+        }
       })
     })
   })
@@ -1142,6 +1168,32 @@ See more help with --help`)
             `${testDir} exists but is not a directory`)
         }
       })
+      describe('custom parse functions', () => {
+        const customParseException = 'NOT_OK'
+        it('accepts custom parse that passes', async () => {
+          existsStub.returns(true)
+          statStub.returns({isDirectory: () => true})
+          const out = await parse([`--dir=${testDir}`], {
+            flags: {dir: directory({exists: true, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
+          })
+          expect(out.flags).to.deep.include({dir: testDir})
+        })
+
+        it('accepts custom parse that fails', async () => {
+          existsStub.returns(true)
+          statStub.returns({isDirectory: () => true})
+          try {
+            const out = await parse([`--dir=${testDir}`], {
+              flags: {dir: directory({exists: true, parse: async input => input.includes('NOT_THERE') ? input : assert.fail(customParseException)})},
+            })
+            throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+          } catch (error_) {
+            const error = error_ as Error
+            expect(error.message).to.equal(
+              customParseException)
+          }
+        })
+      })
     })
 
     describe('file', () => {
@@ -1192,6 +1244,32 @@ See more help with --help`)
           const error = error_ as Error
           expect(error.message).to.equal(`${testFile} exists but is not a file`)
         }
+      })
+      describe('custom parse functions', () => {
+        const customParseException = 'NOT_OK'
+        it('accepts custom parse that passes', async () => {
+          existsStub.returns(true)
+          statStub.returns({isFile: () => true})
+          const out = await parse([`--dir=${testFile}`], {
+            flags: {dir: file({exists: false, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
+          })
+          expect(out.flags).to.deep.include({dir: testFile})
+        })
+
+        it('accepts custom parse that fails', async () => {
+          existsStub.returns(true)
+          statStub.returns({isFile: () => true})
+          try {
+            const out = await parse([`--dir=${testFile}`], {
+              flags: {dir: file({exists: true, parse: async input => input.includes('NOT_THERE') ? input : assert.fail(customParseException)})},
+            })
+            throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
+          } catch (error_) {
+            const error = error_ as Error
+            expect(error.message).to.equal(
+              customParseException)
+          }
+        })
       })
     })
   })

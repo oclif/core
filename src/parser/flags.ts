@@ -35,9 +35,11 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
+export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true} & ({required: true} | { default: Default<number> })): OptionFlag<number[]>
+export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true}): OptionFlag<number[] | undefined>
 export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & ({required: true} | { default: Default<number> })): OptionFlag<number>
 export function integer(opts?: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } = {}): OptionFlag<number> | OptionFlag<number | undefined> {
+export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } = {}): OptionFlag<number> | OptionFlag<number[]> | OptionFlag<number | undefined> | OptionFlag<number[] | undefined> {
   return build({
     ...opts,
     parse: async input => {
@@ -48,26 +50,44 @@ export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?:
         throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
       if (opts.max !== undefined && num > opts.max)
         throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
-      return num
+      return opts.parse ? opts.parse(input, 1) : num
     },
   })()
 }
 
+export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
+export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
 export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
 export function directory(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string | undefined> {
+export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
   return build<string>({
     ...opts,
-    parse: async (input: string) => opts.exists ? dirExists(input) : input,
+    parse: async (input: string) => {
+      if (opts.exists) {
+        // 2nd "context" arg is required but unused
+        return opts.parse ? opts.parse(await dirExists(input), true) : dirExists(input)
+      }
+
+      return opts.parse ? opts.parse(input, true) : input
+    },
   })()
 }
 
+export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
+export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
 export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: string })): OptionFlag<string>
 export function file(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string | undefined>  {
+export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
   return build<string>({
     ...opts,
-    parse: async (input: string) => opts.exists ? fileExists(input) : input,
+    parse: async (input: string) => {
+      if (opts.exists) {
+        // 2nd "context" arg is required but unused
+        return opts.parse ? opts.parse(await fileExists(input), true) : fileExists(input)
+      }
+
+      return opts.parse ? opts.parse(input, true) : input
+    },
   })()
 }
 
