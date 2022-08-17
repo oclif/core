@@ -88,7 +88,7 @@ export type DefaultHelp<T> = T | ((context: DefaultContext<T>) => Promise<string
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
 export type Relationship = {
-  type: 'all' | 'some' | 'never';
+  type: 'all' | 'some' | 'none';
   flags: FlagRelationship[];
 }
 

@@ -155,7 +155,7 @@ export async function validate(parse: {
         await validateSome(name, flags)
       }
 
-      if (relationship.type === 'never') {
+      if (relationship.type === 'none') {
         await validateExclusive(name, flags)
       }
     }

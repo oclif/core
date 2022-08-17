@@ -552,7 +552,7 @@ describe('validate', () => {
       })
     })
 
-    describe('type: never', () => {
+    describe('type: none', () => {
       it('should pass if none of the specified flags are provided', async () => {
         const input = {
           argv: [],
@@ -564,7 +564,7 @@ describe('validate', () => {
               name: 'dessert',
               relationships: [
                 {
-                  type: 'never',
+                  type: 'none',
                   flags: ['cookies', 'sprinkles'],
                 },
               ],
@@ -601,7 +601,7 @@ describe('validate', () => {
               name: 'dessert',
               relationships: [
                 {
-                  type: 'never',
+                  type: 'none',
                   flags: ['cookies', 'sprinkles'],
                 },
               ],
@@ -651,7 +651,7 @@ describe('validate', () => {
               name: 'dessert',
               relationships: [
                 {
-                  type: 'never',
+                  type: 'none',
                   flags: [
                     {
                       name: 'sprinkles',
@@ -708,7 +708,7 @@ describe('validate', () => {
               name: 'dessert',
               relationships: [
                 {
-                  type: 'never',
+                  type: 'none',
                   flags: [
                     {
                       name: 'sprinkles',
