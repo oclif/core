@@ -75,7 +75,7 @@ export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string
 
 export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
 export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: string })): OptionFlag<string>
+export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
 export function file(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
 export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
   return build<string>({

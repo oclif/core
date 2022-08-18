@@ -1,4 +1,4 @@
-import {OptionFlag, Definition, BooleanFlag, EnumFlagOptions} from './interfaces'
+import {OptionFlag, Definition, BooleanFlag, EnumFlagOptions, Default} from './interfaces'
 import * as Parser from './parser'
 import Command from './command'
 
@@ -12,7 +12,11 @@ export function option<T>(options: {parse: OptionFlag<T>['parse']} & Partial<Opt
   return build<T>(options)()
 }
 
-const _enum = <T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> => {
+export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true} & ({required: true} | { default: Default<T> })): OptionFlag<T[]>
+export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true}): OptionFlag<T[] | undefined>
+export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: Default<T> })): OptionFlag<T>
+export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>
+export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | OptionFlag<T[]> | OptionFlag<T | undefined> | OptionFlag<T[] | undefined> {
   return build<T>({
     async parse(input) {
       if (!opts.options.includes(input)) throw new Error(`Expected --${this.name}=${input} to be one of: ${opts.options.join(', ')}`)
@@ -20,7 +24,7 @@ const _enum = <T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> => {
     },
     helpValue: `(${opts.options.join('|')})`,
     ...opts,
-  })() as OptionFlag<T>
+  })()
 }
 
 export {_enum as enum}
