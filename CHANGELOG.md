@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.14.2](https://github.com/oclif/core/compare/v1.14.1...v1.14.2) (2022-08-18)
+
+
+### Bug Fixes
+
+* add overloads to enum flag ([799455b](https://github.com/oclif/core/commit/799455bbb526b221c806bf8feff6b625dcf50a56))
+
 ### [1.14.1](https://github.com/oclif/core/compare/v1.14.0...v1.14.1) (2022-08-16)
 
 
