@@ -94,15 +94,35 @@ class MyCommand extends BaseCommand {
     requiredMultiUrl: Flags.url({multiple: true, required: true}),
     defaultMultiUrl: Flags.url({multiple: true, default: [new URL('http://example.com')]}),
 
-    optionalCustom: Flags.build<MyType>({
+    optionalBuild: Flags.build<MyType>({
       parse: async () => ({foo: true}),
     })(),
-    requiredCustom: Flags.build<MyType>({
+    requiredBuild: Flags.build<MyType>({
       parse: async () => ({foo: true}),
     })({required: true}),
-    defaultCustom: Flags.build<MyType>({
+    defaultBuild: Flags.build<MyType>({
       parse: async () => ({foo: true}),
     })({default: {foo: true}}),
+
+    optionalCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })(),
+    requiredCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })({required: true}),
+    defaultCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })({default: {foo: true}}),
+
+    optionalMultiCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })({multiple: true}),
+    requiredMultiCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })({required: true, multiple: true}),
+    defaultMultiCustom: Flags.custom<MyType>({
+      parse: async () => ({foo: true}),
+    })({default: [{foo: true}], multiple: true}),
   }
 
   public flags!: MyFlags
@@ -205,11 +225,23 @@ class MyCommand extends BaseCommand {
     expectNotType<undefined>(this.flags.defaultMultiUrl)
     expectType<URL[] | undefined>(this.flags.optionalMultiUrl)
 
+    expectType<MyType>(this.flags.requiredBuild)
+    expectNotType<undefined>(this.flags.requiredBuild)
+    expectType<MyType>(this.flags.defaultBuild)
+    expectNotType<undefined>(this.flags.defaultBuild)
+    expectType<MyType | undefined>(this.flags.optionalBuild)
+
     expectType<MyType>(this.flags.requiredCustom)
     expectNotType<undefined>(this.flags.requiredCustom)
     expectType<MyType>(this.flags.defaultCustom)
     expectNotType<undefined>(this.flags.defaultCustom)
     expectType<MyType | undefined>(this.flags.optionalCustom)
+
+    expectType<MyType[]>(this.flags.requiredMultiCustom)
+    expectNotType<undefined>(this.flags.requiredMultiCustom)
+    expectType<MyType[]>(this.flags.defaultMultiCustom)
+    expectNotType<undefined>(this.flags.defaultMultiCustom)
+    expectType<MyType[] | undefined>(this.flags.optionalMultiCustom)
 
     return result.flags
   }
