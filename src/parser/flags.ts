@@ -8,9 +8,7 @@ import * as fs from 'fs'
 export function build<T>(
   defaults: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
 ): Definition<T>
-export function build(
-  defaults: Partial<OptionFlag<string>>,
-): Definition<string>
+export function build(defaults: Partial<OptionFlag<string>>): Definition<string>
 export function build<T>(defaults: Partial<OptionFlag<T>>): Definition<T> {
   return (options: any = {}) => {
     return {
@@ -35,13 +33,19 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true} & ({required: true} | { default: Default<number> })): OptionFlag<number[]>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true}): OptionFlag<number[] | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & ({required: true} | { default: Default<number> })): OptionFlag<number>
-export function integer(opts?: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } = {}): OptionFlag<number> | OptionFlag<number[]> | OptionFlag<number | undefined> | OptionFlag<number[] | undefined> {
+type IntegerFlagOptions = Partial<OptionFlag<number>> & {
+  min?: number;
+  max?: number;
+}
+
+export function integer(opts: IntegerFlagOptions & {multiple: true} & ({required: true} | { default: Default<number[]> })): OptionFlag<number[]>
+export function integer(opts: IntegerFlagOptions & {multiple: true}): OptionFlag<number[] | undefined>
+export function integer(opts: IntegerFlagOptions & ({required: true} | { default: Default<number> })): OptionFlag<number>
+export function integer(opts?: IntegerFlagOptions): OptionFlag<number | undefined>
+export function integer(opts: IntegerFlagOptions = {}): OptionFlag<number> | OptionFlag<number[]> | OptionFlag<number | undefined> | OptionFlag<number[] | undefined> {
   return build({
     ...opts,
+    // parse thinks it needs an array to be returned, which is not the case
     parse: async input => {
       if (!/^-?\d+$/.test(input))
         throw new Error(`Expected an integer but received: ${input}`)
@@ -50,16 +54,20 @@ export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?:
         throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
       if (opts.max !== undefined && num > opts.max)
         throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
-      return opts.parse ? opts.parse(input, 1) : num
+      return (opts.parse ? opts.parse(input, 1) : num)
     },
   })()
 }
 
-export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
-export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
-export function directory(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
+type DirectoryFlagOptions = Partial<OptionFlag<string>> & {
+  exists?: boolean;
+}
+
+export function directory(opts: DirectoryFlagOptions & {multiple: true} & ({required: true} | { default: Default<string[]> })): OptionFlag<string[]>
+export function directory(opts: DirectoryFlagOptions & {multiple: true}): OptionFlag<string[] | undefined>
+export function directory(opts: DirectoryFlagOptions & ({required: true} | { default: Default<string> })): OptionFlag<string>
+export function directory(opts?: DirectoryFlagOptions): OptionFlag<string | undefined>
+export function directory(opts: DirectoryFlagOptions = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
   return build<string>({
     ...opts,
     parse: async (input: string) => {
@@ -73,11 +81,15 @@ export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string
   })()
 }
 
-export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
-export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
-export function file(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
+type FileFlagOptions = Partial<OptionFlag<string>> & {
+  exists?: boolean;
+}
+
+export function file(opts: FileFlagOptions & {multiple: true} & ({required: true} | { default: Default<string[]> })): OptionFlag<string[]>
+export function file(opts: FileFlagOptions & {multiple: true}): OptionFlag<string[] | undefined>
+export function file(opts: FileFlagOptions & ({required: true} | { default: Default<string> })): OptionFlag<string>
+export function file(opts?: FileFlagOptions): OptionFlag<string | undefined>
+export function file(opts: FileFlagOptions = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
   return build<string>({
     ...opts,
     parse: async (input: string) => {

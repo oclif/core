@@ -12,7 +12,7 @@ export function option<T>(options: {parse: OptionFlag<T>['parse']} & Partial<Opt
   return build<T>(options)()
 }
 
-export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true} & ({required: true} | { default: Default<T> })): OptionFlag<T[]>
+export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
 export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true}): OptionFlag<T[] | undefined>
 export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: Default<T> })): OptionFlag<T>
 export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>

@@ -109,10 +109,30 @@ export type FlagProps = {
    * Shows this flag in a separate list in the help.
    */
   helpGroup?: string;
+  /**
+   * Accept an environment variable as input
+   */
+   env?: string;
+  /**
+   * If true, the flag will not be shown in the help.
+   */
   hidden?: boolean;
+  /**
+   * If true, the flag will be required.
+   */
   required?: boolean;
+  /**
+   * List of flags that this flag depends on.
+   */
   dependsOn?: string[];
+  /**
+   * List of flags that cannot be used with this flag.
+   */
   exclusive?: string[];
+  /**
+   * Exactly one of these flags must be provided.
+   */
+  exactlyOne?: string[];
 }
 
 export type BooleanFlagProps = FlagProps & {
@@ -128,36 +148,33 @@ export type OptionFlagProps = FlagProps & {
 }
 
 export type FlagBase<T, I> = FlagProps & {
-  exactlyOne?: string[];
-  /**
-   * also accept an environment variable as input
-   */
-  env?: string;
   parse(input: I, context: any): Promise<T>;
 }
 
 export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
   /**
-   * specifying a default of false is the same not specifying a default
+   * specifying a default of false is the same as not specifying a default
    */
    default?: Default<boolean>;
 }
+
 export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
-  default?: Default<T | undefined>;
   defaultHelp?: DefaultHelp<T>;
   input: string[];
-}
+} & ({
+  default?: Default<T | undefined>;
+  multiple: false;
+} | {
+  default?: Default<T[] | undefined>;
+  multiple: true;
+})
 
 export type Definition<T> = {
   (
-    options: { multiple: true } & ({ required: true } | { default: Default<T> }) &
-      Partial<OptionFlag<T>>,
+    options: { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<Omit<OptionFlag<T>, 'default'>>
   ): OptionFlag<T[]>;
   (options: { multiple: true } & Partial<OptionFlag<T[]>>): OptionFlag<T[] | undefined>;
-  (
-    options: ({ required: true } | { default: Default<T> }) &
-      Partial<OptionFlag<T>>,
-  ): OptionFlag<T>;
+  (options: ({ required: true } | { default: Default<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
   (options?: Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
 }
 
