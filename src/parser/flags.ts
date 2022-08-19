@@ -83,7 +83,7 @@ export const integer = custom<number, {min?: number; max?: number;}>({
 })
 
 export const directory = custom<string, {exists?: boolean}>({
-  parse: async (input: string, opts) => {
+  parse: async (input, _, opts) => {
     if (opts.exists) return dirExists(input)
 
     return input
@@ -91,7 +91,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 export const file = custom<string, {exists?: boolean}>({
-  parse: async (input: string, opts) => {
+  parse: async (input, _, opts) => {
     if (opts.exists) return fileExists(input)
 
     return input
