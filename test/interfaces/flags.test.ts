@@ -12,9 +12,9 @@ abstract class BaseCommand extends Command {
   static enableJsonFlag = true
 
   static globalFlags = {
-    config: Flags.string({
-      description: 'specify config file',
-    }),
+    optionalGlobalFlag: Flags.string(),
+    requiredGlobalFlag: Flags.string({required: true}),
+    defaultGlobalFlag: Flags.string({default: 'default'}),
   }
 }
 
@@ -111,6 +111,12 @@ class MyCommand extends BaseCommand {
     const result = await this.parse(MyCommand)
     this.flags = result.flags
     expectType<MyFlags>(this.flags)
+
+    expectType<string>(this.flags.requiredGlobalFlag)
+    expectNotType<undefined>(this.flags.requiredGlobalFlag)
+    expectType<string>(this.flags.defaultGlobalFlag)
+    expectNotType<undefined>(this.flags.defaultGlobalFlag)
+    expectType<string | undefined>(this.flags.optionalGlobalFlag)
 
     expectType<string>(this.flags.requiredString)
     expectNotType<undefined>(this.flags.requiredString)
