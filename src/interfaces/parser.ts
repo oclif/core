@@ -171,7 +171,7 @@ export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
 
 export type Definition<T> = {
   (
-    options: { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<Omit<OptionFlag<T>, 'default'>>
+    options: { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionFlag<T>>
   ): OptionFlag<T[]>;
   (options: { multiple: true } & Partial<OptionFlag<T[]>>): OptionFlag<T[] | undefined>;
   (options: ({ required: true } | { default: Default<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;

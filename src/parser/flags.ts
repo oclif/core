@@ -54,7 +54,7 @@ export function integer(opts: IntegerFlagOptions = {}): OptionFlag<number> | Opt
         throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
       if (opts.max !== undefined && num > opts.max)
         throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
-      return (opts.parse ? opts.parse(input, 1) : num)
+      return opts.parse ? opts.parse(input, 1) : num
     },
   })()
 }
