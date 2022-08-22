@@ -78,13 +78,13 @@ type MetadataFlag = {
 export type ListItem = [string, string | undefined]
 export type List = ListItem[]
 
-export type DefaultContext<T> = {
-  options: OptionFlag<T>;
-  flags: { [k: string]: string };
+export type DefaultContext<T, P> = {
+  options: P & OptionFlag<T>;
+  flags: Record<string, string>;
 }
 
-export type Default<T> = T | ((context: DefaultContext<T>) => Promise<T>)
-export type DefaultHelp<T> = T | ((context: DefaultContext<T>) => Promise<string | undefined>)
+export type Default<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<T>)
+export type DefaultHelp<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<string | undefined>)
 
 export type FlagProps = {
   name: string;
@@ -144,7 +144,7 @@ export type OptionFlagProps = FlagProps & {
   type: 'option';
   helpValue?: string;
   options?: string[];
-  multiple: boolean;
+  multiple?: boolean;
 }
 
 export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T>
@@ -160,16 +160,11 @@ export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
    default?: Default<boolean>;
 }
 
-export type CustomOptionFlag<T, P = any> = FlagBase<T, string, P> & OptionFlagProps & {
+export type CustomOptionFlag<T, P = any, M = false> = FlagBase<T, string, P> & OptionFlagProps & {
   defaultHelp?: DefaultHelp<T>;
   input: string[];
-} & ({
-  default?: Default<T | undefined>;
-  multiple: false;
-} | {
-  default?: Default<T[] | undefined>;
-  multiple: true;
-})
+  default?: M extends true ? Default<T[] | undefined, P> : Default<T | undefined, P>;
+}
 
 export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
   defaultHelp?: DefaultHelp<T>;
@@ -186,14 +181,20 @@ export type Definition<T, P = Record<string, unknown>> = {
   (
     options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionFlag<T>>
   ): OptionFlag<T[]>;
-  (options: P & { multiple: true } & Partial<OptionFlag<T[]>>): OptionFlag<T[] | undefined>;
+  (options: P & { multiple: true } & Partial<OptionFlag<T>>): OptionFlag<T[] | undefined>;
   (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
   (options?: P & Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
 }
 
-export type EnumFlagOptions<T> = Partial<OptionFlag<T>> & {
+export type EnumFlagOptions<T, M = false> = Partial<CustomOptionFlag<T, any, M>> & {
   options: T[];
-}
+} & ({
+  default?: Default<T | undefined>;
+  multiple?: false;
+} | {
+  default?: Default<T[] | undefined>;
+  multiple: true;
+})
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 

@@ -3,8 +3,8 @@ import {custom, boolean} from './parser'
 import Command from './command'
 export {boolean, integer, url, directory, file, string, build, option, custom} from './parser'
 
-export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
-export function _enum<T = string>(opts: EnumFlagOptions<T> & {multiple: true}): OptionFlag<T[] | undefined>
+export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
+export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true}): OptionFlag<T[] | undefined>
 export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: Default<T> })): OptionFlag<T>
 export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>
 export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | OptionFlag<T[]> | OptionFlag<T | undefined> | OptionFlag<T[] | undefined> {

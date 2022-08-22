@@ -21,7 +21,10 @@ import {FlagParser, CustomOptionFlag} from '../interfaces/parser'
  *   },
  * })
  */
-export function custom<T, P>(
+export function custom<T, P = Record<string, unknown>>(
+  defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<CustomOptionFlag<T, P, true>>,
+): Definition<T, P>
+export function custom<T, P = Record<string, unknown>>(
   defaults: {parse: FlagParser<T, string, P>} & Partial<CustomOptionFlag<T, P>>,
 ): Definition<T, P>
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): Definition<T, P>
@@ -70,7 +73,7 @@ export function boolean<T = boolean>(
 }
 
 export const integer = custom<number, {min?: number; max?: number;}>({
-  parse: async (input, ctx, opts) => {
+  parse: async (input, _, opts) => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
@@ -113,7 +116,7 @@ export const url = custom<URL>({
 })
 
 export function option<T>(
-  options: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
+  options: {parse: OptionFlag<T>['parse']} & Partial<CustomOptionFlag<T>>,
 ) {
   return custom<T>(options)()
 }
