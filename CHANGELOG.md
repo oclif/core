@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github.com/oclif/core/compare/v1.14.2...v1.15.0) (2022-08-23)
+
+
+### Features
+
+* add InferredFlags type ([#473](https://github.com/oclif/core/issues/473)) ([ee5ce65](https://github.com/oclif/core/commit/ee5ce651899c0ef586d425567ef3b78468dca627))
+
 ### [1.14.2](https://github.com/oclif/core/compare/v1.14.1...v1.14.2) (2022-08-18)
 
 
