@@ -790,6 +790,28 @@ See more help with --help`)
 
       expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
     })
+    it('fails when invalid env var', async () => {
+      let message = ''
+      process.env.TEST_FOO = 'invalidopt'
+      try {
+        await parse([], {
+          flags: {foo: flags.string({options: ['myopt', 'myotheropt'], env: 'TEST_FOO'})},
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+    })
+
+    it('accepts valid option env var', async () => {
+      process.env.TEST_FOO = 'myopt'
+
+      const out = await parse([], {
+        flags: {foo: flags.string({options: ['myopt', 'myotheropt'], env: 'TEST_FOO'})},
+      })
+      expect(out.flags.foo).to.equal('myopt')
+    })
   })
 
   describe('url flag', () => {

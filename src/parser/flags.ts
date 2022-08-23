@@ -1,20 +1,57 @@
-// tslint:disable interface-over-type-literal
-
 import {URL} from 'url'
 
-import {Definition, OptionFlag, BooleanFlag, Default} from '../interfaces'
+import {Definition, OptionFlag, BooleanFlag} from '../interfaces'
 import * as fs from 'fs'
+import {FlagParser, CustomOptionFlag} from '../interfaces/parser'
 
+/**
+ * Create a custom flag.
+ *
+ * @example
+ * type Id = string
+ * type IdOpts = { startsWith: string; length: number };
+ *
+ * export const myFlag = custom<Id, IdOpts>({
+ *   parse: async (input, opts) => {
+ *     if (input.startsWith(opts.startsWith) && input.length === opts.length) {
+ *       return input
+ *     }
+ *
+ *     throw new Error('Invalid id')
+ *   },
+ * })
+ */
+export function custom<T, P = Record<string, unknown>>(
+  defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<CustomOptionFlag<T, P, true>>,
+): Definition<T, P>
+export function custom<T, P = Record<string, unknown>>(
+  defaults: {parse: FlagParser<T, string, P>} & Partial<CustomOptionFlag<T, P>>,
+): Definition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): Definition<T, P>
+export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): Definition<T, P> {
+  return (options: any = {}) => {
+    return {
+      parse: async (i: string, _context: any, _opts: P) => i,
+      ...defaults,
+      ...options,
+      input: [] as string[],
+      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
+      type: 'option',
+    }
+  }
+}
+
+/**
+ * @deprecated Use Flags.custom instead.
+ */
 export function build<T>(
   defaults: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
 ): Definition<T>
-export function build(
-  defaults: Partial<OptionFlag<string>>,
-): Definition<string>
+export function build(defaults: Partial<OptionFlag<string>>): Definition<string>
 export function build<T>(defaults: Partial<OptionFlag<T>>): Definition<T> {
   return (options: any = {}) => {
     return {
-      parse: async (i: string, _: any) => i,
+      parse: async (i: string, _context: any) => i,
       ...defaults,
       ...options,
       input: [] as string[],
@@ -35,67 +72,40 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true} & ({required: true} | { default: Default<number> })): OptionFlag<number[]>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & {multiple: true}): OptionFlag<number[] | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } & ({required: true} | { default: Default<number> })): OptionFlag<number>
-export function integer(opts?: Partial<OptionFlag<number>> & {min?: number; max?: number }): OptionFlag<number | undefined>
-export function integer(opts: Partial<OptionFlag<number>> & {min?: number; max?: number } = {}): OptionFlag<number> | OptionFlag<number[]> | OptionFlag<number | undefined> | OptionFlag<number[] | undefined> {
-  return build({
-    ...opts,
-    parse: async input => {
-      if (!/^-?\d+$/.test(input))
-        throw new Error(`Expected an integer but received: ${input}`)
-      const num = Number.parseInt(input, 10)
-      if (opts.min !== undefined && num < opts.min)
-        throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
-      if (opts.max !== undefined && num > opts.max)
-        throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
-      return opts.parse ? opts.parse(input, 1) : num
-    },
-  })()
-}
+export const integer = custom<number, {min?: number; max?: number;}>({
+  parse: async (input, _, opts) => {
+    if (!/^-?\d+$/.test(input))
+      throw new Error(`Expected an integer but received: ${input}`)
+    const num = Number.parseInt(input, 10)
+    if (opts.min !== undefined && num < opts.min)
+      throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
+    if (opts.max !== undefined && num > opts.max)
+      throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
+    return num
+  },
+})
 
-export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
-export function directory(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: Default<string> })): OptionFlag<string>
-export function directory(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function directory(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
-  return build<string>({
-    ...opts,
-    parse: async (input: string) => {
-      if (opts.exists) {
-        // 2nd "context" arg is required but unused
-        return opts.parse ? opts.parse(await dirExists(input), true) : dirExists(input)
-      }
+export const directory = custom<string, {exists?: boolean}>({
+  parse: async (input, _, opts) => {
+    if (opts.exists) return dirExists(input)
 
-      return opts.parse ? opts.parse(input, true) : input
-    },
-  })()
-}
+    return input
+  },
+})
 
-export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true} & ({required: true} | { default: Default<string> })): OptionFlag<string[]>
-export function file(opts: Partial<OptionFlag<string>> & { exists?: boolean } & {multiple: true}): OptionFlag<string[] | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> & ({required: true} | { default: string })): OptionFlag<string>
-export function file(opts?: { exists?: boolean } & Partial<OptionFlag<string>>): OptionFlag<string | undefined>
-export function file(opts: { exists?: boolean } & Partial<OptionFlag<string>> = {}): OptionFlag<string> | OptionFlag<string[]> | OptionFlag<string | undefined> | OptionFlag<string[] | undefined> {
-  return build<string>({
-    ...opts,
-    parse: async (input: string) => {
-      if (opts.exists) {
-        // 2nd "context" arg is required but unused
-        return opts.parse ? opts.parse(await fileExists(input), true) : fileExists(input)
-      }
+export const file = custom<string, {exists?: boolean}>({
+  parse: async (input, _, opts) => {
+    if (opts.exists) return fileExists(input)
 
-      return opts.parse ? opts.parse(input, true) : input
-    },
-  })()
-}
+    return input
+  },
+})
 
 /**
  * Initializes a string as a URL. Throws an error
  * if the string is not a valid URL.
  */
-export const url = build({
+export const url = custom<URL>({
   parse: async input => {
     try {
       return new URL(input)
@@ -106,12 +116,12 @@ export const url = build({
 })
 
 export function option<T>(
-  options: {parse: OptionFlag<T>['parse']} & Partial<OptionFlag<T>>,
+  options: {parse: OptionFlag<T>['parse']} & Partial<CustomOptionFlag<T>>,
 ) {
-  return build<T>(options)()
+  return custom<T>(options)()
 }
 
-const stringFlag = build({})
+const stringFlag = custom({})
 export {stringFlag as string}
 
 export const defaultFlags = {
