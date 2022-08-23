@@ -31,6 +31,4 @@ export async function parse<TFlags, GFlags, TArgs extends { [name: string]: stri
   return output as ParserOutput<TFlags, GFlags, TArgs>
 }
 
-const {boolean, integer, url, directory, file} = flags
-
-export {boolean, integer, url, directory, file}
+export {boolean, integer, url, directory, file, string, build, option, custom} from './flags'

@@ -169,6 +169,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.metaData.flags = {} as any
     for (const token of this._flagTokens) {
       const flag = this.input.flags[token.flag]
+
       if (!flag) throw new m.errors.CLIError(`Unexpected flag ${token.flag}`)
       if (flag.type === 'boolean') {
         if (token.input === `--no-${flag.name}`) {
@@ -178,13 +179,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
 
         // eslint-disable-next-line no-await-in-loop
-        flags[token.flag] = await flag.parse(flags[token.flag], this.context)
+        flags[token.flag] = await flag.parse(flags[token.flag], this.context, flag)
       } else {
         const input = token.input
         this._validateOptions(flag, input)
 
         // eslint-disable-next-line no-await-in-loop
-        const value = flag.parse ? await flag.parse(input, this.context) : input
+        const value = flag.parse ? await flag.parse(input, this.context, flag) : input
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(value)
@@ -203,7 +204,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           this._validateOptions(flag, input)
 
           // eslint-disable-next-line no-await-in-loop
-          flags[k] = await flag.parse(input, this.context)
+          flags[k] = await flag.parse(input, this.context, flag)
         }
       }
 
