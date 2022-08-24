@@ -56,7 +56,7 @@ describe('validate', () => {
       assert.fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
-      expect(err.message).to.equal('--dessert=cheesecake cannot also be provided when using --dinner')
+      expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
     }
   })
 
@@ -274,7 +274,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('All of the following must be provided when using --dessert: --cookies, --sprinkles')
+          expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
         }
       })
 
@@ -322,7 +322,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('All of the following must be provided when using --dessert: --cookies, --sprinkles')
+          expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
         }
       })
 
@@ -370,7 +370,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('All of the following must be provided when using --dessert: --cookies')
+          expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
         }
       })
     })
@@ -451,7 +451,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('One of the following must be provided when using --dessert: --cookies, --sprinkles')
+          expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
         }
       })
 
@@ -499,7 +499,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('One of the following must be provided when using --dessert: --cookies, --sprinkles')
+          expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
         }
       })
 
@@ -547,7 +547,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('One of the following must be provided when using --dessert: --cookies')
+          expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
         }
       })
     })
@@ -635,7 +635,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('--sprinkles=true cannot also be provided when using --dessert')
+          expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
 
@@ -692,7 +692,7 @@ describe('validate', () => {
           assert.fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.message).to.equal('--sprinkles=true cannot also be provided when using --dessert')
+          expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
 
@@ -745,6 +745,115 @@ describe('validate', () => {
 
         // @ts-expect-error
         await validate({input, output})
+      })
+    })
+
+    describe('mixed', () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          cake: {input: [], name: 'cake'},
+          brownies: {input: [], name: 'brownies'},
+          pie: {input: [], name: 'pie'},
+          fudge: {input: [], name: 'fudge'},
+          cupcake: {input: [], name: 'cupcake'},
+          muffin: {input: [], name: 'muffin'},
+          scone: {input: [], name: 'scone'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            relationships: [
+              {
+                type: 'all',
+                flags: [
+                  'cookies',
+                  {name: 'sprinkles', when: async () => Promise.resolve(false)},
+                  {name: 'cake', when: async () => Promise.resolve(true)},
+                ],
+              },
+              {
+                type: 'some',
+                flags: [
+                  'brownies',
+                  {name: 'pie', when: async () => Promise.resolve(false)},
+                  {name: 'fudge', when: async () => Promise.resolve(true)},
+                ],
+              },
+              {
+                type: 'none',
+                flags: [
+                  'cupcake',
+                  {name: 'muffin', when: async () => Promise.resolve(false)},
+                  {name: 'scone', when: async () => Promise.resolve(true)},
+                ],
+              },
+            ],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      it('should succeed', async () => {
+        const output = {
+          args: {},
+          argv: [],
+          flags: {
+            dessert: 'ice-cream',
+            cookies: true,
+            brownies: true,
+            cake: true,
+            muffin: true,
+          },
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'cookies', input: true},
+            {type: 'flag', flag: 'brownies', input: true},
+            {type: 'flag', flag: 'cake', input: true},
+            {type: 'flag', flag: 'muffin', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should fail', async () => {
+        const output = {
+          args: {},
+          argv: [],
+          flags: {
+            dessert: 'ice-cream',
+            sprinkles: true,
+            cake: true,
+            scone: true,
+            pie: true,
+          },
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+            {type: 'flag', flag: 'cake', input: true},
+            {type: 'flag', flag: 'scone', input: true},
+            {type: 'flag', flag: 'pie', input: true},
+          ],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          assert.fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --cake')
+          expect(err.message).to.include('--scone=true cannot also be provided when using --dessert')
+          expect(err.message).to.include('One of the following must be provided when using --dessert: --brownies, --fudge')
+        }
       })
     })
   })
