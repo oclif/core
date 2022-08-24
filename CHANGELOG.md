@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.0](https://github.com/oclif/core/compare/v1.15.0...v1.16.0) (2022-08-24)
+
+
+### Features
+
+* support complex flag relationships ([#468](https://github.com/oclif/core/issues/468)) ([222d1f6](https://github.com/oclif/core/commit/222d1f67012557ac0707077d6c8840966dbf00cb))
+
 ## [1.15.0](https://github.com/oclif/core/compare/v1.14.2...v1.15.0) (2022-08-23)
 
 
