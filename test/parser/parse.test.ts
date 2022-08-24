@@ -135,7 +135,7 @@ describe('parse', () => {
       }
 
       expect(message).to.equal(
-        'Missing required flag:\n --myflag MYFLAG  flag description\nSee more help with --help',
+        'The following error occurred:\n  Missing required flag myflag\nSee more help with --help',
       )
     })
 
@@ -925,7 +925,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= must also be provided when using --foo=')
+      expect(message).to.equal('The following error occurred:\n  All of the following must be provided when using --foo: --bar\nSee more help with --help')
     })
   })
 
@@ -962,7 +962,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message).to.equal('The following error occurred:\n  --bar=b cannot also be provided when using --foo\nSee more help with --help')
     })
   })
 
@@ -980,7 +980,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Exactly one of the following must be provided: --bar, --foo')
+      expect(message).to.equal('The following error occurred:\n  Exactly one of the following must be provided: --bar, --foo\nSee more help with --help')
     })
 
     it('throws if multiple are set', async () => {
@@ -996,7 +996,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message).to.equal('The following errors occurred:\n  --bar cannot also be provided when using --foo\n  --foo cannot also be provided when using --bar\nSee more help with --help')
     })
 
     it('succeeds if exactly one', async () => {
@@ -1057,7 +1057,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('--else= cannot also be provided when using --foo=')
+      expect(message).to.equal('The following errors occurred:\n  --else cannot also be provided when using --foo\n  --foo cannot also be provided when using --else\nSee more help with --help')
     })
 
     it('handles cross-references/pairings that don\'t make sense', async () => {
@@ -1075,7 +1075,7 @@ See more help with --help`)
         message1 = error.message
       }
 
-      expect(message1).to.equal('--bar= cannot also be provided when using --foo=')
+      expect(message1).to.equal('The following error occurred:\n  --bar cannot also be provided when using --foo\nSee more help with --help')
 
       let message2 = ''
       try {
@@ -1086,7 +1086,7 @@ See more help with --help`)
         message2 = error.message
       }
 
-      expect(message2).to.equal('--else= cannot also be provided when using --bar=')
+      expect(message2).to.equal('The following error occurred:\n  --else cannot also be provided when using --bar\nSee more help with --help')
 
       const out = await parse(['--foo', 'a', '--else', '4'], {
         flags: crazyFlags,

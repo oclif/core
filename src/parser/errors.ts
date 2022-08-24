@@ -3,7 +3,9 @@ import {CLIError} from '../errors'
 import Deps from './deps'
 import * as Help from './help'
 import * as List from './list'
+import * as chalk from 'chalk'
 import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
+import {uniq} from '../config/util'
 
 export {CLIError} from '../errors'
 
@@ -13,6 +15,14 @@ const m = Deps()
 .add('help', () => require('./help') as typeof Help)
 // eslint-disable-next-line node/no-missing-require
 .add('list', () => require('./list') as typeof List)
+.add('chalk', () => require('chalk') as typeof chalk)
+
+export type Validation = {
+  name: string;
+  status: 'success' | 'failed';
+  validationFn: string;
+  reason?: string;
+}
 
 export class CLIParseError extends CLIError {
   public parse: CLIParseErrorOptions['parse']
@@ -88,5 +98,15 @@ export class ArgInvalidOptionError extends CLIParseError {
   constructor(arg: ParserArg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
     super({parse: {}, message})
+  }
+}
+
+export class FailedFlagValidationError extends CLIParseError {
+  constructor({parse, failed}: CLIParseErrorOptions & { failed: Validation[] }) {
+    const reasons = failed.map(r => r.reason)
+    const deduped = uniq(reasons)
+    const errString = deduped.length === 1 ? 'error' : 'errors'
+    const message = `The following ${errString} occurred:\n  ${m.chalk.dim(deduped.join('\n  '))}`
+    super({parse, message})
   }
 }

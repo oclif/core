@@ -86,6 +86,12 @@ export type DefaultContext<T, P> = {
 export type Default<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<T>)
 export type DefaultHelp<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<string | undefined>)
 
+export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
+export type Relationship = {
+  type: 'all' | 'some' | 'none';
+  flags: FlagRelationship[];
+}
+
 export type FlagProps = {
   name: string;
   char?: AlphabetLowercase | AlphabetUppercase;
@@ -133,6 +139,10 @@ export type FlagProps = {
    * Exactly one of these flags must be provided.
    */
   exactlyOne?: string[];
+  /**
+   * Define complex relationships between flags.
+   */
+   relationships?: Relationship[];
 }
 
 export type BooleanFlagProps = FlagProps & {

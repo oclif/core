@@ -1,14 +1,15 @@
-import {CLIError} from '../errors'
-
 import {
   InvalidArgsSpecError,
   RequiredArgsError,
-  RequiredFlagError,
+  Validation,
   UnexpectedArgsError,
+  FailedFlagValidationError,
 } from './errors'
-import {ParserArg, ParserInput, ParserOutput, Flag} from '../interfaces'
+import {ParserArg, ParserInput, ParserOutput, Flag, CompletableFlag} from '../interfaces'
+import {FlagRelationship} from '../interfaces/parser'
+import {uniq} from '../config/util'
 
-export function validate(parse: {
+export async function validate(parse: {
   input: ParserInput;
   output: ParserOutput;
 }) {
@@ -41,64 +42,147 @@ export function validate(parse: {
     }
   }
 
-  function validateAcrossFlags(flag: Flag<any>) {
+  async function validateFlags() {
+    const promises = Object.entries(parse.input.flags).map(async ([name, flag]) => {
+      const results: Validation[] = []
+      if (parse.output.flags[name] !== undefined) {
+        results.push(
+          ...await validateRelationships(name, flag),
+          await validateDependsOn(name, flag.dependsOn ?? []),
+          await validateExclusive(name, flag.exclusive ?? []),
+          await validateExactlyOne(name, flag.exactlyOne ?? []),
+        )
+      } else if (flag.required) {
+        results.push({status: 'failed', name, validationFn: 'required', reason: `Missing required flag ${name}`})
+      } else if (flag.exactlyOne && flag.exactlyOne.length > 0) {
+        results.push(validateAcrossFlags(flag))
+      }
+
+      return results
+    })
+
+    const results = (await Promise.all(promises)).flat()
+
+    const failed = results.filter(r => r.status === 'failed')
+    if (failed.length > 0) throw new FailedFlagValidationError({parse, failed})
+  }
+
+  async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
+    const promises = flags.map(async flag => {
+      if (typeof flag === 'string') {
+        return [flag, parse.output.flags[flag]]
+      }
+
+      const result = await flag.when(parse.output.flags)
+      return result ? [flag.name, parse.output.flags[flag.name]] : null
+    })
+    const resolved = await Promise.all(promises)
+    return Object.fromEntries(resolved.filter(r => r !== null) as [string, unknown][])
+  }
+
+  function getPresentFlags(flags: Record<string, unknown>): string[] {
+    return Object.keys(flags).reduce((acc, key) => {
+      if (flags[key]) acc.push(key)
+      return acc
+    }, [] as string[])
+  }
+
+  function validateAcrossFlags(flag: Flag<any>): Validation {
+    const base = {name: flag.name, validationFn: 'validateAcrossFlags'}
     const intersection = Object.entries(parse.input.flags)
     .map(entry => entry[0]) // array of flag names
     .filter(flagName => parse.output.flags[flagName] !== undefined) // with values
     .filter(flagName => flag.exactlyOne && flag.exactlyOne.includes(flagName)) // and in the exactlyOne list
     if (intersection.length === 0) {
       // the command's exactlyOne may or may not include itself, so we'll use Set to add + de-dupe
-      throw new CLIError(`Exactly one of the following must be provided: ${[
-        ...new Set(flag.exactlyOne?.map(flag => `--${flag}`)),
-      ].join(', ')}`)
+      const deduped = uniq(flag.exactlyOne?.map(flag => `--${flag}`) ?? []).join(', ')
+      const reason = `Exactly one of the following must be provided: ${deduped}`
+      return {...base, status: 'failed', reason}
     }
+
+    return {...base, status: 'success'}
   }
 
-  function validateFlags() {
-    for (const [name, flag] of Object.entries(parse.input.flags)) {
-      if (parse.output.flags[name] !== undefined) {
-        for (const also of flag.dependsOn || []) {
-          if (!parse.output.flags[also]) {
-            throw new CLIError(
-              `--${also}= must also be provided when using --${name}=`,
-            )
-          }
-        }
-
-        for (const also of flag.exclusive || []) {
-          // do not enforce exclusivity for flags that were defaulted
-          if (
-            parse.output.metadata.flags[also] &&
-            parse.output.metadata.flags[also].setFromDefault
-          )
-            continue
-          if (
-            parse.output.metadata.flags[name] &&
-            parse.output.metadata.flags[name].setFromDefault
-          )
-            continue
-          if (parse.output.flags[also]) {
-            throw new CLIError(
-              `--${also}= cannot also be provided when using --${name}=`,
-            )
-          }
-        }
-
-        for (const also of flag.exactlyOne || []) {
-          if (also !== name && parse.output.flags[also]) {
-            throw new CLIError(
-              `--${also}= cannot also be provided when using --${name}=`,
-            )
-          }
-        }
-      } else if (flag.required) {
-        throw new RequiredFlagError({parse, flag})
-      } else if (flag.exactlyOne && flag.exactlyOne.length > 0) {
-        validateAcrossFlags(flag)
+  async function validateExclusive(name: string, flags: FlagRelationship[]): Promise<Validation> {
+    const base = {name, validationFn: 'validateExclusive'}
+    const resolved = await resolveFlags(flags)
+    const keys = getPresentFlags(resolved)
+    for (const flag of keys) {
+      // do not enforce exclusivity for flags that were defaulted
+      if (parse.output.metadata.flags && parse.output.metadata.flags[flag]?.setFromDefault)
+        continue
+      if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault)
+        continue
+      if (parse.output.flags[flag]) {
+        return {...base, status: 'failed', reason: `--${flag}=${parse.output.flags[flag]} cannot also be provided when using --${name}`}
       }
     }
+
+    return {...base, status: 'success'}
+  }
+
+  async function validateExactlyOne(name: string, flags: FlagRelationship[]): Promise<Validation> {
+    const base = {name, validationFn: 'validateExactlyOne'}
+    const resolved = await resolveFlags(flags)
+    const keys = getPresentFlags(resolved)
+    for (const flag of keys) {
+      if (flag !== name && parse.output.flags[flag]) {
+        return {...base, status: 'failed', reason: `--${flag} cannot also be provided when using --${name}`}
+      }
+    }
+
+    return {...base, status: 'success'}
+  }
+
+  async function validateDependsOn(name: string, flags: FlagRelationship[]): Promise<Validation> {
+    const base = {name, validationFn: 'validateDependsOn'}
+    const resolved = await resolveFlags(flags)
+    const foundAll = Object.values(resolved).every(Boolean)
+    if (!foundAll) {
+      const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
+      return {...base, status: 'failed', reason: `All of the following must be provided when using --${name}: ${formattedFlags}`}
+    }
+
+    return {...base, status: 'success'}
+  }
+
+  async function validateSome(name: string, flags: FlagRelationship[]): Promise<Validation> {
+    const base = {name, validationFn: 'validateSome'}
+    const resolved = await resolveFlags(flags)
+    const foundAtLeastOne = Object.values(resolved).some(Boolean)
+    if (!foundAtLeastOne) {
+      const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
+      return {...base, status: 'failed', reason: `One of the following must be provided when using --${name}: ${formattedFlags}`}
+    }
+
+    return {...base, status: 'success'}
+  }
+
+  async function validateRelationships(name: string, flag: CompletableFlag<any>): Promise<Validation[]> {
+    if (!flag.relationships) return []
+    const results = await Promise.all(flag.relationships.map(async relationship => {
+      const flags = relationship.flags ?? []
+      const results = []
+      switch (relationship.type) {
+      case 'all':
+        results.push(await validateDependsOn(name, flags))
+        break
+      case 'some':
+        results.push(await validateSome(name, flags))
+        break
+      case 'none':
+        results.push(await validateExclusive(name, flags))
+        break
+      default:
+        break
+      }
+
+      return results
+    }))
+
+    return results.flat()
   }
 
   validateArgs()
-  validateFlags()
+  await validateFlags()
 }
