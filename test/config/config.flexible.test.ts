@@ -129,7 +129,7 @@ describe('Config with flexible taxonomy', () => {
     const plugins: IPlugin[] = [pluginA, pluginB]
 
     test = test.add('config', async () => {
-      const config = await Config.load()
+      const config = await Config.load({root: '', devPlugins: false})
       config.flexibleTaxonomy = true
       config.plugins = plugins
       config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
