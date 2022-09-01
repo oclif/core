@@ -24,15 +24,6 @@ function channelFromVersion(version: string) {
   return (m && m[1]) || 'stable'
 }
 
-function hasManifest(p: string): boolean {
-  try {
-    require(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
 const WSL = require('is-wsl')
 
 function isConfig(o: any): o is IConfig {
@@ -230,7 +221,7 @@ export class Config implements IConfig {
   async loadDevPlugins() {
     if (this.options.devPlugins !== false) {
       // do not load oclif.devPlugins in production
-      if (hasManifest(path.join(this.root, 'oclif.manifest.json'))) return
+      if (this.isProd) return
       try {
         const devPlugins = this.pjson.oclif.devPlugins
         if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
@@ -598,7 +589,7 @@ export class Config implements IConfig {
   }
 
   protected get isProd() {
-    return isProd()
+    return isProd(this.root)
   }
 
   private getCmdLookupId(id: string): string {

@@ -1,3 +1,4 @@
+import {join} from 'path'
 export function compact<T>(a: (T | undefined)[]): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
@@ -36,8 +37,17 @@ export function castArray<T>(input?: T | T[]): T[] {
   return Array.isArray(input) ? input : [input]
 }
 
-export function isProd() {
-  return !['development', 'test'].includes(process.env.NODE_ENV ?? '')
+function hasManifest(path: string): boolean {
+  try {
+    require(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function isProd(root: string) {
+  return hasManifest(join(root, 'oclif.manifest.json'))
 }
 
 export function maxBy<T>(arr: T[], fn: (i: T) => number): T | undefined {

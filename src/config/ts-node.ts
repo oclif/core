@@ -49,7 +49,7 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
     // the CLI specifically turned it off
     (settings.tsnodeEnabled === false) ||
     // the CLI didn't specify ts-node and it is production
-    (settings.tsnodeEnabled === undefined && isProd())
+    (settings.tsnodeEnabled === undefined && isProd(root))
 
   if (skipTSNode) return orig
 
