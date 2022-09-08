@@ -198,13 +198,18 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
       if (flags[k]) continue
-      if (flag.type === 'option' && flag.env) {
+      if (flag.env) {
         const input = process.env[flag.env]
-        if (input) {
-          this._validateOptions(flag, input)
+        if (flag.type === 'option') {
+          if (input) {
+            this._validateOptions(flag, input)
 
-          // eslint-disable-next-line no-await-in-loop
-          flags[k] = await flag.parse(input, this.context, flag)
+            // eslint-disable-next-line no-await-in-loop
+            flags[k] = await flag.parse(input, this.context, flag)
+          }
+        } else if (flag.type === 'boolean') {
+          // eslint-disable-next-line no-negated-condition
+          flags[k] = input !== undefined ? ['true', 'TRUE', '1', 'yes', 'YES', 'y', 'Y'].includes(input) : false
         }
       }
 
