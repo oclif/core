@@ -860,13 +860,45 @@ See more help with --help`)
   })
 
   describe('env', () => {
-    it('accepts as environment variable', async () => {
-      process.env.TEST_FOO = '101'
-      const out = await parse([], {
-        flags: {foo: flags.string({env: 'TEST_FOO'})},
+    describe('string', () => {
+      it('accepts as environment variable', async () => {
+        process.env.TEST_FOO = '101'
+        const out = await parse([], {
+          flags: {foo: flags.string({env: 'TEST_FOO'})},
+        })
+        expect(out.flags.foo).to.equal('101')
+        delete process.env.TEST_FOO
       })
-      expect(out.flags.foo).to.equal('101')
-      delete process.env.TEST_FOO
+    })
+
+    describe('boolean', () => {
+      const truthy = ['true', 'TRUE', '1', 'yes', 'YES', 'y', 'Y']
+      for (const value of truthy) {
+        it(`accepts '${value}' as a truthy environment variable`, async () => {
+          process.env.TEST_FOO = value
+          const out = await parse([], {
+            flags: {
+              foo: flags.boolean({env: 'TEST_FOO'}),
+            },
+          })
+          expect(out.flags.foo).to.be.true
+          delete process.env.TEST_FOO
+        })
+      }
+
+      const falsy = ['false', 'FALSE', '0', 'no', 'NO', 'n', 'N']
+      for (const value of falsy) {
+        it(`accepts '${value}' as a falsy environment variable`, async () => {
+          process.env.TEST_FOO = value
+          const out = await parse([], {
+            flags: {
+              foo: flags.boolean({env: 'TEST_FOO'}),
+            },
+          })
+          expect(out.flags.foo).to.be.false
+          delete process.env.TEST_FOO
+        })
+      }
     })
   })
 
