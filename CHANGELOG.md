@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.16.1](https://github.com/oclif/core/compare/v1.16.0...v1.16.1) (2022-09-08)
+
+
+### Bug Fixes
+
+* support environment variables for boolean flags ([#488](https://github.com/oclif/core/issues/488)) ([#490](https://github.com/oclif/core/issues/490)) ([506945c](https://github.com/oclif/core/commit/506945c6ea2f8b75f0d56ad1f6e62a3717384a42)), closes [#487](https://github.com/oclif/core/issues/487)
+
 ## [1.16.0](https://github.com/oclif/core/compare/v1.15.0...v1.16.0) (2022-08-24)
 
 
