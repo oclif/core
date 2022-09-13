@@ -155,7 +155,12 @@ export class Help extends HelpBase {
     }
 
     if (subCommands.length > 0) {
-      this.log(this.formatCommands(subCommands))
+      const aliases:string[] = []
+      const uniqueSubCommands:Interfaces.Command.Loadable[] = subCommands.filter(p => {
+        aliases.push(...p.aliases)
+        return !aliases.includes(p.id)
+      })
+      this.log(this.formatCommands(uniqueSubCommands))
       this.log('')
     }
   }
