@@ -248,8 +248,7 @@ export default abstract class Command {
     g['http-call']!.userAgent = this.config.userAgent
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  protected async parse<F extends Interfaces.FlagOutput = object, G extends Interfaces.FlagOutput = { [name: string]: unknown }, A extends { [name: string]: any } = { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
+  protected async parse<F extends Interfaces.FlagOutput, G extends Interfaces.FlagOutput, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
