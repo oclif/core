@@ -73,7 +73,7 @@
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "sinon": "^11.1.2",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.9.1",
     "tsd": "^0.22.0",
     "typescript": "^4.8.3"
   },
@@ -111,7 +111,7 @@
     "prepack": "yarn run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 600000",
-    "pretest": "yarn build --noEmit && tsc -p test --noEmit"
+    "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
   },
   "types": "lib/index.d.ts"
 }

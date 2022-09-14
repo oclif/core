@@ -1,35 +1,15 @@
 import {expect, test as base} from '@oclif/test'
-import stripAnsi = require('strip-ansi')
-
-import {Help} from '../../src/help'
-import {Interfaces} from '../../src'
+import {TestHelp, topicHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
-
-// extensions to expose method as public for testing
-class TestHelp extends Help {
-  public formatTopic(topic: Interfaces.Topic) {
-    return super.formatTopic(topic)
-  }
-}
 
 const test = base
 .loadConfig()
 .add('help', ctx => {
   return new TestHelp(ctx.config as any)
 })
-.register('topicHelp', (topic: Interfaces.Topic) => ({
-  run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const topicHelpOutput = ctx.help.formatTopic(topic)
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(topicHelpOutput)
-    }
-
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
-    ctx.expectation = 'has topicHelp'
-  },
-}))
+.register('topicHelp', topicHelp)
 
 describe('formatHelp', () => {
   test

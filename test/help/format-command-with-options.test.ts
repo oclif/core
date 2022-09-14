@@ -1,8 +1,7 @@
 import {expect, test as base} from '@oclif/test'
-import stripAnsi = require('strip-ansi')
 
-import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
-import {Help, CommandHelp} from '../../src/help'
+import {Command as Base, Flags as flags} from '../../src'
+import {commandHelp, TestHelpWithOptions as TestHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
@@ -15,47 +14,10 @@ class Command extends Base {
   }
 }
 
-// Allow overriding section headers
-class TestCommandHelp extends CommandHelp {
-  protected sections() {
-    const sections = super.sections()
-    const flagSection = sections.find(section => section.header === 'FLAGS')
-    if (flagSection) flagSection.header = 'OPTIONS'
-    return sections
-  }
-}
-
-// extensions to expose method as public for testing
-class TestHelp extends Help {
-  CommandHelpClass = TestCommandHelp
-
-  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
-    super(config, opts)
-    this.opts.showFlagNameInTitle = true
-    this.opts.showFlagOptionsInTitle = true
-    this.opts.hideCommandSummaryInDescription = true
-  }
-
-  public formatCommand(command: Interfaces.Command) {
-    return super.formatCommand(command)
-  }
-}
-
 const test = base
 .loadConfig()
 .add('help', ctx => new TestHelp(ctx.config as any))
-.register('commandHelp', (command?: any) => ({
-  async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await toCached(command!, {} as any)
-    const help = ctx.help.formatCommand(cached)
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(help)
-    }
-
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
-    ctx.expectation = 'has commandHelp'
-  },
-}))
+.register('commandHelp', commandHelp)
 
 describe('formatCommand', () => {
   test

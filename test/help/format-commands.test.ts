@@ -14,10 +14,7 @@ class TestHelp extends Help {
   }
 }
 
-const test = base
-.loadConfig()
-.add('help', ctx => new TestHelp(ctx.config as any))
-.register('formatCommands', (commands: Interfaces.Command[] = []) => ({
+const formatCommands = (commands: Interfaces.Command[]) => ({
   run(ctx: {help: TestHelp; output: string}) {
     const help = ctx.help.formatCommands(commands)
     if (process.env.TEST_OUTPUT === '1') {
@@ -26,7 +23,12 @@ const test = base
 
     ctx.output = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
   },
-}))
+})
+
+const test = base
+.loadConfig()
+.add('help', ctx => new TestHelp(ctx.config as any))
+.register('formatCommands', formatCommands)
 
 describe('formatCommand', () => {
   test
@@ -46,8 +48,6 @@ describe('formatCommand', () => {
     static id = 'hello:world'
 
     static description = 'This is a very long command description that should wrap after too many characters have been entered'
-
-    static flags = {}
 
     static args = []
 
