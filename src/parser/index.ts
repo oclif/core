@@ -2,7 +2,7 @@ import * as args from './args'
 import Deps from './deps'
 import * as flags from './flags'
 import {Parser} from './parse'
-import {FlagInput, Input, ParserOutput} from '../interfaces'
+import {FlagInput, Input, ParserOutput, OutputFlags, FlagOutput} from '../interfaces'
 import * as Validate from './validate'
 export {args}
 export {flags}
@@ -13,7 +13,7 @@ const m = Deps()
 // eslint-disable-next-line node/no-missing-require
 .add('validate', () => require('./validate').validate as typeof Validate.validate)
 
-export async function parse<TFlags, GFlags, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags, GFlags>): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
+export async function parse<TFlags extends OutputFlags<any>, GFlags extends FlagOutput, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags, GFlags>): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
   const input = {
     argv,
     context: options.context,

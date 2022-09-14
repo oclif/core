@@ -1,4 +1,4 @@
-export function pickBy<T>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
+export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)
   .reduce((o, [k, v]) => {
     if (fn(v)) o[k] = v
