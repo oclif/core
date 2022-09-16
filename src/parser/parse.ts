@@ -258,7 +258,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         stdinRead = true
       }
 
-      if (!args[i] && 'default' in arg) {
+      if (!args[i] && arg?.default !== undefined) {
         if (typeof arg.default === 'function') {
           // eslint-disable-next-line no-await-in-loop
           const f = await arg.default()

@@ -7,6 +7,7 @@ import {Interfaces} from '../../src'
 import {URL} from 'url'
 import {directory, file} from '../../src/parser/flags'
 import * as sinon from 'sinon'
+import {CLIError} from '../../src/errors'
 
 const stripAnsi = require('strip-ansi')
 
@@ -34,6 +35,16 @@ describe('parse', () => {
     })
     expect(out.argv).to.deep.equal(['arg1', 'arg2'])
     expect(out.args).to.deep.equal({foo: 'arg1', bar: 'arg2'})
+  })
+
+  it('should throw if unexpected argument is provided', async () => {
+    try {
+      await parse(['arg1'], {})
+      expect.fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('Unexpected argument: arg1')
+    }
   })
 
   describe('output: array', () => {
