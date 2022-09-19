@@ -118,7 +118,7 @@ export type FlagProps = {
   /**
    * Accept an environment variable as input
    */
-   env?: string;
+  env?: string;
   /**
    * If true, the flag will not be shown in the help.
    */
@@ -142,7 +142,7 @@ export type FlagProps = {
   /**
    * Define complex relationships between flags.
    */
-   relationships?: Relationship[];
+  relationships?: Relationship[];
 }
 
 export type BooleanFlagProps = FlagProps & {
