@@ -246,5 +246,4 @@ export type CompletableOptionFlag<T> = OptionFlag<T> & {
 
 export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type FlagInput<T extends FlagOutput = object> = { [P in keyof T]: CompletableFlag<T[P]> }
+export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in keyof T]: CompletableFlag<T[P]> }

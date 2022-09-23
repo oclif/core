@@ -107,10 +107,8 @@ export default abstract class Command {
     if (value === true) {
       this.globalFlags = jsonFlag
     } else {
-      // @ts-expect-error because this.globalFlags is typed as a plain object
       delete this.globalFlags?.json
       this.flags = {} // force the flags setter to run
-      // @ts-expect-error because this.flags is typed as a plain object
       delete this.flags?.json
     }
   }
@@ -250,7 +248,7 @@ export default abstract class Command {
     g['http-call']!.userAgent = this.config.userAgent
   }
 
-  protected async parse<F, G, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
+  protected async parse<F extends Interfaces.FlagOutput, G extends Interfaces.FlagOutput, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here

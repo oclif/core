@@ -17,9 +17,7 @@ class TestHelp extends Help {
   }
 }
 
-const test = base
-.loadConfig()
-.register('rootHelp', (ctxOverride?: (config: Interfaces.Config) => Interfaces.Config) => ({
+const rootHelp = (ctxOverride?: (config: Interfaces.Config) => Interfaces.Config) => ({
   run(ctx: { config: Interfaces.Config; help: Help; commandHelp: string; expectation: string}) {
     const config = ctxOverride ? ctxOverride(ctx.config) : ctx.config
 
@@ -31,7 +29,11 @@ const test = base
 
     ctx.commandHelp = stripAnsi(root).split('\n').map(s => s.trimEnd()).join('\n')
   },
-}))
+})
+
+const test = base
+.loadConfig()
+.register('rootHelp', rootHelp)
 
 describe('formatRoot', () => {
   test
