@@ -565,10 +565,10 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.3.tgz#472eaab5f15c1ffdd7f8628bd4c4f753995ec79e"
   integrity sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==
 
-"@tsd/typescript@~4.7.4":
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-4.7.4.tgz#f1e4e6c3099a174a0cb7aa51cf53f34f6494e528"
-  integrity sha512-jbtC+RgKZ9Kk65zuRZbKLTACf+tvFW4Rfq0JEMXrlmV3P3yme+Hm+pnb5fJRyt61SjIitcrC810wj7+1tgsEmg==
+"@tsd/typescript@~4.8.3":
+  version "4.8.3"
+  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-4.8.3.tgz#10f04aef9217e0a516947ddc4c457687d6482d6c"
+  integrity sha512-ytRZWmXF0i4VFSG8NQ67NUDQ3NGe3E4oByFrxH8eJyW5uBOM5juIdXCg81OY/IcK81qHCzrvGEo8tujlIQbexw==
 
 "@types/ansi-styles@^3.2.1":
   version "3.2.1"
@@ -3266,12 +3266,12 @@ ts-node@^10.9.1:
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
 
-tsd@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.22.0.tgz#2ff75cf3adff5136896abee1f2c5540497bf3b54"
-  integrity sha512-NH+tfEDQ0Ze8gH7TorB6IxYybD+M68EYawe45YNVrbQcydNBfdQHP9IiD0QbnqmwNXrv+l9GAiULT68mo4q/xA==
+tsd@^0.24.1:
+  version "0.24.1"
+  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.24.1.tgz#10c596acf7278182d3ca142b902ca9a62b1f13ef"
+  integrity sha512-sD+s81/2aM4RRhimCDttd4xpBNbUFWnoMSHk/o8kC8Ek23jljeRNWjsxFJmOmYLuLTN9swRt1b6iXfUXTcTiIA==
   dependencies:
-    "@tsd/typescript" "~4.7.4"
+    "@tsd/typescript" "~4.8.3"
     eslint-formatter-pretty "^4.1.0"
     globby "^11.0.1"
     meow "^9.0.0"
