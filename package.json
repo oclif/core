@@ -110,7 +110,7 @@
     "posttest": "yarn lint",
     "prepack": "yarn run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 600000",
+    "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 1200000",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
   },
   "types": "lib/index.d.ts"
