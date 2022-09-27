@@ -256,7 +256,7 @@ export default abstract class Command {
     return Parser.parse(argv, opts)
   }
 
-  protected async catch(err: Error & {exitCode?: number}): Promise<any> {
+  protected async catch(err: Interfaces.CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       CliUx.ux.styledJSON(this.toErrorJson(err))

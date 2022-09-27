@@ -1,7 +1,7 @@
 export {AlphabetLowercase, AlphabetUppercase} from './alphabet'
 export {Config, ArchTypes, PlatformTypes, LoadOptions} from './config'
 export {Command, Example} from './command'
-export {OclifError, PrettyPrintableError} from './errors'
+export {OclifError, PrettyPrintableError, CommandError} from './errors'
 export {HelpOptions} from './help'
 export {Hook, Hooks} from './hooks'
 export {Manifest} from './manifest'
