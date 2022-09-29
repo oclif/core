@@ -17,6 +17,9 @@ import ModuleLoader from '../module-loader'
 
 const _pjson = require('../../package.json')
 
+const PACKAGE_JSON = 'package.json'
+const DENO_JSON = 'deno.jsonc'
+
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
@@ -40,9 +43,9 @@ function * up(from: string) {
   yield from
 }
 
-async function findSourcesRoot(root: string) {
+async function findSourcesRoot(root: string, configFile: string) {
   for (const next of up(root)) {
-    const cur = path.join(next, 'package.json')
+    const cur = path.join(next, configFile)
     // eslint-disable-next-line no-await-in-loop
     if (await exists(cur)) return path.dirname(cur)
   }
@@ -79,17 +82,17 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
   }
 }
 
-async function findRoot(name: string | undefined, root: string) {
+async function findRoot(name: string | undefined, root: string, configFile: string = PACKAGE_JSON) {
   if (name) {
     let pkgPath
     try {
       pkgPath = resolvePackage(name, {paths: [root]})
     } catch {}
 
-    return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
+    return pkgPath ? findSourcesRoot(path.dirname(pkgPath), configFile) : findRootLegacy(name, root)
   }
 
-  return findSourcesRoot(root)
+  return findSourcesRoot(root, configFile)
 }
 
 export class Plugin implements IPlugin {
@@ -135,14 +138,24 @@ export class Plugin implements IPlugin {
   async load() {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-    const root = await findRoot(this.options.name, this.options.root)
-    if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
+
+    // Tries finding the root based on a node project.
+    let rootConfigFile = PACKAGE_JSON
+    let root = await findRoot(this.options.name, this.options.root, rootConfigFile)
+    // If unsuccessful, it then tries finding
+    // the root based on a deno project.
+    if (!root) {
+      rootConfigFile = DENO_JSON
+      root = await findRoot(this.options.name, this.options.root, rootConfigFile)
+    }
+
+    if (!root) throw new Error(`could not find package.json with options: ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json')) as any
+    this.pjson = await loadJSON(path.join(root, rootConfigFile)) as any
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = path.join(root, 'package.json')
+    const pjsonPath = path.join(root, rootConfigFile)
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
