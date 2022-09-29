@@ -43,11 +43,16 @@ function * up(from: string) {
   yield from
 }
 
-async function findSourcesRoot(root: string, configFile: string) {
+// Looks for a node or a deno root config file.
+// Which is ever is closest up in the directory tree.
+async function findSourcesRoot(root: string) {
   for (const next of up(root)) {
-    const cur = path.join(next, configFile)
+    const nodeConfigFile = path.join(next, PACKAGE_JSON)
+    const denoConfigFile = path.join(next, DENO_JSON)
     // eslint-disable-next-line no-await-in-loop
-    if (await exists(cur)) return path.dirname(cur)
+    if (await exists(nodeConfigFile)) return path.dirname(nodeConfigFile)
+    // eslint-disable-next-line no-await-in-loop
+    if (await exists(denoConfigFile)) return path.dirname(denoConfigFile)
   }
 }
 
@@ -82,17 +87,22 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
   }
 }
 
-async function findRoot(name: string | undefined, root: string, configFile: string = PACKAGE_JSON) {
+async function findRoot(name: string | undefined, root: string) {
   if (name) {
     let pkgPath
     try {
       pkgPath = resolvePackage(name, {paths: [root]})
     } catch {}
 
-    return pkgPath ? findSourcesRoot(path.dirname(pkgPath), configFile) : findRootLegacy(name, root)
+    return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
   }
 
-  return findSourcesRoot(root, configFile)
+  return findSourcesRoot(root)
+}
+
+async function findRootConfigFile(rootPath: string) {
+  if (await exists(path.join(rootPath, PACKAGE_JSON))) return PACKAGE_JSON
+  if (await exists(path.join(rootPath, DENO_JSON))) return DENO_JSON
 }
 
 export class Plugin implements IPlugin {
@@ -138,18 +148,10 @@ export class Plugin implements IPlugin {
   async load() {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-
-    // Tries finding the root based on a node project.
-    let rootConfigFile = PACKAGE_JSON
-    let root = await findRoot(this.options.name, this.options.root, rootConfigFile)
-    // If unsuccessful, it then tries finding
-    // the root based on a deno project.
-    if (!root) {
-      rootConfigFile = DENO_JSON
-      root = await findRoot(this.options.name, this.options.root, rootConfigFile)
-    }
-
+    const root = await findRoot(this.options.name, this.options.root)
     if (!root) throw new Error(`could not find package.json with options: ${inspect(this.options)}`)
+    const rootConfigFile = await findRootConfigFile(root)
+    if (!rootConfigFile) throw new Error(`could not find ${rootConfigFile} in ${root}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, rootConfigFile)) as any
