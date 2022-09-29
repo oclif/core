@@ -43,16 +43,14 @@ function * up(from: string) {
   yield from
 }
 
-// Looks for a node or a deno root config file.
-// Which is ever is closest up in the directory tree.
+// Finds the root dir based on a node or a deno root config file,
+// which ever is closest up in the directory tree.
 async function findSourcesRoot(root: string) {
   for (const next of up(root)) {
     const nodeConfigFile = path.join(next, PACKAGE_JSON)
     const denoConfigFile = path.join(next, DENO_JSON)
     // eslint-disable-next-line no-await-in-loop
-    if (await exists(nodeConfigFile)) return path.dirname(nodeConfigFile)
-    // eslint-disable-next-line no-await-in-loop
-    if (await exists(denoConfigFile)) return path.dirname(denoConfigFile)
+    if (await exists(nodeConfigFile) || await exists(denoConfigFile)) return path.dirname(nodeConfigFile)
   }
 }
 
@@ -149,7 +147,7 @@ export class Plugin implements IPlugin {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
-    if (!root) throw new Error(`could not find package.json with options: ${inspect(this.options)}`)
+    if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
     const rootConfigFile = await findRootConfigFile(root)
     if (!rootConfigFile) throw new Error(`could not find ${rootConfigFile} in ${root}`)
     this.root = root
