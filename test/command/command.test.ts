@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 
-import {Command as Base, Flags as flags} from '../../src'
+import {Command as Base, Flags, Flags as flags} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -231,6 +231,76 @@ describe('command', () => {
     })
     .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
     .it('uses util.format()')
+  })
+
+  describe('deprecated flags', () => {
+    fancy
+    .stdout()
+    .stderr()
+    .do(async () => {
+      class CMD extends Command {
+        static flags = {
+          name: Flags.string({
+            deprecated: {
+              to: '--full-name',
+              version: '2.0.0',
+            },
+          }),
+        }
+
+        async run() {
+          this.log('running command')
+        }
+      }
+      await CMD.run([])
+    })
+    .do(ctx => expect(ctx.stderr).to.include('Warning: The "name" flag has been deprecated'))
+    .it('shows warning for deprecated flags')
+  })
+
+  describe('deprecated state', () => {
+    fancy
+    .stdout()
+    .stderr()
+    .do(async () => {
+      class CMD extends Command {
+        static id = 'my:command'
+        static state = 'deprecated'
+        async run() {
+          this.log('running command')
+        }
+      }
+      await CMD.run([])
+    })
+    .do(ctx => expect(ctx.stderr).to.include('Warning: The "my:command" command has been deprecated'))
+    .it('shows warning for deprecated flags')
+  })
+
+  describe('deprecated state with options', () => {
+    fancy
+    .stdout()
+    .stderr()
+    .do(async () => {
+      class CMD extends Command {
+        static id = 'my:command'
+        static state = 'deprecated'
+        static deprecationOptions = {
+          version: '2.0.0',
+          to: 'my:other:command',
+        }
+
+        async run() {
+          this.log('running command')
+        }
+      }
+      await CMD.run([])
+    })
+    .do(ctx => {
+      expect(ctx.stderr).to.include('Warning: The "my:command" command has been deprecated')
+      expect(ctx.stderr).to.include('in version 2.0.0')
+      expect(ctx.stderr).to.include('Use "my:other:command" instead')
+    })
+    .it('shows warning for deprecated flags')
   })
 
   describe('stdout err', () => {

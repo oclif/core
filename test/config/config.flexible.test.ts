@@ -18,7 +18,7 @@ interface Options {
 }
 
 // @ts-expect-error
-class MyComandClass implements ICommand.Class {
+class MyCommandClass implements ICommand.Class {
   _base = ''
 
   aliases: string[] = []
@@ -57,7 +57,7 @@ describe('Config with flexible taxonomy', () => {
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<ICommand.Class> => {
-      return new MyComandClass() as unknown as ICommand.Class
+      return new MyCommandClass() as unknown as ICommand.Class
     }
 
     const commandPluginA: ICommand.Loadable = {
@@ -70,7 +70,7 @@ describe('Config with flexible taxonomy', () => {
       hidden: false,
       id: commandIds[0],
       async load(): Promise<ICommand.Class> {
-        return new MyComandClass() as unknown as ICommand.Class
+        return new MyCommandClass() as unknown as ICommand.Class
       },
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
@@ -85,7 +85,7 @@ describe('Config with flexible taxonomy', () => {
       hidden: false,
       id: commandIds[1],
       async load(): Promise<ICommand.Class> {
-        return new MyComandClass() as unknown as ICommand.Class
+        return new MyCommandClass() as unknown as ICommand.Class
       },
       pluginType: types[1] ?? 'core',
       pluginAlias: '@My/pluginb',

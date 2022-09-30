@@ -3,6 +3,7 @@ import {Config as IConfig, HelpOptions} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
 import {collectUsableIds} from '../config/util'
+import {Deprecation} from '../interfaces/parser'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
@@ -81,8 +82,8 @@ export function toStandardizedId(commandID: string, config: IConfig): string {
 }
 
 export function toConfiguredId(commandID: string, config: IConfig): string {
-  const defaultTopicSeperator = ':'
-  return commandID.replace(new RegExp(defaultTopicSeperator, 'g'), config.topicSeparator || defaultTopicSeperator)
+  const defaultTopicSeparator = ':'
+  return commandID.replace(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {
@@ -96,4 +97,32 @@ export function getHelpFlagAdditions(config: IConfig): string[] {
   const helpFlags = ['--help']
   const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
   return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
+}
+
+export function formatFlagDeprecationWarning(flag: string, opts: Deprecation): string {
+  if (opts.message) return opts.message
+
+  let message = `The "${flag}" flag has been deprecated`
+  if (opts.version) {
+    message += ` and will be removed in version ${opts.version}`
+  }
+
+  message += opts.to ? `. Use "${opts.to}" instead.` : '.'
+
+  return message
+}
+
+export function formatCommandDeprecationWarning(command: string, opts?: Deprecation): string {
+  let message = `The "${command}" command has been deprecated`
+  if (!opts) return `${message}.`
+
+  if (opts.message) return opts.message
+
+  if (opts.version) {
+    message += ` and will be removed in version ${opts.version}`
+  }
+
+  message += opts.to ? `. Use "${opts.to}" instead.` : '.'
+
+  return message
 }

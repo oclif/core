@@ -1,13 +1,15 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-import {CliUx} from './index'
+import {CliUx, toConfiguredId} from './index'
 import {Config} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
+import {Deprecation} from './interfaces/parser'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning} from './help/util'
 
 const pjson = require('../package.json')
 
@@ -52,11 +54,13 @@ export default abstract class Command {
    */
   static description: string | undefined
 
-  /** Hide the command from help? */
+  /** Hide the command from help */
   static hidden: boolean
 
-  /** Mark the command as a given state (e.g. beta) in help? */
-  static state?: string;
+  /** Mark the command as a given state (e.g. beta or deprecated) in help */
+  static state?: 'beta' | 'deprecated' | string;
+
+  static deprecationOptions?: Deprecation;
 
   /**
    * An override string (or strings) for the default usage documentation.
@@ -239,13 +243,23 @@ export default abstract class Command {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
     if (this.config.debug) Errors.config.debug = true
     if (this.config.errlog) Errors.config.errlog = this.config.errlog
-    // global['cli-ux'].context = global['cli-ux'].context || {
-    //   command: compact([this.id, ...this.argv]).join(' '),
-    //   version: this.config.userAgent,
-    // }
     const g: any = global
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent
+    this.checkForDeprecations()
+  }
+
+  protected checkForDeprecations() {
+    if (this.ctor.state === 'deprecated') {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
+    }
+
+    for (const [flag, opts] of Object.entries(this.ctor.flags ?? {})) {
+      if (opts.deprecated) {
+        this.warn(formatFlagDeprecationWarning(flag, opts.deprecated))
+      }
+    }
   }
 
   protected async parse<F extends Interfaces.FlagOutput, G extends Interfaces.FlagOutput, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
@@ -275,7 +289,6 @@ export default abstract class Command {
     try {
       const config = Errors.config
       if (config.errorLogger) await config.errorLogger.flush()
-      // tslint:disable-next-line no-console
     } catch (error: any) {
       console.error(error)
     }

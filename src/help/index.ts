@@ -5,7 +5,7 @@ import {error} from '../errors'
 import CommandHelp from './command'
 import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
-import {getHelpFlagAdditions, standardizeIDFromArgv} from './util'
+import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
@@ -139,7 +139,14 @@ export class Help extends HelpBase {
     const plugin = this.config.plugins.find(p => p.name === command.pluginName)
 
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
-    if (state) this.log(`This command is in ${state}.\n`)
+
+    if (state) {
+      this.log(
+        state === 'deprecated' ?
+          `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}` :
+          `This command is in ${state}.\n`,
+      )
+    }
 
     const summary = this.summary(command)
     if (summary) {
@@ -170,7 +177,14 @@ export class Help extends HelpBase {
     let rootCommands = this.sortedCommands
 
     const state = this.config.pjson?.oclif?.state
-    if (state) this.log(`${this.config.bin} is in ${state}.\n`)
+    if (state) {
+      this.log(
+        state === 'deprecated' ?
+          `${this.config.bin} is deprecated` :
+          `${this.config.bin} is in ${state}.\n`,
+      )
+    }
+
     this.log(this.formatRoot())
     this.log('')
 

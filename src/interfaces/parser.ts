@@ -92,6 +92,12 @@ export type Relationship = {
   flags: FlagRelationship[];
 }
 
+export type Deprecation = {
+  to?: string;
+  message?: string;
+  version?: string;
+}
+
 export type FlagProps = {
   name: string;
   char?: AlphabetLowercase | AlphabetUppercase;
@@ -143,6 +149,10 @@ export type FlagProps = {
    * Define complex relationships between flags.
    */
   relationships?: Relationship[];
+  /**
+   * Make the flag as deprecated.
+   */
+  deprecated?: Deprecation;
 }
 
 export type BooleanFlagProps = FlagProps & {

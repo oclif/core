@@ -46,7 +46,7 @@ export namespace PJSON {
       };
       additionalHelpFlags?: string[];
       additionalVersionFlags?: string[];
-      state?: string;
+      state?: 'beta' | 'deprecated' | string;
     };
   }
 
