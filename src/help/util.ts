@@ -99,10 +99,11 @@ export function getHelpFlagAdditions(config: IConfig): string[] {
   return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
 }
 
-export function formatFlagDeprecationWarning(flag: string, opts: Deprecation): string {
+export function formatFlagDeprecationWarning(flag: string, opts: true | Deprecation): string {
+  let message = `The "${flag}" flag has been deprecated`
+  if (opts === true) return `${message}.`
   if (opts.message) return opts.message
 
-  let message = `The "${flag}" flag has been deprecated`
   if (opts.version) {
     message += ` and will be removed in version ${opts.version}`
   }
