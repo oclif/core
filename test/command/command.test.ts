@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 
-import {Command as Base, Flags, Flags as flags} from '../../src'
+import {Command as Base, Flags} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -204,7 +204,7 @@ describe('command', () => {
     .it('has a flag', async ctx => {
       class CMD extends Base {
         static flags = {
-          foo: flags.string(),
+          foo: Flags.string(),
         }
 
         async run() {
