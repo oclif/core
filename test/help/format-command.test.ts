@@ -25,6 +25,7 @@ describe('formatCommand', () => {
       static aliases = ['app:init', 'create']
 
       static description = `first line
+
 multiline help`
 
       static enableJsonFlag = true
@@ -222,7 +223,7 @@ DESCRIPTION
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static description = 'description of apps:create\nthese values are after and will show up in the command description'
+        static description = 'description of apps:create\n\nthese values are after and will show up in the command description'
 
         static aliases = ['app:init', 'create']
 
@@ -259,7 +260,7 @@ ALIASES
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static description = 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>'
+        static description = 'root part of the description\n\nThe <%= config.bin %> CLI has <%= command.id %>'
 
         static disableJsonFlag = true
     })
@@ -275,7 +276,7 @@ DESCRIPTION
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static description = 'root part of the description\r\nusing both carriage \nreturn and new line'
+        static description = 'root part of the description\r\n\nusing both carriage \n\nreturn and new line'
 
         static disableJsonFlag = true
     })
