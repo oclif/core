@@ -143,6 +143,10 @@ export type FlagProps = {
    * Define complex relationships between flags.
    */
   relationships?: Relationship[];
+  /**
+   * Alternate names that can be used for this flag.
+   */
+  aliases?: string[];
 }
 
 export type BooleanFlagProps = FlagProps & {
