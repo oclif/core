@@ -1338,4 +1338,28 @@ See more help with --help`)
       })
     })
   })
+
+  describe('flag aliases', () => {
+    it('works with defined name', async () => {
+      const out = await parse(['--foo'], {
+        flags: {
+          foo: flags.boolean({
+            aliases: ['bar'],
+          }),
+        },
+      })
+      expect(out.flags.foo).to.equal(true)
+    })
+
+    it('works with aliased name', async () => {
+      const out = await parse(['--bar'], {
+        flags: {
+          foo: flags.boolean({
+            aliases: ['bar'],
+          }),
+        },
+      })
+      expect(out.flags.foo).to.equal(true)
+    })
+  })
 })

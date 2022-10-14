@@ -39,6 +39,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private readonly raw: ParsingToken[] = []
 
   private readonly booleanFlags: { [k: string]: BooleanFlag<any> }
+  private readonly flagAliases: { [k: string]: BooleanFlag<any> | OptionFlag<any> }
 
   private readonly context: any
 
@@ -52,6 +53,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
+    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
+      return (flag.aliases ?? []).map(a => [a, flag])
+    }))
+
     this.metaData = {}
   }
 
@@ -62,6 +67,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const name = arg.slice(2)
       if (this.input.flags[name]) {
         return name
+      }
+
+      if (this.flagAliases[name]) {
+        return this.flagAliases[name].name
       }
 
       if (arg.startsWith('--no-')) {

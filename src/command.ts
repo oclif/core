@@ -267,6 +267,7 @@ export default abstract class Command {
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
     opts.flags = options?.flags
+    opts.args = options?.args
     return Parser.parse(argv, opts)
   }
 

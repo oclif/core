@@ -153,6 +153,10 @@ export type FlagProps = {
    * Make the flag as deprecated.
    */
   deprecated?: true | Deprecation;
+  /**
+   * Alternate names that can be used for this flag.
+   */
+  aliases?: string[];
 }
 
 export type BooleanFlagProps = FlagProps & {
