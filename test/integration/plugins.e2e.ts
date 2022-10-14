@@ -193,7 +193,7 @@ describe('oclif plugins', () => {
 
     describe('installing a plugin by name', () => {
       it('should install the plugin', async () => {
-        const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available')
+        const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available 2>&1')
         expect(result.code).to.equal(0)
         expect(result.output).to.include('@oclif/plugin-warn-if-update-available... installed v')
 
@@ -205,7 +205,7 @@ describe('oclif plugins', () => {
 
     describe('installing a plugin by github url', () => {
       after(async () => {
-        await executor.executeCommand('plugins:uninstall @oclif/plugin-warn-if-update-available')
+        await executor.executeCommand('plugins:uninstall @oclif/plugin-warn-if-update-available 2>&1')
       })
 
       it('should install the plugin', async () => {
@@ -220,7 +220,7 @@ describe('oclif plugins', () => {
 
     describe('forcefully installing a plugin', () => {
       it('should install the plugin', async () => {
-        const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available --force')
+        const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available --force 2>&1')
         expect(result.code).to.equal(0)
         expect(result.output).to.include('@oclif/plugin-warn-if-update-available... installed v')
 
@@ -236,7 +236,7 @@ describe('oclif plugins', () => {
       })
 
       it('should uninstall the plugin', async () => {
-        const result = await executor.executeCommand('plugins:uninstall @oclif/plugin-warn-if-update-available')
+        const result = await executor.executeCommand('plugins:uninstall @oclif/plugin-warn-if-update-available 2>&1')
         expect(result.code).to.equal(0)
         expect(result.output).to.include('success Uninstalled packages.Uninstalling @oclif/plugin-warn-if-update-available... done\n')
 
