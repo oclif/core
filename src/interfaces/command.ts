@@ -1,5 +1,5 @@
 import {Config, LoadOptions} from './config'
-import {ArgInput, BooleanFlagProps, FlagInput, OptionFlagProps} from './parser'
+import {ArgInput, BooleanFlagProps, Deprecation, FlagInput, OptionFlagProps} from './parser'
 import {Plugin as IPlugin} from './plugin'
 
 export type Example = string | {
@@ -11,11 +11,16 @@ export interface CommandProps {
   /** A command ID, used mostly in error or verbose reporting. */
   id: string;
 
-  /** Hide the command from help? */
+  /** Hide the command from help */
   hidden: boolean;
 
-  /** Mark the command as a given state (e.g. beta) in help? */
-  state?: string;
+  /** Mark the command as a given state (e.g. beta or deprecated) in help */
+  state?: 'beta' | 'deprecated' | string;
+
+  /**
+   * Provide details to the deprecation warning if state === 'deprecated'
+   */
+  deprecationOptions?: Deprecation;
 
   /** An array of aliases for this command. */
   aliases: string[];
