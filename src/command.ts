@@ -246,19 +246,22 @@ export default abstract class Command {
     const g: any = global
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent
-    this.checkForDeprecations()
+    this.warnIfCommandDeprecated()
   }
 
-  protected checkForDeprecations() {
+  protected warnIfFlagDeprecated(flags: Record<string, unknown>) {
+    for (const flag of Object.keys(flags)) {
+      const deprecated = this.ctor.flags[flag]?.deprecated
+      if (deprecated) {
+        this.warn(formatFlagDeprecationWarning(flag, deprecated))
+      }
+    }
+  }
+
+  protected warnIfCommandDeprecated(): void {
     if (this.ctor.state === 'deprecated') {
       const cmdName = toConfiguredId(this.ctor.id, this.config)
       this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
-    }
-
-    for (const [flag, opts] of Object.entries(this.ctor.flags ?? {})) {
-      if (opts.deprecated) {
-        this.warn(formatFlagDeprecationWarning(flag, opts.deprecated))
-      }
     }
   }
 
@@ -268,7 +271,10 @@ export default abstract class Command {
     // the spread operator doesn't work with getters so we have to manually add it here
     opts.flags = options?.flags
     opts.args = options?.args
-    return Parser.parse(argv, opts)
+    const results = await Parser.parse<F, G, A>(argv, opts)
+    this.warnIfFlagDeprecated(results.flags ?? {})
+
+    return results
   }
 
   protected async catch(err: Interfaces.CommandError): Promise<any> {

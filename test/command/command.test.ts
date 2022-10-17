@@ -246,16 +246,45 @@ describe('command', () => {
               version: '2.0.0',
             },
           }),
+          force: Flags.boolean(),
         }
 
         async run() {
+          await this.parse(CMD)
           this.log('running command')
         }
       }
-      await CMD.run([])
+      await CMD.run(['--name', 'astro'])
     })
     .do(ctx => expect(ctx.stderr).to.include('Warning: The "name" flag has been deprecated'))
     .it('shows warning for deprecated flags')
+  })
+
+  describe('deprecated flags that are not provided', () => {
+    fancy
+    .stdout()
+    .stderr()
+    .do(async () => {
+      class CMD extends Command {
+        static flags = {
+          name: Flags.string({
+            deprecated: {
+              to: '--full-name',
+              version: '2.0.0',
+            },
+          }),
+          force: Flags.boolean(),
+        }
+
+        async run() {
+          await this.parse(CMD)
+          this.log('running command')
+        }
+      }
+      await CMD.run(['--force'])
+    })
+    .do(ctx => expect(ctx.stderr).to.not.include('Warning: The "name" flag has been deprecated'))
+    .it('does not show warning for deprecated flags if they are not provided')
   })
 
   describe('deprecated state', () => {
@@ -273,7 +302,7 @@ describe('command', () => {
       await CMD.run([])
     })
     .do(ctx => expect(ctx.stderr).to.include('Warning: The "my:command" command has been deprecated'))
-    .it('shows warning for deprecated flags')
+    .it('shows warning for deprecated command')
   })
 
   describe('deprecated state with options', () => {
@@ -300,7 +329,7 @@ describe('command', () => {
       expect(ctx.stderr).to.include('in version 2.0.0')
       expect(ctx.stderr).to.include('Use "my:other:command" instead')
     })
-    .it('shows warning for deprecated flags')
+    .it('shows warning for deprecated command with custom options')
   })
 
   describe('stdout err', () => {
