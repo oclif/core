@@ -22,6 +22,7 @@ export namespace PJSON {
       default?: string;
       plugins?: string[];
       devPlugins?: string[];
+      jitPlugins?: string[];
       helpClass?: string;
       helpOptions?: HelpOptions;
       aliases?: { [name: string]: string | null };
