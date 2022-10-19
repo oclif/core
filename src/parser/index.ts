@@ -16,7 +16,7 @@ const m = Deps()
 export async function parse<TFlags extends OutputFlags<any>, GFlags extends FlagOutput, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags, GFlags>): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
   const input = {
     argv,
-    context: options.context!,
+    context: options.context,
     args: (options.args || []).map((a: any) => args.newArg(a as any)),
     '--': options['--'],
     flags: {
