@@ -63,7 +63,6 @@ describe('handle', () => {
   fancy
   .stdout()
   .stderr()
-  .finally(() => delete process.exitCode)
   .it('hides an exit error', ctx => {
     handle(new ExitError(0))
     expect(ctx.stdout).to.equal('')
@@ -79,7 +78,6 @@ describe('handle', () => {
   .finally(() => {
     config.errlog = undefined
   })
-  .finally(() => delete process.exitCode)
   .it('logs when errlog is set', async ctx => {
     handle(new CLIError('uh oh!'))
     expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!\n`)
