@@ -1,4 +1,5 @@
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
+import Command from '../command'
 import {Config} from './config'
 
 export type ParseFn<T> = (input: string) => Promise<T>
@@ -171,7 +172,7 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T>
+export type FlagParser<T, I, P = any> = (input: I, context: Command, opts: P & OptionFlag<T>) => Promise<T>
 
 export type FlagBase<T, I, P = any> = FlagProps & {
   parse: FlagParser<T, I, P>;
@@ -227,7 +228,7 @@ export type Input<TFlags extends FlagOutput, GFlags extends FlagOutput> = {
   globalFlags?: FlagInput<GFlags>;
   args?: ArgInput;
   strict?: boolean;
-  context?: any;
+  context?: Command;
   '--'?: boolean;
 }
 
@@ -236,7 +237,7 @@ export interface ParserInput {
   flags: FlagInput<any>;
   args: ParserArg<any>[];
   strict: boolean;
-  context: any;
+  context: Command;
   '--'?: boolean;
 }
 
