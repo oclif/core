@@ -21,20 +21,20 @@ The [cli-ux README](./src/cli-ux/README.md) also contains detailed usage example
 Usage
 =====
 
-Without the generator, you can create a simple CLI like this:
+We strongly encourage you generate an oclif CLI using the [oclif cli](https://github.com/oclif/oclif). The generator will generate an npm package with `@oclif/core` as a dependency.
 
-**TypeScript**
-```js
+You can, however, use `@oclif/core` in a standalone script like this:
+```typescript
 #!/usr/bin/env ts-node
 
 import * as fs from 'fs'
 import {Command, Flags} from '@oclif/core'
 
 class LS extends Command {
+  static description = 'List the files in a directory.'
   static flags = {
     version: Flags.version(),
     help: Flags.help(),
-    // run with --dir= or -d=
     dir: Flags.string({
       char: 'd',
       default: process.cwd(),
@@ -43,34 +43,23 @@ class LS extends Command {
 
   async run() {
     const {flags} = await this.parse(LS)
-    let files = fs.readdirSync(flags.dir)
-    for (let f of files) {
+    const files = fs.readdirSync(flags.dir)
+    for (const f of files) {
       this.log(f)
     }
   }
 }
 
-LS.run()
-.catch(require('@oclif/core/handle'))
+LS.run().then(() => {
+  require('@oclif/core/flush')
+}, () => {
+  require('@oclif/core/handle')
+})
 ```
 
-Then run either of these with:
+Then run it like this:
 
 ```sh-session
-$ ./myscript
+$ ts-node myscript.ts
 ...files in current dir...
-$ ./myscript --dir foobar
-...files in ./foobar...
-$ ./myscript --version
-myscript/0.0.0 darwin-x64 node-v9.5.0
-$ ./myscript --help
-USAGE
-  $ @oclif/core
-
-OPTIONS
-  -d, --dir=dir  [default: /Users/jdickey/src/github.com/oclif/core]
-  --help         show CLI help
-  --version      show CLI version
 ```
-
-See the [generator](https://github.com/oclif/oclif) for all the options you can pass to the command.

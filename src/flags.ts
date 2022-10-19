@@ -1,6 +1,7 @@
 import {OptionFlag, BooleanFlag, EnumFlagOptions, Default} from './interfaces'
 import {custom, boolean} from './parser'
 import Command from './command'
+import {Help} from './help'
 export {boolean, integer, url, directory, file, string, build, option, custom} from './parser'
 
 export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
@@ -36,7 +37,8 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
     description: 'Show CLI help.',
     ...opts,
     parse: async (_: any, cmd: Command) => {
-      (cmd as any)._help()
+      new Help(cmd.config).showHelp(cmd.argv)
+      cmd.exit(0)
     },
   })
 }
