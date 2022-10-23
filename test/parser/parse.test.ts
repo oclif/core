@@ -910,6 +910,26 @@ See more help with --help`)
           delete process.env.TEST_FOO
         })
       }
+
+      it('ignores unset environment variables', async () => {
+        delete process.env.TEST_FOO
+        const out = await parse([], {
+          flags: {
+            foo: flags.boolean({env: 'TEST_FOO'}),
+          },
+        })
+        expect(out.flags.foo).to.be.undefined
+      })
+
+      it('uses default when environment variable is unset', async () => {
+        delete process.env.TEST_FOO
+        const out = await parse([], {
+          flags: {
+            foo: flags.boolean({env: 'TEST_FOO', default: true}),
+          },
+        })
+        expect(out.flags.foo).to.be.true
+      })
     })
   })
 
