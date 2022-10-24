@@ -751,6 +751,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
         dependsOn: flag.dependsOn,
+        relationships: flag.relationships,
         exclusive: flag.exclusive,
         deprecated: flag.deprecated,
         aliases: flag.aliases,
@@ -813,7 +814,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   }
 
   // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags']
+  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags']
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: any = {}
