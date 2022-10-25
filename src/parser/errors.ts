@@ -1,21 +1,12 @@
 import {CLIError} from '../errors'
 
-import Deps from './deps'
-import * as Help from './help'
-import * as List from './list'
+import {flagUsages} from './help'
+import {renderList} from './list'
 import * as chalk from 'chalk'
 import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'
 
 export {CLIError} from '../errors'
-
-// eslint-disable-next-line new-cap
-const m = Deps()
-// eslint-disable-next-line node/no-missing-require
-.add('help', () => require('./help') as typeof Help)
-// eslint-disable-next-line node/no-missing-require
-.add('list', () => require('./list') as typeof List)
-.add('chalk', () => require('chalk') as typeof chalk)
 
 export type Validation = {
   name: string;
@@ -41,7 +32,7 @@ export class InvalidArgsSpecError extends CLIParseError {
     let message = 'Invalid argument spec'
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
-      const list = m.list.renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
+      const list = renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
       message += `:\n${list}`
     }
 
@@ -57,7 +48,7 @@ export class RequiredArgsError extends CLIParseError {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
-      const list = m.list.renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
+      const list = renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
       message += `:\n${list}`
     }
 
@@ -70,7 +61,7 @@ export class RequiredFlagError extends CLIParseError {
   public flag: Flag<any>
 
   constructor({flag, parse}: CLIParseErrorOptions & { flag: Flag<any> }) {
-    const usage = m.list.renderList(m.help.flagUsages([flag], {displayRequired: false}))
+    const usage = renderList(flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
     super({parse, message})
     this.flag = flag
@@ -106,7 +97,7 @@ export class FailedFlagValidationError extends CLIParseError {
     const reasons = failed.map(r => r.reason)
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
-    const message = `The following ${errString} occurred:\n  ${m.chalk.dim(deduped.join('\n  '))}`
+    const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
     super({parse, message})
   }
 }

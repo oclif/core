@@ -11,7 +11,7 @@ import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfigu
 import {Plugin} from './interfaces/plugin'
 import {LoadOptions} from './interfaces/config'
 import {CommandError} from './interfaces/errors'
-import {boolean} from './parser'
+import {boolean} from './flags'
 
 const pjson = require('../package.json')
 

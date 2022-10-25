@@ -1,14 +1,6 @@
-import Deps from './deps'
-import * as Errors from './errors'
-import * as Util from './util'
+import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
+import * as util from './util'
 import {ParserInput, OutputFlags, ParsingToken, OutputArgs, ArgToken, FlagToken, BooleanFlag, OptionFlag, ParserOutput, FlagOutput} from '../interfaces'
-
-// eslint-disable-next-line new-cap
-const m = Deps()
-// eslint-disable-next-line node/no-missing-require
-.add('errors', () => require('./errors') as typeof Errors)
-// eslint-disable-next-line node/no-missing-require
-.add('util', () => require('./util') as typeof Util)
 
 let debug: any
 try {
@@ -46,11 +38,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private currentFlag?: OptionFlag<any>
 
   constructor(private readonly input: T) {
-    const {pickBy} = m.util
     this.context = input.context || {}
     this.argv = [...input.argv]
     this._setNames()
-    this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
+    this.booleanFlags = util.pickBy(input.flags, f => f.type === 'boolean') as any
     this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
       return (flag.aliases ?? []).map(a => [a, flag])
     }))
@@ -106,7 +97,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         this.currentFlag = flag
         const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
         if (typeof input !== 'string') {
-          throw new m.errors.CLIError(`Flag --${name} expects a value`)
+          throw new CLIError(`Flag --${name} expects a value`)
         }
 
         this.raw.push({type: 'flag', flag: flag.name, input})
@@ -177,7 +168,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const token of this._flagTokens) {
       const flag = this.input.flags[token.flag]
 
-      if (!flag) throw new m.errors.CLIError(`Unexpected flag ${token.flag}`)
+      if (!flag) throw new CLIError(`Unexpected flag ${token.flag}`)
       if (flag.type === 'boolean') {
         if (token.input === `--no-${flag.name}`) {
           flags[token.flag] = false
@@ -233,7 +224,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
   private _validateOptions(flag: OptionFlag<any>, input: string) {
     if (flag.options && !flag.options.includes(input))
-      throw new m.errors.FlagInvalidOptionError(flag, input)
+      throw new FlagInvalidOptionError(flag, input)
   }
 
   private async _argv(): Promise<any[]> {
@@ -246,7 +237,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (token) {
         if (arg) {
           if (arg.options && !arg.options.includes(token.input)) {
-            throw new m.errors.ArgInvalidOptionError(arg, token.input)
+            throw new ArgInvalidOptionError(arg, token.input)
           }
 
           // eslint-disable-next-line no-await-in-loop

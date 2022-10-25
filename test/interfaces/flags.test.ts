@@ -94,16 +94,6 @@ class MyCommand extends BaseCommand {
     requiredMultiUrl: Flags.url({multiple: true, required: true}),
     defaultMultiUrl: Flags.url({multiple: true, default: [new URL('http://example.com')]}),
 
-    optionalBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })(),
-    requiredBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })({required: true}),
-    defaultBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })({default: {foo: true}}),
-
     optionalCustom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })(),
@@ -224,12 +214,6 @@ class MyCommand extends BaseCommand {
     expectType<URL[]>(this.flags.defaultMultiUrl)
     expectNotType<undefined>(this.flags.defaultMultiUrl)
     expectType<URL[] | undefined>(this.flags.optionalMultiUrl)
-
-    expectType<MyType>(this.flags.requiredBuild)
-    expectNotType<undefined>(this.flags.requiredBuild)
-    expectType<MyType>(this.flags.defaultBuild)
-    expectNotType<undefined>(this.flags.defaultBuild)
-    expectType<MyType | undefined>(this.flags.optionalBuild)
 
     expectType<MyType>(this.flags.requiredCustom)
     expectNotType<undefined>(this.flags.requiredCustom)
