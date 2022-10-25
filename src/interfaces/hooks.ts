@@ -14,12 +14,12 @@ export interface Hooks {
     return: void;
   };
   prerun: {
-    options: { command: Command.Class; argv: string[] };
+    options: { Command: Command.Class; argv: string[] };
     return: void;
   };
   postrun: {
     options: {
-      command: Command.Class;
+      Command: Command.Class;
       result?: any;
       argv: string[];
     };

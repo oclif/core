@@ -321,10 +321,10 @@ export class Config implements IConfig {
     }
 
     const command = await c.load()
-    await this.runHook('prerun', {command, argv})
+    await this.runHook('prerun', {Command: command, argv})
 
     const result = (await command.run(argv, this)) as T
-    await this.runHook('postrun', {command, result, argv})
+    await this.runHook('postrun', {Command: command, result, argv})
     return result
   }
 
