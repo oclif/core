@@ -13,7 +13,7 @@ import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {Cached, CommandImport, Loadable} from '../command'
+import {Command} from '../command'
 
 const _pjson = require('../../package.json')
 
@@ -112,7 +112,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: Loadable[]
+  commands!: Command.Loadable[]
 
   hooks!: {[k: string]: string[]}
 
@@ -129,7 +129,6 @@ export class Plugin implements IPlugin {
 
   protected warned = false
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(public options: PluginOptions) {}
 
   async load() {
@@ -199,11 +198,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<CommandImport>
+  async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<CommandImport | undefined>
+  async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<CommandImport | undefined> {
+  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const fetch = async () => {
       if (!this.commandsDir) return
       const search = (cmd: any) => {
@@ -232,11 +231,6 @@ export class Plugin implements IPlugin {
 
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
-
-    // if (cmd.id === 'hello:world') {
-    //   // @ts-ignore
-    //   await (new cmd([], this.config)).run()
-    // }
 
     return cmd
   }
@@ -277,11 +271,11 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Cached] => Boolean(f))
+      .filter((f): f is [string, Command.Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: Cached}),
+      }, {} as {[k: string]: Command.Cached}),
     }
   }
 

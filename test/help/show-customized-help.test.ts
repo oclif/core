@@ -4,8 +4,7 @@ import * as path from 'path'
 
 import {CommandHelp, Help} from '../../src/help'
 import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
-import {Interfaces, Config} from '../../src'
-import {CommandImport} from '../../src/command'
+import {Interfaces, Config, Command} from '../../src'
 
 const g: any = global
 g.oclif.columns = 80
@@ -38,7 +37,7 @@ class TestHelp extends Help {
     this.opts.usageHeader = 'SYNOPSIS'
   }
 
-  summary(c: CommandImport): string {
+  summary(c: Command.Class): string {
     // This will essentially ignore the summary
     return this.wrap(c.description || '')
   }

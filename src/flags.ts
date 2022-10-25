@@ -1,6 +1,6 @@
 import {OptionFlag, BooleanFlag, EnumFlagOptions, Default} from './interfaces'
 import {custom, boolean} from './parser'
-import Command from './command'
+import {Command} from './command'
 import {Help} from './help'
 export {boolean, integer, url, directory, file, string, build, option, custom} from './parser'
 

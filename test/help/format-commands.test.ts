@@ -6,16 +6,15 @@ const g: any = global
 g.oclif.columns = 80
 import {Help} from '../../src/help'
 import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
-import {CommandImport} from '../../src/command'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
-  public formatCommands(commands: CommandImport[]) {
+  public formatCommands(commands: Command.Class[]) {
     return super.formatCommands(commands)
   }
 }
 
-const formatCommands = (commands: CommandImport[]) => ({
+const formatCommands = (commands: Command.Class[]) => ({
   run(ctx: {help: TestHelp; output: string}) {
     const help = ctx.help.formatCommands(commands)
     if (process.env.TEST_OUTPUT === '1') {

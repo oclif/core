@@ -19,7 +19,6 @@ export class Logger {
 
   protected buffer: string[] = []
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(public file: string) {}
 
   log(msg: string) {

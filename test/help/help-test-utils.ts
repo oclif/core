@@ -1,4 +1,4 @@
-import {CommandImport, Loadable, Cached} from '../../src/command'
+import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 
 import {Interfaces, toCached} from '../../src'
@@ -24,14 +24,14 @@ export class TestHelpWithOptions extends Help {
     this.opts.hideCommandSummaryInDescription = true
   }
 
-  public formatCommand(command: CommandImport) {
+  public formatCommand(command: Command.Class) {
     return super.formatCommand(command)
   }
 }
 
 // extensions to expose method as public for testing
 export class TestHelp extends Help {
-  public formatCommand(command: CommandImport | Loadable | Cached) {
+  public formatCommand(command: Command.Class | Command.Loadable | Command.Cached) {
     return super.formatCommand(command)
   }
 

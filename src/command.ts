@@ -30,46 +30,12 @@ const jsonFlag = {
   }),
 }
 
-export type CommandImport = typeof Command & {
-    id: string;
-    run(argv?: string[], config?: Interfaces.LoadOptions): PromiseLike<any>;
-}
-
-export interface Loadable extends Cached {
-  load(): Promise<CommandImport>
-}
-
-export interface Cached {
-  [key: string]: unknown;
-  id: string;
-  hidden: boolean;
-  state?: 'beta' | 'deprecated' | string;
-  deprecationOptions?: Deprecation;
-  aliases: string[];
-  summary?: string;
-  description?: string;
-  usage?: string | string[];
-  examples?: Interfaces.Example[];
-  strict?: boolean;
-  type?: string;
-  pluginName?: string;
-  pluginType?: string;
-  pluginAlias?: string;
-  flags: {[name: string]: CachedFlag};
-  args: Interfaces.Arg[];
-  hasDynamicHelp?: boolean;
-}
-
-export type Flag = Interfaces.CompletableFlag<any>
-
-export type CachedFlag = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | Interfaces.OptionFlagProps)
-
 /**
  * An abstract class which acts as the base for each command
  * in your project.
  */
 
-export default abstract class Command {
+export abstract class Command {
   static _base = `${pjson.name}@${pjson.version}`
 
   /** A command ID, used mostly in error or verbose reporting. */
@@ -114,9 +80,9 @@ export default abstract class Command {
 
   static plugin: Interfaces.Plugin | undefined
 
-  static pluginName?: string;
-  static pluginType?: string;
-  static pluginAlias?: string;
+  static readonly pluginName?: string;
+  static readonly pluginType?: string;
+  static readonly pluginAlias?: string;
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -132,7 +98,7 @@ export default abstract class Command {
    *     $ <%= config.bin => command flags
    * ```
    */
-  static examples: Interfaces.Example[]
+  static examples: Command.Example[]
 
   static hasDynamicHelp = false
 
@@ -156,7 +122,7 @@ export default abstract class Command {
   /**
    * instantiate and run the command
    *
-   * @param {CommandImport} this - the command class
+   * @param {Command.Class} this - the command class
    * @param {string[]} argv argv
    * @param {Interfaces.LoadOptions} opts options
    * @returns {Promise<unknown>} result
@@ -344,5 +310,49 @@ export default abstract class Command {
 
   protected toErrorJson(err: unknown): any {
     return {error: err}
+  }
+}
+
+export namespace Command {
+  export type Class = typeof Command & {
+    id: string;
+    run(argv?: string[], config?: Interfaces.LoadOptions): PromiseLike<any>;
+  }
+
+  export interface Loadable extends Cached {
+    load(): Promise<Command.Class>
+  }
+
+  export interface Cached {
+    [key: string]: unknown;
+    id: string;
+    hidden: boolean;
+    state?: 'beta' | 'deprecated' | string;
+    deprecationOptions?: Deprecation;
+    aliases: string[];
+    summary?: string;
+    description?: string;
+    usage?: string | string[];
+    examples?: Example[];
+    strict?: boolean;
+    type?: string;
+    pluginName?: string;
+    pluginType?: string;
+    pluginAlias?: string;
+    flags: {[name: string]: Flag.Cached};
+    args: Interfaces.Arg[];
+    hasDynamicHelp?: boolean;
+  }
+
+  export type Flag = Interfaces.CompletableFlag<any>
+
+  export namespace Flag {
+    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | Interfaces.OptionFlagProps)
+    export type Any = Flag | Cached
+  }
+
+  export type Example = string | {
+    description: string;
+    command: string;
   }
 }

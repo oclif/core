@@ -30,7 +30,6 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): void {
 }
 
 export class Executor {
-  // eslint-disable-next-line no-useless-constructor
   public constructor(private testDir: string) {}
 
   public executeInTestDir(cmd: string, silent = true): Promise<Result> {

@@ -13,7 +13,7 @@ import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} fr
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
-import {Cached, CachedFlag, CommandImport, Loadable} from '../command'
+import {Command} from '../command'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -121,13 +121,12 @@ export class Config implements IConfig {
 
   private topicPermutations = new Permutations()
 
-  private _commands = new Map<string, Loadable>()
+  private _commands = new Map<string, Command.Loadable>()
 
   private _topics = new Map<string, Topic>()
 
   private _commandIDs!: string[]
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
@@ -324,10 +323,9 @@ export class Config implements IConfig {
     return final
   }
 
-  // eslint-disable-next-line default-param-last
-  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Loadable): Promise<T> {
+  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
     debug('runCommand %s %o', id, argv)
-    const c = cachedCommand || this.findCommand(id)
+    const c = cachedCommand ?? this.findCommand(id)
     if (!c) {
       const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
       const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
@@ -370,11 +368,11 @@ export class Config implements IConfig {
     .toUpperCase()
   }
 
-  findCommand(id: string, opts: { must: true }): Loadable
+  findCommand(id: string, opts: { must: true }): Command.Loadable
 
-  findCommand(id: string, opts?: { must: boolean }): Loadable | undefined
+  findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
 
-  findCommand(id: string, opts: { must?: boolean } = {}): Loadable | undefined {
+  findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
@@ -405,7 +403,7 @@ export class Config implements IConfig {
    * @param argv string[] process.argv containing the flags and arguments provided by the user
    * @returns string[]
    */
-  findMatches(partialCmdId: string, argv: string[]): Loadable[] {
+  findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
@@ -425,7 +423,7 @@ export class Config implements IConfig {
    * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
    * @returns Command.Loadable[]
    */
-  getAllCommands(): Loadable[] {
+  getAllCommands(): Command.Loadable[] {
     const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
@@ -446,7 +444,7 @@ export class Config implements IConfig {
     return this.getAllCommands().map(c => c.id)
   }
 
-  get commands(): Loadable[] {
+  get commands(): Command.Loadable[] {
     return [...this._commands.values()]
   }
 
@@ -686,7 +684,7 @@ export class Config implements IConfig {
    * @param commands commands to determine the priority of
    * @returns command instance {Command.Loadable} or undefined
    */
-  private determinePriority(commands: Loadable[]): Loadable {
+  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
     const commandPlugins = commands.sort((a, b) => {
       const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
@@ -737,8 +735,8 @@ const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-export async function toCached(c: CommandImport, plugin?: IPlugin): Promise<Cached> {
-  const flags = {} as {[k: string]: CachedFlag}
+export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command.Cached> {
+  const flags = {} as {[k: string]: Command.Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {

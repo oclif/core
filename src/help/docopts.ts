@@ -1,4 +1,4 @@
-import {Flag, CommandImport, Loadable, Cached, CachedFlag} from '../command'
+import {Command} from '../command'
 /**
  * DocOpts - See http://docopt.org/.
  *
@@ -56,11 +56,11 @@ import {Flag, CommandImport, Loadable, Cached, CachedFlag} from '../command'
  *
  */
 export class DocOpts {
-  private flagMap: {[index: string]: Flag | CachedFlag}
+  private flagMap: {[index: string]: Command.Flag.Any}
 
-  private flagList: Flag[] | CachedFlag[]
+  private flagList: Command.Flag.Any[]
 
-  public constructor(private cmd: CommandImport | Loadable | Cached) {
+  public constructor(private cmd: Command.Class | Command.Loadable | Command.Cached) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -71,7 +71,7 @@ export class DocOpts {
     })
   }
 
-  public static generate(cmd: CommandImport | Loadable | Cached): string {
+  public static generate(cmd: Command.Class | Command.Loadable | Command.Cached): string {
     return new DocOpts(cmd).toString()
   }
 
@@ -163,8 +163,7 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
-  // eslint-disable-next-line default-param-last
-  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flag[] | CachedFlag[]): string[] {
+  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Command.Flag.Any[] = []): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
       let type = ''

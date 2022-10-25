@@ -3,10 +3,9 @@ import stripAnsi = require('strip-ansi')
 
 import {castArray, compact, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
-import {Example} from '../interfaces/command'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 import {DocOpts} from './docopts'
-import {Cached, CachedFlag, CommandImport, Flag, Loadable} from '../command'
+import {Command} from '../command'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be
@@ -27,7 +26,7 @@ if (process.env.ConEmuANSI === 'ON') {
 
 export class CommandHelp extends HelpFormatter {
   constructor(
-    public command: CommandImport | Loadable | Cached,
+    public command: Command.Class | Command.Loadable | Command.Cached,
     public config: Interfaces.Config,
     public opts: Interfaces.HelpOptions) {
     super(config, opts)
@@ -55,9 +54,9 @@ export class CommandHelp extends HelpFormatter {
     return output
   }
 
-  protected groupFlags(flags: Array<Flag | CachedFlag>) {
-    const mainFlags: Array<Flag | CachedFlag> = []
-    const flagGroups: { [index: string]: Array<Flag | CachedFlag> } = {}
+  protected groupFlags(flags: Array<Command.Flag.Any>) {
+    const mainFlags: Array<Command.Flag.Any> = []
+    const flagGroups: { [index: string]: Array<Command.Flag.Any> } = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup
@@ -178,7 +177,7 @@ export class CommandHelp extends HelpFormatter {
     return body
   }
 
-  protected examples(examples: Example[] | undefined | string): string | undefined {
+  protected examples(examples: Command.Example[] | undefined | string): string | undefined {
     if (!examples || examples.length === 0) return
 
     const formatIfCommand = (example: string): string => {
@@ -247,7 +246,7 @@ export class CommandHelp extends HelpFormatter {
     return `[${name}]`
   }
 
-  protected flagHelpLabel(flag: Flag | CachedFlag, showOptions = false) {
+  protected flagHelpLabel(flag: Command.Flag.Any, showOptions = false) {
     let label = flag.helpLabel
 
     if (!label) {
@@ -278,7 +277,7 @@ export class CommandHelp extends HelpFormatter {
     return label
   }
 
-  protected flags(flags: Array<Flag | CachedFlag>): [string, string | undefined][] | undefined {
+  protected flags(flags: Array<Command.Flag.Any>): [string, string | undefined][] | undefined {
     if (flags.length === 0) return
 
     return flags.map(flag => {
@@ -299,7 +298,7 @@ export class CommandHelp extends HelpFormatter {
     })
   }
 
-  protected flagsDescriptions(flags: Array<Flag | CachedFlag>): string | undefined {
+  protected flagsDescriptions(flags: Array<Command.Flag.Any>): string | undefined {
     const flagsWithExtendedDescriptions = flags.filter(flag => flag.summary && flag.description)
     if (flagsWithExtendedDescriptions.length === 0) return
 

@@ -2,7 +2,7 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 
-import Command from '../../src/command'
+import {Command} from '../../src/command'
 import * as Flags from '../../src/flags'
 import * as Interfaces from '../../src/interfaces'
 import {expectType, expectNotType} from 'tsd'

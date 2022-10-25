@@ -7,7 +7,6 @@ import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'
 import {Command, Interfaces} from '../../src'
-import {CommandImport, Loadable} from '../../src/command'
 
 interface Options {
   pjson?: any;
@@ -186,21 +185,21 @@ describe('Config', () => {
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<CommandImport> => {
+      const findCommand = async (): Promise<Command.Class> => {
         return MyCommandClass
       }
 
-      const commandPluginA: Loadable = {
+      const commandPluginA: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<CommandImport> {
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: Loadable = {
+      const commandPluginB: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<CommandImport> {
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[1] ?? 'core',

@@ -1,5 +1,4 @@
-import {Loadable, CommandImport} from '../command'
-// import {Command} from './command'
+import {Command} from '../command'
 import {Config} from './config'
 import {Plugin} from './plugin'
 
@@ -15,12 +14,12 @@ export interface Hooks {
     return: void;
   };
   prerun: {
-    options: { Command: CommandImport; argv: string[] };
+    options: { Command: Command.Class; argv: string[] };
     return: void;
   };
   postrun: {
     options: {
-      Command: CommandImport;
+      Command: Command.Class;
       result?: any;
       argv: string[];
     };
@@ -39,7 +38,7 @@ export interface Hooks {
     return: unknown;
   };
   'command_incomplete': {
-    options: {id: string; argv: string[], matches: Loadable[]};
+    options: {id: string; argv: string[], matches: Command.Loadable[]};
     return: unknown;
   };
   'plugins:preinstall': {

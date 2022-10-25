@@ -1,7 +1,7 @@
 import * as Chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
-import {Cached, CachedFlag, CommandImport, Flag, Loadable} from '../command'
+import {Command} from '../command'
 
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
@@ -17,7 +17,7 @@ const {
 
 export type HelpSectionKeyValueTable = {name: string; description: string}[]
 export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: CommandImport | Loadable | Cached; flags: Array<Flag | CachedFlag>; args: Interfaces.Arg[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
+export type HelpSectionRenderer = (data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Interfaces.Arg[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
 
 export class HelpFormatter {
   indentSpacing = 2

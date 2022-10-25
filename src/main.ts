@@ -31,15 +31,14 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-// eslint-disable-next-line default-param-last
-export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
+export async function run(argv?: string[], options?: Interfaces.LoadOptions) {
+  argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)
   }
 
-  // return Main.run(argv, options)
-  const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
+  const config = await Config.load(options ?? module.filename ?? __dirname)
 
   if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
   let [id, ...argvSlice] = argv
