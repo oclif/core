@@ -60,7 +60,7 @@ export class Help extends HelpBase {
     })
   }
 
-  protected get sortedCommands() {
+  protected get sortedCommands(): Command.Loadable[] {
     let commands = this.config.commands
 
     commands = commands.filter(c => this.opts.all || !c.hidden)
@@ -70,7 +70,7 @@ export class Help extends HelpBase {
     return commands
   }
 
-  protected get sortedTopics() {
+  protected get sortedTopics(): Interfaces.Topic[] {
     let topics = this._topics
     topics = topics.filter(t => this.opts.all || !t.hidden)
     topics = sortBy(topics, t => t.name)
@@ -83,7 +83,7 @@ export class Help extends HelpBase {
     super(config, opts)
   }
 
-  public async showHelp(argv: string[]) {
+  public async showHelp(argv: string[]): Promise<void> {
     const originalArgv = argv.slice(1)
     argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
 
@@ -131,7 +131,7 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
-  public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached) {
+  public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
 
@@ -173,7 +173,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected async showRootHelp() {
+  protected async showRootHelp(): Promise<void> {
     let rootTopics = this.sortedTopics
     let rootCommands = this.sortedCommands
 
@@ -206,7 +206,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected async showTopicHelp(topic: Interfaces.Topic) {
+  protected async showTopicHelp(topic: Interfaces.Topic): Promise<void> {
     const name = topic.name
     const depth = name.split(':').length
 
@@ -244,7 +244,7 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected getCommandHelpClass(command: Command.Class | Command.Loadable | Command.Cached) {
+  protected getCommandHelpClass(command: Command.Class | Command.Loadable | Command.Cached): CommandHelp {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
@@ -312,11 +312,11 @@ export class Help extends HelpBase {
     return this.section('TOPICS', body)
   }
 
-  protected command(command: Command.Class) {
+  protected command(command: Command.Class): string {
     return this.formatCommand(command)
   }
 
-  protected log(...args: string[]) {
+  protected log(...args: string[]): void {
     console.log(...args)
   }
 }

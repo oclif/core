@@ -12,7 +12,7 @@ export {
   FlagToken, List, ListItem, BooleanFlag, Flag, FlagBase, OptionFlag,
   Input, EnumFlagOptions, DefaultContext, Default, Definition,
   CompletableOptionFlag, Completion, CompletionContext, FlagInput,
-  CompletableFlag, OptionFlagProps,
+  CompletableFlag, OptionFlagProps, BooleanFlagProps, Deprecation,
 } from './parser'
 export {PJSON} from './pjson'
 export {Plugin, PluginOptions, Options} from './plugin'

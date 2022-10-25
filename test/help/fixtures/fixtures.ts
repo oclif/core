@@ -10,13 +10,11 @@ export class AppsCreate extends Command {
 
   static description = 'this only shows up in command help under DESCRIPTION';
 
-  static disableJsonFlag = true;
-
   static flags = {};
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -31,7 +29,7 @@ export class AppsDestroy extends Command {
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -45,7 +43,7 @@ export class AppsIndex extends Command {
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -60,7 +58,7 @@ this only shows up in command help under DESCRIPTION`;
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -87,7 +85,7 @@ export class AppsAdminIndex extends Command {
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -102,7 +100,7 @@ export class AppsAdminAdd extends Command {
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }
@@ -119,7 +117,7 @@ export class DbCreate extends Command {
 
   static args = [];
 
-  async run() {
+  async run(): Promise<void> {
     'run'
   }
 }

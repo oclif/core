@@ -1,5 +1,3 @@
-// tslint:disable
-
 import {maxBy} from '../util'
 import deps from './deps'
 

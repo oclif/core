@@ -1,4 +1,4 @@
-import {error} from '../errors'
+import {CLIError, error} from '../errors'
 import * as Globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
@@ -21,12 +21,12 @@ function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
   if (Array.isArray(input)) {
-    return input.concat(flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`)))
+    return [...input, ...flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`))]
   }
 
   return flatMap(Object.keys(input), k => {
     input[k].name = k
-    return [{...input[k], name: `${base}${k}`}].concat(topicsToArray(input[k].subtopics, `${base}${input[k].name}`))
+    return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })
 }
 
@@ -131,7 +131,7 @@ export class Plugin implements IPlugin {
 
   constructor(public options: PluginOptions) {}
 
-  async load() {
+  public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
@@ -162,15 +162,15 @@ export class Plugin implements IPlugin {
     .sort((a, b) => a.id.localeCompare(b.id))
   }
 
-  get topics(): Topic[] {
+  public get topics(): Topic[] {
     return topicsToArray(this.pjson.oclif.topics || {})
   }
 
-  get commandsDir() {
+  public get commandsDir(): string | undefined {
     return tsPath(this.root, this.pjson.oclif.commands)
   }
 
-  get commandIDs() {
+  public get commandIDs(): string[] {
     if (!this.commandsDir) return []
     let globby: typeof Globby
     try {
@@ -279,7 +279,7 @@ export class Plugin implements IPlugin {
     }
   }
 
-  protected warn(err: any, scope?: string) {
+  protected warn(err: string | Error | CLIError, scope?: string): void {
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))

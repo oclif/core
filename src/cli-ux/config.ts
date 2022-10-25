@@ -50,7 +50,7 @@ export class Config {
     return globals.context || {}
   }
 
-  set context(v: any) {
+  set context(v: unknown) {
     globals.context = v
   }
 }

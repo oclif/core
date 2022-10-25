@@ -1,9 +1,7 @@
-// tslint:disable interface-over-type-literal
-
 import Deps from './deps'
 import * as Errors from './errors'
 import * as Util from './util'
-import {ParserInput, OutputFlags, ParsingToken, OutputArgs, ArgToken, FlagToken, BooleanFlag, OptionFlag} from '../interfaces'
+import {ParserInput, OutputFlags, ParsingToken, OutputArgs, ArgToken, FlagToken, BooleanFlag, OptionFlag, ParserOutput, FlagOutput} from '../interfaces'
 
 // eslint-disable-next-line new-cap
 const m = Deps()
@@ -33,7 +31,7 @@ const readStdin = async () => {
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, GFlags extends FlagOutput, TArgs extends OutputArgs> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
@@ -60,7 +58,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.metaData = {}
   }
 
-  public async parse() {
+  public async parse(): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
     this._debugInput()
 
     const findLongFlag = (arg: string) => {
@@ -173,7 +171,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return args
   }
 
-  private async _flags(): Promise<TFlags> {
+  private async _flags(): Promise<TFlags & GFlags & { json: boolean | undefined }> {
     const flags = {} as any
     this.metaData.flags = {} as any
     for (const token of this._flagTokens) {

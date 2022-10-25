@@ -520,11 +520,6 @@ See more help with --help`)
     })
   })
 
-  it('--no-color', async () => {
-    const out = await parse(['--no-color'], {})
-    expect(out.flags).to.deep.include({color: false})
-  })
-
   describe('parse', () => {
     it('parse', async () => {
       const out = await parse(['--foo=bar', '100'], {

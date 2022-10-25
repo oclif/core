@@ -52,7 +52,7 @@ export class CLIError extends Error implements OclifError {
     return output
   }
 
-  get bang() {
+  get bang(): string | undefined {
     try {
       return chalk.red(process.platform === 'win32' ? '»' : '›')
     } catch {}
@@ -66,7 +66,7 @@ export namespace CLIError {
       this.name = 'Warning'
     }
 
-    get bang() {
+    get bang(): string | undefined {
       try {
         return chalk.yellow(process.platform === 'win32' ? '»' : '›')
       } catch {}

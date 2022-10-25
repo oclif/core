@@ -1,5 +1,3 @@
-// tslint:disable restrict-plus-operands
-
 import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
 
@@ -30,7 +28,7 @@ export default class SpinnerAction extends ActionBase {
     this.frameIndex = 0
   }
 
-  protected _start() {
+  protected _start(): void {
     this._reset()
     if (this.spinner) clearInterval(this.spinner)
     this._render()
@@ -43,14 +41,14 @@ export default class SpinnerAction extends ActionBase {
     interval.unref()
   }
 
-  protected _stop(status: string) {
+  protected _stop(status: string): void {
     if (this.task) this.task.status = status
     if (this.spinner) clearInterval(this.spinner)
     this._render()
     this.output = undefined
   }
 
-  protected _pause(icon?: string) {
+  protected _pause(icon?: string): void {
     if (this.spinner) clearInterval(this.spinner)
     this._reset()
     if (icon) this._render(` ${icon}`)

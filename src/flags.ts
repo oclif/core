@@ -1,4 +1,4 @@
-import {OptionFlag, BooleanFlag, EnumFlagOptions, Default} from './interfaces'
+import {OptionFlag, EnumFlagOptions, Default, BooleanFlag} from './interfaces'
 import {custom, boolean} from './parser'
 import {Command} from './command'
 import {Help} from './help'
@@ -21,7 +21,8 @@ export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | Opt
 
 export {_enum as enum}
 
-export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
+// TODO: move this to parser/index
+export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
     description: 'Show CLI version.',
     ...opts,
@@ -32,10 +33,12 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
   })
 }
 
-export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
+// TODO: move this to parser/index
+export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
     description: 'Show CLI help.',
     ...opts,
+    // TODO: better types on the context
     parse: async (_: any, cmd: Command) => {
       new Help(cmd.config).showHelp(cmd.argv)
       cmd.exit(0)

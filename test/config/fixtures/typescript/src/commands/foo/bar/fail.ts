@@ -1,5 +1,5 @@
 export const Command = {
-  run() {
+  run(): void {
     console.log('it fails!')
     throw new Error('random error')
   },

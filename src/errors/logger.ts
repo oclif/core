@@ -21,16 +21,15 @@ export class Logger {
 
   constructor(public file: string) {}
 
-  log(msg: string) {
+  log(msg: string): void {
     const stripAnsi: typeof StripAnsi = require('strip-ansi')
     msg = stripAnsi(chomp(msg))
     const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
-    // tslint:disable-next-line no-console
     this.flush(50).catch(console.error)
   }
 
-  async flush(waitForMs = 0) {
+  async flush(waitForMs = 0): Promise<void> {
     await wait(waitForMs)
     this.flushing = this.flushing.then(async () => {
       if (this.buffer.length === 0) return

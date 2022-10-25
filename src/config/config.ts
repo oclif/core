@@ -63,57 +63,33 @@ class Permutations extends Map<string, Set<string>> {
 }
 
 export class Config implements IConfig {
-  _base = `${_pjson.name}@${_pjson.version}`
+  private _base = `${_pjson.name}@${_pjson.version}`
 
-  name!: string
-
-  version!: string
-
-  channel!: string
-
-  root!: string
-
-  arch!: ArchTypes
-
-  bin!: string
-
-  cacheDir!: string
-
-  configDir!: string
-
-  dataDir!: string
-
-  dirname!: string
-
-  errlog!: string
-
-  home!: string
-
-  platform!: PlatformTypes
-
-  shell!: string
-
-  windows!: boolean
-
-  userAgent!: string
-
-  debug = 0
-
-  npmRegistry?: string
-
-  pjson!: PJSON.CLI
-
-  userPJSON?: PJSON.User
-
-  plugins: IPlugin[] = []
-
-  binPath?: string
-
-  valid!: boolean
-
-  topicSeparator: ':' | ' ' = ':'
-
-  flexibleTaxonomy!: boolean
+  public arch!: ArchTypes
+  public bin!: string
+  public binPath?: string
+  public cacheDir!: string
+  public channel!: string
+  public configDir!: string
+  public dataDir!: string
+  public debug = 0
+  public dirname!: string
+  public errlog!: string
+  public flexibleTaxonomy!: boolean
+  public home!: string
+  public name!: string
+  public npmRegistry?: string
+  public pjson!: PJSON.CLI
+  public platform!: PlatformTypes
+  public plugins: IPlugin[] = []
+  public root!: string
+  public shell!: string
+  public topicSeparator: ':' | ' ' = ':'
+  public userAgent!: string
+  public userPJSON?: PJSON.User
+  public valid!: boolean
+  public version!: string
+  public windows!: boolean
 
   protected warned = false
 
@@ -144,7 +120,7 @@ export class Config implements IConfig {
   }
 
   // eslint-disable-next-line complexity
-  async load() {
+  public async load(): Promise<void> {
     const plugin = new Plugin.Plugin({root: this.options.root})
     await plugin.load()
     this.plugins.push(plugin)
@@ -213,13 +189,13 @@ export class Config implements IConfig {
     debug('config done')
   }
 
-  async loadCorePlugins() {
+  public async loadCorePlugins(): Promise<void> {
     if (this.pjson.oclif.plugins) {
       await this.loadPlugins(this.root, 'core', this.pjson.oclif.plugins)
     }
   }
 
-  async loadDevPlugins() {
+  public async loadDevPlugins(): Promise<void> {
     if (this.options.devPlugins !== false) {
       // do not load oclif.devPlugins in production
       if (this.isProd) return
@@ -232,7 +208,7 @@ export class Config implements IConfig {
     }
   }
 
-  async loadUserPlugins() {
+  public async loadUserPlugins(): Promise<void> {
     if (this.options.userPlugins !== false) {
       try {
         const userPJSONPath = path.join(this.dataDir, 'package.json')
@@ -249,7 +225,7 @@ export class Config implements IConfig {
     }
   }
 
-  async runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>> {
+  public async runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>> {
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
@@ -323,7 +299,7 @@ export class Config implements IConfig {
     return final
   }
 
-  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
+  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand ?? this.findCommand(id)
     if (!c) {
@@ -352,38 +328,38 @@ export class Config implements IConfig {
     return result
   }
 
-  scopedEnvVar(k: string) {
+  public scopedEnvVar(k: string): string | undefined {
     return process.env[this.scopedEnvVarKey(k)]
   }
 
-  scopedEnvVarTrue(k: string): boolean {
+  public scopedEnvVarTrue(k: string): boolean {
     const v = process.env[this.scopedEnvVarKey(k)]
     return v === '1' || v === 'true'
   }
 
-  scopedEnvVarKey(k: string) {
+  public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
     .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
   }
 
-  findCommand(id: string, opts: { must: true }): Command.Loadable
+  public findCommand(id: string, opts: { must: true }): Command.Loadable
 
-  findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
+  public findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
 
-  findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
+  public findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
     return command
   }
 
-  findTopic(id: string, opts: { must: true }): Topic
+  public findTopic(id: string, opts: { must: true }): Topic
 
-  findTopic(id: string, opts?: { must: boolean }): Topic | undefined
+  public findTopic(id: string, opts?: { must: boolean }): Topic | undefined
 
-  findTopic(name: string, opts: { must?: boolean } = {}) {
+  public findTopic(name: string, opts: { must?: boolean } = {}): Topic | undefined {
     const lookupId = this.getTopicLookupId(name)
     const topic = this._topics.get(lookupId)
     if (topic) return topic
@@ -403,7 +379,7 @@ export class Config implements IConfig {
    * @param argv string[] process.argv containing the flags and arguments provided by the user
    * @returns string[]
    */
-  findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
+  public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
@@ -423,7 +399,7 @@ export class Config implements IConfig {
    * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
    * @returns Command.Loadable[]
    */
-  getAllCommands(): Command.Loadable[] {
+  public getAllCommands(): Command.Loadable[] {
     const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
@@ -440,32 +416,32 @@ export class Config implements IConfig {
    * Returns an array of all command ids. If flexible taxonomy is enabled then all permutations will be appended to the array.
    * @returns string[]
    */
-  getAllCommandIDs(): string[] {
+  public getAllCommandIDs(): string[] {
     return this.getAllCommands().map(c => c.id)
   }
 
-  get commands(): Command.Loadable[] {
+  public get commands(): Command.Loadable[] {
     return [...this._commands.values()]
   }
 
-  get commandIDs(): string[] {
+  public get commandIDs(): string[] {
     if (this._commandIDs) return this._commandIDs
     this._commandIDs = this.commands.map(c => c.id)
     return this._commandIDs
   }
 
-  get topics(): Topic[] {
+  public get topics(): Topic[] {
     return [...this._topics.values()]
   }
 
-  s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}) {
+  public s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
     const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...this as any, ...options})
   }
 
-  s3Url(key: string) {
+  public s3Url(key: string): string {
     const host = this.pjson.oclif.update.s3.host
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
@@ -480,15 +456,15 @@ export class Config implements IConfig {
     return path.join(base, this.dirname)
   }
 
-  protected windowsHome() {
+  protected windowsHome(): string | undefined {
     return this.windowsHomedriveHome() || this.windowsUserprofileHome()
   }
 
-  protected windowsHomedriveHome() {
+  protected windowsHomedriveHome(): string | undefined {
     return (process.env.HOMEDRIVE && process.env.HOMEPATH && path.join(process.env.HOMEDRIVE!, process.env.HOMEPATH!))
   }
 
-  protected windowsUserprofileHome() {
+  protected windowsUserprofileHome(): string | undefined {
     return process.env.USERPROFILE
   }
 
@@ -520,7 +496,7 @@ export class Config implements IConfig {
     return 0
   }
 
-  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin) {
+  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin): Promise<void> {
     if (!plugins || plugins.length === 0) return
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
@@ -551,7 +527,7 @@ export class Config implements IConfig {
     }))
   }
 
-  protected warn(err: string | Error | { name: string; detail: string }, scope?: string) {
+  protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
     if (this.warned) return
 
     if (typeof err === 'string') {
@@ -589,7 +565,7 @@ export class Config implements IConfig {
     process.emitWarning(JSON.stringify(err))
   }
 
-  protected get isProd() {
+  protected get isProd(): boolean {
     return isProd()
   }
 

@@ -138,7 +138,6 @@ class Table<T extends Record<string, unknown>> {
   }
 
   private resolveColumnsToObjectArray() {
-    // tslint:disable-next-line:no-this-assignment
     const {data, columns} = this
     return data.map((d: any) => {
       // eslint-disable-next-line unicorn/prefer-object-from-entries
@@ -160,7 +159,6 @@ class Table<T extends Record<string, unknown>> {
   }
 
   private outputCSV() {
-    // tslint:disable-next-line:no-this-assignment
     const {data, columns, options} = this
 
     if (!options['no-header']) {
@@ -174,7 +172,6 @@ class Table<T extends Record<string, unknown>> {
   }
 
   private outputTable() {
-    // tslint:disable-next-line:no-this-assignment
     const {data, options} = this
     // column truncation
     //
@@ -298,7 +295,7 @@ class Table<T extends Record<string, unknown>> {
   }
 }
 
-export function table<T extends Record<string, unknown>>(data: T[], columns: table.Columns<T>, options: table.Options = {}) {
+export function table<T extends Record<string, unknown>>(data: T[], columns: table.Columns<T>, options: table.Options = {}): void {
   new Table(data, columns, options).display()
 }
 
@@ -334,6 +331,7 @@ export namespace table {
   export function flags(): IFlags
   export function flags<Z extends keyof IFlags = keyof IFlags>(opts: { except: Z | Z[] }): ExcludeFlags<IFlags, Z>
   export function flags<K extends keyof IFlags = keyof IFlags>(opts: { only: K | K[] }): IncludeFlags<IFlags, K>
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   export function flags(opts?: any): any {
     if (opts) {
       const f = {}

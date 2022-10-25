@@ -1,10 +1,8 @@
-// tslint:disable restrict-plus-operands
-
 import * as chalk from 'chalk'
 
 import {CliUx} from '../../index'
 
-export default function styledJSON(obj: any) {
+export default function styledJSON(obj: unknown): void {
   const json = JSON.stringify(obj, null, 2)
   if (!chalk.level) {
     CliUx.ux.info(json)

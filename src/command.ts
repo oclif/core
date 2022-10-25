@@ -1,15 +1,17 @@
 import {fileURLToPath} from 'url'
 
 import {format, inspect} from 'util'
-import {CliUx, toConfiguredId} from './index'
+import * as CliUx from './cli-ux'
 import {Config} from './config'
-import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
-import * as Flags from './flags'
-import {BooleanFlagProps, Deprecation} from './interfaces/parser'
-import {formatCommandDeprecationWarning, formatFlagDeprecationWarning} from './help/util'
+import {Arg, ArgInput, BooleanFlagProps, CompletableFlag, Deprecation, FlagInput, FlagOutput, Input, OptionFlagProps, ParserOutput} from './interfaces/parser'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId} from './help/util'
+import {Plugin} from './interfaces/plugin'
+import {LoadOptions} from './interfaces/config'
+import {CommandError} from './interfaces/errors'
+import {boolean} from './parser'
 
 const pjson = require('../package.json')
 
@@ -24,7 +26,7 @@ process.stdout.on('error', (err: any) => {
 })
 
 const jsonFlag = {
-  json: Flags.boolean({
+  json: boolean({
     description: 'Format output as json.',
     helpGroup: 'GLOBAL',
   }),
@@ -36,53 +38,53 @@ const jsonFlag = {
  */
 
 export abstract class Command {
-  static _base = `${pjson.name}@${pjson.version}`
+  private static readonly _base = `${pjson.name}@${pjson.version}`
 
   /** A command ID, used mostly in error or verbose reporting. */
-  static id: string
+  public static id: string
 
   /**
    * The tweet-sized description for your class, used in a parent-commands
    * sub-command listing and as the header for the command help.
    */
-  static summary?: string;
+  public static summary?: string;
 
   /**
    * A full description of how to use the command.
    *
    * If no summary, the first line of the description will be used as the summary.
    */
-  static description: string | undefined
+  public static description: string | undefined
 
   /** Hide the command from help */
-  static hidden: boolean
+  public static hidden: boolean
 
   /** Mark the command as a given state (e.g. beta or deprecated) in help */
-  static state?: 'beta' | 'deprecated' | string;
+  public static state?: 'beta' | 'deprecated' | string;
 
-  static deprecationOptions?: Deprecation;
+  public static deprecationOptions?: Deprecation;
 
   /**
    * An override string (or strings) for the default usage documentation.
    */
-  static usage: string | string[] | undefined
+  public static usage: string | string[] | undefined
 
-  static help: string | undefined
+  public static help: string | undefined
 
   /** An array of aliases for this command. */
-  static aliases: string[] = []
+  public static aliases: string[] = []
 
   /** When set to false, allows a variable amount of arguments */
-  static strict = true
+  public static strict = true
 
   /** An order-dependent array of arguments for the command */
-  static args?: Interfaces.ArgInput
+  public static args?: ArgInput
 
-  static plugin: Interfaces.Plugin | undefined
+  public static plugin: Plugin | undefined
 
-  static readonly pluginName?: string;
-  static readonly pluginType?: string;
-  static readonly pluginAlias?: string;
+  public static readonly pluginName?: string;
+  public static readonly pluginType?: string;
+  public static readonly pluginAlias?: string;
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -98,17 +100,17 @@ export abstract class Command {
    *     $ <%= config.bin => command flags
    * ```
    */
-  static examples: Command.Example[]
+  public static examples: Command.Example[]
 
-  static hasDynamicHelp = false
+  public static hasDynamicHelp = false
 
-  static _enableJsonFlag = false
+  protected static _enableJsonFlag = false
 
-  static get enableJsonFlag(): boolean {
+  public static get enableJsonFlag(): boolean {
     return this._enableJsonFlag
   }
 
-  static set enableJsonFlag(value: boolean) {
+  public static set enableJsonFlag(value: boolean) {
     this._enableJsonFlag = value
     if (value === true) {
       this.globalFlags = jsonFlag
@@ -124,10 +126,10 @@ export abstract class Command {
    *
    * @param {Command.Class} this - the command class
    * @param {string[]} argv argv
-   * @param {Interfaces.LoadOptions} opts options
+   * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
    */
-  static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: Interfaces.LoadOptions): Promise<unknown> {
+  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<unknown> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -140,34 +142,33 @@ export abstract class Command {
     return cmd._run()
   }
 
-  protected static _globalFlags: Interfaces.FlagInput
+  protected static _globalFlags: FlagInput
 
-  static get globalFlags(): Interfaces.FlagInput {
+  static get globalFlags(): FlagInput {
     return this._globalFlags
   }
 
-  static set globalFlags(flags: Interfaces.FlagInput) {
+  static set globalFlags(flags: FlagInput) {
     this._globalFlags = Object.assign({}, this.globalFlags, flags)
     this.flags = {} // force the flags setter to run
   }
 
   /** A hash of flags for the command */
-  protected static _flags: Interfaces.FlagInput
+  protected static _flags: FlagInput
 
-  static get flags(): Interfaces.FlagInput {
+  public static get flags(): FlagInput {
     return this._flags
   }
 
-  static set flags(flags: Interfaces.FlagInput) {
+  public static set flags(flags: FlagInput) {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 
-  id: string | undefined
-  // id: string
+  public id: string | undefined
 
   protected debug: (...args: any[]) => void
 
-  constructor(public argv: string[], public config: Config) {
+  public constructor(public argv: string[], public config: Config) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -176,11 +177,11 @@ export abstract class Command {
     }
   }
 
-  get ctor(): typeof Command {
+  protected get ctor(): typeof Command {
     return this.constructor as typeof Command
   }
 
-  async _run<T>(): Promise<T | undefined> {
+  protected async _run<T>(): Promise<T | undefined> {
     let err: Error | undefined
     let result
     try {
@@ -202,31 +203,31 @@ export abstract class Command {
     return result
   }
 
-  exit(code = 0): void {
+  public exit(code = 0): void {
     return Errors.exit(code)
   }
 
-  warn(input: string | Error): string | Error {
+  public warn(input: string | Error): string | Error {
     if (!this.jsonEnabled()) Errors.warn(input)
     return input
   }
 
-  error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
+  public error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
 
-  error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
+  public error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
 
-  error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
+  public error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
     return Errors.error(input, options as any)
   }
 
-  log(message = '', ...args: any[]): void {
+  public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
       process.stdout.write(format(message, ...args) + '\n')
     }
   }
 
-  logToStderr(message = '', ...args: any[]): void {
+  public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
       process.stderr.write(format(message, ...args) + '\n')
@@ -240,7 +241,7 @@ export abstract class Command {
   /**
    * actual command run code goes here
    */
-  abstract run(): PromiseLike<any>
+  public abstract run(): PromiseLike<any>
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
@@ -252,7 +253,7 @@ export abstract class Command {
     this.warnIfCommandDeprecated()
   }
 
-  protected warnIfFlagDeprecated(flags: Record<string, unknown>) {
+  protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
     for (const flag of Object.keys(flags)) {
       const deprecated = this.ctor.flags[flag]?.deprecated
       if (deprecated) {
@@ -268,7 +269,7 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends Interfaces.FlagOutput, G extends Interfaces.FlagOutput, A extends { [name: string]: any }>(options?: Interfaces.Input<F, G>, argv = this.argv): Promise<Interfaces.ParserOutput<F, G, A>> {
+  protected async parse<F extends FlagOutput, G extends FlagOutput, A extends { [name: string]: any }>(options?: Input<F, G>, argv = this.argv): Promise<ParserOutput<F, G, A>> {
     if (!options) options = this.constructor as any
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
@@ -280,7 +281,7 @@ export abstract class Command {
     return results
   }
 
-  protected async catch(err: Interfaces.CommandError): Promise<any> {
+  protected async catch(err: CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       CliUx.ux.styledJSON(this.toErrorJson(err))
@@ -316,7 +317,7 @@ export abstract class Command {
 export namespace Command {
   export type Class = typeof Command & {
     id: string;
-    run(argv?: string[], config?: Interfaces.LoadOptions): PromiseLike<any>;
+    run(argv?: string[], config?: LoadOptions): PromiseLike<any>;
   }
 
   export interface Loadable extends Cached {
@@ -340,14 +341,14 @@ export namespace Command {
     pluginType?: string;
     pluginAlias?: string;
     flags: {[name: string]: Flag.Cached};
-    args: Interfaces.Arg[];
+    args: Arg[];
     hasDynamicHelp?: boolean;
   }
 
-  export type Flag = Interfaces.CompletableFlag<any>
+  export type Flag = CompletableFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | Interfaces.OptionFlagProps)
+    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
     export type Any = Flag | Cached
   }
 

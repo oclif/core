@@ -3,7 +3,7 @@ import * as fs from 'fs'
 const debug = require('debug')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
-  return arr.reduce((arr, i) => arr.concat(fn(i)), [] as U[])
+  return arr.reduce((arr, i) => [...arr, ...fn(i)], [] as U[])
 }
 
 export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in keyof T]: T[P]}, fn: (i: T[keyof T], k: keyof T) => TResult): {[P in keyof T]: TResult} {
@@ -75,7 +75,7 @@ export function getPermutations(arr: string[]): Array<string[]> {
     for (let j = 0, len2 = partial.length; j <= len2; j++) {
       const start = partial.slice(0, j)
       const end = partial.slice(j)
-      const merged = start.concat(first, end)
+      const merged = [...start, first, ...end]
 
       output.push(merged)
     }

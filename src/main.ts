@@ -8,7 +8,6 @@ import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
-  // tslint:disable-next-line strict-type-predicates
   message = typeof message === 'string' ? message : inspect(message)
   process.stdout.write(format(message, ...args) + '\n')
 }
@@ -31,14 +30,14 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-export async function run(argv?: string[], options?: Interfaces.LoadOptions) {
+export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<void> {
   argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)
   }
 
-  const config = await Config.load(options ?? module.filename ?? __dirname)
+  const config = await Config.load(options ?? require.main?.filename ?? __dirname)
 
   if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
   let [id, ...argvSlice] = argv

@@ -115,18 +115,8 @@ export const url = custom<URL>({
   },
 })
 
-export function option<T>(
-  options: {parse: OptionFlag<T>['parse']} & Partial<CustomOptionFlag<T>>,
-) {
-  return custom<T>(options)()
-}
-
 const stringFlag = custom({})
 export {stringFlag as string}
-
-export const defaultFlags = {
-  color: boolean({allowNo: true}),
-}
 
 const dirExists = async (input: string): Promise<string> => {
   if (!fs.existsSync(input)) {

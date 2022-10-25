@@ -1,5 +1,5 @@
 // this code is largely taken from opn
-import * as childProcess from 'child_process'
+import {ChildProcess, SpawnOptions, spawn} from 'child_process'
 const isWsl = require('is-wsl')
 
 export namespace open {
@@ -9,13 +9,11 @@ export namespace open {
   }
 }
 
-export default function open(target: string, opts: open.Options = {}) {
-  // opts = {wait: true, ...opts}
-
+export default function open(target: string, opts: open.Options = {}): Promise<ChildProcess> {
   let cmd
   let appArgs: string[] = []
   let args: string[] = []
-  const cpOpts: childProcess.SpawnOptions = {}
+  const cpOpts: SpawnOptions = {}
 
   if (Array.isArray(opts.app)) {
     appArgs = opts.app.slice(1)
@@ -70,7 +68,7 @@ export default function open(target: string, opts: open.Options = {}) {
     args = [...args, ...appArgs]
   }
 
-  const cp = childProcess.spawn(cmd, args, cpOpts)
+  const cp = spawn(cmd, args, cpOpts)
 
   return new Promise((resolve, reject) => {
     cp.once('error', reject)

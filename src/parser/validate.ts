@@ -12,7 +12,7 @@ import {uniq} from '../config/util'
 export async function validate(parse: {
   input: ParserInput;
   output: ParserOutput;
-}) {
+}): Promise<void> {
   function validateArgs() {
     const maxArgs = parse.input.args.length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {

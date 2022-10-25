@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 

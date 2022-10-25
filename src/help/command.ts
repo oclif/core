@@ -54,7 +54,7 @@ export class CommandHelp extends HelpFormatter {
     return output
   }
 
-  protected groupFlags(flags: Array<Command.Flag.Any>) {
+  protected groupFlags(flags: Array<Command.Flag.Any>): {mainFlags: Array<Command.Flag.Any>; flagGroups: {[name: string]: Array<Command.Flag.Any>}} {
     const mainFlags: Array<Command.Flag.Any> = []
     const flagGroups: { [index: string]: Array<Command.Flag.Any> } = {}
 
@@ -246,7 +246,7 @@ export class CommandHelp extends HelpFormatter {
     return `[${name}]`
   }
 
-  protected flagHelpLabel(flag: Command.Flag.Any, showOptions = false) {
+  protected flagHelpLabel(flag: Command.Flag.Any, showOptions = false): string {
     let label = flag.helpLabel
 
     if (!label) {

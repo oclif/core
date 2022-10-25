@@ -3,6 +3,7 @@ import * as util from 'util'
 
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
+// todo: get rid of this pattern
 import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
@@ -41,75 +42,75 @@ export const ux = {
   error: Errors.error,
   exit: Errors.exit,
 
-  get prompt() {
+  get prompt(): typeof deps.prompt.prompt {
     return deps.prompt.prompt
   },
   /**
    * "press anykey to continue"
    */
-  get anykey() {
+  get anykey(): typeof deps.prompt.anykey {
     return deps.prompt.anykey
   },
-  get confirm() {
+  get confirm(): typeof deps.prompt.confirm {
     return deps.prompt.confirm
   },
-  get action() {
+  get action(): ActionBase {
     return config.action
   },
-  get prideAction() {
+  get prideAction(): ActionBase {
     return config.prideAction
   },
-  styledObject(obj: any, keys?: string[]) {
+  styledObject(obj: Record<string, unknown> | Array<Record<string, unknown>>, keys?: string[]): void {
     ux.info(deps.styledObject(obj, keys))
   },
-  get styledHeader() {
+  get styledHeader(): typeof deps.styledHeader {
     return deps.styledHeader
   },
-  get styledJSON() {
+  get styledJSON(): typeof deps.styledJSON {
     return deps.styledJSON
   },
-  get table() {
+  get table(): typeof deps.table {
     return deps.table
   },
-  get tree() {
+  get tree(): typeof deps.tree {
     return deps.tree
   },
-  get open() {
+  get open(): typeof deps.open {
     return deps.open
   },
-  get wait() {
+  get wait(): typeof deps.wait {
     return deps.wait
   },
-  get progress() {
+  get progress(): typeof deps.progress {
     return deps.progress
   },
 
-  async done() {
+  async done(): Promise<void> {
     config.action.stop()
     // await flushStdout()
   },
 
-  trace(format: string, ...args: string[]) {
+  trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
   },
 
-  debug(format: string, ...args: string[]) {
+  debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
   },
 
-  info(format: string, ...args: string[]) {
+  info(format: string, ...args: string[]): void {
     process.stdout.write(util.format(format, ...args) + '\n')
   },
 
-  log(format?: string, ...args: string[]) {
+  log(format?: string, ...args: string[]): void {
     this.info(format || '', ...args)
   },
 
-  url(text: string, uri: string, params = {}) {
+  url(text: string, uri: string, params = {}): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       this.log(hyperlinker(text, uri, params))
@@ -118,7 +119,7 @@ export const ux = {
     }
   },
 
-  annotation(text: string, annotation: string) {
+  annotation(text: string, annotation: string): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
@@ -128,7 +129,7 @@ export const ux = {
     }
   },
 
-  async flush(ms = 10_000) {
+  async flush(ms = 10_000): Promise<void> {
     await timeout(flush(), ms)
   },
 }
@@ -146,7 +147,6 @@ const cliuxProcessExitHandler = async () => {
   try {
     await ux.done()
   } catch (error) {
-    // tslint:disable no-console
     console.error(error)
     process.exitCode = 1
   }
