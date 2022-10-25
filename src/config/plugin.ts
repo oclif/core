@@ -4,7 +4,7 @@ import * as path from 'path'
 import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {Command} from '../interfaces/command'
+import {Command as ICommand} from '../interfaces/command'
 import {toCached} from './config'
 import {Debug} from './util'
 import {Manifest} from '../interfaces/manifest'
@@ -112,7 +112,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: Command.Loadable[]
+  commands!: ICommand.Loadable[]
 
   hooks!: {[k: string]: string[]}
 
@@ -199,11 +199,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+  async findCommand(id: string, opts: {must: true}): Promise<ICommand.Class>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
+  async findCommand(id: string, opts?: {must: boolean}): Promise<ICommand.Class | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<ICommand.Class | undefined> {
     const fetch = async () => {
       if (!this.commandsDir) return
       const search = (cmd: any) => {
@@ -232,6 +232,12 @@ export class Plugin implements IPlugin {
 
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
+
+    // if (cmd.id === 'hello:world') {
+    //   // @ts-ignore
+    //   await (new cmd([], this.config)).run()
+    // }
+
     return cmd
   }
 
@@ -271,11 +277,11 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Command] => Boolean(f))
+      .filter((f): f is [string, ICommand] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: Command}),
+      }, {} as {[k: string]: ICommand}),
     }
   }
 

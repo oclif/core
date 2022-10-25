@@ -1,4 +1,4 @@
-import {Command} from './command'
+import {Command as ICommand} from './command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
 
@@ -64,12 +64,12 @@ export interface Plugin {
    */
   valid: boolean;
 
-  commands: Command.Loadable[];
+  commands: ICommand.Loadable[];
   hooks: { [k: string]: string[] };
   readonly commandIDs: string[];
   readonly topics: Topic[];
 
-  findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
-  findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
+  findCommand(id: string, opts: { must: true }): Promise<ICommand.Class>;
+  findCommand(id: string, opts?: { must: boolean }): Promise<ICommand.Class> | undefined;
   load(): Promise<void>;
 }

@@ -30,6 +30,32 @@ const jsonFlag = {
   }),
 }
 
+export interface Loadable extends Cached {
+  pluginName: string;
+  load(): Promise<Command>
+}
+
+export interface Cached {
+  [key: string]: unknown;
+  id: string;
+  hidden: boolean;
+  state?: 'beta' | 'deprecated' | string;
+  deprecationOptions?: Deprecation;
+  aliases: string[];
+  summary?: string;
+  description?: string;
+  usage?: string | string[];
+  examples?: Interfaces.Example[];
+  strict?: boolean;
+  type?: string;
+  pluginName?: string;
+  pluginType?: string;
+  pluginAlias?: string;
+  flags: {[name: string]: Interfaces.Command.Flag};
+  args: Interfaces.Command.Arg[];
+  hasDynamicHelp?: boolean;
+}
+
 /**
  * An abstract class which acts as the base for each command
  * in your project.
@@ -75,8 +101,6 @@ export default abstract class Command {
   /** When set to false, allows a variable amount of arguments */
   static strict = true
 
-  static parse = true
-
   /** An order-dependent array of arguments for the command */
   static args?: Interfaces.ArgInput
 
@@ -98,7 +122,7 @@ export default abstract class Command {
    */
   static examples: Interfaces.Example[]
 
-  static parserOptions = {}
+  static hasDynamicHelp = false
 
   static _enableJsonFlag = false
 
@@ -117,14 +141,15 @@ export default abstract class Command {
     }
   }
 
-  // eslint-disable-next-line valid-jsdoc
   /**
    * instantiate and run the command
+   *
    * @param {Interfaces.Command.Class} this Class
    * @param {string[]} argv argv
    * @param {Interfaces.LoadOptions} opts options
+   * @returns {Promise<unknown>} result
    */
-  static run: Interfaces.Command.Class['run'] = async function (this: Interfaces.Command.Class, argv?: string[], opts?) {
+  static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: Interfaces.LoadOptions): Promise<unknown> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -132,10 +157,9 @@ export default abstract class Command {
       opts = fileURLToPath(opts)
     }
 
-    // to-do: update in node-14 to module.main
-    const config = await Config.load(opts || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
+    const config = await Config.load(opts || require.main?.filename || __dirname)
     const cmd = new this(argv, config)
-    return cmd._run(argv)
+    return cmd._run()
   }
 
   protected static _globalFlags: Interfaces.FlagInput
@@ -160,7 +184,8 @@ export default abstract class Command {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 
-  id: string | undefined
+  // id: string | undefined
+  id: string
 
   protected debug: (...args: any[]) => void
 

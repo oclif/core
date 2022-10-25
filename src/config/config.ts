@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Command as ICommand, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
@@ -26,7 +26,7 @@ function channelFromVersion(version: string) {
 
 const WSL = require('is-wsl')
 
-function isConfig(o: any): o is IConfig {
+function isConfig(o: any): o is Config {
   return o && Boolean(o._base)
 }
 
@@ -120,7 +120,7 @@ export class Config implements IConfig {
 
   private topicPermutations = new Permutations()
 
-  private _commands = new Map<string, Command.Loadable>()
+  private _commands = new Map<string, ICommand.Loadable>()
 
   private _topics = new Map<string, Topic>()
 
@@ -129,7 +129,7 @@ export class Config implements IConfig {
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
 
-  static async load(opts: LoadOptions = (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) {
+  static async load(opts: LoadOptions = require.main?.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
       opts = fileURLToPath(opts)
@@ -137,6 +137,7 @@ export class Config implements IConfig {
 
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) return opts
+
     const config = new Config(opts)
     await config.load()
     return config
@@ -323,7 +324,7 @@ export class Config implements IConfig {
   }
 
   // eslint-disable-next-line default-param-last
-  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Loadable): Promise<T> {
+  async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: ICommand.Loadable): Promise<T> {
     debug('runCommand %s %o', id, argv)
     const c = cachedCommand || this.findCommand(id)
     if (!c) {
@@ -367,11 +368,11 @@ export class Config implements IConfig {
     .toUpperCase()
   }
 
-  findCommand(id: string, opts: { must: true }): Command.Loadable
+  findCommand(id: string, opts: { must: true }): ICommand.Loadable
 
-  findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
+  findCommand(id: string, opts?: { must: boolean }): ICommand.Loadable | undefined
 
-  findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
+  findCommand(id: string, opts: { must?: boolean } = {}): ICommand.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
@@ -402,7 +403,7 @@ export class Config implements IConfig {
    * @param argv string[] process.argv containing the flags and arguments provided by the user
    * @returns string[]
    */
-  findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
+  findMatches(partialCmdId: string, argv: string[]): ICommand.Loadable[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
@@ -422,7 +423,7 @@ export class Config implements IConfig {
    * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
    * @returns Command.Loadable[]
    */
-  getAllCommands(): Command.Loadable[] {
+  getAllCommands(): ICommand.Loadable[] {
     const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
@@ -443,7 +444,7 @@ export class Config implements IConfig {
     return this.getAllCommands().map(c => c.id)
   }
 
-  get commands(): Command.Loadable[] {
+  get commands(): ICommand.Loadable[] {
     return [...this._commands.values()]
   }
 
@@ -683,7 +684,7 @@ export class Config implements IConfig {
    * @param commands commands to determine the priority of
    * @returns command instance {Command.Loadable} or undefined
    */
-  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
+  private determinePriority(commands: ICommand.Loadable[]): ICommand.Loadable {
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
     const commandPlugins = commands.sort((a, b) => {
       const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
@@ -734,8 +735,9 @@ const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command> {
-  const flags = {} as {[k: string]: Command.Flag}
+// make typeof Command work
+export async function toCached(c: ICommand.Class, plugin?: IPlugin): Promise<ICommand> {
+  const flags = {} as {[k: string]: ICommand.Flag}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {
@@ -751,6 +753,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
         dependsOn: flag.dependsOn,
+        relationships: flag.relationships,
         exclusive: flag.exclusive,
         deprecated: flag.deprecated,
         aliases: flag.aliases,
@@ -812,11 +815,10 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     args,
   }
 
-  // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags']
+  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags']
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  const additionalProperties: any = {}
+  const additionalProperties: Record<string, unknown> = {}
   for (const key of keysToAdd) {
     additionalProperties[key] = (c as any)[key]
   }
