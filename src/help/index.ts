@@ -8,6 +8,7 @@ import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
+import {Loadable} from '../command'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
 
@@ -163,7 +164,7 @@ export class Help extends HelpBase {
 
     if (subCommands.length > 0) {
       const aliases:string[] = []
-      const uniqueSubCommands:Interfaces.Command.Loadable[] = subCommands.filter(p => {
+      const uniqueSubCommands: Loadable[] = subCommands.filter(p => {
         aliases.push(...p.aliases)
         return !aliases.includes(p.id)
       })

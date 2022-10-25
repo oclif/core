@@ -1,8 +1,9 @@
 import {PJSON} from './pjson'
 import {Hooks, Hook} from './hooks'
-import {Command} from './command'
+// import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
+import {Loadable} from '../command'
 
 export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
@@ -90,20 +91,20 @@ export interface Config {
   valid: boolean;
   flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
-  readonly commands: Command.Loadable[];
+  readonly commands: Loadable[];
   readonly topics: Topic[];
   readonly commandIDs: string[];
 
   runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
-  runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
+  runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Loadable): Promise<T>;
   runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]
-  getAllCommands(): Command.Loadable[]
-  findCommand(id: string, opts: { must: true }): Command.Loadable;
-  findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined;
+  getAllCommands(): Loadable[]
+  findCommand(id: string, opts: { must: true }): Loadable;
+  findCommand(id: string, opts?: { must: boolean }): Loadable | undefined;
   findTopic(id: string, opts: { must: true }): Topic;
   findTopic(id: string, opts?: { must: boolean }): Topic | undefined;
-  findMatches(id: string, argv: string[]): Command.Loadable[];
+  findMatches(id: string, argv: string[]): Loadable[];
   scopedEnvVar(key: string): string | undefined;
   scopedEnvVarKey(key: string): string;
   scopedEnvVarTrue(key: string): boolean;

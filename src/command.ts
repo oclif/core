@@ -30,9 +30,18 @@ const jsonFlag = {
   }),
 }
 
+export type CommandImport = typeof Command & {
+    id: string;
+    plugin?: Interfaces.Plugin;
+    flags?: Interfaces.FlagInput<any>;
+    args?: Interfaces.ArgInput;
+    strict: boolean;
+    hasDynamicHelp?: boolean;
+    run(argv?: string[], config?: Interfaces.LoadOptions): PromiseLike<any>;
+}
+
 export interface Loadable extends Cached {
-  pluginName: string;
-  load(): Promise<Command>
+  load(): Promise<CommandImport>
 }
 
 export interface Cached {
@@ -184,8 +193,8 @@ export default abstract class Command {
     this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
   }
 
-  // id: string | undefined
-  id: string
+  id: string | undefined
+  // id: string
 
   protected debug: (...args: any[]) => void
 

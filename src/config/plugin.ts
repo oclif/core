@@ -14,6 +14,7 @@ import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
+import {CommandImport, Loadable} from '../command'
 
 const _pjson = require('../../package.json')
 
@@ -112,7 +113,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: ICommand.Loadable[]
+  commands!: Loadable[]
 
   hooks!: {[k: string]: string[]}
 
@@ -199,11 +200,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<ICommand.Class>
+  async findCommand(id: string, opts: {must: true}): Promise<CommandImport>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<ICommand.Class | undefined>
+  async findCommand(id: string, opts?: {must: boolean}): Promise<CommandImport | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<ICommand.Class | undefined> {
+  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<CommandImport | undefined> {
     const fetch = async () => {
       if (!this.commandsDir) return
       const search = (cmd: any) => {
