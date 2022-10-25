@@ -9,7 +9,6 @@ import {
   FlagParser,
   CustomOptionFlag,
 } from './interfaces'
-import {Command} from './command'
 import {Help} from './help'
 
 /**
@@ -151,9 +150,9 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<v
   return boolean({
     description: 'Show CLI version.',
     ...opts,
-    parse: async (_: any, cmd: Command) => {
-      cmd.log(cmd.config.userAgent)
-      cmd.exit(0)
+    parse: async (_: any, ctx) => {
+      ctx.log(ctx.config.userAgent)
+      ctx.exit(0)
     },
   })
 }
@@ -162,10 +161,9 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   return boolean({
     description: 'Show CLI help.',
     ...opts,
-    // TODO: better types on the context
-    parse: async (_: any, cmd: Command) => {
-      new Help(cmd.config).showHelp(cmd.argv)
-      cmd.exit(0)
+    parse: async (_: any, ctx) => {
+      new Help(ctx.config).showHelp(ctx.argv)
+      ctx.exit(0)
     },
   })
 }

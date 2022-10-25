@@ -6,7 +6,18 @@ import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
-import {Arg, ArgInput, BooleanFlagProps, CompletableFlag, Deprecation, FlagInput, FlagOutput, Input, OptionFlagProps, ParserOutput} from './interfaces/parser'
+import {
+  Arg,
+  ArgInput,
+  BooleanFlagProps,
+  CompletableFlag,
+  Deprecation,
+  FlagInput,
+  FlagOutput,
+  Input,
+  OptionFlagProps,
+  ParserOutput,
+} from './interfaces/parser'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId} from './help/util'
 import {Plugin} from './interfaces/plugin'
 import {LoadOptions} from './interfaces/config'

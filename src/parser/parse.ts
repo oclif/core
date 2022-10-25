@@ -1,6 +1,16 @@
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import * as util from './util'
-import {ParserInput, OutputFlags, ParsingToken, OutputArgs, ArgToken, FlagToken, BooleanFlag, OptionFlag, ParserOutput, FlagOutput} from '../interfaces'
+import {
+  ParserInput,
+  OutputFlags,
+  ParsingToken,
+  OutputArgs,
+  ArgToken,
+  FlagToken,
+  BooleanFlag,
+  OptionFlag,
+  ParserOutput,
+} from '../interfaces'
 
 let debug: any
 try {
@@ -23,7 +33,7 @@ const readStdin = async () => {
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, GFlags extends FlagOutput, TArgs extends OutputArgs> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, GFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []

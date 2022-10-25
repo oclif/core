@@ -911,6 +911,7 @@ See more help with --help`)
   describe('flag context', () => {
     it('accepts context in parse', async () => {
       const out = await parse(['--foo'], {
+        // @ts-expect-error
         context: {a: 101},
         flags: {
           foo: boolean({

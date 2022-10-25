@@ -3,7 +3,6 @@ import * as util from 'util'
 
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
-// todo: get rid of this pattern
 import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
