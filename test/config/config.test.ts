@@ -4,10 +4,10 @@ import * as path from 'path'
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
-import {Command as ICommand} from '../../src/interfaces'
 
 import {expect, fancy} from './test'
-import {Interfaces} from '../../src'
+import {Command, Interfaces} from '../../src'
+import {CommandImport, Loadable} from '../../src/command'
 
 interface Options {
   pjson?: any;
@@ -171,8 +171,7 @@ describe('Config', () => {
       commandIds = ['foo:bar', 'foo:baz'],
       types = [],
     }: Options = {}) => {
-    // @ts-ignore
-      class MyComandClass implements ICommand.Class {
+      class MyCommandClass extends Command {
       _base = ''
 
       aliases: string[] = []
@@ -181,34 +180,28 @@ describe('Config', () => {
 
       id = 'foo:bar'
 
-      new(): ICommand.Instance {
-        return {_run(): Promise<any> {
-          return Promise.resolve()
-        }}
-      }
-
       run(): PromiseLike<any> {
         return Promise.resolve()
       }
       }
+
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<ICommand.Class> => {
-      // @ts-ignore
-        return new MyComandClass()
+      const findCommand = async (): Promise<CommandImport> => {
+        return MyCommandClass
       }
 
-      const commandPluginA: ICommand.Loadable = {
+      const commandPluginA: Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
-          return new MyComandClass() as unknown as ICommand.Class
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<CommandImport> {
+          return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: ICommand.Loadable = {
+      const commandPluginB: Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
-          return new MyComandClass() as unknown as ICommand.Class
+        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<CommandImport> {
+          return MyCommandClass
         },
         pluginType: types[1] ?? 'core',
         pluginAlias: '@My/pluginb',

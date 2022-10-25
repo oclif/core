@@ -71,7 +71,6 @@ describe('command', () => {
 
   describe('toCached', () => {
     fancy
-    .only()
     .do(async () => {
       class C extends Command {
       static id = 'foo:bar'

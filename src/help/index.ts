@@ -8,7 +8,7 @@ import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
-import {Loadable} from '../command'
+import {Cached, CommandImport, Loadable} from '../command'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
 
@@ -40,7 +40,7 @@ export abstract class HelpBase extends HelpFormatter {
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): Promise<void>;
+  public abstract showCommandHelp(command: CommandImport, topics: Interfaces.Topic[]): Promise<void>;
 }
 
 export class Help extends HelpBase {
@@ -131,7 +131,7 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
-  public async showCommandHelp(command: Interfaces.Command) {
+  public async showCommandHelp(command: CommandImport | Loadable | Cached) {
     const name = command.id
     const depth = name.split(':').length
 
@@ -234,7 +234,7 @@ export class Help extends HelpBase {
     return help.root()
   }
 
-  protected formatCommand(command: Interfaces.Command): string {
+  protected formatCommand(command: CommandImport | Loadable | Cached): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replace(/:/g, this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
@@ -244,11 +244,11 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected getCommandHelpClass(command: Interfaces.Command) {
+  protected getCommandHelpClass(command: CommandImport | Loadable | Cached) {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
-  protected formatCommands(commands: Interfaces.Command[]): string {
+  protected formatCommands(commands: Array<CommandImport | Loadable | Cached>): string {
     if (commands.length === 0) return ''
 
     const body = this.renderList(commands.map(c => {
@@ -266,13 +266,13 @@ export class Help extends HelpBase {
     return this.section('COMMANDS', body)
   }
 
-  protected summary(c: Interfaces.Command): string | undefined {
+  protected summary(c: CommandImport | Loadable | Cached): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
     return c.description && this.render(c.description).split('\n')[0]
   }
 
-  protected description(c: Interfaces.Command): string {
+  protected description(c: CommandImport | Loadable | Cached): string {
     const description = this.render(c.description || '')
     if (c.summary) {
       return description
@@ -317,7 +317,7 @@ export class Help extends HelpBase {
    * @param {object} command The command to generate readme help for
    * @return {string} the readme help string for the given command
    */
-  protected command(command: Interfaces.Command) {
+  protected command(command: CommandImport) {
     return this.formatCommand(command)
   }
 

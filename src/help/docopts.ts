@@ -1,8 +1,4 @@
-import {Interfaces} from '..'
-
-type Flag = Interfaces.Command.Flag
-type Flags = Flag[]
-
+import {Flag, CommandImport, Loadable, Cached, CachedFlag} from '../command'
 /**
  * DocOpts - See http://docopt.org/.
  *
@@ -60,11 +56,11 @@ type Flags = Flag[]
  *
  */
 export class DocOpts {
-  private flagMap: {[index: string]: Flag}
+  private flagMap: {[index: string]: Flag | CachedFlag}
 
-  private flagList: Flags
+  private flagList: Flag[] | CachedFlag[]
 
-  public constructor(private cmd: Interfaces.Command) {
+  public constructor(private cmd: CommandImport | Loadable | Cached) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -75,7 +71,7 @@ export class DocOpts {
     })
   }
 
-  public static generate(cmd: Interfaces.Command): string {
+  public static generate(cmd: CommandImport | Loadable | Cached): string {
     return new DocOpts(cmd).toString()
   }
 
@@ -168,7 +164,7 @@ export class DocOpts {
   }
 
   // eslint-disable-next-line default-param-last
-  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flags): string[] {
+  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flag[] | CachedFlag[]): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
       let type = ''

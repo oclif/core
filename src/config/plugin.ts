@@ -4,7 +4,6 @@ import * as path from 'path'
 import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {Command as ICommand} from '../interfaces/command'
 import {toCached} from './config'
 import {Debug} from './util'
 import {Manifest} from '../interfaces/manifest'
@@ -14,7 +13,7 @@ import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
-import {CommandImport, Loadable} from '../command'
+import {Cached, CommandImport, Loadable} from '../command'
 
 const _pjson = require('../../package.json')
 
@@ -278,11 +277,11 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, ICommand] => Boolean(f))
+      .filter((f): f is [string, Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: ICommand}),
+      }, {} as {[k: string]: Cached}),
     }
   }
 

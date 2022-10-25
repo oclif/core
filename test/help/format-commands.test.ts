@@ -1,4 +1,4 @@
-import {Command, Interfaces} from '../../src'
+import {Command} from '../../src'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
@@ -6,15 +6,16 @@ const g: any = global
 g.oclif.columns = 80
 import {Help} from '../../src/help'
 import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
+import {CommandImport} from '../../src/command'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
-  public formatCommands(commands: Interfaces.Command[]) {
+  public formatCommands(commands: CommandImport[]) {
     return super.formatCommands(commands)
   }
 }
 
-const formatCommands = (commands: Interfaces.Command[]) => ({
+const formatCommands = (commands: CommandImport[]) => ({
   run(ctx: {help: TestHelp; output: string}) {
     const help = ctx.help.formatCommands(commands)
     if (process.env.TEST_OUTPUT === '1') {
@@ -48,8 +49,6 @@ describe('formatCommand', () => {
     static id = 'hello:world'
 
     static description = 'This is a very long command description that should wrap after too many characters have been entered'
-
-    static args = []
 
     async run() {
       'run'

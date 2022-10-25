@@ -6,6 +6,7 @@ import * as Interfaces from '../interfaces'
 import {Example} from '../interfaces/command'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 import {DocOpts} from './docopts'
+import {Cached, CachedFlag, CommandImport, Flag, Loadable} from '../command'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be
@@ -26,7 +27,7 @@ if (process.env.ConEmuANSI === 'ON') {
 
 export class CommandHelp extends HelpFormatter {
   constructor(
-    public command: Interfaces.Command,
+    public command: CommandImport | Loadable | Cached,
     public config: Interfaces.Config,
     public opts: Interfaces.HelpOptions) {
     super(config, opts)
@@ -54,9 +55,9 @@ export class CommandHelp extends HelpFormatter {
     return output
   }
 
-  protected groupFlags(flags: Interfaces.Command.Flag[]) {
-    const mainFlags: Interfaces.Command.Flag[] = []
-    const flagGroups: { [index: string]: Interfaces.Command.Flag[] } = {}
+  protected groupFlags(flags: Array<Flag | CachedFlag>) {
+    const mainFlags: Array<Flag | CachedFlag> = []
+    const flagGroups: { [index: string]: Array<Flag | CachedFlag> } = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup
@@ -148,7 +149,7 @@ export class CommandHelp extends HelpFormatter {
 
     return compact([
       this.command.id,
-      this.command.args.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
+      this.command.args?.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
     ]).join(' ')
   }
 
@@ -228,7 +229,7 @@ export class CommandHelp extends HelpFormatter {
     return body
   }
 
-  protected args(args: Interfaces.Command['args']): [string, string | undefined][] | undefined {
+  protected args(args: Interfaces.Arg[]): [string, string | undefined][] | undefined {
     if (args.filter(a => a.description).length === 0) return
 
     return args.map(a => {
@@ -240,13 +241,13 @@ export class CommandHelp extends HelpFormatter {
     })
   }
 
-  protected arg(arg: Interfaces.Command['args'][0]): string {
+  protected arg(arg: Interfaces.Arg): string {
     const name = arg.name.toUpperCase()
     if (arg.required) return `${name}`
     return `[${name}]`
   }
 
-  protected flagHelpLabel(flag: Interfaces.Command.Flag, showOptions = false) {
+  protected flagHelpLabel(flag: Flag | CachedFlag, showOptions = false) {
     let label = flag.helpLabel
 
     if (!label) {
@@ -277,7 +278,7 @@ export class CommandHelp extends HelpFormatter {
     return label
   }
 
-  protected flags(flags: Interfaces.Command.Flag[]): [string, string | undefined][] | undefined {
+  protected flags(flags: Array<Flag | CachedFlag>): [string, string | undefined][] | undefined {
     if (flags.length === 0) return
 
     return flags.map(flag => {
@@ -298,7 +299,7 @@ export class CommandHelp extends HelpFormatter {
     })
   }
 
-  protected flagsDescriptions(flags: Interfaces.Command.Flag[]): string | undefined {
+  protected flagsDescriptions(flags: Array<Flag | CachedFlag>): string | undefined {
     const flagsWithExtendedDescriptions = flags.filter(flag => flag.summary && flag.description)
     if (flagsWithExtendedDescriptions.length === 0) return
 

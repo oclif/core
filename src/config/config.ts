@@ -7,13 +7,13 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command as ICommand, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
-import { Cached, CommandImport, Loadable } from '../command'
+import {Cached, CachedFlag, CommandImport, Loadable} from '../command'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -130,7 +130,7 @@ export class Config implements IConfig {
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: Options) {}
 
-  static async load(opts: LoadOptions = require.main?.filename || __dirname): Promise<Config> {
+  static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
       opts = fileURLToPath(opts)
@@ -737,9 +737,8 @@ const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-// make typeof Command work
 export async function toCached(c: CommandImport, plugin?: IPlugin): Promise<Cached> {
-  const flags = {} as {[k: string]: ICommand.Flag}
+  const flags = {} as {[k: string]: CachedFlag}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {

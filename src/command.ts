@@ -8,7 +8,7 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import * as Flags from './flags'
-import {Deprecation} from './interfaces/parser'
+import {BooleanFlagProps, Deprecation} from './interfaces/parser'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning} from './help/util'
 
 const pjson = require('../package.json')
@@ -32,11 +32,6 @@ const jsonFlag = {
 
 export type CommandImport = typeof Command & {
     id: string;
-    plugin?: Interfaces.Plugin;
-    flags?: Interfaces.FlagInput<any>;
-    args?: Interfaces.ArgInput;
-    strict: boolean;
-    hasDynamicHelp?: boolean;
     run(argv?: string[], config?: Interfaces.LoadOptions): PromiseLike<any>;
 }
 
@@ -60,10 +55,14 @@ export interface Cached {
   pluginName?: string;
   pluginType?: string;
   pluginAlias?: string;
-  flags: {[name: string]: Interfaces.Command.Flag};
-  args: Interfaces.Command.Arg[];
+  flags: {[name: string]: CachedFlag};
+  args: Interfaces.Arg[];
   hasDynamicHelp?: boolean;
 }
+
+export type Flag = Interfaces.CompletableFlag<any>
+
+export type CachedFlag = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | Interfaces.OptionFlagProps)
 
 /**
  * An abstract class which acts as the base for each command
@@ -115,6 +114,10 @@ export default abstract class Command {
 
   static plugin: Interfaces.Plugin | undefined
 
+  static pluginName?: string;
+  static pluginType?: string;
+  static pluginAlias?: string;
+
   /**
    * An array of examples to show at the end of the command's help.
    *
@@ -153,7 +156,7 @@ export default abstract class Command {
   /**
    * instantiate and run the command
    *
-   * @param {Interfaces.Command.Class} this Class
+   * @param {CommandImport} this - the command class
    * @param {string[]} argv argv
    * @param {Interfaces.LoadOptions} opts options
    * @returns {Promise<unknown>} result

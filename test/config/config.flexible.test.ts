@@ -3,10 +3,10 @@ import * as path from 'path'
 
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
-import {Command as ICommand} from '../../src/interfaces'
 
 import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
+import Command, {CommandImport, Loadable} from '../../src/command'
 
 interface Options {
   pjson?: any;
@@ -17,8 +17,7 @@ interface Options {
   types?: string[];
 }
 
-// @ts-expect-error
-class MyCommandClass implements ICommand.Class {
+class MyCommandClass extends Command {
   _base = ''
 
   aliases: string[] = []
@@ -28,13 +27,6 @@ class MyCommandClass implements ICommand.Class {
   id = 'foo:bar'
 
   flags = {}
-
-  new(): ICommand.Instance {
-    return {
-      _run(): Promise<any> {
-        return Promise.resolve()
-      }}
-  }
 
   run(): PromiseLike<any> {
     return Promise.resolve()
@@ -56,11 +48,11 @@ describe('Config with flexible taxonomy', () => {
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
-    const findCommand = async (): Promise<ICommand.Class> => {
-      return new MyCommandClass() as unknown as ICommand.Class
+    const findCommand = async (): Promise<CommandImport> => {
+      return MyCommandClass
     }
 
-    const commandPluginA: ICommand.Loadable = {
+    const commandPluginA: Loadable = {
       strict: false,
       aliases: [],
       args: [],
@@ -69,13 +61,13 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[0],
-      async load(): Promise<ICommand.Class> {
-        return new MyCommandClass() as unknown as ICommand.Class
+      async load(): Promise<CommandImport> {
+        return MyCommandClass
       },
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
     }
-    const commandPluginB: ICommand.Loadable = {
+    const commandPluginB: Loadable = {
       strict: false,
       aliases: [],
       args: [],
@@ -84,8 +76,8 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[1],
-      async load(): Promise<ICommand.Class> {
-        return new MyCommandClass() as unknown as ICommand.Class
+      async load(): Promise<CommandImport> {
+        return MyCommandClass
       },
       pluginType: types[1] ?? 'core',
       pluginAlias: '@My/pluginb',
