@@ -21,7 +21,7 @@ function timeout(p: Promise<any>, ms: number) {
   return Promise.race([p, wait(ms, true).then(() => ux.error('timed out'))])
 }
 
-async function flush() {
+async function _flush() {
   const p = new Promise(resolve => {
     process.stdout.once('drain', () => resolve(null))
   })
@@ -34,7 +34,7 @@ async function flush() {
   return p
 }
 
-export const ux = {
+const ux = {
   config,
 
   warn: Errors.warn,
@@ -86,7 +86,6 @@ export const ux = {
 
   async done(): Promise<void> {
     config.action.stop()
-    // await flushStdout()
   },
 
   trace(format: string, ...args: string[]): void {
@@ -129,17 +128,66 @@ export const ux = {
   },
 
   async flush(ms = 10_000): Promise<void> {
-    await timeout(flush(), ms)
+    await timeout(_flush(), ms)
   },
 }
 
+const action = ux.action
+const annotation = ux.annotation.bind(ux)
+const anykey = ux.anykey.bind(ux)
+const confirm = ux.confirm.bind(ux)
+const debug = ux.debug.bind(ux)
+const done = ux.done.bind(ux)
+const error = ux.error.bind(ux)
+const exit = ux.exit.bind(ux)
+const flush = ux.flush.bind(ux)
+const info = ux.info.bind(ux)
+const log = ux.log.bind(ux)
+const open = ux.open.bind(ux)
+const prideAction = ux.prideAction
+const progress = ux.progress.bind(ux)
+const prompt = ux.prompt.bind(ux)
+const styledHeader = ux.styledHeader.bind(ux)
+const styledJSON = ux.styledJSON.bind(ux)
+const styledObject = ux.styledObject.bind(ux)
+const table = ux.table.bind(ux)
+const trace = ux.trace.bind(ux)
+const tree = ux.tree.bind(ux)
+const url = ux.url.bind(ux)
+const wait = ux.wait.bind(ux)
+const warn = ux.warn.bind(ux)
+
 export {
-  config,
+  action,
   ActionBase,
+  annotation,
+  anykey,
+  config,
   Config,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
   ExitError,
+  flush,
+  info,
   IPromptOptions,
+  log,
+  open,
+  prideAction,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
   Table,
+  trace,
+  tree,
+  url,
+  wait,
+  warn,
 }
 
 const cliuxProcessExitHandler = async () => {

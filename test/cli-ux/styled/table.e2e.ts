@@ -1,5 +1,5 @@
 import {expect, fancy} from 'fancy-test'
-import {CliUx} from '../../../src'
+import {ux} from '../../../src'
 
 describe('styled/table', () => {
   describe('null/undefined handling', () => {
@@ -7,7 +7,7 @@ describe('styled/table', () => {
     .stdout()
     .end('omits nulls and undefined by default', output => {
       const data = [{a: 1, b: '2', c: null, d: undefined}]
-      CliUx.ux.table(data, {a: {}, b: {}, c: {}, d: {}})
+      ux.table(data, {a: {}, b: {}, c: {}, d: {}})
       expect(output.stdout).to.include('1')
       expect(output.stdout).to.include('2')
       expect(output.stdout).to.not.include('null')
@@ -27,7 +27,7 @@ describe('styled/table', () => {
         value: {header: 'TEST'},
       }
 
-      CliUx.ux.table(data, tallColumns)
+      ux.table(data, tallColumns)
       expect(output.stdout).to.include('ID')
     })
 
@@ -39,7 +39,7 @@ describe('styled/table', () => {
       const data = Array.from({length: bigRows}).fill(row) as Record<string, unknown>[]
       const bigColumns = Object.fromEntries(Array.from({length: columns}).map((_, i) => [`col${i}`, {header: `col${i}`.toUpperCase()}]))
 
-      CliUx.ux.table(data, bigColumns)
+      ux.table(data, bigColumns)
       expect(output.stdout).to.include('COL1')
     })
   })

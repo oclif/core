@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 
-import {CliUx} from '../../../src'
+import {ux} from '../../../src'
 
 /* eslint-disable camelcase */
 const apps = [
@@ -71,13 +71,13 @@ const extendedHeader = `ID  Name${ws.padEnd(14)}Web url${ws.padEnd(34)}Stack${ws
 describe('styled/table', () => {
   fancy
   .end('export flags and display()', () => {
-    expect(typeof (CliUx.ux.table.flags())).to.eq('object')
-    expect(typeof (CliUx.ux.table)).to.eq('function')
+    expect(typeof (ux.table.flags())).to.eq('object')
+    expect(typeof (ux.table)).to.eq('function')
   })
 
   fancy
   .end('has optional flags', _ => {
-    const flags = CliUx.ux.table.flags()
+    const flags = ux.table.flags()
     expect(flags.columns).to.exist
     expect(flags.sort).to.exist
     expect(flags.filter).to.exist
@@ -91,7 +91,7 @@ describe('styled/table', () => {
   fancy
   .stdout()
   .end('displays table', output => {
-    CliUx.ux.table(apps, columns)
+    ux.table(apps, columns)
     expect(output.stdout).to.equal(` ID  Name${ws.padEnd(14)}
  ─── ─────────────────${ws}
  123 supertable-test-1${ws}
@@ -102,14 +102,14 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('use header value for id', output => {
-      CliUx.ux.table(apps, columns)
+      ux.table(apps, columns)
       expect(output.stdout.slice(1, 3)).to.equal('ID')
     })
 
     fancy
     .stdout()
     .end('shows extended columns/uses get() for value', output => {
-      CliUx.ux.table(apps, columns, {extended: true})
+      ux.table(apps, columns, {extended: true})
       expect(output.stdout).to.equal(`${ws}${extendedHeader}
  ─── ───────────────── ──────────────────────────────────────── ─────────${ws}
  123 supertable-test-1 https://supertable-test-1.herokuapp.com/ heroku-16${ws}
@@ -121,14 +121,14 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('shows extended columns', output => {
-      CliUx.ux.table(apps, columns, {extended: true})
+      ux.table(apps, columns, {extended: true})
       expect(output.stdout).to.contain(extendedHeader)
     })
 
     fancy
     .stdout()
     .end('shows title with divider', output => {
-      CliUx.ux.table(apps, columns, {title: 'testing'})
+      ux.table(apps, columns, {title: 'testing'})
       expect(output.stdout).to.equal(`testing
 =======================
 | ID  Name${ws.padEnd(14)}
@@ -140,7 +140,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('skips header', output => {
-      CliUx.ux.table(apps, columns, {'no-header': true})
+      ux.table(apps, columns, {'no-header': true})
       expect(output.stdout).to.equal(` 123 supertable-test-1${ws}
  321 supertable-test-2${ws}\n`)
     })
@@ -148,7 +148,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('only displays given columns', output => {
-      CliUx.ux.table(apps, columns, {columns: 'id'})
+      ux.table(apps, columns, {columns: 'id'})
       expect(output.stdout).to.equal(` ID${ws}${ws}
  ───${ws}
  123${ws}
@@ -158,7 +158,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in csv', output => {
-      CliUx.ux.table(apps, columns, {output: 'csv'})
+      ux.table(apps, columns, {output: 'csv'})
       expect(output.stdout).to.equal(`ID,Name
 123,supertable-test-1
 321,supertable-test-2\n`)
@@ -167,7 +167,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in csv with escaped values', output => {
-      CliUx.ux.table([
+      ux.table([
         {
           id: '123\n2',
           name: 'supertable-test-1',
@@ -195,7 +195,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in csv without headers', output => {
-      CliUx.ux.table(apps, columns, {output: 'csv', 'no-header': true})
+      ux.table(apps, columns, {output: 'csv', 'no-header': true})
       expect(output.stdout).to.equal(`123,supertable-test-1
 321,supertable-test-2\n`)
     })
@@ -203,7 +203,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in csv with alias flag', output => {
-      CliUx.ux.table(apps, columns, {csv: true})
+      ux.table(apps, columns, {csv: true})
       expect(output.stdout).to.equal(`ID,Name
 123,supertable-test-1
 321,supertable-test-2\n`)
@@ -212,7 +212,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in json', output => {
-      CliUx.ux.table(apps, columns, {output: 'json'})
+      ux.table(apps, columns, {output: 'json'})
       expect(output.stdout).to.equal(`[
   {
     "id": "123",
@@ -229,7 +229,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('outputs in yaml', output => {
-      CliUx.ux.table(apps, columns, {output: 'yaml'})
+      ux.table(apps, columns, {output: 'yaml'})
       expect(output.stdout).to.equal(`- id: '123'
   name: supertable-test-1
 - id: '321'
@@ -241,7 +241,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('sorts by property', output => {
-      CliUx.ux.table(apps, columns, {sort: '-name'})
+      ux.table(apps, columns, {sort: '-name'})
       expect(output.stdout).to.equal(` ID  Name${ws.padEnd(14)}
  ─── ─────────────────${ws}
  321 supertable-test-2${ws}
@@ -251,7 +251,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('filters by property & value (partial string match)', output => {
-      CliUx.ux.table(apps, columns, {filter: 'id=123'})
+      ux.table(apps, columns, {filter: 'id=123'})
       expect(output.stdout).to.equal(` ID  Name${ws.padEnd(14)}
  ─── ─────────────────${ws}
  123 supertable-test-1${ws}\n`)
@@ -261,7 +261,7 @@ describe('styled/table', () => {
     .stdout()
     .end('does not truncate', output => {
       const three = {...apps[0], id: '0'.repeat(80), name: 'supertable-test-3'}
-      CliUx.ux.table([...apps, three], columns, {filter: 'id=0', 'no-truncate': true})
+      ux.table([...apps, three], columns, {filter: 'id=0', 'no-truncate': true})
       expect(output.stdout).to.equal(` ID${ws.padEnd(78)} Name${ws.padEnd(14)}
  ${''.padEnd(three.id.length, '─')} ─────────────────${ws}
  ${three.id} supertable-test-3${ws}\n`)
@@ -271,14 +271,14 @@ describe('styled/table', () => {
   describe('#flags', () => {
     fancy
     .end('includes only flags', _ => {
-      const flags = CliUx.ux.table.flags({only: 'columns'})
+      const flags = ux.table.flags({only: 'columns'})
       expect(flags.columns).to.be.a('object')
       expect((flags as any).sort).to.be.undefined
     })
 
     fancy
     .end('excludes except flags', _ => {
-      const flags = CliUx.ux.table.flags({except: 'columns'})
+      const flags = ux.table.flags({except: 'columns'})
       expect((flags as any).columns).to.be.undefined
       expect(flags.sort).to.be.a('object')
     })
@@ -288,7 +288,7 @@ describe('styled/table', () => {
     fancy
     .stdout()
     .end('ignores header case', output => {
-      CliUx.ux.table(apps, columns, {columns: 'iD,Name', filter: 'nAMe=supertable-test', sort: '-ID'})
+      ux.table(apps, columns, {columns: 'iD,Name', filter: 'nAMe=supertable-test', sort: '-ID'})
       expect(output.stdout).to.equal(` ID  Name${ws.padEnd(14)}
  ─── ─────────────────${ws}
  321 supertable-test-2${ws}
@@ -309,7 +309,7 @@ describe('styled/table', () => {
       }
       /* eslint-enable camelcase */
 
-      CliUx.ux.table([...apps, app3 as any], columns, {sort: '-ID'})
+      ux.table([...apps, app3 as any], columns, {sort: '-ID'})
       expect(output.stdout).to.equal(` ID  Name${ws.padEnd(14)}
  ─── ─────────────────${ws}
  456 supertable-test${ws.padEnd(3)}

@@ -1,6 +1,6 @@
 import * as chalk from 'chalk'
-import {CliUx} from '../../index'
+import {ux} from '../../index'
 
 export default function styledHeader(header: string): void {
-  CliUx.ux.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
+  ux.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
 }

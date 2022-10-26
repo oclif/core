@@ -1,11 +1,11 @@
 import {expect, fancy} from 'fancy-test'
-import {CliUx} from '../../../src'
+import {ux} from '../../../src'
 
 describe('progress', () => {
   // single bar
   fancy
   .end('single bar has default settings', _ => {
-    const b1 = CliUx.ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
+    const b1 = ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
     // @ts-expect-error because private member
     expect(b1.options.format).to.contain('Example 1: Progress')
     // @ts-expect-error because private member
@@ -15,7 +15,7 @@ describe('progress', () => {
   // testing no settings passed, default settings created
   fancy
   .end('single bar, no bars array', _ => {
-    const b1 = CliUx.ux.progress({})
+    const b1 = ux.progress({})
     // @ts-expect-error because private member
     expect(b1.options.format).to.contain('progress')
     // @ts-expect-error because private member
@@ -26,7 +26,7 @@ describe('progress', () => {
   // testing getProgressBar returns correct type
   fancy
   .end('typeof progress bar is object', _ => {
-    const b1 = CliUx.ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
+    const b1 = ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
     expect(typeof (b1)).to.equal('object')
   })
 })
