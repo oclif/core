@@ -14,6 +14,7 @@ import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
+import {OptionFlagArg} from '../interfaces/parser'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -691,7 +692,7 @@ export class Config implements IConfig {
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
+const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
@@ -708,6 +709,26 @@ const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
     } catch {}
   } else {
     return flag.default
+  }
+}
+
+const defaultArgToCached = async (arg: OptionFlagArg<any>) => {
+  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+  if (typeof arg.defaultHelp === 'function') {
+    try {
+      return await arg.defaultHelp()
+    } catch {
+      return
+    }
+  }
+
+  // if not specified, try the default function
+  if (typeof arg.default === 'function') {
+    try {
+      return await arg.default({options: {}, flags: {}})
+    } catch {}
+  } else {
+    return arg.default
   }
 }
 
@@ -750,7 +771,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultToCached(flag),
+        default: await defaultFlagToCached(flag),
         deprecated: flag.deprecated,
         aliases: flag.aliases,
       }
@@ -761,16 +782,29 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  const argsPromise = (c.args || []).map(async a => ({
-    name: a.name,
-    description: a.description,
-    required: a.required,
-    options: a.options,
-    default: typeof a.default === 'function' ? await a.default({}) : a.default,
-    hidden: a.hidden,
-  }))
-
-  const args = await Promise.all(argsPromise)
+  const flagArgs = {} as {[k: string]: Command.Arg.Cached}
+  for (const [name, arg] of Object.entries(c.flagArgs || {})) {
+    if (arg.type === 'boolean') {
+      flagArgs[name] = {
+        name,
+        type: arg.type,
+        description: arg.description,
+        required: arg.required,
+        options: arg.options,
+        hidden: arg.hidden,
+      }
+    } else {
+      flagArgs[name] = {
+        name,
+        type: arg.type,
+        description: arg.description,
+        required: arg.required,
+        options: arg.options,
+        default: await defaultArgToCached(arg),
+        hidden: arg.hidden,
+      }
+    }
+  }
 
   const stdProperties = {
     id: c.id,
@@ -787,7 +821,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     examples: c.examples || (c as any).example,
     deprecationOptions: c.deprecationOptions,
     flags,
-    args,
+    flagArgs,
   }
 
   const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_baseFlags']

@@ -115,6 +115,8 @@ class MyCommand extends BaseCommand {
     })({default: [{foo: true}], multiple: true}),
   }
 
+  // static args = {}
+
   public flags!: MyFlags
 
   public async run(): Promise<MyFlags> {

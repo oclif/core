@@ -3,8 +3,9 @@ import {CLIError} from '../errors'
 import {flagUsages} from './help'
 import {renderList} from './list'
 import * as chalk from 'chalk'
-import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
+import {CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'
+import {FlagArg, FlagArgInput} from '../interfaces/parser'
 
 export {CLIError} from '../errors'
 
@@ -26,11 +27,11 @@ export class CLIParseError extends CLIError {
 }
 
 export class InvalidArgsSpecError extends CLIParseError {
-  public args: ParserArg<any>[]
+  public args: FlagArgInput
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: FlagArgInput }) {
     let message = 'Invalid argument spec'
-    const namedArgs = args.filter(a => a.name)
+    const namedArgs = Object.values(args).filter(a => a.name)
     if (namedArgs.length > 0) {
       const list = renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
       message += `:\n${list}`
@@ -42,9 +43,9 @@ export class InvalidArgsSpecError extends CLIParseError {
 }
 
 export class RequiredArgsError extends CLIParseError {
-  public args: ParserArg<any>[]
+  public args: FlagArg<any>[]
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: FlagArg<any>[] }) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
@@ -86,7 +87,7 @@ export class FlagInvalidOptionError extends CLIParseError {
 }
 
 export class ArgInvalidOptionError extends CLIParseError {
-  constructor(arg: ParserArg<any>, input: string) {
+  constructor(arg: FlagArg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
     super({parse: {}, message})
   }

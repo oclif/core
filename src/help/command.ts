@@ -41,7 +41,7 @@ export class CommandHelp extends HelpFormatter {
       return v
     }), f => [!f.char, f.char, f.name])
 
-    const args = (cmd.args || []).filter(a => !a.hidden)
+    const args = Object.values(cmd.flagArgs ?? {}).filter(a => !a.hidden)
     const output = compact(this.sections().map(({header, generate}) => {
       const body = generate({cmd, flags, args}, header)
       // Generate can return a list of sections
@@ -148,7 +148,7 @@ export class CommandHelp extends HelpFormatter {
 
     return compact([
       this.command.id,
-      this.command.args?.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
+      Object.values(this.command.flagArgs ?? {})?.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
     ]).join(' ')
   }
 
@@ -228,7 +228,7 @@ export class CommandHelp extends HelpFormatter {
     return body
   }
 
-  protected args(args: Interfaces.Arg[]): [string, string | undefined][] | undefined {
+  protected args(args: Interfaces.Arg<unknown>[]): [string, string | undefined][] | undefined {
     if (args.filter(a => a.description).length === 0) return
 
     return args.map(a => {
@@ -240,7 +240,7 @@ export class CommandHelp extends HelpFormatter {
     })
   }
 
-  protected arg(arg: Interfaces.Arg): string {
+  protected arg(arg: Interfaces.Arg<unknown>): string {
     const name = arg.name.toUpperCase()
     if (arg.required) return `${name}`
     return `[${name}]`

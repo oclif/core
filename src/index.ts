@@ -7,6 +7,7 @@ import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import * as Flags from './flags'
+import * as Args from './args'
 import {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
@@ -18,6 +19,7 @@ import * as cliUx from './cli-ux'
 const flush = cliUx.ux.flush
 
 export {
+  Args,
   Command,
   CommandHelp,
   Config,

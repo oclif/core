@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import * as util from './util'
 import {
@@ -23,7 +24,7 @@ try {
 const readStdin = async () => {
   const {stdin} = process
   let result
-  if (stdin.isTTY || stdin.isTTY === undefined) return result
+  if (stdin.isTTY) return result
   result = ''
   stdin.setEncoding('utf8')
   for await (const chunk of stdin) {
@@ -144,32 +145,22 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
 
       // not a flag, parse as arg
-      const arg = this.input.args[this._argTokens.length]
-      if (arg) arg.input = input
-      this.raw.push({type: 'arg', input})
+      const arg = Object.keys(this.input.flagArgs)[this._argTokens.length]
+      this.raw.push({type: 'arg', arg, input})
     }
 
-    const argv = await this._argv()
-    const args = this._args(argv)
+    const {argv, args} = await this._args()
     const flags = await this._flags()
     this._debugOutput(argv, args, flags)
     return {
-      args,
+      // TODO: fix this type
+      args: args as TArgs,
       argv,
       flags,
+      flagArgs: args,
       raw: this.raw,
       metadata: this.metaData,
     }
-  }
-
-  private _args(argv: any[]): TArgs {
-    const args = {} as any
-    for (let i = 0; i < this.input.args.length; i++) {
-      const arg = this.input.args[i]
-      args[arg.name!] = argv[i]
-    }
-
-    return args
   }
 
   private async _flags(): Promise<TFlags & BFlags & { json: boolean | undefined }> {
@@ -186,13 +177,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           flags[token.flag] = true
         }
 
-        // eslint-disable-next-line no-await-in-loop
         flags[token.flag] = await flag.parse(flags[token.flag], this.context, flag)
       } else {
         const input = token.input
         this._validateOptions(flag, input)
 
-        // eslint-disable-next-line no-await-in-loop
         const value = flag.parse ? await flag.parse(input, this.context, flag) : input
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
@@ -212,7 +201,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (input) {
             this._validateOptions(flag, input)
 
-            // eslint-disable-next-line no-await-in-loop
             flags[k] = await flag.parse(input, this.context, flag)
           }
         } else if (flag.type === 'boolean') {
@@ -223,7 +211,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {setFromDefault: true}
-        // eslint-disable-next-line no-await-in-loop
         const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags, ...this.context}) : flag.default)
         flags[k] = defaultValue
       }
@@ -237,47 +224,50 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       throw new FlagInvalidOptionError(flag, input)
   }
 
-  private async _argv(): Promise<any[]> {
-    const args: any[] = []
+  private async _args(): Promise<{ argv: string[]; args: OutputArgs}> {
+    const argv: string[] = []
+    const args: OutputArgs = {}
     const tokens = this._argTokens
     let stdinRead = false
-    for (let i = 0; i < Math.max(this.input.args.length, tokens.length); i++) {
-      const token = tokens[i]
-      const arg = this.input.args[i]
-      if (token) {
-        if (arg) {
-          if (arg.options && !arg.options.includes(token.input)) {
-            throw new ArgInvalidOptionError(arg, token.input)
-          }
 
-          // eslint-disable-next-line no-await-in-loop
-          args[i] = await arg.parse(token.input)
+    for (const [name, arg] of Object.entries(this.input.flagArgs)) {
+      const token = tokens.find(t => t.arg === name)
+      if (token) {
+        if (arg.options && !arg.options.includes(token.input)) {
+          throw new ArgInvalidOptionError(arg, token.input)
+        }
+
+        const parsed = await arg.parse(token.input, this.context, arg)
+        argv.push(parsed)
+        args[token.arg] = parsed
+      } else if (arg.default || arg.default === false) {
+        if (typeof arg.default === 'function') {
+          const f = await arg.default()
+          argv.push(f)
+          args[name] = f
         } else {
-          args[i] = token.input
+          argv.push(arg.default)
+          args[name] = arg.default
         }
       } else if (!arg.ignoreStdin && !stdinRead) {
-        // eslint-disable-next-line no-await-in-loop
         let stdin = await readStdin()
         if (stdin) {
           stdin = stdin.trim()
-          args[i] = stdin
+          const parsed = await arg.parse(stdin, this.context, arg)
+          argv.push(parsed)
+          args[name] = parsed
         }
 
         stdinRead = true
       }
-
-      if (!args[i] && arg?.default !== undefined) {
-        if (typeof arg.default === 'function') {
-          // eslint-disable-next-line no-await-in-loop
-          const f = await arg.default()
-          args[i] = f
-        } else {
-          args[i] = arg.default
-        }
-      }
     }
 
-    return args
+    for (const token of tokens) {
+      if (args[token.arg]) continue
+      argv.push(token.input)
+    }
+
+    return {argv, args}
   }
 
   private _debugOutput(args: any, flags: any, argv: any) {
@@ -296,8 +286,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
   private _debugInput() {
     debug('input: %s', this.argv.join(' '))
-    if (this.input.args.length > 0) {
-      debug('available args: %s', this.input.args.map(a => a.name).join(' '))
+    const args = Object.keys(this.input.flagArgs)
+    if (args.length > 0) {
+      debug('available args: %s', args.join(' '))
     }
 
     if (Object.keys(this.input.flags).length === 0) return
@@ -320,6 +311,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private _setNames() {
     for (const k of Object.keys(this.input.flags)) {
       this.input.flags[k].name = k
+    }
+
+    for (const k of Object.keys(this.input.flagArgs)) {
+      this.input.flagArgs[k].name = k
     }
   }
 }
