@@ -124,9 +124,9 @@ export abstract class Command {
   public static set enableJsonFlag(value: boolean) {
     this._enableJsonFlag = value
     if (value === true) {
-      this.globalFlags = jsonFlag
+      this.baseFlags = jsonFlag
     } else {
-      delete this.globalFlags?.json
+      delete this.baseFlags?.json
       this.flags = {} // force the flags setter to run
       delete this.flags?.json
     }
@@ -153,14 +153,14 @@ export abstract class Command {
     return cmd._run()
   }
 
-  protected static _globalFlags: FlagInput
+  protected static _baseFlags: FlagInput
 
-  static get globalFlags(): FlagInput {
-    return this._globalFlags
+  static get baseFlags(): FlagInput {
+    return this._baseFlags
   }
 
-  static set globalFlags(flags: FlagInput) {
-    this._globalFlags = Object.assign({}, this.globalFlags, flags)
+  static set baseFlags(flags: FlagInput) {
+    this._baseFlags = Object.assign({}, this.baseFlags, flags)
     this.flags = {} // force the flags setter to run
   }
 
@@ -172,7 +172,7 @@ export abstract class Command {
   }
 
   public static set flags(flags: FlagInput) {
-    this._flags = Object.assign({}, this._flags ?? {}, this.globalFlags, flags)
+    this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
   }
 
   public id: string | undefined

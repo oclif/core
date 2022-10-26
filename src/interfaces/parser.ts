@@ -51,11 +51,11 @@ export interface CLIParseErrorOptions {
 export type OutputArgs = { [name: string]: any }
 export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
 
-export type ParserOutput<TFlags extends OutputFlags<any> = any, GFlags extends OutputFlags<any> = any, TArgs extends OutputArgs = any> = {
+export type ParserOutput<TFlags extends OutputFlags<any> = any, BFlags extends OutputFlags<any> = any, TArgs extends OutputArgs = any> = {
   // Add in global flags so that they show up in the types
   // This is necessary because there's no easy way to optionally return
   // the individual flags based on wether they're enabled or not
-  flags: TFlags & GFlags & { json: boolean | undefined };
+  flags: TFlags & BFlags & { json: boolean | undefined };
   args: TArgs;
   argv: string[];
   raw: ParsingToken[];
@@ -223,9 +223,9 @@ export type EnumFlagOptions<T, M = false> = Partial<CustomOptionFlag<T, any, M>>
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 
-export type Input<TFlags extends FlagOutput, GFlags extends FlagOutput> = {
+export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput> = {
   flags?: FlagInput<TFlags>;
-  globalFlags?: FlagInput<GFlags>;
+  baseFlags?: FlagInput<BFlags>;
   args?: ArgInput;
   strict?: boolean;
   context?: Command;

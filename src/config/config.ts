@@ -790,7 +790,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     args,
   }
 
-  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags']
+  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_baseFlags']
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: Record<string, unknown> = {}

@@ -33,7 +33,7 @@ const readStdin = async () => {
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, GFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
@@ -59,7 +59,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.metaData = {}
   }
 
-  public async parse(): Promise<ParserOutput<TFlags, GFlags, TArgs>> {
+  public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
     const findLongFlag = (arg: string) => {
@@ -172,7 +172,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return args
   }
 
-  private async _flags(): Promise<TFlags & GFlags & { json: boolean | undefined }> {
+  private async _flags(): Promise<TFlags & BFlags & { json: boolean | undefined }> {
     const flags = {} as any
     this.metaData.flags = {} as any
     for (const token of this._flagTokens) {

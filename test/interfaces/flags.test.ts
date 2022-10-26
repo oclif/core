@@ -11,14 +11,14 @@ import {URL} from 'url'
 abstract class BaseCommand extends Command {
   static enableJsonFlag = true
 
-  static globalFlags = {
+  static baseFlags = {
     optionalGlobalFlag: Flags.string(),
     requiredGlobalFlag: Flags.string({required: true}),
     defaultGlobalFlag: Flags.string({default: 'default'}),
   }
 }
 
-type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.globalFlags>
+type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
 
 enum MyEnum {
   'A' = 'A',
