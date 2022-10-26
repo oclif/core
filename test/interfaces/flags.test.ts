@@ -2,9 +2,7 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 
-import {Command} from '../../src/command'
-import * as Flags from '../../src/flags'
-import * as Interfaces from '../../src/interfaces'
+import {Command, Flags, Interfaces} from '../../src'
 import {expectType, expectNotType} from 'tsd'
 import {URL} from 'url'
 
@@ -114,8 +112,6 @@ class MyCommand extends BaseCommand {
       parse: async () => ({foo: true}),
     })({default: [{foo: true}], multiple: true}),
   }
-
-  // static args = {}
 
   public flags!: MyFlags
 

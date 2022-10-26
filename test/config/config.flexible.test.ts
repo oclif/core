@@ -55,7 +55,7 @@ describe('Config with flexible taxonomy', () => {
     const commandPluginA: Command.Loadable = {
       strict: false,
       aliases: [],
-      args: [],
+      args: {},
       flags: {
         flagA: Flags.boolean({char: 'a'}),
       },
@@ -70,7 +70,7 @@ describe('Config with flexible taxonomy', () => {
     const commandPluginB: Command.Loadable = {
       strict: false,
       aliases: [],
-      args: [],
+      args: {},
       flags: {
         flagB: Flags.boolean({}),
       },

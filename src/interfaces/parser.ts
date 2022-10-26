@@ -3,17 +3,15 @@ import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
 import {Config} from './config'
 
 export type FlagOutput = { [name: string]: any }
-export type FlagArgOutput = { [name: string]: any }
 export type ArgOutput = { [name: string]: any }
 
-export interface CLIParseErrorOptions {
+export type CLIParseErrorOptions = {
   parse: {
     input?: ParserInput;
     output?: ParserOutput;
   };
 }
 
-// export type OutputArgs = { [name: string]: any }
 export type OutputArgs<T extends ParserInput['args']> = { [P in keyof T]: any }
 export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
 
@@ -36,7 +34,7 @@ export type ArgToken = { type: 'arg'; arg: string; input: string }
 export type FlagToken = { type: 'flag'; flag: string; input: string }
 export type ParsingToken = ArgToken | FlagToken
 
-export interface FlagUsageOptions { displayRequired?: boolean }
+export type FlagUsageOptions = { displayRequired?: boolean }
 
 export type Metadata = {
   flags: { [key: string]: MetadataFlag };
@@ -178,10 +176,10 @@ export type OptionArgProps = ArgProps & {
   options?: string[];
 }
 
-export type ArgParser<T, P = any> = (input: string, context: Command, opts: P & OptionArg<T>) => Promise<T>
+export type ArgParser<T, I, P = any> = (input: I, context: Command, opts: P & OptionArg<T>) => Promise<T>
 
-export type ArgBase<T, P = any> = ArgProps & {
-  parse: ArgParser<T, P>;
+export type ArgBase<T, I, P = any> = ArgProps & {
+  parse: ArgParser<T, I, P>;
 }
 
 export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
@@ -191,11 +189,31 @@ export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
    default?: Default<boolean>;
 }
 
-export type BooleanArg<T> = ArgBase<T> & BooleanArgProps & {
+export type BooleanArg<T> = ArgBase<T, string> & BooleanArgProps & {
   /**
    * specifying a default of false is the same as not specifying a default
    */
    default?: Default<boolean>;
+}
+
+export type OptionArg<T> = ArgBase<T, string> & OptionArgProps & {
+  defaultHelp?: DefaultHelp<T>;
+  input: string[];
+} & ({
+  default?: Default<T | undefined>;
+  multiple: false;
+} | {
+  default?: Default<T[] | undefined>;
+  multiple: true;
+})
+
+export type ArgDefinition<T, P = Record<string, unknown>> = {
+  (
+    options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionArg<T>>
+  ): OptionArg<T[]>;
+  (options: P & { multiple: true } & Partial<OptionArg<T>>): OptionArg<T[] | undefined>;
+  (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionArg<T>>): OptionArg<T>;
+  (options?: P & Partial<OptionArg<T>>): OptionArg<T | undefined>;
 }
 
 export type CustomOptionFlag<T, P = any, M = false> = FlagBase<T, string, P> & OptionFlagProps & {
@@ -215,17 +233,6 @@ export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
   multiple: true;
 })
 
-export type OptionArg<T> = ArgBase<T> & OptionArgProps & {
-  defaultHelp?: DefaultHelp<T>;
-  input: string[];
-} & ({
-  default?: Default<T | undefined>;
-  multiple: false;
-} | {
-  default?: Default<T[] | undefined>;
-  multiple: true;
-})
-
 export type FlagDefinition<T, P = Record<string, unknown>> = {
   (
     options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionFlag<T>>
@@ -233,15 +240,6 @@ export type FlagDefinition<T, P = Record<string, unknown>> = {
   (options: P & { multiple: true } & Partial<OptionFlag<T>>): OptionFlag<T[] | undefined>;
   (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
   (options?: P & Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
-}
-
-export type ArgDefinition<T, P = Record<string, unknown>> = {
-  (
-    options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionArg<T>>
-  ): OptionArg<T[]>;
-  (options: P & { multiple: true } & Partial<OptionArg<T>>): OptionArg<T[] | undefined>;
-  (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionArg<T>>): OptionArg<T>;
-  (options?: P & Partial<OptionArg<T>>): OptionArg<T | undefined>;
 }
 
 export type EnumFlagOptions<T, M = false> = Partial<CustomOptionFlag<T, any, M>> & {
@@ -266,7 +264,7 @@ export type EnumArgOptions<T> = Partial<OptionArg<T>> & {
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 
-export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends FlagArgOutput> = {
+export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
   flags?: FlagInput<TFlags>;
   baseFlags?: FlagInput<BFlags>;
   args?: ArgInput<AFlags>;
@@ -275,7 +273,7 @@ export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags e
   '--'?: boolean;
 }
 
-export interface ParserInput {
+export type ParserInput = {
   argv: string[];
   flags: FlagInput<any>;
   args: ArgInput<any>;
@@ -308,4 +306,4 @@ export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in 
 
 export type Arg<T> = OptionArg<T> | BooleanArg<T>
 
-export type ArgInput<T extends FlagArgOutput = { [arg: string]: any }> = { [P in keyof T]: Arg<T[P]> }
+export type ArgInput<T extends ArgOutput = { [arg: string]: any }> = { [P in keyof T]: Arg<T[P]> }

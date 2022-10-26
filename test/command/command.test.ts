@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 
-import {Command as Base, Flags, toCached} from '../../src'
+import {Args, Command as Base, Flags, toCached} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -92,16 +92,15 @@ describe('command', () => {
         }),
       }
 
-      static args = [
-        {
-          name: 'arg1',
+      static args = {
+        arg1: Args.string({
           description: 'arg1 desc',
           required: true,
           hidden: false,
           options: ['af', 'b'],
-          default: () => 'a',
-        },
-      ]
+          default: async () => 'a',
+        }),
+      }
       }
 
       const c = await toCached(C)
@@ -161,8 +160,8 @@ describe('command', () => {
             options: ['a', 'b'],
           },
         },
-        args: [
-          {
+        args: {
+          arg1: {
             description: 'arg1 desc',
             name: 'arg1',
             hidden: false,
@@ -170,7 +169,7 @@ describe('command', () => {
             options: ['af', 'b'],
             default: 'a',
           },
-        ],
+        },
       })
     })
     .it('converts to cached with everything set')

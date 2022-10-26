@@ -12,7 +12,7 @@ export class AppsCreate extends Command {
 
   static flags = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -27,7 +27,7 @@ export class AppsDestroy extends Command {
 
   static flags: Record<string, never> = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -41,7 +41,7 @@ export class AppsIndex extends Command {
 
   static flags: Record<string, never> = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -56,7 +56,7 @@ this only shows up in command help under DESCRIPTION`;
 
   static flags: Record<string, never> = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -83,7 +83,7 @@ export class AppsAdminIndex extends Command {
 
   static flags: Record<string, never> = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -98,7 +98,7 @@ export class AppsAdminAdd extends Command {
 
   static flags: Record<string, never> = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'
@@ -115,7 +115,7 @@ export class DbCreate extends Command {
 
   static flags = {};
 
-  static args = [];
+  static args = {};
 
   async run(): Promise<void> {
     'run'

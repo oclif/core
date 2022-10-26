@@ -20,10 +20,10 @@ import {OptionArg, ArgDefinition, BooleanArg, Default, ArgParser, EnumArgOptions
  * })
  */
 export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: ArgParser<T, P>, multiple: true} & Partial<OptionArg<T>>,
+  defaults: {parse: ArgParser<T, string, P>, multiple: true} & Partial<OptionArg<T>>,
 ): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: ArgParser<T, P>} & Partial<OptionArg<T>>,
+  defaults: {parse: ArgParser<T, string, P>} & Partial<OptionArg<T>>,
 ): ArgDefinition<T, P>
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionArg<T>>): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionArg<T>>): ArgDefinition<T, P> {
@@ -42,7 +42,7 @@ export function boolean<T = boolean>(
   options: Partial<BooleanArg<T>> = {},
 ): BooleanArg<T> {
   return {
-    parse: async b => Boolean(b),
+    parse: async b => Boolean(b) && b.toLowerCase() !== 'false',
     ...options,
     type: 'boolean',
   } as BooleanArg<T>

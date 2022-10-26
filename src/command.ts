@@ -13,13 +13,13 @@ import {
   Deprecation,
   Arg as IArg,
   ArgInput,
-  FlagArgOutput,
   FlagInput,
   FlagOutput,
   Input,
   OptionArgProps,
   OptionFlagProps,
   ParserOutput,
+  ArgOutput,
 } from './interfaces/parser'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId} from './help/util'
 import {Plugin} from './interfaces/plugin'
@@ -283,7 +283,7 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends FlagArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
@@ -338,7 +338,7 @@ export namespace Command {
     load(): Promise<Command.Class>
   }
 
-  export interface Cached {
+  export type Cached = {
     [key: string]: unknown;
     id: string;
     hidden: boolean;

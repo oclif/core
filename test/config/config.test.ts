@@ -191,7 +191,7 @@ describe('Config', () => {
 
       const commandPluginA: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
@@ -199,7 +199,7 @@ describe('Config', () => {
       }
       const commandPluginB: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[1] ?? 'core',
