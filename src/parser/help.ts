@@ -1,6 +1,6 @@
 import * as chalk from 'chalk'
+import {Flag, FlagUsageOptions} from '../interfaces/parser'
 import * as util from './util'
-import {FlagUsageOptions, Flag} from '../interfaces'
 
 export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [string, string | undefined] {
   const label = []

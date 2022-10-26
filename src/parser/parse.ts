@@ -1,17 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import * as util from './util'
-import {
-  ParserInput,
-  OutputFlags,
-  ParsingToken,
-  OutputArgs,
-  ArgToken,
-  FlagToken,
-  BooleanFlag,
-  OptionFlag,
-  ParserOutput,
-} from '../interfaces'
+import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
 
 let debug: any
 try {
@@ -34,7 +24,7 @@ const readStdin = async () => {
   return result
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs> {
+export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
@@ -145,7 +135,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
 
       // not a flag, parse as arg
-      const arg = Object.keys(this.input.flagArgs)[this._argTokens.length]
+      const arg = Object.keys(this.input.args)[this._argTokens.length]
       this.raw.push({type: 'arg', arg, input})
     }
 
@@ -153,11 +143,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const flags = await this._flags()
     this._debugOutput(argv, args, flags)
     return {
-      // TODO: fix this type
-      args: args as TArgs,
       argv,
       flags,
-      flagArgs: args,
+      args: args as TArgs,
       raw: this.raw,
       metadata: this.metaData,
     }
@@ -224,13 +212,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       throw new FlagInvalidOptionError(flag, input)
   }
 
-  private async _args(): Promise<{ argv: string[]; args: OutputArgs}> {
+  private async _args(): Promise<{ argv: string[]; args: Record<string, string>}> {
     const argv: string[] = []
-    const args: OutputArgs = {}
+    const args = {} as Record<string, string>
     const tokens = this._argTokens
     let stdinRead = false
 
-    for (const [name, arg] of Object.entries(this.input.flagArgs)) {
+    for (const [name, arg] of Object.entries(this.input.args)) {
       const token = tokens.find(t => t.arg === name)
       if (token) {
         if (arg.options && !arg.options.includes(token.input)) {
@@ -267,7 +255,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       argv.push(token.input)
     }
 
-    return {argv, args}
+    return {argv, args: args}
   }
 
   private _debugOutput(args: any, flags: any, argv: any) {
@@ -286,7 +274,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
   private _debugInput() {
     debug('input: %s', this.argv.join(' '))
-    const args = Object.keys(this.input.flagArgs)
+    const args = Object.keys(this.input.args)
     if (args.length > 0) {
       debug('available args: %s', args.join(' '))
     }
@@ -313,8 +301,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       this.input.flags[k].name = k
     }
 
-    for (const k of Object.keys(this.input.flagArgs)) {
-      this.input.flagArgs[k].name = k
+    for (const k of Object.keys(this.input.args)) {
+      this.input.args[k].name = k
     }
   }
 }

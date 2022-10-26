@@ -1,15 +1,8 @@
 import {URL} from 'url'
 import * as fs from 'fs'
-import {
-  OptionFlag,
-  EnumFlagOptions,
-  Default,
-  BooleanFlag,
-  Definition,
-  FlagParser,
-  CustomOptionFlag,
-} from './interfaces'
 import {Help} from './help'
+import {BooleanFlag, Default, OptionFlag} from './interfaces'
+import {FlagParser, CustomOptionFlag, EnumFlagOptions, FlagDefinition} from './interfaces/parser'
 
 /**
  * Create a custom flag.
@@ -30,12 +23,12 @@ import {Help} from './help'
  */
 export function custom<T, P = Record<string, unknown>>(
   defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<CustomOptionFlag<T, P, true>>,
-): Definition<T, P>
+): FlagDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(
   defaults: {parse: FlagParser<T, string, P>} & Partial<CustomOptionFlag<T, P>>,
-): Definition<T, P>
-export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): Definition<T, P>
-export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): Definition<T, P> {
+): FlagDefinition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
     return {
       parse: async (i: string, _context: any, _opts: P) => i,

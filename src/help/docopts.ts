@@ -77,8 +77,8 @@ export class DocOpts {
 
   public toString(): string {
     const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
-    if (this.cmd.flagArgs) {
-      const a = Object.values(this.cmd.flagArgs ?? {}).map(arg => `[${arg.name.toUpperCase()}]`) || []
+    if (this.cmd.args) {
+      const a = Object.values(this.cmd.args ?? {}).map(arg => `[${arg.name.toUpperCase()}]`) || []
       opts.push(...a)
     }
 

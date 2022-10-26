@@ -7,14 +7,14 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
-import {OptionFlagArg} from '../interfaces/parser'
+import {CompletableOptionFlag, OptionArg} from '../interfaces/parser'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -712,7 +712,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-const defaultArgToCached = async (arg: OptionFlagArg<any>) => {
+const defaultArgToCached = async (arg: OptionArg<any>) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
@@ -782,10 +782,10 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  const flagArgs = {} as {[k: string]: Command.Arg.Cached}
-  for (const [name, arg] of Object.entries(c.flagArgs || {})) {
+  const args = {} as {[k: string]: Command.Arg.Cached}
+  for (const [name, arg] of Object.entries(c.args || {})) {
     if (arg.type === 'boolean') {
-      flagArgs[name] = {
+      args[name] = {
         name,
         type: arg.type,
         description: arg.description,
@@ -794,7 +794,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         hidden: arg.hidden,
       }
     } else {
-      flagArgs[name] = {
+      args[name] = {
         name,
         type: arg.type,
         description: arg.description,
@@ -821,7 +821,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     examples: c.examples || (c as any).example,
     deprecationOptions: c.deprecationOptions,
     flags,
-    flagArgs,
+    args,
   }
 
   const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_baseFlags']

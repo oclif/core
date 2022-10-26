@@ -17,7 +17,7 @@ const {
 
 export type HelpSectionKeyValueTable = {name: string; description: string}[]
 export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Interfaces.Arg<unknown>[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
+export type HelpSectionRenderer = (data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Command.Arg.Any[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
 
 export class HelpFormatter {
   indentSpacing = 2

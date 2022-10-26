@@ -52,7 +52,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
       const id = finalizeId()
       if (!id) return false
       const cmd = config.findCommand(id)
-      return Boolean(cmd && (cmd.strict === false || Object.keys(cmd.flagArgs ?? {}).length > 0))
+      return Boolean(cmd && (cmd.strict === false || Object.keys(cmd.args ?? {}).length > 0))
     }
 
     for (const arg of argv) {

@@ -3,9 +3,9 @@ import {CLIError} from '../errors'
 import {flagUsages} from './help'
 import {renderList} from './list'
 import * as chalk from 'chalk'
-import {CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
+import {OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'
-import {FlagArg, FlagArgInput} from '../interfaces/parser'
+import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
 
 export {CLIError} from '../errors'
 
@@ -27,9 +27,9 @@ export class CLIParseError extends CLIError {
 }
 
 export class InvalidArgsSpecError extends CLIParseError {
-  public args: FlagArgInput
+  public args: ArgInput
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: FlagArgInput }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: ArgInput }) {
     let message = 'Invalid argument spec'
     const namedArgs = Object.values(args).filter(a => a.name)
     if (namedArgs.length > 0) {
@@ -43,9 +43,9 @@ export class InvalidArgsSpecError extends CLIParseError {
 }
 
 export class RequiredArgsError extends CLIParseError {
-  public args: FlagArg<any>[]
+  public args: Arg<any>[]
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: FlagArg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: Arg<any>[] }) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
@@ -87,7 +87,7 @@ export class FlagInvalidOptionError extends CLIParseError {
 }
 
 export class ArgInvalidOptionError extends CLIParseError {
-  constructor(arg: FlagArg<any>, input: string) {
+  constructor(arg: Arg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
     super({parse: {}, message})
   }

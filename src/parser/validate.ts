@@ -5,8 +5,7 @@ import {
   UnexpectedArgsError,
   FailedFlagValidationError,
 } from './errors'
-import {ParserInput, ParserOutput, Flag, CompletableFlag} from '../interfaces'
-import {FlagArg, FlagRelationship} from '../interfaces/parser'
+import {Arg, CompletableFlag, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../config/util'
 
 export async function validate(parse: {
@@ -14,22 +13,22 @@ export async function validate(parse: {
   output: ParserOutput;
 }): Promise<void> {
   function validateArgs() {
-    const maxArgs = Object.keys(parse.input.flagArgs).length
+    const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({parse, args: extras})
     }
 
-    const missingRequiredArgs: FlagArg<any>[] = []
+    const missingRequiredArgs: Arg<any>[] = []
     let hasOptional = false
 
-    for (const [name, arg] of Object.entries(parse.input.flagArgs)) {
+    for (const [name, arg] of Object.entries(parse.input.args)) {
       if (!arg.required) {
         hasOptional = true
       } else if (hasOptional) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
-        throw new InvalidArgsSpecError({parse, args: parse.input.flagArgs})
+        throw new InvalidArgsSpecError({parse, args: parse.input.args})
       }
 
       if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {

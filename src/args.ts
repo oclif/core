@@ -1,13 +1,6 @@
 import {URL} from 'url'
 import * as fs from 'fs'
-import {
-  OptionFlagArg,
-  EnumFlagArgOptions,
-  Default,
-  BooleanFlagArg,
-  DefinitionArg,
-  FlagArgParser,
-} from './interfaces'
+import {OptionArg, ArgDefinition, BooleanArg, Default, ArgParser, EnumArgOptions} from './interfaces/parser'
 
 /**
  * Create a custom arg.
@@ -27,13 +20,13 @@ import {
  * })
  */
 export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: FlagArgParser<T, P>, multiple: true} & Partial<OptionFlagArg<T>>,
-): DefinitionArg<T, P>
+  defaults: {parse: ArgParser<T, P>, multiple: true} & Partial<OptionArg<T>>,
+): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: FlagArgParser<T, P>} & Partial<OptionFlagArg<T>>,
-): DefinitionArg<T, P>
-export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagArg<T>>): DefinitionArg<T, P>
-export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagArg<T>>): DefinitionArg<T, P> {
+  defaults: {parse: ArgParser<T, P>} & Partial<OptionArg<T>>,
+): ArgDefinition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionArg<T>>): ArgDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionArg<T>>): ArgDefinition<T, P> {
   return (options: any = {}) => {
     return {
       parse: async (i: string, _context: any, _opts: P) => i,
@@ -46,21 +39,21 @@ export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionF
 }
 
 export function boolean<T = boolean>(
-  options: Partial<BooleanFlagArg<T>> = {},
-): BooleanFlagArg<T> {
+  options: Partial<BooleanArg<T>> = {},
+): BooleanArg<T> {
   return {
     parse: async b => Boolean(b),
     ...options,
     type: 'boolean',
-  } as BooleanFlagArg<T>
+  } as BooleanArg<T>
 }
 
-export function _enum<T = string>(opts: EnumFlagArgOptions<T> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlagArg<T[]>
-export function _enum<T = string>(opts: EnumFlagArgOptions<T> & {multiple: true}): OptionFlagArg<T[] | undefined>
-export function _enum<T = string>(opts: EnumFlagArgOptions<T> & ({required: true} | { default: Default<T> })): OptionFlagArg<T>
-export function _enum<T = string>(opts: EnumFlagArgOptions<T>): OptionFlagArg<T | undefined>
-export function _enum<T = string>(opts: EnumFlagArgOptions<T>): OptionFlagArg<T> | OptionFlagArg<T[]> | OptionFlagArg<T | undefined> | OptionFlagArg<T[] | undefined> {
-  return custom<T, EnumFlagArgOptions<T>>({
+export function _enum<T = string>(opts: EnumArgOptions<T> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionArg<T[]>
+export function _enum<T = string>(opts: EnumArgOptions<T> & {multiple: true}): OptionArg<T[] | undefined>
+export function _enum<T = string>(opts: EnumArgOptions<T> & ({required: true} | { default: Default<T> })): OptionArg<T>
+export function _enum<T = string>(opts: EnumArgOptions<T>): OptionArg<T | undefined>
+export function _enum<T = string>(opts: EnumArgOptions<T>): OptionArg<T> | OptionArg<T[]> | OptionArg<T | undefined> | OptionArg<T[] | undefined> {
+  return custom<T, EnumArgOptions<T>>({
     async parse(input) {
       if (!opts.options.includes(input)) throw new Error(`Expected --${this.name}=${input} to be one of: ${opts.options.join(', ')}`)
       return input as unknown as T

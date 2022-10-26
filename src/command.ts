@@ -7,18 +7,17 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {
-  ArgOutput,
-  BooleanFlagArgProps,
+  BooleanArgProps,
   BooleanFlagProps,
   CompletableFlag,
   Deprecation,
-  FlagArg,
-  FlagArgInput,
+  Arg as IArg,
+  ArgInput,
   FlagArgOutput,
   FlagInput,
   FlagOutput,
   Input,
-  OptionFlagArgProps,
+  OptionArgProps,
   OptionFlagProps,
   ParserOutput,
 } from './interfaces/parser'
@@ -92,9 +91,8 @@ export abstract class Command {
   /** When set to false, allows a variable amount of arguments */
   public static strict = true
 
-  /** An order-dependent array of arguments for the command */
-  // public static args?: ArgInput
-  public static flagArgs: FlagArgInput = {}
+  /** An order-dependent object of arguments for the command */
+  public static args: ArgInput = {}
 
   public static plugin: Plugin | undefined
 
@@ -285,13 +283,13 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput, C extends FlagArgOutput>(options?: Input<F, B, C>, argv = this.argv): Promise<ParserOutput<F, B, A, C>> {
-    if (!options) options = this.ctor as Input<F, B, C>
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends FlagArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
+    if (!options) options = this.ctor as Input<F, B, A>
     const opts = {context: this, ...options}
     // the spread operator doesn't work with getters so we have to manually add it here
     opts.flags = options?.flags
-    opts.flagArgs = options?.flagArgs
-    const results = await Parser.parse<F, B, A, C>(argv, opts)
+    opts.args = options?.args
+    const results = await Parser.parse<F, B, A>(argv, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
     return results
@@ -357,7 +355,7 @@ export namespace Command {
     pluginType?: string;
     pluginAlias?: string;
     flags: {[name: string]: Flag.Cached};
-    flagArgs: {[name: string]: Arg.Cached};
+    args: {[name: string]: Arg.Cached};
     hasDynamicHelp?: boolean;
   }
 
@@ -368,10 +366,10 @@ export namespace Command {
     export type Any = Flag | Cached
   }
 
-  export type Arg = FlagArg<any>
+  export type Arg = IArg<any>
 
   export namespace Arg {
-    export type Cached = Omit<Arg, 'parse' | 'input'> & (BooleanFlagArgProps | OptionFlagArgProps)
+    export type Cached = Omit<Arg, 'parse' | 'input'> & (BooleanArgProps | OptionArgProps)
     export type Any = Arg | Cached
   }
 
