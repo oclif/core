@@ -166,7 +166,7 @@ describe('parse', () => {
             args: {
               arg1: Args.string({required: true}),
               arg2: Args.string({required: true, description: 'arg2 desc'}),
-              arg3: Args.string({required: true, description: 'arg3 desc',}),
+              arg3: Args.string({required: true, description: 'arg3 desc'}),
             },
           })
         } catch (error: any) {
