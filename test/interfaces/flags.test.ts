@@ -18,12 +18,6 @@ abstract class BaseCommand extends Command {
 
 type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
 
-enum MyEnum {
-  'A' = 'A',
-  'B' = 'B',
-  'C' = 'C',
-}
-
 type MyType = {
   foo: boolean;
 }
@@ -47,18 +41,6 @@ class MyCommand extends BaseCommand {
     requiredBoolean: Flags.boolean({required: true}),
     optionalBoolean: Flags.boolean(),
     defaultBoolean: Flags.boolean({default: true}),
-
-    optionalEnum: Flags.enum({options: ['a', 'b', 'c']}),
-    requiredEnum: Flags.enum({options: ['a', 'b', 'c'], required: true}),
-    defaultEnum: Flags.enum({options: ['a', 'b', 'c'], default: 'a'}),
-
-    optionalMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c']}),
-    requiredMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c'], required: true}),
-    defaultMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c'], default: ['a']}),
-
-    optionalTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum)}),
-    requiredTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum), required: true}),
-    defaultTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum), default: MyEnum.A}),
 
     optionalInteger: Flags.integer(),
     requiredInteger: Flags.integer({required: true}),
@@ -146,24 +128,6 @@ class MyCommand extends BaseCommand {
     expectType<boolean>(this.flags.defaultBoolean)
     expectNotType<undefined>(this.flags.defaultBoolean)
     expectType<boolean | undefined>(this.flags.optionalBoolean)
-
-    expectType<string>(this.flags.requiredEnum)
-    expectNotType<undefined>(this.flags.requiredEnum)
-    expectType<string>(this.flags.defaultEnum)
-    expectNotType<undefined>(this.flags.defaultEnum)
-    expectType<string | undefined>(this.flags.optionalEnum)
-
-    expectType<string[]>(this.flags.requiredMultiEnum)
-    expectNotType<undefined>(this.flags.requiredMultiEnum)
-    expectType<string[]>(this.flags.defaultMultiEnum)
-    expectNotType<undefined>(this.flags.defaultMultiEnum)
-    expectType<string[] | undefined>(this.flags.optionalMultiEnum)
-
-    expectType<MyEnum>(this.flags.requiredTypedEnum)
-    expectNotType<undefined>(this.flags.requiredTypedEnum)
-    expectType<MyEnum>(this.flags.defaultTypedEnum)
-    expectNotType<undefined>(this.flags.defaultTypedEnum)
-    expectType<MyEnum | undefined>(this.flags.optionalTypedEnum)
 
     expectType<number>(this.flags.requiredInteger)
     expectNotType<undefined>(this.flags.requiredInteger)

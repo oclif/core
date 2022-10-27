@@ -793,26 +793,6 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
       default: await defaultArgToCached(arg),
       hidden: arg.hidden,
     }
-    // if (arg.type === 'boolean') {
-    //   args[name] = {
-    //     name,
-    //     type: arg.type,
-    //     description: arg.description,
-    //     required: arg.required,
-    //     options: arg.options,
-    //     hidden: arg.hidden,
-    //   }
-    // } else {
-    //   args[name] = {
-    //     name,
-    //     type: arg.type,
-    //     description: arg.description,
-    //     required: arg.required,
-    //     options: arg.options,
-    //     default: await defaultArgToCached(arg),
-    //     hidden: arg.hidden,
-    //   }
-    // }
   }
 
   const stdProperties = {

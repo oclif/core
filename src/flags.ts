@@ -1,7 +1,7 @@
 import {URL} from 'url'
 import {Help} from './help'
-import {BooleanFlag, OptionFlag} from './interfaces'
-import {FlagDefault, FlagParser, CustomOptionFlag, EnumFlagOptions, FlagDefinition} from './interfaces/parser'
+import {BooleanFlag} from './interfaces'
+import {CustomOptionFlag, FlagDefinition} from './interfaces/parser'
 import {Command} from './command'
 import {dirExists, fileExists} from './util'
 
@@ -22,12 +22,6 @@ import {dirExists, fileExists} from './util'
  *   },
  * })
  */
-export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<CustomOptionFlag<T, P, true>>,
-): FlagDefinition<T, P>
-export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: FlagParser<T, string, P>} & Partial<CustomOptionFlag<T, P>>,
-): FlagDefinition<T, P>
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
@@ -52,23 +46,6 @@ export function boolean<T = boolean>(
     type: 'boolean',
   } as BooleanFlag<T>
 }
-
-export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: FlagDefault<T[]> })): OptionFlag<T[]>
-export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true}): OptionFlag<T[] | undefined>
-export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: FlagDefault<T> })): OptionFlag<T>
-export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>
-export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | OptionFlag<T[]> | OptionFlag<T | undefined> | OptionFlag<T[] | undefined> {
-  return custom<T, EnumFlagOptions<T>>({
-    async parse(input) {
-      if (!opts.options.includes(input)) throw new Error(`Expected --${this.name}=${input} to be one of: ${opts.options.join(', ')}`)
-      return input as unknown as T
-    },
-    helpValue: `(${opts.options.join('|')})`,
-    ...opts,
-  })()
-}
-
-export {_enum as enum}
 
 export const integer = custom<number, {min?: number; max?: number;}>({
   parse: async (input, _, opts) => {
