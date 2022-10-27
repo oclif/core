@@ -3,7 +3,8 @@ import {assert, expect} from 'chai'
 import * as fs from 'fs'
 
 import {parse} from '../../src/parser'
-import {Args, Interfaces, Flags} from '../../src'
+import {Args, Flags} from '../../src'
+import {FlagDefault} from '../../src/interfaces/parser'
 import {URL} from 'url'
 import * as sinon from 'sinon'
 import {CLIError} from '../../src/errors'
@@ -667,7 +668,7 @@ See more help with --help`)
     })
 
     it('default has options', async () => {
-      const def: Interfaces.Default<string | undefined> = async ({options}) =>
+      const def: FlagDefault<string | undefined> = async ({options}) =>
         options.description
       const out = await parse([], {
         flags: {foo: Flags.string({description: 'bar', default: def})},
@@ -676,7 +677,7 @@ See more help with --help`)
     })
 
     it('can default to a different flag', async () => {
-      const def: Interfaces.Default<string | undefined> = async opts => opts.flags.foo
+      const def: FlagDefault<string | undefined> = async opts => opts.flags.foo
       const out = await parse(['--foo=bar'], {
         flags: {
           bar: Flags.string({

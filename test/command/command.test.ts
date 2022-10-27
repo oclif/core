@@ -168,7 +168,6 @@ describe('command', () => {
             required: true,
             options: ['af', 'b'],
             default: 'a',
-            type: 'option',
           },
         },
       })
