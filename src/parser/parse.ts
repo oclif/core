@@ -2,6 +2,7 @@
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import * as util from './util'
 import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
+import * as readline from 'readline'
 
 let debug: any
 try {
@@ -11,17 +12,46 @@ try {
   debug = () => {}
 }
 
-const readStdin = async () => {
-  const {stdin} = process
-  let result
-  if (stdin.isTTY) return result
-  result = ''
-  stdin.setEncoding('utf8')
-  for await (const chunk of stdin) {
-    result += chunk
-  }
+const readStdin = async (): Promise<string | null> => {
+  const {stdin, stdout} = process
+  debug('stdin.isTTY', stdin.isTTY)
+  if (stdin.isTTY) return null
 
-  return result
+  // process.stdin.isTTY is true whenever it's running in a terminal.
+  // process.stdin.isTTY is undefined when it's running in a pipe, e.g. echo 'foo' | my-cli command
+  // process.stdin.isTTY is undefined when it's running in a spawned process, even if there's no pipe.
+  // This means that reading from stdin could hang indefinitely while waiting for a non-existent pipe.
+  // Because of this, we have to set a timeout to prevent the process from hanging.
+  return new Promise(resolve => {
+    let result = ''
+    const ac = new AbortController()
+    const signal = ac.signal
+    const timeout = setTimeout(() => ac.abort(), 100)
+
+    const rl = readline.createInterface({
+      input: stdin,
+      output: stdout,
+      terminal: false,
+    })
+
+    rl.on('line', line => {
+      result += line
+    })
+
+    rl.once('close', () => {
+      clearTimeout(timeout)
+      debug('resolved from stdin', result)
+      resolve(result)
+    })
+
+    // @ts-expect-error because the AbortSignal interface is missing addEventListener
+    signal.addEventListener('abort', () => {
+      debug('stdin aborted')
+      clearTimeout(timeout)
+      rl.close()
+      resolve(null)
+    }, {once: true})
+  })
 }
 
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
@@ -228,15 +258,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         const parsed = await arg.parse(token.input, this.context, arg)
         argv.push(parsed)
         args[token.arg] = parsed
-      } else if (arg.default || arg.default === false) {
-        if (typeof arg.default === 'function') {
-          const f = await arg.default()
-          argv.push(f)
-          args[name] = f
-        } else {
-          argv.push(arg.default)
-          args[name] = arg.default
-        }
       } else if (!arg.ignoreStdin && !stdinRead) {
         let stdin = await readStdin()
         if (stdin) {
@@ -247,6 +268,17 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
 
         stdinRead = true
+      }
+
+      if (!args[name] && (arg.default || arg.default === false)) {
+        if (typeof arg.default === 'function') {
+          const f = await arg.default()
+          argv.push(f)
+          args[name] = f
+        } else {
+          argv.push(arg.default)
+          args[name] = arg.default
+        }
       }
     }
 
