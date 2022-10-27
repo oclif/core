@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
-import * as util from './util'
 import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
 import * as readline from 'readline'
+import {isTruthy, pickBy} from '../util'
 
 let debug: any
 try {
@@ -72,7 +72,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.context = input.context || {}
     this.argv = [...input.argv]
     this._setNames()
-    this.booleanFlags = util.pickBy(input.flags, f => f.type === 'boolean') as any
+    this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
     this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
       return (flag.aliases ?? []).map(a => [a, flag])
     }))
@@ -223,7 +223,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           }
         } else if (flag.type === 'boolean') {
           // eslint-disable-next-line no-negated-condition
-          flags[k] = input !== undefined ? ['true', 'TRUE', '1', 'yes', 'YES', 'y', 'Y'].includes(input) : false
+          flags[k] = input !== undefined ? isTruthy(input) : false
         }
       }
 
@@ -242,9 +242,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       throw new FlagInvalidOptionError(flag, input)
   }
 
-  private async _args(): Promise<{ argv: string[]; args: Record<string, string>}> {
-    const argv: string[] = []
-    const args = {} as Record<string, string>
+  private async _args(): Promise<{ argv: unknown[]; args: Record<string, unknown>}> {
+    const argv: unknown[] = []
+    const args = {} as Record<string, unknown>
     const tokens = this._argTokens
     let stdinRead = false
 

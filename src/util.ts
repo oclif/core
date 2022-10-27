@@ -1,3 +1,13 @@
+import * as fs from 'fs'
+
+export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
+  return Object.entries(obj)
+  .reduce((o, [k, v]) => {
+    if (fn(v)) o[k] = v
+    return o
+  }, {} as any)
+}
+
 export function compact<T>(a: (T | undefined)[]): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
@@ -58,4 +68,36 @@ export function sumBy<T>(arr: T[], fn: (i: T) => number): number {
 
 export function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
+}
+
+export const dirExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No directory found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isDirectory()) {
+    throw new Error(`${input} exists but is not a directory`)
+  }
+
+  return input
+}
+
+export const fileExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No file found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isFile()) {
+    throw new Error(`${input} exists but is not a file`)
+  }
+
+  return input
+}
+
+export function isTruthy(input: string): boolean {
+  return ['true', 'TRUE', '1', 'yes', 'YES', 'y', 'Y'].includes(input)
+}
+
+export function isNotFalsy(input: string): boolean {
+  return !['false', 'FALSE', '0', 'no', 'NO', 'n', 'N'].includes(input)
 }

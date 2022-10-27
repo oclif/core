@@ -7,12 +7,6 @@ import {URL} from 'url'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 
-enum MyEnum {
-  'A' = 'A',
-  'B' = 'B',
-  'C' = 'C',
-}
-
 type MyType = {
   foo: boolean;
 }
@@ -32,14 +26,6 @@ class MyCommand extends Command {
     requiredBoolean: Args.boolean({required: true}),
     optionalBoolean: Args.boolean(),
     defaultBoolean: Args.boolean({default: true}),
-
-    optionalEnum: Args.enum({options: ['a', 'b', 'c']}),
-    requiredEnum: Args.enum({options: ['a', 'b', 'c'], required: true}),
-    defaultEnum: Args.enum({options: ['a', 'b', 'c'], default: 'a'}),
-
-    optionalTypedEnum: Args.enum<MyEnum>({options: Object.values(MyEnum)}),
-    requiredTypedEnum: Args.enum<MyEnum>({options: Object.values(MyEnum), required: true}),
-    defaultTypedEnum: Args.enum<MyEnum>({options: Object.values(MyEnum), default: MyEnum.A}),
 
     optionalInteger: Args.integer(),
     requiredInteger: Args.integer({required: true}),
@@ -88,18 +74,6 @@ class MyCommand extends Command {
     expectType<boolean>(this.args.defaultBoolean)
     expectNotType<undefined>(this.args.defaultBoolean)
     expectType<boolean | undefined>(this.args.optionalBoolean)
-
-    expectType<string>(this.args.requiredEnum)
-    expectNotType<undefined>(this.args.requiredEnum)
-    expectType<string>(this.args.defaultEnum)
-    expectNotType<undefined>(this.args.defaultEnum)
-    expectType<string | undefined>(this.args.optionalEnum)
-
-    expectType<MyEnum>(this.args.requiredTypedEnum)
-    expectNotType<undefined>(this.args.requiredTypedEnum)
-    expectType<MyEnum>(this.args.defaultTypedEnum)
-    expectNotType<undefined>(this.args.defaultTypedEnum)
-    expectType<MyEnum | undefined>(this.args.optionalTypedEnum)
 
     expectType<number>(this.args.requiredInteger)
     expectNotType<undefined>(this.args.requiredInteger)

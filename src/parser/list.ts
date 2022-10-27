@@ -1,6 +1,6 @@
 import {List} from '../interfaces/parser'
 import {stdtermwidth} from '../screen'
-import {maxBy} from './util'
+import {maxBy} from '../util'
 
 function linewrap(length: number, s: string): string {
   const lw = require('@oclif/linewrap')

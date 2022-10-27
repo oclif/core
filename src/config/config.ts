@@ -14,7 +14,7 @@ import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
-import {CompletableOptionFlag, OptionArg} from '../interfaces/parser'
+import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -712,7 +712,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-const defaultArgToCached = async (arg: OptionArg<any>) => {
+const defaultArgToCached = async (arg: Arg<any>) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
@@ -784,26 +784,35 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
 
   const args = {} as {[k: string]: Command.Arg.Cached}
   for (const [name, arg] of Object.entries(c.args || {})) {
-    if (arg.type === 'boolean') {
-      args[name] = {
-        name,
-        type: arg.type,
-        description: arg.description,
-        required: arg.required,
-        options: arg.options,
-        hidden: arg.hidden,
-      }
-    } else {
-      args[name] = {
-        name,
-        type: arg.type,
-        description: arg.description,
-        required: arg.required,
-        options: arg.options,
-        default: await defaultArgToCached(arg),
-        hidden: arg.hidden,
-      }
+    args[name] = {
+      name,
+      // type: arg.type,
+      description: arg.description,
+      required: arg.required,
+      options: arg.options,
+      default: await defaultArgToCached(arg),
+      hidden: arg.hidden,
     }
+    // if (arg.type === 'boolean') {
+    //   args[name] = {
+    //     name,
+    //     type: arg.type,
+    //     description: arg.description,
+    //     required: arg.required,
+    //     options: arg.options,
+    //     hidden: arg.hidden,
+    //   }
+    // } else {
+    //   args[name] = {
+    //     name,
+    //     type: arg.type,
+    //     description: arg.description,
+    //     required: arg.required,
+    //     options: arg.options,
+    //     default: await defaultArgToCached(arg),
+    //     hidden: arg.hidden,
+    //   }
+    // }
   }
 
   const stdProperties = {

@@ -25,7 +25,7 @@ export type ParserOutput<
   // on wether enableJsonFlag is set in the command.
   flags: TFlags & BFlags & { json: boolean | undefined };
   args: TArgs;
-  argv: string[];
+  argv: unknown[];
   raw: ParsingToken[];
   metadata: Metadata;
 }
@@ -47,13 +47,18 @@ type MetadataFlag = {
 export type ListItem = [string, string | undefined]
 export type List = ListItem[]
 
-export type DefaultContext<T, P> = {
-  options: P & OptionFlag<T>;
+export type CustomOptions = Record<string, unknown>
+
+export type DefaultContext<T> = {
+  options: T;
   flags: Record<string, string>;
 }
 
-export type Default<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<T>)
-export type DefaultHelp<T, P = Record<string, unknown>> = T | ((context: DefaultContext<T, P>) => Promise<string | undefined>)
+export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T>>) => Promise<T>)
+export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T>>) => Promise<string | undefined>)
+
+export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<T>)
+export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
 export type Relationship = {
@@ -167,98 +172,61 @@ export type FlagBase<T, I, P = any> = FlagProps & {
   parse: FlagParser<T, I, P>;
 }
 
-export type BooleanArgProps = ArgProps & {
-  type: 'boolean';
+export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: Arg<T, P>) => Promise<T>
+
+export type Arg<T, P = CustomOptions> = P & ArgProps & {
+  options?: T[];
+  defaultHelp?: ArgDefaultHelp<T>;
+  input: string[];
+  default?: ArgDefault<T | undefined>;
+  parse: ArgParser<T, P>;
 }
 
-export type OptionArgProps = ArgProps & {
-  type: 'option';
-  options?: string[];
-}
-
-export type ArgParser<T, I, P = any> = (input: I, context: Command, opts: P & OptionArg<T>) => Promise<T>
-
-export type ArgBase<T, I, P = any> = ArgProps & {
-  parse: ArgParser<T, I, P>;
+export type ArgDefinition<T, P = CustomOptions> = {
+  (options: P & ({ required: true } | { default: ArgDefault<T> }) & Partial<Arg<T, P>>): Arg<T, P>;
+  (options?: P & Partial<Arg<T, P>>): Arg<T | undefined, P>;
 }
 
 export type BooleanFlag<T> = FlagBase<T, boolean> & BooleanFlagProps & {
   /**
    * specifying a default of false is the same as not specifying a default
    */
-   default?: Default<boolean>;
-}
-
-export type BooleanArg<T> = ArgBase<T, string> & BooleanArgProps & {
-  /**
-   * specifying a default of false is the same as not specifying a default
-   */
-   default?: Default<boolean>;
-}
-
-export type OptionArg<T> = ArgBase<T, string> & OptionArgProps & {
-  defaultHelp?: DefaultHelp<T>;
-  input: string[];
-} & ({
-  default?: Default<T | undefined>;
-  multiple: false;
-} | {
-  default?: Default<T[] | undefined>;
-  multiple: true;
-})
-
-export type ArgDefinition<T, P = Record<string, unknown>> = {
-  (
-    options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionArg<T>>
-  ): OptionArg<T[]>;
-  (options: P & { multiple: true } & Partial<OptionArg<T>>): OptionArg<T[] | undefined>;
-  (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionArg<T>>): OptionArg<T>;
-  (options?: P & Partial<OptionArg<T>>): OptionArg<T | undefined>;
+   default?: FlagDefault<boolean>;
 }
 
 export type CustomOptionFlag<T, P = any, M = false> = FlagBase<T, string, P> & OptionFlagProps & {
-  defaultHelp?: DefaultHelp<T>;
+  defaultHelp?: FlagDefaultHelp<T>;
   input: string[];
-  default?: M extends true ? Default<T[] | undefined, P> : Default<T | undefined, P>;
+  default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
 }
 
-export type OptionFlag<T> = FlagBase<T, string> & OptionFlagProps & {
-  defaultHelp?: DefaultHelp<T>;
+export type OptionFlag<T, P = Record<string, unknown>> = FlagBase<T, string> & OptionFlagProps & {
+  defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
 } & ({
-  default?: Default<T | undefined>;
+  default?: FlagDefault<T | undefined, P>;
   multiple: false;
 } | {
-  default?: Default<T[] | undefined>;
+  default?: FlagDefault<T[] | undefined, P>;
   multiple: true;
 })
 
 export type FlagDefinition<T, P = Record<string, unknown>> = {
   (
-    options: P & { multiple: true } & ({ required: true } | { default: Default<T[]> }) & Partial<OptionFlag<T>>
+    options: P & { multiple: true } & ({ required: true } | { default: FlagDefault<T[]> }) & Partial<OptionFlag<T>>
   ): OptionFlag<T[]>;
   (options: P & { multiple: true } & Partial<OptionFlag<T>>): OptionFlag<T[] | undefined>;
-  (options: P & ({ required: true } | { default: Default<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
+  (options: P & ({ required: true } | { default: FlagDefault<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
   (options?: P & Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
 }
 
 export type EnumFlagOptions<T, M = false> = Partial<CustomOptionFlag<T, any, M>> & {
   options: T[];
 } & ({
-  default?: Default<T | undefined>;
+  default?: FlagDefault<T | undefined>;
   multiple?: false;
 } | {
-  default?: Default<T[] | undefined>;
-  multiple: true;
-})
-
-export type EnumArgOptions<T> = Partial<OptionArg<T>> & {
-  options: T[];
-} & ({
-  default?: Default<T | undefined>;
-  multiple?: false;
-} | {
-  default?: Default<T[] | undefined>;
+  default?: FlagDefault<T[] | undefined>;
   multiple: true;
 })
 
@@ -303,7 +271,5 @@ export type CompletableOptionFlag<T> = OptionFlag<T> & {
 export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
 
 export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in keyof T]: CompletableFlag<T[P]> }
-
-export type Arg<T> = OptionArg<T> | BooleanArg<T>
 
 export type ArgInput<T extends ArgOutput = { [arg: string]: any }> = { [P in keyof T]: Arg<T[P]> }

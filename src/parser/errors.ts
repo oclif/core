@@ -70,9 +70,9 @@ export class RequiredFlagError extends CLIParseError {
 }
 
 export class UnexpectedArgsError extends CLIParseError {
-  public args: string[]
+  public args: unknown[]
 
-  constructor({parse, args}: CLIParseErrorOptions & { args: string[] }) {
+  constructor({parse, args}: CLIParseErrorOptions & { args: unknown[] }) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
     super({parse, message})
     this.args = args

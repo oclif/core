@@ -7,7 +7,6 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {
-  BooleanArgProps,
   BooleanFlagProps,
   CompletableFlag,
   Deprecation,
@@ -16,7 +15,7 @@ import {
   FlagInput,
   FlagOutput,
   Input,
-  OptionArgProps,
+  ArgProps,
   OptionFlagProps,
   ParserOutput,
   ArgOutput,
@@ -369,7 +368,7 @@ export namespace Command {
   export type Arg = IArg<any>
 
   export namespace Arg {
-    export type Cached = Omit<Arg, 'parse' | 'input'> & (BooleanArgProps | OptionArgProps)
+    export type Cached = Omit<Arg, 'parse' | 'input'> & ArgProps
     export type Any = Arg | Cached
   }
 

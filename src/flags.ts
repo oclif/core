@@ -1,8 +1,9 @@
 import {URL} from 'url'
-import * as fs from 'fs'
 import {Help} from './help'
-import {BooleanFlag, Default, OptionFlag} from './interfaces'
-import {FlagParser, CustomOptionFlag, EnumFlagOptions, FlagDefinition} from './interfaces/parser'
+import {BooleanFlag, OptionFlag} from './interfaces'
+import {FlagDefault, FlagParser, CustomOptionFlag, EnumFlagOptions, FlagDefinition} from './interfaces/parser'
+import {Command} from './command'
+import {dirExists, fileExists} from './util'
 
 /**
  * Create a custom flag.
@@ -31,7 +32,7 @@ export function custom<T = string, P = Record<string, unknown>>(defaults: Partia
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
     return {
-      parse: async (i: string, _context: any, _opts: P) => i,
+      parse: async (i: string, _context: Command, _opts: P) => i,
       ...defaults,
       ...options,
       input: [] as string[],
@@ -52,9 +53,9 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
+export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: FlagDefault<T[]> })): OptionFlag<T[]>
 export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true}): OptionFlag<T[] | undefined>
-export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: Default<T> })): OptionFlag<T>
+export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: FlagDefault<T> })): OptionFlag<T>
 export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>
 export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | OptionFlag<T[]> | OptionFlag<T | undefined> | OptionFlag<T[] | undefined> {
   return custom<T, EnumFlagOptions<T>>({
@@ -114,30 +115,6 @@ export const url = custom<URL>({
 
 const stringFlag = custom({})
 export {stringFlag as string}
-
-const dirExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
-    throw new Error(`No directory found at ${input}`)
-  }
-
-  if (!(await fs.promises.stat(input)).isDirectory()) {
-    throw new Error(`${input} exists but is not a directory`)
-  }
-
-  return input
-}
-
-const fileExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
-    throw new Error(`No file found at ${input}`)
-  }
-
-  if (!(await fs.promises.stat(input)).isFile()) {
-    throw new Error(`${input} exists but is not a file`)
-  }
-
-  return input
-}
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
