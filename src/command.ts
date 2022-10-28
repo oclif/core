@@ -263,7 +263,7 @@ export default abstract class Command {
 
       const deprecateAliases = this.ctor.flags[flag]?.deprecateAliases
       const aliases = this.ctor.flags[flag]?.aliases ?? []
-      if (deprecateAliases && aliases) {
+      if (deprecateAliases && aliases.length > 0) {
         const foundAliases = this.argv.filter(a => aliases.includes(a.replace(/-/g, '')))
         for (const alias of foundAliases) {
           this.warn(formatFlagDeprecationWarning(alias, {to: this.ctor.flags[flag]?.name}))
