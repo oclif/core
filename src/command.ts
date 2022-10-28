@@ -65,7 +65,7 @@ export default abstract class Command {
   /**
    * Emit deprecation warning when a command alias is used
    */
-  static deprecateAliases: boolean
+  static deprecateAliases?: boolean
 
   /**
    * An override string (or strings) for the default usage documentation.

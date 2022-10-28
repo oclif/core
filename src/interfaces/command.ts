@@ -25,7 +25,7 @@ export interface CommandProps {
   /**
    * Emit a deprecation warning when a command alias is used.
    */
-  deprecateAliases: boolean
+  deprecateAliases?: boolean
 
   /** An array of aliases for this command. */
   aliases: string[];

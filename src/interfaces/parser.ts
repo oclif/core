@@ -160,7 +160,7 @@ export type FlagProps = {
   /**
    * Emit deprecation warning when a flag alias is provided
    */
-  deprecateAliases: boolean
+  deprecateAliases?: boolean
 }
 
 export type BooleanFlagProps = FlagProps & {
