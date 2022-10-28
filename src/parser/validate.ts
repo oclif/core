@@ -4,6 +4,7 @@ import {
   Validation,
   UnexpectedArgsError,
   FailedFlagValidationError,
+  NonExistentFlagsError,
 } from './errors'
 import {Arg, CompletableFlag, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../config/util'
@@ -17,6 +18,10 @@ export async function validate(parse: {
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({parse, args: extras})
+    }
+
+    if (parse.output.nonExistentFlags.length > 0) {
+      throw new NonExistentFlagsError({parse, flags: parse.output.nonExistentFlags})
     }
 
     const missingRequiredArgs: Arg<any>[] = []

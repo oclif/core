@@ -28,6 +28,7 @@ export type ParserOutput<
   argv: unknown[];
   raw: ParsingToken[];
   metadata: Metadata;
+  nonExistentFlags: string[];
 }
 
 export type ArgToken = { type: 'arg'; arg: string; input: string }

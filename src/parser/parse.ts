@@ -144,6 +144,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     let parsingFlags = true
+    const nonExistentFlags: string[] = []
     while (this.argv.length > 0) {
       const input = this.argv.shift() as string
       if (parsingFlags && input.startsWith('-') && input !== '-') {
@@ -156,7 +157,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (parseFlag(input)) {
           continue
         }
-        // not actually a flag if it reaches here so parse as an arg
+
+        // At this point we have a value that begins with '-' or '--'
+        // but doesn't match up to a flag definition. So we assume that
+        // this is a misspelled flag or a non-existent flag,
+        // e.g. --hekp instead of --help
+        nonExistentFlags.push(input)
+        continue
       }
 
       if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
@@ -173,11 +180,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const flags = await this._flags()
     this._debugOutput(argv, args, flags)
     return {
-      argv,
+      argv: [...argv, ...nonExistentFlags],
       flags,
       args: args as TArgs,
       raw: this.raw,
       metadata: this.metaData,
+      nonExistentFlags,
     }
   }
 

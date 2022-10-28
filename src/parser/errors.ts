@@ -79,6 +79,16 @@ export class UnexpectedArgsError extends CLIParseError {
   }
 }
 
+export class NonExistentFlagsError extends CLIParseError {
+  public flags: string[]
+
+  constructor({parse, flags}: CLIParseErrorOptions & { flags: string[] }) {
+    const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
+    super({parse, message})
+    this.flags = flags
+  }
+}
+
 export class FlagInvalidOptionError extends CLIParseError {
   constructor(flag: OptionFlag<any>, input: string) {
     const message = `Expected --${flag.name}=${input} to be one of: ${flag.options!.join(', ')}`
