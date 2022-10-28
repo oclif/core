@@ -252,7 +252,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['--username', 'astro']))
     .do(ctx => expect(ctx.stderr).to.include('Warning: The "--username" flag has been deprecated'))
     .it('shows warning for deprecated flag alias')
@@ -260,7 +259,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['--target-user', 'astro']))
     .do(ctx => expect(ctx.stderr).to.include('Warning: The "--target-user" flag has been deprecated'))
     .it('shows warning for deprecated flag alias')
@@ -268,7 +266,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['-u', 'astro']))
     .do(ctx => expect(ctx.stderr).to.include('Warning: The "-u" flag has been deprecated'))
     .it('shows warning for deprecated short char flag alias')
@@ -276,7 +273,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['--name', 'username']))
     .do(ctx => expect(ctx.stderr).to.be.empty)
     .it('shows no warning when using proper flag name with a value that matches a flag alias')
@@ -284,7 +280,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['--other', 'target-user']))
     .do(ctx => expect(ctx.stderr).to.be.empty)
     .it('shows no warning when using another flag with a value that matches a deprecated flag alias')
@@ -292,7 +287,6 @@ describe('command', () => {
     fancy
     .stdout()
     .stderr()
-    .only()
     .do(async () => CMD.run(['--name', 'u']))
     .do(ctx => expect(ctx.stderr).to.be.empty)
     .it('shows no warning when proper flag name with a value that matches a short char flag alias')
