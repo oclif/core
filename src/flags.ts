@@ -107,9 +107,9 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   return boolean({
     description: 'Show CLI help.',
     ...opts,
-    parse: async (_: any, ctx) => {
-      new Help(ctx.config).showHelp([ctx.id!, ...ctx.argv])
-      ctx.exit(0)
+    parse: async (_, cmd) => {
+      new Help(cmd.config).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
+      cmd.exit(0)
     },
   })
 }

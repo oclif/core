@@ -107,7 +107,7 @@ export function formatFlagDeprecationWarning(flag: string, opts: true | Deprecat
     message += ` and will be removed in version ${opts.version}`
   }
 
-  message += opts.to ? `. Use "${opts.to}" instead.` : '.'
+  message += opts.to ? `. Use "--${opts.to}" instead.` : '.'
 
   return message
 }
@@ -125,4 +125,9 @@ export function formatCommandDeprecationWarning(command: string, opts?: Deprecat
   message += opts.to ? `. Use "${opts.to}" instead.` : '.'
 
   return message
+}
+
+export function normalizeArgv(config: IConfig, argv = process.argv.slice(2)): string[] {
+  if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
+  return argv
 }

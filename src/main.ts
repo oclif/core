@@ -5,7 +5,7 @@ import {format, inspect} from 'util'
 import * as Interfaces from './interfaces'
 import {URL} from 'url'
 import {Config} from './config'
-import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
+import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
@@ -39,8 +39,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const config = await Config.load(options ?? require.main?.filename ?? __dirname)
 
-  if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
-  let [id, ...argvSlice] = argv
+  let [id, ...argvSlice] = normalizeArgv(config, argv)
   // run init hook
   await config.runHook('init', {id, argv: argvSlice})
 

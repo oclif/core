@@ -20,7 +20,7 @@ import {
   ParserOutput,
   ArgOutput,
 } from './interfaces/parser'
-import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId} from './help/util'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId, normalizeArgv} from './help/util'
 import {Plugin} from './interfaces/plugin'
 import {LoadOptions} from './interfaces/config'
 import {CommandError} from './interfaces/errors'
@@ -76,6 +76,11 @@ export abstract class Command {
   public static state?: 'beta' | 'deprecated' | string;
 
   public static deprecationOptions?: Deprecation;
+
+  /**
+   * Emit deprecation warning when a command alias is used
+   */
+  static deprecateAliases?: boolean
 
   /**
    * An override string (or strings) for the default usage documentation.
@@ -272,10 +277,27 @@ export abstract class Command {
       if (deprecated) {
         this.warn(formatFlagDeprecationWarning(flag, deprecated))
       }
+
+      const deprecateAliases = this.ctor.flags[flag]?.deprecateAliases
+      const aliases = (this.ctor.flags[flag]?.aliases ?? []).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+      if (deprecateAliases && aliases.length > 0) {
+        const foundAliases = this.argv.filter(a => aliases.includes(a))
+        for (const alias of foundAliases) {
+          this.warn(formatFlagDeprecationWarning(alias, {to: this.ctor.flags[flag]?.name}))
+        }
+      }
     }
   }
 
   protected warnIfCommandDeprecated(): void {
+    const [id] = normalizeArgv(this.config)
+
+    if (this.ctor.deprecateAliases && this.ctor.aliases.includes(id)) {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      const aliasName = toConfiguredId(id, this.config)
+      this.warn(formatCommandDeprecationWarning(aliasName, {to: cmdName}))
+    }
+
     if (this.ctor.state === 'deprecated') {
       const cmdName = toConfiguredId(this.ctor.id, this.config)
       this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
