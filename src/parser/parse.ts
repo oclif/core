@@ -149,6 +149,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
     let parsingFlags = true
     const nonExistentFlags: string[] = []
+    let dashdash = false
+    const originalArgv = [...this.argv]
+
     while (this.argv.length > 0) {
       const input = this.argv.shift() as string
       if (parsingFlags && input.startsWith('-') && input !== '-') {
@@ -162,12 +165,19 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           continue
         }
 
-        // At this point we have a value that begins with '-' or '--'
-        // but doesn't match up to a flag definition. So we assume that
-        // this is a misspelled flag or a non-existent flag,
-        // e.g. --hekp instead of --help
-        nonExistentFlags.push(input)
-        continue
+        if (input === '--') {
+          dashdash = true
+          continue
+        }
+
+        if (this.input['--'] !== false) {
+          // At this point we have a value that begins with '-' or '--'
+          // but doesn't match up to a flag definition. So we assume that
+          // this is a misspelled flag or a non-existent flag,
+          // e.g. --hekp instead of --help
+          nonExistentFlags.push(input)
+          continue
+        }
       }
 
       if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
@@ -183,8 +193,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const {argv, args} = await this._args()
     const flags = await this._flags()
     this._debugOutput(argv, args, flags)
+
+    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
+
     return {
-      argv: [...argv, ...nonExistentFlags],
+      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
       flags,
       args: args as TArgs,
       raw: this.raw,

@@ -215,11 +215,18 @@ See more help with --help`)
         expect(out.argv).to.deep.equal(['foo'])
       })
 
-      it('parses something looking like a flag as an arg', async () => {
-        const out = await parse(['--foo'], {
-          args: {myarg: Args.string()},
-        })
-        expect(out.argv).to.deep.equal(['--foo'])
+      it('throws an error when parsing a non-existent flag', async () => {
+        try {
+          await parse(['arg', '--foo'], {
+            args: {
+              myArg: Args.string(),
+            },
+          })
+          assert.fail('should have thrown')
+        } catch (error) {
+          const err = error as Error
+          expect(err.message).to.include('Nonexistent flag: --foo')
+        }
       })
 
       it('parses - as an arg', async () => {
@@ -357,6 +364,7 @@ See more help with --help`)
             strict: false,
             '--': false,
           })
+          console.log(out)
           expect(out.argv).to.deep.equal(['foo', 'bar', '--', '--myflag'])
           expect(out.args).to.deep.equal({argOne: 'foo'})
         })
@@ -365,8 +373,13 @@ See more help with --help`)
       it('does not repeat arguments', async () => {
         const out = await parse(['foo', '--myflag=foo bar'], {
           strict: false,
+          flags: {
+            myflag: Flags.string(),
+          },
         })
-        expect(out.argv).to.deep.equal(['foo', '--myflag=foo bar'])
+
+        expect(out.argv).to.deep.equal(['foo'])
+        expect(out.flags).to.deep.equal({myflag: 'foo bar'})
       })
     })
 

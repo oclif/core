@@ -119,6 +119,7 @@ describe('command', () => {
         usage: ['$ usage'],
         examples: undefined,
         deprecationOptions: undefined,
+        deprecateAliases: undefined,
         summary: undefined,
         strict: true,
         flags: {
@@ -127,6 +128,7 @@ describe('command', () => {
             char: undefined,
             description: undefined,
             dependsOn: undefined,
+            deprecateAliases: undefined,
             deprecated: undefined,
             exclusive: undefined,
             helpGroup: undefined,
@@ -144,6 +146,7 @@ describe('command', () => {
             char: 'b',
             description: 'flagb desc',
             dependsOn: undefined,
+            deprecateAliases: undefined,
             deprecated: undefined,
             exclusive: undefined,
             helpGroup: undefined,
