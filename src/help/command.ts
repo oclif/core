@@ -229,8 +229,6 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected args(args: Command.Arg.Any[]): [string, string | undefined][] | undefined {
-    if (args.filter(a => a.description).length === 0) return
-
     return args.map(a => {
       const name = a.name.toUpperCase()
       let description = a.description || ''

@@ -2,7 +2,6 @@ import {URL} from 'url'
 import {Help} from './help'
 import {BooleanFlag} from './interfaces'
 import {CustomOptionFlag, FlagDefinition} from './interfaces/parser'
-import {Command} from './command'
 import {dirExists, fileExists} from './util'
 
 /**
@@ -26,7 +25,7 @@ export function custom<T = string, P = Record<string, unknown>>(defaults: Partia
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<CustomOptionFlag<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
     return {
-      parse: async (i: string, _context: Command, _opts: P) => i,
+      parse: async (input, _ctx, _opts) => input,
       ...defaults,
       ...options,
       input: [] as string[],
@@ -109,7 +108,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
     description: 'Show CLI help.',
     ...opts,
     parse: async (_: any, ctx) => {
-      new Help(ctx.config).showHelp(ctx.argv)
+      new Help(ctx.config).showHelp([ctx.id!, ...ctx.argv])
       ctx.exit(0)
     },
   })
