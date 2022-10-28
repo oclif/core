@@ -5,7 +5,7 @@ import {format, inspect} from 'util'
 import * as Interfaces from './interfaces'
 import {URL} from 'url'
 import {Config} from './config'
-import {getHelpFlagAdditions, loadHelpClass, standardizeIDFromArgv} from './help'
+import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 
 const log = (message = '', ...args: any[]) => {
   // tslint:disable-next-line strict-type-predicates
@@ -41,8 +41,7 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // return Main.run(argv, options)
   const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
 
-  if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
-  let [id, ...argvSlice] = argv
+  let [id, ...argvSlice] = normalizeArgv(config, argv)
   // run init hook
   await config.runHook('init', {id, argv: argvSlice})
 

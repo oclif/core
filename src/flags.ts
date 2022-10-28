@@ -37,7 +37,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
     description: 'Show CLI help.',
     ...opts,
     parse: async (_: any, cmd: Command) => {
-      new Help(cmd.config).showHelp(cmd.argv)
+      new Help(cmd.config).showHelp([cmd.id!, ...cmd.argv])
       cmd.exit(0)
     },
   })

@@ -9,7 +9,7 @@ import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFrom
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions} from './util'
+export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'

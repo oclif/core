@@ -79,8 +79,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
     }
 
-    const findShortFlag = (arg: string) => {
-      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === arg[1])
+    const findShortFlag = ([_, char]: string) => {
+      if (this.flagAliases[char]) {
+        return this.flagAliases[char].name
+      }
+
+      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === char)
     }
 
     const parseFlag = (arg: string): boolean => {

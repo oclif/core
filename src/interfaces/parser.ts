@@ -157,6 +157,10 @@ export type FlagProps = {
    * Alternate names that can be used for this flag.
    */
   aliases?: string[];
+  /**
+   * Emit deprecation warning when a flag alias is provided
+   */
+  deprecateAliases: boolean
 }
 
 export type BooleanFlagProps = FlagProps & {
