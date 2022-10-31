@@ -211,7 +211,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
       if (flags[k]) continue
-      if (flag.env) {
+      if (flag.env && Object.prototype.hasOwnProperty.call(process.env, flag.env)) {
         const input = process.env[flag.env]
         if (flag.type === 'option') {
           if (input) {
