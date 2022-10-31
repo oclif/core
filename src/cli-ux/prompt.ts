@@ -120,7 +120,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
  * prompt for input
  * @param name - prompt text
  * @param options - @see IPromptOptions
- * @returns void
+ * @returns Promise<string>
  */
 export async function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
   return config.action.pauseAsync(() => {

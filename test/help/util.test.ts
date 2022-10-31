@@ -1,8 +1,9 @@
 import {resolve} from 'path'
 import {Config, Interfaces} from '../../src'
-import {expect, test} from '@oclif/test'
+import {test} from '@oclif/test'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
+import {expect} from 'chai'
 
 describe('util', () => {
   let config: Interfaces.Config
