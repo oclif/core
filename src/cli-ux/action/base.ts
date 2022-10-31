@@ -92,7 +92,7 @@ export class ActionBase {
     task.status = status
   }
 
-  public async pauseAsync(fn: () => Promise<any>, icon?: string) {
+  public async pauseAsync<T extends any>(fn: () => Promise<T>, icon?: string): Promise<T> {
     const task = this.task
     const active = task && task.active
     if (task && active) {
