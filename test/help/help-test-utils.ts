@@ -80,3 +80,13 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
     ctx.expectation = 'has topicHelp'
   },
 })
+
+export function monkeyPatchCommands(config: any, plugins: Array<{commands: Interfaces.Command[], topics: Interfaces.Topic[]}>) {
+  config.plugins = plugins
+  config._commands = new Map()
+  config._topics = new Map()
+  for (const plugin of config.plugins) {
+    config.loadCommands(plugin)
+    config.loadTopics(plugin)
+  }
+}
