@@ -5,10 +5,10 @@ We've removed the exported member `cli`, because it's equivalent to the exported
 Updating your project to use cli IO utilities should be straight forward.
 
 1. Remove the `cli-ux` dependency.
-1. Change all imports that reference `cli-ux` to `@oclif/core`.
-1. Add the namespace member `CliUx` to your `@oclif/core` import.
-1. Preface previous `cli-ux` members with the namespace `CliUx`.
-1. Replace all references to member `cli` with `ux`.
+2. Change all imports that reference `cli-ux` to `@oclif/core`.
+3. Add the namespace member `ux` to your `@oclif/core` import.
+4. Preface previous `cli-ux` members with the namespace `ux`.
+5. Replace all references to member `cli` with `ux`.
 
 cli-ux
 ======
@@ -20,105 +20,105 @@ cli IO utilities
 The following example assumes you've installed `@oclif/core` to your project with `npm install @oclif/core` or `yarn add @oclif/core` and have it required in your script (TypeScript example):
 
 ```typescript
-import {CliUx} from '@oclif/core'
-CliUx.ux.prompt('What is your name?')
+import {ux} from '@oclif/core'
+ux.prompt('What is your name?')
 ```
 
 JavaScript:
 
 ```javascript
-const {CliUx} = require('@oclif/core')
+const {ux} = require('@oclif/core')
 
-CliUx.ux.prompt('What is your name?')
+ux.prompt('What is your name?')
 ```
 
-# CliUx.ux.prompt()
+# ux.prompt()
 
 Prompt for user input.
 
 ```typescript
 // just prompt for input
-await CliUx.ux.prompt('What is your name?')
+await ux.prompt('What is your name?')
 
 // mask input after enter is pressed
-await CliUx.ux.prompt('What is your two-factor token?', {type: 'mask'})
+await ux.prompt('What is your two-factor token?', {type: 'mask'})
 
 // mask input on keypress (before enter is pressed)
-await CliUx.ux.prompt('What is your password?', {type: 'hide'})
+await ux.prompt('What is your password?', {type: 'hide'})
 
 // yes/no confirmation
-await CliUx.ux.confirm('Continue?')
+await ux.confirm('Continue?')
 
 // "press any key to continue"
-await CliUx.ux.anykey()
+await ux.anykey()
 ```
 
 ![prompt demo](assets/prompt.gif)
 
-# CliUx.ux.url(text, uri)
+# ux.url(text, uri)
 
 Create a hyperlink (if supported in the terminal)
 
 ```typescript
-await CliUx.ux.url('sometext', 'https://google.com')
+await ux.url('sometext', 'https://google.com')
 // shows sometext as a hyperlink in supported terminals
 // shows https://google.com in unsupported terminals
 ```
 
 ![url demo](assets/url.gif)
 
-# CliUx.ux.open
+# ux.open
 
 Open a url in the browser
 
 ```typescript
-await CliUx.ux.open('https://oclif.io')
+await ux.open('https://oclif.io')
 ```
 
-# CliUx.ux.action
+# ux.action
 
 Shows a spinner
 
 ```typescript
 // start the spinner
-CliUx.ux.action.start('starting a process')
+ux.action.start('starting a process')
 // show on stdout instead of stderr
-CliUx.ux.action.start('starting a process', 'initializing', {stdout: true})
+ux.action.start('starting a process', 'initializing', {stdout: true})
 
 // stop the spinner
-CliUx.ux.action.stop() // shows 'starting a process... done'
-CliUx.ux.action.stop('custom message') // shows 'starting a process... custom message'
+ux.action.stop() // shows 'starting a process... done'
+ux.action.stop('custom message') // shows 'starting a process... custom message'
 ```
 
 This degrades gracefully when not connected to a TTY. It queues up any writes to stdout/stderr so they are displayed above the spinner.
 
 ![action demo](assets/action.gif)
 
-# CliUx.ux.annotation
+# ux.annotation
 
 Shows an iterm annotation
 
 ```typescript
-CliUx.ux.annotation('sometext', 'annotated with this text')
+ux.annotation('sometext', 'annotated with this text')
 ```
 
 ![annotation demo](assets/annotation.png)
 
-# CliUx.ux.wait
+# ux.wait
 
 Waits for 1 second or given milliseconds
 
 ```typescript
-await CliUx.ux.wait()
-await CliUx.ux.wait(3000)
+await ux.wait()
+await ux.wait(3000)
 ```
 
-# CliUx.ux.table
+# ux.table
 
 Displays tabular data
 
 ```typescript
-CliUx.ux.table(data, columns, options)
+ux.table(data, columns, options)
 ```
 
 Where:
@@ -127,7 +127,7 @@ Where:
 - `columns`: [Table.Columns](./src/styled/table.ts)
 - `options`: [Table.Options](./src/styled/table.ts)
 
-`CliUx.ux.table.flags()` returns an object containing all the table flags to include in your command.
+`ux.table.flags()` returns an object containing all the table flags to include in your command.
 
 ```typescript
 {
@@ -141,12 +141,12 @@ Where:
 }
 ```
 
-Passing `{only: ['columns']}` or `{except: ['columns']}` as an argument into `CliUx.ux.table.flags()` allows or blocks, respectively, those flags from the returned object.
+Passing `{only: ['columns']}` or `{except: ['columns']}` as an argument into `ux.table.flags()` allows or blocks, respectively, those flags from the returned object.
 
 `Table.Columns` defines the table columns and their display options.
 
 ```typescript
-const columns: CliUx.Table.Columns = {
+const columns: ux.Table.Columns = {
   // where `.name` is a property of a data object
   name: {}, // "Name" inferred as the column header
   id: {
@@ -161,7 +161,7 @@ const columns: CliUx.Table.Columns = {
 `Table.Options` defines the table options, most of which are the parsed flags from the user for display customization, all of which are optional.
 
 ```typescript
-const options: CliUx.Table.Options = {
+const options: ux.Table.Options = {
   printLine: myLogger, // custom logger
   columns: flags.columns,
   sort: flags.sort,
@@ -176,19 +176,19 @@ const options: CliUx.Table.Options = {
 Example class:
 
 ```typescript
-import {Command, CliUx} from '@oclif/core'
+import {Command, ux} from '@oclif/core'
 import axios from 'axios'
 
 export default class Users extends Command {
   static flags = {
-    ...CliUx.ux.table.flags()
+    ...ux.table.flags()
   }
 
   async run() {
     const {flags} = this.parse(Users)
     const {data: users} = await axios.get('https://jsonplaceholder.typicode.com/users')
 
-    CliUx.ux.table(users, {
+    ux.table(users, {
       name: {
         minWidth: 7,
       },
@@ -268,16 +268,16 @@ Clementine Bauch         Romaguera-Jacobson
 Glenna Reichert          Yost and Sons
 ```
 
-# CliUx.ux.tree
+# ux.tree
 
 Generate a tree and display it
 
 ```typescript
-let tree = CliUx.ux.tree()
+let tree = ux.tree()
 tree.insert('foo')
 tree.insert('bar')
 
-let subtree = CliUx.ux.tree()
+let subtree = ux.tree()
 subtree.insert('qux')
 tree.nodes.bar.insert('baz', subtree)
 
@@ -292,15 +292,15 @@ Outputs:
       └─ qux
 ```
 
-# CliUx.ux.progress
+# ux.progress
 
 Generate a customizable progress bar and display it
 
 ```typescript
-const simpleBar = CliUx.ux.progress()
+const simpleBar = ux.progress()
 simpleBar.start()
 
-const customBar = CliUx.ux.progress({
+const customBar = ux.progress({
                    format: 'PROGRESS | {bar} | {value}/{total} Files',
                    barCompleteChar: '\u2588',
                    barIncompleteChar: '\u2591',
