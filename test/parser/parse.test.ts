@@ -911,7 +911,7 @@ See more help with --help`)
         delete process.env.TEST_FOO
         const out = await parse([], {
           flags: {
-            foo: flags.boolean({env: 'TEST_FOO'}),
+            foo: Flags.boolean({env: 'TEST_FOO'}),
           },
         })
         expect(out.flags.foo).to.be.undefined
@@ -921,7 +921,7 @@ See more help with --help`)
         delete process.env.TEST_FOO
         const out = await parse([], {
           flags: {
-            foo: flags.boolean({env: 'TEST_FOO', default: true}),
+            foo: Flags.boolean({env: 'TEST_FOO', default: true}),
           },
         })
         expect(out.flags.foo).to.be.true

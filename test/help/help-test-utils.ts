@@ -83,7 +83,7 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{commands: Interfaces.Command[], topics: Interfaces.Topic[]}>) {
+export function monkeyPatchCommands(config: any, plugins: Array<{commands: Command.Class[], topics: Interfaces.Topic[]}>) {
   config.plugins = plugins
   config._commands = new Map()
   config._topics = new Map()
