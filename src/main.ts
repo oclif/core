@@ -6,6 +6,9 @@ import * as Interfaces from './interfaces'
 import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
+import {settings} from './settings'
+import {Errors, flush} from '.'
+import {join, dirname} from 'path'
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
@@ -73,4 +76,77 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // command id.
   if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
   await config.runCommand(id, argvSlice, cmd)
+}
+
+function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
+  return type === 'cjs' ? join(dir, '..', 'tsconfig.json') : join(dirname(fileURLToPath(dir)), '..', 'tsconfig.json')
+}
+
+/**
+ * Load and run oclif CLI
+ *
+ * @param options - options to load the CLI
+ * @returns Promise<void>
+ *
+ * @example For ESM dev.js
+ * ```
+ * #!/usr/bin/env ts-node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'esm', development: true, dir: import.meta.url})
+ * })()
+ * ```
+ *
+ * @example For ESM run.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'esm', dir: import.meta.url})
+ * })()
+ * ```
+ *
+ * @example For CJS dev.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'cjs', development: true, dir: __dirname})
+ * })()
+ * ```
+ *
+ * @example For CJS run.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'cjs', dir: import.meta.url})
+ * })()
+ * ```
+ */
+export async function execute(
+  options: {
+    type: 'cjs' | 'esm';
+    dir: string;
+    args?: string[];
+    loadOptions?: Interfaces.LoadOptions;
+    development?: boolean;
+  },
+): Promise<void> {
+  if (options.development) {
+    // In dev mode -> use ts-node and dev plugins
+    process.env.NODE_ENV = 'development'
+    require('ts-node').register({
+      project: getTsConfigPath(options.dir, options.type),
+    })
+    settings.debug = true
+  }
+
+  await run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
+  .then(async () => flush())
+  .catch(Errors.handle)
 }
