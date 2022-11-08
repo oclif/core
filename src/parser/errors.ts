@@ -1,7 +1,7 @@
 import {CLIError} from '../errors'
 
 import {flagUsages} from './help'
-import {renderList} from './list'
+import {renderList} from '../cli-ux/list'
 import * as chalk from 'chalk'
 import {OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'

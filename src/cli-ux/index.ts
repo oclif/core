@@ -3,11 +3,14 @@ import * as util from 'util'
 
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
-import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
-import * as Table from './styled/table'
+import * as styled from './styled'
+import {Table} from './styled'
+import * as uxPrompt from './prompt'
+import uxWait from './wait'
 
+const uxOpen = require('open')
 const hyperlinker = require('hyperlinker')
 
 function timeout(p: Promise<any>, ms: number) {
@@ -41,17 +44,17 @@ const ux = {
   error: Errors.error,
   exit: Errors.exit,
 
-  get prompt(): typeof deps.prompt.prompt {
-    return deps.prompt.prompt
+  get prompt(): typeof uxPrompt.prompt {
+    return uxPrompt.prompt
   },
   /**
    * "press anykey to continue"
    */
-  get anykey(): typeof deps.prompt.anykey {
-    return deps.prompt.anykey
+  get anykey(): typeof uxPrompt.anykey {
+    return uxPrompt.anykey
   },
-  get confirm(): typeof deps.prompt.confirm {
-    return deps.prompt.confirm
+  get confirm(): typeof uxPrompt.confirm {
+    return uxPrompt.confirm
   },
   get action(): ActionBase {
     return config.action
@@ -60,28 +63,28 @@ const ux = {
     return config.prideAction
   },
   styledObject(obj: Record<string, unknown> | Array<Record<string, unknown>>, keys?: string[]): void {
-    ux.info(deps.styledObject(obj, keys))
+    ux.info(styled.styledObject(obj, keys))
   },
-  get styledHeader(): typeof deps.styledHeader {
-    return deps.styledHeader
+  get styledHeader(): typeof styled.styledHeader {
+    return styled.styledHeader
   },
-  get styledJSON(): typeof deps.styledJSON {
-    return deps.styledJSON
+  get styledJSON(): typeof styled.styledJSON {
+    return styled.styledJSON
   },
-  get table(): typeof deps.table {
-    return deps.table
+  get table(): typeof styled.Table.table {
+    return styled.Table.table
   },
-  get tree(): typeof deps.tree {
-    return deps.tree
+  get tree(): typeof styled.tree {
+    return styled.tree
   },
-  get open(): typeof deps.open {
-    return deps.open
+  get open(): typeof uxOpen {
+    return uxOpen
   },
-  get wait(): typeof deps.wait {
-    return deps.wait
+  get wait(): typeof uxWait {
+    return uxWait
   },
-  get progress(): typeof deps.progress {
-    return deps.progress
+  get progress(): typeof styled.progress {
+    return styled.progress
   },
 
   async done(): Promise<void> {

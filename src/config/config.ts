@@ -10,7 +10,7 @@ import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../inter
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
-import {isProd} from '../util'
+import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
@@ -19,7 +19,7 @@ import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
-const _pjson = require('../../package.json')
+const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)

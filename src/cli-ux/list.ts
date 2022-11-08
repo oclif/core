@@ -1,9 +1,9 @@
+import {stdtermwidth} from '../screen'
 import {maxBy} from '../util'
-import deps from './deps'
+const wordwrap = require('wordwrap')
 
 function linewrap(length: number, s: string): string {
-  const lw = require('@oclif/linewrap')
-  return lw(length, deps.screen.stdtermwidth, {
+  return wordwrap(length, stdtermwidth, {
     skipScheme: 'ansi-color',
   })(s).trim()
 }

@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import {join} from 'path'
 
 export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)
@@ -100,4 +101,8 @@ export function isTruthy(input: string): boolean {
 
 export function isNotFalsy(input: string): boolean {
   return !['false', 'FALSE', '0', 'no', 'NO', 'n', 'N'].includes(input)
+}
+
+export function requireJson<T>(...pathParts: string[]): T {
+  return JSON.parse(fs.readFileSync(join(...pathParts), 'utf8'))
 }

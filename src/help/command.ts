@@ -1,4 +1,4 @@
-import * as Chalk from 'chalk'
+import * as chalk from 'chalk'
 import stripAnsi = require('strip-ansi')
 
 import {castArray, compact, sortBy} from '../util'
@@ -14,14 +14,14 @@ const POSSIBLE_LINE_FEED = /\r\n|\n/
 
 const {
   underline,
-} = Chalk
+} = chalk
 let {
   dim,
-} = Chalk
+} = chalk
 
 if (process.env.ConEmuANSI === 'ON') {
   // eslint-disable-next-line unicorn/consistent-destructuring
-  dim = Chalk.gray
+  dim = chalk.gray
 }
 
 export class CommandHelp extends HelpFormatter {

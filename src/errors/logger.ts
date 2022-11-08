@@ -1,6 +1,6 @@
-import * as FS from 'fs-extra'
+import * as fs from 'fs-extra'
 import * as path from 'path'
-import StripAnsi = require('strip-ansi')
+import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
 let timer: any
@@ -22,7 +22,6 @@ export class Logger {
   constructor(public file: string) {}
 
   log(msg: string): void {
-    const stripAnsi: typeof StripAnsi = require('strip-ansi')
     msg = stripAnsi(chomp(msg))
     const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
@@ -35,7 +34,6 @@ export class Logger {
       if (this.buffer.length === 0) return
       const mylines = this.buffer
       this.buffer = []
-      const fs: typeof FS = require('fs-extra')
       await fs.mkdirp(path.dirname(this.file))
       await fs.appendFile(this.file, mylines.join('\n') + '\n')
     })

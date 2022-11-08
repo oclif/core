@@ -1,5 +1,5 @@
 import {CLIError, error} from '../errors'
-import * as Globby from 'globby'
+import * as globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
 
@@ -11,11 +11,11 @@ import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
-import {isProd} from '../util'
+import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {Command} from '../command'
 
-const _pjson = require('../../package.json')
+const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
@@ -172,14 +172,6 @@ export class Plugin implements IPlugin {
 
   public get commandIDs(): string[] {
     if (!this.commandsDir) return []
-    let globby: typeof Globby
-    try {
-      const globbyPath = require.resolve('globby', {paths: [this.root, __dirname]})
-      globby = require(globbyPath)
-    } catch (error: any) {
-      this.warn(error, 'not loading commands, globby not found')
-      return []
-    }
 
     this._debug(`loading IDs from ${this.commandsDir}`)
     const patterns = [

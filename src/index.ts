@@ -1,4 +1,3 @@
-import * as path from 'path'
 import * as semver from 'semver'
 
 import {Command} from './command'
@@ -15,6 +14,7 @@ import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
 import * as ux from './cli-ux'
+import {requireJson} from './util'
 
 const flush = ux.flush
 
@@ -58,8 +58,7 @@ function checkCWD() {
 }
 
 function checkNodeVersion() {
-  const root = path.join(__dirname, '..')
-  const pjson = require(path.join(root, 'package.json'))
+  const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', 'package.json')
   if (!semver.satisfies(process.versions.node, pjson.engines.node)) {
     process.stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
   }

@@ -1,16 +1,16 @@
 import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
-
-import deps from '../deps'
-
+const stripAnsi = require('strip-ansi')
+const ansiStyles = require('ansi-styles')
+const ansiEscapes = require('ansi-escapes')
+import {errtermwidth} from '../../screen'
+import spinners from './spinners'
 import {ActionBase, ActionType} from './base'
-/* eslint-disable-next-line node/no-missing-require */
-const spinners = require('./spinners')
 
 function color(s: string): string {
   if (!supportsColor) return s
   const has256 = supportsColor.stdout ? supportsColor.stdout.has256 : (process.env.TERM || '').includes('256')
-  return has256 ? `\u001B[38;5;104m${s}${deps.ansiStyles.reset.open}` : chalk.magenta(s)
+  return has256 ? `\u001B[38;5;104m${s}${ansiStyles.reset.open}` : chalk.magenta(s)
 }
 
 export default class SpinnerAction extends ActionBase {
@@ -75,15 +75,13 @@ export default class SpinnerAction extends ActionBase {
   private _reset() {
     if (!this.output) return
     const lines = this._lines(this.output)
-    this._write(this.std, deps.ansiEscapes.cursorLeft + deps.ansiEscapes.cursorUp(lines) + deps.ansiEscapes.eraseDown)
+    this._write(this.std, ansiEscapes.cursorLeft + ansiEscapes.cursorUp(lines) + ansiEscapes.eraseDown)
     this.output = undefined
   }
 
   private _lines(s: string): number {
-    return deps
-    .stripAnsi(s)
-    .split('\n')
-    .map(l => Math.ceil(l.length / deps.screen.errtermwidth))
+    return (stripAnsi(s).split('\n') as any[])
+    .map(l => Math.ceil(l.length / errtermwidth))
     .reduce((c, i) => c + i, 0)
   }
 }

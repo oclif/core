@@ -1,5 +1,5 @@
 import {fileURLToPath} from 'url'
-
+import * as chalk from 'chalk'
 import {format, inspect} from 'util'
 import * as ux from './cli-ux'
 import {Config} from './config'
@@ -25,8 +25,10 @@ import {Plugin} from './interfaces/plugin'
 import {LoadOptions} from './interfaces/config'
 import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
+import {requireJson} from './util'
+import {PJSON} from './interfaces'
 
-const pjson = require('../package.json')
+const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
 /**
  * swallows stdout epipe errors
@@ -323,7 +325,6 @@ export abstract class Command {
     } else {
       if (!err.message) throw err
       try {
-        const chalk = require('chalk')
         ux.action.stop(chalk.bold.red('!'))
       } catch {}
 
