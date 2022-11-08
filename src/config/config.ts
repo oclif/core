@@ -341,8 +341,17 @@ export class Config implements IConfig {
       throw new CLIError(`command ${id} not found`)
     }
 
-    if (this.pjson.oclif.jitPlugins?.includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)) {
-      const jitResult = await this.runHook('jit_plugin_not_installed', {id, argv, command: c})
+    // console.log(this.pjson.oclif.jitPlugins)
+    if (Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)) {
+      const pluginName = c.pluginName!
+      const pluginVersion = this.pjson.oclif.jitPlugins![pluginName]
+      const jitResult = await this.runHook('jit_plugin_not_installed', {
+        id,
+        argv,
+        command: c,
+        pluginName,
+        pluginVersion,
+      })
       if (jitResult.failures[0]) throw jitResult.failures[0].error
       if (jitResult.successes[0]) {
         await this.loadPluginsAndCommands()
@@ -835,7 +844,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   }
 
   // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags']
+  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags']
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: any = {}

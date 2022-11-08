@@ -42,7 +42,7 @@ export interface Hooks {
     return: unknown;
   };
   'jit_plugin_not_installed': {
-    options: {id: string; argv: string[]; command: Command.Loadable};
+    options: {id: string; argv: string[]; command: Command.Loadable, pluginName: string; pluginVersion: string};
     return: unknown;
   };
   'plugins:preinstall': {
