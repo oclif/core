@@ -503,7 +503,7 @@
     tslib "^2.0.0"
     yarn "^1.22.18"
 
-"@oclif/screen@^3.0.2", "@oclif/screen@^3.0.3":
+"@oclif/screen@^3.0.2":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-3.0.3.tgz#e679ad10535e31d333f809f7a71335cc9aef1e55"
   integrity sha512-KX8gMYA9ujBPOd1HFsV9e0iEx7Uoj8AG/3YsW4TtWQTg4lJvr82qNm7o/cFQfYRIt+jw7Ew/4oL4A22zOT+IRA==
