@@ -486,10 +486,10 @@
   dependencies:
     "@oclif/core" "^1.20.0"
 
-"@oclif/plugin-plugins@^2.1.6":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.1.6.tgz#8a42ef7b610898962b57101427912ff268a76cf4"
-  integrity sha512-jpD3/bUOwcGou9764d4BOnnfOHojhOUqRoZ/zp+JIpscKZu/XIGsVVfZ2BHn+OHI/LbHeECRoBN5afSe19rnwA==
+"@oclif/plugin-plugins@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.1.7.tgz#5f51a93c7f8057ec9b68307e72980d28ee426085"
+  integrity sha512-z3nJWFskBKSimw8HUmlYyoaGEJlbjoFRT0xuiip4x7bccWn/Jyp4OWUzXcEdas6mnzmtBpNcQ5VxLaHIfad70Q==
   dependencies:
     "@oclif/color" "^1.0.1"
     "@oclif/core" "^1.20.0"
@@ -500,7 +500,7 @@
     load-json-file "^5.3.0"
     npm-run-path "^4.0.1"
     semver "^7.3.8"
-    tslib "^2.0.0"
+    tslib "^2.4.1"
     yarn "^1.22.18"
 
 "@oclif/screen@^3.0.2", "@oclif/screen@^3.0.3":
@@ -3282,7 +3282,7 @@ tslib@^1.8.1:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2, tslib@^2.0.0, tslib@^2.3.1, tslib@^2.4.1:
+tslib@^2, tslib@^2.3.1, tslib@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
   integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
