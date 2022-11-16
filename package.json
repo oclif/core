@@ -1,7 +1,7 @@
 {
-  "name": "@oclif/core",
+  "name": "oclif-core-rc",
   "description": "base library for oclif CLIs",
-  "version": "1.16.4",
+  "version": "16.6.7",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
