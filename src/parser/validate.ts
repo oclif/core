@@ -82,7 +82,7 @@ export async function validate(parse: {
 
   function getPresentFlags(flags: Record<string, unknown>): string[] {
     return Object.keys(flags).reduce((acc, key) => {
-      if (flags[key]) acc.push(key)
+      if (flags[key] !== undefined) acc.push(key)
       return acc
     }, [] as string[])
   }
@@ -113,7 +113,7 @@ export async function validate(parse: {
         continue
       if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault)
         continue
-      if (parse.output.flags[flag]) {
+      if (parse.output.flags[flag] !== undefined) {
         return {...base, status: 'failed', reason: `--${flag}=${parse.output.flags[flag]} cannot also be provided when using --${name}`}
       }
     }
@@ -126,7 +126,7 @@ export async function validate(parse: {
     const resolved = await resolveFlags(flags)
     const keys = getPresentFlags(resolved)
     for (const flag of keys) {
-      if (flag !== name && parse.output.flags[flag]) {
+      if (flag !== name && parse.output.flags[flag] !== undefined) {
         return {...base, status: 'failed', reason: `--${flag} cannot also be provided when using --${name}`}
       }
     }
@@ -137,7 +137,7 @@ export async function validate(parse: {
   async function validateDependsOn(name: string, flags: FlagRelationship[]): Promise<Validation> {
     const base = {name, validationFn: 'validateDependsOn'}
     const resolved = await resolveFlags(flags)
-    const foundAll = Object.values(resolved).every(Boolean)
+    const foundAll = Object.values(resolved).every(val => val !== undefined)
     if (!foundAll) {
       const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
       return {...base, status: 'failed', reason: `All of the following must be provided when using --${name}: ${formattedFlags}`}

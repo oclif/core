@@ -748,6 +748,48 @@ describe('validate', () => {
       })
     })
 
+    it('should pass if the specified flags whose when property resolves to true, flag has a false value', async () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            relationships: [
+              {
+                type: 'all',
+                flags: [
+                  'sprinkles',
+                  {name: 'cookies', when: async () => Promise.resolve(true)},
+                ],
+              },
+            ],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      const output = {
+        args: {},
+        argv: [],
+        flags: {sprinkles: true, dessert: 'ice-cream', cookies: false},
+        raw: [
+          {type: 'flag', flag: 'sprinkles', input: true},
+          {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+          {type: 'flag', flag: 'cookies', input: false},
+        ],
+        metadata: {},
+      }
+
+      // @ts-expect-error
+      await validate({input, output})
+    })
+
     describe('mixed', () => {
       const input = {
         argv: [],
