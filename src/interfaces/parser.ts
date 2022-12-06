@@ -175,7 +175,7 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T>
+export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T | T[]>
 
 export type FlagBase<T, I, P = any> = FlagProps & {
   parse: FlagParser<T, I, P>;
