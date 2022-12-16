@@ -19,17 +19,7 @@ export type Settings = {
    *   OCLIF_COLUMNS=80
    */
   columns?: number;
-  /**
-   * Try to use ts-node to load typescript source files instead of
-   * javascript files.
-   *
-   * NOTE: This requires registering ts-node first.
-   * require('ts-node').register();
-   *
-   * Environment Variable:
-   *   NODE_ENV=development
-   */
-  tsnodeEnabled?: boolean;
+
 };
 
 // Set global.oclif to the new object if it wasn't set before
