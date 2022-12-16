@@ -6,10 +6,10 @@ import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes} from '../interfaces/config'
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
+import {collectUsableIds, compact, Debug, getCommandIdPermutations, loadJSON} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
@@ -186,16 +186,16 @@ export class Config implements IConfig {
       ...s3.templates,
       target: {
         baseDir: '<%- bin %>',
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
+        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>',
+        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>',
+        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- platform %>-<%- arch %>',
         ...s3.templates && s3.templates.target,
       },
       vanilla: {
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %><%- ext %>',
+        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>',
         baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
+        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %>version',
         ...s3.templates && s3.templates.vanilla,
       },
     }
@@ -735,7 +735,7 @@ const defaultToCached = async (flag: CompletableOptionFlag<any>) => {
 }
 
 export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command> {
-  const flags = {} as {[k: string]: Command.Flag}
+  const flags = {} as { [k: string]: Command.Flag }
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {
