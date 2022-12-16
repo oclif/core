@@ -5,7 +5,6 @@ import * as fs from 'fs-extra'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
-import * as Config from './config'
 
 const getPackageType = require('get-package-type')
 
@@ -123,7 +122,7 @@ export default class ModuleLoader {
 
   /**
    * Resolves a modulePath first by `require.resolve` to allow Node to resolve an actual module. If this fails then
-   * the `modulePath` is resolved from the root of the provided config. `Config.tsPath` is used for initial resolution.
+   * the `modulePath` is resolved from the root of the provided config.
    * If this file path does not exist then several extensions are tried from `s_EXTENSIONS` in order: '.js', '.mjs',
    * '.cjs'. After a file path has been selected `isPathModule` is used to determine if the file is an ES Module.
    *
@@ -140,7 +139,7 @@ export default class ModuleLoader {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch {
-      filePath = Config.tsPath(config.root, modulePath)
+      filePath = path.join(config.root, modulePath)
 
       let fileExists = false
       let isDirectory = false

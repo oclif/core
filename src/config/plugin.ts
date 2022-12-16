@@ -1,7 +1,7 @@
 import {error} from '../errors'
 import * as Globby from 'globby'
 import * as path from 'path'
-import {inspect} from 'util'
+import {inspect, promisify} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Command} from '../interfaces/command'
@@ -10,7 +10,6 @@ import {Debug} from './util'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
-import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
@@ -129,6 +128,8 @@ export class Plugin implements IPlugin {
 
   protected warned = false
 
+  private memoizedCommandsDir?: string;
+
   // eslint-disable-next-line no-useless-constructor
   constructor(public options: PluginOptions) {}
 
@@ -156,7 +157,13 @@ export class Plugin implements IPlugin {
 
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
 
+    if (this.type === 'link' && this.pjson.devDependencies?.typescript) {
+      // if linked plugin, and project uses TS, we need to compile it
+      await promisify(require('child_process').exec)('yarn tsc -p . --incremental --skipLibCheck', {cwd: this.root})
+    }
+
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
+
     this.commands = Object
     .entries(this.manifest.commands)
     .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
@@ -168,7 +175,11 @@ export class Plugin implements IPlugin {
   }
 
   get commandsDir() {
-    return tsPath(this.root, this.pjson.oclif.commands)
+    if (!this.memoizedCommandsDir) {
+      this.memoizedCommandsDir = this.pjson.oclif.commands ? path.join(this.root, this.pjson.oclif.commands) : undefined
+    }
+
+    return this.memoizedCommandsDir
   }
 
   get commandIDs() {

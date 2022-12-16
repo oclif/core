@@ -18,5 +18,4 @@ export {
 export {PJSON} from './pjson'
 export {Plugin, PluginOptions, Options} from './plugin'
 export {Topic} from './topic'
-export {TSConfig} from './ts-config'
 export {InferredFlags} from './flags'

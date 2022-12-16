@@ -3,7 +3,7 @@ import * as semver from 'semver'
 
 import Command from './command'
 import {run} from './main'
-import {Config, Plugin, tsPath, toCached} from './config'
+import {Config, Plugin, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import * as Flags from './flags'
@@ -35,7 +35,6 @@ export {
   Plugin,
   run,
   toCached,
-  tsPath,
   toStandardizedId,
   toConfiguredId,
   settings,
