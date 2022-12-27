@@ -748,6 +748,88 @@ describe('validate', () => {
       })
     })
 
+    it('should pass if the specified flags whose when property resolves to true, flag has a false value', async () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            relationships: [
+              {
+                type: 'all',
+                flags: [
+                  'sprinkles',
+                  {name: 'cookies', when: async () => Promise.resolve(true)},
+                ],
+              },
+            ],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      const output = {
+        args: {},
+        argv: [],
+        flags: {sprinkles: true, dessert: 'ice-cream', cookies: false},
+        raw: [
+          {type: 'flag', flag: 'sprinkles', input: true},
+          {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+          {type: 'flag', flag: 'cookies', input: false},
+        ],
+        metadata: {},
+      }
+
+      // @ts-expect-error
+      await validate({input, output})
+    })
+
+    it('should fail if the specified flags whose when property resolves to true in exclusive, flag has a false value', async () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            exclusive: [{name: 'cookies', when: async () => Promise.resolve(true)}],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      const output = {
+        args: {},
+        argv: [],
+        flags: {sprinkles: true, dessert: 'ice-cream', cookies: false},
+        raw: [
+          {type: 'flag', flag: 'sprinkles', input: true},
+          {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+          {type: 'flag', flag: 'cookies', input: false},
+        ],
+        metadata: {},
+      }
+
+      try {
+        // @ts-expect-error
+        await validate({input, output})
+        assert.fail('should have thrown')
+      } catch (error) {
+        const err = error as CLIError
+        expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
+      }
+    })
+
     describe('mixed', () => {
       const input = {
         argv: [],
