@@ -13,6 +13,7 @@ import {collectUsableIds, compact, Debug, getCommandIdPermutations, loadJSON} fr
 import {isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
+import {ConfigGraph} from './config-graph'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -114,6 +115,8 @@ export class Config implements IConfig {
 
   flexibleTaxonomy!: boolean
 
+  configGraph: ConfigGraph | undefined
+
   protected warned = false
 
   private commandPermutations = new Permutations()
@@ -208,6 +211,8 @@ export class Config implements IConfig {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
+
+    this.loadConfigGraph()
 
     debug('config done')
   }
@@ -710,6 +715,10 @@ export class Config implements IConfig {
       return 0
     })
     return commandPlugins[0]
+  }
+
+  private loadConfigGraph() {
+    this.configGraph = ConfigGraph.fromConfig(this)
   }
 }
 

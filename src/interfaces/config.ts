@@ -3,12 +3,14 @@ import {Hooks, Hook} from './hooks'
 import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
+import {ConfigGraph} from '../config/config-graph'
 
 export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
 export type ArchTypes = 'arm' | 'arm64' | 'mips' | 'mipsel' | 'ppc' | 'ppc64' | 's390' | 's390x' | 'x32' | 'x64' | 'x86'
 
 export interface Config {
+  configGraph: ConfigGraph | undefined
   name: string;
   version: string;
   channel: string;
