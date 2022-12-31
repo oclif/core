@@ -38,7 +38,7 @@
     "@commitlint/config-conventional": "^12.1.4",
     "@oclif/plugin-help": "^5.1.20",
     "@oclif/plugin-plugins": "^2.1.9",
-    "@oclif/test": "^2.2.16",
+    "@oclif/test": "^2.2.17",
     "@types/ansi-styles": "^3.2.1",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
