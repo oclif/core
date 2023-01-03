@@ -317,10 +317,14 @@ describe('Config with flexible taxonomy', () => {
 
     testConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
     .it('find matches', config => {
-      const matches = config.configGraph?.findMatches('foo:bar', [])!
-      expect(matches[0]).to.have.property('id', 'foo:bar')
-      expect(matches[0]).to.have.property('pluginType', 'user')
-      expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      const matches = config.configGraph?.findMatches('foo:bar', [])
+      expect(matches).to.be.ok
+      expect(matches).to.have.length(1)
+      if (matches) {
+        expect(matches[0]).to.have.property('id', 'foo:bar')
+        expect(matches[0]).to.have.property('pluginType', 'user')
+        expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      }
     })
   })
 })
