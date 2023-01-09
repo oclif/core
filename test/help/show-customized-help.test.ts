@@ -5,6 +5,7 @@ import * as path from 'path'
 import {CommandHelp, Help} from '../../src/help'
 import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
 import {Interfaces, Config} from '../../src'
+import {monkeyPatchCommands} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
@@ -85,12 +86,12 @@ describe('showHelp for root', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config;
+    const config = ctx.config
 
-    (config as any).plugins = [{
+    monkeyPatchCommands(config, [{
       commands: [AppsIndexWithDesc, AppsCreate, AppsDestroy],
       topics: [],
-    }]
+    }])
 
     const help = new TestHelp(config as any)
     await help.showHelp([])
@@ -116,12 +117,12 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config;
+    const config = ctx.config
 
-    (config as any).plugins = [{
+    monkeyPatchCommands(config, [{
       commands: [AppsIndexWithDesc],
       topics: [],
-    }]
+    }])
 
     const help = new TestHelp(config as any)
     await help.showHelp([])
@@ -146,12 +147,12 @@ describe('showHelp for a command', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config;
+    const config = ctx.config
 
-    (config as any).plugins = [{
+    monkeyPatchCommands(config, [{
       commands: [AppsCreate],
       topics: [AppsTopic],
-    }]
+    }])
 
     const help = new TestHelp(config as any)
     await help.showHelp(['apps:create'])
@@ -175,12 +176,12 @@ CUSTOM
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config;
+    const config = ctx.config
 
-    (config as any).plugins = [{
+    monkeyPatchCommands(config, [{
       commands: [AppsIndexWithDesc, AppsCreate, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
-    }]
+    }])
 
     const help = new TestHelp(config as any)
     await help.showHelp(['apps'])

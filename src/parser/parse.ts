@@ -79,8 +79,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
     }
 
-    const findShortFlag = (arg: string) => {
-      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === arg[1])
+    const findShortFlag = ([_, char]: string) => {
+      if (this.flagAliases[char]) {
+        return this.flagAliases[char].name
+      }
+
+      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === char)
     }
 
     const parseFlag = (arg: string): boolean => {
@@ -197,7 +201,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         const value = flag.parse ? await flag.parse(input, this.context, flag) : input
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
-          flags[token.flag].push(value)
+          flags[token.flag].push(...(Array.isArray(value) ? value : [value]))
         } else {
           flags[token.flag] = value
         }
@@ -207,7 +211,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
       if (flags[k]) continue
-      if (flag.env) {
+      if (flag.env && Object.prototype.hasOwnProperty.call(process.env, flag.env)) {
         const input = process.env[flag.env]
         if (flag.type === 'option') {
           if (input) {

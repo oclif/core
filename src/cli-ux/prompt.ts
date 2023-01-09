@@ -120,9 +120,9 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
  * prompt for input
  * @param name - prompt text
  * @param options - @see IPromptOptions
- * @returns void
+ * @returns Promise<string>
  */
-export function prompt(name: string, options: IPromptOptions = {}) {
+export function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
   return config.action.pauseAsync(() => {
     return _prompt(name, options)
   }, chalk.cyan('?'))
@@ -149,9 +149,9 @@ export function confirm(message: string): Promise<boolean> {
 /**
  * "press anykey to continue"
  * @param message - optional message to display to user
- * @returns Promise<void>
+ * @returns Promise<string>
  */
-export async function anykey(message?: string): Promise<void> {
+export async function anykey(message?: string): Promise<string> {
   const tty = Boolean(process.stdin.setRawMode)
   if (!message) {
     message = tty ?

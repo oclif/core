@@ -1,6 +1,6 @@
 import * as Interfaces from '../../interfaces'
 import * as F from '../../flags'
-import {stdtermwidth} from '@oclif/screen'
+import {stdtermwidth} from '../../screen'
 import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
 import {safeDump} from 'js-yaml'

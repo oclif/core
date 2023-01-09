@@ -157,6 +157,10 @@ export type FlagProps = {
    * Alternate names that can be used for this flag.
    */
   aliases?: string[];
+  /**
+   * Emit deprecation warning when a flag alias is provided
+   */
+  deprecateAliases?: boolean
 }
 
 export type BooleanFlagProps = FlagProps & {
@@ -171,7 +175,7 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T>
+export type FlagParser<T, I, P = any> = (input: I, context: any, opts: P & OptionFlag<T>) => Promise<T | T[]>
 
 export type FlagBase<T, I, P = any> = FlagProps & {
   parse: FlagParser<T, I, P>;

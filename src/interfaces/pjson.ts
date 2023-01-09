@@ -3,6 +3,7 @@ import {HelpOptions} from './help'
 export interface PJSON {
   [k: string]: any;
   dependencies?: {[name: string]: string};
+  devDependencies?: {[name: string]: string};
   oclif: {
     schema?: number;
   };

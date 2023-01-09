@@ -634,6 +634,22 @@ See more help with --help`)
       })
       expect(out.args).to.deep.include({num: '15'})
     })
+    it('flag multiple with arguments, custom parser', async () => {
+      const out = await parse(
+        ['--foo', './a.txt,./b.txt', '--foo', './c.txt', '--', '15'],
+        {
+          args: [{name: 'num'}],
+          flags: {foo: flags.string({
+            multiple: true,
+            parse: async input => input.split(',').map(i => i.trim()),
+          })},
+        },
+      )
+      expect(out.flags).to.deep.include({
+        foo: ['./a.txt', './b.txt', './c.txt'],
+      })
+      expect(out.args).to.deep.include({num: '15'})
+    })
   })
 
   describe('defaults', () => {
@@ -910,6 +926,26 @@ See more help with --help`)
           delete process.env.TEST_FOO
         })
       }
+
+      it('ignores unset environment variables', async () => {
+        delete process.env.TEST_FOO
+        const out = await parse([], {
+          flags: {
+            foo: flags.boolean({env: 'TEST_FOO'}),
+          },
+        })
+        expect(out.flags.foo).to.be.undefined
+      })
+
+      it('uses default when environment variable is unset', async () => {
+        delete process.env.TEST_FOO
+        const out = await parse([], {
+          flags: {
+            foo: flags.boolean({env: 'TEST_FOO', default: true}),
+          },
+        })
+        expect(out.flags.foo).to.be.true
+      })
     })
   })
 

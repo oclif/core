@@ -782,8 +782,10 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         helpGroup: flag.helpGroup,
         allowNo: flag.allowNo,
         dependsOn: flag.dependsOn,
+        relationships: flag.relationships,
         exclusive: flag.exclusive,
         deprecated: flag.deprecated,
+        deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
       }
     } else {
@@ -805,6 +807,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         exclusive: flag.exclusive,
         default: await defaultToCached(flag),
         deprecated: flag.deprecated,
+        deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
       }
       // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
@@ -839,6 +842,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     aliases: c.aliases || [],
     examples: c.examples || (c as any).example,
     deprecationOptions: c.deprecationOptions,
+    deprecateAliases: c.deprecateAliases,
     flags,
     args,
   }
