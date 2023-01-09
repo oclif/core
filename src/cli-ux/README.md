@@ -67,14 +67,6 @@ await ux.url('sometext', 'https://google.com')
 
 ![url demo](assets/url.gif)
 
-# ux.open
-
-Open a url in the browser
-
-```typescript
-await ux.open('https://oclif.io')
-```
-
 # ux.action
 
 Shows a spinner

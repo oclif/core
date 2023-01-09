@@ -22,7 +22,6 @@
     "js-yaml": "^3.14.1",
     "natural-orderby": "^2.0.3",
     "object-treeify": "^1.1.33",
-    "open": "^8.4.0",
     "password-prompt": "^1.1.2",
     "semver": "^7.3.7",
     "string-width": "^4.2.3",

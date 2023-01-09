@@ -10,7 +10,6 @@ import {Table} from './styled'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
 
-const uxOpen = require('open')
 const hyperlinker = require('hyperlinker')
 
 function timeout(p: Promise<any>, ms: number) {
@@ -76,9 +75,6 @@ const ux = {
   },
   get tree(): typeof styled.tree {
     return styled.tree
-  },
-  get open(): typeof uxOpen {
-    return uxOpen
   },
   get wait(): typeof uxWait {
     return uxWait
@@ -146,7 +142,6 @@ const exit = ux.exit.bind(ux)
 const flush = ux.flush.bind(ux)
 const info = ux.info.bind(ux)
 const log = ux.log.bind(ux)
-const open = ux.open.bind(ux)
 const prideAction = ux.prideAction
 const progress = ux.progress.bind(ux)
 const prompt = ux.prompt.bind(ux)
@@ -177,7 +172,6 @@ export {
   info,
   IPromptOptions,
   log,
-  open,
   prideAction,
   progress,
   prompt,
