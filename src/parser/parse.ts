@@ -228,7 +228,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         const value = flag.parse ? await flag.parse(input, this.context, flag) : input
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
-          flags[token.flag].push(value)
+          flags[token.flag].push(...(Array.isArray(value) ? value : [value]))
         } else {
           flags[token.flag] = value
         }

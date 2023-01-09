@@ -171,16 +171,16 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>
+// export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: Command, opts: P & OptionFlag<T, P>) => Promise<T | T[]>
 
-export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>
+// export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>
 
 export type Arg<T, P = CustomOptions> = ArgProps & {
   options?: T[];
   defaultHelp?: ArgDefaultHelp<T>;
   input: string[];
   default?: ArgDefault<T | undefined>;
-  parse: ArgParser<T, P>;
+  parse: (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>;
 }
 
 export type ArgDefinition<T, P = CustomOptions> = {
