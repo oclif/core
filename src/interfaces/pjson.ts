@@ -81,6 +81,7 @@ export namespace PJSON {
       scope?: string;
       dirname?: string;
       flexibleTaxonomy?: boolean;
+      jitPlugins?: Record<string, string>;
     };
   }
 

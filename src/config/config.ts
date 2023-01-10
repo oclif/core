@@ -341,8 +341,7 @@ export class Config implements IConfig {
       throw new CLIError(`command ${id} not found`)
     }
 
-    // console.log(this.pjson.oclif.jitPlugins)
-    if (Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)) {
+    if (this.isJitPluginCommand(c)) {
       const pluginName = c.pluginName!
       const pluginVersion = this.pjson.oclif.jitPlugins![pluginName]
       const jitResult = await this.runHook('jit_plugin_not_installed', {
@@ -611,6 +610,10 @@ export class Config implements IConfig {
 
   protected get isProd() {
     return isProd()
+  }
+
+  private isJitPluginCommand(c: Command.Loadable): boolean {
+    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)
   }
 
   private getCmdLookupId(id: string): string {
