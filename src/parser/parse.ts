@@ -206,6 +206,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
   }
 
+  // eslint-disable-next-line complexity
   private async _flags(): Promise<TFlags & BFlags & { json: boolean | undefined }> {
     const flags = {} as any
     this.metaData.flags = {} as any
@@ -225,12 +226,18 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         const input = token.input
         this._validateOptions(flag, input)
 
-        const value = flag.parse ? await flag.parse(input, this.context, flag) : input
-        if (flag.multiple) {
+        if (flag.delimiter && flag.multiple) {
+          const values = await Promise.all(input.split(flag.delimiter).map(async v => flag.parse ? flag.parse(v.trim(), this.context, flag) : v.trim()))
           flags[token.flag] = flags[token.flag] || []
-          flags[token.flag].push(...(Array.isArray(value) ? value : [value]))
+          flags[token.flag].push(...values)
         } else {
-          flags[token.flag] = value
+          const value = flag.parse ? await flag.parse(input, this.context, flag) : input
+          if (flag.multiple) {
+            flags[token.flag] = flags[token.flag] || []
+            flags[token.flag].push(value)
+          } else {
+            flags[token.flag] = value
+          }
         }
       }
     }

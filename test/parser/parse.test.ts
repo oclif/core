@@ -633,25 +633,25 @@ See more help with --help`)
       })
       expect(out.args).to.deep.include({num: '15'})
     })
-    // TODO: add this test back
-    // it('flag multiple with arguments, custom parser', async () => {
-    //   const out = await parse(
-    //     ['--foo', './a.txt,./b.txt', '--foo', './c.txt', '--', '15'],
-    //     {
-    //       args: {num: Args.string()},
-    //       flags: {
-    //         foo: Flags.string({
-    //           multiple: true,
-    //           parse: async input => input.split(',').map(i => i.trim()),
-    //         }),
-    //       },
-    //     },
-    //   )
-    //   expect(out.flags).to.deep.include({
-    //     foo: ['./a.txt', './b.txt', './c.txt'],
-    //   })
-    //   expect(out.args).to.deep.include({num: '15'})
-    // })
+    it('flag multiple with arguments and custom delimiter and parser', async () => {
+      const out = await parse(
+        ['--foo', './a.txt,./b.txt', '--foo', './c.txt', '--', '15'],
+        {
+          args: {num: Args.string()},
+          flags: {
+            foo: Flags.string({
+              multiple: true,
+              delimiter: ',',
+              parse: async input => input.replace('.txt', '.json'),
+            }),
+          },
+        },
+      )
+      expect(out.flags).to.deep.include({
+        foo: ['./a.json', './b.json', './c.json'],
+      })
+      expect(out.args).to.deep.include({num: '15'})
+    })
   })
 
   describe('defaults', () => {

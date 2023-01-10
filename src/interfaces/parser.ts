@@ -136,6 +136,12 @@ export type FlagProps = {
    * Emit deprecation warning when a flag alias is provided
    */
   deprecateAliases?: boolean
+  /**
+   * Delimiter to separate the values for a multiple value flag.
+   * Only respected if multiple is set to true. Default behavior is to
+   * separate on spaces.
+   */
+  delimiter?: ',',
 }
 
 export type ArgProps = {
@@ -171,10 +177,6 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-// export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>
-
-// export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>
-
 export type Arg<T, P = CustomOptions> = ArgProps & {
   options?: T[];
   defaultHelp?: ArgDefaultHelp<T>;
@@ -195,16 +197,6 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
    default?: FlagDefault<boolean>;
    parse: (input: boolean, context: Command, opts: BooleanFlag<T>) => Promise<T>
 }
-
-// export type CustomOptionFlag<T, P = any, M = false> = FlagProps & OptionFlagProps & {
-//   parse: M extends true ?
-//     (input: string, context: Command, opts: P & CustomOptionFlag<T, P>) => Promise<T[]> :
-//     (input: string, context: Command, opts: P & CustomOptionFlag<T, P>) => Promise<T>
-//   // parse: (input: string, context: Command, opts: P & CustomOptionFlag<T, P>) => Promise<T>
-//   defaultHelp?: FlagDefaultHelp<T>;
-//   input: string[];
-//   default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
-// }
 
 export type OptionFlag<T, P = Record<string, unknown>> = FlagProps & OptionFlagProps & {
   parse: (input: string, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>

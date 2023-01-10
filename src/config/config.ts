@@ -754,6 +754,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        delimiter: flag.delimiter,
       }
     } else {
       flags[name] = {
@@ -776,6 +777,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        delimiter: flag.delimiter,
       }
       // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
       if (typeof flag.defaultHelp === 'function') {
