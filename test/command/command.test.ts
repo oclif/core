@@ -140,6 +140,7 @@ describe('command', () => {
             relationships: undefined,
             allowNo: false,
             type: 'boolean',
+            delimiter: undefined,
           },
           flagb: {
             aliases: undefined,
@@ -161,6 +162,7 @@ describe('command', () => {
             helpValue: undefined,
             default: 'a',
             options: ['a', 'b'],
+            delimiter: undefined,
           },
         },
         args: {
