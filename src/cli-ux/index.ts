@@ -61,7 +61,7 @@ const ux = {
   get prideAction(): ActionBase {
     return config.prideAction
   },
-  styledObject(obj: Record<string, unknown> | Array<Record<string, unknown>>, keys?: string[]): void {
+  styledObject(obj: any, keys?: string[]): void {
     ux.info(styled.styledObject(obj, keys))
   },
   get styledHeader(): typeof styled.styledHeader {

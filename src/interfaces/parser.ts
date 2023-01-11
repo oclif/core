@@ -199,7 +199,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
    * specifying a default of false is the same as not specifying a default
    */
   default?: FlagDefault<boolean>;
-  parse: FlagParser<T, boolean, BooleanFlag<T>>
+  parse: (input: boolean, context: Command, opts: BooleanFlag<T>) => Promise<T>
 }
 
 export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {

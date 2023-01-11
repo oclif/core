@@ -1,7 +1,8 @@
 import * as chalk from 'chalk'
 import * as util from 'util'
 
-export default function styledObject(obj: Record<string, unknown> | Array<Record<string, unknown>>, keys?: string[]): string {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default function styledObject(obj: any, keys?: string[]): string {
   const output: string[] = []
   const keyLengths = Object.keys(obj).map(key => key.toString().length)
   const maxKeyLength = Math.max(...keyLengths) + 2
@@ -21,7 +22,6 @@ export default function styledObject(obj: Record<string, unknown> | Array<Record
   }
 
   for (const key of keys || Object.keys(obj).sort()) {
-    // @ts-expect-error
     const value = obj[key]
     if (Array.isArray(value)) {
       if (value.length > 0) {
