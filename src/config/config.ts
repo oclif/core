@@ -14,7 +14,7 @@ import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
-import {CompletableOptionFlag, Arg} from '../interfaces/parser'
+import {CompletableOptionFlag, Arg, ArgInput} from '../interfaces/parser'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -786,11 +786,15 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
+  // v1 commands have args as an array, so we need to normalize it to an object for backwards compatibility
+  const normalized = (Array.isArray(c.args) ? (c.args ?? []).reduce((x, y) => {
+    return {...x, [y.name]: y}
+  }, {} as ArgInput) : c.args ?? {}) as ArgInput
+
   const args = {} as {[k: string]: Command.Arg.Cached}
-  for (const [name, arg] of Object.entries(c.args || {})) {
+  for (const [name, arg] of Object.entries(normalized)) {
     args[name] = {
       name,
-      // type: arg.type,
       description: arg.description,
       required: arg.required,
       options: arg.options,
