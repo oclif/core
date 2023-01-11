@@ -55,8 +55,8 @@ export type DefaultContext<T> = {
   flags: Record<string, string>;
 }
 
-export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<OptionFlag<T, P>>) => Promise<T>)
-export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<OptionFlag<T, P>>) => Promise<string | undefined>)
+export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<OptionFlag<T, P> & P>) => Promise<T>)
+export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<OptionFlag<T, P> & P>) => Promise<string | undefined>)
 
 export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<T>)
 export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
@@ -177,12 +177,16 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
+export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>
+
+export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>
+
 export type Arg<T, P = CustomOptions> = ArgProps & {
   options?: T[];
   defaultHelp?: ArgDefaultHelp<T>;
   input: string[];
   default?: ArgDefault<T | undefined>;
-  parse: (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>;
+  parse: ArgParser<T, P>;
 }
 
 export type ArgDefinition<T, P = CustomOptions> = {
@@ -194,12 +198,19 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
   /**
    * specifying a default of false is the same as not specifying a default
    */
-   default?: FlagDefault<boolean>;
-   parse: (input: boolean, context: Command, opts: BooleanFlag<T>) => Promise<T>
+  default?: FlagDefault<boolean>;
+  parse: FlagParser<T, boolean, BooleanFlag<T>>
 }
 
-export type OptionFlag<T, P = Record<string, unknown>> = FlagProps & OptionFlagProps & {
-  parse: (input: string, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>
+export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
+  parse: FlagParser<T, string, P & OptionFlag<T, P>>
+  defaultHelp?: FlagDefaultHelp<T>;
+  input: string[];
+  default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
+}
+
+export type OptionFlag<T, P = CustomOptions> = FlagProps & OptionFlagProps & {
+  parse: FlagParser<T, string, P & OptionFlag<T, P>>
   defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
 } & ({
@@ -210,7 +221,7 @@ export type OptionFlag<T, P = Record<string, unknown>> = FlagProps & OptionFlagP
   multiple: true;
 })
 
-export type FlagDefinition<T, P = Record<string, unknown>> = {
+export type FlagDefinition<T, P = CustomOptions> = {
   (
     options: P & { multiple: true } & ({ required: true } | { default: FlagDefault<T[]> }) & Partial<OptionFlag<T, P>>
   ): OptionFlag<T[]>;

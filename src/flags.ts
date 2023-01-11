@@ -1,7 +1,7 @@
 import {URL} from 'url'
 import {Help} from './help'
 import {BooleanFlag} from './interfaces'
-import {OptionFlag, FlagDefinition} from './interfaces/parser'
+import {FlagDefinition, OptionFlagDefaults, FlagParser} from './interfaces/parser'
 import {dirExists, fileExists} from './util'
 
 /**
@@ -21,8 +21,14 @@ import {dirExists, fileExists} from './util'
  *   },
  * })
  */
-export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlag<T, P>>): FlagDefinition<T, P>
-export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlag<T, P>>): FlagDefinition<T, P> {
+export function custom<T, P = Record<string, unknown>>(
+    defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<OptionFlagDefaults<T, P, true>>,
+): FlagDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(
+  defaults: {parse: FlagParser<T, string, P>} & Partial<OptionFlagDefaults<T, P>>,
+): FlagDefinition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
     return {
       parse: async (input, _ctx, _opts) => input,

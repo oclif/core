@@ -36,7 +36,11 @@ class MyCommand extends BaseCommand {
 
     requiredMultiString: Flags.string({required: true, multiple: true}),
     optionalMultiString: Flags.string({multiple: true}),
-    defaultMultiString: Flags.string({multiple: true, default: ['default']}),
+    defaultMultiString: Flags.string({
+      multiple: true,
+      default: ['default'],
+      defaultHelp: async _ctx => 'defaultHelp',
+    }),
 
     requiredBoolean: Flags.boolean({required: true}),
     optionalBoolean: Flags.boolean(),
@@ -68,7 +72,10 @@ class MyCommand extends BaseCommand {
 
     optionalUrl: Flags.url(),
     requiredUrl: Flags.url({required: true}),
-    defaultUrl: Flags.url({default: new URL('http://example.com')}),
+    defaultUrl: Flags.url({
+      default: new URL('http://example.com'),
+      defaultHelp: async _ctx => 'Example URL',
+    }),
 
     optionalMultiUrl: Flags.url({multiple: true}),
     requiredMultiUrl: Flags.url({multiple: true, required: true}),
@@ -82,6 +89,7 @@ class MyCommand extends BaseCommand {
     })({required: true}),
     defaultCustom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
+      default: async _ctx => ({foo: true}),
     })({default: {foo: true}}),
 
     optionalMultiCustom: Flags.custom<MyType>({
