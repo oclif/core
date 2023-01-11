@@ -66,6 +66,7 @@ describe('Config with flexible taxonomy', () => {
       args: [],
       flags: {
         flagA: Flags.boolean({char: 'a'}),
+        flagC: Flags.boolean({char: 'c'}),
       },
       hidden: false,
       id: commandIds[0],
@@ -81,6 +82,7 @@ describe('Config with flexible taxonomy', () => {
       args: [],
       flags: {
         flagB: Flags.boolean({}),
+        flagC: Flags.boolean({aliases: ['ceeee']}),
       },
       hidden: false,
       id: commandIds[1],
@@ -263,12 +265,12 @@ describe('Config with flexible taxonomy', () => {
     })
   })
   describe('findCommand - graph', () => {
-    // testConfig()
-    // .it('find command with no duplicates', config => {
-    //   const command = config.configGraph?.findCommand('foo:bar', {must: true})
-    //   expect(command).to.have.property('pluginAlias', '@My/plugina')
-    // })
-    //
+    testConfig()
+    .it('find command with no duplicates', config => {
+      const command = config.configGraph?.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
+
     testConfig({commandIds: ['foo:bar', 'foo:bar']})
     .it('find command with duplicates and choose the one that appears first in oclif.plugins', config => {
       const command = config.configGraph?.findCommand('foo:bar', {must: true})
@@ -320,6 +322,50 @@ describe('Config with flexible taxonomy', () => {
       const matches = config.configGraph?.findMatches('foo:bar', [])
       expect(matches).to.be.ok
       expect(matches).to.have.length(1)
+      if (matches) {
+        expect(matches[0]).to.have.property('id', 'foo:bar')
+        expect(matches[0]).to.have.property('pluginType', 'user')
+        expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      }
+    })
+    testConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
+    .it('find matches - with flag', config => {
+      const matches = config.configGraph?.findMatches('foo:bar', ['a'])
+      expect(matches).to.be.ok
+      expect(matches).to.have.length(1)
+      if (matches) {
+        expect(matches[0]).to.have.property('id', 'foo:bar')
+        expect(matches[0]).to.have.property('pluginType', 'user')
+        expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      }
+    })
+    testConfig({commandIds: ['foo:bar', 'foo:baz'], types: ['user', 'user']})
+    .it('find matches - same flag on different commands', config => {
+      const matches = config.configGraph?.findMatches('foo', ['flagC'])
+      expect(matches).to.be.ok
+      expect(matches).to.have.length(2)
+      if (matches) {
+        expect(matches[0]).to.have.property('id', 'foo:bar')
+        expect(matches[0]).to.have.property('pluginType', 'user')
+        expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      }
+    })
+    testConfig({commandIds: ['foo:bar', 'foo:baz'], types: ['user', 'user']})
+    .it('find matches - same flag on different commands - using short char', config => {
+      const matches = config.configGraph?.findMatches('foo', ['c'])
+      expect(matches).to.be.ok
+      expect(matches).to.have.length(2)
+      if (matches) {
+        expect(matches[0]).to.have.property('id', 'foo:bar')
+        expect(matches[0]).to.have.property('pluginType', 'user')
+        expect(matches[0]).to.have.property('pluginAlias', '@My/plugina')
+      }
+    })
+    testConfig({commandIds: ['foo:bar', 'foo:baz'], types: ['user', 'user']})
+    .it('find matches - same flag on different commands - using flag alias', config => {
+      const matches = config.configGraph?.findMatches('foo', ['ceeee'])
+      expect(matches).to.be.ok
+      expect(matches).to.have.length(2)
       if (matches) {
         expect(matches[0]).to.have.property('id', 'foo:bar')
         expect(matches[0]).to.have.property('pluginType', 'user')

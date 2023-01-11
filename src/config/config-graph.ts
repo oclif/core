@@ -219,6 +219,10 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
 
       for (const [key, flag] of Object.entries(command.flags)) {
         graph.addFlag(key, command.id)
+        if (flag.char) {
+          graph.addFlagAlias(flag.char, key)
+        }
+
         for (const alias of flag.aliases || []) {
           graph.addFlagAlias(alias, key)
         }
@@ -314,7 +318,6 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
   public findMatches(command: string, flags: string[]): (Command.Loadable | undefined)[] | undefined {
     const commandKeys = this.getCommandKeys(command)
     if (commandKeys.length === 0) return
-    const pluginCommandKeys = this.getPluginCommandKeys(commandKeys)
 
     // with the flags, produce a list of flag keys
     const flagKeys = [
@@ -322,18 +325,22 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
       flags.map(flag => this.getNodeKey(flag, 'flag')).filter(key => this.hasNode(key)),
       // the flag keys from flag aliases
       flags.map(flag =>
-        this.outboundNeighbors(this.getNodeKey(flag, 'flagAlias')).filter(node => this.getNodeAttribute(node, 'nodeType') === 'flag')),
+        this.hasNode(flag) ?
+          this.outboundNeighbors(this.getNodeKey(flag, 'flagAlias')).filter(node => this.getNodeAttribute(node, 'nodeType') === 'flag')        :
+          [],
+      ),
     ].flat(2)
 
-    const commandsWithFlags = subgraph(this, [...pluginCommandKeys, ...flagKeys])
-
-    const commandsWithAllFlags = subgraph(this, commandsWithFlags.filterNodes(node => {
+    // commandKeys contains all potential matches to the provided command - this is full and partial matches
+    // flagKeys contains all flag keys (nodeType = 'flag')
+    // reduce the commandKeys to only those that have all the flagKeys
+    const commandsWithAllFlags = subgraph(this, commandKeys.filter(node => {
       const inboundNeighbors = this.inboundNeighbors(node)
       const flagNodes = new Set(inboundNeighbors
-      .filter(n => this.getNodeAttributes(n).type === 'flag'))
+      .filter(n => this.getNodeAttributes(n).nodeType === 'flag'))
       return flagKeys.every(flag => flagNodes.has(flag))
     }))
-    return commandsWithAllFlags.nodes().map(node => this.getNodeAttribute(node, 'command'))
+    return this.getPluginCommandKeys(commandsWithAllFlags.nodes()).map(key => this.getNodeAttribute(key, 'command'))
   }
 
   private getNodeKey(id: string, type: NodeType): string {
@@ -381,7 +388,8 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
           return key
         }
 
-        return this.outboundNeighbors(key).filter(n => n.startsWith('command:'))
+        const obn = this.outboundNeighbors(key)
+        return obn.filter(n => n.startsWith('command|'))
       }
 
       return []
