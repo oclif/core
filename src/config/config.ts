@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {ArgInput, Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
@@ -786,7 +786,9 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  const argsPromise = (c.args || []).map(async a => ({
+  // v2 commands have args as an object, so we need to normalize it to an array for forwards compatibility
+  const normalized = (Array.isArray(c.args) ? c.args ?? [] : Object.values(c.args ?? {})) as ArgInput
+  const argsPromise = normalized.map(async a => ({
     name: a.name,
     description: a.description,
     required: a.required,
