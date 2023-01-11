@@ -1,16 +1,4 @@
-# How to migrate from the `cli-ux` module and use the `ux` components now contained in `@oclif/core`
-
-We've retained the capabilities of `cli-ux` in `@oclif/core`, but we've reorganized the code to expose the exported members via a namespace.
-We've removed the exported member `cli`, because it's equivalent to the exported member `ux`.
-Updating your project to use cli IO utilities should be straight forward.
-
-1. Remove the `cli-ux` dependency.
-2. Change all imports that reference `cli-ux` to `@oclif/core`.
-3. Add the namespace member `ux` to your `@oclif/core` import.
-4. Preface previous `cli-ux` members with the namespace `ux`.
-5. Replace all references to member `cli` with `ux`.
-
-cli-ux
+CLI UX
 ======
 
 cli IO utilities
