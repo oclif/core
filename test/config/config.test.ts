@@ -60,6 +60,12 @@ describe('Config', () => {
       hasS3Key(k: keyof Interfaces.PJSON.S3.Templates, expected: string, extra: any = {}) {
         return this
         .it(`renders ${k} template as ${expected}`, config => {
+          // Config.load reads the package.json to determine the version and channel
+          // In order to allow prerelease branches to pass, we need to strip the prerelease
+          // tag from the version and switch the channel to stable.
+          config.version = config.version.replace(/-beta\.\d/g, '')
+          config.channel = 'stable'
+
           // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
