@@ -2,7 +2,7 @@ name: publish
 
 on:
   release:
-    types: [released]
+    types: [published]
   # support manual release in case something goes wrong and needs to be repeated or tested
   workflow_dispatch:
     inputs:
