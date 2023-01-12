@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 
-import {Command as Base, Flags} from '../../src'
+import {Args, Command as Base, Flags, toCached} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -69,85 +69,114 @@ describe('command', () => {
   .catch(/EEXIT: 0/)
   .it('exits with 0')
 
-  describe('convertToCached', () => {
+  describe('toCached', () => {
     fancy
-    // .skip()
-    // .do(async () => {
-    // class C extends Command {
-    //   static title = 'cmd title'
-    //   static type = 'mytype'
-    //   static usage = ['$ usage']
-    //   static description = 'test command'
-    //   static aliases = ['alias1', 'alias2']
-    //   static hidden = true
-    //   static flags = {
-    //     flaga: flags.boolean(),
-    //     flagb: flags.string({
-    //       char: 'b',
-    //       hidden: true,
-    //       required: false,
-    //       description: 'flagb desc',
-    //       options: ['a', 'b'],
-    //       default: () => 'mydefault',
-    //     }),
-    //   }
-    //   static args = [
-    //     {
-    //       name: 'arg1',
-    //       description: 'arg1 desc',
-    //       required: true,
-    //       hidden: false,
-    //       options: ['af', 'b'],
-    //       default: () => 'myadefault',
-    //     }
-    //   ]
-    // }
-    // const c = Config.Command.toCached(C)
-    // expect(await c.load()).to.have.property('run')
-    // delete c.load
-    // expect(c).to.deep.equal({
-    //   _base: `@oclif/command@${pjson.version}`,
-    //   id: 'foo:bar',
-    //   type: 'mytype',
-    //   hidden: true,
-    //   pluginName: undefined,
-    //   description: 'test command',
-    //   aliases: ['alias1', 'alias2'],
-    //   title: 'cmd title',
-    //   usage: ['$ usage'],
-    //   flags: {
-    //     flaga: {
-    //       char: undefined,
-    //       description: undefined,
-    //       name: 'flaga',
-    //       hidden: undefined,
-    //       required: undefined,
-    //       type: 'boolean',
-    //     },
-    //     flagb: {
-    //       char: 'b',
-    //       description: 'flagb desc',
-    //       name: 'flagb',
-    //       hidden: true,
-    //       required: false,
-    //       type: 'option',
-    //       helpValue: undefined,
-    //       default: 'mydefault',
-    //       options: ['a', 'b'],
-    //     }
-    //   },
-    //   args: [
-    //     {
-    //       description: 'arg1 desc',
-    //       name: 'arg1',
-    //       hidden: false,
-    //       required: true,
-    //       options: ['af', 'b'],
-    //       default: 'myadefault',
-    //     }
-    //   ],
-    // })
-    // })
+    .do(async () => {
+      class C extends Command {
+      static id = 'foo:bar'
+      static title = 'cmd title'
+      static type = 'mytype'
+      static usage = ['$ usage']
+      static description = 'test command'
+      static aliases = ['alias1', 'alias2']
+      static hidden = true
+      static flags = {
+        flaga: Flags.boolean(),
+        flagb: Flags.string({
+          char: 'b',
+          hidden: true,
+          required: false,
+          description: 'flagb desc',
+          options: ['a', 'b'],
+          default: async () => 'a',
+        }),
+      }
+
+      static args = {
+        arg1: Args.string({
+          description: 'arg1 desc',
+          required: true,
+          hidden: false,
+          options: ['af', 'b'],
+          default: async () => 'a',
+        }),
+      }
+      }
+
+      const c = await toCached(C)
+
+      expect(c).to.deep.equal({
+        id: 'foo:bar',
+        type: 'mytype',
+        hidden: true,
+        pluginName: undefined,
+        pluginAlias: undefined,
+        pluginType: undefined,
+        state: undefined,
+        description: 'test command',
+        aliases: ['alias1', 'alias2'],
+        title: 'cmd title',
+        usage: ['$ usage'],
+        examples: undefined,
+        deprecationOptions: undefined,
+        deprecateAliases: undefined,
+        summary: undefined,
+        strict: true,
+        flags: {
+          flaga: {
+            aliases: undefined,
+            char: undefined,
+            description: undefined,
+            dependsOn: undefined,
+            deprecateAliases: undefined,
+            deprecated: undefined,
+            exclusive: undefined,
+            helpGroup: undefined,
+            helpLabel: undefined,
+            summary: undefined,
+            name: 'flaga',
+            hidden: undefined,
+            required: undefined,
+            relationships: undefined,
+            allowNo: false,
+            type: 'boolean',
+            delimiter: undefined,
+          },
+          flagb: {
+            aliases: undefined,
+            char: 'b',
+            description: 'flagb desc',
+            dependsOn: undefined,
+            deprecateAliases: undefined,
+            deprecated: undefined,
+            exclusive: undefined,
+            helpGroup: undefined,
+            helpLabel: undefined,
+            summary: undefined,
+            name: 'flagb',
+            hidden: true,
+            required: false,
+            multiple: false,
+            relationships: undefined,
+            type: 'option',
+            helpValue: undefined,
+            default: 'a',
+            options: ['a', 'b'],
+            delimiter: undefined,
+          },
+        },
+        args: {
+          arg1: {
+            description: 'arg1 desc',
+            name: 'arg1',
+            hidden: false,
+            required: true,
+            options: ['af', 'b'],
+            default: 'a',
+          },
+        },
+      })
+    })
     .it('converts to cached with everything set')
 
     fancy

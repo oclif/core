@@ -1,9 +1,8 @@
 import * as ejs from 'ejs'
-import {Config as IConfig, HelpOptions} from '../interfaces'
+import {Config as IConfig, HelpOptions, Deprecation} from '../interfaces'
 import {Help, HelpBase} from '.'
 import ModuleLoader from '../module-loader'
 import {collectUsableIds} from '../config/util'
-import {Deprecation} from '../interfaces/parser'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
@@ -29,7 +28,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
   return Help
 }
 
-export function template(context: any): (t: string) => string {
+export function template(context: ejs.Data): (t: string) => string {
   function render(t: string): string {
     return ejs.render(t, context)
   }
@@ -53,7 +52,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
       const id = finalizeId()
       if (!id) return false
       const cmd = config.findCommand(id)
-      return Boolean(cmd && (cmd.strict === false || cmd.args?.length > 0))
+      return Boolean(cmd && (cmd.strict === false || Object.keys(cmd.args ?? {}).length > 0))
     }
 
     for (const arg of argv) {

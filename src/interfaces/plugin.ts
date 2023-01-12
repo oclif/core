@@ -1,4 +1,4 @@
-import {Command} from './command'
+import {Command} from '../command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
 

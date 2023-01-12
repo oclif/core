@@ -1,21 +1,13 @@
 import {CLIError} from '../errors'
 
-import Deps from './deps'
-import * as Help from './help'
-import * as List from './list'
+import {flagUsages} from './help'
+import {renderList} from '../cli-ux/list'
 import * as chalk from 'chalk'
-import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
+import {OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'
+import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
 
 export {CLIError} from '../errors'
-
-// eslint-disable-next-line new-cap
-const m = Deps()
-// eslint-disable-next-line node/no-missing-require
-.add('help', () => require('./help') as typeof Help)
-// eslint-disable-next-line node/no-missing-require
-.add('list', () => require('./list') as typeof List)
-.add('chalk', () => require('chalk') as typeof chalk)
 
 export type Validation = {
   name: string;
@@ -35,13 +27,13 @@ export class CLIParseError extends CLIError {
 }
 
 export class InvalidArgsSpecError extends CLIParseError {
-  public args: ParserArg<any>[]
+  public args: ArgInput
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: ArgInput }) {
     let message = 'Invalid argument spec'
-    const namedArgs = args.filter(a => a.name)
+    const namedArgs = Object.values(args).filter(a => a.name)
     if (namedArgs.length > 0) {
-      const list = m.list.renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
+      const list = renderList(namedArgs.map(a => [`${a.name} (${a.required ? 'required' : 'optional'})`, a.description] as [string, string]))
       message += `:\n${list}`
     }
 
@@ -51,13 +43,13 @@ export class InvalidArgsSpecError extends CLIParseError {
 }
 
 export class RequiredArgsError extends CLIParseError {
-  public args: ParserArg<any>[]
+  public args: Arg<any>[]
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: ParserArg<any>[] }) {
+  constructor({args, parse}: CLIParseErrorOptions & { args: Arg<any>[] }) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
-      const list = m.list.renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
+      const list = renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
       message += `:\n${list}`
     }
 
@@ -70,7 +62,7 @@ export class RequiredFlagError extends CLIParseError {
   public flag: Flag<any>
 
   constructor({flag, parse}: CLIParseErrorOptions & { flag: Flag<any> }) {
-    const usage = m.list.renderList(m.help.flagUsages([flag], {displayRequired: false}))
+    const usage = renderList(flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
     super({parse, message})
     this.flag = flag
@@ -78,12 +70,22 @@ export class RequiredFlagError extends CLIParseError {
 }
 
 export class UnexpectedArgsError extends CLIParseError {
-  public args: string[]
+  public args: unknown[]
 
-  constructor({parse, args}: CLIParseErrorOptions & { args: string[] }) {
+  constructor({parse, args}: CLIParseErrorOptions & { args: unknown[] }) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
     super({parse, message})
     this.args = args
+  }
+}
+
+export class NonExistentFlagsError extends CLIParseError {
+  public flags: string[]
+
+  constructor({parse, flags}: CLIParseErrorOptions & { flags: string[] }) {
+    const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
+    super({parse, message})
+    this.flags = flags
   }
 }
 
@@ -95,7 +97,7 @@ export class FlagInvalidOptionError extends CLIParseError {
 }
 
 export class ArgInvalidOptionError extends CLIParseError {
-  constructor(arg: ParserArg<any>, input: string) {
+  constructor(arg: Arg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
     super({parse: {}, message})
   }
@@ -106,7 +108,7 @@ export class FailedFlagValidationError extends CLIParseError {
     const reasons = failed.map(r => r.reason)
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
-    const message = `The following ${errString} occurred:\n  ${m.chalk.dim(deduped.join('\n  '))}`
+    const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
     super({parse, message})
   }
 }

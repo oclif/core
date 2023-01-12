@@ -19,8 +19,7 @@ export class Tree {
     }
   }
 
-  // tslint:disable-next-line:no-console
-  display(logger: any = console.log) {
+  display(logger: any = console.log): void {
     const addNodes = function (nodes: any) {
       const tree: { [key: string]: any } = {}
       for (const p of Object.keys(nodes)) {
@@ -35,6 +34,6 @@ export class Tree {
   }
 }
 
-export default function tree() {
+export default function tree(): Tree {
   return new Tree()
 }

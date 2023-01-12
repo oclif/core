@@ -1,23 +1,25 @@
-import * as path from 'path'
 import * as semver from 'semver'
 
-import Command from './command'
-import {run} from './main'
+import {Command} from './command'
+import {run, execute} from './main'
 import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import * as Flags from './flags'
+import * as Args from './args'
 import {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
-import * as cliUx from './cli-ux'
+import * as ux from './cli-ux'
+import {requireJson} from './util'
 
-const flush = cliUx.ux.flush
+const flush = ux.flush
 
 export {
+  Args,
   Command,
   CommandHelp,
   Config,
@@ -41,7 +43,8 @@ export {
   settings,
   Settings,
   flush,
-  cliUx as CliUx,
+  ux,
+  execute,
 }
 
 function checkCWD() {
@@ -55,8 +58,7 @@ function checkCWD() {
 }
 
 function checkNodeVersion() {
-  const root = path.join(__dirname, '..')
-  const pjson = require(path.join(root, 'package.json'))
+  const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', 'package.json')
   if (!semver.satisfies(process.versions.node, pjson.engines.node)) {
     process.stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
   }

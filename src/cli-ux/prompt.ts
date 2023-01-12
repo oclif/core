@@ -1,8 +1,9 @@
 import * as Errors from '../errors'
-import * as chalk from 'chalk'
-
 import config from './config'
-import deps from './deps'
+
+import * as chalk from 'chalk'
+const ansiEscapes = require('ansi-escapes')
+const passwordPrompt = require('password-prompt')
 
 export interface IPromptOptions {
   prompt?: string;
@@ -76,11 +77,11 @@ async function single(options: IPromptConfig): Promise<string> {
 }
 
 function replacePrompt(prompt: string) {
-  process.stderr.write(deps.ansiEscapes.cursorHide + deps.ansiEscapes.cursorUp(1) + deps.ansiEscapes.cursorLeft + prompt +
-    deps.ansiEscapes.cursorDown(1) + deps.ansiEscapes.cursorLeft + deps.ansiEscapes.cursorShow)
+  process.stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
+    ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
 }
 
-function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
+async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
   const prompt = getPrompt(name, inputOptions.type, inputOptions.default)
   const options: IPromptConfig = {
     isTTY: Boolean(process.env.TERM !== 'dumb' && process.stdin.isTTY),
@@ -97,7 +98,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
   case 'single':
     return single(options)
   case 'mask':
-    return deps.passwordPrompt(options.prompt, {
+    return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
       default: options.default,
@@ -106,7 +107,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
       return value
     })
   case 'hide':
-    return deps.passwordPrompt(options.prompt, {
+    return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
       default: options.default,
@@ -122,7 +123,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
  * @param options - @see IPromptOptions
  * @returns Promise<string>
  */
-export function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
+export async function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
   return config.action.pauseAsync(() => {
     return _prompt(name, options)
   }, chalk.cyan('?'))

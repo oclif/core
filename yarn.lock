@@ -503,7 +503,7 @@
     tslib "^2.4.1"
     yarn "^1.22.18"
 
-"@oclif/screen@^3.0.3", "@oclif/screen@^3.0.4":
+"@oclif/screen@^3.0.3":
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-3.0.4.tgz#663db0ecaf23f3184e7f01886ed578060e4a7f1c"
   integrity sha512-IMsTN1dXEXaOSre27j/ywGbBjrzx0FNd1XmuhCWCB9NTPrhWI1Ifbz+YLSEcstfQfocYsrbrIessxXb2oon4lA==
@@ -752,6 +752,11 @@
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@types/supports-color/-/supports-color-8.1.1.tgz#1b44b1b096479273adf7f93c75fc4ecc40a61ee4"
   integrity sha512-dPWnWsf+kzIG140B8z2w3fr5D03TLWbOAFQl45xUpI3vcizeXriNR5VYkWZ+WTMsUHqZ9Xlt3hrxGNANFyNQfw==
+
+"@types/wordwrap@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/wordwrap/-/wordwrap-1.0.1.tgz#6cfbe1e2ea03a30831453389e5fdec8be40fd178"
+  integrity sha512-xe+rWyom8xn0laMWH3M7elOpWj2rDQk+3f13RAur89GKsf4FO5qmBNtXXtwepFo2XNgQI0nePdCEStoHFnNvWg==
 
 "@types/wrap-ansi@^3.0.0":
   version "3.0.0"
@@ -3413,6 +3418,11 @@ word-wrap@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"
   integrity sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==
+
+wordwrap@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
+  integrity sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==
 
 workerpool@6.1.0:
   version "6.1.0"

@@ -1,181 +1,207 @@
-Migrating to @oclif/core
+Migrating to @oclif/core@V2
 ==============
 
-Migrating to `@oclif/core` from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`) is relatively straight forward.
+## Breaking Changes
 
-- [Migrating to @oclif/core](#migrating-to-oclifcore)
-  - [Update Imports](#update-imports)
-  - [Update your bin scripts](#update-your-bin-scripts)
-  - [Add `main` to your package.json](#add-main-to-your-packagejson)
-  - [Restore `-h`, `-v`, and `version`](#restore--h--v-and-version)
-  - [Configure the `topicSeparator`](#configure-the-topicseparator)
-  - [Update `this.parse` to `await this.parse`](#update-thisparse-to-await-thisparse)
-  - [Update `default` property on flag definitions](#update-default-property-on-flag-definitions)
-  - [Replace cli-ux library with `CliUx`](#replace-cli-ux-library-with-cliux)
+### Command Args
 
-## Update Imports
+We updated the `Command.args` to more closely resemble flags
 
-Replace imports from the old libraries with `@oclif/core`. For example,
+**Before**
 
 ```typescript
-import Help from '@oclif/plugin-help';
-import {Topic} from '@oclif/config';
-import {Command, Flags} from '@oclif/command'
+import { Command } from '@oclif/core'
+
+export default MyCommand extends Command {
+  static args = [{name: arg1, description: 'an argument', required: true}]
+
+  public async run(): Promise<void> {
+    const {args} = await this.parse(MyCommand) // args is useless {[name: string]: any}
+  }
+}
 ```
 
-With this import:
+**After**
 
 ```typescript
-import {Command, Flags, Topic, Help} from '@oclif/core';
-```
+import { Command, Args } from '@oclif/core'
 
-## Update your bin scripts
+export default MyCommand extends Command {
+  static args = {
+    arg1: Args.string({description: 'an argument', required: true})
+  }
 
-`@oclif/core` now supports separate bin scripts for production and development.
-
-You can copy these new bin scripts directly from our [example repository](https://github.com/oclif/hello-world/tree/main/bin).
-
-## Add `main` to your package.json
-
-We recommend that all oclif plugins specify the `main` field in their package.json so that we can begin working on supporting Yarn v2.
-
-```json
-{
-  "main": "lib/index.js"
-}
-```
-
-All plugins will be required to have this field in the next major version of `@oclif/core`.
-
-## Restore `-h`, `-v`, and `version`
-
-`@oclif/config` automatically added `-h` as a short flag for `--help`, `-v` as a short flag for `--version`, and `version` as an alias for `--version`.
-
-`@oclif/core` removes these so you can now use those flags for whatever you want! However, we've added a way to restore that functionality if you want to keep it.
-
-Simply add the `additionalHelpFlags` and `additionalVersionFlags` properties to the oclif section of your package.json:
-
-```json
-{
-  "oclif": {
-    "additionalHelpFlags": ["-h"],
-    "additionalVersionFlags": ["-v"]
+  public async run(): Promise<void> {
+    const {args} = await this.parse(MyCommand) // args is { arg1: string }
   }
 }
 ```
 
-To get the `version` command, install `@oclif/plugin-version` into your CLI:
+These are the available Args:
+- string
+- integer
+- boolean
+- url
+- file
+- directory
+- custom
 
-```json
-{
-  "dependencies": {
-    "@oclif/plugin-version": "^1"
-  },
-  "oclif": {
-    "plugins": [
-      "@oclif/plugin-version"
-    ]
-  }
-}
+### Interfaces
+
+- Removed `Interfaces.Command` since they were not usable for tests. These are replaced by types that are available under the `Command` namespace
+
+```
+Interfaces.Command => Command.Cached
+Interfaces.Command.Class => Command.Class
+Interfaces.Command.Loadable => Command.Lodable
 ```
 
-## Configure the `topicSeparator`
+- Removed the following interfaces from the export. Exporting all of these made it difficult to make non-breaking changes when modifying types and/or fixing compilation bugs. We are open to PRs to reintroduce these to the export if they are needed for your project
+  - Arg
+  - ArgInput
+  - ArgToken
+  - CLIParseErrorOptions
+  - CompletableFlag
+  - CompletableOptionFlag
+  - Completion
+  - CompletionContext
+  - Default
+  - DefaultContext
+  - Definition
+  - EnumFlagOptions
+  - FlagBase
+  - FlagInput
+  - FlagOutput
+  - FlagToken
+  - FlagUsageOptions
+  - Input
+  - List
+  - ListItem
+  - Metadata
+  - OptionalArg
+  - OptionFlagProps
+  - OutputArgs
+  - OutputFlags
+  - ParseFn
+  - ParserArg
+  - ParserInput
+  - ParserOutput
+  - ParsingToken
+  - RequiredArg
 
-By default, the `topicSeparator` is set to a colon (`:`) to maintain backwards compatibility with existing CLIs. If you prefer, you can now set it to a space.
+### CliUx
 
-For colons:
-```json
-{
-  "oclif": {
-    "topicSeparator": ":"
-  }
-}
-```
+We flattened `CliUx.ux` into `ux` for ease of use
 
-For spaces:
-```json
-{
-  "oclif": {
-    "topicSeparator": " "
-  }
-}
-```
-
-**NOTE: Using colons always works, even if you set the `topicSeparator` to spaces.** This means that you can enable spaces in your CLI without introducing a breaking change to your users.
-
-## Update `this.parse` to `await this.parse`
-
-The `parse` method on `Command` is now asynchronous (more [here](https://oclif.io/blog/#async-command-parsing)). So you'll now need to `await` any calls to `this.parse`:
-
-`const { args, flags } = this.parse(MyCommand)` => `const { args, flags } = await this.parse(MyCommand)`
-
-## Update `default` property on flag definitions
-
-The `default` property on flag definitions is now asynchronous. So you'll now need to await those.
-
-Example:
+**Before**
 
 ```typescript
-import {Command, Flags} from '@oclif/core'
-import {readFile} from 'fs/promises'
+import {CliUx} from '@oclif/core'
 
-function getTeam(): Promise<string> {
-  return readFile('team.txt', 'utf-8')
-}
+CliUx.ux.log('Hello World')
+```
 
-export const team = Flags.build({
-  char: 't',
-  description: 'team to use',
-  default: () => getTeam(),
+**After**
+
+```typescript
+import {ux} from '@oclif/core'
+
+ux.log('Hello World')
+```
+
+#### CliUx.ux.open
+
+We removed the `open` method since it was a direct import/export of the [`open`](https://www.npmjs.com/package/open) package. If you need this functionality, then you should import `open` yourself.
+
+### Flags
+
+- Flags.custom replaces Flags.build, Flags.enum, and Flags.option
+- Removed builtin `color` flag
+- Renamed `globalFlags` to `baseFlags`
+  - `globalFlags` was a misleading name because the flags added there weren't actually global to the entire CLI. Instead, they were just flags that would be inherited by any command that extended the command class they were defined in.
+
+### Flag and Arg Parsing
+
+- In v1, any input that didn't match a flag definition was assumed to be an argument. This meant that misspelled flags, e.g. `--hekp` were parsed as arguments, instead of throwing an error. In order to handle this, oclif now assumes that anything that starts with a hyphen must be a flag and will throw an error if no corresponding flag definition is found. **In other words, your command can no longer accept arguments that begin with a hyphen** (fixes https://github.com/oclif/core/issues/526)
+- v1 allowed you to return an array from a flag's `parse`. This was added to support backwards compatibility for flags that separated values by commas (e.g. `my-flag=val1,val2`). However, this was problematic because it didn't allow the `parse` to manipulate the individual values. If you need this functionality, you can now set a `delimiter` option on your flags. By doing so, oclif will split the string on the delimiter before parsing.
+
+## ESM/CJS Friendliness
+
+Writing plugins with ESM has always been possible, but it requires [a handful of modifications](https://oclif.io/docs/esm) for it to work, especially in the bin scripts. In v2 we've introduced an `execute` method that the bin scripts can use to avoid having to make changes for ESM of CJS.
+
+**CJS `bin/dev` before**
+```typescript
+#!/usr/bin/env node
+
+const oclif = require('@oclif/core')
+
+const path = require('path')
+const project = path.join(__dirname, '..', 'tsconfig.json')
+
+// In dev mode -> use ts-node and dev plugins
+process.env.NODE_ENV = 'development'
+
+require('ts-node').register({project})
+
+// In dev mode, always show stack traces
+oclif.settings.debug = true;
+
+
+// Start the CLI
+oclif.run().then(oclif.flush).catch(oclif.Errors.handle)
+```
+
+**CJS `bin/dev.js` after**
+```typescript
+#!/usr/bin/env node
+// eslint-disable-next-line node/shebang
+(async () => {
+  const oclif = await import('@oclif/core')
+  await oclif.execute({type: 'cjs', development: true, dir: __dirname})
+})()
+```
+
+**ESM `bin/dev.js` before**
+```typescript
+#!/usr/bin/env ts-node
+
+/* eslint-disable node/shebang */
+
+import oclif from '@oclif/core'
+import path from 'node:path'
+import url from 'node:url'
+// eslint-disable-next-line node/no-unpublished-import
+import {register} from 'ts-node'
+
+// In dev mode -> use ts-node and dev plugins
+process.env.NODE_ENV = 'development'
+
+register({
+  project: path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', 'tsconfig.json'),
 })
 
-export class MyCLI extends Command {
-  static flags = {
-    team: team(),
-  }
+// In dev mode, always show stack traces
+oclif.settings.debug = true
 
-  async run() {
-    const {flags} = this.parse(MyCLI)
-    if (flags.team) console.log(`--team is ${flags.team}`)
-  }
-}
+// Start the CLI
+oclif
+.run(process.argv.slice(2), import.meta.url)
+.then(oclif.flush)
+.catch(oclif.Errors.handle)
 ```
 
-## Replace cli-ux library with `CliUx`
-
-The [`cli-ux` library](https://github.com/oclif/cli-ux) has also been moved into `@oclif/core` in order to break a complex circular dependency between the two projects.
-
-All the exports that were available from `cli-ux` are now available under the `CliUx` namespace, with the exception of the `cli` export which was identical to the `ux` export.
-
-Old:
-
+**ESM `bin/dev.js` after**
 ```typescript
-import { cli } from 'cli-ux`
-
-cli.log('hello world')
-cli.action.start('doing things')
-cli.action.stop()
+#!/usr/bin/env node
+// eslint-disable-next-line node/shebang
+(async () => {
+  const oclif = await import('@oclif/core')
+  await oclif.execute({type: 'esm', dir: import.meta.url})
+})()
 ```
 
-New:
+Note that ESM and CJS plugins still require different settings in the tsconfig.json - you will still need to make those modifications yourself.
 
-```typescript
-import { CliUx } from '@oclif/core`
-
-CliUx.ux.log('hello world')
-CliUx.ux.action.start('doing things')
-CliUx.ux.action.stop()
-```
-
-## Single command CLIs
-
-Single command CLIs now are configured in a different way. To ensure your migrated CLI work as before, you have to add the following to your `oclif` configuration in the `package.json`:
-
-```json
-"oclif": {
-  "default": ".",
-  "commands": "./lib"
-}
-```
-
-Where `./lib` points to the folder in which your `tsconfig.json` is configured to output to (if you are using TypeScript), and your single command CLI entrypoint `index.(ts|js)` is located.
+## Other Changes
+- Removed dependency on `@oclif/screen`
+- Replaced `@oclif/linewrap` with `wordwrap`

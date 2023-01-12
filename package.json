@@ -5,8 +5,6 @@
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
-    "@oclif/linewrap": "^1.0.0",
-    "@oclif/screen": "^3.0.4",
     "ansi-escapes": "^4.3.2",
     "ansi-styles": "^4.3.0",
     "cardinal": "^2.1.1",
@@ -32,6 +30,7 @@
     "supports-hyperlinks": "^2.2.0",
     "tslib": "^2.4.1",
     "widest-line": "^3.1.0",
+    "wordwrap": "^1.0.0",
     "wrap-ansi": "^7.0.0"
   },
   "devDependencies": {
@@ -57,6 +56,7 @@
     "@types/shelljs": "^0.8.11",
     "@types/strip-ansi": "^5.2.1",
     "@types/supports-color": "^8.1.1",
+    "@types/wordwrap": "^1.0.1",
     "@types/wrap-ansi": "^3.0.0",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
@@ -109,7 +109,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "mocha \"test/**/*.test.ts\"",
     "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 1200000",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
   },

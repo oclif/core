@@ -1,5 +1,3 @@
-// tslint:disable restrict-plus-operands
-
 import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
 

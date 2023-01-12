@@ -3,10 +3,12 @@ import * as util from 'util'
 
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
-import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
-import * as Table from './styled/table'
+import * as styled from './styled'
+import {Table} from './styled'
+import * as uxPrompt from './prompt'
+import uxWait from './wait'
 
 const hyperlinker = require('hyperlinker')
 
@@ -21,7 +23,7 @@ function timeout(p: Promise<any>, ms: number) {
   return Promise.race([p, wait(ms, true).then(() => ux.error('timed out'))])
 }
 
-async function flush() {
+async function _flush() {
   const p = new Promise(resolve => {
     process.stdout.once('drain', () => resolve(null))
   })
@@ -34,82 +36,78 @@ async function flush() {
   return p
 }
 
-export const ux = {
+const ux = {
   config,
 
   warn: Errors.warn,
   error: Errors.error,
   exit: Errors.exit,
 
-  get prompt() {
-    return deps.prompt.prompt
+  get prompt(): typeof uxPrompt.prompt {
+    return uxPrompt.prompt
   },
   /**
    * "press anykey to continue"
    */
-  get anykey() {
-    return deps.prompt.anykey
+  get anykey(): typeof uxPrompt.anykey {
+    return uxPrompt.anykey
   },
-  get confirm() {
-    return deps.prompt.confirm
+  get confirm(): typeof uxPrompt.confirm {
+    return uxPrompt.confirm
   },
-  get action() {
+  get action(): ActionBase {
     return config.action
   },
-  get prideAction() {
+  get prideAction(): ActionBase {
     return config.prideAction
   },
-  styledObject(obj: any, keys?: string[]) {
-    ux.info(deps.styledObject(obj, keys))
+  styledObject(obj: any, keys?: string[]): void {
+    ux.info(styled.styledObject(obj, keys))
   },
-  get styledHeader() {
-    return deps.styledHeader
+  get styledHeader(): typeof styled.styledHeader {
+    return styled.styledHeader
   },
-  get styledJSON() {
-    return deps.styledJSON
+  get styledJSON(): typeof styled.styledJSON {
+    return styled.styledJSON
   },
-  get table() {
-    return deps.table
+  get table(): typeof styled.Table.table {
+    return styled.Table.table
   },
-  get tree() {
-    return deps.tree
+  get tree(): typeof styled.tree {
+    return styled.tree
   },
-  get open() {
-    return deps.open
+  get wait(): typeof uxWait {
+    return uxWait
   },
-  get wait() {
-    return deps.wait
-  },
-  get progress() {
-    return deps.progress
+  get progress(): typeof styled.progress {
+    return styled.progress
   },
 
-  async done() {
+  async done(): Promise<void> {
     config.action.stop()
-    // await flushStdout()
   },
 
-  trace(format: string, ...args: string[]) {
+  trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
   },
 
-  debug(format: string, ...args: string[]) {
+  debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
   },
 
-  info(format: string, ...args: string[]) {
+  info(format: string, ...args: string[]): void {
     process.stdout.write(util.format(format, ...args) + '\n')
   },
 
-  log(format?: string, ...args: string[]) {
+  log(format?: string, ...args: string[]): void {
     this.info(format || '', ...args)
   },
 
-  url(text: string, uri: string, params = {}) {
+  url(text: string, uri: string, params = {}): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       this.log(hyperlinker(text, uri, params))
@@ -118,7 +116,7 @@ export const ux = {
     }
   },
 
-  annotation(text: string, annotation: string) {
+  annotation(text: string, annotation: string): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
@@ -128,25 +126,71 @@ export const ux = {
     }
   },
 
-  async flush(ms = 10_000) {
-    await timeout(flush(), ms)
+  async flush(ms = 10_000): Promise<void> {
+    await timeout(_flush(), ms)
   },
 }
 
+const action = ux.action
+const annotation = ux.annotation.bind(ux)
+const anykey = ux.anykey.bind(ux)
+const confirm = ux.confirm.bind(ux)
+const debug = ux.debug.bind(ux)
+const done = ux.done.bind(ux)
+const error = ux.error.bind(ux)
+const exit = ux.exit.bind(ux)
+const flush = ux.flush.bind(ux)
+const info = ux.info.bind(ux)
+const log = ux.log.bind(ux)
+const prideAction = ux.prideAction
+const progress = ux.progress.bind(ux)
+const prompt = ux.prompt.bind(ux)
+const styledHeader = ux.styledHeader.bind(ux)
+const styledJSON = ux.styledJSON.bind(ux)
+const styledObject = ux.styledObject.bind(ux)
+const table = ux.table
+const trace = ux.trace.bind(ux)
+const tree = ux.tree.bind(ux)
+const url = ux.url.bind(ux)
+const wait = ux.wait.bind(ux)
+const warn = ux.warn.bind(ux)
+
 export {
-  config,
+  action,
   ActionBase,
+  annotation,
+  anykey,
+  config,
   Config,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
   ExitError,
+  flush,
+  info,
   IPromptOptions,
+  log,
+  prideAction,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
   Table,
+  trace,
+  tree,
+  url,
+  wait,
+  warn,
 }
 
 const cliuxProcessExitHandler = async () => {
   try {
     await ux.done()
   } catch (error) {
-    // tslint:disable no-console
     console.error(error)
     process.exitCode = 1
   }

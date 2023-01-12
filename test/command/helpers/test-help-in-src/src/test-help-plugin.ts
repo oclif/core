@@ -4,6 +4,7 @@ import {Interfaces, HelpBase} from '../../../../../src'
 export type TestHelpClassConfig = Interfaces.Config & { showCommandHelpSpy?: SinonSpy; showHelpSpy?: SinonSpy }
 
 export default class extends HelpBase {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   constructor(config: any, opts: any) {
     super(config, opts)
     config.showCommandHelpSpy = this.showCommandHelp

@@ -3,20 +3,20 @@ import {ActionBase, ActionType} from './base'
 export default class SimpleAction extends ActionBase {
   public type: ActionType = 'simple'
 
-  protected _start() {
+  protected _start(): void {
     const task = this.task
     if (!task) return
     this._render(task.action, task.status)
   }
 
-  protected _pause(icon?: string) {
+  protected _pause(icon?: string): void {
     if (icon) this._updateStatus(icon)
     else this._flush()
   }
 
-  protected _resume() {}
+  protected _resume(): void {}
 
-  protected _updateStatus(status: string, prevStatus?: string, newline = false) {
+  protected _updateStatus(status: string, prevStatus?: string, newline = false): void {
     const task = this.task
     if (!task) return
     if (task.active && !prevStatus) this._write(this.std, ` ${status}`)
@@ -24,7 +24,7 @@ export default class SimpleAction extends ActionBase {
     if (newline || !prevStatus) this._flush()
   }
 
-  protected _stop(status: string) {
+  protected _stop(status: string): void {
     const task = this.task
     if (!task) return
     this._updateStatus(status, task.status, true)
