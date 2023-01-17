@@ -159,6 +159,12 @@ export abstract class Command {
 
     const config = await Config.load(opts || require.main?.filename || __dirname)
     const cmd = new this(argv, config)
+    if (!cmd.id) {
+      const id = cmd.constructor.name.toLowerCase()
+      cmd.id = id
+      cmd.ctor.id = id
+    }
+
     return cmd._run()
   }
 
@@ -353,7 +359,7 @@ export abstract class Command {
 export namespace Command {
   export type Class = typeof Command & {
     id: string;
-    run(argv?: string[], config?: LoadOptions): PromiseLike<any>;
+    run(argv?: string[], config?: LoadOptions): Promise<any>;
   }
 
   export interface Loadable extends Cached {

@@ -185,7 +185,7 @@ describe('Config', () => {
 
       id = 'foo:bar'
 
-      run(): PromiseLike<any> {
+      run(): Promise<any> {
         return Promise.resolve()
       }
       }

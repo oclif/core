@@ -28,7 +28,7 @@ class MyCommandClass extends Command {
 
   flags = {}
 
-  run(): PromiseLike<any> {
+  run(): Promise<any> {
     return Promise.resolve()
   }
 }
