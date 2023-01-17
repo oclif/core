@@ -44,7 +44,6 @@ const readStdin = async (): Promise<string | null> => {
       resolve(result)
     })
 
-    // @ts-expect-error because the AbortSignal interface is missing addEventListener
     signal.addEventListener('abort', () => {
       debug('stdin aborted')
       clearTimeout(timeout)
