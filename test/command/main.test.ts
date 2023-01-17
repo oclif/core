@@ -84,4 +84,9 @@ COMMANDS
   .do(() => run(['foo', 'bar', 'succeed'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
   .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
   .it('runs foo:bar:succeed with space separator')
+
+  fancy
+  .add('result', () => run(['foo', 'bar', 'succeed'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
+  .do((output: any) => expect(output.result).to.equal('returned success!'))
+  .it('returns foo:bar:succeed result directly')
 })
