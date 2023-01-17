@@ -5,6 +5,7 @@
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
+    "@types/cli-progress": "^3.11.0",
     "ansi-escapes": "^4.3.2",
     "ansi-styles": "^4.3.0",
     "cardinal": "^2.1.1",
@@ -42,7 +43,6 @@
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/clean-stack": "^2.1.1",
-    "@types/cli-progress": "^3.11.0",
     "@types/ejs": "^3.1.0",
     "@types/fs-extra": "^9.0.13",
     "@types/indent-string": "^4.0.1",
@@ -109,7 +109,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
-    "test": "mocha \"test/**/*.test.ts\"",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 1200000",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
   },

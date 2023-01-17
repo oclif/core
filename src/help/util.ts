@@ -28,7 +28,8 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
   return Help
 }
 
-export function template(context: ejs.Data): (t: string) => string {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function template(context: any): (t: string) => string {
   function render(t: string): string {
     return ejs.render(t, context)
   }
