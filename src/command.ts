@@ -267,7 +267,7 @@ export abstract class Command {
   /**
    * actual command run code goes here
    */
-  public abstract run(): PromiseLike<any>
+  public abstract run(): Promise<any>
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
