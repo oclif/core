@@ -7,7 +7,7 @@ import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
-import {ArgInput, Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {isProd} from '../util'
@@ -787,7 +787,8 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   }
 
   // v2 commands have args as an object, so we need to normalize it to an array for forwards compatibility
-  const normalized = (Array.isArray(c.args) ? c.args ?? [] : Object.values(c.args ?? {})) as ArgInput
+  // @ts-ignore
+  const normalized = Array.isArray(c.args) ? c.args ?? [] : Object.entries(c.args ?? {}).map(([name, arg]) => ({...arg, name}))
   const argsPromise = normalized.map(async a => ({
     name: a.name,
     description: a.description,
@@ -819,7 +820,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
   }
 
   // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags']
+  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags', '_baseFlags']
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: any = {}
