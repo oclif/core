@@ -74,5 +74,5 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
   // command id.
   if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
-  await config.runCommand(id, argvSlice, cmd)
+  return config.runCommand(id, argvSlice, cmd)
 }
