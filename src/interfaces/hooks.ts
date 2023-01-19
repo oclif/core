@@ -41,6 +41,10 @@ export interface Hooks {
     options: {id: string; argv: string[], matches: Command.Loadable[]};
     return: unknown;
   };
+  'jit_plugin_not_installed': {
+    options: {id: string; argv: string[]; command: Command.Loadable, pluginName: string; pluginVersion: string};
+    return: unknown;
+  };
   'plugins:preinstall': {
     options: {
       plugin: { name: string; tag: string; type: 'npm' } | { url: string; type: 'repo' };
@@ -60,6 +64,7 @@ export namespace Hook {
   export type Update = Hook<'update'>
   export type CommandNotFound = Hook<'command_not_found'>
   export type CommandIncomplete = Hook<'command_incomplete'>
+  export type JitPluginNotInstalled = Hook<'jit_plugin_not_installed'>
 
   export interface Context {
     config: Config;

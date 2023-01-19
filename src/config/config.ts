@@ -178,6 +178,12 @@ export class Config implements IConfig {
       },
     }
 
+    await this.loadPluginsAndCommands()
+
+    debug('config done')
+  }
+
+  async loadPluginsAndCommands(): Promise<void> {
     await this.loadUserPlugins()
     await this.loadDevPlugins()
     await this.loadCorePlugins()
@@ -186,8 +192,6 @@ export class Config implements IConfig {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
-
-    debug('config done')
   }
 
   public async loadCorePlugins(): Promise<void> {
@@ -302,23 +306,39 @@ export class Config implements IConfig {
 
   public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
     debug('runCommand %s %o', id, argv)
-    const c = cachedCommand ?? this.findCommand(id)
+    let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
       const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
       const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
         await this.runHook('command_incomplete', {id, argv, matches}) :
         await this.runHook('command_not_found', {id, argv})
 
-      if (hookResult.successes[0]) {
-        const cmdResult = hookResult.successes[0].result
-        return cmdResult as T
-      }
-
-      if (hookResult.failures[0]) {
-        throw hookResult.failures[0].error
-      }
-
+      if (hookResult.successes[0]) return hookResult.successes[0].result as T
+      if (hookResult.failures[0]) throw hookResult.failures[0].error
       throw new CLIError(`command ${id} not found`)
+    }
+
+    if (this.isJitPluginCommand(c)) {
+      const pluginName = c.pluginName!
+      const pluginVersion = this.pjson.oclif.jitPlugins![pluginName]
+      const jitResult = await this.runHook('jit_plugin_not_installed', {
+        id,
+        argv,
+        command: c,
+        pluginName,
+        pluginVersion,
+      })
+      if (jitResult.failures[0]) throw jitResult.failures[0].error
+      if (jitResult.successes[0]) {
+        await this.loadPluginsAndCommands()
+        c = this.findCommand(id) ?? c
+      } else {
+        // this means that no jit_plugin_not_installed hook exists, so we should run the default behavior
+        const result = await this.runHook('command_not_found', {id, argv})
+        if (result.successes[0]) return result.successes[0].result as T
+        if (result.failures[0]) throw result.failures[0].error
+        throw new CLIError(`command ${id} not found`)
+      }
     }
 
     const command = await c.load()
@@ -570,6 +590,10 @@ export class Config implements IConfig {
     return isProd()
   }
 
+  private isJitPluginCommand(c: Command.Loadable): boolean {
+    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)
+  }
+
   private getCmdLookupId(id: string): string {
     if (this._commands.has(id)) return id
     if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
@@ -681,6 +705,16 @@ export class Config implements IConfig {
 
       // if a is a core plugin and b is not sort a first
       if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+
+      // if a is a jit plugin and b is not sort b first
+      if (a.pluginType === 'jit' && b.pluginType !== 'jit') {
+        return 1
+      }
+
+      // if b is a jit plugin and a is not sort a first
+      if (b.pluginType === 'jit' && a.pluginType !== 'jit') {
         return -1
       }
 
