@@ -70,7 +70,7 @@ export type Relationship = {
 export type Deprecation = {
   to?: string;
   message?: string;
-  version?: string;
+  version?: string | number;
 }
 
 export type FlagProps = {
