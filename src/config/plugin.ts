@@ -114,8 +114,6 @@ export class Plugin implements IPlugin {
 
   commands!: Command.Loadable[]
 
-  // jitCommands!: Command.Loadable[]
-
   hooks!: {[k: string]: string[]}
 
   valid = false
