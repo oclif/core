@@ -712,7 +712,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>) => {
+const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {

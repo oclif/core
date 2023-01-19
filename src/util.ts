@@ -98,11 +98,11 @@ export const fileExists = async (input: string): Promise<string> => {
 }
 
 export function isTruthy(input: string): boolean {
-  return ['true', 'TRUE', '1', 'yes', 'YES', 'y', 'Y'].includes(input)
+  return ['true', '1', 'yes', 'y'].includes(input.toLowerCase())
 }
 
 export function isNotFalsy(input: string): boolean {
-  return !['false', 'FALSE', '0', 'no', 'NO', 'n', 'N'].includes(input)
+  return !['false', '0', 'no', 'n'].includes(input.toLowerCase())
 }
 
 export function requireJson<T>(...pathParts: string[]): T {
