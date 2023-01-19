@@ -1,5 +1,7 @@
 import * as fs from 'fs'
 import {join} from 'path'
+import {Command} from './command'
+import {ArgInput} from './interfaces/parser'
 
 export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)
@@ -105,4 +107,17 @@ export function isNotFalsy(input: string): boolean {
 
 export function requireJson<T>(...pathParts: string[]): T {
   return JSON.parse(fs.readFileSync(join(...pathParts), 'utf8'))
+}
+
+/**
+ * Ensure that the provided args are an object. This is for backwards compatibility with v1 commands which
+ * defined args as an array.
+ *
+ * @param args Either an array of args or an object of args
+ * @returns ArgInput
+ */
+export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Command.Arg.Cached}): ArgInput {
+  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => {
+    return {...x, [y.name]: y}
+  }, {} as ArgInput) : args ?? {}) as ArgInput
 }

@@ -1,7 +1,7 @@
 import * as chalk from 'chalk'
 import stripAnsi = require('strip-ansi')
 
-import {castArray, compact, sortBy} from '../util'
+import {castArray, compact, ensureArgObject, sortBy} from '../util'
 import * as Interfaces from '../interfaces'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 import {DocOpts} from './docopts'
@@ -41,7 +41,7 @@ export class CommandHelp extends HelpFormatter {
       return v
     }), f => [!f.char, f.char, f.name])
 
-    const args = Object.values(cmd.args ?? {}).filter(a => !a.hidden)
+    const args = Object.values(ensureArgObject(cmd.args)).filter(a => !a.hidden)
     const output = compact(this.sections().map(({header, generate}) => {
       const body = generate({cmd, flags, args}, header)
       // Generate can return a list of sections
