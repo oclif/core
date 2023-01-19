@@ -159,7 +159,12 @@ export class Plugin implements IPlugin {
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object
     .entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => ({
+      ...c,
+      pluginAlias: this.alias,
+      pluginType: c.pluginType === 'jit' ? 'jit' : this.type,
+      load: async () => this.findCommand(id, {must: true}),
+    }))
     .sort((a, b) => a.id.localeCompare(b.id))
   }
 

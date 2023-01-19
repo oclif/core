@@ -15,6 +15,7 @@ export interface PluginOptions {
 
 export interface Options extends PluginOptions {
   devPlugins?: boolean;
+  jitPlugins?: boolean;
   userPlugins?: boolean;
   channel?: string;
   version?: string;
