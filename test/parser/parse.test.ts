@@ -411,7 +411,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3.14')
+        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3.14\nSee more help with --help')
       })
 
       it('does not parse fractions', async () => {
@@ -424,7 +424,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3/4')
+        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3/4\nSee more help with --help')
       })
 
       it('does not parse strings', async () => {
@@ -437,7 +437,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: s10')
+        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: s10\nSee more help with --help')
       })
 
       describe('min/max', () => {
@@ -476,7 +476,7 @@ See more help with --help`)
             message = error.message
           }
 
-          expect(message).to.equal('Parsing --int \n\tExpected an integer greater than or equal to 10 but received: 9')
+          expect(message).to.equal('Parsing --int \n\tExpected an integer greater than or equal to 10 but received: 9\nSee more help with --help')
         })
         it('max fail gt', async () => {
           let message = ''
@@ -488,7 +488,7 @@ See more help with --help`)
             message = error.message
           }
 
-          expect(message).to.equal('Parsing --int \n\tExpected an integer less than or equal to 20 but received: 21')
+          expect(message).to.equal('Parsing --int \n\tExpected an integer less than or equal to 20 but received: 21\nSee more help with --help')
         })
       })
     })
@@ -514,7 +514,7 @@ See more help with --help`)
         } catch (error_) {
           const error = error_ as Error
           expect(error.message).to.equal(
-            `Parsing --int \n\t${customParseException}`)
+            `Parsing --int \n\t${customParseException}\nSee more help with --help`)
         }
       })
     })
@@ -860,7 +860,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Parsing --foo \n\tExpected a valid url but received: example')
+      expect(message).to.equal('Parsing --foo \n\tExpected a valid url but received: example\nSee more help with --help')
     })
   })
 
@@ -1251,7 +1251,7 @@ See more help with --help`)
         } catch (error_) {
           const error = error_ as Error
           expect(error.message).to.equal(
-            `Parsing --dir \n\tNo directory found at ${testDir}`,
+            `Parsing --dir \n\tNo directory found at ${testDir}\nSee more help with --help`,
           )
         }
       })
@@ -1266,7 +1266,7 @@ See more help with --help`)
         } catch (error_) {
           const error = error_ as Error
           expect(error.message).to.equal(
-            `Parsing --dir \n\t${testDir} exists but is not a directory`)
+            `Parsing --dir \n\t${testDir} exists but is not a directory\nSee more help with --help`)
         }
       })
       describe('custom parse functions', () => {
@@ -1291,7 +1291,7 @@ See more help with --help`)
           } catch (error_) {
             const error = error_ as Error
             expect(error.message).to.equal(
-              `Parsing --dir \n\t${customParseException}`)
+              `Parsing --dir \n\t${customParseException}\nSee more help with --help`)
           }
         })
       })
@@ -1330,7 +1330,7 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(`Parsing --file \n\tNo file found at ${testFile}`)
+          expect(error.message).to.equal(`Parsing --file \n\tNo file found at ${testFile}\nSee more help with --help`)
         }
       })
       it('fails when file exists but is not a file', async () => {
@@ -1343,7 +1343,7 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(`Parsing --file \n\t${testFile} exists but is not a file`)
+          expect(error.message).to.equal(`Parsing --file \n\t${testFile} exists but is not a file\nSee more help with --help`)
         }
       })
       describe('custom parse functions', () => {
@@ -1368,7 +1368,7 @@ See more help with --help`)
           } catch (error_) {
             const error = error_ as Error
             expect(error.message).to.equal(
-              `Parsing --dir \n\t${customParseException}`)
+              `Parsing --dir \n\t${customParseException}\nSee more help with --help`)
           }
         })
       })
