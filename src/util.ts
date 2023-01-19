@@ -1,3 +1,5 @@
+import {ArgInput} from './interfaces'
+
 export function compact<T>(a: (T | undefined)[]): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
@@ -58,4 +60,15 @@ export function sumBy<T>(arr: T[], fn: (i: T) => number): number {
 
 export function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
+}
+
+/**
+ * Ensure that the args are in an array instead of an object. This is required to ensure
+ * forwards compatibility with the new arg format in v2.
+ *
+ * @param args The args to ensure are in an array
+ * @returns ArgInput
+ */
+export function ensureArgArray(args?: ArgInput | {[name: string]: any}): ArgInput {
+  return Array.isArray(args) ? args ?? [] : Object.entries(args ?? {}).map(([name, arg]) => ({...arg, name}))
 }
