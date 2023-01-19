@@ -10,7 +10,7 @@ import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../inter
 import {Command, CompletableOptionFlag, Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
-import {isProd} from '../util'
+import {ensureArgArray, isProd} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 
@@ -786,10 +786,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  // v2 commands have args as an object, so we need to normalize it to an array for forwards compatibility
-  // @ts-ignore
-  const normalized = Array.isArray(c.args) ? c.args ?? [] : Object.entries(c.args ?? {}).map(([name, arg]) => ({...arg, name}))
-  const argsPromise = normalized.map(async a => ({
+  const argsPromise = ensureArgArray(c.args).map(async a => ({
     name: a.name,
     description: a.description,
     required: a.required,
