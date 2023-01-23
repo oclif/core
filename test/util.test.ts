@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {maxBy, sumBy, capitalize, ensureArgArray} from '../src/util'
+import {maxBy, sumBy, capitalize, ensureArgObject} from '../src/util'
 
 describe('capitalize', () => {
   it('capitalizes the string', () => {
@@ -34,17 +34,21 @@ describe('maxBy', () => {
   })
 })
 
-describe('ensureArgArray', () => {
-  it('should convert arg object to array', () => {
+describe('ensureArgObject', () => {
+  it('should convert array of arguments to an object', () => {
+    const args = [
+      {name: 'foo', description: 'foo desc', required: true},
+      {name: 'bar', description: 'bar desc'},
+    ]
+    const expected = {foo: args[0], bar: args[1]}
+    expect(ensureArgObject(args)).to.deep.equal(expected)
+  })
+
+  it('should do nothing to an arguments object', () => {
     const args = {
       foo: {name: 'foo', description: 'foo desc', required: true},
       bar: {name: 'bar', description: 'bar desc'},
     }
-    const expected = [
-      {name: 'foo', description: 'foo desc', required: true},
-      {name: 'bar', description: 'bar desc'},
-    ]
-
-    expect(ensureArgArray(args)).to.deep.equal(expected)
+    expect(ensureArgObject(args)).to.deep.equal(args)
   })
 })

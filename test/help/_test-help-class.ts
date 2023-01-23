@@ -3,18 +3,18 @@
 // this sample help class file in tests, although it is not needed
 // for ../help itself.
 
-import {HelpBase} from '.'
+import {HelpBase} from '../../src'
 
 export default class extends HelpBase  {
-  async showHelp() {
+  async showHelp(): Promise<void> {
     console.log('help')
   }
 
-  async showCommandHelp() {
+  async showCommandHelp(): Promise<void> {
     console.log('command help')
   }
 
-  getCommandHelpForReadme() {
+  getCommandHelpForReadme(): string {
     return 'help for readme'
   }
 }

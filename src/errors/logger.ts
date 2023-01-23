@@ -1,6 +1,6 @@
-import * as FS from 'fs-extra'
+import * as fs from 'fs-extra'
 import * as path from 'path'
-import StripAnsi = require('strip-ansi')
+import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
 let timer: any
@@ -19,25 +19,21 @@ export class Logger {
 
   protected buffer: string[] = []
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(public file: string) {}
 
-  log(msg: string) {
-    const stripAnsi: typeof StripAnsi = require('strip-ansi')
+  log(msg: string): void {
     msg = stripAnsi(chomp(msg))
     const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
-    // tslint:disable-next-line no-console
     this.flush(50).catch(console.error)
   }
 
-  async flush(waitForMs = 0) {
+  async flush(waitForMs = 0): Promise<void> {
     await wait(waitForMs)
     this.flushing = this.flushing.then(async () => {
       if (this.buffer.length === 0) return
       const mylines = this.buffer
       this.buffer = []
-      const fs: typeof FS = require('fs-extra')
       await fs.mkdirp(path.dirname(this.file))
       await fs.appendFile(this.file, mylines.join('\n') + '\n')
     })

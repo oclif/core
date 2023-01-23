@@ -1,5 +1,3 @@
-// tslint:disable no-console
-
 export {handle} from './handle'
 export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
@@ -21,7 +19,7 @@ export function exit(code = 0): never {
 
 export function error(input: string | Error, options: {exit: false} & PrettyPrintableError): void
 export function error(input: string | Error, options?: {exit?: number} & PrettyPrintableError): never
-export function error(input: string | Error, options: {exit?: number | false} & PrettyPrintableError = {}) {
+export function error(input: string | Error, options: {exit?: number | false} & PrettyPrintableError = {}): void {
   let err: Error & OclifError
 
   if (typeof input === 'string') {
@@ -41,7 +39,7 @@ export function error(input: string | Error, options: {exit?: number | false} & 
   } else throw err
 }
 
-export function warn(input: string | Error) {
+export function warn(input: string | Error): void {
   let err: Error & OclifError
 
   if (typeof input === 'string') {

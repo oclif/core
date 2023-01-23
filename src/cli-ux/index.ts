@@ -3,10 +3,12 @@ import * as util from 'util'
 
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
-import deps from './deps'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
-import * as Table from './styled/table'
+import * as styled from './styled'
+import {Table} from './styled'
+import * as uxPrompt from './prompt'
+import uxWait from './wait'
 
 const hyperlinker = require('hyperlinker')
 
@@ -18,10 +20,10 @@ function timeout(p: Promise<any>, ms: number) {
     })
   }
 
-  return Promise.race([p, wait(ms, true).then(() => ux.error('timed out'))])
+  return Promise.race([p, wait(ms, true).then(() => Errors.error('timed out'))])
 }
 
-async function flush() {
+async function _flush() {
   const p = new Promise(resolve => {
     process.stdout.once('drain', () => resolve(null))
   })
@@ -34,91 +36,95 @@ async function flush() {
   return p
 }
 
-export const ux = {
-  config,
+export class ux {
+  public static config: Config = config
 
-  warn: Errors.warn,
-  error: Errors.error,
-  exit: Errors.exit,
+  public static get prompt(): typeof uxPrompt.prompt {
+    return uxPrompt.prompt
+  }
 
-  get prompt() {
-    return deps.prompt.prompt
-  },
   /**
    * "press anykey to continue"
    */
-  get anykey() {
-    return deps.prompt.anykey
-  },
-  get confirm() {
-    return deps.prompt.confirm
-  },
-  get action() {
+  public static get anykey(): typeof uxPrompt.anykey {
+    return uxPrompt.anykey
+  }
+
+  public static get confirm(): typeof uxPrompt.confirm {
+    return uxPrompt.confirm
+  }
+
+  public static get action(): ActionBase {
     return config.action
-  },
-  get prideAction() {
+  }
+
+  public static get prideAction(): ActionBase {
     return config.prideAction
-  },
-  styledObject(obj: any, keys?: string[]) {
-    ux.info(deps.styledObject(obj, keys))
-  },
-  get styledHeader() {
-    return deps.styledHeader
-  },
-  get styledJSON() {
-    return deps.styledJSON
-  },
-  get table() {
-    return deps.table
-  },
-  get tree() {
-    return deps.tree
-  },
-  get open() {
-    return deps.open
-  },
-  get wait() {
-    return deps.wait
-  },
-  get progress() {
-    return deps.progress
-  },
+  }
 
-  async done() {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  public static styledObject(obj: any, keys?: string[]): void {
+    this.info(styled.styledObject(obj, keys))
+  }
+
+  public static get styledHeader(): typeof styled.styledHeader {
+    return styled.styledHeader
+  }
+
+  public static get styledJSON(): typeof styled.styledJSON {
+    return styled.styledJSON
+  }
+
+  public static get table(): typeof styled.Table.table {
+    return styled.Table.table
+  }
+
+  public static get tree(): typeof styled.tree {
+    return styled.tree
+  }
+
+  public static get wait(): typeof uxWait {
+    return uxWait
+  }
+
+  public static get progress(): typeof styled.progress {
+    return styled.progress
+  }
+
+  public static async done(): Promise<void> {
     config.action.stop()
-    // await flushStdout()
-  },
+  }
 
-  trace(format: string, ...args: string[]) {
+  public static trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
-  },
+  }
 
-  debug(format: string, ...args: string[]) {
+  public static debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
       process.stdout.write(util.format(format, ...args) + '\n')
     }
-  },
+  }
 
-  info(format: string, ...args: string[]) {
+  public static info(format: string, ...args: string[]): void {
     process.stdout.write(util.format(format, ...args) + '\n')
-  },
+  }
 
-  log(format?: string, ...args: string[]) {
+  public static log(format?: string, ...args: string[]): void {
     this.info(format || '', ...args)
-  },
+  }
 
-  url(text: string, uri: string, params = {}) {
+  public static url(text: string, uri: string, params = {}): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       this.log(hyperlinker(text, uri, params))
     } else {
       this.log(uri)
     }
-  },
+  }
 
-  annotation(text: string, annotation: string) {
+  public static annotation(text: string, annotation: string): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
@@ -126,27 +132,73 @@ export const ux = {
     } else {
       this.log(text)
     }
-  },
+  }
 
-  async flush(ms = 10_000) {
-    await timeout(flush(), ms)
-  },
+  public static async flush(ms = 10_000): Promise<void> {
+    await timeout(_flush(), ms)
+  }
 }
 
+const action = ux.action
+const annotation = ux.annotation
+const anykey = ux.anykey
+const confirm = ux.confirm
+const debug = ux.debug
+const done = ux.done
+const error = Errors.error
+const exit = Errors.exit
+const flush = ux.flush
+const info = ux.info
+const log = ux.log
+const prideAction = ux.prideAction
+const progress = ux.progress
+const prompt = ux.prompt
+const styledHeader = ux.styledHeader
+const styledJSON = ux.styledJSON
+const styledObject = ux.styledObject
+const table = ux.table
+const trace = ux.trace
+const tree = ux.tree
+const url = ux.url
+const wait = ux.wait
+const warn = Errors.warn
+
 export {
-  config,
+  action,
   ActionBase,
+  annotation,
+  anykey,
+  config,
   Config,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
   ExitError,
+  flush,
+  info,
   IPromptOptions,
+  log,
+  prideAction,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
   Table,
+  trace,
+  tree,
+  url,
+  wait,
+  warn,
 }
 
 const cliuxProcessExitHandler = async () => {
   try {
     await ux.done()
   } catch (error) {
-    // tslint:disable no-console
     console.error(error)
     process.exitCode = 1
   }

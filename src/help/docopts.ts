@@ -1,9 +1,5 @@
-import {Interfaces} from '..'
-import {ensureArgArray} from '../util'
-
-type Flag = Interfaces.Command.Flag
-type Flags = Flag[]
-
+import {Command} from '../command'
+import {ensureArgObject} from '../util'
 /**
  * DocOpts - See http://docopt.org/.
  *
@@ -61,11 +57,11 @@ type Flags = Flag[]
  *
  */
 export class DocOpts {
-  private flagMap: {[index: string]: Flag}
+  private flagMap: {[index: string]: Command.Flag.Any}
 
-  private flagList: Flags
+  private flagList: Command.Flag.Any[]
 
-  public constructor(private cmd: Interfaces.Command) {
+  public constructor(private cmd: Command.Class | Command.Loadable | Command.Cached) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -76,14 +72,14 @@ export class DocOpts {
     })
   }
 
-  public static generate(cmd: Interfaces.Command): string {
+  public static generate(cmd: Command.Class | Command.Loadable | Command.Cached): string {
     return new DocOpts(cmd).toString()
   }
 
   public toString(): string {
     const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
     if (this.cmd.args) {
-      const a = ensureArgArray(this.cmd.args).map(arg => `[${arg.name.toUpperCase()}]`) || []
+      const a = Object.values(ensureArgObject(this.cmd.args)).map(arg => `[${arg.name.toUpperCase()}]`) || []
       opts.push(...a)
     }
 
@@ -168,8 +164,7 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
-  // eslint-disable-next-line default-param-last
-  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flags): string[] {
+  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Command.Flag.Any[] = []): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
       let type = ''

@@ -25,7 +25,7 @@ export class ActionBase {
     stderr: process.stderr.write,
   }
 
-  public start(action: string, status?: string, opts: Options = {}) {
+  public start(action: string, status?: string, opts: Options = {}): void {
     this.std = opts.stdout ? 'stdout' : 'stderr'
     const task = {action, status, active: Boolean(this.task && this.task.active)}
     this.task = task
@@ -35,7 +35,7 @@ export class ActionBase {
     this._stdout(true)
   }
 
-  public stop(msg = 'done') {
+  public stop(msg = 'done'): void {
     const task = this.task
     if (!task) {
       return
@@ -109,7 +109,7 @@ export class ActionBase {
     return ret
   }
 
-  public pause(fn: () => any, icon?: string) {
+  public pause(fn: () => any, icon?: string): Promise<any> {
     const task = this.task
     const active = task && task.active
     if (task && active) {
@@ -126,26 +126,26 @@ export class ActionBase {
     return ret
   }
 
-  protected _start() {
+  protected _start(): void {
     throw new Error('not implemented')
   }
 
-  protected _stop(_: string) {
+  protected _stop(_: string): void {
     throw new Error('not implemented')
   }
 
-  protected _resume() {
+  protected _resume(): void {
     if (this.task) this.start(this.task.action, this.task.status)
   }
 
-  protected _pause(_?: string) {
+  protected _pause(_?: string): void {
     throw new Error('not implemented')
   }
 
-  protected _updateStatus(_: string | undefined, __?: string) {}
+  protected _updateStatus(_: string | undefined, __?: string): void {}
 
   // mock out stdout/stderr so it doesn't screw up the rendering
-  protected _stdout(toggle: boolean) {
+  protected _stdout(toggle: boolean): void {
     try {
       const outputs: ['stdout', 'stderr'] = ['stdout', 'stderr']
       if (toggle) {
@@ -173,7 +173,7 @@ export class ActionBase {
   }
 
   // flush mocked stdout/stderr
-  protected _flushStdout() {
+  protected _flushStdout(): void {
     try {
       let output = ''
       let std: 'stdout' | 'stderr' | undefined
@@ -195,7 +195,7 @@ export class ActionBase {
   }
 
   // write to the real stdout/stderr
-  protected _write(std: 'stdout' | 'stderr', s: string | string[]) {
+  protected _write(std: 'stdout' | 'stderr', s: string | string[]): void {
     this.stdmockOrigs[std].apply(process[std], castArray(s) as [string])
   }
 }

@@ -1,42 +1,119 @@
-import {OptionFlag, BooleanFlag, EnumFlagOptions, Default} from './interfaces'
-import {custom, boolean} from './parser'
-import Command from './command'
+import {URL} from 'url'
 import {Help} from './help'
-export {boolean, integer, url, directory, file, string, build, option, custom} from './parser'
+import {BooleanFlag} from './interfaces'
+import {FlagDefinition, OptionFlagDefaults, FlagParser} from './interfaces/parser'
+import {dirExists, fileExists} from './util'
 
-export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true} & ({required: true} | { default: Default<T[]> })): OptionFlag<T[]>
-export function _enum<T = string>(opts: EnumFlagOptions<T, true> & {multiple: true}): OptionFlag<T[] | undefined>
-export function _enum<T = string>(opts: EnumFlagOptions<T> & ({required: true} | { default: Default<T> })): OptionFlag<T>
-export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T | undefined>
-export function _enum<T = string>(opts: EnumFlagOptions<T>): OptionFlag<T> | OptionFlag<T[]> | OptionFlag<T | undefined> | OptionFlag<T[] | undefined> {
-  return custom<T, EnumFlagOptions<T>>({
-    async parse(input) {
-      if (!opts.options.includes(input)) throw new Error(`Expected --${this.name}=${input} to be one of: ${opts.options.join(', ')}`)
-      return input as unknown as T
-    },
-    helpValue: `(${opts.options.join('|')})`,
-    ...opts,
-  })()
+/**
+ * Create a custom flag.
+ *
+ * @example
+ * type Id = string
+ * type IdOpts = { startsWith: string; length: number };
+ *
+ * export const myFlag = custom<Id, IdOpts>({
+ *   parse: async (input, opts) => {
+ *     if (input.startsWith(opts.startsWith) && input.length === opts.length) {
+ *       return input
+ *     }
+ *
+ *     throw new Error('Invalid id')
+ *   },
+ * })
+ */
+export function custom<T, P = Record<string, unknown>>(
+    defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<OptionFlagDefaults<T, P, true>>,
+): FlagDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(
+  defaults: {parse: FlagParser<T, string, P>} & Partial<OptionFlagDefaults<T, P>>,
+): FlagDefinition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P>
+export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
+  return (options: any = {}) => {
+    return {
+      parse: async (input, _ctx, _opts) => input,
+      ...defaults,
+      ...options,
+      input: [] as string[],
+      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
+      type: 'option',
+    }
+  }
 }
 
-export {_enum as enum}
+export function boolean<T = boolean>(
+  options: Partial<BooleanFlag<T>> = {},
+): BooleanFlag<T> {
+  return {
+    parse: async (b, _) => b,
+    ...options,
+    allowNo: Boolean(options.allowNo),
+    type: 'boolean',
+  } as BooleanFlag<T>
+}
 
-export const version = (opts: Partial<BooleanFlag<boolean>> = {}) => {
+export const integer = custom<number, {min?: number; max?: number;}>({
+  parse: async (input, _, opts) => {
+    if (!/^-?\d+$/.test(input))
+      throw new Error(`Expected an integer but received: ${input}`)
+    const num = Number.parseInt(input, 10)
+    if (opts.min !== undefined && num < opts.min)
+      throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
+    if (opts.max !== undefined && num > opts.max)
+      throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
+    return num
+  },
+})
+
+export const directory = custom<string, {exists?: boolean}>({
+  parse: async (input, _, opts) => {
+    if (opts.exists) return dirExists(input)
+
+    return input
+  },
+})
+
+export const file = custom<string, {exists?: boolean}>({
+  parse: async (input, _, opts) => {
+    if (opts.exists) return fileExists(input)
+
+    return input
+  },
+})
+
+/**
+ * Initializes a string as a URL. Throws an error
+ * if the string is not a valid URL.
+ */
+export const url = custom<URL>({
+  parse: async input => {
+    try {
+      return new URL(input)
+    } catch {
+      throw new Error(`Expected a valid url but received: ${input}`)
+    }
+  },
+})
+
+const stringFlag = custom({})
+export {stringFlag as string}
+
+export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
     description: 'Show CLI version.',
     ...opts,
-    parse: async (_: any, cmd: Command) => {
-      cmd.log(cmd.config.userAgent)
-      cmd.exit(0)
+    parse: async (_: any, ctx) => {
+      ctx.log(ctx.config.userAgent)
+      ctx.exit(0)
     },
   })
 }
 
-export const help = (opts: Partial<BooleanFlag<boolean>> = {}) => {
+export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
     description: 'Show CLI help.',
     ...opts,
-    parse: async (_: any, cmd: Command) => {
+    parse: async (_, cmd) => {
       new Help(cmd.config).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
       cmd.exit(0)
     },

@@ -8,6 +8,7 @@ import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
+import {Command} from '../command'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 
@@ -39,7 +40,7 @@ export abstract class HelpBase extends HelpFormatter {
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Interfaces.Command, topics: Interfaces.Topic[]): Promise<void>;
+  public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>;
 }
 
 export class Help extends HelpBase {
@@ -59,7 +60,7 @@ export class Help extends HelpBase {
     })
   }
 
-  protected get sortedCommands() {
+  protected get sortedCommands(): Command.Loadable[] {
     let commands = this.config.commands
 
     commands = commands.filter(c => this.opts.all || !c.hidden)
@@ -69,7 +70,7 @@ export class Help extends HelpBase {
     return commands
   }
 
-  protected get sortedTopics() {
+  protected get sortedTopics(): Interfaces.Topic[] {
     let topics = this._topics
     topics = topics.filter(t => this.opts.all || !t.hidden)
     topics = sortBy(topics, t => t.name)
@@ -82,7 +83,7 @@ export class Help extends HelpBase {
     super(config, opts)
   }
 
-  public async showHelp(argv: string[]) {
+  public async showHelp(argv: string[]): Promise<void> {
     const originalArgv = argv.slice(1)
     argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
 
@@ -130,7 +131,7 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
-  public async showCommandHelp(command: Interfaces.Command) {
+  public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
 
@@ -163,7 +164,7 @@ export class Help extends HelpBase {
 
     if (subCommands.length > 0) {
       const aliases:string[] = []
-      const uniqueSubCommands:Interfaces.Command.Loadable[] = subCommands.filter(p => {
+      const uniqueSubCommands: Command.Loadable[] = subCommands.filter(p => {
         aliases.push(...p.aliases)
         return !aliases.includes(p.id)
       })
@@ -172,7 +173,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected async showRootHelp() {
+  protected async showRootHelp(): Promise<void> {
     let rootTopics = this.sortedTopics
     let rootCommands = this.sortedCommands
 
@@ -205,7 +206,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected async showTopicHelp(topic: Interfaces.Topic) {
+  protected async showTopicHelp(topic: Interfaces.Topic): Promise<void> {
     const name = topic.name
     const depth = name.split(':').length
 
@@ -233,7 +234,7 @@ export class Help extends HelpBase {
     return help.root()
   }
 
-  protected formatCommand(command: Interfaces.Command): string {
+  protected formatCommand(command: Command.Class | Command.Loadable | Command.Cached): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replace(/:/g, this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
@@ -243,11 +244,11 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected getCommandHelpClass(command: Interfaces.Command) {
+  protected getCommandHelpClass(command: Command.Class | Command.Loadable | Command.Cached): CommandHelp {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
-  protected formatCommands(commands: Interfaces.Command[]): string {
+  protected formatCommands(commands: Array<Command.Class | Command.Loadable | Command.Cached>): string {
     if (commands.length === 0) return ''
 
     const body = this.renderList(commands.map(c => {
@@ -265,13 +266,13 @@ export class Help extends HelpBase {
     return this.section('COMMANDS', body)
   }
 
-  protected summary(c: Interfaces.Command): string | undefined {
+  protected summary(c: Command.Class | Command.Loadable | Command.Cached): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
     return c.description && this.render(c.description).split('\n')[0]
   }
 
-  protected description(c: Interfaces.Command): string {
+  protected description(c: Command.Class | Command.Loadable | Command.Cached): string {
     const description = this.render(c.description || '')
     if (c.summary) {
       return description
@@ -311,16 +312,11 @@ export class Help extends HelpBase {
     return this.section('TOPICS', body)
   }
 
-  /**
-   * @deprecated used for readme generation
-   * @param {object} command The command to generate readme help for
-   * @return {string} the readme help string for the given command
-   */
-  protected command(command: Interfaces.Command) {
+  protected command(command: Command.Class): string {
     return this.formatCommand(command)
   }
 
-  protected log(...args: string[]) {
+  protected log(...args: string[]): void {
     console.log(...args)
   }
 }

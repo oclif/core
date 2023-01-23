@@ -4,7 +4,6 @@
 base library for oclif CLIs
 
 [![Version](https://img.shields.io/npm/v/@oclif/core.svg)](https://npmjs.org/package/@oclif/core)
-[![CircleCI](https://circleci.com/gh/oclif/core/tree/main.svg?style=svg)](https://circleci.com/gh/oclif/core/tree/main)
 [![Downloads/week](https://img.shields.io/npm/dw/@oclif/core.svg)](https://npmjs.org/package/@oclif/core)
 [![License](https://img.shields.io/npm/l/@oclif/core.svg)](https://github.com/oclif/core/blob/main/package.json)
 
@@ -12,11 +11,12 @@ base library for oclif CLIs
 Migrating
 =====
 
-If you're migrating from the old oclif libraries (`@oclif/config`, `@oclif/command`, `@oclif/error`, `@oclif/parser`), see the [migration guide](./MIGRATION.md).
+See the [migration guide](./MIGRATION.md) for an overview of breaking changes that occurred between v1 and v2.
 
-The `@oclif/core` module now also includes the `cli-ux` module. Merging `cli-ux` into `@oclif/core` resolves a circular dependency between the two modules.
-See the [cli-ux README](./src/cli-ux/README.md) for instructions on how to replace the `cli-ux` module with `@oclif/core`.
-The [cli-ux README](./src/cli-ux/README.md) also contains detailed usage examples.
+CLI UX
+=====
+
+The [ux README](./src/cli-ux/README.md) contains detailed usage examples of using the `ux` export.
 
 Usage
 =====

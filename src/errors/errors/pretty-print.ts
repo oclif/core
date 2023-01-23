@@ -30,7 +30,7 @@ const formatSuggestions = (suggestions?: string[]): string | undefined => {
   return `${label}\n${indent(multiple, 2)}`
 }
 
-export default function prettyPrint(error: Error & PrettyPrintableError & CLIErrorDisplayOptions) {
+export default function prettyPrint(error: Error & PrettyPrintableError & CLIErrorDisplayOptions): string | undefined {
   if (config.debug) {
     return error.stack
   }

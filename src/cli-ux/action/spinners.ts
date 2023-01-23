@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   hexagon: {
     interval: 400,
     frames: ['⬡', '⬢'],

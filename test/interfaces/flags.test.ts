@@ -2,29 +2,21 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 
-import Command from '../../src/command'
-import * as Flags from '../../src/flags'
-import * as Interfaces from '../../src/interfaces'
+import {Command, Flags, Interfaces} from '../../src'
 import {expectType, expectNotType} from 'tsd'
 import {URL} from 'url'
 
 abstract class BaseCommand extends Command {
   static enableJsonFlag = true
 
-  static globalFlags = {
+  static baseFlags = {
     optionalGlobalFlag: Flags.string(),
     requiredGlobalFlag: Flags.string({required: true}),
     defaultGlobalFlag: Flags.string({default: 'default'}),
   }
 }
 
-type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.globalFlags>
-
-enum MyEnum {
-  'A' = 'A',
-  'B' = 'B',
-  'C' = 'C',
-}
+type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
 
 type MyType = {
   foo: boolean;
@@ -44,23 +36,15 @@ class MyCommand extends BaseCommand {
 
     requiredMultiString: Flags.string({required: true, multiple: true}),
     optionalMultiString: Flags.string({multiple: true}),
-    defaultMultiString: Flags.string({multiple: true, default: ['default']}),
+    defaultMultiString: Flags.string({
+      multiple: true,
+      default: ['default'],
+      defaultHelp: async _ctx => 'defaultHelp',
+    }),
 
     requiredBoolean: Flags.boolean({required: true}),
     optionalBoolean: Flags.boolean(),
     defaultBoolean: Flags.boolean({default: true}),
-
-    optionalEnum: Flags.enum({options: ['a', 'b', 'c']}),
-    requiredEnum: Flags.enum({options: ['a', 'b', 'c'], required: true}),
-    defaultEnum: Flags.enum({options: ['a', 'b', 'c'], default: 'a'}),
-
-    optionalMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c']}),
-    requiredMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c'], required: true}),
-    defaultMultiEnum: Flags.enum({multiple: true, options: ['a', 'b', 'c'], default: ['a']}),
-
-    optionalTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum)}),
-    requiredTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum), required: true}),
-    defaultTypedEnum: Flags.enum<MyEnum>({options: Object.values(MyEnum), default: MyEnum.A}),
 
     optionalInteger: Flags.integer(),
     requiredInteger: Flags.integer({required: true}),
@@ -88,21 +72,14 @@ class MyCommand extends BaseCommand {
 
     optionalUrl: Flags.url(),
     requiredUrl: Flags.url({required: true}),
-    defaultUrl: Flags.url({default: new URL('http://example.com')}),
+    defaultUrl: Flags.url({
+      default: new URL('http://example.com'),
+      defaultHelp: async _ctx => 'Example URL',
+    }),
 
     optionalMultiUrl: Flags.url({multiple: true}),
     requiredMultiUrl: Flags.url({multiple: true, required: true}),
     defaultMultiUrl: Flags.url({multiple: true, default: [new URL('http://example.com')]}),
-
-    optionalBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })(),
-    requiredBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })({required: true}),
-    defaultBuild: Flags.build<MyType>({
-      parse: async () => ({foo: true}),
-    })({default: {foo: true}}),
 
     optionalCustom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
@@ -112,6 +89,7 @@ class MyCommand extends BaseCommand {
     })({required: true}),
     defaultCustom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
+      default: async _ctx => ({foo: true}),
     })({default: {foo: true}}),
 
     optionalMultiCustom: Flags.custom<MyType>({
@@ -158,24 +136,6 @@ class MyCommand extends BaseCommand {
     expectType<boolean>(this.flags.defaultBoolean)
     expectNotType<undefined>(this.flags.defaultBoolean)
     expectType<boolean | undefined>(this.flags.optionalBoolean)
-
-    expectType<string>(this.flags.requiredEnum)
-    expectNotType<undefined>(this.flags.requiredEnum)
-    expectType<string>(this.flags.defaultEnum)
-    expectNotType<undefined>(this.flags.defaultEnum)
-    expectType<string | undefined>(this.flags.optionalEnum)
-
-    expectType<string[]>(this.flags.requiredMultiEnum)
-    expectNotType<undefined>(this.flags.requiredMultiEnum)
-    expectType<string[]>(this.flags.defaultMultiEnum)
-    expectNotType<undefined>(this.flags.defaultMultiEnum)
-    expectType<string[] | undefined>(this.flags.optionalMultiEnum)
-
-    expectType<MyEnum>(this.flags.requiredTypedEnum)
-    expectNotType<undefined>(this.flags.requiredTypedEnum)
-    expectType<MyEnum>(this.flags.defaultTypedEnum)
-    expectNotType<undefined>(this.flags.defaultTypedEnum)
-    expectType<MyEnum | undefined>(this.flags.optionalTypedEnum)
 
     expectType<number>(this.flags.requiredInteger)
     expectNotType<undefined>(this.flags.requiredInteger)
@@ -224,12 +184,6 @@ class MyCommand extends BaseCommand {
     expectType<URL[]>(this.flags.defaultMultiUrl)
     expectNotType<undefined>(this.flags.defaultMultiUrl)
     expectType<URL[] | undefined>(this.flags.optionalMultiUrl)
-
-    expectType<MyType>(this.flags.requiredBuild)
-    expectNotType<undefined>(this.flags.requiredBuild)
-    expectType<MyType>(this.flags.defaultBuild)
-    expectNotType<undefined>(this.flags.defaultBuild)
-    expectType<MyType | undefined>(this.flags.optionalBuild)
 
     expectType<MyType>(this.flags.requiredCustom)
     expectNotType<undefined>(this.flags.requiredCustom)

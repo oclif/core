@@ -1,8 +1,8 @@
 import {PJSON} from './pjson'
 import {Hooks, Hook} from './hooks'
-import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
+import {Command} from '../command'
 
 export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
@@ -94,7 +94,6 @@ export interface Config {
   readonly topics: Topic[];
   readonly commandIDs: string[];
 
-  runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
   runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]

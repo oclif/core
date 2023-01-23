@@ -4,26 +4,30 @@ import {
   Validation,
   UnexpectedArgsError,
   FailedFlagValidationError,
+  NonExistentFlagsError,
 } from './errors'
-import {ParserArg, ParserInput, ParserOutput, Flag, CompletableFlag} from '../interfaces'
-import {FlagRelationship} from '../interfaces/parser'
+import {Arg, CompletableFlag, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../config/util'
 
 export async function validate(parse: {
   input: ParserInput;
   output: ParserOutput;
-}) {
+}): Promise<void> {
   function validateArgs() {
-    const maxArgs = parse.input.args.length
+    if (parse.output.nonExistentFlags?.length > 0) {
+      throw new NonExistentFlagsError({parse, flags: parse.output.nonExistentFlags})
+    }
+
+    const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({parse, args: extras})
     }
 
-    const missingRequiredArgs: ParserArg<any>[] = []
+    const missingRequiredArgs: Arg<any>[] = []
     let hasOptional = false
 
-    for (const [index, arg] of parse.input.args.entries()) {
+    for (const [name, arg] of Object.entries(parse.input.args)) {
       if (!arg.required) {
         hasOptional = true
       } else if (hasOptional) {
@@ -32,7 +36,7 @@ export async function validate(parse: {
         throw new InvalidArgsSpecError({parse, args: parse.input.args})
       }
 
-      if (arg.required && !parse.output.argv[index] && parse.output.argv[index] as any as number !== 0) {
+      if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
         missingRequiredArgs.push(arg)
       }
     }

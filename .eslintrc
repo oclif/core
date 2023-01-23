@@ -4,8 +4,6 @@
     "oclif-typescript"
   ],
   "rules": {
-    "unicorn/no-abusive-eslint-disable": "off",
-    "unicorn/prefer-spread": "off",
     "unicorn/prefer-module": "off",
     "unicorn/prefer-node-protocol": "off",
     "unicorn/import-style": "off",
@@ -16,6 +14,6 @@
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "no-useless-constructor": "off"
   }
 }
