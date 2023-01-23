@@ -192,13 +192,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
 
         // eslint-disable-next-line no-await-in-loop
-        flags[token.flag] = await flag.parse(flags[token.flag], this.context, flag)
+        flags[token.flag] = await this._parseFlag(flags[token.flag], flag)
       } else {
         const input = token.input
         this._validateOptions(flag, input)
 
         // eslint-disable-next-line no-await-in-loop
-        const value = flag.parse ? await flag.parse(input, this.context, flag) : input
+        const value = await this._parseFlag(input, flag)
+
         if (flag.multiple) {
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...(Array.isArray(value) ? value : [value]))
@@ -235,6 +236,18 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     return flags
+  }
+
+  private async _parseFlag(input: any, flag: BooleanFlag<T> | OptionFlag<T>) {
+    try {
+      if (flag.type === 'boolean') {
+        return await flag.parse(input, this.context, flag)
+      }
+
+      return flag.parse ? await flag.parse(input, this.context, flag) : input
+    } catch (error: any) {
+      throw new m.errors.FailedFlagParseError(flag, error.message)
+    }
   }
 
   private _validateOptions(flag: OptionFlag<any>, input: string) {

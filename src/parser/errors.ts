@@ -4,7 +4,7 @@ import Deps from './deps'
 import * as Help from './help'
 import * as List from './list'
 import * as chalk from 'chalk'
-import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag} from '../interfaces'
+import {ParserArg, CLIParseErrorOptions, OptionFlag, Flag, BooleanFlag} from '../interfaces'
 import {uniq} from '../config/util'
 
 export {CLIError} from '../errors'
@@ -90,6 +90,13 @@ export class UnexpectedArgsError extends CLIParseError {
 export class FlagInvalidOptionError extends CLIParseError {
   constructor(flag: OptionFlag<any>, input: string) {
     const message = `Expected --${flag.name}=${input} to be one of: ${flag.options!.join(', ')}`
+    super({parse: {}, message})
+  }
+}
+
+export class FailedFlagParseError extends CLIParseError {
+  constructor(flag: BooleanFlag<any> | OptionFlag<any>, errMsg: string) {
+    const message = `Parsing --${flag.name} \n\t${errMsg}`
     super({parse: {}, message})
   }
 }
