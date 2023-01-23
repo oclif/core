@@ -5,7 +5,7 @@ import {renderList} from '../cli-ux/list'
 import * as chalk from 'chalk'
 import {OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../config/util'
-import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
+import {Arg, ArgInput, BooleanFlag, CLIParseErrorOptions} from '../interfaces/parser'
 
 export {CLIError} from '../errors'
 
@@ -92,6 +92,13 @@ export class NonExistentFlagsError extends CLIParseError {
 export class FlagInvalidOptionError extends CLIParseError {
   constructor(flag: OptionFlag<any>, input: string) {
     const message = `Expected --${flag.name}=${input} to be one of: ${flag.options!.join(', ')}`
+    super({parse: {}, message})
+  }
+}
+
+export class FailedFlagParseError extends CLIParseError {
+  constructor(flag: BooleanFlag<any> | OptionFlag<any>, errMsg: string) {
+    const message = `Parsing --${flag.name} \n\t${errMsg}`
     super({parse: {}, message})
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
+import {ArgInvalidOptionError, CLIError, FailedFlagParseError, FlagInvalidOptionError} from './errors'
 import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
 import * as readline from 'readline'
 import {isTruthy, pickBy} from '../util'
@@ -220,13 +220,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           flags[token.flag] = true
         }
 
-        flags[token.flag] = await flag.parse(flags[token.flag], this.context, flag)
+        flags[token.flag] = await this._parseFlag(flags[token.flag], flag)
       } else {
         const input = token.input
         this._validateOptions(flag, input)
 
         if (flag.delimiter && flag.multiple) {
-          const values = await Promise.all(input.split(flag.delimiter).map(async v => flag.parse ? flag.parse(v.trim(), this.context, flag) : v.trim()))
+          const values = await Promise.all(input.split(flag.delimiter).map(async v => this._parseFlag(v.trim(), flag)))
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...values)
         } else {
@@ -266,6 +266,18 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     return flags
+  }
+
+  private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>) {
+    try {
+      if (flag.type === 'boolean') {
+        return await flag.parse(input, this.context, flag)
+      }
+
+      return flag.parse ? await flag.parse(input, this.context, flag) : input
+    } catch (error: any) {
+      throw new FailedFlagParseError(flag, error.message)
+    }
   }
 
   private _validateOptions(flag: OptionFlag<any>, input: string) {
