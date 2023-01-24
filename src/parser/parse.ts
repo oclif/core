@@ -234,7 +234,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...values)
         } else {
-          const value = flag.parse ? await flag.parse(input, this.context, flag) : input
+          const value = await this._parseFlag(input, flag)
           if (flag.multiple) {
             flags[token.flag] = flags[token.flag] || []
             flags[token.flag].push(value)
@@ -254,7 +254,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (input) {
             this._validateOptions(flag, input)
 
-            flags[k] = await flag.parse(input, this.context, flag)
+            flags[k] = await this._parseFlag(input, flag)
           }
         } else if (flag.type === 'boolean') {
           // eslint-disable-next-line no-negated-condition
@@ -273,6 +273,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   }
 
   private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>) {
+    if (!flag.parse) return input
+
     try {
       if (flag.type === 'boolean') {
         return await flag.parse(input, this.context, flag)
