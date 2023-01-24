@@ -53,6 +53,10 @@ const readStdin = async (): Promise<string | null> => {
   })
 }
 
+function isNegativeNumber(input: string): boolean {
+  return /^-\d/g.test(input)
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -169,7 +173,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           continue
         }
 
-        if (this.input['--'] !== false) {
+        if (this.input['--'] !== false && !isNegativeNumber(input)) {
           // At this point we have a value that begins with '-' or '--'
           // but doesn't match up to a flag definition. So we assume that
           // this is a misspelled flag or a non-existent flag,
