@@ -22,6 +22,16 @@ type MyType = {
   foo: boolean;
 }
 
+export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' | 'seconds'}>({
+  parse: async (input, _, opts) => {
+    const value = opts.unit === 'minutes' ? new Date(input).getMinutes() : new Date(input).getSeconds()
+    return Promise.resolve(value)
+  },
+  default: async _ctx => _ctx.options.unit === 'minutes' ? 1 : 2,
+  defaultHelp: async _ctx => _ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds',
+  char: 'c',
+})
+
 class MyCommand extends BaseCommand {
   static description = 'describe the command here'
 
@@ -101,6 +111,10 @@ class MyCommand extends BaseCommand {
     defaultMultiCustom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({default: [{foo: true}], multiple: true}),
+
+    optionalCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes'}),
+    requiredCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', required: true}),
+    defaultCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', default: 23}),
   }
 
   public flags!: MyFlags
@@ -196,6 +210,12 @@ class MyCommand extends BaseCommand {
     expectType<MyType[]>(this.flags.defaultMultiCustom)
     expectNotType<undefined>(this.flags.defaultMultiCustom)
     expectType<MyType[] | undefined>(this.flags.optionalMultiCustom)
+
+    expectType<number | undefined>(this.flags.optionalCustomFlagWithRequiredProp)
+    expectType<number>(this.flags.requiredCustomFlagWithRequiredProp)
+    expectNotType<undefined>(this.flags.requiredCustomFlagWithRequiredProp)
+    expectType<number>(this.flags.defaultCustomFlagWithRequiredProp)
+    expectNotType<undefined>(this.flags.defaultCustomFlagWithRequiredProp)
 
     return result.flags
   }
