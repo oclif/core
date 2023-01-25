@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {ArgInvalidOptionError, CLIError, FailedFlagParseError, FlagInvalidOptionError} from './errors'
+import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
 import * as readline from 'readline'
 import {isTruthy, pickBy} from '../util'
@@ -282,7 +282,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
       return flag.parse ? await flag.parse(input, this.context, flag) : input
     } catch (error: any) {
-      throw new FailedFlagParseError(flag, error.message)
+      error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
+      throw error
     }
   }
 
