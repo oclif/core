@@ -229,6 +229,13 @@ See more help with --help`)
         }
       })
 
+      it('parses negative number arg', async () => {
+        const out = await parse(['-119.1949853', '34.14986578'], {
+          args: {longitude: Args.string(), latitude: Args.string()},
+        })
+        expect(out.argv).to.deep.equal(['-119.1949853', '34.14986578'])
+      })
+
       it('parses - as an arg', async () => {
         const out = await parse(['-'], {
           args: {myarg: Args.string()},

@@ -53,6 +53,10 @@ const readStdin = async (): Promise<string | null> => {
   })
 }
 
+function isNegativeNumber(input: string): boolean {
+  return /^-\d/g.test(input)
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -169,7 +173,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           continue
         }
 
-        if (this.input['--'] !== false) {
+        if (this.input['--'] !== false && !isNegativeNumber(input)) {
           // At this point we have a value that begins with '-' or '--'
           // but doesn't match up to a flag definition. So we assume that
           // this is a misspelled flag or a non-existent flag,
@@ -230,7 +234,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...values)
         } else {
-          const value = flag.parse ? await flag.parse(input, this.context, flag) : input
+          const value = await this._parseFlag(input, flag)
           if (flag.multiple) {
             flags[token.flag] = flags[token.flag] || []
             flags[token.flag].push(value)
@@ -250,7 +254,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           if (input) {
             this._validateOptions(flag, input)
 
-            flags[k] = await flag.parse(input, this.context, flag)
+            flags[k] = await this._parseFlag(input, flag)
           }
         } else if (flag.type === 'boolean') {
           // eslint-disable-next-line no-negated-condition
@@ -269,6 +273,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   }
 
   private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>) {
+    if (!flag.parse) return input
+
     try {
       if (flag.type === 'boolean') {
         return await flag.parse(input, this.context, flag)
