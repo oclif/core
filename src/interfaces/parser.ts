@@ -177,9 +177,13 @@ export type OptionFlagProps = FlagProps & {
   multiple?: boolean;
 }
 
-export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: Command, opts: P & OptionFlag<T, P>) => Promise<T>
+export type FlagParserContext = Command & {token: FlagToken}
 
-export type ArgParser<T, P = CustomOptions> = (input: string, context: Command, opts: P & Arg<T, P>) => Promise<T>
+export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: FlagParserContext, opts: P & OptionFlag<T, P>) => Promise<T>
+
+export type ArgParserContext = Command & {token: ArgToken}
+
+export type ArgParser<T, P = CustomOptions> = (input: string, context: ArgParserContext, opts: P & Arg<T, P>) => Promise<T>
 
 export type Arg<T, P = CustomOptions> = ArgProps & {
   options?: T[];

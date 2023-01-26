@@ -32,6 +32,11 @@ export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' 
   char: 'c',
 })
 
+export const arrayFlag = Flags.custom<string[]>({
+  delimiter: ',',
+  multiple: true,
+})
+
 class MyCommand extends BaseCommand {
   static description = 'describe the command here'
 
@@ -115,6 +120,10 @@ class MyCommand extends BaseCommand {
     optionalCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes'}),
     requiredCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', required: true}),
     defaultCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', default: 23}),
+
+    optionalArrayFlag: arrayFlag(),
+    requiredArrayFlag: arrayFlag({required: true}),
+    defaultArrayFlag: arrayFlag({default: ['foo', 'bar']}),
   }
 
   public flags!: MyFlags

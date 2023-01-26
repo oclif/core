@@ -224,17 +224,19 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           flags[token.flag] = true
         }
 
-        flags[token.flag] = await this._parseFlag(flags[token.flag], flag)
+        flags[token.flag] = await this._parseFlag(flags[token.flag], flag, token)
       } else {
         const input = token.input
         this._validateOptions(flag, input)
 
         if (flag.delimiter && flag.multiple) {
-          const values = await Promise.all(input.split(flag.delimiter).map(async v => this._parseFlag(v.trim(), flag)))
+          const values = await Promise.all(
+            input.split(flag.delimiter).map(async v => this._parseFlag(v.trim(), flag, token)),
+          )
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...values)
         } else {
-          const value = await this._parseFlag(input, flag)
+          const value = await this._parseFlag(input, flag, token)
           if (flag.multiple) {
             flags[token.flag] = flags[token.flag] || []
             flags[token.flag].push(value)
@@ -272,15 +274,15 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return flags
   }
 
-  private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>) {
+  private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>, token?: FlagToken) {
     if (!flag.parse) return input
 
     try {
       if (flag.type === 'boolean') {
-        return await flag.parse(input, this.context, flag)
+        return await flag.parse(input, {...this.context, token}, flag)
       }
 
-      return flag.parse ? await flag.parse(input, this.context, flag) : input
+      return flag.parse ? await flag.parse(input, {...this.context, token}, flag) : input
     } catch (error: any) {
       error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
       throw error
@@ -305,14 +307,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           throw new ArgInvalidOptionError(arg, token.input)
         }
 
-        const parsed = await arg.parse(token.input, this.context, arg)
+        const parsed = await arg.parse(token.input, {...this.context, token}, arg)
         argv.push(parsed)
         args[token.arg] = parsed
       } else if (!arg.ignoreStdin && !stdinRead) {
         let stdin = await readStdin()
         if (stdin) {
           stdin = stdin.trim()
-          const parsed = await arg.parse(stdin, this.context, arg)
+          const parsed = await arg.parse(stdin, {...this.context, token}, arg)
           argv.push(parsed)
           args[name] = parsed
         }
