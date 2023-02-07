@@ -355,7 +355,7 @@ See more help with --help`)
       it('allowed options on multiple', async () => {
         const out = await parse(['--foo', 'a', '--foo=b'], {
           flags: {
-            foo: Flags.custom({multiple: true, parse: async i => i, options: ['a', 'b']})(),
+            foo: Flags.string({multiple: true, parse: async i => i, options: ['a', 'b']}),
           },
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
@@ -364,7 +364,7 @@ See more help with --help`)
       it('one of allowed options on multiple', async () => {
         const out = await parse(['--foo', 'a'], {
           flags: {
-            foo: Flags.custom({multiple: true, parse: async i => i, options: ['a', 'b']})(),
+            foo: Flags.string({multiple: true, options: ['a', 'b']}),
           },
         })
         expect(out.flags).to.deep.include({foo: ['a']})
@@ -373,7 +373,7 @@ See more help with --help`)
         try {
           await parse(['--foo', 'a', '--foo=c'], {
             flags: {
-              foo: Flags.custom({multiple: true, parse: async i => i, options: ['a', 'b']})(),
+              foo: Flags.string({multiple: true, options: ['a', 'b']}),
             },
           })
         } catch (error:any) {
@@ -384,7 +384,7 @@ See more help with --help`)
         it('basic', async () => {
           const out = await parse(['--foo', 'a,b'], {
             flags: {
-              foo: Flags.custom({multiple: true, delimiter: ',', parse: async i => i})(),
+              foo: Flags.string({multiple: true, delimiter: ','}),
             },
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
@@ -392,7 +392,7 @@ See more help with --help`)
         it('with spaces inside quotes', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
             flags: {
-              foo: Flags.custom({multiple: true, delimiter: ',', parse: async i => i})(),
+              foo: Flags.string({multiple: true, delimiter: ','}),
             },
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
@@ -400,7 +400,7 @@ See more help with --help`)
         it('with options', async () => {
           const out = await parse(['--foo', 'a,b'], {
             flags: {
-              foo: Flags.custom({multiple: true, delimiter: ',', parse: async i => i, options: ['a', 'b']})(),
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a', 'b']}),
             },
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
@@ -409,7 +409,7 @@ See more help with --help`)
           try {
             await parse(['--foo', 'a,c'], {
               flags: {
-                foo: Flags.custom({multiple: true, parse: async i => i, options: ['a', 'b']})(),
+                foo: Flags.string({multiple: true, options: ['a', 'b']}),
               },
             })
           } catch (error:any) {
@@ -420,7 +420,7 @@ See more help with --help`)
         it('with options and quotes with spaces', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
             flags: {
-              foo: Flags.custom({multiple: true, delimiter: ',', parse: async i => i, options: ['a a', 'b b']})(),
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
             },
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
@@ -429,7 +429,7 @@ See more help with --help`)
           try {
             await parse(['--foo', '"a a","b c"'], {
               flags: {
-                foo: Flags.custom({multiple: true, delimiter: ',', parse: async i => i, options: ['a a', 'b b']})(),
+                foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
               },
             })
           } catch (error:any) {
