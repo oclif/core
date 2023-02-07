@@ -227,15 +227,21 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         flags[token.flag] = await this._parseFlag(flags[token.flag], flag, token)
       } else {
         const input = token.input
-        this._validateOptions(flag, input)
 
         if (flag.delimiter && flag.multiple) {
+          // split, trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
           const values = await Promise.all(
-            input.split(flag.delimiter).map(async v => this._parseFlag(v.trim(), flag, token)),
+            input.split(flag.delimiter).map(async v => this._parseFlag(v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'), flag, token)),
           )
+          // then parse that each element aligns with the `options` property
+          for (const v of values) {
+            this._validateOptions(flag, v)
+          }
+
           flags[token.flag] = flags[token.flag] || []
           flags[token.flag].push(...values)
         } else {
+          this._validateOptions(flag, input)
           const value = await this._parseFlag(input, flag, token)
           if (flag.multiple) {
             flags[token.flag] = flags[token.flag] || []

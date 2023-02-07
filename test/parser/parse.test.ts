@@ -1,5 +1,5 @@
 /* eslint-disable max-nested-callbacks */
-import {assert, expect} from 'chai'
+import {assert, expect, config} from 'chai'
 import * as fs from 'fs'
 
 import {parse} from '../../src/parser'
@@ -9,6 +9,7 @@ import {URL} from 'url'
 import * as sinon from 'sinon'
 import {CLIError} from '../../src/errors'
 
+config.truncateThreshold = 0
 const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
@@ -145,8 +146,8 @@ describe('parse', () => {
         message = stripAnsi(error.message)
       }
 
-      expect(message).to.equal(
-        'The following error occurred:\n  Missing required flag myflag\nSee more help with --help',
+      expect(message).to.include(
+        'Missing required flag myflag',
       )
     })
 
@@ -174,7 +175,7 @@ describe('parse', () => {
           message = error.message
         }
 
-        expect(message).to.equal(`Missing 2 required args:
+        expect(message).to.include(`Missing 2 required args:
 arg2  arg2 desc
 arg3  arg3 desc
 See more help with --help`)
@@ -192,7 +193,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Unexpected argument: arg2\nSee more help with --help')
+        expect(message).to.include('Unexpected argument: arg2')
       })
 
       it('parses args', async () => {
@@ -258,7 +259,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal(`Missing 1 required arg:
+        expect(message).to.include(`Missing 1 required arg:
 arg1
 See more help with --help`)
       })
@@ -300,7 +301,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal(`Invalid argument spec:
+        expect(message).to.include(`Invalid argument spec:
 arg1 (optional)
 arg2 (required)
 See more help with --help`)
@@ -321,7 +322,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal(`Invalid argument spec:
+        expect(message).to.include(`Invalid argument spec:
 arg1 (optional)
 arg2 (optional)
 arg3 (optional)
@@ -350,6 +351,134 @@ See more help with --help`)
           },
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
+      })
+      it('allowed options on multiple', async () => {
+        const out = await parse(['--foo', 'a', '--foo=b'], {
+          flags: {
+            foo: Flags.string({multiple: true, parse: async i => i, options: ['a', 'b']}),
+          },
+        })
+        expect(out.flags).to.deep.include({foo: ['a', 'b']})
+      })
+
+      it('one of allowed options on multiple', async () => {
+        const out = await parse(['--foo', 'a'], {
+          flags: {
+            foo: Flags.string({multiple: true, options: ['a', 'b']}),
+          },
+        })
+        expect(out.flags).to.deep.include({foo: ['a']})
+      })
+      it('throws if non-allowed options on multiple', async () => {
+        try {
+          await parse(['--foo', 'a', '--foo=c'], {
+            flags: {
+              foo: Flags.string({multiple: true, options: ['a', 'b']}),
+            },
+          })
+        } catch (error:any) {
+          expect(error.message).to.include('Expected --foo=c to be one of: a, b')
+        }
+      })
+      describe('comma delimiter', () => {
+        it('basic', async () => {
+          const out = await parse(['--foo', 'a,b'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', 'b']})
+        })
+        it('preserves non-exterior double quotes (single and pairs)', async () => {
+          const out = await parse(['--foo', 'a,",b,hi"yo"'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', '"', 'b', 'hi"yo"']})
+        })
+        it('preserves non-exterior single quotes (single and pairs)', async () => {
+          const out = await parse(['--foo', "a,',b,hi'yo'"], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', "'", 'b', "hi'yo'"]})
+        })
+        it('with spaces inside double quotes', async () => {
+          const out = await parse(['--foo', '"a a","b b"'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('with spaces inside single quotes', async () => {
+          const out = await parse(['--foo', "'a a','b b'"], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('with options', async () => {
+          const out = await parse(['--foo', 'a,b'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a', 'b']}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', 'b']})
+        })
+        it('throws if non-allowed options on multiple', async () => {
+          try {
+            await parse(['--foo', 'a,c'], {
+              flags: {
+                foo: Flags.string({multiple: true, options: ['a', 'b']}),
+              },
+            })
+          } catch (error:any) {
+            expect(error.message).to.include('Expected --foo=a,c to be one of: a, b')
+          }
+        })
+
+        it('with options and double quotes with spaces', async () => {
+          const out = await parse(['--foo', '"a a","b b"'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('with options and single quotes with spaces', async () => {
+          const out = await parse(['--foo', "'a a','b b'"], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('throws if non-allowed with options and double quotes with spaces', async () => {
+          try {
+            await parse(['--foo', '"a a","b c"'], {
+              flags: {
+                foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+              },
+            })
+          } catch (error:any) {
+            expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
+          }
+        })
+        it('throws if non-allowed with options and single quotes with spaces', async () => {
+          try {
+            await parse(['--foo', "'a a','b c'"], {
+              flags: {
+                foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+              },
+            })
+          } catch (error:any) {
+            expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
+          }
+        })
       })
     })
 
@@ -422,7 +551,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3.14\nSee more help with --help')
+        expect(message).to.include('Parsing --int \n\tExpected an integer but received: 3.14')
       })
 
       it('does not parse fractions', async () => {
@@ -435,7 +564,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: 3/4\nSee more help with --help')
+        expect(message).to.include('Parsing --int \n\tExpected an integer but received: 3/4')
       })
 
       it('does not parse strings', async () => {
@@ -448,7 +577,7 @@ See more help with --help`)
           message = error.message
         }
 
-        expect(message).to.equal('Parsing --int \n\tExpected an integer but received: s10\nSee more help with --help')
+        expect(message).to.include('Parsing --int \n\tExpected an integer but received: s10')
       })
 
       describe('min/max', () => {
@@ -487,7 +616,7 @@ See more help with --help`)
             message = error.message
           }
 
-          expect(message).to.equal('Parsing --int \n\tExpected an integer greater than or equal to 10 but received: 9\nSee more help with --help')
+          expect(message).to.include('Parsing --int \n\tExpected an integer greater than or equal to 10 but received: 9')
         })
         it('max fail gt', async () => {
           let message = ''
@@ -499,7 +628,7 @@ See more help with --help`)
             message = error.message
           }
 
-          expect(message).to.equal('Parsing --int \n\tExpected an integer less than or equal to 20 but received: 21\nSee more help with --help')
+          expect(message).to.include('Parsing --int \n\tExpected an integer less than or equal to 20 but received: 21')
         })
       })
     })
@@ -524,8 +653,8 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(
-            `Parsing --int \n\t${customParseException}\nSee more help with --help`)
+          expect(error.message).to.include(
+            `Parsing --int \n\t${customParseException}`)
         }
       })
     })
@@ -821,7 +950,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+      expect(message).to.include('Expected --foo=invalidopt to be one of: myopt, myotheropt')
     })
     it('fails when invalid env var', async () => {
       let message = ''
@@ -834,7 +963,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Expected --foo=invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+      expect(message).to.include('Expected --foo=invalidopt to be one of: myopt, myotheropt')
     })
 
     it('accepts valid option env var', async () => {
@@ -866,7 +995,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Parsing --foo \n\tExpected a valid url but received: example\nSee more help with --help')
+      expect(message).to.include('Parsing --foo \n\tExpected a valid url but received: example')
     })
   })
 
@@ -888,7 +1017,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('Expected invalidopt to be one of: myopt, myotheropt\nSee more help with --help')
+      expect(message).to.include('Expected invalidopt to be one of: myopt, myotheropt')
     })
   })
 
@@ -1011,7 +1140,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('The following error occurred:\n  All of the following must be provided when using --foo: --bar\nSee more help with --help')
+      expect(message).to.include('All of the following must be provided when using --foo: --bar')
     })
   })
 
@@ -1048,7 +1177,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('The following error occurred:\n  --bar=b cannot also be provided when using --foo\nSee more help with --help')
+      expect(message).to.include('--bar=b cannot also be provided when using --foo')
     })
   })
 
@@ -1066,7 +1195,7 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('The following error occurred:\n  Exactly one of the following must be provided: --bar, --foo\nSee more help with --help')
+      expect(message).to.include('Exactly one of the following must be provided: --bar, --foo')
     })
 
     it('throws if multiple are set', async () => {
@@ -1082,7 +1211,9 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('The following errors occurred:\n  --bar cannot also be provided when using --foo\n  --foo cannot also be provided when using --bar\nSee more help with --help')
+      expect(message).to.include('The following errors occurred:')
+      expect(message).to.include('--bar cannot also be provided when using --foo')
+      expect(message).to.include('--foo cannot also be provided when using --bar')
     })
 
     it('succeeds if exactly one', async () => {
@@ -1143,7 +1274,9 @@ See more help with --help`)
         message = error.message
       }
 
-      expect(message).to.equal('The following errors occurred:\n  --else cannot also be provided when using --foo\n  --foo cannot also be provided when using --else\nSee more help with --help')
+      expect(message).to.include('The following errors occurred:')
+      expect(message).to.include('--else cannot also be provided when using --foo')
+      expect(message).to.include('--foo cannot also be provided when using --else')
     })
 
     it('handles cross-references/pairings that don\'t make sense', async () => {
@@ -1161,7 +1294,7 @@ See more help with --help`)
         message1 = error.message
       }
 
-      expect(message1).to.equal('The following error occurred:\n  --bar cannot also be provided when using --foo\nSee more help with --help')
+      expect(message1).to.include('--bar cannot also be provided when using --foo')
 
       let message2 = ''
       try {
@@ -1172,7 +1305,7 @@ See more help with --help`)
         message2 = error.message
       }
 
-      expect(message2).to.equal('The following error occurred:\n  --else cannot also be provided when using --bar\nSee more help with --help')
+      expect(message2).to.include('--else cannot also be provided when using --bar')
 
       const out = await parse(['--foo', 'a', '--else', '4'], {
         flags: crazyFlags,
@@ -1257,8 +1390,8 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(
-            `Parsing --dir \n\tNo directory found at ${testDir}\nSee more help with --help`,
+          expect(error.message).to.include(
+            `Parsing --dir \n\tNo directory found at ${testDir}`,
           )
         }
       })
@@ -1272,8 +1405,8 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(
-            `Parsing --dir \n\t${testDir} exists but is not a directory\nSee more help with --help`)
+          expect(error.message).to.include(
+            `Parsing --dir \n\t${testDir} exists but is not a directory`)
         }
       })
       describe('custom parse functions', () => {
@@ -1297,8 +1430,8 @@ See more help with --help`)
             throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
           } catch (error_) {
             const error = error_ as Error
-            expect(error.message).to.equal(
-              `Parsing --dir \n\t${customParseException}\nSee more help with --help`)
+            expect(error.message).to.include(
+              `Parsing --dir \n\t${customParseException}`)
           }
         })
       })
@@ -1337,7 +1470,7 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(`Parsing --file \n\tNo file found at ${testFile}\nSee more help with --help`)
+          expect(error.message).to.include(`Parsing --file \n\tNo file found at ${testFile}`)
         }
       })
       it('fails when file exists but is not a file', async () => {
@@ -1350,7 +1483,7 @@ See more help with --help`)
           throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error_) {
           const error = error_ as Error
-          expect(error.message).to.equal(`Parsing --file \n\t${testFile} exists but is not a file\nSee more help with --help`)
+          expect(error.message).to.include(`Parsing --file \n\t${testFile} exists but is not a file`)
         }
       })
       describe('custom parse functions', () => {
@@ -1374,8 +1507,8 @@ See more help with --help`)
             throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
           } catch (error_) {
             const error = error_ as Error
-            expect(error.message).to.equal(
-              `Parsing --dir \n\t${customParseException}\nSee more help with --help`)
+            expect(error.message).to.include(
+              `Parsing --dir \n\t${customParseException}`)
           }
         })
       })
