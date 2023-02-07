@@ -389,8 +389,16 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
         })
-        it('with spaces inside quotes', async () => {
+        it('with spaces inside double quotes', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('with spaces inside single quotes', async () => {
+          const out = await parse(['--foo', "'a a','b b'"], {
             flags: {
               foo: Flags.string({multiple: true, delimiter: ','}),
             },
@@ -417,7 +425,7 @@ See more help with --help`)
           }
         })
 
-        it('with options and quotes with spaces', async () => {
+        it('with options and double quotes with spaces', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
             flags: {
               foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
@@ -425,9 +433,28 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
         })
-        it('throws if non-allowed comma as delimiter with options and quotes with spaces', async () => {
+        it('with options and single quotes with spaces', async () => {
+          const out = await parse(['--foo', "'a a','b b'"], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
+        })
+        it('throws if non-allowed with options and double quotes with spaces', async () => {
           try {
             await parse(['--foo', '"a a","b c"'], {
+              flags: {
+                foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
+              },
+            })
+          } catch (error:any) {
+            expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
+          }
+        })
+        it('throws if non-allowed with options and single quotes with spaces', async () => {
+          try {
+            await parse(['--foo', "'a a','b c'"], {
               flags: {
                 foo: Flags.string({multiple: true, delimiter: ',', options: ['a a', 'b b']}),
               },
