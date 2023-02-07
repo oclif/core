@@ -233,7 +233,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           const values = await Promise.all(
             input.split(flag.delimiter).map(async v => this._parseFlag(v.trim().replace(/^"(.*)"$/, '$1'), flag, token)),
           )
-          // the parse that each element aligns with the `options` property
+          // then parse that each element aligns with the `options` property
           for (const v of values) {
             this._validateOptions(flag, v)
           }
