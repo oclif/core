@@ -389,6 +389,22 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
         })
+        it('preserves non-exterior double quotes (single and pairs)', async () => {
+          const out = await parse(['--foo', 'a,",b,hi"yo"'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', '"', 'b', 'hi"yo"']})
+        })
+        it('preserves non-exterior single quotes (single and pairs)', async () => {
+          const out = await parse(['--foo', "a,',b,hi'yo'"], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a', "'", 'b', "hi'yo'"]})
+        })
         it('with spaces inside double quotes', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
             flags: {
