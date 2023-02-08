@@ -230,7 +230,12 @@ export class Config implements IConfig {
     }
   }
 
-  public async runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>> {
+  public async runHook<T extends keyof Hooks>(
+    event: T,
+    opts: Hooks[T]['options'],
+    timeout?: number,
+    captureErrors?: boolean,
+  ): Promise<Hook.Result<Hooks[T]['return']>> {
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
@@ -293,6 +298,7 @@ export class Config implements IConfig {
         } catch (error: any) {
           final.failures.push({plugin: p, error: error as Error})
           debug(error)
+          if (!captureErrors && error.oclif?.exit !== undefined) throw error
         }
       }
     })
