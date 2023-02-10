@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -29,16 +29,16 @@
     "strip-ansi": "^6.0.1",
     "supports-color": "^8.1.1",
     "supports-hyperlinks": "^2.2.0",
-    "tslib": "^2.4.1",
+    "tslib": "^2.5.0",
     "widest-line": "^3.1.0",
     "wordwrap": "^1.0.0",
     "wrap-ansi": "^7.0.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^12.1.4",
-    "@oclif/plugin-help": "^5.1.22",
-    "@oclif/plugin-plugins": "^2.1.12",
-    "@oclif/test": "^2.2.20",
+    "@oclif/plugin-help": "^5.2.4",
+    "@oclif/plugin-plugins": "^2.3.0",
+    "@oclif/test": "^2.3.5",
     "@types/ansi-styles": "^3.2.1",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
@@ -63,7 +63,7 @@
     "commitlint": "^12.1.4",
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4.0.0",
-    "eslint-config-oclif-typescript": "^1.0.2",
+    "eslint-config-oclif-typescript": "^1.0.3",
     "fancy-test": "^2.0.12",
     "globby": "^11.1.0",
     "husky": "6",
@@ -110,7 +110,7 @@
     "posttest": "yarn lint",
     "prepack": "yarn run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "test:e2e": "mocha \"test/**/*.e2e.ts\" --timeout 1200000",
+    "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --timeout 1200000",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
   },
   "types": "lib/index.d.ts"

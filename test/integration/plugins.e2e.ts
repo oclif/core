@@ -238,7 +238,7 @@ describe('oclif plugins', () => {
       it('should uninstall the plugin', async () => {
         const result = await executor.executeCommand('plugins:uninstall @oclif/plugin-warn-if-update-available 2>&1')
         expect(result.code).to.equal(0)
-        expect(result.output).to.include('success Uninstalled packages.Uninstalling @oclif/plugin-warn-if-update-available... done\n')
+        expect(result.output).to.include('Uninstalling @oclif/plugin-warn-if-update-available... done\n')
 
         const pluginsResult = await executor.executeCommand('plugins')
         expect(pluginsResult.code).to.equal(0)
