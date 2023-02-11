@@ -429,7 +429,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@oclif/color@^1.0.3":
+"@oclif/color@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@oclif/color/-/color-1.0.4.tgz#07e54e3bd76a29e77d6ad71aef33222fe4f728e7"
   integrity sha512-HEcVnSzpQkjskqWJyVN3tGgR0H0F8GrBmDjgQ1N0ZwwktYa4y9kfV07P/5vt5BjPXNyslXHc4KAO8Bt7gmErCA==
@@ -440,10 +440,10 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^2.0.3", "@oclif/core@^2.0.8":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.0.10.tgz#2d5ffd79b05de388934103ff567b8d6d0886a501"
-  integrity sha512-icRaEpQ/dK596Z0rYcGoeMTiXyPv9DbTm8c47NcDXmmOvMuxBr1ntB9/QjsD1fe0BcjZtsfRAbsBT0RgEHwuhg==
+"@oclif/core@^2.0.8", "@oclif/core@^2.1.1":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.1.2.tgz#a3e47ed2274e47cb2b3dc1a16b5955cceae5d2d0"
+  integrity sha512-l7Kx+80zuDgi9o4gZe39XQeYvQuj6Hf+B31kXSUSntgXpfLdDbpFSZH/GP7tsldzG4icrpmSwnLDOz8MNB40Hg==
   dependencies:
     "@types/cli-progress" "^3.11.0"
     ansi-escapes "^4.3.2"
@@ -451,7 +451,7 @@
     cardinal "^2.1.1"
     chalk "^4.1.2"
     clean-stack "^3.0.1"
-    cli-progress "^3.10.0"
+    cli-progress "^3.11.2"
     debug "^4.3.4"
     ejs "^3.1.6"
     fs-extra "^9.1.0"
@@ -469,7 +469,7 @@
     strip-ansi "^6.0.1"
     supports-color "^8.1.1"
     supports-hyperlinks "^2.2.0"
-    tslib "^2.4.1"
+    tslib "^2.5.0"
     widest-line "^3.1.0"
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
@@ -481,13 +481,13 @@
   dependencies:
     "@oclif/core" "^2.0.8"
 
-"@oclif/plugin-plugins@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.3.0.tgz#81d80b5f77604e1394dd72e6611f31c45120cf7a"
-  integrity sha512-VmlLLYE4LCXX2RGNv4ht8AqG9OADvLIE4Kxhm18h5RZ9cMee7U6nrHQeW455lh/idnWC2XT7bHgJBv2kgYxSiQ==
+"@oclif/plugin-plugins@^2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.3.2.tgz#0bbd41fc2b5663469ef4030b8ec8c5d51d53497e"
+  integrity sha512-jq/ik7A7bCO/oQp0/Znnpu8/JBXifAQ2OF2KmswbNYt7EpsLqz2DaI/CvkrXRSb+Edzx4Xx3usEgSyocVN/u2A==
   dependencies:
-    "@oclif/color" "^1.0.3"
-    "@oclif/core" "^2.0.3"
+    "@oclif/color" "^1.0.4"
+    "@oclif/core" "^2.1.1"
     chalk "^4.1.2"
     debug "^4.3.4"
     fs-extra "^9.0"
@@ -1154,7 +1154,7 @@ clean-stack@^3.0.1:
   dependencies:
     escape-string-regexp "4.0.0"
 
-cli-progress@^3.10.0, cli-progress@^3.11.2:
+cli-progress@^3.11.2:
   version "3.11.2"
   resolved "https://registry.yarnpkg.com/cli-progress/-/cli-progress-3.11.2.tgz#f8c89bd157e74f3f2c43bcfb3505670b4d48fc77"
   integrity sha512-lCPoS6ncgX4+rJu5bS3F/iCz17kZ9MPZ6dpuTtI0KXKABkhyXIdYB3Inby1OpaGti3YlI3EeEkM9AuWpelJrVA==
