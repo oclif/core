@@ -152,6 +152,62 @@ describe('validate', () => {
     }
   })
 
+  it('throws when extra flags are provided', async () => {
+    const input = {
+      argv: [],
+      flags: {},
+      args: {},
+      strict: true,
+      context: {},
+      '--': true,
+    }
+
+    const output = {
+      args: {},
+      argv: [],
+      flags: {foobar: 'baz'},
+      raw: [],
+      metadata: {
+        flags: {},
+      },
+      nonExistentFlags: ['foobar'],
+    }
+
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      assert.fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('Nonexistent flag')
+    }
+  })
+
+  it("doesn't throw if extra flags are provided and strict is false", async () => {
+    const input = {
+      argv: [],
+      flags: {},
+      args: {},
+      strict: false,
+      context: {},
+      '--': true,
+    }
+
+    const output = {
+      args: {},
+      argv: [],
+      flags: {foobar: 'baz'},
+      raw: [],
+      metadata: {
+        flags: {},
+      },
+      nonExistentFlags: ['foobar'],
+    }
+
+    // @ts-expect-error
+    await validate({input, output})
+  })
+
   describe('relationships', () => {
     describe('type: all', () => {
       it('should pass if all required flags are provided', async () => {

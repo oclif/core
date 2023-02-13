@@ -14,7 +14,7 @@ export async function validate(parse: {
   output: ParserOutput;
 }): Promise<void> {
   function validateArgs() {
-    if (parse.output.nonExistentFlags?.length > 0) {
+    if (parse.input.strict && parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({parse, flags: parse.output.nonExistentFlags})
     }
 
