@@ -284,11 +284,16 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     if (!flag.parse) return input
 
     try {
+      const ctx = this.context
+      ctx.token = token
+
       if (flag.type === 'boolean') {
-        return await flag.parse(input, {...this.context, token}, flag)
+        const ctx = this.context
+        ctx.token = token
+        return await flag.parse(input, ctx, flag)
       }
 
-      return flag.parse ? await flag.parse(input, {...this.context, token}, flag) : input
+      return flag.parse ? await flag.parse(input, ctx, flag) : input
     } catch (error: any) {
       error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
       throw error
@@ -305,22 +310,24 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
     let stdinRead = false
+    const ctx = this.context
 
     for (const [name, arg] of Object.entries(this.input.args)) {
       const token = tokens.find(t => t.arg === name)
+      ctx.token = token
       if (token) {
         if (arg.options && !arg.options.includes(token.input)) {
           throw new ArgInvalidOptionError(arg, token.input)
         }
 
-        const parsed = await arg.parse(token.input, {...this.context, token}, arg)
+        const parsed = await arg.parse(token.input, ctx, arg)
         argv.push(parsed)
         args[token.arg] = parsed
       } else if (!arg.ignoreStdin && !stdinRead) {
         let stdin = await readStdin()
         if (stdin) {
           stdin = stdin.trim()
-          const parsed = await arg.parse(stdin, {...this.context, token}, arg)
+          const parsed = await arg.parse(stdin, ctx, arg)
           argv.push(parsed)
           args[name] = parsed
         }
