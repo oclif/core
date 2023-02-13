@@ -1,3 +1,4 @@
+import {stdout, stderr} from './cli-ux/stream'
 import {settings} from './settings'
 
 function termwidth(stream: any): number {
@@ -19,5 +20,5 @@ function termwidth(stream: any): number {
 
 const columns = Number.parseInt(process.env.OCLIF_COLUMNS!, 10) || settings.columns
 
-export const stdtermwidth = columns || termwidth(process.stdout)
-export const errtermwidth = columns || termwidth(process.stderr)
+export const stdtermwidth = columns || termwidth(stdout)
+export const errtermwidth = columns || termwidth(stderr)

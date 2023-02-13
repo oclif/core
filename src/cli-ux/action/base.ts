@@ -1,5 +1,6 @@
 import {inspect} from 'util'
 import {castArray} from '../../util'
+import {stderr, stdout} from '../stream'
 
 export interface ITask {
   action: string;
@@ -21,8 +22,8 @@ export class ActionBase {
   protected stdmocks?: ['stdout' | 'stderr', string[]][]
 
   private stdmockOrigs = {
-    stdout: process.stdout.write,
-    stderr: process.stderr.write,
+    stdout: stdout.write,
+    stderr: stderr.write,
   }
 
   public start(action: string, status?: string, opts: Options = {}): void {

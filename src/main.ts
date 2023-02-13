@@ -9,10 +9,11 @@ import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import {settings} from './settings'
 import {Errors, flush} from '.'
 import {join, dirname} from 'path'
+import {stdout} from './cli-ux/stream'
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
-  process.stdout.write(format(message, ...args) + '\n')
+  stdout.write(format(message, ...args) + '\n')
 }
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {

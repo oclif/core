@@ -1,12 +1,21 @@
-import {expect, fancy} from 'fancy-test'
+import {expect} from 'chai'
 
-import {ux} from '../../../src'
+import {ux, stdout} from '../../../src'
+import {stub, SinonStub} from 'sinon'
 
 describe('styled/header', () => {
-  fancy
-  .stdout()
-  .end('shows a styled header', output => {
+  let writeStub: SinonStub
+
+  beforeEach(() => {
+    writeStub = stub(stdout, 'write')
+  })
+
+  afterEach(() => {
+    writeStub.restore()
+  })
+
+  it('shows a styled header', () => {
     ux.styledHeader('A styled header')
-    expect(output.stdout).to.equal('=== A styled header\n\n')
+    expect(writeStub.firstCall.firstArg).to.equal('=== A styled header\n')
   })
 })

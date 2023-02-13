@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 import * as chalk from 'chalk'
 import {format, inspect} from 'util'
-import * as ux from './cli-ux'
+import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -27,6 +27,7 @@ import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
 import {requireJson} from './util'
 import {PJSON} from './interfaces'
+import {stdout} from './cli-ux/stream'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
@@ -34,7 +35,7 @@ const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-process.stdout.on('error', (err: any) => {
+stdout.on('error', (err: any) => {
   if (err && err.code === 'EPIPE')
     return
   throw err
@@ -249,14 +250,14 @@ export abstract class Command {
   public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      process.stdout.write(format(message, ...args) + '\n')
+      stdout.write(format(message, ...args) + '\n')
     }
   }
 
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      process.stderr.write(format(message, ...args) + '\n')
+      stdout.write(format(message, ...args) + '\n')
     }
   }
 

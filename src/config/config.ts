@@ -15,6 +15,7 @@ import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help/util'
 import {Command} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
+import {stdout} from '../cli-ux/stream'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -270,7 +271,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          process.stdout.write(format(message, ...args) + '\n')
+          stdout.write(format(message, ...args) + '\n')
         },
         error(message, options: { code?: string; exit?: number } = {}) {
           error(message, options)
