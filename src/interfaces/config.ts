@@ -95,7 +95,7 @@ export interface Config {
   readonly commandIDs: string[];
 
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
-  runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
+  runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number, captureErrors?: boolean): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]
   getAllCommands(): Command.Loadable[]
   findCommand(id: string, opts: { must: true }): Command.Loadable;
