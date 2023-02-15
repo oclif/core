@@ -150,7 +150,7 @@ export abstract class Command {
    * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
    */
-  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<unknown> {
+  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<ReturnType<T['run']>> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -166,7 +166,7 @@ export abstract class Command {
       cmd.ctor.id = id
     }
 
-    return cmd._run()
+    return cmd._run<ReturnType<T['run']>>() as ReturnType<T['run']>
   }
 
   protected static _baseFlags: FlagInput
