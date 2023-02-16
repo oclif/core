@@ -311,6 +311,10 @@ export class Config implements IConfig {
             await search(module).call(context, {...opts as any, config: this})
           final.successes.push({plugin: p, result})
 
+          if (p.name === '@oclif/plugin-legacy' && event === 'init') {
+            this.insertLegacyPlugins(result as IPlugin[])
+          }
+
           debug('done')
         } catch (error: any) {
           final.failures.push({plugin: p, error: error as Error})
@@ -744,6 +748,14 @@ export class Config implements IConfig {
       return 0
     })
     return commandPlugins[0]
+  }
+
+  private insertLegacyPlugins(plugins: IPlugin[]) {
+    for (const plugin of plugins) {
+      const idx = this.plugins.findIndex(p => p.name === plugin.name)
+      if (idx !== -1) this.plugins = this.plugins.splice(idx, 1, plugin)
+      this.loadCommands(plugin)
+    }
   }
 }
 
