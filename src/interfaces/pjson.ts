@@ -38,6 +38,10 @@ export namespace PJSON {
           version?: string;
           targets?: string[];
         };
+        deno?: {
+          version?: string;
+          targets?: string[];
+        };
       };
       topics?: {
         [k: string]: {

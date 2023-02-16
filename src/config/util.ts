@@ -1,4 +1,6 @@
 import * as fs from 'fs'
+import * as path from 'path'
+import * as JSON5 from 'json5'
 
 const debug = require('debug')
 
@@ -23,13 +25,16 @@ export function resolvePackage(id: string, paths: { paths: string[] }): string {
   return require.resolve(id, paths)
 }
 
-export function loadJSON(path: string): Promise<any> {
+export function loadJSON(_path: string): Promise<any> {
   debug('config')('loadJSON %s', path)
+  // Allows reading JSON with comments
+  const _JSON = path.extname(_path) === '.jsonc' ? JSON5 : JSON
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: any, d: any) => {
+    fs.readFile(_path, 'utf8', (err: any, d: any) => {
       try {
         if (err) reject(err)
-        else resolve(JSON.parse(d))
+        const obj = _JSON.parse(d)
+        resolve(obj)
       } catch (error: any) {
         reject(error)
       }

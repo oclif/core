@@ -17,6 +17,9 @@ import {Command} from '../command'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
+const PACKAGE_JSON = 'package.json'
+const DENO_JSON = 'deno.jsonc'
+
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
@@ -40,11 +43,14 @@ function * up(from: string) {
   yield from
 }
 
+// Finds the root dir based on a node or a deno root config file,
+// which ever is closest up in the directory tree.
 async function findSourcesRoot(root: string) {
   for (const next of up(root)) {
-    const cur = path.join(next, 'package.json')
+    const nodeConfigFile = path.join(next, PACKAGE_JSON)
+    const denoConfigFile = path.join(next, DENO_JSON)
     // eslint-disable-next-line no-await-in-loop
-    if (await exists(cur)) return path.dirname(cur)
+    if (await exists(nodeConfigFile) || await exists(denoConfigFile)) return path.dirname(nodeConfigFile)
   }
 }
 
@@ -92,6 +98,11 @@ async function findRoot(name: string | undefined, root: string) {
   return findSourcesRoot(root)
 }
 
+async function findRootConfigFile(rootPath: string) {
+  if (await exists(path.join(rootPath, PACKAGE_JSON))) return PACKAGE_JSON
+  if (await exists(path.join(rootPath, DENO_JSON))) return DENO_JSON
+}
+
 export class Plugin implements IPlugin {
   // static loadedPlugins: {[name: string]: Plugin} = {}
   _base = `${_pjson.name}@${_pjson.version}`
@@ -136,12 +147,14 @@ export class Plugin implements IPlugin {
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
     if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
+    const rootConfigFile = await findRootConfigFile(root)
+    if (!rootConfigFile) throw new Error(`could not find ${rootConfigFile} in ${root}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json')) as any
+    this.pjson = await loadJSON(path.join(root, rootConfigFile)) as any
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = path.join(root, 'package.json')
+    const pjsonPath = path.join(root, rootConfigFile)
     if (!this.name) throw new Error(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
