@@ -166,7 +166,7 @@ export abstract class Command {
       cmd.ctor.id = id
     }
 
-    return cmd._run<ReturnType<T['run']>>() as ReturnType<T['run']>
+    return cmd._run<ReturnType<T['run']>>()
   }
 
   protected static _baseFlags: FlagInput
@@ -208,7 +208,7 @@ export abstract class Command {
     return this.constructor as typeof Command
   }
 
-  protected async _run<T>(): Promise<T | undefined> {
+  protected async _run<T>(): Promise<T> {
     let err: Error | undefined
     let result
     try {
@@ -227,7 +227,7 @@ export abstract class Command {
       ux.styledJSON(this.toSuccessJson(result))
     }
 
-    return result
+    return result as T
   }
 
   public exit(code = 0): void {
