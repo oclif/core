@@ -223,7 +223,7 @@ export abstract class Command {
       await this.finally(err)
     }
 
-    this.logJson(result)
+    if (result && this.jsonEnabled()) this.logJson(result)
 
     return result as T
   }
@@ -355,7 +355,7 @@ export abstract class Command {
   }
 
   protected logJson(json: unknown): void {
-    if (json && this.jsonEnabled()) ux.styledJSON(json)
+    ux.styledJSON(json)
   }
 }
 

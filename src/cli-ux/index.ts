@@ -69,7 +69,7 @@ export class ux {
   }
 
   public static styledHeader(header: string): void {
-    stdout.write(chalk.dim('=== ') + chalk.bold(header) + '\n')
+    this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
