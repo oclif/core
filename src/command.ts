@@ -223,9 +223,7 @@ export abstract class Command {
       await this.finally(err)
     }
 
-    if (result && this.jsonEnabled()) {
-      ux.styledJSON(this.toSuccessJson(result))
-    }
+    this.logJson(result)
 
     return result as T
   }
@@ -328,7 +326,7 @@ export abstract class Command {
   protected async catch(err: CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
-      ux.styledJSON(this.toErrorJson(err))
+      this.logJson(this.toErrorJson(err))
     } else {
       if (!err.message) throw err
       try {
@@ -354,6 +352,10 @@ export abstract class Command {
 
   protected toErrorJson(err: unknown): any {
     return {error: err}
+  }
+
+  protected logJson(json: unknown): void {
+    if (json && this.jsonEnabled()) ux.styledJSON(json)
   }
 }
 
