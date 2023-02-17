@@ -12,7 +12,7 @@ import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
-import {getHelpFlagAdditions} from '../help/util'
+import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 
@@ -91,6 +91,7 @@ export class Config implements IConfig {
   public valid!: boolean
   public version!: string
   public windows!: boolean
+  public binAliases?: string[];
 
   protected warned = false
 
@@ -136,6 +137,7 @@ export class Config implements IConfig {
     this.platform = WSL ? 'wsl' : os.platform() as any
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
+    this.binAliases = this.pjson.oclif.binAliases
     this.dirname = this.pjson.oclif.dirname || this.name
     this.flexibleTaxonomy = this.pjson.oclif.flexibleTaxonomy || false
     // currently, only colons or spaces are valid separators

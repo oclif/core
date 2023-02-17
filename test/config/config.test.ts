@@ -1,12 +1,11 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'
-import {Command, Interfaces} from '../../src'
+import {Command, Config, Interfaces} from '../../src'
 
 interface Options {
   pjson?: any;
@@ -23,6 +22,7 @@ const pjson = {
   files: [],
   commands: {},
   oclif: {
+    binAliases: ['foo', 'bar'],
     topics: {
       t1: {
         description: 'desc for t1',
@@ -98,6 +98,13 @@ describe('Config', () => {
     .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
     .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
     .hasProperty('home', path.join('/my/home'))
+  })
+
+  describe('binAliases', () => {
+    testConfig({pjson})
+    .it('will have binAliases set', config => {
+      expect(config.binAliases).to.deep.equal(['foo', 'bar'])
+    })
   })
 
   describe('linux', () => {
