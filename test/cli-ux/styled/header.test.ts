@@ -16,6 +16,6 @@ describe('styled/header', () => {
 
   it('shows a styled header', () => {
     ux.styledHeader('A styled header')
-    expect(writeStub.firstCall.firstArg).to.equal('=== A styled header\n')
+    expect(writeStub.firstCall.firstArg).to.equal('=== A styled header\n\n')
   })
 })
