@@ -223,7 +223,7 @@ export abstract class Command {
       await this.finally(err)
     }
 
-    if (result && this.jsonEnabled()) this.logJson(result)
+    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
 
     return result as T
   }
