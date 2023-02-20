@@ -27,7 +27,7 @@ import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
 import {requireJson} from './util'
 import {PJSON} from './interfaces'
-import {stdout} from './cli-ux/stream'
+import {stdout, stderr} from './cli-ux/stream'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
@@ -255,7 +255,7 @@ export abstract class Command {
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      stdout.write(format(message, ...args) + '\n')
+      stderr.write(format(message, ...args) + '\n')
     }
   }
 
