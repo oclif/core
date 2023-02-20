@@ -15,6 +15,7 @@ import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
 import * as ux from './cli-ux'
 import {requireJson} from './util'
+import {stderr, stdout} from './cli-ux/stream'
 
 const flush = ux.flush
 
@@ -45,6 +46,8 @@ export {
   flush,
   ux,
   execute,
+  stderr,
+  stdout,
 }
 
 function checkCWD() {
@@ -52,7 +55,7 @@ function checkCWD() {
     process.cwd()
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      process.stderr.write('WARNING: current directory does not exist\n')
+      stderr.write('WARNING: current directory does not exist\n')
     }
   }
 }
@@ -60,7 +63,7 @@ function checkCWD() {
 function checkNodeVersion() {
   const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', 'package.json')
   if (!semver.satisfies(process.versions.node, pjson.engines.node)) {
-    process.stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
+    stderr.write(`WARNING\nWARNING Node version must be ${pjson.engines.node} to use this CLI\nWARNING Current node version: ${process.versions.node}\nWARNING\n`)
   }
 }
 

@@ -2,6 +2,7 @@ import * as Errors from '../errors'
 import config from './config'
 
 import * as chalk from 'chalk'
+import {stderr} from './stream'
 const ansiEscapes = require('ansi-escapes')
 const passwordPrompt = require('password-prompt')
 
@@ -39,7 +40,7 @@ function normal(options: IPromptConfig, retries = 100): Promise<string> {
     }
 
     process.stdin.setEncoding('utf8')
-    process.stderr.write(options.prompt)
+    stderr.write(options.prompt)
     process.stdin.resume()
     process.stdin.once('data', b => {
       if (timer) clearTimeout(timer)
@@ -77,7 +78,7 @@ async function single(options: IPromptConfig): Promise<string> {
 }
 
 function replacePrompt(prompt: string) {
-  process.stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
+  stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
     ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
 }
 
@@ -161,7 +162,7 @@ export async function anykey(message?: string): Promise<string> {
   }
 
   const char = await prompt(message, {type: 'single', required: false})
-  if (tty) process.stderr.write('\n')
+  if (tty) stderr.write('\n')
   if (char === 'q') Errors.error('quit')
   if (char === '\u0003') Errors.error('ctrl-c')
   return char

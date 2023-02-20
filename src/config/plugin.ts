@@ -138,7 +138,7 @@ export class Plugin implements IPlugin {
     if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json')) as any
+    this.pjson = await loadJSON(path.join(root, 'package.json'))
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
