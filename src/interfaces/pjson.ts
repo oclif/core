@@ -77,6 +77,7 @@ export namespace PJSON {
     oclif: Plugin['oclif'] & {
       schema?: number;
       bin?: string;
+      binAliases?: string[];
       npmRegistry?: string;
       scope?: string;
       dirname?: string;

@@ -87,6 +87,10 @@ export interface Config {
   userPJSON?: PJSON.User;
   plugins: Plugin[];
   binPath?: string;
+  /**
+   * name of any bin aliases that will execute the cli
+   */
+  binAliases?: string[];
   valid: boolean;
   flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
