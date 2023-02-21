@@ -1,6 +1,6 @@
 import * as Errors from '../errors'
 import * as util from 'util'
-
+import * as chalk from 'chalk'
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
 import {ExitError} from './exit'
@@ -9,6 +9,7 @@ import * as styled from './styled'
 import {Table} from './styled'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
+import {stdout} from './stream'
 
 const hyperlinker = require('hyperlinker')
 
@@ -25,9 +26,9 @@ function timeout(p: Promise<any>, ms: number) {
 
 async function _flush() {
   const p = new Promise(resolve => {
-    process.stdout.once('drain', () => resolve(null))
+    stdout.once('drain', () => resolve(null))
   })
-  const flushed = process.stdout.write('')
+  const flushed = stdout.write('')
 
   if (flushed) {
     return Promise.resolve()
@@ -67,8 +68,8 @@ export class ux {
     this.info(styled.styledObject(obj, keys))
   }
 
-  public static get styledHeader(): typeof styled.styledHeader {
-    return styled.styledHeader
+  public static styledHeader(header: string): void {
+    this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
@@ -97,18 +98,18 @@ export class ux {
 
   public static trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
-      process.stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(util.format(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
-      process.stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(util.format(format, ...args) + '\n')
     }
   }
 
   public static info(format: string, ...args: string[]): void {
-    process.stdout.write(util.format(format, ...args) + '\n')
+    stdout.write(util.format(format, ...args) + '\n')
   }
 
   public static log(format?: string, ...args: string[]): void {

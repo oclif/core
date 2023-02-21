@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 import * as chalk from 'chalk'
 import {format, inspect} from 'util'
-import * as ux from './cli-ux'
+import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -27,6 +27,7 @@ import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
 import {requireJson} from './util'
 import {PJSON} from './interfaces'
+import {stdout, stderr} from './cli-ux/stream'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
@@ -34,7 +35,7 @@ const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-process.stdout.on('error', (err: any) => {
+stdout.on('error', (err: any) => {
   if (err && err.code === 'EPIPE')
     return
   throw err
@@ -149,7 +150,7 @@ export abstract class Command {
    * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
    */
-  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<unknown> {
+  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<ReturnType<T['run']>> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -165,7 +166,7 @@ export abstract class Command {
       cmd.ctor.id = id
     }
 
-    return cmd._run()
+    return cmd._run<ReturnType<T['run']>>()
   }
 
   protected static _baseFlags: FlagInput
@@ -207,7 +208,7 @@ export abstract class Command {
     return this.constructor as typeof Command
   }
 
-  protected async _run<T>(): Promise<T | undefined> {
+  protected async _run<T>(): Promise<T> {
     let err: Error | undefined
     let result
     try {
@@ -222,11 +223,9 @@ export abstract class Command {
       await this.finally(err)
     }
 
-    if (result && this.jsonEnabled()) {
-      ux.styledJSON(this.toSuccessJson(result))
-    }
+    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
 
-    return result
+    return result as T
   }
 
   public exit(code = 0): void {
@@ -249,14 +248,14 @@ export abstract class Command {
   public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      process.stdout.write(format(message, ...args) + '\n')
+      stdout.write(format(message, ...args) + '\n')
     }
   }
 
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      process.stderr.write(format(message, ...args) + '\n')
+      stderr.write(format(message, ...args) + '\n')
     }
   }
 
@@ -327,7 +326,7 @@ export abstract class Command {
   protected async catch(err: CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
-      ux.styledJSON(this.toErrorJson(err))
+      this.logJson(this.toErrorJson(err))
     } else {
       if (!err.message) throw err
       try {
@@ -353,6 +352,10 @@ export abstract class Command {
 
   protected toErrorJson(err: unknown): any {
     return {error: err}
+  }
+
+  protected logJson(json: unknown): void {
+    ux.styledJSON(json)
   }
 }
 

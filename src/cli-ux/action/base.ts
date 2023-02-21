@@ -1,5 +1,6 @@
 import {inspect} from 'util'
 import {castArray} from '../../util'
+import {stderr, stdout} from '../stream'
 
 export interface ITask {
   action: string;
@@ -21,8 +22,8 @@ export class ActionBase {
   protected stdmocks?: ['stdout' | 'stderr', string[]][]
 
   private stdmockOrigs = {
-    stdout: process.stdout.write,
-    stderr: process.stderr.write,
+    stdout: stdout.write,
+    stderr: stderr.write,
   }
 
   public start(action: string, status?: string, opts: Options = {}): void {
@@ -147,25 +148,29 @@ export class ActionBase {
   // mock out stdout/stderr so it doesn't screw up the rendering
   protected _stdout(toggle: boolean): void {
     try {
-      const outputs: ['stdout', 'stderr'] = ['stdout', 'stderr']
       if (toggle) {
         if (this.stdmocks) return
         this.stdmockOrigs = {
-          stdout: process.stdout.write,
-          stderr: process.stderr.write,
+          stdout: stdout.write,
+          stderr: stderr.write,
         }
 
         this.stdmocks = []
-        for (const std of outputs) {
-          (process[std] as any).write = (...args: any[]) => {
-            this.stdmocks!.push([std, args] as ['stdout' | 'stderr', string[]])
-          }
+        stdout.write = (...args: any[]) => {
+          this.stdmocks!.push(['stdout', args] as ['stdout', string[]])
+          return true
+        }
+
+        stderr.write = (...args: any[]) => {
+          this.stdmocks!.push(['stderr', args] as ['stderr', string[]])
+          return true
         }
       } else {
         if (!this.stdmocks) return
         // this._write('stderr', '\nresetstdmock\n\n\n')
         delete this.stdmocks
-        for (const std of outputs) process[std].write = this.stdmockOrigs[std] as any
+        stdout.write = this.stdmockOrigs.stdout
+        stderr.write = this.stdmockOrigs.stderr
       }
     } catch (error) {
       this._write('stderr', inspect(error))
@@ -196,6 +201,15 @@ export class ActionBase {
 
   // write to the real stdout/stderr
   protected _write(std: 'stdout' | 'stderr', s: string | string[]): void {
-    this.stdmockOrigs[std].apply(process[std], castArray(s) as [string])
+    switch (std) {
+    case 'stdout':
+      this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
+      break
+    case 'stderr':
+      this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
+      break
+    default:
+      throw new Error(`invalid std: ${std}`)
+    }
   }
 }

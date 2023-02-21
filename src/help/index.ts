@@ -1,5 +1,5 @@
 import stripAnsi = require('strip-ansi')
-
+import * as util from 'util'
 import * as Interfaces from '../interfaces'
 import {error} from '../errors'
 import CommandHelp from './command'
@@ -9,6 +9,7 @@ import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFrom
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 import {Command} from '../command'
+import {stdout} from '../cli-ux/stream'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 
@@ -317,6 +318,6 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]): void {
-    console.log(...args)
+    stdout.write(util.format.apply(this, args) + '\n')
   }
 }

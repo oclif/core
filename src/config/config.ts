@@ -15,6 +15,7 @@ import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
+import {stdout} from '../cli-ux/stream'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -272,7 +273,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          process.stdout.write(format(message, ...args) + '\n')
+          stdout.write(format(message, ...args) + '\n')
         },
         error(message, options: { code?: string; exit?: number } = {}) {
           error(message, options)
@@ -635,7 +636,7 @@ export class Config implements IConfig {
       for (const alias of command.aliases ?? []) {
         if (this._commands.has(alias)) {
           const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
-          this._commands.set(prioritizedCommand.id, {...prioritizedCommand, id: alias})
+          this._commands.set(alias, {...prioritizedCommand, id: alias})
         } else {
           this._commands.set(alias, {...command, id: alias})
         }

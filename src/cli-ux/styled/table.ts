@@ -5,6 +5,7 @@ import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
 import {safeDump} from 'js-yaml'
 import {inspect} from 'util'
+import {stdout} from '../stream'
 
 const sw = require('string-width')
 const {orderBy} = require('natural-orderby')
@@ -42,7 +43,7 @@ class Table<T extends Record<string, unknown>> {
       filter,
       'no-header': options['no-header'] ?? false,
       'no-truncate': options['no-truncate'] ?? false,
-      printLine: printLine ?? ((s: any) => process.stdout.write(s + '\n')),
+      printLine: printLine ?? ((s: any) => stdout.write(s + '\n')),
       rowStart: ' ',
       sort,
       title,
@@ -190,7 +191,7 @@ class Table<T extends Record<string, unknown>> {
     // truncation logic
     const shouldShorten = () => {
       // don't shorten if full mode
-      if (options['no-truncate'] || (!process.stdout.isTTY && !process.env.CLI_UX_SKIP_TTY_CHECK)) return
+      if (options['no-truncate'] || (!stdout.isTTY && !process.env.CLI_UX_SKIP_TTY_CHECK)) return
 
       // don't shorten if there is enough screen width
       const dataMaxWidth = sumBy(columns, c => c.width!)
