@@ -100,7 +100,6 @@ export interface Config {
   readonly topics: Topic[];
   readonly commandIDs: string[];
 
-  runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
   runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number, captureErrors?: boolean): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]
