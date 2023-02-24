@@ -1,8 +1,12 @@
 import * as semver from 'semver'
-
+import {PJSON} from '../interfaces/pjson'
+import {requireJson} from '../util'
+import spinner from './action/spinner'
+import simple from './action/spinner'
+import pride from './action/pride-spinner'
 import {ActionBase} from './action/base'
 
-const version = semver.parse(require('../../package.json').version)!
+const version = semver.parse(requireJson<PJSON>(__dirname, '..', '..', 'package.json').version)!
 
 export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
 
@@ -22,10 +26,8 @@ const actionType = (
   'spinner'
 ) || 'simple'
 
-/* eslint-disable node/no-missing-require */
-const Action = actionType === 'spinner' ? require('./action/spinner').default : require('./action/simple').default
-const PrideAction = actionType === 'spinner' ? require('./action/pride-spinner').default : require('./action/simple').default
-/* eslint-enable node/no-missing-require */
+const Action = actionType === 'spinner' ? spinner : simple
+const PrideAction = actionType === 'spinner' ? pride : simple
 
 export class Config {
   outputLevel: Levels = 'info'
@@ -50,7 +52,7 @@ export class Config {
     return globals.context || {}
   }
 
-  set context(v: any) {
+  set context(v: unknown) {
     globals.context = v
   }
 }

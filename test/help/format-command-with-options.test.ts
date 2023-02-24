@@ -1,14 +1,12 @@
 import {expect, test as base} from '@oclif/test'
 
-import {Command as Base, Flags as flags} from '../../src'
+import {Args, Command as Base, Flags as flags} from '../../src'
 import {commandHelp, TestHelpWithOptions as TestHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
 
 class Command extends Base {
-  static disableJsonFlag = true
-
   async run() {
     return null
   }
@@ -29,7 +27,10 @@ describe('formatCommand', () => {
       static description = `first line
 multiline help`
 
-      static args = [{name: 'app_name', description: 'app to use'}]
+      static args = {
+        // eslint-disable-next-line camelcase
+        app_name: Args.string({description: 'app to use'}),
+      }
 
       static flags = {
         app: flags.string({char: 'a', hidden: true}),
@@ -76,7 +77,10 @@ ALIASES
 
         static aliases = ['app:init', 'create']
 
-        static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
+        static args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'.repeat(35)}),
+        }
 
         static flags = {
           app: flags.string({char: 'a', hidden: true}),
@@ -122,7 +126,10 @@ ALIASES
 
         static aliases = ['app:init', 'create']
 
-        static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
+        static args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'.repeat(35)}),
+        }
 
         static flags = {
           app: flags.string({char: 'a', hidden: true}),
@@ -178,7 +185,10 @@ ALIASES
 
         static aliases = ['app:init', 'create']
 
-        static args = [{name: 'app_name', description: 'app to use'}]
+        static args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'}),
+        }
 
         static flags = {
           force: flags.boolean({description: 'forces'}),
@@ -234,11 +244,11 @@ OPTIONS
     .commandHelp(class extends Command {
       static id = 'apps:create'
 
-      static args = [
-        {name: 'arg1', default: '.'},
-        {name: 'arg2', default: '.', description: 'arg2 desc'},
-        {name: 'arg3', description: 'arg3 desc'},
-      ]
+      static args = {
+        arg1: Args.string({default: '.'}),
+        arg2: Args.string({default: '.', description: 'arg2 desc'}),
+        arg3: Args.string({description: 'arg3 desc'}),
+      }
 
       static flags = {
         flag1: flags.string({default: '.'}),
@@ -279,9 +289,9 @@ OPTIONS
     .commandHelp(class extends Command {
         static id = 'apps:create'
 
-        static args = [
-          {name: 'arg1', description: 'Show the options', options: ['option1', 'option2']},
-        ]
+        static args = {
+          arg1: Args.string({description: 'Show the options', options: ['option1', 'option2']}),
+        }
     })
     .it('outputs with arg options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [ARG1]

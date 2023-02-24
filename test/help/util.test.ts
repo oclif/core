@@ -2,7 +2,7 @@ import {resolve} from 'path'
 import {Config, Interfaces} from '../../src'
 import {test} from '@oclif/test'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
-import configuredHelpClass from '../../src/help/_test-help-class'
+import configuredHelpClass from './_test-help-class'
 import {expect} from 'chai'
 
 describe('util', () => {
@@ -26,7 +26,7 @@ describe('util', () => {
 
     test
     .it('loads help class defined in pjson.oclif.helpClass', async () => {
-      config.pjson.oclif.helpClass = '../src/help/_test-help-class'
+      config.pjson.oclif.helpClass = '../test/help/_test-help-class'
       config.root = resolve(__dirname, '..')
 
       expect(configuredHelpClass).to.not.be.undefined

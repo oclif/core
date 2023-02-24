@@ -1,10 +1,9 @@
-import {error} from '../errors'
-import * as Globby from 'globby'
+import {CLIError, error} from '../errors'
+import * as globby from 'globby'
 import * as path from 'path'
 import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {Command} from '../interfaces/command'
 import {toCached} from './config'
 import {Debug} from './util'
 import {Manifest} from '../interfaces/manifest'
@@ -12,21 +11,22 @@ import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
-import {isProd} from '../util'
+import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
+import {Command} from '../command'
 
-const _pjson = require('../../package.json')
+const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
   if (Array.isArray(input)) {
-    return input.concat(flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`)))
+    return [...input, ...flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`))]
   }
 
   return flatMap(Object.keys(input), k => {
     input[k].name = k
-    return [{...input[k], name: `${base}${k}`}].concat(topicsToArray(input[k].subtopics, `${base}${input[k].name}`))
+    return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })
 }
 
@@ -129,17 +129,16 @@ export class Plugin implements IPlugin {
 
   protected warned = false
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(public options: PluginOptions) {}
 
-  async load() {
+  public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
     if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json')) as any
+    this.pjson = await loadJSON(path.join(root, 'package.json'))
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
@@ -159,28 +158,25 @@ export class Plugin implements IPlugin {
     this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate))
     this.commands = Object
     .entries(this.manifest.commands)
-    .map(([id, c]) => ({...c, pluginAlias: this.alias, pluginType: this.type, load: async () => this.findCommand(id, {must: true})}))
+    .map(([id, c]) => ({
+      ...c,
+      pluginAlias: this.alias,
+      pluginType: c.pluginType === 'jit' ? 'jit' : this.type,
+      load: async () => this.findCommand(id, {must: true}),
+    }))
     .sort((a, b) => a.id.localeCompare(b.id))
   }
 
-  get topics(): Topic[] {
+  public get topics(): Topic[] {
     return topicsToArray(this.pjson.oclif.topics || {})
   }
 
-  get commandsDir() {
+  public get commandsDir(): string | undefined {
     return tsPath(this.root, this.pjson.oclif.commands)
   }
 
-  get commandIDs() {
+  public get commandIDs(): string[] {
     if (!this.commandsDir) return []
-    let globby: typeof Globby
-    try {
-      const globbyPath = require.resolve('globby', {paths: [this.root, __dirname]})
-      globby = require(globbyPath)
-    } catch (error: any) {
-      this.warn(error, 'not loading commands, globby not found')
-      return []
-    }
 
     this._debug(`loading IDs from ${this.commandsDir}`)
     const patterns = [
@@ -232,6 +228,7 @@ export class Plugin implements IPlugin {
 
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
+
     return cmd
   }
 
@@ -271,15 +268,15 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Command] => Boolean(f))
+      .filter((f): f is [string, Command.Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: Command}),
+      }, {} as {[k: string]: Command.Cached}),
     }
   }
 
-  protected warn(err: any, scope?: string) {
+  protected warn(err: string | Error | CLIError, scope?: string): void {
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))

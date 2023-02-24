@@ -27,7 +27,7 @@ describe('doc opts', () => {
   })
   it('shows no short char', () => {
     const usage = DocOpts.generate({flags: {
-      testFlag: Flags.enum({
+      testFlag: Flags.string({
         name: 'testFlag',
         description: 'test',
         options: ['a', 'b'],

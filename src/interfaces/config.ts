@@ -1,8 +1,8 @@
 import {PJSON} from './pjson'
 import {Hooks, Hook} from './hooks'
-import {Command} from './command'
 import {Plugin, Options} from './plugin'
 import {Topic} from './topic'
+import {Command} from '../command'
 import {ConfigGraph} from '../config/config-graph'
 
 export type LoadOptions = Options | string | Config | undefined
@@ -89,6 +89,10 @@ export interface Config {
   userPJSON?: PJSON.User;
   plugins: Plugin[];
   binPath?: string;
+  /**
+   * name of any bin aliases that will execute the cli
+   */
+  binAliases?: string[];
   valid: boolean;
   flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
@@ -98,7 +102,7 @@ export interface Config {
 
   runCommand<T = unknown>(id: string, argv?: string[]): Promise<T>;
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
-  runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number): Promise<Hook.Result<Hooks[T]['return']>>;
+  runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number, captureErrors?: boolean): Promise<Hook.Result<Hooks[T]['return']>>;
   getAllCommandIDs(): string[]
   getAllCommands(): Command.Loadable[]
   findCommand(id: string, opts: { must: true }): Command.Loadable;

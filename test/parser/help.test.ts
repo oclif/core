@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import stripAnsi = require('strip-ansi')
 
-import * as flags from '../../src/parser/flags'
+import * as flags from '../../src/flags'
 import {flagUsages} from '../../src/parser/help'
 
 describe('flagUsage', () => {

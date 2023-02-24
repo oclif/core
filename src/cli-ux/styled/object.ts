@@ -1,8 +1,7 @@
-// tslint:disable
-
 import * as chalk from 'chalk'
 import * as util from 'util'
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function styledObject(obj: any, keys?: string[]): string {
   const output: string[] = []
   const keyLengths = Object.keys(obj).map(key => key.toString().length)

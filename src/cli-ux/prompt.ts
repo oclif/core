@@ -1,8 +1,10 @@
 import * as Errors from '../errors'
-import * as chalk from 'chalk'
-
 import config from './config'
-import deps from './deps'
+
+import * as chalk from 'chalk'
+import {stderr} from './stream'
+const ansiEscapes = require('ansi-escapes')
+const passwordPrompt = require('password-prompt')
 
 export interface IPromptOptions {
   prompt?: string;
@@ -38,7 +40,7 @@ function normal(options: IPromptConfig, retries = 100): Promise<string> {
     }
 
     process.stdin.setEncoding('utf8')
-    process.stderr.write(options.prompt)
+    stderr.write(options.prompt)
     process.stdin.resume()
     process.stdin.once('data', b => {
       if (timer) clearTimeout(timer)
@@ -76,11 +78,11 @@ async function single(options: IPromptConfig): Promise<string> {
 }
 
 function replacePrompt(prompt: string) {
-  process.stderr.write(deps.ansiEscapes.cursorHide + deps.ansiEscapes.cursorUp(1) + deps.ansiEscapes.cursorLeft + prompt +
-    deps.ansiEscapes.cursorDown(1) + deps.ansiEscapes.cursorLeft + deps.ansiEscapes.cursorShow)
+  stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
+    ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
 }
 
-function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
+async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
   const prompt = getPrompt(name, inputOptions.type, inputOptions.default)
   const options: IPromptConfig = {
     isTTY: Boolean(process.env.TERM !== 'dumb' && process.stdin.isTTY),
@@ -97,7 +99,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
   case 'single':
     return single(options)
   case 'mask':
-    return deps.passwordPrompt(options.prompt, {
+    return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
       default: options.default,
@@ -106,7 +108,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
       return value
     })
   case 'hide':
-    return deps.passwordPrompt(options.prompt, {
+    return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
       default: options.default,
@@ -122,7 +124,7 @@ function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Prom
  * @param options - @see IPromptOptions
  * @returns Promise<string>
  */
-export function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
+export async function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
   return config.action.pauseAsync(() => {
     return _prompt(name, options)
   }, chalk.cyan('?'))
@@ -160,7 +162,7 @@ export async function anykey(message?: string): Promise<string> {
   }
 
   const char = await prompt(message, {type: 'single', required: false})
-  if (tty) process.stderr.write('\n')
+  if (tty) stderr.write('\n')
   if (char === 'q') Errors.error('quit')
   if (char === '\u0003') Errors.error('ctrl-c')
   return char

@@ -6,11 +6,14 @@ import * as Interfaces from './interfaces'
 import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
+import {settings} from './settings'
+import {Errors, flush} from '.'
+import {join, dirname} from 'path'
+import {stdout} from './cli-ux/stream'
 
 const log = (message = '', ...args: any[]) => {
-  // tslint:disable-next-line strict-type-predicates
   message = typeof message === 'string' ? message : inspect(message)
-  process.stdout.write(format(message, ...args) + '\n')
+  stdout.write(format(message, ...args) + '\n')
 }
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
@@ -31,15 +34,14 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-// eslint-disable-next-line default-param-last
-export async function run(argv = process.argv.slice(2), options?: Interfaces.LoadOptions) {
+export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<void> {
+  argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)
   }
 
-  // return Main.run(argv, options)
-  const config = await Config.load(options || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname) as Config
+  const config = await Config.load(options ?? require.main?.filename ?? __dirname)
 
   let [id, ...argvSlice] = normalizeArgv(config, argv)
   // run init hook
@@ -74,5 +76,78 @@ export async function run(argv = process.argv.slice(2), options?: Interfaces.Loa
   // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
   // command id.
   if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
-  await config.runCommand(id, argvSlice, cmd)
+  return config.runCommand(id, argvSlice, cmd)
+}
+
+function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
+  return type === 'cjs' ? join(dir, '..', 'tsconfig.json') : join(dirname(fileURLToPath(dir)), '..', 'tsconfig.json')
+}
+
+/**
+ * Load and run oclif CLI
+ *
+ * @param options - options to load the CLI
+ * @returns Promise<void>
+ *
+ * @example For ESM dev.js
+ * ```
+ * #!/usr/bin/env ts-node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'esm', development: true, dir: import.meta.url})
+ * })()
+ * ```
+ *
+ * @example For ESM run.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'esm', dir: import.meta.url})
+ * })()
+ * ```
+ *
+ * @example For CJS dev.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'cjs', development: true, dir: __dirname})
+ * })()
+ * ```
+ *
+ * @example For CJS run.js
+ * ```
+ * #!/usr/bin/env node
+ * // eslint-disable-next-line node/shebang
+ * (async () => {
+ *   const oclif = await import('@oclif/core')
+ *   await oclif.execute({type: 'cjs', dir: import.meta.url})
+ * })()
+ * ```
+ */
+export async function execute(
+  options: {
+    type: 'cjs' | 'esm';
+    dir: string;
+    args?: string[];
+    loadOptions?: Interfaces.LoadOptions;
+    development?: boolean;
+  },
+): Promise<void> {
+  if (options.development) {
+    // In dev mode -> use ts-node and dev plugins
+    process.env.NODE_ENV = 'development'
+    require('ts-node').register({
+      project: getTsConfigPath(options.dir, options.type),
+    })
+    settings.debug = true
+  }
+
+  await run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
+  .then(async () => flush())
+  .catch(Errors.handle)
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 
 import {Interfaces, toCached} from '../../src'
@@ -23,14 +25,14 @@ export class TestHelpWithOptions extends Help {
     this.opts.hideCommandSummaryInDescription = true
   }
 
-  public formatCommand(command: Interfaces.Command) {
+  public formatCommand(command: Command.Class) {
     return super.formatCommand(command)
   }
 }
 
 // extensions to expose method as public for testing
 export class TestHelp extends Help {
-  public formatCommand(command: Interfaces.Command) {
+  public formatCommand(command: Command.Class | Command.Loadable | Command.Cached) {
     return super.formatCommand(command)
   }
 
@@ -81,7 +83,7 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{commands: Interfaces.Command[], topics: Interfaces.Topic[]}>) {
+export function monkeyPatchCommands(config: any, plugins: Array<{commands: Command.Class[], topics: Interfaces.Topic[]}>) {
   config.plugins = plugins
   config._commands = new Map()
   config._topics = new Map()

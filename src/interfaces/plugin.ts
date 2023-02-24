@@ -1,4 +1,4 @@
-import {Command} from './command'
+import {Command} from '../command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
 
@@ -15,6 +15,7 @@ export interface PluginOptions {
 
 export interface Options extends PluginOptions {
   devPlugins?: boolean;
+  jitPlugins?: boolean;
   userPlugins?: boolean;
   channel?: string;
   version?: string;

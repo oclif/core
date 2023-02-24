@@ -23,6 +23,7 @@ export namespace PJSON {
       default?: string;
       plugins?: string[];
       devPlugins?: string[];
+      jitPlugins?: Record<string, string>;
       helpClass?: string;
       helpOptions?: HelpOptions;
       aliases?: { [name: string]: string | null };
@@ -76,10 +77,12 @@ export namespace PJSON {
     oclif: Plugin['oclif'] & {
       schema?: number;
       bin?: string;
+      binAliases?: string[];
       npmRegistry?: string;
       scope?: string;
       dirname?: string;
       flexibleTaxonomy?: boolean;
+      jitPlugins?: Record<string, string>;
     };
   }
 

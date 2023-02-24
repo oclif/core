@@ -1,13 +1,11 @@
 import * as os from 'os'
 import * as path from 'path'
 
-import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
-import {Command as ICommand} from '../../src/interfaces'
 
 import {expect, fancy} from './test'
-import {Interfaces} from '../../src'
+import {Command, Config, Interfaces} from '../../src'
 
 interface Options {
   pjson?: any;
@@ -24,6 +22,7 @@ const pjson = {
   files: [],
   commands: {},
   oclif: {
+    binAliases: ['foo', 'bar'],
     topics: {
       t1: {
         description: 'desc for t1',
@@ -61,6 +60,12 @@ describe('Config', () => {
       hasS3Key(k: keyof Interfaces.PJSON.S3.Templates, expected: string, extra: any = {}) {
         return this
         .it(`renders ${k} template as ${expected}`, config => {
+          // Config.load reads the package.json to determine the version and channel
+          // In order to allow prerelease branches to pass, we need to strip the prerelease
+          // tag from the version and switch the channel to stable.
+          config.version = config.version.replace(/-beta\.\d/g, '')
+          config.channel = 'stable'
+
           // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
@@ -93,6 +98,13 @@ describe('Config', () => {
     .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
     .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
     .hasProperty('home', path.join('/my/home'))
+  })
+
+  describe('binAliases', () => {
+    testConfig({pjson})
+    .it('will have binAliases set', config => {
+      expect(config.binAliases).to.deep.equal(['foo', 'bar'])
+    })
   })
 
   describe('linux', () => {
@@ -171,8 +183,7 @@ describe('Config', () => {
       commandIds = ['foo:bar', 'foo:baz'],
       types = [],
     }: Options = {}) => {
-    // @ts-ignore
-      class MyComandClass implements ICommand.Class {
+      class MyCommandClass extends Command {
       _base = ''
 
       aliases: string[] = []
@@ -181,34 +192,28 @@ describe('Config', () => {
 
       id = 'foo:bar'
 
-      new(): ICommand.Instance {
-        return {_run(): Promise<any> {
-          return Promise.resolve()
-        }}
-      }
-
-      run(): PromiseLike<any> {
+      run(): Promise<any> {
         return Promise.resolve()
       }
       }
+
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<ICommand.Class> => {
-      // @ts-ignore
-        return new MyComandClass()
+      const findCommand = async (): Promise<Command.Class> => {
+        return MyCommandClass
       }
 
-      const commandPluginA: ICommand.Loadable = {
+      const commandPluginA: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[0], async load(): Promise<ICommand.Class> {
-          return new MyComandClass() as unknown as ICommand.Class
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
+          return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: ICommand.Loadable = {
+      const commandPluginB: Command.Loadable = {
         strict: false,
-        aliases: [], args: [], flags: {}, hidden: false, id: commandIds[1], async load(): Promise<ICommand.Class> {
-          return new MyComandClass() as unknown as ICommand.Class
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
+          return MyCommandClass
         },
         pluginType: types[1] ?? 'core',
         pluginAlias: '@My/pluginb',

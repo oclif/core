@@ -1,3 +1,16 @@
+import * as fs from 'fs'
+import {join} from 'path'
+import {Command} from './command'
+import {ArgInput} from './interfaces/parser'
+
+export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
+  return Object.entries(obj)
+  .reduce((o, [k, v]) => {
+    if (fn(v)) o[k] = v
+    return o
+  }, {} as any)
+}
+
 export function compact<T>(a: (T | undefined)[]): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
@@ -36,7 +49,7 @@ export function castArray<T>(input?: T | T[]): T[] {
   return Array.isArray(input) ? input : [input]
 }
 
-export function isProd() {
+export function isProd(): boolean {
   return !['development', 'test'].includes(process.env.NODE_ENV ?? '')
 }
 
@@ -58,4 +71,53 @@ export function sumBy<T>(arr: T[], fn: (i: T) => number): number {
 
 export function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
+}
+
+export const dirExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No directory found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isDirectory()) {
+    throw new Error(`${input} exists but is not a directory`)
+  }
+
+  return input
+}
+
+export const fileExists = async (input: string): Promise<string> => {
+  if (!fs.existsSync(input)) {
+    throw new Error(`No file found at ${input}`)
+  }
+
+  if (!(await fs.promises.stat(input)).isFile()) {
+    throw new Error(`${input} exists but is not a file`)
+  }
+
+  return input
+}
+
+export function isTruthy(input: string): boolean {
+  return ['true', '1', 'yes', 'y'].includes(input.toLowerCase())
+}
+
+export function isNotFalsy(input: string): boolean {
+  return !['false', '0', 'no', 'n'].includes(input.toLowerCase())
+}
+
+export function requireJson<T>(...pathParts: string[]): T {
+  return JSON.parse(fs.readFileSync(join(...pathParts), 'utf8'))
+}
+
+/**
+ * Ensure that the provided args are an object. This is for backwards compatibility with v1 commands which
+ * defined args as an array.
+ *
+ * @param args Either an array of args or an object of args
+ * @returns ArgInput
+ */
+export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Command.Arg.Cached}): ArgInput {
+  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => {
+    return {...x, [y.name]: y}
+  }, {} as ArgInput) : args ?? {}) as ArgInput
 }

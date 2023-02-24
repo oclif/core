@@ -1,5 +1,6 @@
 import {inspect} from 'util'
 import {castArray} from '../../util'
+import {stderr, stdout} from '../stream'
 
 export interface ITask {
   action: string;
@@ -21,11 +22,11 @@ export class ActionBase {
   protected stdmocks?: ['stdout' | 'stderr', string[]][]
 
   private stdmockOrigs = {
-    stdout: process.stdout.write,
-    stderr: process.stderr.write,
+    stdout: stdout.write,
+    stderr: stderr.write,
   }
 
-  public start(action: string, status?: string, opts: Options = {}) {
+  public start(action: string, status?: string, opts: Options = {}): void {
     this.std = opts.stdout ? 'stdout' : 'stderr'
     const task = {action, status, active: Boolean(this.task && this.task.active)}
     this.task = task
@@ -35,7 +36,7 @@ export class ActionBase {
     this._stdout(true)
   }
 
-  public stop(msg = 'done') {
+  public stop(msg = 'done'): void {
     const task = this.task
     if (!task) {
       return
@@ -109,7 +110,7 @@ export class ActionBase {
     return ret
   }
 
-  public pause(fn: () => any, icon?: string) {
+  public pause(fn: () => any, icon?: string): Promise<any> {
     const task = this.task
     const active = task && task.active
     if (task && active) {
@@ -126,46 +127,50 @@ export class ActionBase {
     return ret
   }
 
-  protected _start() {
+  protected _start(): void {
     throw new Error('not implemented')
   }
 
-  protected _stop(_: string) {
+  protected _stop(_: string): void {
     throw new Error('not implemented')
   }
 
-  protected _resume() {
+  protected _resume(): void {
     if (this.task) this.start(this.task.action, this.task.status)
   }
 
-  protected _pause(_?: string) {
+  protected _pause(_?: string): void {
     throw new Error('not implemented')
   }
 
-  protected _updateStatus(_: string | undefined, __?: string) {}
+  protected _updateStatus(_: string | undefined, __?: string): void {}
 
   // mock out stdout/stderr so it doesn't screw up the rendering
-  protected _stdout(toggle: boolean) {
+  protected _stdout(toggle: boolean): void {
     try {
-      const outputs: ['stdout', 'stderr'] = ['stdout', 'stderr']
       if (toggle) {
         if (this.stdmocks) return
         this.stdmockOrigs = {
-          stdout: process.stdout.write,
-          stderr: process.stderr.write,
+          stdout: stdout.write,
+          stderr: stderr.write,
         }
 
         this.stdmocks = []
-        for (const std of outputs) {
-          (process[std] as any).write = (...args: any[]) => {
-            this.stdmocks!.push([std, args] as ['stdout' | 'stderr', string[]])
-          }
+        stdout.write = (...args: any[]) => {
+          this.stdmocks!.push(['stdout', args] as ['stdout', string[]])
+          return true
+        }
+
+        stderr.write = (...args: any[]) => {
+          this.stdmocks!.push(['stderr', args] as ['stderr', string[]])
+          return true
         }
       } else {
         if (!this.stdmocks) return
         // this._write('stderr', '\nresetstdmock\n\n\n')
         delete this.stdmocks
-        for (const std of outputs) process[std].write = this.stdmockOrigs[std] as any
+        stdout.write = this.stdmockOrigs.stdout
+        stderr.write = this.stdmockOrigs.stderr
       }
     } catch (error) {
       this._write('stderr', inspect(error))
@@ -173,7 +178,7 @@ export class ActionBase {
   }
 
   // flush mocked stdout/stderr
-  protected _flushStdout() {
+  protected _flushStdout(): void {
     try {
       let output = ''
       let std: 'stdout' | 'stderr' | undefined
@@ -195,7 +200,16 @@ export class ActionBase {
   }
 
   // write to the real stdout/stderr
-  protected _write(std: 'stdout' | 'stderr', s: string | string[]) {
-    this.stdmockOrigs[std].apply(process[std], castArray(s) as [string])
+  protected _write(std: 'stdout' | 'stderr', s: string | string[]): void {
+    switch (std) {
+    case 'stdout':
+      this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
+      break
+    case 'stderr':
+      this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
+      break
+    default:
+      throw new Error(`invalid std: ${std}`)
+    }
   }
 }
