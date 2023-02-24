@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
-import {Command as ICommand} from '../../src/interfaces'
+import {Command} from '../../src/command'
 
 import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
@@ -17,8 +17,7 @@ interface Options {
   types?: string[];
 }
 
-// @ts-expect-error
-class MyCommandClass implements ICommand.Class {
+class MyCommandClass extends Command {
   _base = ''
 
   aliases: string[] = []
@@ -29,14 +28,15 @@ class MyCommandClass implements ICommand.Class {
 
   flags = {}
 
-  new(): ICommand.Instance {
+  new(): Command {
+    // @ts-ignore
     return {
       _run(): Promise<any> {
         return Promise.resolve()
       }}
   }
 
-  run(): PromiseLike<any> {
+  run(): Promise<any> {
     return Promise.resolve()
   }
 }
@@ -56,38 +56,41 @@ describe('Config with flexible taxonomy', () => {
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
-    const findCommand = async (): Promise<ICommand.Class> => {
-      return new MyCommandClass() as unknown as ICommand.Class
+    const findCommand = (): Promise<Command.Class> => {
+      // @ts-ignore
+      return Promise.resolve(new MyCommandClass([], {} as Config))
     }
 
-    const commandPluginA: ICommand.Loadable = {
+    const commandPluginA: Command.Loadable = {
       strict: false,
       aliases: [],
-      args: [],
+      args: {},
       flags: {
         flagA: Flags.boolean({char: 'a'}),
         flagC: Flags.boolean({char: 'c'}),
       },
       hidden: false,
       id: commandIds[0],
-      async load(): Promise<ICommand.Class> {
-        return new MyCommandClass() as unknown as ICommand.Class
+      async load(): Promise<Command.Class> {
+        // @ts-ignore
+        return new MyCommandClass([], {} as Config)
       },
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
     }
-    const commandPluginB: ICommand.Loadable = {
+    const commandPluginB: Command.Loadable = {
       strict: false,
       aliases: [],
-      args: [],
+      args: {},
       flags: {
         flagB: Flags.boolean({}),
         flagC: Flags.boolean({aliases: ['ceeee']}),
       },
       hidden: false,
       id: commandIds[1],
-      async load(): Promise<ICommand.Class> {
-        return new MyCommandClass() as unknown as ICommand.Class
+      async load(): Promise<Command.Class> {
+        // @ts-ignore
+        return new MyCommandClass([], {} as Config)
       },
       pluginType: types[1] ?? 'core',
       pluginAlias: '@My/pluginb',

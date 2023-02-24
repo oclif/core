@@ -94,6 +94,7 @@ export class Config implements IConfig {
   public version!: string
   public windows!: boolean
   public binAliases?: string[];
+  public configGraph: ConfigGraph | undefined
 
   protected warned = false
 
@@ -106,7 +107,6 @@ export class Config implements IConfig {
   private _topics = new Map<string, Topic>()
 
   private _commandIDs!: string[]
-  private configGraph: ConfigGraph | undefined
 
   constructor(public options: Options) {}
 
@@ -197,7 +197,7 @@ export class Config implements IConfig {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
-    
+
     this.loadConfigGraph()
   }
 
@@ -752,7 +752,6 @@ export class Config implements IConfig {
   private loadConfigGraph() {
     this.configGraph = ConfigGraph.fromConfig(this)
   }
-
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it

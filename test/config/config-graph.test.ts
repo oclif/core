@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {combinations, ConfigGraph} from '../../src/config/config-graph'
-import {Command} from '../../src/interfaces'
+import {Command} from '../../src/command'
 
 describe('config-graph', () => {
   let configGraph: ConfigGraph

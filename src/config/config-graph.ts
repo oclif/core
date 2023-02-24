@@ -1,7 +1,8 @@
 import {DirectedGraph} from 'graphology'
 import {Attributes} from 'graphology-types'
 import {subgraph} from 'graphology-operators'
-import {Config, Command, PJSON} from '../interfaces'
+import {Config, PJSON} from '../interfaces'
+import {Command} from '../command'
 import * as crypto from 'crypto'
 
 /* start of Akseli Palén code */
@@ -412,8 +413,8 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
    * If there is not a core plugin command present, this function will return the first
    * plugin as discovered (will not change the order)
    *
-   * @param commands commands to determine the priority of
    * @returns command instance {Command.Loadable} or undefined
+   * @param commandKeys - array of command keys
    */
   private determinePriority(commandKeys: string[]): Command.Loadable {
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
