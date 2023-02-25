@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
