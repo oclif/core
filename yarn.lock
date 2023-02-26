@@ -440,7 +440,7 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^2.1.1", "@oclif/core@^2.1.2", "@oclif/core@^2.1.7":
+"@oclif/core@^2.1.1", "@oclif/core@^2.1.7":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.3.0.tgz#f63071a8116118ae02e457ac1d28a7649904aecf"
   integrity sha512-xA53NIZDqz9nuxyCMA5Pz5b1RSgyTNWbtOdwbUJeZa/ajtVrVO9yA8k/4vJRsffUuLyP8tNbh4cH3DDZKwIFnw==
@@ -498,12 +498,12 @@
     tslib "^2.4.1"
     yarn "^1.22.18"
 
-"@oclif/test@^2.3.6":
-  version "2.3.6"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-2.3.6.tgz#b3c7594f04c2eb55fc6b6f8e61d825500debb85a"
-  integrity sha512-n1DGbLzGrrfn/Nm2f8829RcQ2iOd9EXDZxx0U9WswpJS75P4N9Py4tYBhfX+wGU7CaJDfYxnqQHB0YuRYDBwrw==
+"@oclif/test@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-2.3.7.tgz#acb49d61eb71de76fd044ec8481029cf1cc73779"
+  integrity sha512-uUm+pYXe3crJVHyih4w7g4wiu8I6LzTxcBUyALVMxn5SWnjhoGa1jvGseMnjbBkmdvh/8re8Z348vBYz/HkSbg==
   dependencies:
-    "@oclif/core" "^2.1.2"
+    "@oclif/core" "^2.1.7"
     fancy-test "^2.0.12"
 
 "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.8.3":
