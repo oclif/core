@@ -434,12 +434,12 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
         return aIndex - bIndex
       }
 
-      // if b is a core plugin and a is not sort b first
+      // if "b" is a core plugin and "a" is not sort "b" first
       if (b.pluginType === 'core' && a.pluginType !== 'core') {
         return 1
       }
 
-      // if a is a core plugin and b is not sort a first
+      // if "a" is a core plugin and "b" is not sort "a" first
       if (a.pluginType === 'core' && b.pluginType !== 'core') {
         return -1
       }

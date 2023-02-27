@@ -198,7 +198,9 @@ export class Config implements IConfig {
       this.loadTopics(plugin)
     }
 
+    console.time('before loadConfigGraph')
     this.loadConfigGraph()
+    console.time('after loadConfigGraph')
   }
 
   public async loadCorePlugins(): Promise<void> {
