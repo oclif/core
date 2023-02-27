@@ -41,10 +41,10 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
   const findId = (argv: string[]): string | undefined => {
-    const ids = collectUsableIds(config.commandIDs)
+    const ids = new Set(collectUsableIds(config.commandIDs))
 
     const final: string[] = []
-    const idPresent = (id: string) => ids.includes(id)
+    const idPresent = (id: string) => ids.has(id)
     const isFlag = (s: string) => s.startsWith('-')
     const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
