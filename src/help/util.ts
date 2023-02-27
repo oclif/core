@@ -41,7 +41,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
   const findId = (argv: string[]): string | undefined => {
-    const ids = new Set(collectUsableIds(config.commandIDs))
+    const ids = collectUsableIds(config.commandIDs)
 
     const final: string[] = []
     const idPresent = (id: string) => ids.has(id)
