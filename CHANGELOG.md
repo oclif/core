@@ -1,3 +1,12 @@
+# [2.4.0](https://github.com/oclif/core/compare/2.3.2...2.4.0) (2023-02-28)
+
+
+### Features
+
+* add option to skip oclif error printing ([#642](https://github.com/oclif/core/issues/642)) ([ca88895](https://github.com/oclif/core/commit/ca88895bcfdca2d1c1ae5eda6e879ae6b1ac4122))
+
+
+
 ## [2.3.2](https://github.com/oclif/core/compare/2.3.1...2.3.2) (2023-02-28)
 
 
