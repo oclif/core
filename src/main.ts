@@ -92,9 +92,12 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
   // command id.
   if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
-  const result = await config.runCommand(id, argvSlice, cmd)
-  await collectPerf()
-  return result
+
+  try {
+    return await config.runCommand(id, argvSlice, cmd)
+  } finally {
+    await collectPerf()
+  }
 }
 
 function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
