@@ -10,6 +10,7 @@ import {settings} from './settings'
 import {Errors, flush} from '.'
 import {join, dirname} from 'path'
 import {stdout} from './cli-ux/stream'
+import {Performance} from './performance'
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
@@ -34,7 +35,18 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<void> {
+export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
+  const marker = Performance.mark('main.run')
+
+  const initMarker = Performance.mark('main.run#init')
+
+  const collectPerf = async () => {
+    marker?.stop()
+    initMarker?.stop()
+    await Performance.collect()
+    Performance.debug()
+  }
+
   argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
@@ -50,6 +62,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // display version if applicable
   if (versionAddition(argv, config)) {
     log(config.userAgent)
+    await collectPerf()
     return
   }
 
@@ -58,6 +71,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.helpOptions)
     await help.showHelp(argv)
+    await collectPerf()
     return
   }
 
@@ -72,11 +86,15 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     }
   }
 
+  initMarker?.stop()
+
   // If the the default command is '.' (signifying that the CLI is a single command CLI) and '.' is provided
   // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
   // command id.
   if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
-  return config.runCommand(id, argvSlice, cmd)
+  const result = await config.runCommand(id, argvSlice, cmd)
+  await collectPerf()
+  return result
 }
 
 function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
