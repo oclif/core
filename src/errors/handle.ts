@@ -7,12 +7,12 @@ import clean = require('clean-stack')
 import {CLIError} from './errors/cli'
 import {OclifError, PrettyPrintableError} from '../interfaces'
 
-export const handle = (err: Error & Partial<PrettyPrintableError> & Partial<OclifError>): void => {
+export const handle = (err: Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}): void => {
   try {
     if (!err) err = new CLIError('no error?')
     if (err.message === 'SIGINT') process.exit(1)
 
-    const shouldPrint = !(err instanceof ExitError)
+    const shouldPrint = !(err instanceof ExitError) && !err.skipOclifErrorHandling
     const pretty = prettyPrint(err)
     const stack = clean(err.stack || '', {pretty: true})
 
