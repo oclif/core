@@ -107,7 +107,7 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @param commandIds string[]
  * @returns string[]
  */
-export function collectUsableIds(commandIds: string[]): string[] {
+export function collectUsableIds(commandIds: string[]): Set<string> {
   const usuableIds: string[] = []
   for (const id of commandIds) {
     const parts = id.split(':')
@@ -118,5 +118,5 @@ export function collectUsableIds(commandIds: string[]): string[] {
     }
   }
 
-  return uniq(usuableIds).sort()
+  return new Set(usuableIds)
 }

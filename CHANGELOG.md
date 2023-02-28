@@ -1,3 +1,12 @@
+## [2.3.2](https://github.com/oclif/core/compare/2.3.1...2.3.2) (2023-02-28)
+
+
+### Bug Fixes
+
+* change useable ids to set to improve search perf ([#640](https://github.com/oclif/core/issues/640)) ([a0996a4](https://github.com/oclif/core/commit/a0996a4b3b5b1d69f2bb343c1c1ed2eef9e298b4))
+
+
+
 ## [2.3.1](https://github.com/oclif/core/compare/2.3.0...2.3.1) (2023-02-25)
 
 

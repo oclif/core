@@ -6,14 +6,14 @@ describe('util', () => {
     test
     .it('returns all usable command ids', async () => {
       const ids = collectUsableIds(['foo:bar:baz', 'one:two:three'])
-      expect(ids).to.deep.equal([
+      expect(ids).to.deep.equal(new Set([
         'foo',
         'foo:bar',
         'foo:bar:baz',
         'one',
         'one:two',
         'one:two:three',
-      ])
+      ]))
     })
   })
 
