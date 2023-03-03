@@ -1,5 +1,6 @@
 // 3pp
-import {Options, SingleBar} from 'cli-progress'
+import type {Options} from 'cli-progress'
+import {SingleBar} from 'cli-progress'
 
 export default function progress(options: Options = {}): SingleBar {
   // set noTTYOutput for options
