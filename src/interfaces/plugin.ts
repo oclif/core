@@ -19,6 +19,7 @@ export interface Options extends PluginOptions {
   userPlugins?: boolean;
   channel?: string;
   version?: string;
+  enablePerf?: boolean;
 }
 
 export interface Plugin {
