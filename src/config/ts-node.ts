@@ -9,6 +9,9 @@ import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
+const TYPE_ROOTS = [`${__dirname}/../node_modules/@types`]
+const ROOT_DIRS: string[] = []
+
 function loadTSConfig(root: string): TSConfig | undefined {
   const tsconfigPath = path.join(root, 'tsconfig.json')
   let typescript: typeof import('typescript') | undefined
@@ -35,17 +38,13 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
-const TS_CONFIGS: Record<string, TSConfig> = {}
-const TYPE_ROOTS = [`${__dirname}/../node_modules/@types`]
-const ROOT_DIRS: string[] = []
 function registerTSNode(root: string) {
-  if (TS_CONFIGS[root]) return
   const tsconfig = loadTSConfig(root)
   if (!tsconfig) return
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   const tsNode: typeof TSNode = require(tsNodePath)
-  TS_CONFIGS[root] = tsconfig
+
   TYPE_ROOTS.push(`${root}/node_modules/@types`)
 
   if (tsconfig.compilerOptions.rootDirs) {
@@ -72,6 +71,7 @@ function registerTSNode(root: string) {
         jsx: 'react',
       },
     })
+    return tsconfig
   } finally {
     process.chdir(cwd)
   }
@@ -86,7 +86,7 @@ export function tsPath(root: string, orig: string, type?: string): string
 export function tsPath(root: string, orig: string | undefined, type?: string): string | undefined
 export function tsPath(root: string, orig: string | undefined, type?: string): string | undefined {
   if (!orig) return orig
-  orig = path.join(root, orig)
+  orig = orig.startsWith(root) ? orig : path.join(root, orig)
 
   const skipTSNode =
     // the CLI specifically turned it off
