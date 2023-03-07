@@ -16,6 +16,7 @@ import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help
 import * as ux from './cli-ux'
 import {requireJson} from './util'
 import {stderr, stdout} from './cli-ux/stream'
+import {Performance} from './performance'
 
 const flush = ux.flush
 
@@ -36,6 +37,7 @@ export {
   Interfaces,
   Parser,
   Plugin,
+  Performance,
   run,
   toCached,
   tsPath,

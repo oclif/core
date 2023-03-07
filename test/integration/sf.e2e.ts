@@ -101,13 +101,15 @@ describe('Salesforce CLI (sf)', () => {
     expect(result).to.have.property('warnings')
   })
 
-  it('should handle varags', async () => {
+  it('should handle varargs', async () => {
     const config = await executor.executeCommand('config set disable-telemetry=true org-api-version=54.0 --global --json')
     const parsed = parseJson(config.output!)
     expect(parsed.status).to.equal(0)
-    const results = parsed.result as Array<{success: boolean}>
-    for (const result of results) {
+    const results = parsed.result as {successes: Array<{success: boolean}>, failures: Array<{failed: boolean}>}
+    for (const result of results.successes) {
       expect(result.success).to.be.true
     }
+
+    expect(results.failures).to.be.empty
   })
 })

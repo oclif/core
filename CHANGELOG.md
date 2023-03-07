@@ -1,3 +1,12 @@
+# [2.5.0](https://github.com/oclif/core/compare/2.4.0...2.5.0) (2023-03-06)
+
+
+### Features
+
+* add Performance class ([#641](https://github.com/oclif/core/issues/641)) ([c808189](https://github.com/oclif/core/commit/c8081890bcd73b382ba2eb03ae13ad6cfd6b1f17))
+
+
+
 # [2.4.0](https://github.com/oclif/core/compare/2.3.2...2.4.0) (2023-02-28)
 
 

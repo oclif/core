@@ -30,6 +30,11 @@ export type Settings = {
    *   NODE_ENV=development
    */
   tsnodeEnabled?: boolean;
+  /**
+   * Enable performance tracking. Resulting data is available in the `perf` property of the `Config` class.
+   * This will be overridden by the `enablePerf` property passed into Config constructor.
+   */
+  performanceEnabled?: boolean;
 };
 
 // Set global.oclif to the new object if it wasn't set before

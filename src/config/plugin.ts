@@ -14,6 +14,7 @@ import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './u
 import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {Command} from '../command'
+import {Performance} from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
@@ -124,6 +125,8 @@ export class Plugin implements IPlugin {
 
   children: Plugin[] = []
 
+  hasManifest = false
+
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
@@ -178,6 +181,7 @@ export class Plugin implements IPlugin {
   public get commandIDs(): string[] {
     if (!this.commandsDir) return []
 
+    const marker = Performance.mark(`plugin.commandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${this.commandsDir}`)
     const patterns = [
       '**/*.+(js|cjs|mjs|ts|tsx)',
@@ -192,6 +196,8 @@ export class Plugin implements IPlugin {
       return id === '' ? '.' : id
     })
     this._debug('found commands', ids)
+    marker?.addDetails({count: ids.length})
+    marker?.stop()
     return ids
   }
 
@@ -200,6 +206,7 @@ export class Plugin implements IPlugin {
   async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
   async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+    const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
     const fetch = async () => {
       if (!this.commandsDir) return
       const search = (cmd: any) => {
@@ -228,7 +235,7 @@ export class Plugin implements IPlugin {
 
     const cmd = await fetch()
     if (!cmd && opts.must) error(`command ${id} not found`)
-
+    marker?.stop()
     return cmd
   }
 
@@ -241,6 +248,7 @@ export class Plugin implements IPlugin {
           process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
         } else {
           this._debug('using manifest from', p)
+          this.hasManifest = true
           return manifest
         }
       } catch (error: any) {
@@ -252,12 +260,17 @@ export class Plugin implements IPlugin {
       }
     }
 
+    const marker = Performance.mark(`plugin.manifest#${this.name}`, {plugin: this.name})
     if (!ignoreManifest) {
       const manifest = await readManifest()
-      if (manifest) return manifest
+      if (manifest) {
+        marker?.addDetails({fromCache: true, commandCount: Object.keys(manifest.commands).length})
+        marker?.stop()
+        return manifest
+      }
     }
 
-    return {
+    const manifest = {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
@@ -274,6 +287,9 @@ export class Plugin implements IPlugin {
         return commands
       }, {} as {[k: string]: Command.Cached}),
     }
+    marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
+    marker?.stop()
+    return manifest
   }
 
   protected warn(err: string | Error | CLIError, scope?: string): void {
