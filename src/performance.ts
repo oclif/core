@@ -27,6 +27,7 @@ class Marker {
   public module: string;
   public method: string;
   public scope: string;
+  public stopped = false;
 
   private startMarker: string
   private stopMarker: string
@@ -48,6 +49,7 @@ class Marker {
   }
 
   public stop() {
+    this.stopped = true
     performance.mark(this.stopMarker)
   }
 
@@ -103,6 +105,12 @@ export class Performance {
    */
   public static async collect(): Promise<void> {
     if (!Performance.enabled) return
+
+    if (Performance._results.length > 0) return
+
+    for (const marker of Object.values(Performance.markers).filter(m => !m.stopped)) {
+      marker.stop()
+    }
 
     return new Promise(resolve => {
       const perfObserver = new PerformanceObserver(items => {

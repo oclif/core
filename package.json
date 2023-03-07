@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "2.4.0",
+  "version": "2.5.1",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^12.1.4",
-    "@oclif/plugin-help": "^5.2.5",
+    "@oclif/plugin-help": "^5.2.7",
     "@oclif/plugin-plugins": "^2.3.2",
     "@oclif/test": "^2.3.7",
     "@types/ansi-styles": "^3.2.1",
