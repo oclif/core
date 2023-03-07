@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as TSNode from 'ts-node'
 
 import {TSConfig} from '../interfaces/ts-config'
 import {settings} from '../settings'
@@ -34,14 +35,56 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
+const TS_CONFIGS: Record<string, TSConfig> = {}
+const TYPE_ROOTS = [`${__dirname}/../node_modules/@types`]
+const ROOT_DIRS: string[] = []
+function registerTSNode(root: string) {
+  if (TS_CONFIGS[root]) return
+  const tsconfig = loadTSConfig(root)
+  if (!tsconfig) return
+  debug('registering ts-node at', root)
+  const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
+  const tsNode: typeof TSNode = require(tsNodePath)
+  TS_CONFIGS[root] = tsconfig
+  TYPE_ROOTS.push(`${root}/node_modules/@types`)
+
+  if (tsconfig.compilerOptions.rootDirs) {
+    ROOT_DIRS.push(...tsconfig.compilerOptions.rootDirs.map(r => path.join(root, r)))
+  } else {
+    ROOT_DIRS.push(`${root}/src`)
+  }
+
+  const cwd = process.cwd()
+  try {
+    process.chdir(root)
+    tsNode.register({
+      skipProject: true,
+      transpileOnly: true,
+      compilerOptions: {
+        esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
+        target: tsconfig.compilerOptions.target || 'es2017',
+        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
+        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
+        module: 'commonjs',
+        sourceMap: true,
+        rootDirs: ROOT_DIRS,
+        typeRoots: TYPE_ROOTS,
+        jsx: 'react',
+      },
+    })
+  } finally {
+    process.chdir(cwd)
+  }
+}
+
 /**
- * convert a path from the compiled ./lib files to the ./src typescript source
+ * Convert a path from the compiled ./lib files to the ./src typescript source
  * this is for developing typescript plugins/CLIs
- * if there is a tsconfig and the original sources exist, it attempts to require ts-
+ * if there is a tsconfig and the original sources exist, it attempts to require ts-node
  */
-export function tsPath(root: string, orig: string): string
-export function tsPath(root: string, orig: string | undefined): string | undefined
-export function tsPath(root: string, orig: string | undefined): string | undefined {
+export function tsPath(root: string, orig: string, type?: string): string
+export function tsPath(root: string, orig: string | undefined, type?: string): string | undefined
+export function tsPath(root: string, orig: string | undefined, type?: string): string | undefined {
   if (!orig) return orig
   orig = path.join(root, orig)
 
@@ -51,10 +94,11 @@ export function tsPath(root: string, orig: string | undefined): string | undefin
     // the CLI didn't specify ts-node and it is production
     (settings.tsnodeEnabled === undefined && isProd())
 
-  if (skipTSNode) return orig
+  // We always want to load the tsconfig for linked plugins.
+  if (skipTSNode && type !== 'link') return orig
 
   try {
-    const tsconfig = loadTSConfig(root)
+    const tsconfig = type === 'link' ? registerTSNode(root) : loadTSConfig(root)
     if (!tsconfig) return orig
     const {rootDir, rootDirs, outDir} = tsconfig.compilerOptions
     const rootDirPath = rootDir || (rootDirs || [])[0]
