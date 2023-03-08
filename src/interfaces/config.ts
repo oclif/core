@@ -8,6 +8,16 @@ export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
 export type ArchTypes = 'arm' | 'arm64' | 'mips' | 'mipsel' | 'ppc' | 'ppc64' | 's390' | 's390x' | 'x32' | 'x64' | 'x86'
 
+export type VersionDetails = {
+  cliVersion: string;
+  architecture: string;
+  nodeVersion: string;
+  pluginVersions?: Record<string, {version: string; type: string; root: string}>;
+  osVersion?: string;
+  shell?: string;
+  rootPath?: string;
+}
+
 export interface Config {
   name: string;
   version: string;
