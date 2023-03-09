@@ -1,3 +1,16 @@
+# [2.6.0](https://github.com/oclif/core/compare/2.5.2...2.6.0) (2023-03-09)
+
+
+### Features
+
+* add Config.versionDetails ([#651](https://github.com/oclif/core/issues/651)) ([ddddcd9](https://github.com/oclif/core/commit/ddddcd97913822dc3774b5b6250b7a0dbcfd4111))
+
+
+
+## [2.5.2](https://github.com/oclif/core/compare/2.5.1...2.5.2) (2023-03-08)
+
+
+
 ## [2.5.1](https://github.com/oclif/core/compare/2.5.0...2.5.1) (2023-03-07)
 
 
