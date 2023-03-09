@@ -1,3 +1,12 @@
+## [2.6.1](https://github.com/oclif/core/compare/2.6.0...2.6.1) (2023-03-09)
+
+
+### Bug Fixes
+
+* improve Performance class ([b263fc3](https://github.com/oclif/core/commit/b263fc38fccbf100a5fdf876f84eeb01afb7501a))
+
+
+
 # [2.6.0](https://github.com/oclif/core/compare/2.5.2...2.6.0) (2023-03-09)
 
 
