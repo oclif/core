@@ -1,3 +1,12 @@
+## [2.6.2](https://github.com/oclif/core/compare/2.6.1...2.6.2) (2023-03-09)
+
+
+### Bug Fixes
+
+* add version details property to config interface ([#652](https://github.com/oclif/core/issues/652)) ([378095d](https://github.com/oclif/core/commit/378095d64413a673fc3d77598a46e4f14551dc16))
+
+
+
 ## [2.6.1](https://github.com/oclif/core/compare/2.6.0...2.6.1) (2023-03-09)
 
 
