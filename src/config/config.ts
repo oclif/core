@@ -6,7 +6,7 @@ import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
+import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
@@ -495,6 +495,19 @@ export class Config implements IConfig {
 
   public get topics(): Topic[] {
     return [...this._topics.values()]
+  }
+
+  public get versionDetails(): VersionDetails {
+    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ')
+    return {
+      cliVersion,
+      architecture,
+      nodeVersion,
+      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      osVersion: `${os.type()} ${os.release()}`,
+      shell: this.shell,
+      rootPath: this.root,
+    }
   }
 
   public s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}): string {
