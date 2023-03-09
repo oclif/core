@@ -68,6 +68,7 @@ export class Performance {
   }
 
   public static get results(): PerfResult[] {
+    if (!Performance.enabled) return []
     if (Performance._results.length > 0) return Performance._results
 
     throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
@@ -78,6 +79,8 @@ export class Performance {
   }
 
   public static get highlights(): PerfHighlights {
+    if (!Performance.enabled) return {} as PerfHighlights
+
     if (Performance._highlights) return Performance._highlights
 
     throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
@@ -108,7 +111,10 @@ export class Performance {
 
     if (Performance._results.length > 0) return
 
-    for (const marker of Object.values(Performance.markers).filter(m => !m.stopped)) {
+    const markers = Object.values(Performance.markers)
+    if (markers.length === 0) return
+
+    for (const marker of markers.filter(m => !m.stopped)) {
       marker.stop()
     }
 
@@ -173,7 +179,7 @@ export class Performance {
       })
       perfObserver.observe({entryTypes: ['measure'], buffered: true})
 
-      for (const marker of Object.values(Performance.markers)) {
+      for (const marker of markers) {
         try {
           marker.measure()
         } catch {
