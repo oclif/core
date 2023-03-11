@@ -1,3 +1,43 @@
+## [2.6.2](https://github.com/oclif/core/compare/2.6.1...2.6.2) (2023-03-09)
+
+
+### Bug Fixes
+
+* add version details property to config interface ([#652](https://github.com/oclif/core/issues/652)) ([378095d](https://github.com/oclif/core/commit/378095d64413a673fc3d77598a46e4f14551dc16))
+
+
+
+## [2.6.1](https://github.com/oclif/core/compare/2.6.0...2.6.1) (2023-03-09)
+
+
+### Bug Fixes
+
+* improve Performance class ([b263fc3](https://github.com/oclif/core/commit/b263fc38fccbf100a5fdf876f84eeb01afb7501a))
+
+
+
+# [2.6.0](https://github.com/oclif/core/compare/2.5.2...2.6.0) (2023-03-09)
+
+
+### Features
+
+* add Config.versionDetails ([#651](https://github.com/oclif/core/issues/651)) ([ddddcd9](https://github.com/oclif/core/commit/ddddcd97913822dc3774b5b6250b7a0dbcfd4111))
+
+
+
+## [2.5.2](https://github.com/oclif/core/compare/2.5.1...2.5.2) (2023-03-08)
+
+
+
+## [2.5.1](https://github.com/oclif/core/compare/2.5.0...2.5.1) (2023-03-07)
+
+
+### Bug Fixes
+
+* stop any unstopped markers when collecting perf results ([#649](https://github.com/oclif/core/issues/649)) ([f8ab63e](https://github.com/oclif/core/commit/f8ab63e7b0efbda7454bb34e7ab5471f50cec6cf))
+
+
+
 # [2.5.0](https://github.com/oclif/core/compare/2.4.0...2.5.0) (2023-03-06)
 
 

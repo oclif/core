@@ -127,6 +127,8 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
+  private _commandsDir!: string | undefined
+
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
@@ -175,7 +177,10 @@ export class Plugin implements IPlugin {
   }
 
   public get commandsDir(): string | undefined {
-    return tsPath(this.root, this.pjson.oclif.commands)
+    if (this._commandsDir) return this._commandsDir
+
+    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this.type)
+    return this._commandsDir
   }
 
   public get commandIDs(): string[] {
@@ -217,7 +222,7 @@ export class Plugin implements IPlugin {
 
       let m
       try {
-        const p = path.join(this.pjson.oclif.commands as string, ...id.split(':'))
+        const p = path.join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))
         const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
         this._debug(isESM ? '(import)' : '(require)', filePath)
         m = module

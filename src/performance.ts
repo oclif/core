@@ -27,6 +27,7 @@ class Marker {
   public module: string;
   public method: string;
   public scope: string;
+  public stopped = false;
 
   private startMarker: string
   private stopMarker: string
@@ -48,6 +49,7 @@ class Marker {
   }
 
   public stop() {
+    this.stopped = true
     performance.mark(this.stopMarker)
   }
 
@@ -66,6 +68,7 @@ export class Performance {
   }
 
   public static get results(): PerfResult[] {
+    if (!Performance.enabled) return []
     if (Performance._results.length > 0) return Performance._results
 
     throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
@@ -76,6 +79,8 @@ export class Performance {
   }
 
   public static get highlights(): PerfHighlights {
+    if (!Performance.enabled) return {} as PerfHighlights
+
     if (Performance._highlights) return Performance._highlights
 
     throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
@@ -103,6 +108,15 @@ export class Performance {
    */
   public static async collect(): Promise<void> {
     if (!Performance.enabled) return
+
+    if (Performance._results.length > 0) return
+
+    const markers = Object.values(Performance.markers)
+    if (markers.length === 0) return
+
+    for (const marker of markers.filter(m => !m.stopped)) {
+      marker.stop()
+    }
 
     return new Promise(resolve => {
       const perfObserver = new PerformanceObserver(items => {
@@ -165,7 +179,7 @@ export class Performance {
       })
       perfObserver.observe({entryTypes: ['measure'], buffered: true})
 
-      for (const marker of Object.values(Performance.markers)) {
+      for (const marker of markers) {
         try {
           marker.measure()
         } catch {

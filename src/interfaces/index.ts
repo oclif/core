@@ -1,5 +1,5 @@
 export {AlphabetLowercase, AlphabetUppercase} from './alphabet'
-export {Config, ArchTypes, PlatformTypes, LoadOptions} from './config'
+export {Config, ArchTypes, PlatformTypes, LoadOptions, VersionDetails, PluginVersionDetail} from './config'
 export {OclifError, PrettyPrintableError, CommandError} from './errors'
 export {HelpOptions} from './help'
 export {Hook, Hooks} from './hooks'
