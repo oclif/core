@@ -1,3 +1,12 @@
+## [2.6.3](https://github.com/oclif/core/compare/2.6.2...2.6.3) (2023-03-13)
+
+
+### Bug Fixes
+
+* handle undefined env.SHELL ([#657](https://github.com/oclif/core/issues/657)) ([71fc49f](https://github.com/oclif/core/commit/71fc49fb84c217ced89c12e5ad86671c49e4c1aa))
+
+
+
 ## [2.6.2](https://github.com/oclif/core/compare/2.6.1...2.6.2) (2023-03-09)
 
 
