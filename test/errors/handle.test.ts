@@ -71,6 +71,28 @@ describe('handle', () => {
   })
 
   fancy
+  .stdout()
+  .stderr()
+  .it('prints error', ctx => {
+    const error = new Error('foo bar baz') as Error & {skipOclifErrorHandling: boolean}
+    error.skipOclifErrorHandling = false
+    handle(error)
+    expect(ctx.stdout).to.equal('')
+    expect(ctx.stderr).to.include('foo bar baz')
+  })
+
+  fancy
+  .stdout()
+  .stderr()
+  .it('should not print error when skipOclifErrorHandling is true', ctx => {
+    const error = new Error('foo bar baz') as Error & {skipOclifErrorHandling: boolean}
+    error.skipOclifErrorHandling = true
+    handle(error)
+    expect(ctx.stdout).to.equal('')
+    expect(ctx.stderr).to.equal('')
+  })
+
+  fancy
   .stderr()
   .do(() => {
     config.errlog = errlog

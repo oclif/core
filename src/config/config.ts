@@ -6,7 +6,7 @@ import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions} from '../interfaces/config'
+import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
 import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
@@ -16,6 +16,10 @@ import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
+import {Performance} from '../performance'
+import {settings} from '../settings'
+import {userInfo as osUserInfo} from 'node:os'
+import {sep} from 'node:path'
 import {ConfigGraph} from './config-graph'
 
 // eslint-disable-next-line new-cap
@@ -126,6 +130,7 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
+    settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const plugin = new Plugin.Plugin({root: this.options.root})
     await plugin.load()
     this.plugins.push(plugin)
@@ -183,12 +188,22 @@ export class Config implements IConfig {
       },
     }
 
+    const marker = Performance.mark('config.load')
+
     await this.loadPluginsAndCommands()
 
     debug('config done')
+    marker?.addDetails({
+      plugins: this.plugins.length,
+      commandPermutations: this.commands.length,
+      commands: this.plugins.reduce((acc, p) => acc + p.commands.length, 0),
+      topics: this.topics.length,
+    })
+    marker?.stop()
   }
 
   async loadPluginsAndCommands(): Promise<void> {
+    const marker = Performance.mark('config.loadPluginsAndCommands')
     await this.loadUserPlugins()
     await this.loadDevPlugins()
     await this.loadCorePlugins()
@@ -197,8 +212,9 @@ export class Config implements IConfig {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
+   this.loadConfigGraph()
 
-    this.loadConfigGraph()
+    marker?.stop()
   }
 
   public async loadCorePlugins(): Promise<void> {
@@ -243,6 +259,7 @@ export class Config implements IConfig {
     timeout?: number,
     captureErrors?: boolean,
   ): Promise<Hook.Result<Hooks[T]['return']>> {
+    const marker = Performance.mark(`config.runHook#${event}`)
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
@@ -290,6 +307,7 @@ export class Config implements IConfig {
       const hooks = p.hooks[event] || []
 
       for (const hook of hooks) {
+        const marker = Performance.mark(`config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
           const {isESM, module, filePath} = await ModuleLoader.loadWithData(p, hook)
@@ -311,6 +329,13 @@ export class Config implements IConfig {
           debug(error)
           if (!captureErrors && error.oclif?.exit !== undefined) throw error
         }
+
+        marker?.addDetails({
+          plugin: p.name,
+          event,
+          hook,
+        })
+        marker?.stop()
       }
     })
 
@@ -318,10 +343,12 @@ export class Config implements IConfig {
 
     debug('%s hook done', event)
 
+    marker?.stop()
     return final
   }
 
   public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
+    const marker = Performance.mark(`config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
@@ -363,6 +390,9 @@ export class Config implements IConfig {
 
     const result = (await command.run(argv, this)) as T
     await this.runHook('postrun', {Command: command, result, argv})
+
+    marker?.addDetails({command: id, plugin: c.pluginName!})
+    marker?.stop()
     return result
   }
 
@@ -472,6 +502,19 @@ export class Config implements IConfig {
     return [...this._topics.values()]
   }
 
+  public get versionDetails(): VersionDetails {
+    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ')
+    return {
+      cliVersion,
+      architecture,
+      nodeVersion,
+      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      osVersion: `${os.type()} ${os.release()}`,
+      shell: this.shell,
+      rootPath: this.root,
+    }
+  }
+
   public s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
@@ -512,7 +555,8 @@ export class Config implements IConfig {
 
   protected _shell(): string {
     let shellPath
-    const {SHELL, COMSPEC} = process.env
+    const COMSPEC = process.env.COMSPEC
+    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
     } else if (this.windows && COMSPEC) {
@@ -536,6 +580,7 @@ export class Config implements IConfig {
 
   protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin): Promise<void> {
     if (!plugins || plugins.length === 0) return
+    const mark = Performance.mark(`config.loadPlugins#${type}`)
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
       try {
@@ -548,8 +593,18 @@ export class Config implements IConfig {
           opts.root = plugin.root || opts.root
         }
 
+        const pluginMarker = Performance.mark(`plugin.load#${opts.name!}`)
         const instance = new Plugin.Plugin(opts)
         await instance.load()
+        pluginMarker?.addDetails({
+          hasManifest: instance.hasManifest,
+          commandCount: instance.commands.length,
+          topicCount: instance.topics.length,
+          type: instance.type,
+          usesMain: Boolean(instance.pjson.main),
+          name: instance.name,
+        })
+        pluginMarker?.stop()
         if (this.plugins.find(p => p.name === instance.name)) return
         this.plugins.push(instance)
         if (parent) {
@@ -563,6 +618,9 @@ export class Config implements IConfig {
         this.warn(error, 'loadPlugins')
       }
     }))
+
+    mark?.addDetails({pluginCount: plugins.length})
+    mark?.stop()
   }
 
   protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
@@ -624,6 +682,7 @@ export class Config implements IConfig {
   }
 
   private loadCommands(plugin: IPlugin) {
+    const marker = Performance.mark(`config.loadCommands#${plugin.name}`, {plugin: plugin.name})
     for (const command of plugin.commands) {
       if (this._commands.has(command.id)) {
         const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
@@ -651,9 +710,13 @@ export class Config implements IConfig {
         }
       }
     }
+
+    marker?.addDetails({commandCount: plugin.commands.length})
+    marker?.stop()
   }
 
   private loadTopics(plugin: IPlugin) {
+    const marker = Performance.mark(`config.loadTopics#${plugin.name}`, {plugin: plugin.name})
     for (const topic of compact(plugin.topics)) {
       const existing = this._topics.get(topic.name)
       if (existing) {
@@ -681,6 +744,8 @@ export class Config implements IConfig {
         parts.pop()
       }
     }
+
+    marker?.stop()
   }
 
   /**

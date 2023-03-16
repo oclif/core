@@ -1,3 +1,79 @@
+## [2.6.4](https://github.com/oclif/core/compare/2.6.3...2.6.4) (2023-03-16)
+
+
+### Bug Fixes
+
+* pass plugin type when resolving a module path ([#659](https://github.com/oclif/core/issues/659)) ([d5f58a3](https://github.com/oclif/core/commit/d5f58a342d27e381e45fbaa86fdd7983d531f197))
+
+
+
+## [2.6.3](https://github.com/oclif/core/compare/2.6.2...2.6.3) (2023-03-13)
+
+
+### Bug Fixes
+
+* handle undefined env.SHELL ([#657](https://github.com/oclif/core/issues/657)) ([71fc49f](https://github.com/oclif/core/commit/71fc49fb84c217ced89c12e5ad86671c49e4c1aa))
+
+
+
+## [2.6.2](https://github.com/oclif/core/compare/2.6.1...2.6.2) (2023-03-09)
+
+
+### Bug Fixes
+
+* add version details property to config interface ([#652](https://github.com/oclif/core/issues/652)) ([378095d](https://github.com/oclif/core/commit/378095d64413a673fc3d77598a46e4f14551dc16))
+
+
+
+## [2.6.1](https://github.com/oclif/core/compare/2.6.0...2.6.1) (2023-03-09)
+
+
+### Bug Fixes
+
+* improve Performance class ([b263fc3](https://github.com/oclif/core/commit/b263fc38fccbf100a5fdf876f84eeb01afb7501a))
+
+
+
+# [2.6.0](https://github.com/oclif/core/compare/2.5.2...2.6.0) (2023-03-09)
+
+
+### Features
+
+* add Config.versionDetails ([#651](https://github.com/oclif/core/issues/651)) ([ddddcd9](https://github.com/oclif/core/commit/ddddcd97913822dc3774b5b6250b7a0dbcfd4111))
+
+
+
+## [2.5.2](https://github.com/oclif/core/compare/2.5.1...2.5.2) (2023-03-08)
+
+
+
+## [2.5.1](https://github.com/oclif/core/compare/2.5.0...2.5.1) (2023-03-07)
+
+
+### Bug Fixes
+
+* stop any unstopped markers when collecting perf results ([#649](https://github.com/oclif/core/issues/649)) ([f8ab63e](https://github.com/oclif/core/commit/f8ab63e7b0efbda7454bb34e7ab5471f50cec6cf))
+
+
+
+# [2.5.0](https://github.com/oclif/core/compare/2.4.0...2.5.0) (2023-03-06)
+
+
+### Features
+
+* add Performance class ([#641](https://github.com/oclif/core/issues/641)) ([c808189](https://github.com/oclif/core/commit/c8081890bcd73b382ba2eb03ae13ad6cfd6b1f17))
+
+
+
+# [2.4.0](https://github.com/oclif/core/compare/2.3.2...2.4.0) (2023-02-28)
+
+
+### Features
+
+* add option to skip oclif error printing ([#642](https://github.com/oclif/core/issues/642)) ([ca88895](https://github.com/oclif/core/commit/ca88895bcfdca2d1c1ae5eda6e879ae6b1ac4122))
+
+
+
 ## [2.3.2](https://github.com/oclif/core/compare/2.3.1...2.3.2) (2023-02-28)
 
 

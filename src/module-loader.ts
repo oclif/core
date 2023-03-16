@@ -136,11 +136,15 @@ export default class ModuleLoader {
     let isESM: boolean
     let filePath: string
 
+    const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
+      return (<IPlugin>config).type !== undefined
+    }
+
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch {
-      filePath = Config.tsPath(config.root, modulePath)
+      filePath = isPlugin(config) ? Config.tsPath(config.root, modulePath, config.type) : Config.tsPath(config.root, modulePath)
 
       let fileExists = false
       let isDirectory = false

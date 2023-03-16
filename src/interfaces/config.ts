@@ -9,6 +9,22 @@ export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'
 export type ArchTypes = 'arm' | 'arm64' | 'mips' | 'mipsel' | 'ppc' | 'ppc64' | 's390' | 's390x' | 'x32' | 'x64' | 'x86'
 
+export type PluginVersionDetail = {
+  version: string;
+  type: string;
+  root: string
+};
+
+export type VersionDetails = {
+  cliVersion: string;
+  architecture: string;
+  nodeVersion: string;
+  pluginVersions?: Record<string, PluginVersionDetail>;
+  osVersion?: string;
+  shell?: string;
+  rootPath?: string;
+}
+
 export interface Config {
   configGraph: ConfigGraph | undefined
   name: string;
@@ -99,6 +115,7 @@ export interface Config {
   readonly commands: Command.Loadable[];
   readonly topics: Topic[];
   readonly commandIDs: string[];
+  readonly versionDetails: VersionDetails
 
   runCommand<T = unknown>(id: string, argv?: string[], cachedCommand?: Command.Loadable): Promise<T>;
   runHook<T extends keyof Hooks>(event: T, opts: Hooks[T]['options'], timeout?: number, captureErrors?: boolean): Promise<Hook.Result<Hooks[T]['return']>>;
