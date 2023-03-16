@@ -11,8 +11,10 @@ export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
 export {handle} from './handle'
 
-export function exit(code = 0): never {
-  throw new ExitError(code)
+export function exit(code = 0) {
+  if (code !== 0) {
+    throw new ExitError(code)
+  }
 }
 
 export function error(input: Error | string, options: {exit: false} & PrettyPrintableError): void
