@@ -1,3 +1,12 @@
+## [2.6.4](https://github.com/oclif/core/compare/2.6.3...2.6.4) (2023-03-16)
+
+
+### Bug Fixes
+
+* pass plugin type when resolving a module path ([#659](https://github.com/oclif/core/issues/659)) ([d5f58a3](https://github.com/oclif/core/commit/d5f58a342d27e381e45fbaa86fdd7983d531f197))
+
+
+
 ## [2.6.3](https://github.com/oclif/core/compare/2.6.2...2.6.3) (2023-03-13)
 
 
