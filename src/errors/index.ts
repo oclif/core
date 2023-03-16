@@ -13,13 +13,24 @@ import {OclifError, PrettyPrintableError} from '../interfaces'
 
 export {PrettyPrintableError}
 
-export function exit(code = 0): never {
-  throw new ExitError(code)
+export function exit(code = 0) {
+  if (code !== 0) {
+    throw new ExitError(code)
+  }
 }
 
-export function error(input: string | Error, options: {exit: false} & PrettyPrintableError): void
-export function error(input: string | Error, options?: {exit?: number} & PrettyPrintableError): never
-export function error(input: string | Error, options: {exit?: number | false} & PrettyPrintableError = {}): void {
+export function error(
+  input: string | Error,
+  options: { exit: false } & PrettyPrintableError
+): void;
+export function error(
+  input: string | Error,
+  options?: { exit?: number } & PrettyPrintableError
+): never;
+export function error(
+  input: string | Error,
+  options: { exit?: number | false } & PrettyPrintableError = {},
+): void {
   let err: Error & OclifError
 
   if (typeof input === 'string') {
@@ -30,7 +41,9 @@ export function error(input: string | Error, options: {exit?: number | false} & 
     throw new TypeError('first argument must be a string or instance of Error')
   }
 
-  err = applyPrettyPrintOptions(err, options) as Error & OclifError & PrettyPrintableError
+  err = applyPrettyPrintOptions(err, options) as Error &
+    OclifError &
+    PrettyPrintableError
 
   if (options.exit === false) {
     const message = prettyPrint(err)
