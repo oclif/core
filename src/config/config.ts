@@ -6,15 +6,15 @@ import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
+import {collectUsableIds, compact, Debug, getCommandIdPermutations, loadJSON} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
-import {CompletableOptionFlag, Arg} from '../interfaces/parser'
+import {Arg, CompletableOptionFlag} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
 import {settings} from '../settings'
@@ -97,7 +97,7 @@ export class Config implements IConfig {
   public valid!: boolean
   public version!: string
   public windows!: boolean
-  public binAliases?: string[];
+  public binAliases?: string[]
   public configGraph: ConfigGraph | undefined
 
   protected warned = false
@@ -174,16 +174,16 @@ export class Config implements IConfig {
       ...s3.templates,
       target: {
         baseDir: '<%- bin %>',
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
+        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>',
+        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>',
+        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- platform %>-<%- arch %>',
         ...s3.templates && s3.templates.target,
       },
       vanilla: {
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %><%- ext %>',
+        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>',
         baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
+        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %>version',
         ...s3.templates && s3.templates.vanilla,
       },
     }
@@ -212,7 +212,8 @@ export class Config implements IConfig {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
-   this.loadConfigGraph()
+
+    this.loadConfigGraph()
 
     marker?.stop()
   }
@@ -508,7 +509,11 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {
+        version: p.version,
+        type: p.type,
+        root: p.root,
+      }])),
       osVersion: `${os.type()} ${os.release()}`,
       shell: this.shell,
       rootPath: this.root,
@@ -861,7 +866,7 @@ const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
 }
 
 export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command.Cached> {
-  const flags = {} as {[k: string]: Command.Flag.Cached}
+  const flags = {} as { [k: string]: Command.Flag.Cached }
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {
@@ -914,7 +919,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  const args = {} as {[k: string]: Command.Arg.Cached}
+  const args = {} as { [k: string]: Command.Arg.Cached }
   for (const [name, arg] of Object.entries(ensureArgObject(c.args))) {
     args[name] = {
       name,

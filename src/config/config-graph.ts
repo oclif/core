@@ -4,6 +4,7 @@ import {subgraph} from 'graphology-operators'
 import {Config, PJSON} from '../interfaces'
 import {Command} from '../command'
 import * as crypto from 'crypto'
+import {Performance} from '../performance'
 
 /* start of Akseli Palén code */
 /**
@@ -195,6 +196,7 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
   }
 
   public static fromConfig(config: Config): ConfigGraph {
+    const marker = Performance.mark('configGraph.fromConfig')
     const graph = new ConfigGraph(config.flexibleTaxonomy, config.pjson)
     for (const command of config.commands) {
       const pluginCommand = graph.addPluginCommand(command.id, command)
@@ -230,6 +232,7 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
       }
     }
 
+    marker?.stop()
     return graph
   }
 
@@ -303,7 +306,7 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
   }
 
   public findCommand(command: string, opts: { must: boolean }): Command.Loadable {
-    // given a command id, find the command
+    const marker = Performance.mark(`configGraph.findCommand#${command}`, {must: opts.must})
     // a command string maybe a command id, a command alias, or a command combo
 
     const commandKeys = this.getCommandKeys(command)
@@ -313,12 +316,19 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
       throw new Error(`Command not found: ${command}`)
     }
 
+    marker?.stop()
     return pluginCommand
   }
 
   public findMatches(command: string, flags: string[]): (Command.Loadable | undefined)[] | undefined {
+    const marker = Performance.mark(`configGraph.findMatches#${command}`, {flags})
     const commandKeys = this.getCommandKeys(command)
-    if (commandKeys.length === 0) return
+    if (commandKeys.length === 0) {
+      marker?.stop()
+      return
+    }
+
+    marker?.addDetails({cmdKeyCount: commandKeys.length})
 
     // with the flags, produce a list of flag keys
     const flagKeys = [
@@ -332,6 +342,8 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
       ),
     ].flat(2)
 
+    marker?.addDetails({flagKeyCount: flagKeys.length})
+
     // commandKeys contains all potential matches to the provided command - this is full and partial matches
     // flagKeys contains all flag keys (nodeType = 'flag')
     // reduce the commandKeys to only those that have all the flagKeys
@@ -341,6 +353,9 @@ export class ConfigGraph extends DirectedGraph<GraphNodeAttributes, Attributes, 
       .filter(n => this.getNodeAttributes(n).nodeType === 'flag'))
       return flagKeys.every(flag => flagNodes.has(flag))
     }))
+
+    marker?.addDetails({cmdWithAllFlagsCount: commandsWithAllFlags.nodes().length})
+    marker?.stop()
     return this.getPluginCommandKeys(commandsWithAllFlags.nodes()).map(key => this.getNodeAttribute(key, 'command'))
   }
 
