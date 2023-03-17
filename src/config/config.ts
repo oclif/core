@@ -817,7 +817,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
-      return await flag.defaultHelp()
+      return await flag.defaultHelp({options: flag})
     } catch {
       return
     }
@@ -826,7 +826,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: {}, flags: {}})
+      return await flag.default({options: flag, flags: {}})
     } catch {}
   } else {
     return flag.default

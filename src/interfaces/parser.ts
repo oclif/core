@@ -56,7 +56,7 @@ export type DefaultContext<T> = {
 }
 
 export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<T>)
-export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<string | undefined>)
+export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: Omit<DefaultContext<P & OptionFlag<T, P>>, 'flags'>) => Promise<string | undefined>)
 
 export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<T>)
 export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
@@ -208,7 +208,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
 
 export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
   parse: FlagParser<T, string, P>
-  defaultHelp?: FlagDefaultHelp<T>;
+  defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
   default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
 }
