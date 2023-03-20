@@ -55,11 +55,11 @@ export type DefaultContext<T> = {
   flags: Record<string, string>;
 }
 
-export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<T>)
-export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<string | undefined>)
+export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, noSensitiveData?: boolean) => Promise<T>)
+export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, noSensitiveData?: boolean) => Promise<string | undefined>)
 
-export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<T>)
-export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
+export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, noSensitiveData?: boolean) => Promise<T>)
+export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, noSensitiveData?: boolean) => Promise<string | undefined>)
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
 export type Relationship = {
@@ -208,7 +208,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
 
 export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
   parse: FlagParser<T, string, P>
-  defaultHelp?: FlagDefaultHelp<T>;
+  defaultHelp?: T | FlagDefaultHelp<T>;
   input: string[];
   default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
 }
