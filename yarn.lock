@@ -1671,21 +1671,7 @@ events@^3.3.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-fancy-test@^2.0.12:
-  version "2.0.12"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.12.tgz#a93cd92ffc23f70b069c39f19940d34f64c6ca67"
-  integrity sha512-S7qVQNaViLTMzn71huZvrUCV59ldq+enQ1EQOkdNbl4q4Om97gwqbYKvZoglsnzCWRRFaFP+qHynpdqaLdiZqg==
-  dependencies:
-    "@types/chai" "*"
-    "@types/lodash" "*"
-    "@types/node" "*"
-    "@types/sinon" "*"
-    lodash "^4.17.13"
-    mock-stdin "^1.0.0"
-    nock "^13.3.0"
-    stdout-stderr "^0.1.9"
-
-fancy-test@^2.0.13:
+fancy-test@^2.0.12, fancy-test@^2.0.13:
   version "2.0.13"
   resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.13.tgz#861323fe91f5f4b3d6d2e53104756f64274d7dfe"
   integrity sha512-n+rbO0zU861qNT4L3vIy2CEZlsmLR1sp8sy/uZDEOdmRtfnBBwN9OgT37X0zhQJZTlu2vkdKRu51BsyekgB13Q==
@@ -1930,10 +1916,10 @@ graphology-operators@^1.6.0:
   dependencies:
     graphology-utils "^2.0.0"
 
-graphology-types@^0.24.5:
-  version "0.24.5"
-  resolved "https://registry.yarnpkg.com/graphology-types/-/graphology-types-0.24.5.tgz#55b93139047a40657098d308ae7daf0ab9818cc1"
-  integrity sha512-m8FVoj9b6MwIaTN+/AvoxXhcK5n0uSe7ZnhbQNTcjh94vzN6m5hU501LihtCfRjF35QEMVrXYOrTNO0wAR1Gxw==
+graphology-types@^0.24.7:
+  version "0.24.7"
+  resolved "https://registry.yarnpkg.com/graphology-types/-/graphology-types-0.24.7.tgz#7d630a800061666bfa70066310f56612e08b7bee"
+  integrity sha512-tdcqOOpwArNjEr0gNQKCXwaNCWnQJrog14nJNQPeemcLnXQUUGrsCWpWkVKt46zLjcS6/KGoayeJfHHyPDlvwA==
 
 graphology-utils@^2.0.0:
   version "2.5.2"

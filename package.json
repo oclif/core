@@ -19,7 +19,7 @@
     "globby": "^11.1.0",
     "graphology": "^0.25.1",
     "graphology-operators": "^1.6.0",
-    "graphology-types": "^0.24.5",
+    "graphology-types": "^0.24.7",
     "hyperlinker": "^1.0.0",
     "indent-string": "^4.0.0",
     "is-wsl": "^2.2.0",
