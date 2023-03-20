@@ -73,5 +73,5 @@ export interface Plugin {
 
   findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
-  load(noSensitiveData: boolean): Promise<void>;
+  load(suppressSensitiveData: boolean): Promise<void>;
 }

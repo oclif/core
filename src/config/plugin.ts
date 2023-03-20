@@ -136,7 +136,13 @@ export class Plugin implements IPlugin {
 
   constructor(public options: PluginOptions) {}
 
-  public async load(noSensitiveData?: boolean): Promise<void> {
+  /**
+   * Loads a plugin
+   * @param suppressSensitiveData - if true, suppress sensitive data from being included in cached data
+   * default is false to maintain backwards compatibility
+   * @returns Promise<void>
+   */
+  public async load(suppressSensitiveData?: boolean): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
@@ -160,7 +166,7 @@ export class Plugin implements IPlugin {
 
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
 
-    this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate), noSensitiveData)
+    this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate), suppressSensitiveData)
     this.commands = Object
     .entries(this.manifest.commands)
     .map(([id, c]) => ({
@@ -244,7 +250,7 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
-  protected async _manifest(ignoreManifest: boolean, errorOnManifestCreate = false, noSensitiveData = false): Promise<Manifest> {
+  protected async _manifest(ignoreManifest: boolean, errorOnManifestCreate = false, suppressSensitiveData = false): Promise<Manifest> {
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
         const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
@@ -279,7 +285,7 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, await toCached(await this.findCommand(id, {must: true}), this, noSensitiveData)]
+          return [id, await toCached(await this.findCommand(id, {must: true}), this, suppressSensitiveData)]
         } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
