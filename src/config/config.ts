@@ -833,11 +833,11 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, noSensitive
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
+const defaultArgToCached = async (arg: Arg<any>, noSensitiveData = false): Promise<any> => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
-      return await arg.defaultHelp({options: arg, flags: {}}, true)
+      return await arg.defaultHelp({options: arg, flags: {}}, noSensitiveData)
     } catch {
       return
     }
@@ -846,7 +846,7 @@ const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: arg, flags: {}}, true)
+      return await arg.default({options: arg, flags: {}}, noSensitiveData)
     } catch {}
   } else {
     return arg.default
@@ -914,7 +914,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, n
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg),
+      default: await defaultArgToCached(arg, noSensitiveData),
       hidden: arg.hidden,
     }
   }
