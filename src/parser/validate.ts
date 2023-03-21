@@ -118,7 +118,8 @@ export async function validate(parse: {
       if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault)
         continue
       if (parse.output.flags[flag] !== undefined) {
-        return {...base, status: 'failed', reason: `--${flag}=${parse.output.flags[flag]} cannot also be provided when using --${name}`}
+        const flagValue = parse.output.metadata.flags?.[flag]?.defaultHelp ?? parse.output.flags[flag]
+        return {...base, status: 'failed', reason: `--${flag}=${flagValue} cannot also be provided when using --${name}`}
       }
     }
 

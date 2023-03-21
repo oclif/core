@@ -43,6 +43,7 @@ export type Metadata = {
 
 type MetadataFlag = {
   setFromDefault?: boolean;
+  defaultHelp?: unknown;
 }
 
 export type ListItem = [string, string | undefined]
@@ -55,11 +56,94 @@ export type DefaultContext<T> = {
   flags: Record<string, string>;
 }
 
-export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, suppressSensitiveData?: boolean) => Promise<T>)
-export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, suppressSensitiveData?: boolean) => Promise<string | undefined>)
+/**
+ * Type to define a default value for a flag.
+ * @param context The context of the flag.
+ * @param isWritingManifest Informs the function that a manifest file is being written.
+ * The manifest file is used to store the flag definitions, with a default value if present, for a command and is published to npm.
+ * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
+ * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
+ * in the function's implementation.
+ * @example
+ * static flags = {
+ *   foo: flags.string({
+ *     defaultHelp: async (context, isWritingManifest) => {
+ *       if (isWritingManifest) {
+ *         return undefined
+ *       }
+ *       return 'value that is used outside a manifest'
+ *     },
+ *    }),
+ *  }
+ */
+export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, isWritingManifest?: boolean) => Promise<T>)
 
-export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, suppressSensitiveData?: boolean) => Promise<T>)
-export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, suppressSensitiveData?: boolean) => Promise<string | undefined>)
+/**
+ * Type to define a defaultHelp value for a flag.
+ * The defaultHelp value is used in the help output for the flag and when writing a manifest.
+ * It is also can be used to provide a value for the flag when issuing certain error messages.
+ *
+ * @param context The context of the flag.
+ * @param isWritingManifest Informs the function that a manifest file is being written.
+ * The manifest file is used to store the flag definitions, with a default value if present via defaultHelp, for a command and is published to npm.
+ * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
+ * The plugin developer can use isWritingManifest to determine if the defaultHelp value should be omitted from the manifest.
+ * in the function's implementation.
+ * @example
+ * static flags = {
+ *   foo: flags.string({
+ *     defaultHelp: async (context, isWritingManifest) => {
+ *       if (isWritingManifest) {
+ *         return undefined
+ *       }
+ *       return 'value that is used outside a manifest'
+ *     },
+ *    }),
+ *  }
+ */
+export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, isWritingManifest?: boolean) => Promise<string | undefined>)
+
+/**
+ * Type to define a default value for an arg.
+ * @param context The context of the arg.
+ * @param isWritingManifest Informs the function that a manifest file is being written.
+ * The manifest file is used to store the arg definitions, with a default value if present, for a command and is published to npm.
+ * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
+ * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
+ * in the function's implementation.
+ * @example
+ *   public static readonly args = {
+ *     one: Args.string({
+ *       default: async (context, isWritingManifest) => {
+ *          if (isWritingManifest) {
+ *             return undefined
+ *          }
+ *          return 'value that is used outside a manifest'
+ *       }),
+ *   };
+ */
+export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, isWritingManifest?: boolean) => Promise<T>)
+
+/**
+ * Type to define a defaultHelp value for an arg.
+ * @param context The context of the arg.
+ * @param isWritingManifest Informs the function that a manifest file is being written.
+ * The manifest file is used to store the arg definitions, with a default value if present via defaultHelp, for a command and is published to npm.
+ * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
+ * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
+ * in the function's implementation.
+ * @example
+ *   public static readonly args = {
+ *     one: Args.string({
+ *       defaultHelp: async (context, isWritingManifest) => {
+ *          if (isWritingManifest) {
+ *             return undefined
+ *          }
+ *          return 'value that is used outside a manifest'
+ *       }),
+ *   };
+ */
+export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, isWritingManifest?: boolean) => Promise<string | undefined>)
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
 export type Relationship = {

@@ -813,11 +813,11 @@ export class Config implements IConfig {
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, suppressSensitiveData = false) => {
+const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingManifest = false) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
-      return await flag.defaultHelp({options: flag, flags: {}}, suppressSensitiveData)
+      return await flag.defaultHelp({options: flag, flags: {}}, isWritingManifest)
     } catch {
       return
     }
@@ -826,18 +826,18 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, suppressSen
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: {}, flags: {}}, suppressSensitiveData)
+      return await flag.default({options: {}, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return flag.default
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>, suppressSensitiveData = false): Promise<any> => {
+const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Promise<any> => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
-      return await arg.defaultHelp({options: arg, flags: {}}, suppressSensitiveData)
+      return await arg.defaultHelp({options: arg, flags: {}}, isWritingManifest)
     } catch {
       return
     }
@@ -846,14 +846,14 @@ const defaultArgToCached = async (arg: Arg<any>, suppressSensitiveData = false):
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: arg, flags: {}}, suppressSensitiveData)
+      return await arg.default({options: arg, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return arg.default
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, suppressSensitiveData?: boolean): Promise<Command.Cached> {
+export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Command.Cached> {
   const flags = {} as {[k: string]: Command.Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
@@ -894,7 +894,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, s
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, suppressSensitiveData),
+        default: await defaultFlagToCached(flag, isWritingManifest),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
@@ -914,7 +914,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, s
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg, suppressSensitiveData),
+      default: await defaultArgToCached(arg, isWritingManifest),
       hidden: arg.hidden,
     }
   }

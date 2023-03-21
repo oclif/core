@@ -217,6 +217,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[token.flag]
 
       if (!flag) throw new CLIError(`Unexpected flag ${token.flag}`)
+
+      // if flag has defaultHelp, capture its value into metadata
+      if (Reflect.has(flag, 'defaultHelp')) {
+        const defaultHelpProperty = Reflect.get(flag, 'defaultHelp')
+        const defaultHelp = (typeof defaultHelpProperty === 'function' ? await defaultHelpProperty({options: flag, flags, ...this.context}) : defaultHelpProperty)
+        this.metaData.flags[token.flag] = {...this.metaData.flags[token.flag], defaultHelp}
+      }
+
       if (flag.type === 'boolean') {
         if (token.input === `--no-${flag.name}`) {
           flags[token.flag] = false
@@ -256,7 +264,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
       if (flags[k]) continue
-      if (flag.env && Object.prototype.hasOwnProperty.call(process.env, flag.env)) {
+      if (flag.env && Reflect.has(process.env, flag.env)) {
         const input = process.env[flag.env]
         if (flag.type === 'option') {
           if (input) {
@@ -271,7 +279,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
 
       if (!(k in flags) && flag.default !== undefined) {
-        this.metaData.flags[k] = {setFromDefault: true}
+        this.metaData.flags[k] = {...this.metaData.flags[k], setFromDefault: true}
         const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags, ...this.context}) : flag.default)
         flags[k] = defaultValue
       }
