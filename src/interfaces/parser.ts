@@ -292,7 +292,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
 
 export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
   parse: FlagParser<T, string, P>
-  defaultHelp?: T | FlagDefaultHelp<T>;
+  defaultHelp?: FlagDefaultHelp<T>;
   input: string[];
   default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
 }
