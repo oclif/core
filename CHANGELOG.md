@@ -1,3 +1,12 @@
+## [2.6.5](https://github.com/oclif/core/compare/2.6.4...2.6.5) (2023-03-21)
+
+
+### Bug Fixes
+
+* add flag name and short char to deprecation message ([#664](https://github.com/oclif/core/issues/664)) ([79c41ca](https://github.com/oclif/core/commit/79c41cafe58a27f22b6f7c88e1126c5fd06cb7bb))
+
+
+
 ## [2.6.4](https://github.com/oclif/core/compare/2.6.3...2.6.4) (2023-03-16)
 
 
