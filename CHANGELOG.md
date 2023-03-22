@@ -1,3 +1,12 @@
+## [2.7.1](https://github.com/oclif/core/compare/2.7.0...2.7.1) (2023-03-22)
+
+
+### Reverts
+
+* Revert "feat: add param noSensitiveData to Plugin.load (#665)" (#670) ([bdcbc87](https://github.com/oclif/core/commit/bdcbc8735c1c585029217215679da34608780f08)), closes [#665](https://github.com/oclif/core/issues/665) [#670](https://github.com/oclif/core/issues/670)
+
+
+
 # [2.7.0](https://github.com/oclif/core/compare/2.6.5...2.7.0) (2023-03-22)
 
 
