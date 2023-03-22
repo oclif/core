@@ -106,7 +106,7 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
-        const dynamicCommand = await toCached(await command.load(), undefined, false)
+        const dynamicCommand = await toCached(await command.load())
         await this.showCommandHelp(dynamicCommand)
       } else {
         await this.showCommandHelp(command)
