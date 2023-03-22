@@ -1,3 +1,12 @@
+# [2.7.0](https://github.com/oclif/core/compare/2.6.5...2.7.0) (2023-03-22)
+
+
+### Features
+
+* add param noSensitiveData to Plugin.load ([#665](https://github.com/oclif/core/issues/665)) ([b4a738e](https://github.com/oclif/core/commit/b4a738e40735c40dbf633546011c4a860ebff46c))
+
+
+
 ## [2.6.5](https://github.com/oclif/core/compare/2.6.4...2.6.5) (2023-03-21)
 
 
