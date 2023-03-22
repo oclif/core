@@ -103,7 +103,7 @@ describe('command', () => {
       }
       }
 
-      const c = await toCached(C, undefined, false)
+      const c = await toCached(C)
 
       expect(c).to.deep.equal({
         id: 'foo:bar',
