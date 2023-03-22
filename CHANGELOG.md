@@ -1,3 +1,30 @@
+## [2.6.5](https://github.com/oclif/core/compare/2.6.4...2.6.5) (2023-03-21)
+
+
+### Bug Fixes
+
+* add flag name and short char to deprecation message ([#664](https://github.com/oclif/core/issues/664)) ([79c41ca](https://github.com/oclif/core/commit/79c41cafe58a27f22b6f7c88e1126c5fd06cb7bb))
+
+
+
+## [2.6.4](https://github.com/oclif/core/compare/2.6.3...2.6.4) (2023-03-16)
+
+
+### Bug Fixes
+
+* pass plugin type when resolving a module path ([#659](https://github.com/oclif/core/issues/659)) ([d5f58a3](https://github.com/oclif/core/commit/d5f58a342d27e381e45fbaa86fdd7983d531f197))
+
+
+
+## [2.6.3](https://github.com/oclif/core/compare/2.6.2...2.6.3) (2023-03-13)
+
+
+### Bug Fixes
+
+* handle undefined env.SHELL ([#657](https://github.com/oclif/core/issues/657)) ([71fc49f](https://github.com/oclif/core/commit/71fc49fb84c217ced89c12e5ad86671c49e4c1aa))
+
+
+
 ## [2.6.2](https://github.com/oclif/core/compare/2.6.1...2.6.2) (2023-03-09)
 
 

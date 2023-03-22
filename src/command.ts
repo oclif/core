@@ -280,17 +280,23 @@ export abstract class Command {
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
     for (const flag of Object.keys(flags)) {
-      const deprecated = this.ctor.flags[flag]?.deprecated
+      const flagDef = this.ctor.flags[flag]
+      const deprecated = flagDef?.deprecated
       if (deprecated) {
         this.warn(formatFlagDeprecationWarning(flag, deprecated))
       }
 
-      const deprecateAliases = this.ctor.flags[flag]?.deprecateAliases
-      const aliases = (this.ctor.flags[flag]?.aliases ?? []).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+      const deprecateAliases = flagDef?.deprecateAliases
+      const aliases = (flagDef?.aliases ?? []).map(a => a.length === 1 ? `-${a}` : `--${a}`)
       if (deprecateAliases && aliases.length > 0) {
         const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
         for (const alias of foundAliases) {
-          this.warn(formatFlagDeprecationWarning(alias, {to: this.ctor.flags[flag]?.name}))
+          let preferredUsage = `--${flagDef?.name}`
+          if (flagDef?.char) {
+            preferredUsage += ` | -${flagDef?.char}`
+          }
+
+          this.warn(formatFlagDeprecationWarning(alias, {to: preferredUsage}))
         }
       }
     }
