@@ -440,10 +440,10 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^2.4.0", "@oclif/core@^2.6.2":
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.6.2.tgz#6ec15faf0c1e0e01e3c13c1c33827c12baaf0c88"
-  integrity sha512-roxcBLr4BuoOEDEkMQk4Yy0Tolr39n6i+A63qPLa19vrgxjZZJygh2HpThsn69/UPuEzMq051FnvJ9tNln3Y5g==
+"@oclif/core@^2.6.2", "@oclif/core@^2.6.4":
+  version "2.6.5"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.6.5.tgz#bfe3200a3dd5fb75cc444c7d0d98c1959fd32083"
+  integrity sha512-fk2dVH3eJ3skL+gOrxowy4dlqTMH/0iBffubLncSEOTb3pXuDQspzNmP60aq5Y82XxKN0iOj/5ZqxtiMHpH1Sg==
   dependencies:
     "@types/cli-progress" "^3.11.0"
     ansi-escapes "^4.3.2"
@@ -499,13 +499,13 @@
     tslib "^2.4.1"
     yarn "^1.22.18"
 
-"@oclif/test@^2.3.9":
-  version "2.3.9"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-2.3.9.tgz#6cb071c2a5537caf45e1c42c98549ece5921f536"
-  integrity sha512-FACnv9W9Pd0F9ADH/xCh8n3s9bJ3NvCoR4QkD8fedjxocfASu00h+ggFDVSlD2Wmgqpk1E0HSK2gDvKKtSJQOQ==
+"@oclif/test@^2.3.11":
+  version "2.3.11"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-2.3.11.tgz#efb268b2313bfe89c0ceee08497cbca8fc8f7b3d"
+  integrity sha512-QZGhAla1+lfXGJfzB/7yMs1rtdjmHFuu9prBxuT6yHKXTIdi5vwqDZKKzlZzJhtNLe+37ub/Z7uk0zT7dXbhBA==
   dependencies:
-    "@oclif/core" "^2.4.0"
-    fancy-test "^2.0.12"
+    "@oclif/core" "^2.6.4"
+    fancy-test "^2.0.13"
 
 "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.8.3":
   version "1.8.3"
@@ -1666,7 +1666,7 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-fancy-test@^2.0.12, fancy-test@^2.0.15:
+fancy-test@^2.0.13, fancy-test@^2.0.15:
   version "2.0.15"
   resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.15.tgz#d2949d7a4b889030389e46402289c754be69ffbb"
   integrity sha512-yCtzWue60qfQd+b16dVUNE8kWCyQHNHUALnrue32M/ZxwH2AXjzjxdzA5YCe48kFlzqIi/tSxOuJa8TkU8Px1g==
