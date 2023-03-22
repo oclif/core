@@ -108,7 +108,7 @@ export function formatFlagDeprecationWarning(flag: string, opts: true | Deprecat
     message += ` and will be removed in version ${opts.version}`
   }
 
-  message += opts.to ? `. Use "--${opts.to}" instead.` : '.'
+  message += opts.to ? `. Use "${opts.to}" instead.` : '.'
 
   return message
 }
