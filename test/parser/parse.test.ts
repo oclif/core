@@ -684,6 +684,10 @@ See more help with --help`)
         constructor(input: string) {
           this.prop = input
         }
+
+        public toString(): string {
+          return this.prop
+        }
       }
       it('uses default via value', async () => {
         const out = await parse([], {
@@ -706,6 +710,43 @@ See more help with --help`)
           },
         })
         expect(out.flags.foo?.prop).to.equal('baz')
+      })
+      it('should error with exclusive flag violation', async () => {
+        try {
+          const out = await parse(['--foo', 'baz', '--bar'], {
+            flags: {
+              foo: Flags.custom<TestClass>({
+                parse: async input => new TestClass(input),
+                defaultHelp: new TestClass('bar'),
+              })(),
+              bar: Flags.boolean({
+                exclusive: ['foo'],
+              }),
+            },
+          })
+          expect.fail(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error) {
+          assert(error instanceof Error)
+          expect(error.message).to.include('--foo=bar cannot also be provided when using --bar')
+        }
+      })
+      it('should error with exclusive flag violation and defaultHelp value', async () => {
+        try {
+          const out = await parse(['--foo', 'baz', '--bar'], {
+            flags: {
+              foo: Flags.custom<TestClass>({
+                parse: async input => new TestClass(input),
+              })(),
+              bar: Flags.boolean({
+                exclusive: ['foo'],
+              }),
+            },
+          })
+          expect.fail(`Should have thrown an error ${JSON.stringify(out)}`)
+        } catch (error) {
+          assert(error instanceof Error)
+          expect(error.message).to.include('--foo=baz cannot also be provided when using --bar')
+        }
       })
       it('uses parser when value provided', async () => {
         const out = await parse(['--foo=bar'], {
