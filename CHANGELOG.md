@@ -1,3 +1,12 @@
+# [2.8.0](https://github.com/oclif/core/compare/2.7.1...2.8.0) (2023-03-28)
+
+
+### Features
+
+* feat: add new param isWritingManifest to Plugin.load ([#675](https://github.com/oclif/core/issues/675)) ([c452981](https://github.com/oclif/core/commit/c45298132860f83b4894d9db51e3e6f76d80d8f5))
+
+
+
 ## [2.7.1](https://github.com/oclif/core/compare/2.7.0...2.7.1) (2023-03-22)
 
 
