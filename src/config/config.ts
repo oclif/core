@@ -6,15 +6,15 @@ import {fileURLToPath, URL} from 'url'
 import {format} from 'util'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
+import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import * as Plugin from './plugin'
-import {collectUsableIds, compact, Debug, getCommandIdPermutations, loadJSON} from './util'
+import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
-import {Arg, CompletableOptionFlag} from '../interfaces/parser'
+import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
 import {settings} from '../settings'
@@ -174,16 +174,16 @@ export class Config implements IConfig {
       ...s3.templates,
       target: {
         baseDir: '<%- bin %>',
-        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>',
-        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>',
-        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- platform %>-<%- arch %>',
+        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
         ...s3.templates && s3.templates.target,
       },
       vanilla: {
-        unversioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %><%- ext %>',
-        versioned: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>',
+        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
+        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
         baseDir: '<%- bin %>',
-        manifest: '<%- channel === \'stable\' ? \'\' : \'channels/\' + channel + \'/\' %>version',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
         ...s3.templates && s3.templates.vanilla,
       },
     }
@@ -509,11 +509,7 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {
-        version: p.version,
-        type: p.type,
-        root: p.root,
-      }])),
+      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
       osVersion: `${os.type()} ${os.release()}`,
       shell: this.shell,
       rootPath: this.root,
@@ -825,11 +821,11 @@ export class Config implements IConfig {
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
+const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingManifest = false) => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
-      return await flag.defaultHelp()
+      return await flag.defaultHelp({options: flag, flags: {}}, isWritingManifest)
     } catch {
       return
     }
@@ -838,18 +834,18 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>) => {
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: {}, flags: {}})
+      return await flag.default({options: {}, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return flag.default
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
+const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Promise<any> => {
   // Prefer the helpDefaultValue function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
-      return await arg.defaultHelp()
+      return await arg.defaultHelp({options: arg, flags: {}}, isWritingManifest)
     } catch {
       return
     }
@@ -858,15 +854,15 @@ const defaultArgToCached = async (arg: Arg<any>): Promise<any> => {
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: {}, flags: {}})
+      return await arg.default({options: arg, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return arg.default
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Command.Cached> {
-  const flags = {} as { [k: string]: Command.Flag.Cached }
+export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Command.Cached> {
+  const flags = {} as {[k: string]: Command.Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {
@@ -906,7 +902,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag),
+        default: await defaultFlagToCached(flag, isWritingManifest),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
@@ -919,14 +915,14 @@ export async function toCached(c: Command.Class, plugin?: IPlugin): Promise<Comm
     }
   }
 
-  const args = {} as { [k: string]: Command.Arg.Cached }
+  const args = {} as {[k: string]: Command.Arg.Cached}
   for (const [name, arg] of Object.entries(ensureArgObject(c.args))) {
     args[name] = {
       name,
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg),
+      default: await defaultArgToCached(arg, isWritingManifest),
       hidden: arg.hidden,
     }
   }

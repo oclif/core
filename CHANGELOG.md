@@ -1,3 +1,39 @@
+# [2.8.0](https://github.com/oclif/core/compare/2.7.1...2.8.0) (2023-03-28)
+
+
+### Features
+
+* feat: add new param isWritingManifest to Plugin.load ([#675](https://github.com/oclif/core/issues/675)) ([c452981](https://github.com/oclif/core/commit/c45298132860f83b4894d9db51e3e6f76d80d8f5))
+
+
+
+## [2.7.1](https://github.com/oclif/core/compare/2.7.0...2.7.1) (2023-03-22)
+
+
+### Reverts
+
+* Revert "feat: add param noSensitiveData to Plugin.load (#665)" (#670) ([bdcbc87](https://github.com/oclif/core/commit/bdcbc8735c1c585029217215679da34608780f08)), closes [#665](https://github.com/oclif/core/issues/665) [#670](https://github.com/oclif/core/issues/670)
+
+
+
+# [2.7.0](https://github.com/oclif/core/compare/2.6.5...2.7.0) (2023-03-22)
+
+
+### Features
+
+* add param noSensitiveData to Plugin.load ([#665](https://github.com/oclif/core/issues/665)) ([b4a738e](https://github.com/oclif/core/commit/b4a738e40735c40dbf633546011c4a860ebff46c))
+
+
+
+## [2.6.5](https://github.com/oclif/core/compare/2.6.4...2.6.5) (2023-03-21)
+
+
+### Bug Fixes
+
+* add flag name and short char to deprecation message ([#664](https://github.com/oclif/core/issues/664)) ([79c41ca](https://github.com/oclif/core/commit/79c41cafe58a27f22b6f7c88e1126c5fd06cb7bb))
+
+
+
 ## [2.6.4](https://github.com/oclif/core/compare/2.6.3...2.6.4) (2023-03-16)
 
 

@@ -103,7 +103,7 @@ describe('command', () => {
       }
       }
 
-      const c = await toCached(C)
+      const c = await toCached(C, undefined, false)
 
       expect(c).to.deep.equal({
         id: 'foo:bar',
@@ -268,6 +268,7 @@ describe('command', () => {
         name: Flags.string({
           aliases: ['username', 'target-user', 'u'],
           deprecateAliases: true,
+          char: 'o',
         }),
         other: Flags.string(),
       }
@@ -282,21 +283,21 @@ describe('command', () => {
     .stdout()
     .stderr()
     .do(async () => CMD.run(['--username', 'astro']))
-    .do(ctx => expect(ctx.stderr).to.include('Warning: The "--username" flag has been deprecated'))
+    .do(ctx => expect(ctx.stderr).to.include('Warning: The "--username" flag has been deprecated. Use "--name | -o"'))
     .it('shows warning for deprecated flag alias')
 
     fancy
     .stdout()
     .stderr()
     .do(async () => CMD.run(['--target-user', 'astro']))
-    .do(ctx => expect(ctx.stderr).to.include('Warning: The "--target-user" flag has been deprecated'))
+    .do(ctx => expect(ctx.stderr).to.include('Warning: The "--target-user" flag has been deprecated. Use "--name | -o"'))
     .it('shows warning for deprecated flag alias')
 
     fancy
     .stdout()
     .stderr()
     .do(async () => CMD.run(['-u', 'astro']))
-    .do(ctx => expect(ctx.stderr).to.include('Warning: The "-u" flag has been deprecated'))
+    .do(ctx => expect(ctx.stderr).to.include('Warning: The "-u" flag has been deprecated. Use "--name | -o"'))
     .it('shows warning for deprecated short char flag alias')
 
     fancy
