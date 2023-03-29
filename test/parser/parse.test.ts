@@ -727,7 +727,7 @@ See more help with --help`)
           expect.fail(`Should have thrown an error ${JSON.stringify(out)}`)
         } catch (error) {
           assert(error instanceof Error)
-          expect(error.message).to.include('--foo=bar cannot also be provided when using --bar')
+          expect(error.message).to.include('--foo=baz cannot also be provided when using --bar')
         }
       })
       it('should error with exclusive flag violation and defaultHelp value', async () => {
