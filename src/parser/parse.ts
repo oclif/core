@@ -279,12 +279,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }) : flag.default)
         flags[k] = defaultValue
       }
+    }
 
-      if ((k in flags) && Reflect.has(flag, 'defaultHelp')) {
+    for (const k of Object.keys(this.input.flags)) {
+      if ((k in flags) && Reflect.has(this.input.flags[k], 'defaultHelp')) {
         try {
-          const defaultHelpProperty = Reflect.get(flag, 'defaultHelp')
+          const defaultHelpProperty = Reflect.get(this.input.flags[k], 'defaultHelp')
           const defaultHelp = (typeof defaultHelpProperty === 'function' ? await defaultHelpProperty({
-            options: flag,
+            options: flags[k],
             flags, ...this.context,
           }) : defaultHelpProperty)
           this.metaData.flags[k] = {...this.metaData.flags[k], defaultHelp}
