@@ -482,13 +482,13 @@
   dependencies:
     "@oclif/core" "^2.6.2"
 
-"@oclif/plugin-plugins@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.4.1.tgz#031a65a05a531511f44e3ef5e3f56e7e833bc756"
-  integrity sha512-IZIceVzjI5RjCR7TkWN51aEPi243Mtme5dmOD4Y3HlXI1ul8gtXFeJNRKODKcUQVsJWBqRFhsH1TREfGqE06cA==
+"@oclif/plugin-plugins@^2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.4.3.tgz#b95684d7458f1c3e51a1a98bb0224b474cd57c0e"
+  integrity sha512-dkbzijBkWVCwETQHFIsWTyjX4Sfk8qF6LoWSb5jE6drwlYd89YcrneMLEYn3Fbs/vKUUjxDhO1wFwAatibbHGw==
   dependencies:
     "@oclif/color" "^1.0.4"
-    "@oclif/core" "^2.6.2"
+    "@oclif/core" "^2.6.4"
     chalk "^4.1.2"
     debug "^4.3.4"
     fs-extra "^9.0"
