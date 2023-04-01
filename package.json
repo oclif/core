@@ -65,7 +65,7 @@
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "^1.0.3",
-    "fancy-test": "^2.0.15",
+    "fancy-test": "^2.0.16",
     "globby": "^11.1.0",
     "husky": "6",
     "mocha": "^8.4.0",
