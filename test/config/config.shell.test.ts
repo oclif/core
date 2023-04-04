@@ -1,9 +1,9 @@
 import {expect} from 'chai'
 import {Config} from '../../src'
-import {userInfo as osUserInfo} from 'node:os'
-import {sep} from 'node:path'
+import {sep} from 'path'
+import {userInfo} from 'os'
 
-const getShell = () => osUserInfo().shell?.split(sep)?.pop() || 'unknown'
+const getShell = () => userInfo().shell?.split(sep)?.pop() || 'unknown'
 
 describe('config shell', () => {
   it('has a default shell', () => {

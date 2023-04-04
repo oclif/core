@@ -18,8 +18,6 @@ import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
 import {settings} from '../settings'
-import {userInfo as osUserInfo} from 'node:os'
-import {sep} from 'node:path'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -553,7 +551,7 @@ export class Config implements IConfig {
   protected _shell(): string {
     let shellPath
     const COMSPEC = process.env.COMSPEC
-    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
+    const SHELL = process.env.SHELL ?? os.userInfo().shell?.split(path.sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
     } else if (this.windows && COMSPEC) {
