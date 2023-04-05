@@ -482,13 +482,13 @@
   dependencies:
     "@oclif/core" "^2.6.2"
 
-"@oclif/plugin-plugins@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.4.1.tgz#031a65a05a531511f44e3ef5e3f56e7e833bc756"
-  integrity sha512-IZIceVzjI5RjCR7TkWN51aEPi243Mtme5dmOD4Y3HlXI1ul8gtXFeJNRKODKcUQVsJWBqRFhsH1TREfGqE06cA==
+"@oclif/plugin-plugins@^2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-2.4.3.tgz#b95684d7458f1c3e51a1a98bb0224b474cd57c0e"
+  integrity sha512-dkbzijBkWVCwETQHFIsWTyjX4Sfk8qF6LoWSb5jE6drwlYd89YcrneMLEYn3Fbs/vKUUjxDhO1wFwAatibbHGw==
   dependencies:
     "@oclif/color" "^1.0.4"
-    "@oclif/core" "^2.6.2"
+    "@oclif/core" "^2.6.4"
     chalk "^4.1.2"
     debug "^4.3.4"
     fs-extra "^9.0"
@@ -1666,10 +1666,10 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-fancy-test@^2.0.13, fancy-test@^2.0.15:
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.15.tgz#d2949d7a4b889030389e46402289c754be69ffbb"
-  integrity sha512-yCtzWue60qfQd+b16dVUNE8kWCyQHNHUALnrue32M/ZxwH2AXjzjxdzA5YCe48kFlzqIi/tSxOuJa8TkU8Px1g==
+fancy-test@^2.0.13, fancy-test@^2.0.16:
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.16.tgz#fbeb22f1f6b790b067fc774873093d0ca4fc98c1"
+  integrity sha512-Bgsd32hr+Ohrh/D4zACMstWjViYR6IHJxzvhLSzbekNIrDWOwSHx7zvKtrN/pFrFVyNBo02kNdz3PyPD5W2ibQ==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
