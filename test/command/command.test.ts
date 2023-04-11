@@ -449,4 +449,90 @@ describe('command', () => {
     .do(ctx => expect(ctx.stdout).to.equal('json output: {"a":"foobar"}\n'))
     .it('test stdout EPIPE swallowed')
   })
+  describe('json enabled and pass-through tests', () => {
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+        async run() {
+          this.log('not json output')
+        }
+      }
+      const cmd = new CMD([], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(false)
+    })
+    .it('json enabled/pass through disabled/no --json flag/jsonEnabled() should be false')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+        async run() {}
+      }
+      const cmd = new CMD(['--json'], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('json enabled/pass through disabled/--json flag before --/jsonEnabled() should be true')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = true
+          static '--' = true
+          async run() {
+            const {flags} = await cmd.parse(CMD, ['--json'])
+            expect(flags.json).to.equal(true, 'json flag should be true')
+          }
+      }
+      const cmd = new CMD(['--json'], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('json enabled/pass through enabled/--json flag before --/jsonEnabled() should be true')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = true
+          static '--' = true
+          async run() {
+            const {flags} = await cmd.parse(CMD, ['--', '--json'])
+            expect(flags.json).to.equal(false, 'json flag should be false')
+            expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
+          }
+      }
+      const cmd = new CMD(['--', '--json'], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(false)
+    })
+    .it('json enabled/pass through enabled/--json flag after --/jsonEnabled() should be false')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = true
+          static '--' = true
+          async run() {}
+      }
+      const cmd = new CMD(['--json', '--'], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('json enabled/pass through enabled/--json flag before --/jsonEnabled() should be true')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = false
+          static '--' = true
+          async run() {}
+      }
+      const cmd = new CMD(['--json'], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(false)
+    })
+    .it('json disabled/pass through enable/--json flag before --/jsonEnabled() should be false')
+  })
 })
