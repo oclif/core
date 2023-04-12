@@ -125,6 +125,8 @@ export abstract class Command {
 
   public static hasDynamicHelp = false
 
+  protected static '_--' = false
+
   protected static _enableJsonFlag = false
 
   public static get enableJsonFlag(): boolean {
@@ -140,6 +142,18 @@ export abstract class Command {
       this.flags = {} // force the flags setter to run
       delete this.flags?.json
     }
+  }
+
+  public static get '--'(): boolean {
+    return Command['_--']
+  }
+
+  public static set '--'(value: boolean) {
+    Command['_--'] = value
+  }
+
+  public get passThroughEnabled(): boolean {
+    return Command['_--']
   }
 
   /**
@@ -259,8 +273,22 @@ export abstract class Command {
     }
   }
 
+  /**
+   * Determine if the command is being run with the --json flag in a command that supports it.
+   *
+   * @returns {boolean} true if the command supports json and the --json flag is present
+   */
   public jsonEnabled(): boolean {
-    return this.ctor.enableJsonFlag && this.argv.includes('--json')
+    // if the command doesn't support json, return false
+    if (!this.ctor.enableJsonFlag) return false
+    // if the command parameter pass through is enabled, return true if the --json flag is before the '--' separator
+    if (this.passThroughEnabled) {
+      const ptIndex = this.argv.indexOf('--')
+      const jsonIndex = this.argv.indexOf('--json')
+      return jsonIndex > -1 && (ptIndex === -1 || jsonIndex < ptIndex)
+    }
+
+    return this.argv.includes('--json')
   }
 
   /**
