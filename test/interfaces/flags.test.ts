@@ -126,8 +126,6 @@ class MyCommand extends BaseCommand {
     defaultArrayFlag: arrayFlag({default: ['foo', 'bar']}),
   }
 
-  public static '--' = true
-
   public flags!: MyFlags
 
   public async run(): Promise<MyFlags> {
