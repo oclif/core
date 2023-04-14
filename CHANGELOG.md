@@ -1,3 +1,31 @@
+## [2.8.2](https://github.com/oclif/core/compare/2.8.1...2.8.2) (2023-04-12)
+
+
+### Bug Fixes
+
+*  jsonEnabled not handling after pass-through ([#687](https://github.com/oclif/core/issues/687)) ([5c7e534](https://github.com/oclif/core/commit/5c7e534229197d32ffc605f19394300c6ebdf8ac))
+
+
+
+## [2.8.1](https://github.com/oclif/core/compare/2.8.0...2.8.1) (2023-04-11)
+
+
+### Bug Fixes
+
+* default help behaves properly ([#678](https://github.com/oclif/core/issues/678)) ([8562e13](https://github.com/oclif/core/commit/8562e13f76b8d8fee0ee7ef2ddfdba98a831e3e7))
+* default help behaves properly ([#678](https://github.com/oclif/core/issues/678)) ([1d86cb0](https://github.com/oclif/core/commit/1d86cb0f3edcaa7f7bf09c779d7a307c320dcff2))
+
+
+
+# [2.8.0](https://github.com/oclif/core/compare/2.7.1...2.8.0) (2023-03-28)
+
+
+### Features
+
+* feat: add new param isWritingManifest to Plugin.load ([#675](https://github.com/oclif/core/issues/675)) ([c452981](https://github.com/oclif/core/commit/c45298132860f83b4894d9db51e3e6f76d80d8f5))
+
+
+
 ## [2.7.1](https://github.com/oclif/core/compare/2.7.0...2.7.1) (2023-03-22)
 
 
