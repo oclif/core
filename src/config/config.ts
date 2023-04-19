@@ -826,7 +826,7 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingMa
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: {}, flags: {}}, isWritingManifest)
+      return await flag.default({options: flag, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return flag.default
@@ -846,7 +846,7 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: arg, flags: {}}, isWritingManifest)
+      return await arg.default(isWritingManifest)
     } catch {}
   } else {
     return arg.default
