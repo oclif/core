@@ -846,7 +846,7 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default(isWritingManifest)
+      return await arg.default({options: arg, flags: {}}, isWritingManifest)
     } catch {}
   } else {
     return arg.default
