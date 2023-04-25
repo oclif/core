@@ -116,7 +116,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   console.log(chalk.cyan(`${testFileName}:`), install)
   await executor.executeInTestDir(install)
 
-  const build = 'yarn build'
+  const build = 'yarn build --build --verbose'
   console.log(chalk.cyan(`${testFileName}:`), build)
   await executor.executeInTestDir(build)
 
