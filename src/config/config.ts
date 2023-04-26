@@ -97,6 +97,7 @@ export class Config implements IConfig {
   public version!: string
   public windows!: boolean
   public binAliases?: string[];
+  public nsisCustomization?:string;
 
   protected warned = false
 
@@ -144,6 +145,7 @@ export class Config implements IConfig {
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
+    this.nsisCustomization = this.pjson.oclif.nsisCustomization
     this.dirname = this.pjson.oclif.dirname || this.name
     this.flexibleTaxonomy = this.pjson.oclif.flexibleTaxonomy || false
     // currently, only colons or spaces are valid separators

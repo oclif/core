@@ -25,7 +25,6 @@ export namespace PJSON {
       devPlugins?: string[];
       jitPlugins?: Record<string, string>;
       windows?: {
-        nsisCustomization?: string;
         name?: string;
         keypath?: string;
       }
@@ -83,6 +82,7 @@ export namespace PJSON {
       schema?: number;
       bin?: string;
       binAliases?: string[];
+      nsisCustomization?: string;
       npmRegistry?: string;
       scope?: string;
       dirname?: string;
