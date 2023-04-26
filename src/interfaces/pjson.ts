@@ -24,10 +24,6 @@ export namespace PJSON {
       plugins?: string[];
       devPlugins?: string[];
       jitPlugins?: Record<string, string>;
-      windows?: {
-        name?: string;
-        keypath?: string;
-      }
       helpClass?: string;
       helpOptions?: HelpOptions;
       aliases?: { [name: string]: string | null };
