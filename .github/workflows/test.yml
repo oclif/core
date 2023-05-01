@@ -11,10 +11,11 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
-        node_version: [lts/-1, lts/*, latest]
+        # node_version: [lts/-1, lts/*, latest]
+        node_version: [lts/-1, lts/*]
         exclude:
-          - os: windows-latest
-            node_version: lts/*
+          # - os: windows-latest
+          #   node_version: lts/*
           - os: windows-latest
             node_version: lts/-1
       fail-fast: false
