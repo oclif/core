@@ -107,6 +107,7 @@ export interface Config {
    * name of any bin aliases that will execute the cli
    */
   binAliases?: string[];
+  nsisCustomization?: string;
   valid: boolean;
   flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
