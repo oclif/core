@@ -1,3 +1,12 @@
+## [2.8.5](https://github.com/oclif/core/compare/2.8.4...2.8.5) (2023-05-03)
+
+
+### Bug Fixes
+
+* pass flag to default function ([#691](https://github.com/oclif/core/issues/691)) ([1cb7f26](https://github.com/oclif/core/commit/1cb7f26500b98080f35b8f914fef8441c6b07dbd))
+
+
+
 ## [2.8.4](https://github.com/oclif/core/compare/2.8.3...2.8.4) (2023-05-01)
 
 
