@@ -273,10 +273,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {...this.metaData.flags[k], setFromDefault: true}
-        const defaultValue = (typeof flag.default === 'function' ? await flag.default({
-          options: flag,
-          flags, ...this.context,
-        }) : flag.default)
+        const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags}) : flag.default)
         flags[k] = defaultValue
       }
     }
