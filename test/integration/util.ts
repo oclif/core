@@ -120,7 +120,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     throw new Error('Failed to run `yarn install`')
   }
 
-  const build = 'yarn build --build --verbose'
+  const build = 'yarn build'
   console.log(chalk.cyan(`${testFileName}:`), build)
   const yarnBuildRes = await executor.executeInTestDir(build, false)
   if (yarnBuildRes.code !== 0) {
