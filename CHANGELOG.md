@@ -1,3 +1,21 @@
+## [2.8.4](https://github.com/oclif/core/compare/2.8.3...2.8.4) (2023-05-01)
+
+
+### Bug Fixes
+
+* expose nsisCustomization property on Config ([f0210cc](https://github.com/oclif/core/commit/f0210cccf4be171dedf1ac3ad7c54668df558865))
+
+
+
+## [2.8.3](https://github.com/oclif/core/compare/2.8.2...2.8.3) (2023-05-01)
+
+
+### Bug Fixes
+
+* add nsisCustomization entry ([#695](https://github.com/oclif/core/issues/695)) ([a749c3b](https://github.com/oclif/core/commit/a749c3b2d23fa427431a5a20d82e3ada6a29b80d))
+
+
+
 ## [2.8.2](https://github.com/oclif/core/compare/2.8.1...2.8.2) (2023-04-12)
 
 
