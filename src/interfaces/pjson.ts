@@ -78,6 +78,7 @@ export namespace PJSON {
       schema?: number;
       bin?: string;
       binAliases?: string[];
+      nsisCustomization?: string;
       npmRegistry?: string;
       scope?: string;
       dirname?: string;

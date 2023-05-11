@@ -1,3 +1,49 @@
+## [2.8.5](https://github.com/oclif/core/compare/2.8.4...2.8.5) (2023-05-03)
+
+
+### Bug Fixes
+
+* pass flag to default function ([#691](https://github.com/oclif/core/issues/691)) ([1cb7f26](https://github.com/oclif/core/commit/1cb7f26500b98080f35b8f914fef8441c6b07dbd))
+
+
+
+## [2.8.4](https://github.com/oclif/core/compare/2.8.3...2.8.4) (2023-05-01)
+
+
+### Bug Fixes
+
+* expose nsisCustomization property on Config ([f0210cc](https://github.com/oclif/core/commit/f0210cccf4be171dedf1ac3ad7c54668df558865))
+
+
+
+## [2.8.3](https://github.com/oclif/core/compare/2.8.2...2.8.3) (2023-05-01)
+
+
+### Bug Fixes
+
+* add nsisCustomization entry ([#695](https://github.com/oclif/core/issues/695)) ([a749c3b](https://github.com/oclif/core/commit/a749c3b2d23fa427431a5a20d82e3ada6a29b80d))
+
+
+
+## [2.8.2](https://github.com/oclif/core/compare/2.8.1...2.8.2) (2023-04-12)
+
+
+### Bug Fixes
+
+*  jsonEnabled not handling after pass-through ([#687](https://github.com/oclif/core/issues/687)) ([5c7e534](https://github.com/oclif/core/commit/5c7e534229197d32ffc605f19394300c6ebdf8ac))
+
+
+
+## [2.8.1](https://github.com/oclif/core/compare/2.8.0...2.8.1) (2023-04-11)
+
+
+### Bug Fixes
+
+* default help behaves properly ([#678](https://github.com/oclif/core/issues/678)) ([8562e13](https://github.com/oclif/core/commit/8562e13f76b8d8fee0ee7ef2ddfdba98a831e3e7))
+* default help behaves properly ([#678](https://github.com/oclif/core/issues/678)) ([1d86cb0](https://github.com/oclif/core/commit/1d86cb0f3edcaa7f7bf09c779d7a307c320dcff2))
+
+
+
 # [2.8.0](https://github.com/oclif/core/compare/2.7.1...2.8.0) (2023-03-28)
 
 
