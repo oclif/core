@@ -41,7 +41,7 @@
     "@oclif/plugin-plugins": "^2.4.7",
     "@oclif/test": "^2.3.15",
     "@types/ansi-styles": "^3.2.1",
-    "@types/chai": "^4.3.4",
+    "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.5",
     "@types/clean-stack": "^2.1.1",
     "@types/ejs": "^3.1.2",
