@@ -42,7 +42,7 @@ class Table<T extends Record<string, unknown>> {
       extended,
       filter,
       'no-header': options['no-header'] ?? false,
-      'no-truncate': options['no-truncate'] ?? false,
+      'no-truncate': options['no-truncate'] ?? true,
       printLine: printLine ?? ((s: any) => stdout.write(s + '\n')),
       rowStart: ' ',
       sort,
