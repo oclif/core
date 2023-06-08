@@ -1,6 +1,8 @@
 import * as os from 'os'
-import {expect} from 'chai'
+import {expect, config as chaiConfig} from 'chai'
 import {Executor, Result, setup} from './util'
+
+chaiConfig.truncateThreshold = 0
 
 describe('oclif plugins', () => {
   let executor: Executor
