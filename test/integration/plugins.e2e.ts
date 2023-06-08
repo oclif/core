@@ -57,7 +57,7 @@ describe('oclif plugins', () => {
         expect(help.output).to.include('List installed plugins.')
       })
       it('should show usage', () => {
-        expect(help.output).to.include('USAGE\n  $ oclif-hello-world plugins [--core]')
+        expect(help.output).to.include('USAGE\n  $ oclif-hello-world plugins [--json] [--core]')
       })
       it('should show description', () => {
         expect(help.output).to.include('DESCRIPTION\n  List installed plugins.')
