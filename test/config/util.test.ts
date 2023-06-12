@@ -41,18 +41,37 @@ describe('util', () => {
     }
 
     describe('returns the correct number of permutations', () => {
-      test.it('returns the correct number of permutations', () => {
+      test.it('1', () => {
         expect(getCommandIdPermutations('one').length).to.equal(numberOfPermutations('one'))
+      })
+      test.it('2', () => {
         expect(getCommandIdPermutations('one:two').length).to.equal(numberOfPermutations('one:two'))
+      })
+      test.it('3', () => {
         expect(getCommandIdPermutations('one:two:three').length).to.equal(numberOfPermutations('one:two:three'))
+      })
+      test.it('4', () => {
         expect(getCommandIdPermutations('one:two:three:four').length).to.equal(numberOfPermutations('one:two:three:four'))
+      })
+      test.it('5', () => {
         expect(getCommandIdPermutations('one:two:three:four:five').length).to.equal(numberOfPermutations('one:two:three:four:five'))
+      })
+      test.it('6', () => {
         expect(getCommandIdPermutations('one:two:three:four:five:six').length).to.equal(numberOfPermutations('one:two:three:four:five:six'))
+      })
+      test.it('7', () => {
         expect(getCommandIdPermutations('one:two:three:four:five:six:seven').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven'))
+      })
+      test.it('8', () => {
         expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight'))
+      })
+      test.it('9', () => {
         expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight:nine').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight:nine'))
+      })
+      test.it('10', () => {
         expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight:nine:ten').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight:nine:ten'))
       })
     })
   })
 })
+
