@@ -48,6 +48,7 @@ describe('Config with flexible taxonomy', () => {
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
+    // eslint-disable-next-line @typescript-eslint/require-await
     const findCommand = async (): Promise<Command.Class> => {
       return MyCommandClass
     }
@@ -61,6 +62,7 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[0],
+      // eslint-disable-next-line @typescript-eslint/require-await
       async load(): Promise<Command.Class> {
         return MyCommandClass
       },
@@ -76,6 +78,7 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[1],
+      // eslint-disable-next-line @typescript-eslint/require-await
       async load(): Promise<Command.Class> {
         return MyCommandClass
       },

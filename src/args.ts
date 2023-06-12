@@ -24,6 +24,7 @@ export function custom<T = string, P = Record<string, unknown>>(defaults: Partia
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P> {
   return (options: any = {}) => {
     return {
+      // eslint-disable-next-line @typescript-eslint/require-await
       parse: async (i: string, _context: Command, _opts: P) => i,
       ...defaults,
       ...options,
@@ -34,10 +35,12 @@ export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, 
 }
 
 export const boolean = custom<boolean>({
+  // eslint-disable-next-line @typescript-eslint/require-await
   parse: async b => Boolean(b) && isNotFalsy(b),
 })
 
 export const integer = custom<number, {min?: number; max?: number;}>({
+  // eslint-disable-next-line @typescript-eslint/require-await
   parse: async (input, _, opts) => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
@@ -73,7 +76,7 @@ export const file = custom<string, {exists?: boolean}>({
 export const url = custom<URL>({
   parse: async input => {
     try {
-      return new URL(input)
+      return Promise.resolve(new URL(input))
     } catch {
       throw new Error(`Expected a valid url but received: ${input}`)
     }

@@ -347,7 +347,7 @@ See more help with --help`)
       it('parses multiple flags on custom flags', async () => {
         const out = await parse(['--foo', 'a', '--foo=b'], {
           flags: {
-            foo: Flags.custom({multiple: true, parse: async i => i})(),
+            foo: Flags.custom({multiple: true, parse: async i => Promise.resolve(i)})(),
           },
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
@@ -355,7 +355,7 @@ See more help with --help`)
       it('allowed options on multiple', async () => {
         const out = await parse(['--foo', 'a', '--foo=b'], {
           flags: {
-            foo: Flags.string({multiple: true, parse: async i => i, options: ['a', 'b']}),
+            foo: Flags.string({multiple: true, parse: async i => Promise.resolve(i), options: ['a', 'b']}),
           },
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
@@ -637,7 +637,7 @@ See more help with --help`)
       const testIntPass = 6
       const testIntFail = 7
       const customParseException = 'NOT_OK'
-      const validateEvenNumberString =  async (input:string) => Number.parseInt(input, 10) % 2 === 0 ? Number.parseInt(input, 10) : assert.fail(customParseException)
+      const validateEvenNumberString =  async (input:string) => Promise.resolve(Number.parseInt(input, 10) % 2 === 0 ? Number.parseInt(input, 10) : assert.fail(customParseException))
       it('accepts custom parse that passes', async () => {
         const out = await parse([`--int=${testIntPass}`], {
           flags: {int: Flags.integer({parse: validateEvenNumberString})},
@@ -664,7 +664,7 @@ See more help with --help`)
     it('parse', async () => {
       const out = await parse(['--foo=bar', '100'], {
         args: {num: Args.integer()},
-        flags: {foo: Flags.string({parse: async input => input.toUpperCase()})},
+        flags: {foo: Flags.string({parse: async input => Promise.resolve(input.toUpperCase())})},
       })
       expect(out.flags).to.deep.include({foo: 'BAR'})
       expect(out.args).to.deep.include({num: 100})
@@ -673,12 +673,12 @@ See more help with --help`)
 
     it('parse with a default does not parse default', async () => {
       const out = await parse([], {
-        flags: {foo: Flags.string({parse: async input => input.toUpperCase(), default: 'baz'})},
+        flags: {foo: Flags.string({parse: async input => Promise.resolve(input.toUpperCase()), default: 'baz'})},
       })
       expect(out.flags).to.deep.include({foo: 'baz'})
     })
 
-    describe('parse with a default/value of another type (class)', async () => {
+    describe('parse with a default/value of another type (class)', () => {
       class TestClass {
         public prop: string;
         constructor(input: string) {
@@ -693,7 +693,7 @@ See more help with --help`)
         const out = await parse([], {
           flags: {
             foo: Flags.custom<TestClass>({
-              parse: async input => new TestClass(input),
+              parse: async input => Promise.resolve(new TestClass(input)),
               default: new TestClass('baz'),
             })(),
           },
@@ -704,8 +704,8 @@ See more help with --help`)
         const out = await parse([], {
           flags: {
             foo: Flags.custom<TestClass>({
-              parse: async input => new TestClass(input),
-              default: async () => new TestClass('baz'),
+              parse: async input => Promise.resolve(new TestClass(input)),
+              default: async () => Promise.resolve(new TestClass('baz')),
             })(),
           },
         })
@@ -716,7 +716,7 @@ See more help with --help`)
           const out = await parse(['--foo', 'baz', '--bar'], {
             flags: {
               foo: Flags.custom<TestClass>({
-                parse: async input => new TestClass(input),
+                parse: async input => Promise.resolve(new TestClass(input)),
                 defaultHelp: new TestClass('bar'),
               })(),
               bar: Flags.boolean({
@@ -735,7 +735,7 @@ See more help with --help`)
           const out = await parse(['--foo', 'baz', '--bar'], {
             flags: {
               foo: Flags.custom<TestClass>({
-                parse: async input => new TestClass(input),
+                parse: async input => Promise.resolve(new TestClass(input)),
               })(),
               bar: Flags.boolean({
                 exclusive: ['foo'],
@@ -752,7 +752,7 @@ See more help with --help`)
         const out = await parse(['--foo=bar'], {
           flags: {
             foo: Flags.custom<TestClass>({
-              parse: async input => new TestClass(input),
+              parse: async input => Promise.resolve(new TestClass(input)),
               default: new TestClass('baz'),
             })(),
           },
@@ -819,7 +819,7 @@ See more help with --help`)
             foo: Flags.string({
               multiple: true,
               delimiter: ',',
-              parse: async input => input.replace('.txt', '.json'),
+              parse: async input => Promise.resolve(input.replace('.txt', '.json')),
             }),
           },
         },
@@ -868,8 +868,8 @@ See more help with --help`)
 
     it('default as function', async () => {
       const out = await parse([], {
-        args: {baz: Args.string({default: async () => 'BAZ'})},
-        flags: {foo: Flags.string({default: async () => 'bar'})},
+        args: {baz: Args.string({default: async () => Promise.resolve('BAZ')})},
+        flags: {foo: Flags.string({default: async () => Promise.resolve('bar')})},
       })
       expect(out.args).to.deep.include({baz: 'BAZ'})
       expect(out.argv).to.deep.equal(['BAZ'])
@@ -878,7 +878,7 @@ See more help with --help`)
 
     it('default has options', async () => {
       const def: FlagDefault<string | undefined> = async ({options}) =>
-        options.description
+        Promise.resolve(options.description)
       const out = await parse([], {
         flags: {foo: Flags.string({description: 'bar', default: def})},
       })
@@ -886,7 +886,7 @@ See more help with --help`)
     })
 
     it('can default to a different flag', async () => {
-      const def: FlagDefault<string | undefined> = async opts => opts.flags.foo
+      const def: FlagDefault<string | undefined> = async opts => Promise.resolve(opts.flags.foo)
       const out = await parse(['--foo=bar'], {
         flags: {
           bar: Flags.string({
@@ -921,7 +921,7 @@ See more help with --help`)
     it('default as function', async () => {
       const out = await parse([], {
         flags: {
-          color: Flags.boolean({default: async () => true}),
+          color: Flags.boolean({default: async () => Promise.resolve(true)}),
         },
       })
       expect(out).to.deep.include({flags: {color: true}})
@@ -948,7 +948,7 @@ See more help with --help`)
 
   describe('custom option', () => {
     it('can pass parse fn', async () => {
-      const foo = Flags.custom({char: 'f', parse: async () => 100})()
+      const foo = Flags.custom({char: 'f', parse: async () => Promise.resolve(100)})()
       const out = await parse(['-f', 'bar'], {
         flags: {foo},
       })
@@ -958,7 +958,7 @@ See more help with --help`)
 
   describe('build', () => {
     it('can pass parse fn', async () => {
-      const foo = Flags.custom({char: 'f', parse: async () => 100})
+      const foo = Flags.custom({char: 'f', parse: async () => Promise.resolve(100)})
       const out = await parse(['-f', 'bar'], {
         flags: {foo: foo()},
       })
@@ -1132,7 +1132,7 @@ See more help with --help`)
         context: {a: 101},
         flags: {
           foo: Flags.boolean({
-            parse: async (_: any, ctx: any) => ctx.a,
+            parse: async (_: any, ctx: any) => Promise.resolve(ctx.a),
           }),
         },
       })
@@ -1456,7 +1456,7 @@ See more help with --help`)
           existsStub.returns(true)
           statStub.returns({isDirectory: () => true})
           const out = await parse([`--dir=${testDir}`], {
-            flags: {dir: Flags.directory({exists: true, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
+            flags: {dir: Flags.directory({exists: true, parse: async input => Promise.resolve(input.includes('some') ? input : assert.fail(customParseException))})},
           })
           expect(out.flags).to.deep.include({dir: testDir})
         })
@@ -1466,7 +1466,7 @@ See more help with --help`)
           statStub.returns({isDirectory: () => true})
           try {
             const out = await parse([`--dir=${testDir}`], {
-              flags: {dir: Flags.directory({exists: true, parse: async input => input.includes('NOT_THERE') ? input : assert.fail(customParseException)})},
+              flags: {dir: Flags.directory({exists: true, parse: async input => Promise.resolve(input.includes('NOT_THERE') ? input : assert.fail(customParseException))})},
             })
             throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
           } catch (error_) {
@@ -1533,7 +1533,7 @@ See more help with --help`)
           existsStub.returns(true)
           statStub.returns({isFile: () => true})
           const out = await parse([`--dir=${testFile}`], {
-            flags: {dir: Flags.file({exists: false, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
+            flags: {dir: Flags.file({exists: false, parse: async input => Promise.resolve(input.includes('some') ? input : assert.fail(customParseException))})},
           })
           expect(out.flags).to.deep.include({dir: testFile})
         })
@@ -1543,7 +1543,7 @@ See more help with --help`)
           statStub.returns({isFile: () => true})
           try {
             const out = await parse([`--dir=${testFile}`], {
-              flags: {dir: Flags.file({exists: true, parse: async input => input.includes('NOT_THERE') ? input : assert.fail(customParseException)})},
+              flags: {dir: Flags.file({exists: true, parse: async input => Promise.resolve(input.includes('NOT_THERE') ? input : assert.fail(customParseException))})},
             })
             throw new Error(`Should have thrown an error ${JSON.stringify(out)}`)
           } catch (error_) {

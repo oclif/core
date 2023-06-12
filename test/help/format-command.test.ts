@@ -7,6 +7,7 @@ const g: any = global
 g.oclif.columns = 80
 
 class Command extends Base {
+  // eslint-disable-next-line @typescript-eslint/require-await
   async run() {
     return null
   }

@@ -8,7 +8,7 @@ g.oclif.columns = 80
 
 class Command extends Base {
   async run() {
-    return null
+    return Promise.resolve(null)
   }
 }
 

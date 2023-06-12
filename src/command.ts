@@ -296,6 +296,7 @@ export abstract class Command {
    */
   public abstract run(): Promise<any>
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
     if (this.config.debug) Errors.config.debug = true
@@ -357,6 +358,7 @@ export abstract class Command {
     return results
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   protected async catch(err: CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {

@@ -92,6 +92,7 @@ export class ux {
     return styled.progress
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public static async done(): Promise<void> {
     config.action.stop()
   }

@@ -49,6 +49,7 @@ describe('formatCommand', () => {
 
     static description = 'This is a very long command description that should wrap after too many characters have been entered'
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     async run() {
       'run'
     }

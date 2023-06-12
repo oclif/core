@@ -11,10 +11,12 @@ export default class extends HelpBase {
     config.showHelpSpy = this.showHelp
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   showCommandHelp = spy(async () => {
     console.log('hello from test-help-plugin #showCommandHelp')
   })
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   showHelp = spy(async () => {
     console.log('hello showHelp')
   })

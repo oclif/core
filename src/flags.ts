@@ -31,6 +31,7 @@ export function custom<T = string, P = Record<string, unknown>>(defaults: Partia
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
   return (options: any = {}) => {
     return {
+      // eslint-disable-next-line @typescript-eslint/require-await
       parse: async (input, _ctx, _opts) => input,
       ...defaults,
       ...options,
@@ -45,6 +46,7 @@ export function boolean<T = boolean>(
   options: Partial<BooleanFlag<T>> = {},
 ): BooleanFlag<T> {
   return {
+    // eslint-disable-next-line @typescript-eslint/require-await
     parse: async (b, _) => b,
     ...options,
     allowNo: Boolean(options.allowNo),
@@ -53,6 +55,7 @@ export function boolean<T = boolean>(
 }
 
 export const integer = custom<number, {min?: number; max?: number;}>({
+  // eslint-disable-next-line @typescript-eslint/require-await
   parse: async (input, _, opts) => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
@@ -86,6 +89,7 @@ export const file = custom<string, {exists?: boolean}>({
  * if the string is not a valid URL.
  */
 export const url = custom<URL>({
+  // eslint-disable-next-line @typescript-eslint/require-await
   parse: async input => {
     try {
       return new URL(input)
@@ -102,6 +106,7 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<v
   return boolean({
     description: 'Show CLI version.',
     ...opts,
+    // eslint-disable-next-line @typescript-eslint/require-await
     parse: async (_: any, ctx) => {
       ctx.log(ctx.config.userAgent)
       ctx.exit(0)
@@ -113,6 +118,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   return boolean({
     description: 'Show CLI help.',
     ...opts,
+    // eslint-disable-next-line @typescript-eslint/require-await
     parse: async (_, cmd) => {
       new Help(cmd.config).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
       cmd.exit(0)

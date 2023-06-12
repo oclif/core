@@ -27,8 +27,8 @@ export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' 
     const value = opts.unit === 'minutes' ? new Date(input).getMinutes() : new Date(input).getSeconds()
     return Promise.resolve(value)
   },
-  default: async _ctx => _ctx.options.unit === 'minutes' ? 1 : 2,
-  defaultHelp: async _ctx => _ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds',
+  default: async _ctx => Promise.resolve(_ctx.options.unit === 'minutes' ? 1 : 2),
+  defaultHelp: async _ctx => Promise.resolve(_ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds'),
   char: 'c',
 })
 
@@ -54,7 +54,7 @@ class MyCommand extends BaseCommand {
     defaultMultiString: Flags.string({
       multiple: true,
       default: ['default'],
-      defaultHelp: async _ctx => 'defaultHelp',
+      defaultHelp: async _ctx => Promise.resolve('defaultHelp'),
     }),
 
     requiredBoolean: Flags.boolean({required: true}),
@@ -89,7 +89,7 @@ class MyCommand extends BaseCommand {
     requiredUrl: Flags.url({required: true}),
     defaultUrl: Flags.url({
       default: new URL('http://example.com'),
-      defaultHelp: async _ctx => 'Example URL',
+      defaultHelp: async _ctx => Promise.resolve('Example URL'),
     }),
 
     optionalMultiUrl: Flags.url({multiple: true}),
@@ -97,24 +97,24 @@ class MyCommand extends BaseCommand {
     defaultMultiUrl: Flags.url({multiple: true, default: [new URL('http://example.com')]}),
 
     optionalCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
     })(),
     requiredCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
     })({required: true}),
     defaultCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
-      default: async _ctx => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
+      default: async _ctx => Promise.resolve({foo: true}),
     })({default: {foo: true}}),
 
     optionalMultiCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
     })({multiple: true}),
     requiredMultiCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
     })({required: true, multiple: true}),
     defaultMultiCustom: Flags.custom<MyType>({
-      parse: async () => ({foo: true}),
+      parse: async () => Promise.resolve({foo: true}),
     })({default: [{foo: true}], multiple: true}),
 
     optionalCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes'}),

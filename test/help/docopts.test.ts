@@ -3,7 +3,7 @@ import {DocOpts} from '../../src/help/docopts'
 import {Flags} from '../../src'
 
 describe('doc opts', () => {
-  it('shows required string field', async () => {
+  it('shows required string field', () => {
     const usage = DocOpts.generate({flags: {
       testFlag: Flags.string({
         name: 'testFlag',

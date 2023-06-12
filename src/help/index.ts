@@ -132,6 +132,7 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
@@ -174,6 +175,7 @@ export class Help extends HelpBase {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   protected async showRootHelp(): Promise<void> {
     let rootTopics = this.sortedTopics
     let rootCommands = this.sortedCommands
@@ -207,6 +209,7 @@ export class Help extends HelpBase {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   protected async showTopicHelp(topic: Interfaces.Topic): Promise<void> {
     const name = topic.name
     const depth = name.split(':').length

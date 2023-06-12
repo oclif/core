@@ -70,6 +70,7 @@ const test = base
   },
 }))
 .register('makeTopicsWithoutCommand', () => ({
+  // eslint-disable-next-line @typescript-eslint/require-await
   async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
     // by returning no matching command for a subject, it becomes a topic only
     // with no corresponding command (in which case the showCommandHelp is shown)

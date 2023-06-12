@@ -1,14 +1,13 @@
 import {expect, fancy} from 'fancy-test'
-// import path = require('path')
+import {config as chaiConfig} from 'chai'
 import {Args, Command as Base, Flags, toCached} from '../../src'
-// import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
-// const pjson = require('../package.json')
-// const root = path.resolve(__dirname, '../../package.json')
+chaiConfig.truncateThreshold = 0
 
 class Command extends Base {
   static description = 'test command'
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async run() {
     this.parse()
     this.log('foo')
@@ -33,6 +32,7 @@ describe('command', () => {
     class Command extends Base {
         static description = 'test command'
 
+        // eslint-disable-next-line @typescript-eslint/require-await
         async run() {
           return 101
         }
@@ -45,6 +45,7 @@ describe('command', () => {
   fancy
   .do(() => {
     class Command extends Base {
+      // eslint-disable-next-line @typescript-eslint/require-await
       async run() {
         throw new Error('new x error')
       }
@@ -59,6 +60,7 @@ describe('command', () => {
   .stdout()
   .do(() => {
     class Command extends Base {
+      // eslint-disable-next-line @typescript-eslint/require-await
       async run() {
         this.exit(0)
       }
@@ -89,7 +91,7 @@ describe('command', () => {
               required: false,
               description: 'flagb desc',
               options: ['a', 'b'],
-              default: async () => 'a',
+              default: async () => Promise.resolve('a'),
             }),
             flagc: Flags.integer({
               char: 'c',
@@ -99,7 +101,7 @@ describe('command', () => {
               description: 'flagc desc',
               options: ['a', 'b'],
               // @ts-expect-error: context is any
-              default: async context => context.options.min + 1,
+              default: async context => Promise.resolve(context.options.min + 1),
             }),
           }
 
@@ -109,7 +111,7 @@ describe('command', () => {
               required: true,
               hidden: false,
               options: ['af', 'b'],
-              default: async () => 'a',
+              default: async () => Promise.resolve('a'),
             }),
           }
       }
@@ -289,6 +291,7 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
+        // eslint-disable-next-line @typescript-eslint/require-await
         async run() {
           this.log('json output: %j', {a: 'foobar'})
         }
@@ -425,6 +428,7 @@ describe('command', () => {
           static id = 'my:command'
           static state = 'deprecated'
 
+          // eslint-disable-next-line @typescript-eslint/require-await
           async run() {
             this.log('running command')
           }
@@ -449,6 +453,7 @@ describe('command', () => {
             to: 'my:other:command',
           }
 
+          // eslint-disable-next-line @typescript-eslint/require-await
           async run() {
             this.log('running command')
           }
@@ -469,6 +474,7 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
+        // eslint-disable-next-line @typescript-eslint/require-await
         async run() {
           process.stdout.emit('error', new CodeError('dd'))
         }
@@ -483,6 +489,7 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
+        // eslint-disable-next-line @typescript-eslint/require-await
         async run() {
           process.stdout.emit('error', new CodeError('EPIPE'))
           this.log('json output: %j', {a: 'foobar'})
@@ -497,10 +504,11 @@ describe('command', () => {
   describe('json enabled and pass-through tests', () => {
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
 
+          // eslint-disable-next-line @typescript-eslint/require-await
           async run() {
             this.log('not json output')
           }
@@ -513,7 +521,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
 
@@ -527,7 +535,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
           static '--' = true
@@ -545,7 +553,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
           static '--' = true
@@ -564,7 +572,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
           static '--' = true
@@ -582,7 +590,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
           static '--' = true
@@ -601,7 +609,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = true
           static '--' = true
@@ -616,7 +624,7 @@ describe('command', () => {
 
     fancy
     .stdout()
-    .do(async () => {
+    .do(() => {
       class CMD extends Command {
           static enableJsonFlag = false
           static '--' = true

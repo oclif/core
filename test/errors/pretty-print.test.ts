@@ -7,7 +7,7 @@ const stripAnsi = require('strip-ansi')
 
 describe('pretty-print', () => {
   fancy
-  .it('pretty prints an error', async () => {
+  .it('pretty prints an error',  () => {
     const sampleError: Error & PrettyPrintableError = new Error('Something very serious has gone wrong with the flags!')
     sampleError.ref = 'https://oclif.io/docs/flags'
     sampleError.code = 'OCLIF_BAD_FLAG'
@@ -22,7 +22,7 @@ describe('pretty-print', () => {
   })
 
   fancy
-  .it('pretty prints multiple suggestions', async () => {
+  .it('pretty prints multiple suggestions',  () => {
     const sampleError: Error & PrettyPrintableError = new Error('Something very serious has gone wrong with the flags!')
     sampleError.suggestions = ['Use a good flag', 'Use no flags']
     expect(
@@ -34,7 +34,7 @@ describe('pretty-print', () => {
   })
 
   fancy
-  .it('pretty prints with omitted fields', async () => {
+  .it('pretty prints with omitted fields',  () => {
     const sampleError = new Error('Something very serious has gone wrong with the flags!')
 
     expect(
@@ -44,7 +44,7 @@ describe('pretty-print', () => {
 
   describe('CLI Error properties', () => {
     fancy
-    .it('supports the bang property', async () => {
+    .it('supports the bang property',  () => {
       class SampleCLIError extends CLIError {
         get bang() {
           return '>>>'
@@ -56,7 +56,7 @@ describe('pretty-print', () => {
     })
 
     fancy
-    .it('supports the \'name\' message prefix property', async () => {
+    .it('supports the \'name\' message prefix property',  () => {
       const defaultBang = process.platform === 'win32' ? '»' : '›'
       const sampleError = new CLIError('This is a CLI error')
       sampleError.name = 'Errorz'
@@ -77,7 +77,7 @@ describe('pretty-print', () => {
     })
 
     fancy
-    .it('shows the stack for an error', async () => {
+    .it('shows the stack for an error',  () => {
       const error = new Error('oh no!')
       error.stack = 'this is the error stack property'
       expect(prettyPrint(error)).to.equal('this is the error stack property')

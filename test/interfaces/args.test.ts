@@ -44,12 +44,15 @@ class MyCommand extends Command {
     defaultUrl: Args.url({default: new URL('http://example.com')}),
 
     optionalCustom: Args.custom<MyType>({
+      // eslint-disable-next-line @typescript-eslint/require-await
       parse: async () => ({foo: true}),
     })(),
     requiredCustom: Args.custom<MyType>({
+      // eslint-disable-next-line @typescript-eslint/require-await
       parse: async () => ({foo: true}),
     })({required: true}),
     defaultCustom: Args.custom<MyType>({
+      // eslint-disable-next-line @typescript-eslint/require-await
       parse: async () => ({foo: true}),
     })({default: {foo: true}}),
   }
