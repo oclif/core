@@ -108,7 +108,7 @@ describe('handle', () => {
     expect(process.exitCode).to.equal(2)
   })
 
-  describe.skip('exit', () => {
+  describe('exit', () => {
     fancy
     .stderr()
     .stdout()

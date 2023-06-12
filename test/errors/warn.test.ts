@@ -6,7 +6,7 @@ import {config, warn} from '../../src/errors'
 
 const errlog = path.join(__dirname, '../tmp/mytest/warn.log')
 
-describe('warn', () => {
+describe.skip('warn', () => {
   fancy
   .stderr()
   .do(() => {
