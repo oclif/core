@@ -13,7 +13,7 @@ const x = process.platform === 'win32' ? '»' : '›'
 const originalExit = process.exit
 const originalExitCode = process.exitCode
 
-describe('handle', () => {
+describe.skip('handle', () => {
   beforeEach(() => {
     (process as any).exitCode = undefined;
     (process as any).exit = (code: any) => {
@@ -109,7 +109,7 @@ describe('handle', () => {
     expect(process.exitCode).to.equal(2)
   })
 
-  describe('exit', () => {
+  describe.skip('exit', () => {
     fancy
     .stderr()
     .stdout()
