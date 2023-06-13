@@ -1,3 +1,12 @@
+## [2.8.6](https://github.com/oclif/core/compare/2.8.5...2.8.6) (2023-06-13)
+
+
+### Bug Fixes
+
+* don't override noTTYOutput ([809b9c0](https://github.com/oclif/core/commit/809b9c00244343a24b71be5eaefba0775bb270b5))
+
+
+
 ## [2.8.5](https://github.com/oclif/core/compare/2.8.4...2.8.5) (2023-05-03)
 
 
