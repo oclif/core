@@ -13,7 +13,7 @@ const x = process.platform === 'win32' ? '»' : '›'
 const originalExit = process.exit
 const originalExitCode = process.exitCode
 
-describe.skip('handle', () => {
+describe('handle', () => {
   beforeEach(() => {
     (process as any).exitCode = undefined;
     (process as any).exit = (code: any) => {
@@ -71,6 +71,7 @@ describe.skip('handle', () => {
   })
 
   fancy
+  .skip()
   .stdout()
   .stderr()
   .it('prints error', ctx => {
@@ -82,6 +83,7 @@ describe.skip('handle', () => {
   })
 
   fancy
+  .skip()
   .stdout()
   .stderr()
   .it('should not print error when skipOclifErrorHandling is true', ctx => {
@@ -109,8 +111,9 @@ describe.skip('handle', () => {
     expect(process.exitCode).to.equal(2)
   })
 
-  describe.skip('exit', () => {
+  describe('exit', () => {
     fancy
+    .skip()
     .stderr()
     .stdout()
     .it('exits without displaying anything', ctx => {
