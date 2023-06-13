@@ -95,7 +95,6 @@ describe('handle', () => {
   })
 
   fancy
-  .skip()
   .stderr()
   .do(() => {
     config.errlog = errlog
