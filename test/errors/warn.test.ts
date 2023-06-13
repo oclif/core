@@ -19,7 +19,7 @@ describe('warn', () => {
     warn('foo!')
     expect(ctx.stderr).to.contain('Warning: foo!')
     expect(process.exitCode).to.be.undefined
-    await config.errorLogger!.flush()
+    await config.errorLogger!.flush(2000)
     expect(fs.readFileSync(errlog, 'utf8')).to.contain('Warning: foo!')
   })
 })

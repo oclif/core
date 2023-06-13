@@ -103,12 +103,12 @@ describe('handle', () => {
   .it('logs when errlog is set', async ctx => {
     handle(new CLIError('uh oh!'))
     expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!\n`)
-    await config.errorLogger!.flush()
+    await config.errorLogger!.flush(2000)
     expect(fs.readFileSync(errlog, 'utf8')).to.contain('Error: uh oh!')
     expect(process.exitCode).to.equal(2)
   })
 
-  describe.skip('exit', () => {
+  describe('exit', () => {
     fancy
     .stderr()
     .stdout()
