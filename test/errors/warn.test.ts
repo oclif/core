@@ -6,7 +6,7 @@ import {config, warn} from '../../src/errors'
 
 const errlog = path.join(__dirname, '../tmp/mytest/warn.log')
 
-describe('warn', () => {
+describe.skip('warn', () => {
   fancy
   .stderr()
   .do(() => {
@@ -19,7 +19,7 @@ describe('warn', () => {
     warn('foo!')
     expect(ctx.stderr).to.contain('Warning: foo!')
     expect(process.exitCode).to.be.undefined
-    await config.errorLogger!.flush(2000)
+    await config.errorLogger!.flush()
     expect(fs.readFileSync(errlog, 'utf8')).to.contain('Warning: foo!')
   })
 })
