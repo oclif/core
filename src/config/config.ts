@@ -805,10 +805,24 @@ export class Config implements IConfig {
     return commandPlugins[0]
   }
 
+  /**
+    * Insert legacy plugins
+    *
+    * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
+    * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
+    *
+    * @param plugins array of oclif-compatible plugins
+    * @returns void
+    */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
       const idx = this.plugins.findIndex(p => p.name === plugin.name)
-      if (idx !== -1) this.plugins = this.plugins.splice(idx, 1, plugin)
+      if (idx !== -1) {
+        // invalid plugin instance found in `this.plugins`
+        // replace with the oclif-compatible one
+        this.plugins.splice(idx, 1, plugin)
+      }
+
       this.loadCommands(plugin)
     }
   }
