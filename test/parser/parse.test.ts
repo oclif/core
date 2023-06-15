@@ -84,6 +84,58 @@ describe('parse', () => {
         expect(Boolean(out.flags.myflag2)).to.equal(true)
       })
 
+      it('throws error when no value provided to required flag', async () => {
+        try {
+          await parse(['--myflag', '--second', 'value'], {
+            flags: {myflag: Flags.string({required: true}), second: Flags.string()},
+          })
+        } catch (error) {
+          expect((error as CLIError).message).to.include('Flag --myflag expects a value')
+        }
+      })
+
+      it('throws error when no value provided to required short char flag', async () => {
+        try {
+          await parse(['--myflag', '-s', 'value'], {
+            flags: {myflag: Flags.string({required: true}), second: Flags.string({char: 's'})},
+          })
+        } catch (error) {
+          expect((error as CLIError).message).to.include('Flag --myflag expects a value')
+        }
+      })
+
+      it('doesn\'t throw when boolean flag passed', async () => {
+        const out =   await parse(['--myflag', '--second', 'value'], {
+          flags: {myflag: Flags.boolean(), second: Flags.string()},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when negative number passed', async () => {
+        const out =   await parse(['--myflag', '-s', '-9'], {
+          flags: {myflag: Flags.boolean(), second: Flags.integer({char: 's'})},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal(-9)
+      })
+
+      it('doesn\'t throw when boolean short char is passed', async () => {
+        const out =   await parse(['--myflag', '-s', 'value'], {
+          flags: {myflag: Flags.boolean(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when  short char is passed as a string value', async () => {
+        const out =   await parse(['--myflag', '\'-s\'', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('\'-s\'')
+        expect(out.flags.second).to.equal('value')
+      })
+
       it('parses short flags', async () => {
         const out = await parse(['-mf'], {
           flags: {
