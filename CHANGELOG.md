@@ -1,3 +1,12 @@
+## [2.8.7](https://github.com/oclif/core/compare/2.8.6...2.8.7) (2023-06-15)
+
+
+### Bug Fixes
+
+* correctly load legacy plugins ([ec221d3](https://github.com/oclif/core/commit/ec221d30118f6c9d9b191aec4b25e648e4bb46f6))
+
+
+
 ## [2.8.6](https://github.com/oclif/core/compare/2.8.5...2.8.6) (2023-06-13)
 
 
