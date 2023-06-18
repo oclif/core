@@ -242,8 +242,8 @@ export abstract class Command {
     return result as T
   }
 
-  public exit(code = 0): void {
-    return Errors.exit(code)
+  public exit(code = 0): never {
+    Errors.exit(code)
   }
 
   public warn(input: string | Error): string | Error {
