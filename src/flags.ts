@@ -53,6 +53,7 @@ export function boolean<T = boolean>(
 }
 
 export const integer = custom<number, {min?: number; max?: number;}>({
+  subType: 'integer',
   parse: async (input, _, opts) => {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
@@ -66,6 +67,7 @@ export const integer = custom<number, {min?: number; max?: number;}>({
 })
 
 export const directory = custom<string, {exists?: boolean}>({
+  subType: 'directory',
   parse: async (input, _, opts) => {
     if (opts.exists) return dirExists(input)
 
@@ -74,6 +76,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 export const file = custom<string, {exists?: boolean}>({
+  subType: 'file',
   parse: async (input, _, opts) => {
     if (opts.exists) return fileExists(input)
 
@@ -86,6 +89,7 @@ export const file = custom<string, {exists?: boolean}>({
  * if the string is not a valid URL.
  */
 export const url = custom<URL>({
+  subType: 'url',
   parse: async input => {
     try {
       return new URL(input)
@@ -95,7 +99,7 @@ export const url = custom<URL>({
   },
 })
 
-const stringFlag = custom({})
+const stringFlag = custom({subType: 'string'})
 export {stringFlag as string}
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {

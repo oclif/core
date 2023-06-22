@@ -416,6 +416,7 @@ export namespace Command {
     examples?: Example[];
     strict?: boolean;
     type?: string;
+    subType?: string;
     pluginName?: string;
     pluginType?: string;
     pluginAlias?: string;

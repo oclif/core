@@ -897,6 +897,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
       flags[name] = {
         name,
         type: flag.type,
+        subType: flag.subType,
         char: flag.char,
         summary: flag.summary,
         description: flag.description,
