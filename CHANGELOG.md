@@ -1,3 +1,12 @@
+## [2.8.8](https://github.com/oclif/core/compare/2.8.7...2.8.8) (2023-06-26)
+
+
+### Bug Fixes
+
+* improve flag validation ([ca9fe38](https://github.com/oclif/core/commit/ca9fe38c0531a4058483b5baf4b44946235e9ae0))
+
+
+
 ## [2.8.7](https://github.com/oclif/core/compare/2.8.6...2.8.7) (2023-06-15)
 
 
