@@ -86,7 +86,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
-    const findLongFlag = (arg: string) => {
+    const findLongFlag = (arg: string):string | undefined => {
       const name = arg.slice(2)
       if (this.input.flags[name]) {
         return name
@@ -102,12 +102,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
     }
 
-    const findShortFlag = ([_, char]: string) => {
+    const findShortFlag = ([_, char]: string):string | undefined => {
       if (this.flagAliases[char]) {
         return this.flagAliases[char].name
       }
 
-      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === char)
+      return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
     }
 
     const parseFlag = (arg: string): boolean => {
@@ -133,12 +133,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        if (typeof input !== 'string') {
+        const value = long || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if (typeof value !== 'string' || this.input.flags[findLongFlag(value) as string] || this.input.flags[findShortFlag(value) as string]) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
-        this.raw.push({type: 'flag', flag: flag.name, input})
+        this.raw.push({type: 'flag', flag: flag.name, input: value})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
