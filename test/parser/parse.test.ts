@@ -89,12 +89,13 @@ describe('parse', () => {
           await parse(['--myflag', '--second', 'value'], {
             flags: {myflag: Flags.string({required: true}), second: Flags.string()},
           })
+          assert.fail('should have thrown')
         } catch (error) {
           expect((error as CLIError).message).to.include('Flag --myflag expects a value')
         }
       })
 
-      it('throws error when no value provided to required short char flag', async () => {
+      it('throws error when no value provided to required flag before a short char flag', async () => {
         try {
           await parse(['--myflag', '-s', 'value'], {
             flags: {myflag: Flags.string({required: true}), second: Flags.string({char: 's'})},
