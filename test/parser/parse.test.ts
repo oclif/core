@@ -100,6 +100,7 @@ describe('parse', () => {
           await parse(['--myflag', '-s', 'value'], {
             flags: {myflag: Flags.string({required: true}), second: Flags.string({char: 's'})},
           })
+          assert.fail('should have thrown')
         } catch (error) {
           expect((error as CLIError).message).to.include('Flag --myflag expects a value')
         }
