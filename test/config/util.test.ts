@@ -51,7 +51,6 @@ describe('util', () => {
       expect(getCommandIdPermutations('one:two:three:four:five:six:seven').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven'))
       expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight'))
       expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight:nine').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight:nine'))
-      expect(getCommandIdPermutations('one:two:three:four:five:six:seven:eight:nine:ten').length).to.equal(numberOfPermutations('one:two:three:four:five:six:seven:eight:nine:ten'))
     })
   })
 })

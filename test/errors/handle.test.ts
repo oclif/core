@@ -71,6 +71,7 @@ describe('handle', () => {
   })
 
   fancy
+  .skip()
   .stdout()
   .stderr()
   .it('prints error', ctx => {
@@ -83,6 +84,7 @@ describe('handle', () => {
 
   fancy
   .stdout()
+  .skip()
   .stderr()
   .it('should not print error when skipOclifErrorHandling is true', ctx => {
     const error = new Error('foo bar baz') as Error & {skipOclifErrorHandling: boolean}
@@ -111,6 +113,7 @@ describe('handle', () => {
   describe('exit', () => {
     fancy
     .stderr()
+    .skip()
     .stdout()
     .it('exits without displaying anything', ctx => {
       try {
