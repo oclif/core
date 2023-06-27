@@ -84,6 +84,22 @@ describe('parse', () => {
         expect(Boolean(out.flags.myflag2)).to.equal(true)
       })
 
+      it('doesn\'t throw when 2nd char in value matches a flag char', async () => {
+        const out =   await parse(['--myflag', 'Ishikawa', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('Ishikawa')
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when an unprefixed flag value contains a flag name', async () => {
+        const out =   await parse(['--myflag', 'a-second-place-finish', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('a-second-place-finish')
+        expect(out.flags.second).to.equal('value')
+      })
+      
       it('parses short flags', async () => {
         const out = await parse(['-mf'], {
           flags: {

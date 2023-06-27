@@ -110,9 +110,16 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return Object.keys(this.input.flags).find(k => this.input.flags[k].char === char)
     }
 
+
+    const findFlag = (arg: string): [string|undefined,boolean] => {
+        const long = arg.startsWith('--');
+        const short = long ? false : arg.startsWith('-');
+        const name = (long) ? findLongFlag(arg) : ((short) ? findShortFlag(arg) : undefined);
+        return [name, long];
+    }
+
     const parseFlag = (arg: string): boolean => {
-      const long = arg.startsWith('--')
-      const name = long ? findLongFlag(arg) : findShortFlag(arg)
+      const [name,long] = findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -134,7 +141,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (flag.type === 'option') {
         this.currentFlag = flag
         const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        if (typeof input !== 'string') {
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if ((typeof input !== 'string') || findFlag(input)[0]) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
