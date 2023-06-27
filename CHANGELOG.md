@@ -1,3 +1,12 @@
+## [2.8.9](https://github.com/oclif/core/compare/2.8.8...2.8.9) (2023-06-27)
+
+
+### Bug Fixes
+
+* revert flag validation problem ([11cbfd4](https://github.com/oclif/core/commit/11cbfd46f6f201a064205f5bb352bbd40efb150d))
+
+
+
 ## [2.8.8](https://github.com/oclif/core/compare/2.8.7...2.8.8) (2023-06-26)
 
 
