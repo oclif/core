@@ -9,6 +9,7 @@ import {stdout} from '../stream'
 
 const sw = require('string-width')
 const {orderBy} = require('natural-orderby')
+const sliceAnsi = require('slice-ansi')
 
 class Table<T extends Record<string, unknown>> {
   options: table.Options & { printLine(s: any): any }
@@ -284,7 +285,12 @@ class Table<T extends Record<string, unknown>> {
           const colorWidth = (d.length - visualWidth)
           let cell = d.padEnd(width + colorWidth)
           if ((cell.length - colorWidth) > width || visualWidth === width) {
-            cell = cell.slice(0, width - 2) + '… '
+            // truncate the cell, preserving ANSI escape sequences, and keeping
+            // into account the width of fullwidth unicode characters
+            cell = sliceAnsi(cell, 0, width - 2) + '… '
+            // pad with spaces; this is necessary in case the original string
+            // contained fullwidth characters which cannot be split
+            cell += ' '.repeat(width - sw(cell))
           }
 
           l += cell
