@@ -37,13 +37,14 @@ jobs:
       - run: yarn test:e2e
   nuts:
     needs: linux-unit-tests
-    uses: ./.github/workflows/external-nuts.yml
+    uses: oclif/github-workflows/.github/workflows/externalNut.yml@wr/build
     strategy:
       fail-fast: false
       matrix:
         os: [ 'ubuntu-latest', 'windows-latest' ]
         externalProjectGitUrl:
-          - https://github.com/salesforcecli/plugin-community
+          - https://github.com/salesforcecli/plugin-auth
+          - https://github.com/salesforcecli/plugin-custom-metadata
           - https://github.com/salesforcecli/plugin-data
           - https://github.com/salesforcecli/plugin-env
           - https://github.com/salesforcecli/plugin-limits
@@ -51,6 +52,7 @@ jobs:
           - https://github.com/salesforcecli/plugin-schema
           - https://github.com/salesforcecli/plugin-settings
           - https://github.com/salesforcecli/plugin-signups
+          - https://github.com/salesforcecli/plugin-templates
           - https://github.com/salesforcecli/plugin-user
     with:
       packageName: '@oclif/core'
