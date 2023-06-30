@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest' ]
+        os: ['ubuntu-latest', 'windows-latest']
         externalProjectGitUrl:
           - https://github.com/salesforcecli/plugin-auth
           - https://github.com/salesforcecli/plugin-custom-metadata
@@ -60,6 +60,6 @@ jobs:
       command: 'yarn test:nuts'
       os: ${{ matrix.os }}
       useCache: false
-      preSwapCommands: 'npx yarn-deduplicate; yarn install'
+      preSwapCommands: ' npx yarn-deduplicate; yarn install'
       preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core'
     secrets: inherit
