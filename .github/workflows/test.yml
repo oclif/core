@@ -22,7 +22,7 @@ jobs:
         exclude:
           - os: windows-latest
             node_version: lts/*
-          - os: windows-latest 
+          - os: windows-latest
             node_version: lts/-1
       fail-fast: false
     runs-on: ${{ matrix.os }}
@@ -35,3 +35,25 @@ jobs:
       - run: yarn install --network-timeout 600000
       - run: yarn build
       - run: yarn test:e2e
+  nuts:
+    needs: linux-unit-tests
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest', 'windows-latest' ]
+        externalProjectGitUrl:
+          - https://github.com/salesforcecli/plugin-auth
+          - https://github.com/salesforcecli/plugin-data
+          - https://github.com/salesforcecli/plugin-env
+          - https://github.com/salesforcecli/plugin-org
+          - https://github.com/salesforcecli/plugin-user
+    with:
+      packageName: '@oclif/core'
+      externalProjectGitUrl: ${{ matrix.externalProjectGitUrl }}
+      command: 'yarn test:nuts'
+      os: ${{ matrix.os }}
+      useCache: false
+      preSwapCommands: 'npx yarn-deduplicate; yarn install'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core'
+    secrets: inherit
