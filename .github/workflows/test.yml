@@ -41,10 +41,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest']
-#        os: ['ubuntu-latest', 'windows-latest']
+        os: ['ubuntu-latest', 'windows-latest']
         externalProjectGitUrl:
-#          - https://github.com/salesforcecli/plugin-auth
+          - https://github.com/salesforcecli/plugin-auth
           - https://github.com/salesforcecli/plugin-custom-metadata
           - https://github.com/salesforcecli/plugin-data
           - https://github.com/salesforcecli/plugin-env
