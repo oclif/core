@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'windows-latest']
+        os: ["ubuntu-latest", "windows-latest"]
         externalProjectGitUrl:
           - https://github.com/salesforcecli/plugin-auth
           - https://github.com/salesforcecli/plugin-custom-metadata
@@ -55,11 +55,16 @@ jobs:
           - https://github.com/salesforcecli/plugin-templates
           - https://github.com/salesforcecli/plugin-user
     with:
-      packageName: '@oclif/core'
+      packageName: "@oclif/core"
       externalProjectGitUrl: ${{ matrix.externalProjectGitUrl }}
-      command: 'yarn test:nuts'
+      command: "yarn test:nuts"
       os: ${{ matrix.os }}
       useCache: false
-      preSwapCommands: 'npx yarn-deduplicate; yarn install'
-      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core'
-    secrets: inherit
+      preSwapCommands: "npx yarn-deduplicate; yarn install"
+      preExternalBuildCommands: "shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core"
+    secrets:
+      TESTKIT_AUTH_URL: ${{ secrets.TESTKIT_AUTH_URL }}
+      TESTKIT_HUB_USERNAME: ${{ secrets.TESTKIT_HUB_USERNAME }}
+      TESTKIT_JWT_CLIENT_ID: ${{ secrets.TESTKIT_JWT_CLIENT_ID }}
+      TESTKIT_JWT_KEY: ${{ secrets.TESTKIT_JWT_KEY }}
+      TESTKIT_HUB_INSTANCE: ${{ secrets.TESTKIT_HUB_INSTANCE }}
