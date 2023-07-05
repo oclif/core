@@ -37,7 +37,7 @@ jobs:
       - run: yarn test:e2e
   nuts:
     needs: linux-unit-tests
-    uses: oclif/github-workflows/.github/workflows/externalNut.yml@wr/build
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
     strategy:
       fail-fast: false
       matrix:
