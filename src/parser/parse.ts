@@ -110,9 +110,15 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
     }
 
-    const parseFlag = (arg: string): boolean => {
+    const findFlag = (arg: string): [string|undefined, boolean] => {
       const long = arg.startsWith('--')
-      const name = long ? findLongFlag(arg) : findShortFlag(arg)
+      const short = long ? false : arg.startsWith('-')
+      const name = long ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
+      return [name, long]
+    }
+
+    const parseFlag = (arg: string): boolean => {
+      const [name, long] = findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -133,13 +139,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        const value = long || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
+        const input = long || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
-        if (typeof value !== 'string' || this.input.flags[findLongFlag(value) as string] || this.input.flags[findShortFlag(value) as string]) {
+        if ((typeof input !== 'string') || findFlag(input)[0]) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
-        this.raw.push({type: 'flag', flag: flag.name, input: value})
+        this.raw.push({type: 'flag', flag: flag.name, input: input})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
