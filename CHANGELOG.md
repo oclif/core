@@ -1,3 +1,16 @@
+## [2.8.11](https://github.com/oclif/core/compare/2.8.10...2.8.11) (2023-07-01)
+
+
+### Bug Fixes
+
+* **deps:** bump semver and @types/semver ([fe9f09f](https://github.com/oclif/core/commit/fe9f09f9e9ac301ea25116deca42d394b46f6f3e))
+
+
+
+## [2.8.10](https://github.com/oclif/core/compare/2.8.9...2.8.10) (2023-06-27)
+
+
+
 ## [2.8.9](https://github.com/oclif/core/compare/2.8.8...2.8.9) (2023-06-27)
 
 
