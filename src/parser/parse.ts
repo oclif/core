@@ -213,6 +213,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private async _flags(): Promise<TFlags & BFlags & { json: boolean | undefined }> {
     const flags = {} as any
     this.metaData.flags = {} as any
+
+    // parse the flags that the user provided
     for (const token of this._flagTokens) {
       const flag = this.input.flags[token.flag]
 
@@ -256,7 +258,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
     for (const k of Object.keys(this.input.flags)) {
       const flag = this.input.flags[k]
+      // we already did this one from flagTokens
       if (flags[k]) continue
+      // env flags might not have a token,but get their value from the environment, so we parse those
       if (flag.env && Reflect.has(process.env, flag.env)) {
         const input = process.env[flag.env]
         if (flag.type === 'option') {
@@ -271,6 +275,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         }
       }
 
+      // flags with a default don't have a token, but we want to evaluate their default
       if (!(k in flags) && flag.default !== undefined) {
         this.metaData.flags[k] = {...this.metaData.flags[k], setFromDefault: true}
         const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags}) : flag.default)
@@ -278,6 +283,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
     }
 
+    // set the flag metadata including the defaultHelp for that flag.
     for (const k of Object.keys(this.input.flags)) {
       if ((k in flags) && Reflect.has(this.input.flags[k], 'defaultHelp')) {
         try {
