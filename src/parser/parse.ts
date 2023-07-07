@@ -310,8 +310,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       ctx.token = token
 
       if (flag.type === 'boolean') {
-        const ctx = this.context
-        ctx.token = token
         return await flag.parse(input, ctx, flag)
       }
 
