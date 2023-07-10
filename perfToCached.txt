@@ -1,0 +1,7 @@
+yarn run v1.22.19
+$ ts-node test/perf/command.perf.ts
+toCached (not writing manifest) x 177,438 ops/sec ±3.06% (79 runs sampled)
+toCached (writing manifest) x 167,209 ops/sec ±4.33% (77 runs sampled)
+slowCommand toCached (not writing manifest) x 3.30 ops/sec ±0.12% (21 runs sampled)
+slowCommand (writing manifest) x 3.30 ops/sec ±0.13% (21 runs sampled)
+Done in 28.18s.

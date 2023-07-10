@@ -114,7 +114,7 @@
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --timeout 1200000",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck",
-    "test:perf": "ts-node test/perf/parser.perf.ts"
+    "test:perf": "ts-node test/perf/command.perf.ts"
   },
   "types": "lib/index.d.ts"
 }
