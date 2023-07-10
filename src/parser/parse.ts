@@ -110,15 +110,15 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
     }
 
-    const findFlag = (arg: string): [string|undefined, boolean] => {
-      const long = arg.startsWith('--')
-      const short = long ? false : arg.startsWith('-')
-      const name = long ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
-      return [name, long]
+    const findFlag = (arg: string): { name?: string, isLong: boolean } => {
+      const isLong = arg.startsWith('--')
+      const short = isLong ? false : arg.startsWith('-')
+      const name = isLong ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
+      return {name, isLong}
     }
 
     const parseFlag = (arg: string): boolean => {
-      const [name, long] = findFlag(arg)
+      const {name, isLong} = findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -139,9 +139,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        const input = long || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
+        const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
-        if ((typeof input !== 'string') || findFlag(input)[0]) {
+        if ((typeof input !== 'string') || findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
@@ -149,7 +149,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
-        if (!long && arg.length > 2) {
+        if (!isLong && arg.length > 2) {
           this.argv.unshift(`-${arg.slice(2)}`)
         }
       }
