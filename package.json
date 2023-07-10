@@ -110,6 +110,7 @@
     "commitlint": "commitlint",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "posttest": "yarn lint",
+    "compile": "tsc",
     "prepack": "yarn run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --timeout 1200000",
