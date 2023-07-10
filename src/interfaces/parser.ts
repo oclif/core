@@ -41,7 +41,7 @@ export type Metadata = {
   flags: { [key: string]: MetadataFlag };
 }
 
-type MetadataFlag = {
+export type MetadataFlag = {
   setFromDefault?: boolean;
   defaultHelp?: unknown;
 }

@@ -1,6 +1,6 @@
 yarn run v1.22.19
 $ ts-node test/perf/parser.perf.ts
-simple x 103,392 ops/sec ±0.91% (77 runs sampled)
-multiple async flags that take time x 4.96 ops/sec ±0.13% (28 runs sampled)
-multiple async flags that take time x 5,451 ops/sec ±2.09% (79 runs sampled)
-Done in 21.11s.
+simple x 131,268 ops/sec ±1.15% (79 runs sampled)
+multiple async flags that take time x 9.90 ops/sec ±0.14% (50 runs sampled)
+flagstravaganza x 7,425 ops/sec ±2.10% (83 runs sampled)
+Done in 21.60s.
