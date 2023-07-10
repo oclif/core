@@ -283,7 +283,7 @@ export class Plugin implements IPlugin {
 
     const manifest = {
       version: this.version,
-      commands: (await Promise.all(this.commandIDs.map(async id => {
+      commands: Object.fromEntries((await Promise.all(this.commandIDs.map(async id => {
         try {
           return [id, await toCached(await this.findCommand(id, {must: true}), this, isWritingManifest)]
         } catch (error: any) {
@@ -292,11 +292,7 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Command.Cached] => Boolean(f))
-      .reduce((commands, [id, c]) => {
-        commands[id] = c
-        return commands
-      }, {} as {[k: string]: Command.Cached}),
+      .filter((f): f is [string, Command.Cached] => Boolean(f))),
     }
     marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
     marker?.stop()
