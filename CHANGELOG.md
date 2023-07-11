@@ -1,3 +1,12 @@
+# [2.9.0](https://github.com/oclif/core/compare/2.8.12...2.9.0) (2023-07-11)
+
+
+### Features
+
+* perf benchmarks ([9734b9f](https://github.com/oclif/core/commit/9734b9f9bce5ededc92c52c4eb14663a9e998893))
+
+
+
 ## [2.8.12](https://github.com/oclif/core/compare/2.8.11...2.8.12) (2023-07-10)
 
 
