@@ -1,3 +1,12 @@
+## [2.8.12](https://github.com/oclif/core/compare/2.8.11...2.8.12) (2023-07-10)
+
+
+### Bug Fixes
+
+* properly truncate table cells that contain fullwidth characters or ANSI escape sequences ([db51bf2](https://github.com/oclif/core/commit/db51bf216b4b37d6c6e1d054e64b38dff0856d6d))
+
+
+
 ## [2.8.11](https://github.com/oclif/core/compare/2.8.10...2.8.11) (2023-07-01)
 
 

@@ -1,6 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 
 import {ux} from '../../../src'
+import * as screen from '../../../src/screen'
 
 /* eslint-disable camelcase */
 const apps = [
@@ -317,6 +318,38 @@ describe('styled/table', () => {
  321 supertable-test-2${ws}
  123 supertable-test-1${ws}\n`)
     })
+
+    const orig = {
+      stdtermwidth: screen.stdtermwidth,
+      CLI_UX_SKIP_TTY_CHECK: process.env.CLI_UX_SKIP_TTY_CHECK,
+    }
+
+    fancy
+    .do(() => {
+      Object.assign(screen, {stdtermwidth: 9})
+      process.env.CLI_UX_SKIP_TTY_CHECK = 'true'
+    })
+    .finally(() => {
+      Object.assign(screen, {stdtermwidth: orig.stdtermwidth})
+      process.env.CLI_UX_SKIP_TTY_CHECK = orig.CLI_UX_SKIP_TTY_CHECK
+    })
+    .stdout({stripColor: false})
+    .end('correctly truncates columns with fullwidth characters or ansi escape sequences', output => {
+      /* eslint-disable camelcase */
+      const app4 = {
+        build_stack: {
+          name: 'heroku-16',
+        },
+        id: '456',
+        name: '\u001B[31m超级表格—测试\u001B[0m',
+        web_url: 'https://supertable-test-1.herokuapp.com/',
+      }
+      /* eslint-enable camelcase */
+
+      ux.table([...apps, app4 as any], {name: {}}, {'no-header': true})
+      expect(output.stdout).to.equal(` super…${ws}
+ super…${ws}
+ \u001B[31m超级\u001B[39m…${ws}${ws}\n`)
+    })
   })
 })
-
