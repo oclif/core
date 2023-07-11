@@ -275,7 +275,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       // no input: env flags
       if (fws.inputFlag.flag.env && process.env[fws.inputFlag.flag.env]) {
         const valueFromEnv = process.env[fws.inputFlag.flag.env]
-        if (fws.inputFlag.flag.type === 'option' && typeof valueFromEnv === 'string') {
+        if (fws.inputFlag.flag.type === 'option' && valueFromEnv) {
           return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv), i.inputFlag.flag, this.context)}
         }
 
