@@ -42,6 +42,7 @@
     "@oclif/plugin-plugins": "^2.4.7",
     "@oclif/test": "^2.3.15",
     "@types/ansi-styles": "^3.2.1",
+    "@types/benchmark": "^2.1.2",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/clean-stack": "^2.1.1",
@@ -61,6 +62,7 @@
     "@types/supports-color": "^8.1.1",
     "@types/wordwrap": "^1.0.1",
     "@types/wrap-ansi": "^3.0.0",
+    "benchmark": "^2.1.4",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "commitlint": "^12.1.4",
@@ -114,7 +116,8 @@
     "prepack": "yarn run build",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --timeout 1200000",
-    "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck"
+    "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck",
+    "test:perf": "ts-node test/perf/parser.perf.ts"
   },
   "types": "lib/index.d.ts"
 }

@@ -13,6 +13,8 @@ export async function validate(parse: {
   input: ParserInput;
   output: ParserOutput;
 }): Promise<void> {
+  let cachedResolvedFlags: Record<string, unknown> | undefined
+
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({parse, flags: parse.output.nonExistentFlags})
@@ -47,31 +49,35 @@ export async function validate(parse: {
   }
 
   async function validateFlags() {
-    const promises = Object.entries(parse.input.flags).map(async ([name, flag]) => {
-      const results: Validation[] = []
+    const promises = Object.entries(parse.input.flags).flatMap(([name, flag]): Array<Validation | Promise<Validation>> => {
       if (parse.output.flags[name] !== undefined) {
-        results.push(
-          ...await validateRelationships(name, flag),
-          await validateDependsOn(name, flag.dependsOn ?? []),
-          await validateExclusive(name, flag.exclusive ?? []),
-          await validateExactlyOne(name, flag.exactlyOne ?? []),
-        )
-      } else if (flag.required) {
-        results.push({status: 'failed', name, validationFn: 'required', reason: `Missing required flag ${name}`})
-      } else if (flag.exactlyOne && flag.exactlyOne.length > 0) {
-        results.push(validateAcrossFlags(flag))
+        return [
+          ...flag.relationships ? validateRelationships(name, flag) : [],
+          ...flag.dependsOn ? [validateDependsOn(name, flag.dependsOn)] : [],
+          ...flag.exclusive ? [validateExclusive(name, flag.exclusive)] : [],
+          ...flag.exactlyOne ? [validateExactlyOne(name, flag.exactlyOne)] : [],
+        ]
       }
 
-      return results
+      if (flag.required) {
+        return [{status: 'failed', name, validationFn: 'required', reason: `Missing required flag ${name}`}]
+      }
+
+      if (flag.exactlyOne && flag.exactlyOne.length > 0) {
+        return [validateAcrossFlags(flag)]
+      }
+
+      return []
     })
 
-    const results = (await Promise.all(promises)).flat()
+    const results = (await Promise.all(promises))
 
     const failed = results.filter(r => r.status === 'failed')
     if (failed.length > 0) throw new FailedFlagValidationError({parse, failed})
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
+    if (cachedResolvedFlags) return cachedResolvedFlags
     const promises = flags.map(async flag => {
       if (typeof flag === 'string') {
         return [flag, parse.output.flags[flag]]
@@ -81,15 +87,11 @@ export async function validate(parse: {
       return result ? [flag.name, parse.output.flags[flag.name]] : null
     })
     const resolved = await Promise.all(promises)
-    return Object.fromEntries(resolved.filter(r => r !== null) as [string, unknown][])
+    cachedResolvedFlags = Object.fromEntries(resolved.filter(r => r !== null) as [string, unknown][])
+    return cachedResolvedFlags
   }
 
-  function getPresentFlags(flags: Record<string, unknown>): string[] {
-    return Object.keys(flags).reduce((acc, key) => {
-      if (flags[key] !== undefined) acc.push(key)
-      return acc
-    }, [] as string[])
-  }
+  const getPresentFlags = (flags: Record<string, unknown>): string[] => Object.keys(flags).filter(key => key !== undefined)
 
   function validateAcrossFlags(flag: Flag<any>): Validation {
     const base = {name: flag.name, validationFn: 'validateAcrossFlags'}
@@ -128,6 +130,7 @@ export async function validate(parse: {
 
   async function validateExactlyOne(name: string, flags: FlagRelationship[]): Promise<Validation> {
     const base = {name, validationFn: 'validateExactlyOne'}
+
     const resolved = await resolveFlags(flags)
     const keys = getPresentFlags(resolved)
     for (const flag of keys) {
@@ -142,6 +145,7 @@ export async function validate(parse: {
   async function validateDependsOn(name: string, flags: FlagRelationship[]): Promise<Validation> {
     const base = {name, validationFn: 'validateDependsOn'}
     const resolved = await resolveFlags(flags)
+
     const foundAll = Object.values(resolved).every(val => val !== undefined)
     if (!foundAll) {
       const formattedFlags = Object.keys(resolved).map(f => `--${f}`).join(', ')
@@ -153,6 +157,7 @@ export async function validate(parse: {
 
   async function validateSome(name: string, flags: FlagRelationship[]): Promise<Validation> {
     const base = {name, validationFn: 'validateSome'}
+
     const resolved = await resolveFlags(flags)
     const foundAtLeastOne = Object.values(resolved).some(Boolean)
     if (!foundAtLeastOne) {
@@ -163,31 +168,21 @@ export async function validate(parse: {
     return {...base, status: 'success'}
   }
 
-  async function validateRelationships(name: string, flag: CompletableFlag<any>): Promise<Validation[]> {
-    if (!flag.relationships) return []
-    const results = await Promise.all(flag.relationships.map(async relationship => {
-      const flags = relationship.flags ?? []
-      const results = []
+  function validateRelationships(name: string, flag: CompletableFlag<any>): Promise<Validation>[] {
+    return ((flag.relationships ?? []).map(relationship => {
       switch (relationship.type) {
       case 'all':
-        results.push(await validateDependsOn(name, flags))
-        break
+        return validateDependsOn(name, relationship.flags)
       case 'some':
-        results.push(await validateSome(name, flags))
-        break
+        return validateSome(name, relationship.flags)
       case 'none':
-        results.push(await validateExclusive(name, flags))
-        break
+        return validateExclusive(name, relationship.flags)
       default:
-        break
+        throw new Error(`Unknown relationship type: ${relationship.type}`)
       }
-
-      return results
     }))
-
-    return results.flat()
   }
 
   validateArgs()
-  await validateFlags()
+  return validateFlags()
 }
