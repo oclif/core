@@ -22,6 +22,29 @@ describe('parse', () => {
     expect(out).to.deep.include({flags: {bool: true}})
   })
 
+  describe('undefined flags', () => {
+    it('omits undefined flags when no flags', async () => {
+      const out = await parse([], {
+        flags: {
+          bool: Flags.boolean(),
+        },
+      })
+      expect(out.flags).to.deep.equal({})
+    })
+
+    it('omits undefined flags when some flags exist', async () => {
+      const out = await parse(['--bool', '--str', 'k'], {
+        flags: {
+          bool: Flags.boolean(),
+          bool2: Flags.boolean(),
+          str: Flags.string(),
+          str2: Flags.string(),
+        },
+      })
+      expect(out.flags).to.deep.equal({bool: true, str: 'k'})
+    })
+  })
+
   it('arg1', async () => {
     const out = await parse(['arg1'], {
       args: {foo: Args.string()},

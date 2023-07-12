@@ -346,8 +346,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
     const valueReference = fwsArrayToObject(flagsWithValues.filter(fws => !fws.metadata?.setFromDefault))
 
-    const flagsWithAllValues = await Promise.all(flagsWithValues
+    const flagsWithAllValues = (await Promise.all(flagsWithValues
     .map(async fws => (fws.metadata?.setFromDefault ? {...fws, value: await fws.valueFunction?.(fws, valueReference)} : fws)))
+    ).filter(fws => fws.value !== undefined)
 
     const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
 
