@@ -317,7 +317,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return Promise.all(fws.map(async fws => fws.helpFunction ? ({...fws, metadata: {...fws.metadata, defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context)}}) : fws))
     }
 
-    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(fwsArray.map(fws => [fws.inputFlag.name, fws.value]))
+    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
+      fwsArray.filter(fws => fws.value !== undefined)
+      .map(fws => [fws.inputFlag.name, fws.value]),
+    )
 
     type FlagWithStrategy = {
       inputFlag: {
