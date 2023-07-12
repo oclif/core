@@ -1,3 +1,12 @@
+## [2.9.1](https://github.com/oclif/core/compare/2.9.0...2.9.1) (2023-07-12)
+
+
+### Bug Fixes
+
+* flags omit undefined for boolean flags ([0a7e154](https://github.com/oclif/core/commit/0a7e15415f3514a4baad064478c76f0c17e9548a))
+
+
+
 # [2.9.0](https://github.com/oclif/core/compare/2.8.12...2.9.0) (2023-07-11)
 
 
