@@ -317,7 +317,10 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return Promise.all(fws.map(async fws => fws.helpFunction ? ({...fws, metadata: {...fws.metadata, defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context)}}) : fws))
     }
 
-    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(fwsArray.map(fws => [fws.inputFlag.name, fws.value]))
+    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
+      fwsArray.filter(fws => fws.value !== undefined)
+      .map(fws => [fws.inputFlag.name, fws.value]),
+    )
 
     type FlagWithStrategy = {
       inputFlag: {
@@ -346,9 +349,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
     const valueReference = fwsArrayToObject(flagsWithValues.filter(fws => !fws.metadata?.setFromDefault))
 
-    const flagsWithAllValues = (await Promise.all(flagsWithValues
+    const flagsWithAllValues = await Promise.all(flagsWithValues
     .map(async fws => (fws.metadata?.setFromDefault ? {...fws, value: await fws.valueFunction?.(fws, valueReference)} : fws)))
-    ).filter(fws => fws.value !== undefined)
 
     const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
 
