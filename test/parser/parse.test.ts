@@ -974,11 +974,19 @@ See more help with --help`)
     it('accepts falsy flags', async () => {
       const out = await parse([], {
         flags: {
-          foo: Flags.string({default: ''}),
+          foo1: Flags.string({default: ''}),
+          foo2: Flags.string({default: '0'}),
+          foo3: Flags.string({default: 'false'}),
+          foo4: Flags.string({default: 'undefined'}),
+          bar: Flags.integer({default: 0}),
           baz: Flags.boolean({default: false}),
         },
       })
-      expect(out.flags).to.deep.include({foo: ''})
+      expect(out.flags).to.deep.include({foo1: ''})
+      expect(out.flags).to.deep.include({foo2: '0'})
+      expect(out.flags).to.deep.include({foo3: 'false'})
+      expect(out.flags).to.deep.include({foo4: 'undefined'})
+      expect(out.flags).to.deep.include({bar: 0})
       expect(out.flags).to.deep.include({baz: false})
     })
 
