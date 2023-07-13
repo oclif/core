@@ -106,6 +106,18 @@ describe('parse', () => {
         expect(Boolean(out.flags.myflag)).to.equal(true)
         expect(Boolean(out.flags.myflag2)).to.equal(true)
       })
+      it('doesn\' throw if defaultHelp func fails', async () => {
+        const out = await parse(['--foo', 'baz'], {
+          flags: {
+            foo: Flags.custom({
+              defaultHelp: async () => {
+                throw new Error('failed to get default help value')
+              },
+            })(),
+          },
+        })
+        expect(out.flags.foo).to.equal('baz')
+      })
 
       it('doesn\'t throw when 2nd char in value matches a flag char', async () => {
         const out =   await parse(['--myflag', 'Ishikawa', '-s', 'value'], {

@@ -312,9 +312,25 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return fws
     }
 
-    const addDefaultHelp = async (fws: FlagWithStrategy[]): Promise<FlagWithStrategy[]> => {
+    const addDefaultHelp = async (fwsArray: FlagWithStrategy[]): Promise<FlagWithStrategy[]> => {
       const valueReferenceForHelp = fwsArrayToObject(flagsWithAllValues.filter(fws => !fws.metadata?.setFromDefault))
-      return Promise.all(fws.map(async fws => fws.helpFunction ? ({...fws, metadata: {...fws.metadata, defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context)}}) : fws))
+      return Promise.all(fwsArray.map(async fws => {
+        try {
+          if (fws.helpFunction) {
+            return {
+              ...fws,
+              metadata: {
+                ...fws.metadata,
+                defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context),
+              },
+            }
+          }
+        } catch {
+          // no-op
+        }
+
+        return fws
+      }))
     }
 
     const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
