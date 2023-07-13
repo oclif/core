@@ -971,6 +971,25 @@ See more help with --help`)
       expect(out.args).to.deep.include({baz: false})
     })
 
+    it('accepts falsy flags', async () => {
+      const out = await parse([], {
+        flags: {
+          foo1: Flags.string({default: ''}),
+          foo2: Flags.string({default: '0'}),
+          foo3: Flags.string({default: 'false'}),
+          foo4: Flags.string({default: 'undefined'}),
+          bar: Flags.integer({default: 0}),
+          baz: Flags.boolean({default: false}),
+        },
+      })
+      expect(out.flags).to.deep.include({foo1: ''})
+      expect(out.flags).to.deep.include({foo2: '0'})
+      expect(out.flags).to.deep.include({foo3: 'false'})
+      expect(out.flags).to.deep.include({foo4: 'undefined'})
+      expect(out.flags).to.deep.include({bar: 0})
+      expect(out.flags).to.deep.include({baz: false})
+    })
+
     it('default as function', async () => {
       const out = await parse([], {
         args: {baz: Args.string({default: async () => 'BAZ'})},

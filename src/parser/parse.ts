@@ -351,10 +351,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     const flagTokenMap = this.mapAndValidateFlags()
-
     const flagsWithValues = await Promise.all(Object.entries(this.input.flags)
     // we check them if they have a token, or might have env, default, or defaultHelp.  Also include booleans so they get their default value
-    .filter(([name, flag]) => flag.type === 'boolean' || flag.env || flag.default || 'defaultHelp' in flag || flagTokenMap.has(name))
+    .filter(([name, flag]) => flag.type === 'boolean' || flag.env || flag.default !== undefined || 'defaultHelp' in flag || flagTokenMap.has(name))
     // match each possible flag to its token, if there is one
     .map(([name, flag]): FlagWithStrategy => ({inputFlag: {name, flag}, tokens: flagTokenMap.get(name)}))
     .map(fws => addValueFunction(fws))
