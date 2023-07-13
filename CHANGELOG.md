@@ -1,3 +1,12 @@
+## [2.9.2](https://github.com/oclif/core/compare/2.9.1...2.9.2) (2023-07-13)
+
+
+### Bug Fixes
+
+* **parser:** don't throw if defaultHelp func throws ([#732](https://github.com/oclif/core/issues/732)) ([7003b40](https://github.com/oclif/core/commit/7003b403a3cb9f6fe54a87de843dbc058f96be6c))
+
+
+
 ## [2.9.1](https://github.com/oclif/core/compare/2.9.0...2.9.1) (2023-07-12)
 
 
