@@ -1,3 +1,16 @@
+## [2.9.4](https://github.com/oclif/core/compare/2.9.3...2.9.4) (2023-07-18)
+
+
+### Bug Fixes
+
+* correctly print help when only command found and passed with help ([#733](https://github.com/oclif/core/issues/733)) ([3c3b597](https://github.com/oclif/core/commit/3c3b5973903b401dbd00a4005cb9d9d289289f76))
+
+
+
+## [2.9.3](https://github.com/oclif/core/compare/2.9.2...2.9.3) (2023-07-13)
+
+
+
 ## [2.9.2](https://github.com/oclif/core/compare/2.9.1...2.9.2) (2023-07-13)
 
 
