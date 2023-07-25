@@ -108,12 +108,13 @@ export default class ModuleLoader {
 
     switch (extension) {
     case '.js':
-      return getPackageType.sync(filePath) === 'module'
-
+    case '.jsx':
     case '.ts':
+    case '.tsx':
       return getPackageType.sync(filePath) === 'module'
 
     case '.mjs':
+    case '.mts':
       return true
 
     default:
