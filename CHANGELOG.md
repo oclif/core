@@ -1,3 +1,12 @@
+## [2.9.5](https://github.com/oclif/core/compare/2.9.4...2.9.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* corrected return type for Command.exit ([#715](https://github.com/oclif/core/issues/715)) ([#742](https://github.com/oclif/core/issues/742)) ([dd753f0](https://github.com/oclif/core/commit/dd753f045cde58d89b209e007926d4131f925570))
+
+
+
 ## [2.9.4](https://github.com/oclif/core/compare/2.9.3...2.9.4) (2023-07-18)
 
 
