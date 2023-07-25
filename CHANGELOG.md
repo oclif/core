@@ -1,3 +1,12 @@
+# [2.10.0](https://github.com/oclif/core/compare/2.9.5...2.10.0) (2023-07-25)
+
+
+### Features
+
+* add extensions to esm checking ([#694](https://github.com/oclif/core/issues/694)) ([#743](https://github.com/oclif/core/issues/743)) ([427aa5b](https://github.com/oclif/core/commit/427aa5b877047bcd248bf1dbe0969c9bb0457e36))
+
+
+
 ## [2.9.5](https://github.com/oclif/core/compare/2.9.4...2.9.5) (2023-07-25)
 
 
