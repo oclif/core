@@ -258,7 +258,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, token?: FlagToken, context: typeof this.context = {}) => {
       if (!flag.parse) return input
 
-      context.flag = flag
+      context.token = token
 
       try {
         if (flag.type === 'boolean') {
