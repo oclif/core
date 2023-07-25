@@ -2,7 +2,7 @@
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 import {ArgToken, BooleanFlag, CompletableFlag, FlagToken, Metadata, MetadataFlag, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
 import * as readline from 'readline'
-import {isTruthy, pickBy} from '../util'
+import {isTruthy, last, pickBy} from '../util'
 
 let debug: any
 try {
@@ -245,8 +245,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       // user provided some input
       if (tokenLength) {
         // boolean
-        if (fws.inputFlag.flag.type === 'boolean' && fws.tokens?.at(-1)?.input) {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(i.tokens?.at(-1)?.input !== `--no-${i.inputFlag.name}`, i.inputFlag.flag, i.tokens?.at(-1), this.context)}
+        if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
+          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(last(i.tokens)?.input !== `--no-${i.inputFlag.name}`, i.inputFlag.flag, last(i.tokens), this.context)}
         }
 
         // multiple with custom delimiter
@@ -256,7 +256,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
               ((i.tokens ?? []).flatMap(token => (token.input as string).split(i.inputFlag.flag.delimiter as string)))
               // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
               .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
-              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, {...i.tokens?.at(-1) as FlagToken, input: v}, this.context)),
+              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, {...last(i.tokens) as FlagToken, input: v}, this.context)),
             )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
@@ -268,7 +268,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
 
         // simple option flag
         if (fws.inputFlag.flag.type === 'option') {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, fws.tokens?.at(-1)?.input as string), i.inputFlag.flag, fws.tokens?.at(-1), this.context)}
+          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string), i.inputFlag.flag, last(fws.tokens), this.context)}
         }
       }
 

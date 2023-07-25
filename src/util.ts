@@ -22,6 +22,11 @@ export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
   })
 }
 
+export function last<T>(arr?: T[]): T | undefined {
+  if (!arr) return
+  return arr.slice(-1)[0]
+}
+
 type SortTypes = string | number | undefined | boolean
 
 export function sortBy<T>(arr: T[], fn: (i: T) => SortTypes | SortTypes[]): T[] {
