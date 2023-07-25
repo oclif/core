@@ -12,6 +12,33 @@ try {
   debug = () => {}
 }
 
+/**
+ * Support reading from stdin in Node 14 and older.
+ *
+ * This generally works for Node 14 and older EXCEPT when it's being
+ * run from another process, in which case it will hang indefinitely. Because
+ * of that issue we updated this to use AbortController but since AbortController
+ * is only available in Node 16 and newer, we have to keep this legacy version.
+ *
+ * See these issues for more details on the hanging indefinitely bug:
+ * https://github.com/oclif/core/issues/330
+ * https://github.com/oclif/core/pull/363
+ *
+ * @returns Promise<string | null>
+ */
+const readStdinLegacy = async (): Promise<string | null> => {
+  const {stdin} = process
+  let result
+  if (stdin.isTTY) return null
+  result = ''
+  stdin.setEncoding('utf8')
+  for await (const chunk of stdin) {
+    result += chunk
+  }
+
+  return result
+}
+
 const readStdin = async (): Promise<string | null> => {
   const {stdin, stdout} = process
   debug('stdin.isTTY', stdin.isTTY)
@@ -22,34 +49,40 @@ const readStdin = async (): Promise<string | null> => {
   // process.stdin.isTTY is undefined when it's running in a spawned process, even if there's no pipe.
   // This means that reading from stdin could hang indefinitely while waiting for a non-existent pipe.
   // Because of this, we have to set a timeout to prevent the process from hanging.
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     let result = ''
-    const ac = new AbortController()
-    const signal = ac.signal
-    const timeout = setTimeout(() => ac.abort(), 100)
+    try {
+      const ac = new AbortController()
+      const signal = ac.signal
+      const timeout = setTimeout(() => ac.abort(), 100)
 
-    const rl = readline.createInterface({
-      input: stdin,
-      output: stdout,
-      terminal: false,
-    })
+      const rl = readline.createInterface({
+        input: stdin,
+        output: stdout,
+        terminal: false,
+      })
 
-    rl.on('line', line => {
-      result += line
-    })
+      rl.on('line', line => {
+        result += line
+      })
 
-    rl.once('close', () => {
-      clearTimeout(timeout)
-      debug('resolved from stdin', result)
-      resolve(result)
-    })
+      rl.once('close', () => {
+        clearTimeout(timeout)
+        debug('resolved from stdin', result)
+        resolve(result)
+      })
 
-    signal.addEventListener('abort', () => {
-      debug('stdin aborted')
-      clearTimeout(timeout)
-      rl.close()
-      resolve(null)
-    }, {once: true})
+      signal.addEventListener('abort', () => {
+        debug('stdin aborted')
+        clearTimeout(timeout)
+        rl.close()
+        resolve(null)
+      }, {once: true})
+    } catch (error) {
+      const err = error as Error
+      if (err.name === 'ReferenceError') resolve(readStdinLegacy())
+      reject(error)
+    }
   })
 }
 
