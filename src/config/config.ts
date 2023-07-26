@@ -396,7 +396,7 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVar(k: string): string | undefined {
-    return  process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
+    return process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
   }
 
   public scopedEnvVarTrue(k: string): boolean {
@@ -405,7 +405,7 @@ export class Config implements IConfig {
   }
 
   /**
-   * @deprecated - use scopedEnvVarKeys instead which will account for bin aliases, this should be private
+   * @deprecated - use scopedEnvVarKeys instead which will account for bin aliases, this could be private/removed in a major
    * @param {string} k, the unscoped key you want to get the value for
    * @returns {string} returns the env var key
    */
@@ -421,7 +421,7 @@ export class Config implements IConfig {
    * @param {string} k, the env key e.g. 'debug'
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
-  public scopedEnvVarKeys(k:string): string[] {
+  public scopedEnvVarKeys(k: string): string[] {
     return [this.bin, ...this.binAliases ?? []].map(alias =>
       [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
