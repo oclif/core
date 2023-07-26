@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {maxBy, sumBy, capitalize, ensureArgObject} from '../src/util'
+import {maxBy, sumBy, capitalize, ensureArgObject, last} from '../src/util'
 
 describe('capitalize', () => {
   it('capitalizes the string', () => {
@@ -31,6 +31,22 @@ describe('maxBy', () => {
   it('returns max value in the array', () => {
     const arr: Item[] = [{x: 1}, {x: 3}, {x: 2}]
     expect(maxBy(arr, i => i.x)).to.equal(arr[1])
+  })
+})
+
+describe('last', () => {
+  it('returns undefined for empty array', () => {
+    expect(last([])).to.be.undefined
+  })
+  it('returns undefined for undefined', () => {
+    expect(last()).to.be.undefined
+  })
+  it('returns last value in the array', () => {
+    const arr: Item[] = [{x: 1}, {x: 3}, {x: 2}]
+    expect(last(arr)).to.equal(arr[2])
+  })
+  it('returns only item in array', () => {
+    expect(last([6])).to.equal(6)
   })
 })
 
