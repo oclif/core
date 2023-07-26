@@ -40,8 +40,8 @@ export default class ModuleLoader {
    * @returns {Promise<*>} The entire ESM module from dynamic import or CJS module by require.
    */
   static async load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
-    let filePath
-    let isESM
+    let filePath: string | undefined
+    let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       // It is important to await on import to catch the error code.
@@ -73,8 +73,8 @@ export default class ModuleLoader {
    *                                                                   file path and whether the module is ESM.
    */
   static async loadWithData(config: IConfig|IPlugin, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
-    let filePath
-    let isESM
+    let filePath: string | undefined
+    let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
