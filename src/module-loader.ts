@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as url from 'url'
 import * as fs from 'fs-extra'
 
 import {ModuleLoadError} from './errors'
@@ -43,8 +44,8 @@ export default class ModuleLoader {
     let isESM
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      // It is important to await on _importDynamic to catch the error code.
-      return isESM ? await import(filePath) : require(filePath)
+      // It is important to await on import to catch the error code.
+      return isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
@@ -76,7 +77,7 @@ export default class ModuleLoader {
     let isESM
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      const module = isESM ? await import(filePath) : require(filePath)
+      const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
