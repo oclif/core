@@ -1,5 +1,4 @@
 import * as path from 'path'
-import * as url from 'url'
 import * as fs from 'fs-extra'
 
 import {ModuleLoadError} from './errors'
@@ -14,12 +13,6 @@ const getPackageType = require('get-package-type')
  */
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
-
-/**
- * Provides a mechanism to use dynamic import / import() with tsconfig -> module: commonJS as otherwise import() gets
- * transpiled to require().
- */
-const _importDynamic = new Function('modulePath', 'return import(modulePath)') // eslint-disable-line no-new-func
 
 /**
  * Provides a static class with several utility methods to work with Oclif config / plugin to load ESM or CJS Node
@@ -51,7 +44,7 @@ export default class ModuleLoader {
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       // It is important to await on _importDynamic to catch the error code.
-      return isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+      return isESM ? await import(filePath) : require(filePath)
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
@@ -83,7 +76,7 @@ export default class ModuleLoader {
     let isESM
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+      const module = isESM ? await import(filePath) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
