@@ -127,6 +127,7 @@ export interface Config {
   findMatches(id: string, argv: string[]): Command.Loadable[];
   scopedEnvVar(key: string): string | undefined;
   scopedEnvVarKey(key: string): string;
+  scopedEnvVarKeys(key: string): string[];
   scopedEnvVarTrue(key: string): boolean;
   s3Url(key: string): string;
   s3Key(type: 'versioned' | 'unversioned', ext: '.tar.gz' | '.tar.xz', options?: Config.s3Key.Options): string;

@@ -396,19 +396,34 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVar(k: string): string | undefined {
-    return process.env[this.scopedEnvVarKey(k)]
+    return  process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
   }
 
   public scopedEnvVarTrue(k: string): boolean {
-    const v = process.env[this.scopedEnvVarKey(k)]
+    const v = process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
     return v === '1' || v === 'true'
   }
 
+  /**
+   * @deprecated - use scopedEnvVarKeys instead which will account for bin aliases, this should be private
+   * @param {string} k, the unscoped key you want to get the value for
+   * @returns {string} returns the env var key
+   */
   public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
     .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
+  }
+
+  /**
+   * gets the scoped env var keys for a given key, including bin aliases
+   * @param {string} k, the env key e.g. 'debug'
+   * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
+   */
+  public scopedEnvVarKeys(k:string): string[] {
+    return [this.bin, ...this.binAliases ?? []].map(alias =>
+      [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
   public findCommand(id: string, opts: { must: true }): Command.Loadable
