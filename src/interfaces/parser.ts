@@ -287,7 +287,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
    * specifying a default of false is the same as not specifying a default
    */
   default?: FlagDefault<boolean>;
-  parse: (input: boolean, context: Command, opts: FlagProps & BooleanFlagProps) => Promise<T>
+  parse: (input: boolean, context: FlagParserContext, opts: FlagProps & BooleanFlagProps) => Promise<T>
 }
 
 export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
@@ -325,7 +325,7 @@ export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags e
   baseFlags?: FlagInput<BFlags>;
   args?: ArgInput<AFlags>;
   strict?: boolean;
-  context?: Command;
+  context?: ParserContext;
   '--'?: boolean;
 }
 
@@ -334,8 +334,12 @@ export type ParserInput = {
   flags: FlagInput<any>;
   args: ArgInput<any>;
   strict: boolean;
-  context: Command | undefined;
+  context: ParserContext | undefined;
   '--'?: boolean;
+}
+
+export type ParserContext = Command & {
+  token?: FlagToken | ArgToken;
 }
 
 export type CompletionContext = {
