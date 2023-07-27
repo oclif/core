@@ -405,7 +405,7 @@ export class Config implements IConfig {
   }
 
   /**
-   * @deprecated - use scopedEnvVarKeys instead which will account for bin aliases, this could be private/removed in a major
+   * this DOES NOT account for bin aliases, use scopedEnvVarKeys instead which will account for bin aliases
    * @param {string} k, the unscoped key you want to get the value for
    * @returns {string} returns the env var key
    */
