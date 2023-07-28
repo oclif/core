@@ -1,3 +1,12 @@
+## [2.11.1](https://github.com/oclif/core/compare/2.11.0...2.11.1) (2023-07-28)
+
+
+### Bug Fixes
+
+* fall back to scopedEnvVarKey if scopedEnvVarKeys is not defined ([#752](https://github.com/oclif/core/issues/752)) ([cc63a56](https://github.com/oclif/core/commit/cc63a56766118237e26cab54ea806625cf0bd73c))
+
+
+
 # [2.11.0](https://github.com/oclif/core/compare/2.10.1...2.11.0) (2023-07-28)
 
 
