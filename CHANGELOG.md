@@ -1,3 +1,12 @@
+# [2.11.0](https://github.com/oclif/core/compare/2.10.1...2.11.0) (2023-07-28)
+
+
+### Features
+
+* deprecate scopedEnvVarKey for scopedEnvVarKeys which accounts for binAliases ([#751](https://github.com/oclif/core/issues/751)) ([4787248](https://github.com/oclif/core/commit/4787248655c39aaebb83eccd02bba3109921ccf7))
+
+
+
 ## [2.10.1](https://github.com/oclif/core/compare/2.10.0...2.10.1) (2023-07-28)
 
 
