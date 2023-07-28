@@ -7,5 +7,10 @@ export interface TSConfig {
     esModuleInterop?: boolean;
     experimentalDecorators?: boolean;
     emitDecoratorMetadata?: boolean;
+    module?: string;
+    moduleResolution?: string;
   };
+  'ts-node'?: {
+    esm?: boolean;
+  }
 }

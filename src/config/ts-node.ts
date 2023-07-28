@@ -64,12 +64,14 @@ function registerTSNode(root: string) {
         target: tsconfig.compilerOptions.target || 'es2017',
         experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
         emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
-        module: 'commonjs',
+        module: tsconfig.compilerOptions.module ?? 'commonjs',
+        moduleResolution: tsconfig.compilerOptions.moduleResolution ?? 'Node16',
         sourceMap: true,
         rootDirs: ROOT_DIRS,
         typeRoots: TYPE_ROOTS,
         jsx: 'react',
       },
+      esm: tsconfig['ts-node']?.esm ?? false,
     })
     return tsconfig
   } finally {
@@ -98,7 +100,7 @@ export function tsPath(root: string, orig: string | undefined, type?: string): s
   if (skipTSNode && type !== 'link') return orig
 
   try {
-    const tsconfig = type === 'link' ? registerTSNode(root) : loadTSConfig(root)
+    const tsconfig = registerTSNode(root)
     if (!tsconfig) return orig
     const {rootDir, rootDirs, outDir} = tsconfig.compilerOptions
     const rootDirPath = rootDir || (rootDirs || [])[0]

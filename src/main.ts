@@ -100,10 +100,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   }
 }
 
-function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
-  return type === 'cjs' ? join(dir, '..', 'tsconfig.json') : join(dirname(fileURLToPath(dir)), '..', 'tsconfig.json')
-}
-
 /**
  * Load and run oclif CLI
  *
@@ -162,9 +158,6 @@ export async function execute(
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins
     process.env.NODE_ENV = 'development'
-    require('ts-node').register({
-      project: getTsConfigPath(options.dir, options.type),
-    })
     settings.debug = true
   }
 
