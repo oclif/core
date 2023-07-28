@@ -224,10 +224,10 @@ export abstract class Command {
 
   protected async _run<T>(): Promise<T> {
     let err: Error | undefined
-    let result
+    let result: T | undefined
     try {
       // remove redirected env var to allow subsessions to run autoupdated client
-      this.config.scopedEnvVarKeys('REDIRECTED').map(key => delete process.env[key])
+      this.removeEnvVar('REDIRECTED')
       await this.init()
       result = await this.run()
     } catch (error: any) {
@@ -390,6 +390,17 @@ export abstract class Command {
 
   protected logJson(json: unknown): void {
     ux.styledJSON(json)
+  }
+
+  private removeEnvVar(envVar: string): void {
+    const keys: string[] = []
+    try {
+      keys.push(...this.config.scopedEnvVarKeys(envVar))
+    } catch {
+      keys.push(this.config.scopedEnvVarKey(envVar))
+    }
+
+    keys.map(key => delete process.env[key])
   }
 }
 
