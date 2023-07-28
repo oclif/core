@@ -1,3 +1,12 @@
+## [2.10.1](https://github.com/oclif/core/compare/2.10.0...2.10.1) (2023-07-28)
+
+
+### Bug Fixes
+
+* support node 14 again ([#741](https://github.com/oclif/core/issues/741)) ([a80c4fd](https://github.com/oclif/core/commit/a80c4fd74c7c5dc7b8426e6f78fc60689c82eab7))
+
+
+
 # [2.10.0](https://github.com/oclif/core/compare/2.9.5...2.10.0) (2023-07-25)
 
 
