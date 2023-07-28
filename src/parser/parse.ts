@@ -1,8 +1,24 @@
 /* eslint-disable no-await-in-loop */
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
-import {ArgToken, BooleanFlag, CompletableFlag, FlagToken, Metadata, MetadataFlag, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
+import {
+  ArgParserContext,
+  ArgToken,
+  BooleanFlag,
+  CompletableFlag,
+  FlagParserContext,
+  FlagToken,
+  Metadata,
+  MetadataFlag,
+  OptionFlag,
+  OutputArgs,
+  OutputFlags,
+  ParserContext,
+  ParserInput,
+  ParserOutput,
+  ParsingToken,
+} from '../interfaces/parser'
 import * as readline from 'readline'
-import {isTruthy, pickBy} from '../util'
+import {isTruthy, last, pickBy} from '../util'
 
 let debug: any
 try {
@@ -12,16 +28,44 @@ try {
   debug = () => {}
 }
 
-const readStdin = async (): Promise<string | null> => {
-  const {stdin, stdout} = process
-  debug('stdin.isTTY', stdin.isTTY)
+/**
+ * Support reading from stdin in Node 14 and older.
+ *
+ * This generally works for Node 14 and older EXCEPT when it's being
+ * run from another process, in which case it will hang indefinitely. Because
+ * of that issue we updated this to use AbortController but since AbortController
+ * is only available in Node 16 and newer, we have to keep this legacy version.
+ *
+ * See these issues for more details on the hanging indefinitely bug:
+ * https://github.com/oclif/core/issues/330
+ * https://github.com/oclif/core/pull/363
+ *
+ * @returns Promise<string | null>
+ */
+const readStdinLegacy = async (): Promise<string | null> => {
+  const {stdin} = process
+  let result
   if (stdin.isTTY) return null
+  result = ''
+  stdin.setEncoding('utf8')
+  for await (const chunk of stdin) {
+    result += chunk
+  }
+
+  return result
+}
+
+const readStdinWithTimeout = async (): Promise<string | null> => {
+  const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
   // process.stdin.isTTY is undefined when it's running in a pipe, e.g. echo 'foo' | my-cli command
   // process.stdin.isTTY is undefined when it's running in a spawned process, even if there's no pipe.
   // This means that reading from stdin could hang indefinitely while waiting for a non-existent pipe.
   // Because of this, we have to set a timeout to prevent the process from hanging.
+
+  if (stdin.isTTY) return null
+
   return new Promise(resolve => {
     let result = ''
     const ac = new AbortController()
@@ -53,6 +97,16 @@ const readStdin = async (): Promise<string | null> => {
   })
 }
 
+const readStdin = async (): Promise<string | null> => {
+  const {stdin, version} = process
+  debug('stdin.isTTY', stdin.isTTY)
+
+  const nodeMajorVersion = Number(version.split('.')[0].replace(/^v/, ''))
+  debug('node version', nodeMajorVersion)
+
+  return nodeMajorVersion >= 14 ? readStdinLegacy() : readStdinWithTimeout()
+}
+
 function isNegativeNumber(input: string): boolean {
   return /^-\d/g.test(input)
 }
@@ -65,12 +119,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private readonly booleanFlags: { [k: string]: BooleanFlag<any> }
   private readonly flagAliases: { [k: string]: BooleanFlag<any> | OptionFlag<any> }
 
-  private readonly context: any
+  private readonly context: ParserContext
 
   private currentFlag?: OptionFlag<any>
 
   constructor(private readonly input: T) {
-    this.context = input.context || {}
+    this.context = input.context ?? {} as ParserContext
     this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
@@ -222,15 +276,25 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       return input
     }
 
-    const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, token?: FlagToken, context: typeof this.context = {}) => {
+    const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, context: ParserContext | undefined, token?: FlagToken) => {
       if (!flag.parse) return input
+
+      const ctx = {
+        ...context,
+        token,
+        error: context?.error,
+        exit: context?.exit,
+        log: context?.log,
+        logToStderr: context?.logToStderr,
+        warn: context?.warn,
+      } as FlagParserContext
 
       try {
         if (flag.type === 'boolean') {
-          return await flag.parse(input, {...context, token}, flag)
+          return await flag.parse(input, ctx, flag)
         }
 
-        return await flag.parse(input, {...context, token}, flag)
+        return await flag.parse(input, ctx, flag)
       } catch (error: any) {
         error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
         throw error
@@ -245,8 +309,16 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       // user provided some input
       if (tokenLength) {
         // boolean
-        if (fws.inputFlag.flag.type === 'boolean' && fws.tokens?.at(-1)?.input) {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(i.tokens?.at(-1)?.input !== `--no-${i.inputFlag.name}`, i.inputFlag.flag, i.tokens?.at(-1), this.context)}
+        if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
+              i.inputFlag.flag,
+              this.context,
+              last(i.tokens),
+            ),
+          }
         }
 
         // multiple with custom delimiter
@@ -256,19 +328,38 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
               ((i.tokens ?? []).flatMap(token => (token.input as string).split(i.inputFlag.flag.delimiter as string)))
               // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
               .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
-              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, {...i.tokens?.at(-1) as FlagToken, input: v}, this.context)),
+              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),
             )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
 
         // multiple in the oclif-core style
         if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.multiple) {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => Promise.all((fws.tokens ?? []).map(token => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string), i.inputFlag.flag, token, this.context)))}
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) =>
+              Promise.all(
+                (fws.tokens ?? []).map(token => parseFlagOrThrowError(
+                  validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string),
+                  i.inputFlag.flag,
+                  this.context,
+                  token,
+                )),
+              ),
+          }
         }
 
         // simple option flag
         if (fws.inputFlag.flag.type === 'option') {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, fws.tokens?.at(-1)?.input as string), i.inputFlag.flag, fws.tokens?.at(-1), this.context)}
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string),
+              i.inputFlag.flag,
+              this.context,
+              last(fws.tokens),
+            ),
+          }
         }
       }
 
@@ -276,11 +367,21 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       if (fws.inputFlag.flag.env && process.env[fws.inputFlag.flag.env]) {
         const valueFromEnv = process.env[fws.inputFlag.flag.env]
         if (fws.inputFlag.flag.type === 'option' && valueFromEnv) {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv), i.inputFlag.flag, this.context)}
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv),
+              i.inputFlag.flag,
+              this.context,
+            ),
+          }
         }
 
         if (fws.inputFlag.flag.type === 'boolean') {
-          return {...fws, valueFunction: async (i: FlagWithStrategy) => Promise.resolve(isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'))}
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => Promise.resolve(isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false')),
+          }
         }
       }
 
@@ -381,11 +482,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
     let stdinRead = false
-    const ctx = this.context
+    const ctx = this.context as ArgParserContext
 
     for (const [name, arg] of Object.entries(this.input.args)) {
       const token = tokens.find(t => t.arg === name)
-      ctx.token = token
+      ctx.token = token!
+
       if (token) {
         if (arg.options && !arg.options.includes(token.input)) {
           throw new ArgInvalidOptionError(arg, token.input)
