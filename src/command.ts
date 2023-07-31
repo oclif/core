@@ -288,7 +288,7 @@ export abstract class Command {
       return jsonIndex > -1 && (ptIndex === -1 || jsonIndex < ptIndex)
     }
 
-    return this.argv.includes('--json')
+    return this.argv.includes('--json') || this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json'
   }
 
   /**

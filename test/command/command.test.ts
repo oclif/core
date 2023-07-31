@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
-import {Args, Command as Base, Flags, toCached} from '../../src'
+import {Args, Command as Base, Config, Flags, toCached} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -524,6 +524,22 @@ describe('command', () => {
       expect(cmd.jsonEnabled()).to.equal(true)
     })
     .it('json enabled/pass through disabled/--json flag before --/jsonEnabled() should be true')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = true
+          async run() {}
+      }
+
+      // mock a scopedEnvVar being set to JSON
+      const cmd = new CMD([], {
+        bin: 'FOO', scopedEnvVar: (foo: string) => foo.includes('CONTENT_TYPE') ? 'json' : undefined,
+      } as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('json enabled from env')
 
     fancy
     .stdout()
