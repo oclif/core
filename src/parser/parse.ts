@@ -104,7 +104,7 @@ const readStdin = async (): Promise<string | null> => {
   const nodeMajorVersion = Number(version.split('.')[0].replace(/^v/, ''))
   debug('node version', nodeMajorVersion)
 
-  return nodeMajorVersion >= 14 ? readStdinWithTimeout() : readStdinLegacy()
+  return nodeMajorVersion > 14 ? readStdinWithTimeout() : readStdinLegacy()
 }
 
 function isNegativeNumber(input: string): boolean {
