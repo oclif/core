@@ -1,3 +1,12 @@
+## [2.11.4](https://github.com/oclif/core/compare/2.11.3...2.11.4) (2023-07-31)
+
+
+### Bug Fixes
+
+* add missing properties to Interfaces.PJSON ([9b607f8](https://github.com/oclif/core/commit/9b607f881a78febc849e7307b9b896ee20abaf0e))
+
+
+
 ## [2.11.3](https://github.com/oclif/core/compare/2.11.2...2.11.3) (2023-07-31)
 
 
