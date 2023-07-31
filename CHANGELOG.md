@@ -1,3 +1,12 @@
+## [2.11.3](https://github.com/oclif/core/compare/2.11.2...2.11.3) (2023-07-31)
+
+
+### Bug Fixes
+
+* node 14 stdin logic ([9c88715](https://github.com/oclif/core/commit/9c88715454e061cf4c10aab00c22bd52957a9e4c))
+
+
+
 ## [2.11.2](https://github.com/oclif/core/compare/2.11.1...2.11.2) (2023-07-31)
 
 
