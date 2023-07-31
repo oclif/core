@@ -124,7 +124,7 @@ describe('oclif plugins', () => {
       expect(commands.output).to.include('which')
     })
 
-    it('should fliter commands', async () => {
+    it('should filter commands', async () => {
       commands = await executor.executeCommand('commands --filter "command=plugins"')
       expect(commands.output).to.include('plugins')
       expect(commands.output).to.include('plugins:inspect')
@@ -139,7 +139,7 @@ describe('oclif plugins', () => {
       expect(commands.output).to.not.include('which')
     })
 
-    it('should extedned columns', async () => {
+    it('should extend columns', async () => {
       commands = await executor.executeCommand('commands --extended')
       expect(commands.output).to.include('Command')
       expect(commands.output).to.include('Summary')
