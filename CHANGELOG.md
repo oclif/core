@@ -1,3 +1,12 @@
+## [2.11.5](https://github.com/oclif/core/compare/2.11.4...2.11.5) (2023-07-31)
+
+
+### Bug Fixes
+
+* set moduleResolution to Node16 ([#750](https://github.com/oclif/core/issues/750)) ([d7fdda8](https://github.com/oclif/core/commit/d7fdda8d23a20892d36ada847cfdc24ae76ca4b1))
+
+
+
 ## [2.11.4](https://github.com/oclif/core/compare/2.11.3...2.11.4) (2023-07-31)
 
 
