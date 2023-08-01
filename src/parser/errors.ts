@@ -45,12 +45,18 @@ export class InvalidArgsSpecError extends CLIParseError {
 export class RequiredArgsError extends CLIParseError {
   public args: Arg<any>[]
 
-  constructor({args, parse}: CLIParseErrorOptions & { args: Arg<any>[] }) {
+  constructor({args, parse, flagsWithMultiple}: CLIParseErrorOptions & { args: Arg<any>[]; flagsWithMultiple?: string[] }) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter(a => a.name)
     if (namedArgs.length > 0) {
       const list = renderList(namedArgs.map(a => [a.name, a.description] as [string, string]))
       message += `:\n${list}`
+    }
+
+    if (flagsWithMultiple?.length) {
+      const flags = flagsWithMultiple.map(f => `--${f}`).join(', ')
+      message += `\n\nNote: ${flags} allow${flagsWithMultiple.length === 1 ? 's' : ''} multiple values. Because of this you need to provide all arguments before providing ${flagsWithMultiple.length === 1 ? 'that flag' : 'those flags'}.`
+      message += '\nAlternatively, you can use "--" to signify the end of the flags and the beginning of arguments.'
     }
 
     super({parse, message})

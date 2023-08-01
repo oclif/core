@@ -286,6 +286,53 @@ arg3  arg3 desc
 See more help with --help`)
       })
 
+      it('warns about having one flag with multiple values when missing an arg', async () => {
+        let message = ''
+        try {
+          await parse(['--flag1', 'val1', 'arg1'], {
+            args: {
+              arg1: Args.string({required: true, description: 'arg1 desc'}),
+            },
+            flags: {
+              flag1: Flags.string({multiple: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include(`Missing 1 required arg:
+arg1  arg1 desc
+
+Note: --flag1 allows multiple values. Because of this you need to provide all arguments before providing that flag.
+Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
+See more help with --help`)
+      })
+
+      it('warns about having many flags with multiple values when missing an arg', async () => {
+        let message = ''
+        try {
+          await parse(['--flag1', 'val1', '--flag2', 'val1', 'val2', 'arg1'], {
+            args: {
+              arg1: Args.string({required: true, description: 'arg1 desc'}),
+            },
+            flags: {
+              flag1: Flags.string({multiple: true}),
+              flag2: Flags.string({multiple: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include(`Missing 1 required arg:
+arg1  arg1 desc
+
+Note: --flag1, --flag2 allow multiple values. Because of this you need to provide all arguments before providing those flags.
+Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
+See more help with --help`)
+      })
+
       it('too many args', async () => {
         let message = ''
         try {

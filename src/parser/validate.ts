@@ -44,7 +44,11 @@ export async function validate(parse: {
     }
 
     if (missingRequiredArgs.length > 0) {
-      throw new RequiredArgsError({parse, args: missingRequiredArgs})
+      const flagsWithMultiple = Object.entries(parse.input.flags)
+      .filter(([_, flagDef]) => flagDef.type === 'option' && Boolean(flagDef.multiple))
+      .map(([name]) => name)
+
+      throw new RequiredArgsError({parse, args: missingRequiredArgs, flagsWithMultiple})
     }
   }
 
