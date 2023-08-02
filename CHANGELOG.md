@@ -1,3 +1,12 @@
+## [2.11.6](https://github.com/oclif/core/compare/2.11.5...2.11.6) (2023-08-02)
+
+
+### Bug Fixes
+
+* add note to RequiredArgsError when there are flags with multiple=true ([#754](https://github.com/oclif/core/issues/754)) ([ed359a7](https://github.com/oclif/core/commit/ed359a72012b387c3d106be443be601f51a49225))
+
+
+
 ## [2.11.5](https://github.com/oclif/core/compare/2.11.4...2.11.5) (2023-07-31)
 
 
