@@ -530,6 +530,22 @@ describe('command', () => {
     .do(async () => {
       class CMD extends Command {
           static enableJsonFlag = true
+          async run() {}
+      }
+
+      // mock a scopedEnvVar being set to JSON
+      const cmd = new CMD([], {
+        bin: 'FOO', scopedEnvVar: (foo: string) => foo.includes('CONTENT_TYPE') ? 'json' : undefined,
+      } as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('json enabled from env')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+          static enableJsonFlag = true
           static '--' = true
 
           async run() {
