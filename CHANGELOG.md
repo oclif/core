@@ -1,3 +1,12 @@
+## [2.11.7](https://github.com/oclif/core/compare/2.11.6...2.11.7) (2023-08-03)
+
+
+### Bug Fixes
+
+* allow CONTENT_TYPE env to work for all oclif cmds ([71db0dc](https://github.com/oclif/core/commit/71db0dc63ad5d4a43df72ac4a040df2d92d3b0e1))
+
+
+
 ## [2.11.6](https://github.com/oclif/core/compare/2.11.5...2.11.6) (2023-08-02)
 
 
