@@ -6,6 +6,9 @@ export interface PJSON {
   devDependencies?: {[name: string]: string};
   oclif: {
     schema?: number;
+    bin?: string;
+    dirname?: string;
+    hooks?: Record<string, string | string[]>;
   };
 }
 

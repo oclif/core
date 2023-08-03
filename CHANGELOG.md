@@ -1,3 +1,48 @@
+## [2.11.7](https://github.com/oclif/core/compare/2.11.6...2.11.7) (2023-08-03)
+
+
+### Bug Fixes
+
+* allow CONTENT_TYPE env to work for all oclif cmds ([71db0dc](https://github.com/oclif/core/commit/71db0dc63ad5d4a43df72ac4a040df2d92d3b0e1))
+
+
+
+## [2.11.6](https://github.com/oclif/core/compare/2.11.5...2.11.6) (2023-08-02)
+
+
+### Bug Fixes
+
+* add note to RequiredArgsError when there are flags with multiple=true ([#754](https://github.com/oclif/core/issues/754)) ([ed359a7](https://github.com/oclif/core/commit/ed359a72012b387c3d106be443be601f51a49225))
+
+
+
+## [2.11.5](https://github.com/oclif/core/compare/2.11.4...2.11.5) (2023-07-31)
+
+
+### Bug Fixes
+
+* set moduleResolution to Node16 ([#750](https://github.com/oclif/core/issues/750)) ([d7fdda8](https://github.com/oclif/core/commit/d7fdda8d23a20892d36ada847cfdc24ae76ca4b1))
+
+
+
+## [2.11.4](https://github.com/oclif/core/compare/2.11.3...2.11.4) (2023-07-31)
+
+
+### Bug Fixes
+
+* add missing properties to Interfaces.PJSON ([9b607f8](https://github.com/oclif/core/commit/9b607f881a78febc849e7307b9b896ee20abaf0e))
+
+
+
+## [2.11.3](https://github.com/oclif/core/compare/2.11.2...2.11.3) (2023-07-31)
+
+
+### Bug Fixes
+
+* node 14 stdin logic ([9c88715](https://github.com/oclif/core/commit/9c88715454e061cf4c10aab00c22bd52957a9e4c))
+
+
+
 ## [2.11.2](https://github.com/oclif/core/compare/2.11.1...2.11.2) (2023-07-31)
 
 

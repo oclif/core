@@ -8,7 +8,7 @@ export interface OclifError {
 
 export interface PrettyPrintableError {
   /**
-   * messsage to display related to the error
+   * message to display related to the error
    */
   message?: string;
 
