@@ -157,7 +157,7 @@ type CleanUpOptions = {
   }
 
   await describe('CJS Root Plugin', async () => {
-    process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
+    process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.cjs1.repo})
 
     await test('Install CJS plugin (bin/run)', async () => {

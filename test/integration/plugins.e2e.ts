@@ -212,11 +212,9 @@ describe('oclif plugins', () => {
 
       it('should install the plugin', async () => {
         const result = await executor.executeCommand('plugins:install https://github.com/oclif/plugin-warn-if-update-available')
-        console.log(result)
         expect(result.code).to.equal(0)
 
         const pluginsResult = await executor.executeCommand('plugins --core')
-        console.log(pluginsResult)
         expect(pluginsResult.code).to.equal(0)
         expect(pluginsResult.stdout).to.include('@oclif/plugin-warn-if-update-available')
       })

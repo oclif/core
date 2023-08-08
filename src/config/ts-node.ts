@@ -66,7 +66,7 @@ function registerTSNode(root: string) {
       experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
       emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
       module: tsconfig.compilerOptions.module ?? 'commonjs',
-      moduleResolution: tsconfig.compilerOptions.moduleResolution ?? 'Node16',
+      moduleResolution: tsconfig.compilerOptions.moduleResolution,
       sourceMap: true,
       rootDirs: ROOT_DIRS,
       typeRoots: TYPE_ROOTS,
