@@ -423,6 +423,8 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKeys(k: string): string[] {
     return [this.bin, ...this.binAliases ?? []].map(alias =>
+
+    // return [this.bin, ...this.binAliases ?? []].filter(alias => Boolean(alias)).map(alias =>
       [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
