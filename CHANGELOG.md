@@ -1,3 +1,12 @@
+## [2.11.8](https://github.com/oclif/core/compare/2.11.7...2.11.8) (2023-08-08)
+
+
+### Bug Fixes
+
+* handle lack of bin (happens in UT when stubbing config) ([#758](https://github.com/oclif/core/issues/758)) ([11e4f73](https://github.com/oclif/core/commit/11e4f73cf855f71294e4fc70c9d580c75bcef6e3))
+
+
+
 ## [2.11.7](https://github.com/oclif/core/compare/2.11.6...2.11.7) (2023-08-03)
 
 
