@@ -422,7 +422,7 @@ export class Config implements IConfig {
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
-    return [this.bin, ...this.binAliases ?? []].map(alias =>
+    return [this.bin, ...this.binAliases ?? []].filter(alias => Boolean(alias)).map(alias =>
       [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
