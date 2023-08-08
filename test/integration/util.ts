@@ -6,6 +6,7 @@ import * as chalk from 'chalk'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import {Interfaces} from '../../src'
 
 export type ExecError = cp.ExecException & { stderr: string; stdout: string };
 
@@ -21,13 +22,15 @@ export interface Options {
   plugins?: string[];
 }
 
-function updatePkgJson(testDir: string, obj: Record<string, unknown>): void {
+function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
   const pkgJsonFile = path.join(testDir, 'package.json')
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonFile, 'utf-8'))
   obj.dependencies = Object.assign(pkgJson.dependencies || {}, obj.dependencies || {})
   obj.resolutions = Object.assign(pkgJson.resolutions || {}, obj.resolutions || {})
   const updated = Object.assign(pkgJson, obj)
   fs.writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
+
+  return updated
 }
 
 export class Executor {
@@ -87,9 +90,11 @@ export class Executor {
  */
 export async function setup(testFile: string, options: Options): Promise<Executor> {
   const testFileName = path.basename(testFile)
-  const location = path.join(process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir(), testFileName)
+  const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir()
+  const pluginDir = path.join(dir, testFileName)
+
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
-  const testDir = path.join(location, name)
+  const testDir = path.join(pluginDir, name)
   const executor = new Executor(testDir)
 
   console.log(chalk.cyan(`${testFileName}:`), testDir)
@@ -99,7 +104,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     return executor
   }
 
-  await mkdirp(location)
+  await mkdirp(pluginDir)
   rm('-rf', testDir)
 
   const clone = `git clone ${options.repo} ${testDir}`
@@ -109,20 +114,38 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   console.log(chalk.cyan(`${testFileName}:`), 'Updating package.json')
   const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
 
+  let pjson: Interfaces.PJSON
   if (options.plugins) {
     // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
-    updatePkgJson(testDir, {
+    pjson = updatePkgJson(testDir, {
       resolutions: {'@oclif/core': path.resolve('.')},
       dependencies: Object.assign(dependencies, pluginDeps),
       oclif: {plugins: options.plugins},
     })
   } else {
-    updatePkgJson(testDir, {
+    pjson = updatePkgJson(testDir, {
       resolutions: {'@oclif/core': path.resolve('.')},
       dependencies,
     })
   }
+
+  const bin = (pjson.oclif.bin ?? pjson.name.replace(/-/g, '_')).toUpperCase()
+  const dataDir = path.join(dir, 'data', pjson.oclif.bin ?? pjson.name)
+  const cacheDir = path.join(dir, 'cache', pjson.oclif.bin ?? pjson.name)
+  const configDir = path.join(dir, 'config', pjson.oclif.bin ?? pjson.name)
+
+  await mkdirp(dataDir)
+  await mkdirp(configDir)
+  await mkdirp(cacheDir)
+
+  process.env[`${bin}_DATA_DIR`] = dataDir
+  process.env[`${bin}_CONFIG_DIR`] = configDir
+  process.env[`${bin}_CACHE_DIR`] = cacheDir
+
+  console.log(`${bin}_DATA_DIR`, process.env[`${bin}_DATA_DIR`])
+  console.log(`${bin}_CONFIG_DIR`, process.env[`${bin}_CONFIG_DIR`])
+  console.log(`${bin}_CACHE_DIR`, process.env[`${bin}_CACHE_DIR`])
 
   const install = 'yarn install --force'
   console.log(chalk.cyan(`${testFileName}:`), install)
