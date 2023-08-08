@@ -51,7 +51,7 @@ describe('Salesforce CLI (sf)', () => {
      *   <environment variables>
      */
     const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?DESCRIPTION.*?EXAMPLES.*?FLAG DESCRIPTIONS.*?CONFIGURATION VARIABLES.*?ENVIRONMENT VARIABLES.*$/gs
-    expect(regex.test(help.output!)).to.be.true
+    expect(regex.test(help.stdout!)).to.be.true
   })
 
   it('should show custom short help', async () => {
@@ -72,20 +72,20 @@ describe('Salesforce CLI (sf)', () => {
      *   <global flags>
      */
     const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?(?!DESCRIPTION).*?(?!EXAMPLES).*?(?!FLAG DESCRIPTIONS).*?(?!CONFIGURATION VARIABLES).*?(?!ENVIRONMENT VARIABLES).*$/gs
-    expect(regex.test(help.output!)).to.be.true
+    expect(regex.test(help.stdout!)).to.be.true
   })
 
   it('should show version using -v', async () => {
     const version = await executor.executeCommand('-v')
-    expect(version.output).to.include('@salesforce/cli')
-    expect(version.output).to.include(process.platform)
-    expect(version.output).to.include(os.arch())
-    expect(version.output).to.include(process.version)
+    expect(version.stdout).to.include('@salesforce/cli')
+    expect(version.stdout).to.include(process.platform)
+    expect(version.stdout).to.include(os.arch())
+    expect(version.stdout).to.include(process.version)
   })
 
   it('should have formatted json success output', async () => {
     const config = await executor.executeCommand('config list --json')
-    const result = parseJson(config.output!)
+    const result = parseJson(config.stdout!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('result')
     expect(result).to.have.property('warnings')
@@ -93,7 +93,7 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should have formatted json error output', async () => {
     const config = await executor.executeCommand('config set DOES_NOT_EXIST --json')
-    const result = parseJson(config.output!)
+    const result = parseJson(config.stdout!)
     expect(result).to.have.property('status')
     expect(result).to.have.property('stack')
     expect(result).to.have.property('name')
@@ -103,7 +103,7 @@ describe('Salesforce CLI (sf)', () => {
 
   it('should handle varargs', async () => {
     const config = await executor.executeCommand('config set disable-telemetry=true org-api-version=54.0 --global --json')
-    const parsed = parseJson(config.output!)
+    const parsed = parseJson(config.stdout!)
     expect(parsed.status).to.equal(0)
     const results = parsed.result as {successes: Array<{success: boolean}>, failures: Array<{failed: boolean}>}
     for (const result of results.successes) {

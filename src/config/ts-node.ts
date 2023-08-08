@@ -38,6 +38,10 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
+function removeUndefinedValues(obj: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(obj).filter(([_, value]) => value !== undefined))
+}
+
 function registerTSNode(root: string) {
   const tsconfig = loadTSConfig(root)
   if (!tsconfig) return
@@ -56,23 +60,33 @@ function registerTSNode(root: string) {
   const cwd = process.cwd()
   try {
     process.chdir(root)
-    tsNode.register({
+    const compilerOptions = removeUndefinedValues({
+      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
+      target: tsconfig.compilerOptions.target || 'es2017',
+      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
+      emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
+      module: tsconfig.compilerOptions.module ?? 'commonjs',
+      moduleResolution: tsconfig.compilerOptions.moduleResolution ?? 'Node16',
+      sourceMap: true,
+      rootDirs: ROOT_DIRS,
+      typeRoots: TYPE_ROOTS,
+      jsx: 'react',
+    })
+
+    const tsNodeOptions = removeUndefinedValues({
       skipProject: true,
       transpileOnly: true,
-      compilerOptions: {
-        esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-        target: tsconfig.compilerOptions.target || 'es2017',
-        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
-        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
-        module: tsconfig.compilerOptions.module ?? 'commonjs',
-        moduleResolution: tsconfig.compilerOptions.moduleResolution ?? 'Node16',
-        sourceMap: true,
-        rootDirs: ROOT_DIRS,
-        typeRoots: TYPE_ROOTS,
-        jsx: 'react',
-      },
       esm: tsconfig['ts-node']?.esm ?? false,
+      experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? undefined,
     })
+
+    const conf = {
+      compilerOptions,
+      ...tsNodeOptions,
+    }
+
+    tsNode.register(conf)
+
     return tsconfig
   } finally {
     process.chdir(cwd)

@@ -11,7 +11,8 @@ export type ExecError = cp.ExecException & { stderr: string; stdout: string };
 
 export interface Result {
   code: number;
-  output?: string;
+  stdout?: string;
+  stderr?: string;
   error?: ExecError
 }
 
@@ -30,14 +31,17 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): void {
 }
 
 export class Executor {
-  public constructor(private testDir: string) {}
+  public isESM: boolean
+  public constructor(public testDir: string) {
+    this.isESM = fs.existsSync(path.join(this.testDir, 'bin', 'run.js'))
+  }
 
   public executeInTestDir(cmd: string, silent = true): Promise<Result> {
     return this.exec(cmd, this.testDir, silent)
   }
 
-  public executeCommand(cmd: string): Promise<Result> {
-    const executable = process.platform === 'win32' ? path.join('bin', 'run.cmd') : path.join('bin', 'run')
+  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run'): Promise<Result> {
+    const executable = process.platform === 'win32' ? path.join('bin', `${script}.cmd`) : path.join('bin', `${script}${this.isESM ? '.js' : ''}`)
     return this.executeInTestDir(`${executable} ${cmd}`)
   }
 
@@ -45,11 +49,19 @@ export class Executor {
     return new Promise(resolve => {
       if (silent) {
         try {
-          const r = cp.execSync(cmd, {stdio: 'pipe', cwd})
-          resolve({code: 0, output: r.toString()})
+          const r = cp.execSync(cmd, {
+            stdio: 'pipe',
+            cwd,
+          })
+          resolve({code: 0, stdout: r.toString()})
         } catch (error) {
           const err = error as ExecError
-          resolve({code: 1, error: err, output: err.stdout.toString()})
+          resolve({
+            code: 1,
+            error: err,
+            stdout: err.stdout.toString(),
+            stderr: err.stderr.toString(),
+          })
         }
       } else {
         console.log(chalk.cyan(cmd))
@@ -76,7 +88,7 @@ export class Executor {
 export async function setup(testFile: string, options: Options): Promise<Executor> {
   const testFileName = path.basename(testFile)
   const location = path.join(process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir(), testFileName)
-  const [name] = options.repo.match(/(?<=\/).+?(?=\.)/) ?? ['hello-world']
+  const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
   const testDir = path.join(location, name)
   const executor = new Executor(testDir)
 
