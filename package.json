@@ -116,7 +116,7 @@
     "posttest": "yarn lint",
     "prepack": "yarn run build",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck",
-    "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --timeout 1200000 && yarn test:esm-cjs",
+    "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
     "test:esm-cjs": "ts-node test/integration/esm-cjs.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
     "test": "mocha --forbid-only \"test/**/*.test.ts\""

@@ -166,7 +166,7 @@ type CleanUpOptions = {
     expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin.name)
   }
 
-  await section('CJS Root Plugin', async () => {
+  const cjs = section('CJS Root Plugin', async () => {
     process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.cjs1.repo})
 
@@ -231,7 +231,7 @@ type CleanUpOptions = {
     })
   })
 
-  await section('ESM Root Plugin', async () => {
+  const esm = section('ESM Root Plugin', async () => {
     process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.esm1.repo})
 
@@ -316,6 +316,7 @@ type CleanUpOptions = {
     })
   })
 
+  await Promise.all([cjs, esm])
   exit()
 })()
 

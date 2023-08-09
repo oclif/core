@@ -6,6 +6,7 @@ import * as chalk from 'chalk'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import {randomUUID} from 'crypto'
 import {Interfaces} from '../../src'
 
 export type ExecError = cp.ExecException & { stderr: string; stdout: string };
@@ -99,21 +100,22 @@ export class Executor {
 export async function setup(testFile: string, options: Options): Promise<Executor> {
   const testFileName = path.basename(testFile)
   const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir()
-  const pluginDir = path.join(dir, testFileName)
+  // Put tests in a unique subdirectory to avoid conflicts with other tests when running in parallel
+  const testDir = path.join(dir, randomUUID(), testFileName)
 
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
-  const testDir = path.join(pluginDir, name)
-  const executor = new Executor(testDir, testFileName)
+  const pluginDir = path.join(testDir, name)
+  const executor = new Executor(pluginDir, testFileName)
 
-  executor.log('test directory:', testDir)
+  executor.log('plugin directory:', pluginDir)
 
   if (process.env.OCLIF_CORE_E2E_SKIP_SETUP === 'true') {
     console.log(chalk.yellow.bold('OCLIF_CORE_E2E_SKIP_SETUP is true. Skipping test setup...'))
     return executor
   }
 
-  await mkdirp(pluginDir)
-  rm('-rf', testDir)
+  await mkdirp(testDir)
+  rm('-rf', pluginDir)
 
   await executor.clone(options.repo)
 
@@ -124,13 +126,13 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   if (options.plugins) {
     // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
-    pjson = updatePkgJson(testDir, {
+    pjson = updatePkgJson(pluginDir, {
       resolutions: {'@oclif/core': path.resolve('.')},
       dependencies: Object.assign(dependencies, pluginDeps),
       oclif: {plugins: options.plugins},
     })
   } else {
-    pjson = updatePkgJson(testDir, {
+    pjson = updatePkgJson(pluginDir, {
       resolutions: {'@oclif/core': path.resolve('.')},
       dependencies,
     })
