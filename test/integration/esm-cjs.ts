@@ -81,7 +81,7 @@ type RunCommandOptions = {
   executor: Executor;
   plugin: Plugin;
   script: Script;
-  expectString?: string;
+  expectStrings?: string[];
 }
 
 type CleanUpOptions = {
@@ -97,24 +97,32 @@ type CleanUpOptions = {
       command: 'esm1',
       package: '@oclif/plugin-test-esm-1',
       repo: 'https://github.com/oclif/plugin-test-esm-1',
+      commandText: 'hello I am an ESM plugin',
+      hookText: 'Greetings! from plugin-test-esm-1 init hook',
     },
     esm2: {
       name: 'plugin-test-esm-2',
       command: 'esm2',
       package: '@oclif/plugin-test-esm-2',
       repo: 'https://github.com/oclif/plugin-test-esm-2',
+      commandText: 'hello I am an ESM plugin',
+      hookText: 'Greetings! from plugin-test-esm-2 init hook',
     },
     cjs1: {
       name: 'plugin-test-cjs-1',
       command: 'cjs1',
       package: '@oclif/plugin-test-cjs-1',
       repo: 'https://github.com/oclif/plugin-test-cjs-1',
+      commandText: 'hello I am a CJS plugin',
+      hookText: 'Greetings! from plugin-test-cjs-1 init hook',
     },
     cjs2: {
       name: 'plugin-test-cjs-2',
       command: 'cjs2',
       package: '@oclif/plugin-test-cjs-2',
       repo: 'https://github.com/oclif/plugin-test-cjs-2',
+      commandText: 'hello I am a CJS plugin',
+      hookText: 'Greetings! from plugin-test-cjs-2 init hook',
     },
   }
 
@@ -146,8 +154,10 @@ type CleanUpOptions = {
     const result = await options.executor.executeCommand(options.plugin.command, options.script)
     expect(result.code).to.equal(0)
 
-    if (options.expectString) {
-      expect(result.stdout).to.include(options.expectString)
+    if (options.expectStrings) {
+      for (const expectString of options.expectStrings) {
+        expect(result.stdout).to.include(expectString)
+      }
     }
   }
 
@@ -160,63 +170,63 @@ type CleanUpOptions = {
     process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.cjs1.repo})
 
-    await test('Install CJS plugin (bin/run)', async () => {
+    await test('Install CJS plugin to CJS root plugin (bin/run)', async () => {
       const plugin = PLUGINS.cjs2
       const script = 'run'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install CJS plugin (bin/dev)', async () => {
+    await test('Install CJS plugin to CJS root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.cjs2
       const script = 'dev'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install ESM plugin (bin/run)', async () => {
+    await test('Install ESM plugin to CJS root plugin (bin/run)', async () => {
       const plugin = PLUGINS.esm1
       const script = 'run'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script: 'run'})
+      await runCommand({executor, plugin, script: 'run', expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install ESM plugin (bin/dev)', async () => {
+    await test('Install ESM plugin to CJS root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.esm1
       const script = 'dev'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script: 'dev'})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link CJS plugin (bin/run)', async () => {
+    await test('Link CJS plugin to CJS root plugin (bin/run)', async () => {
       const plugin = PLUGINS.cjs2
       const script = 'run'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
 
-      await runCommand({executor, plugin, script, expectString: 'hello'})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
 
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link CJS plugin (bin/dev)', async () => {
+    await test('Link CJS plugin to CJS root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.cjs2
       const script = 'dev'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script: 'dev', expectString: 'hello'})
+      await runCommand({executor, plugin, script: 'dev', expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
   })
@@ -225,83 +235,83 @@ type CleanUpOptions = {
     process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.esm1.repo})
 
-    await test('Install CJS plugin (bin/run)', async () => {
+    await test('Install CJS plugin to ESM root plugin (bin/run)', async () => {
       const plugin = PLUGINS.cjs1
       const script = 'run'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install CJS plugin (bin/dev)', async () => {
+    await test('Install CJS plugin to ESM root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.cjs1
       const script = 'dev'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install ESM plugin (bin/run)', async () => {
+    await test('Install ESM plugin to ESM root plugin (bin/run)', async () => {
       const plugin = PLUGINS.esm2
       const script = 'run'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Install ESM plugin (bin/dev)', async () => {
+    await test('Install ESM plugin to ESM root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.esm2
       const script = 'dev'
 
       await installPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link CJS plugin (bin/run)', async () => {
+    await test('Link CJS plugin to ESM root plugin (bin/run)', async () => {
       const plugin = PLUGINS.cjs1
       const script = 'run'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link CJS plugin (bin/dev)', async () => {
+    await test('Link CJS plugin to ESM root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.cjs1
       const script = 'dev'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link ESM plugin (bin/run)', async () => {
+    await test('Link ESM plugin to ESM root plugin (bin/run)', async () => {
       const plugin = PLUGINS.esm2
       const script = 'dev'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
 
-    await test('Link ESM plugin (bin/dev)', async () => {
+    await test('Link ESM plugin to ESM root plugin (bin/dev)', async () => {
       const plugin = PLUGINS.esm2
       const script = 'dev'
 
       const linkedPlugin = await linkPlugin({executor, plugin, script})
-      await runCommand({executor, plugin, script})
+      await runCommand({executor, plugin, script, expectStrings: [plugin.commandText, plugin.hookText]})
       await modifyCommand(`${linkedPlugin.testDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
-      await runCommand({executor, plugin, script, expectString: 'howdy'})
+      await runCommand({executor, plugin, script, expectStrings: ['howdy', plugin.hookText]})
       await cleanUp({executor, plugin, script})
     })
   })
