@@ -73,7 +73,7 @@ jobs:
           cache: yarn
       - run: yarn install --network-timeout 600000
       - run: yarn build
-      - run: yarn test:ejs-cjs
+      - run: yarn test:esm-cjs
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
