@@ -31,7 +31,7 @@ async function test(name: string, fn: () => Promise<void>) {
   }
 }
 
-async function describe(name: string, fn: () => Promise<void>) {
+async function section(name: string, fn: () => Promise<void>) {
   console.log()
   console.log(`#### ${bold(name)} ####`)
   await fn()
@@ -152,11 +152,11 @@ type CleanUpOptions = {
   }
 
   async function cleanUp(options: CleanUpOptions): Promise<void> {
-    await options.executor.executeCommand(`plugins:uninstall @oclif/${options.plugin}`)
-    expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin)
+    await options.executor.executeCommand(`plugins:uninstall @oclif/${options.plugin.name}`)
+    expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin.name)
   }
 
-  await describe('CJS Root Plugin', async () => {
+  await section('CJS Root Plugin', async () => {
     process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.cjs1.repo})
 
@@ -221,7 +221,7 @@ type CleanUpOptions = {
     })
   })
 
-  await describe('ESM Root Plugin', async () => {
+  await section('ESM Root Plugin', async () => {
     process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     const executor = await setup(__filename, {repo: PLUGINS.esm1.repo})
 

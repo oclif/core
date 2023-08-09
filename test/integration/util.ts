@@ -34,9 +34,13 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interface
 }
 
 export class Executor {
-  public isESM: boolean
-  public constructor(public testDir: string) {
+  public isESM = false
+  public constructor(public testDir: string, private testFile: string) {}
+
+  public clone(repo: string): Promise<Result> {
+    const result = this.exec(`git clone ${repo} ${this.testDir} --depth 1`)
     this.isESM = fs.existsSync(path.join(this.testDir, 'bin', 'run.js'))
+    return result
   }
 
   public executeInTestDir(cmd: string, silent = true): Promise<Result> {
@@ -50,6 +54,7 @@ export class Executor {
 
   public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
     return new Promise(resolve => {
+      this.log(cmd, chalk.dim(`(cwd: ${cwd}, silent: ${silent})`))
       if (silent) {
         try {
           const r = cp.execSync(cmd, {
@@ -67,11 +72,14 @@ export class Executor {
           })
         }
       } else {
-        console.log(chalk.cyan(cmd))
         cp.execSync(cmd, {stdio: 'inherit', cwd})
         resolve({code: 0})
       }
     })
+  }
+
+  public log(...args: unknown[]): void {
+    console.log(chalk.cyan(`${this.testFile}:`), ...args)
   }
 }
 
@@ -95,9 +103,9 @@ export async function setup(testFile: string, options: Options): Promise<Executo
 
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
   const testDir = path.join(pluginDir, name)
-  const executor = new Executor(testDir)
+  const executor = new Executor(testDir, testFileName)
 
-  console.log(chalk.cyan(`${testFileName}:`), testDir)
+  executor.log('test directory:', testDir)
 
   if (process.env.OCLIF_CORE_E2E_SKIP_SETUP === 'true') {
     console.log(chalk.yellow.bold('OCLIF_CORE_E2E_SKIP_SETUP is true. Skipping test setup...'))
@@ -107,11 +115,9 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   await mkdirp(pluginDir)
   rm('-rf', testDir)
 
-  const clone = `git clone ${options.repo} ${testDir}`
-  console.log(chalk.cyan(`${testFileName}:`), clone)
-  await executor.exec(clone)
+  await executor.clone(options.repo)
 
-  console.log(chalk.cyan(`${testFileName}:`), 'Updating package.json')
+  executor.log('Updating package.json')
   const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
 
   let pjson: Interfaces.PJSON
@@ -130,6 +136,10 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     })
   }
 
+  executor.log('updated dependencies:', JSON.stringify(pjson.dependencies, null, 2))
+  executor.log('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
+  executor.log('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
+
   const bin = (pjson.oclif.bin ?? pjson.name.replace(/-/g, '_')).toUpperCase()
   const dataDir = path.join(dir, 'data', pjson.oclif.bin ?? pjson.name)
   const cacheDir = path.join(dir, 'cache', pjson.oclif.bin ?? pjson.name)
@@ -143,21 +153,17 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   process.env[`${bin}_CONFIG_DIR`] = configDir
   process.env[`${bin}_CACHE_DIR`] = cacheDir
 
-  console.log(`${bin}_DATA_DIR`, process.env[`${bin}_DATA_DIR`])
-  console.log(`${bin}_CONFIG_DIR`, process.env[`${bin}_CONFIG_DIR`])
-  console.log(`${bin}_CACHE_DIR`, process.env[`${bin}_CACHE_DIR`])
+  executor.log(`${bin}_DATA_DIR:`, process.env[`${bin}_DATA_DIR`])
+  executor.log(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
+  executor.log(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
-  const install = 'yarn install --force'
-  console.log(chalk.cyan(`${testFileName}:`), install)
-  const yarnInstallRes = await executor.executeInTestDir(install, false)
+  const yarnInstallRes = await executor.executeInTestDir('yarn install --force', false)
   if (yarnInstallRes.code !== 0) {
     console.error(yarnInstallRes?.error)
     throw new Error('Failed to run `yarn install`')
   }
 
-  const build = 'yarn build'
-  console.log(chalk.cyan(`${testFileName}:`), build)
-  const yarnBuildRes = await executor.executeInTestDir(build, false)
+  const yarnBuildRes = await executor.executeInTestDir('yarn build', false)
   if (yarnBuildRes.code !== 0) {
     console.error(yarnBuildRes?.error)
     throw new Error('Failed to run `yarn build`')

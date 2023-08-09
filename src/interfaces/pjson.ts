@@ -9,6 +9,7 @@ export interface PJSON {
     bin?: string;
     dirname?: string;
     hooks?: Record<string, string | string[]>;
+    plugins?: string[];
   };
 }
 
