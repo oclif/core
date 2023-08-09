@@ -6,8 +6,9 @@ import * as chalk from 'chalk'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import {randomUUID} from 'crypto'
 import {Interfaces} from '../../src'
+
+const debug = require('debug')('e2e')
 
 export type ExecError = cp.ExecException & { stderr: string; stdout: string };
 
@@ -18,9 +19,15 @@ export interface Result {
   error?: ExecError
 }
 
-export interface Options {
+export interface SetupOptions {
   repo: string;
   plugins?: string[];
+  subDir?: string;
+}
+
+export interface ExecutorOptions {
+  pluginDir: string;
+  testFileName: string;
 }
 
 function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
@@ -36,16 +43,25 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interface
 
 export class Executor {
   public isESM = false
-  public constructor(public testDir: string, private testFile: string) {}
+  public pluginDir: string
+  public testFileName: string
+  public parentDir: string
+
+  public constructor(options: ExecutorOptions) {
+    this.pluginDir = options.pluginDir
+    this.testFileName = options.testFileName
+    this.parentDir = path.basename(path.dirname(this.pluginDir))
+    this.debug = debug.extend(`${this.testFileName}:${this.parentDir}`)
+  }
 
   public clone(repo: string): Promise<Result> {
-    const result = this.exec(`git clone ${repo} ${this.testDir} --depth 1`, process.cwd(), false)
-    this.isESM = fs.existsSync(path.join(this.testDir, 'bin', 'run.js'))
+    const result = this.exec(`git clone ${repo} ${this.pluginDir} --depth 1`)
+    this.isESM = fs.existsSync(path.join(this.pluginDir, 'bin', 'run.js'))
     return result
   }
 
   public executeInTestDir(cmd: string, silent = true): Promise<Result> {
-    return this.exec(cmd, this.testDir, silent)
+    return this.exec(cmd, this.pluginDir, silent)
   }
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run'): Promise<Result> {
@@ -55,15 +71,20 @@ export class Executor {
 
   public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
     return new Promise(resolve => {
+      this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
           const r = cp.execSync(cmd, {
             stdio: 'pipe',
             cwd,
           })
-          resolve({code: 0, stdout: r.toString()})
+          const stdout = r.toString()
+          this.debug(stdout)
+          resolve({code: 0, stdout})
         } catch (error) {
           const err = error as ExecError
+          this.debug('stdout', err.stdout.toString())
+          this.debug('stderr', err.stderr.toString())
           resolve({
             code: 1,
             error: err,
@@ -72,23 +93,20 @@ export class Executor {
           })
         }
       } else {
-        this.log(cmd, chalk.dim(`(cwd: ${cwd})`))
         cp.execSync(cmd, {stdio: 'inherit', cwd})
         resolve({code: 0})
       }
     })
   }
 
-  public log(...args: unknown[]): void {
-    console.log(chalk.cyan(`${this.testFile}:`), ...args)
-  }
+  public debug: (...args: any[]) => void
 }
 
 // eslint-disable-next-line valid-jsdoc
 /**
  * Setup for integration tests.
  *
- * Clones the hello-world repo from github
+ * Clones the requested repo from github
  * Adds the local version of @oclif/core to the package.json
  * Adds relevant oclif plugins
  * Builds the package
@@ -97,17 +115,16 @@ export class Executor {
  * - OCLIF_CORE_E2E_TEST_DIR: the directory that you want the setup to happen in
  * - OCLIF_CORE_E2E_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
  */
-export async function setup(testFile: string, options: Options): Promise<Executor> {
+export async function setup(testFile: string, options: SetupOptions): Promise<Executor> {
   const testFileName = path.basename(testFile)
   const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir()
-  // Put tests in a unique subdirectory to avoid conflicts with other tests when running in parallel
-  const testDir = path.join(dir, randomUUID(), testFileName)
+  const testDir = options.subDir ? path.join(dir, testFileName, options.subDir) : path.join(dir, testFileName)
 
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
   const pluginDir = path.join(testDir, name)
-  const executor = new Executor(pluginDir, testFileName)
+  const executor = new Executor({pluginDir, testFileName})
 
-  executor.log('plugin directory:', pluginDir)
+  executor.debug('plugin directory:', pluginDir)
 
   if (process.env.OCLIF_CORE_E2E_SKIP_SETUP === 'true') {
     console.log(chalk.yellow.bold('OCLIF_CORE_E2E_SKIP_SETUP is true. Skipping test setup...'))
@@ -119,7 +136,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
 
   await executor.clone(options.repo)
 
-  executor.log('Updating package.json')
+  executor.debug('Updating package.json')
   const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
 
   let pjson: Interfaces.PJSON
@@ -138,14 +155,14 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     })
   }
 
-  executor.log('updated dependencies:', JSON.stringify(pjson.dependencies, null, 2))
-  executor.log('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
-  executor.log('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
+  executor.debug('updated dependencies:', JSON.stringify(pjson.dependencies, null, 2))
+  executor.debug('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
+  executor.debug('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
 
   const bin = (pjson.oclif.bin ?? pjson.name.replace(/-/g, '_')).toUpperCase()
-  const dataDir = path.join(dir, 'data', pjson.oclif.bin ?? pjson.name)
-  const cacheDir = path.join(dir, 'cache', pjson.oclif.bin ?? pjson.name)
-  const configDir = path.join(dir, 'config', pjson.oclif.bin ?? pjson.name)
+  const dataDir = path.join(testDir, 'data', pjson.oclif.bin ?? pjson.name)
+  const cacheDir = path.join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
+  const configDir = path.join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
 
   await mkdirp(dataDir)
   await mkdirp(configDir)
@@ -155,17 +172,17 @@ export async function setup(testFile: string, options: Options): Promise<Executo
   process.env[`${bin}_CONFIG_DIR`] = configDir
   process.env[`${bin}_CACHE_DIR`] = cacheDir
 
-  executor.log(`${bin}_DATA_DIR:`, process.env[`${bin}_DATA_DIR`])
-  executor.log(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
-  executor.log(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
+  executor.debug(`${bin}_DATA_DIR:`, process.env[`${bin}_DATA_DIR`])
+  executor.debug(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
+  executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
-  const yarnInstallRes = await executor.executeInTestDir('yarn install --force', false)
+  const yarnInstallRes = await executor.executeInTestDir('yarn install --force')
   if (yarnInstallRes.code !== 0) {
     console.error(yarnInstallRes?.error)
     throw new Error('Failed to run `yarn install`')
   }
 
-  const yarnBuildRes = await executor.executeInTestDir('yarn build', false)
+  const yarnBuildRes = await executor.executeInTestDir('yarn build')
   if (yarnBuildRes.code !== 0) {
     console.error(yarnBuildRes?.error)
     throw new Error('Failed to run `yarn build`')
