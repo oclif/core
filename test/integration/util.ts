@@ -38,7 +38,7 @@ export class Executor {
   public constructor(public testDir: string, private testFile: string) {}
 
   public clone(repo: string): Promise<Result> {
-    const result = this.exec(`git clone ${repo} ${this.testDir} --depth 1`)
+    const result = this.exec(`git clone ${repo} ${this.testDir} --depth 1`, process.cwd(), false)
     this.isESM = fs.existsSync(path.join(this.testDir, 'bin', 'run.js'))
     return result
   }
@@ -54,7 +54,6 @@ export class Executor {
 
   public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
     return new Promise(resolve => {
-      this.log(cmd, chalk.dim(`(cwd: ${cwd}, silent: ${silent})`))
       if (silent) {
         try {
           const r = cp.execSync(cmd, {
@@ -72,6 +71,7 @@ export class Executor {
           })
         }
       } else {
+        this.log(cmd, chalk.dim(`(cwd: ${cwd})`))
         cp.execSync(cmd, {stdio: 'inherit', cwd})
         resolve({code: 0})
       }
