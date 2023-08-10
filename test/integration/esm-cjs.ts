@@ -169,7 +169,6 @@ type CleanUpOptions = {
 
   process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
   process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
-  process.env.DEBUG = 'e2e:*'
   const esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
   const cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
 
