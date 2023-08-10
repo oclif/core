@@ -46,12 +46,15 @@ export class Executor {
   public pluginDir: string
   public testFileName: string
   public parentDir: string
+  public pluginName: string
 
   public constructor(options: ExecutorOptions) {
     this.pluginDir = options.pluginDir
     this.testFileName = options.testFileName
     this.parentDir = path.basename(path.dirname(this.pluginDir))
-    this.debug = debug.extend(`${this.testFileName}:${this.parentDir}`)
+    this.pluginName = path.basename(this.pluginDir)
+
+    this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
 
   public clone(repo: string): Promise<Result> {

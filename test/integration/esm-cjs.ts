@@ -31,10 +31,6 @@ async function test(name: string, fn: () => Promise<void>) {
   }
 }
 
-async function section(_name: string, fn: () => Promise<void>) {
-  await fn()
-}
-
 function exit(): never {
   console.log()
   console.log(bold('#### Summary ####'))
@@ -167,12 +163,16 @@ type CleanUpOptions = {
     expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin.name)
   }
 
+  const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
+  const runInParallel = args.includes('--parallel')
+  console.log(runInParallel ? '🐇 Running tests in parallel' : '🐢 Running tests sequentially')
+
   process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
   process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
   const esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
   const cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
 
-  const cjs = section('CJS Root Plugin', async () => {
+  const cjsTests = async () => {
     await test('Install CJS plugin to CJS root plugin', async () => {
       const plugin = PLUGINS.cjs2
 
@@ -243,9 +243,9 @@ type CleanUpOptions = {
 
       await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
     })
-  })
+  }
 
-  const esm = section('ESM Root Plugin', async () => {
+  const esmTests = async () => {
     await test('Install CJS plugin to ESM root plugin', async () => {
       const plugin = PLUGINS.cjs1
 
@@ -347,9 +347,15 @@ type CleanUpOptions = {
 
       await cleanUp({executor: esmExecutor, plugin, script: 'run'})
     })
-  })
+  }
 
-  await Promise.all([cjs, esm])
+  if (runInParallel) {
+    await Promise.all([cjsTests(), esmTests()])
+  } else {
+    await cjsTests()
+    await esmTests()
+  }
+
   exit()
 })()
 
