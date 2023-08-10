@@ -69,7 +69,7 @@ export class Executor {
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run'): Promise<Result> {
     const executable = process.platform === 'win32' ? path.join('bin', `${script}.cmd`) : path.join('bin', `${script}${this.isESM ? '.js' : ''}`)
-    return this.executeInTestDir(`${executable} ${cmd}`)
+    return this.executeInTestDir(`${executable} ${cmd}`, !cmd.includes('install'))
   }
 
   public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
