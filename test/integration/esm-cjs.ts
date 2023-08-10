@@ -8,7 +8,7 @@
  */
 import {Executor, setup} from './util'
 import {expect} from 'chai'
-import {bold, cyan, green, red} from 'chalk'
+import {bold, green, red} from 'chalk'
 import {replaceInFile} from 'replace-in-file'
 
 const FAILED: string[] = []
@@ -21,13 +21,8 @@ async function test(name: string, fn: () => Promise<void>) {
     console.log(green('✓'), name)
   } catch (error) {
     FAILED.push(name)
-    const err = error as Chai.AssertionError & {expected?: string; actual?: string}
-    const formattedMessage = err.message
-    .replace(err.expected ?? '', cyan(err.expected))
-    .replace(err.actual ?? '', red(err.actual))
-
     console.log(red('𐄂'), name)
-    console.log(`  • ${formattedMessage}`)
+    console.log(error)
   }
 }
 
@@ -165,6 +160,7 @@ type CleanUpOptions = {
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
   const runInParallel = args.includes('--parallel')
+  console.log('Node version:', process.version)
   console.log(runInParallel ? '🐇 Running tests in parallel' : '🐢 Running tests sequentially')
 
   process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'

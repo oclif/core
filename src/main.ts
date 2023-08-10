@@ -107,7 +107,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
  *
  * @example For ESM dev.js
  * ```
- * #!/usr/bin/env ts-node
+ * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
  * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')
@@ -127,7 +127,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
  *
  * @example For CJS dev.js
  * ```
- * #!/usr/bin/env node
+ * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
  * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')

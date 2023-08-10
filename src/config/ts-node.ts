@@ -9,10 +9,13 @@ import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
-const TYPE_ROOTS = [`${__dirname}/../node_modules/@types`]
-const ROOT_DIRS: string[] = []
+const TYPE_ROOTS = new Set<string>([`${__dirname}/../node_modules/@types`])
+const ROOT_DIRS = new Set<string>()
+const TS_CONFIGS: Record<string, TSConfig> = {}
+const REGISTERED = new Set<string>()
 
 function loadTSConfig(root: string): TSConfig | undefined {
+  if (TS_CONFIGS[root]) return TS_CONFIGS[root]
   const tsconfigPath = path.join(root, 'tsconfig.json')
   let typescript: typeof import('typescript') | undefined
   try {
@@ -34,6 +37,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
         'did not contain a "compilerOptions" section.')
     }
 
+    TS_CONFIGS[root] = tsconfig
     return tsconfig
   }
 }
@@ -45,16 +49,19 @@ function removeUndefinedValues(obj: Record<string, unknown>) {
 function registerTSNode(root: string) {
   const tsconfig = loadTSConfig(root)
   if (!tsconfig) return
+  if (REGISTERED.has(root)) return tsconfig
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   const tsNode: typeof TSNode = require(tsNodePath)
 
-  TYPE_ROOTS.push(`${root}/node_modules/@types`)
+  TYPE_ROOTS.add(`${root}/node_modules/@types`)
 
   if (tsconfig.compilerOptions.rootDirs) {
-    ROOT_DIRS.push(...tsconfig.compilerOptions.rootDirs.map(r => path.join(root, r)))
+    for (const r of tsconfig.compilerOptions.rootDirs) {
+      ROOT_DIRS.add(path.join(root, r))
+    }
   } else {
-    ROOT_DIRS.push(`${root}/src`)
+    ROOT_DIRS.add(`${root}/src`)
   }
 
   const cwd = process.cwd()
@@ -68,8 +75,8 @@ function registerTSNode(root: string) {
       module: tsconfig.compilerOptions.module ?? 'commonjs',
       moduleResolution: tsconfig.compilerOptions.moduleResolution,
       sourceMap: true,
-      rootDirs: ROOT_DIRS,
-      typeRoots: TYPE_ROOTS,
+      rootDirs: [...ROOT_DIRS],
+      typeRoots: [...TYPE_ROOTS],
       jsx: 'react',
     })
 
@@ -86,6 +93,7 @@ function registerTSNode(root: string) {
     }
 
     tsNode.register(conf)
+    REGISTERED.add(root)
 
     return tsconfig
   } finally {
