@@ -169,6 +169,7 @@ type CleanUpOptions = {
 
   process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
   process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
+  process.env.DEBUG = 'e2e:*'
   const esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
   const cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
 
@@ -316,7 +317,7 @@ type CleanUpOptions = {
       await cleanUp({executor: esmExecutor, plugin, script: 'run'})
     })
 
-    await test('Link CJS plugin to ESM root plugin', async () => {
+    await test('Link ESM plugin to ESM root plugin', async () => {
       const plugin = PLUGINS.esm2
 
       const linkedPlugin = await linkPlugin({executor: esmExecutor, plugin, script: 'run'})
