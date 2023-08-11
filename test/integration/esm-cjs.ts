@@ -160,22 +160,32 @@ type CleanUpOptions = {
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
   const runInParallel = args.includes('--parallel')
+  const skip = args.find(arg => arg.startsWith('--skip='))
+
+  const skips = skip ? skip.split('=')[1].split(',') : []
+  const runEsmTests = !skips.includes('esm')
+  const runCjsTests = !skips.includes('cjs')
+
   console.log('Node version:', process.version)
   console.log(runInParallel ? '🐇 Running tests in parallel' : '🐢 Running tests sequentially')
+  if (skips.length > 0) console.log(`🚨 Skipping ${skips.join(', ')} tests 🚨`)
 
-  process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
-  process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
-  const esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
-  const cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
+  let cjsExecutor: Executor
+  let esmExecutor: Executor
+
+  const cjsBefore = async () => {
+    // process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
+    cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
+  }
+
+  const esmBefore = async () => {
+    // process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
+    esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
+  }
 
   const cjsTests = async () => {
     await test('Install CJS plugin to CJS root plugin', async () => {
       const plugin = PLUGINS.cjs2
-      const devResult = await cjsExecutor.executeCommand('help', 'dev')
-      console.log(devResult)
-
-      const runResult = await cjsExecutor.executeCommand('help', 'run')
-      console.log(runResult)
 
       await installPlugin({executor: cjsExecutor, plugin, script: 'run'})
       await runCommand({
@@ -351,10 +361,21 @@ type CleanUpOptions = {
   }
 
   if (runInParallel) {
-    await Promise.all([cjsTests(), esmTests()])
+    await Promise.all([
+      runCjsTests ? cjsBefore() : Promise.resolve(),
+      runEsmTests ? esmBefore() : Promise.resolve(),
+    ])
+
+    await Promise.all([
+      runCjsTests ? cjsTests() : Promise.resolve(),
+      runEsmTests ? esmTests() : Promise.resolve(),
+    ])
   } else {
-    await cjsTests()
-    await esmTests()
+    if (runCjsTests) await cjsBefore()
+    if (runEsmTests) await esmBefore()
+
+    if (runCjsTests) await cjsTests()
+    if (runEsmTests) await esmTests()
   }
 
   exit()
