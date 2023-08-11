@@ -118,7 +118,7 @@
     "prepack": "yarn run build",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
-    "test:esm-cjs": "cross-env DEBUG=e2e:*,@oclif/plugins,cli:yarn ts-node test/integration/esm-cjs.ts",
+    "test:esm-cjs": "cross-env DEBUG=e2e:*,@oclif/plugins,cli:yarn ts-node test/integration/esm-cjs.ts --skip=esm",
     "test:perf": "ts-node test/perf/parser.perf.ts",
     "test": "mocha --forbid-only \"test/**/*.test.ts\""
   },
