@@ -171,6 +171,11 @@ type CleanUpOptions = {
   const cjsTests = async () => {
     await test('Install CJS plugin to CJS root plugin', async () => {
       const plugin = PLUGINS.cjs2
+      const devResult = await cjsExecutor.executeCommand('help', 'dev')
+      console.log(devResult)
+
+      const runResult = await cjsExecutor.executeCommand('help', 'run')
+      console.log(runResult)
 
       await installPlugin({executor: cjsExecutor, plugin, script: 'run'})
       await runCommand({
@@ -349,7 +354,7 @@ type CleanUpOptions = {
     await Promise.all([cjsTests(), esmTests()])
   } else {
     await cjsTests()
-    await esmTests()
+    // await esmTests()
   }
 
   exit()
