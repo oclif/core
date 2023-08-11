@@ -354,7 +354,7 @@ type CleanUpOptions = {
     await Promise.all([cjsTests(), esmTests()])
   } else {
     await cjsTests()
-    // await esmTests()
+    await esmTests()
   }
 
   exit()
