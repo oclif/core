@@ -6,6 +6,7 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
+import * as path from 'path'
 import {Executor, setup} from './util'
 import {expect} from 'chai'
 import {bold, green, red} from 'chalk'
@@ -235,7 +236,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
       await runCommand({
         executor: cjsExecutor,
         plugin,
@@ -244,7 +245,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'howdy', 'cheers')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
       await runCommand({
         executor: cjsExecutor,
         plugin,
@@ -307,7 +308,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -316,7 +317,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'howdy', 'cheers')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -339,7 +340,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'hello', 'howdy')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -348,7 +349,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(`${linkedPlugin.pluginDir}/src/commands/${plugin.command}.ts`, 'howdy', 'cheers')
+      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
       await runCommand({
         executor: esmExecutor,
         plugin,
