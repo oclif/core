@@ -6,11 +6,11 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
+import * as fs from 'fs/promises'
 import * as path from 'path'
 import {Executor, setup} from './util'
 import {expect} from 'chai'
 import {bold, green, red} from 'chalk'
-import {replaceInFile} from 'replace-in-file'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
@@ -72,6 +72,13 @@ type RunCommandOptions = {
   plugin: Plugin;
   script: Script;
   expectStrings?: string[];
+}
+
+type ModifyCommandOptions = {
+  executor: Executor;
+  plugin: Plugin;
+  from: string;
+  to: string;
 }
 
 type CleanUpOptions = {
@@ -139,8 +146,11 @@ type CleanUpOptions = {
     return pluginExecutor
   }
 
-  async function modifyCommand(files: string, from: string, to: string): Promise<void> {
-    await replaceInFile({files, from, to})
+  async function modifyCommand(options: ModifyCommandOptions): Promise<void> {
+    const filePath = path.join(options.executor.pluginDir, 'src', 'commands', `${options.plugin.command}.ts`)
+    const content = await fs.readFile(filePath, 'utf8')
+    const modifiedContent = content.replace(options.from, options.to)
+    await fs.writeFile(filePath, modifiedContent)
   }
 
   async function runCommand(options: RunCommandOptions): Promise<void> {
@@ -175,12 +185,10 @@ type CleanUpOptions = {
   let esmExecutor: Executor
 
   const cjsBefore = async () => {
-    // process.env.CJS1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
   }
 
   const esmBefore = async () => {
-    // process.env.ESM1_PLUGINS_INSTALL_USE_SPAWN = 'true'
     esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
   }
 
@@ -236,7 +244,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
       await runCommand({
         executor: cjsExecutor,
         plugin,
@@ -245,7 +253,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
       await runCommand({
         executor: cjsExecutor,
         plugin,
@@ -308,7 +316,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -317,7 +325,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -340,7 +348,7 @@ type CleanUpOptions = {
         expectStrings: [plugin.commandText, plugin.hookText],
       })
       // test un-compiled changes with bin/run
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'hello', 'howdy')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -349,7 +357,7 @@ type CleanUpOptions = {
       })
 
       // test un-compiled changes with bin/dev
-      await modifyCommand(path.join(linkedPlugin.pluginDir, 'src', 'commands', `${plugin.command}.ts`), 'howdy', 'cheers')
+      await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
       await runCommand({
         executor: esmExecutor,
         plugin,
