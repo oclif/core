@@ -12,6 +12,6 @@ export interface TSConfig {
   };
   'ts-node'?: {
     esm?: boolean;
-    experimentalSpecifierResolution?: boolean;
+    experimentalSpecifierResolution?: 'node' | 'explicit';
   }
 }

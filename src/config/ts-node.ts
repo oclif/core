@@ -44,16 +44,13 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
-function removeUndefinedValues(obj: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(obj).filter(([_, value]) => value !== undefined))
-}
-
 function registerTSNode(root: string) {
   const tsconfig = loadTSConfig(root)
   if (!tsconfig) return
   if (REGISTERED.has(root)) return tsconfig
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
+  debug('ts-node path:', tsNodePath)
   const tsNode: typeof TSNode = require(tsNodePath)
 
   TYPE_ROOTS.add(path.join(root, 'node_modules', '@types'))
@@ -69,29 +66,27 @@ function registerTSNode(root: string) {
   const cwd = process.cwd()
   try {
     process.chdir(root)
-    const compilerOptions = removeUndefinedValues({
-      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-      target: tsconfig.compilerOptions.target || 'es2017',
-      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
-      emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
-      module: tsconfig.compilerOptions.module ?? 'commonjs',
-      moduleResolution: tsconfig.compilerOptions.moduleResolution,
-      sourceMap: true,
-      rootDirs: [...ROOT_DIRS],
-      typeRoots: [...TYPE_ROOTS],
-      jsx: 'react',
-    })
-
-    const tsNodeOptions = removeUndefinedValues({
+    const conf: TSNode.RegisterOptions = {
+      compilerOptions: {
+        esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
+        target: tsconfig.compilerOptions.target || 'es2017',
+        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
+        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
+        module: tsconfig.compilerOptions.module ?? 'commonjs',
+        sourceMap: true,
+        rootDirs: [...ROOT_DIRS],
+        typeRoots: [...TYPE_ROOTS],
+        jsx: 'react',
+      },
       skipProject: true,
       transpileOnly: true,
       esm: tsconfig['ts-node']?.esm ?? false,
-      experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? undefined,
-    })
+      experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
+    }
 
-    const conf = {
-      compilerOptions,
-      ...tsNodeOptions,
+    if (tsconfig.compilerOptions.moduleResolution) {
+      // @ts-expect-error TSNode.RegisterOptions.compilerOptions is typed as a plain object
+      conf.compilerOptions.moduleResolution = tsconfig.compilerOptions.moduleResolution
     }
 
     tsNode.register(conf)
