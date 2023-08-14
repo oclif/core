@@ -9,7 +9,9 @@ import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
-const TYPE_ROOTS = new Set<string>([`${__dirname}/../node_modules/@types`])
+const TYPE_ROOTS = new Set<string>([
+  path.join(__dirname, '..', 'node_modules', '@types'),
+])
 const ROOT_DIRS = new Set<string>()
 const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
@@ -22,7 +24,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
     typescript = require('typescript')
   } catch {
     try {
-      typescript = require(root + '/node_modules/typescript')
+      typescript = require(path.join(root, 'node_modules', 'typescript'))
     } catch {}
   }
 
@@ -54,14 +56,14 @@ function registerTSNode(root: string) {
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   const tsNode: typeof TSNode = require(tsNodePath)
 
-  TYPE_ROOTS.add(`${root}/node_modules/@types`)
+  TYPE_ROOTS.add(path.join(root, 'node_modules', '@types'))
 
   if (tsconfig.compilerOptions.rootDirs) {
     for (const r of tsconfig.compilerOptions.rootDirs) {
       ROOT_DIRS.add(path.join(root, r))
     }
   } else {
-    ROOT_DIRS.add(`${root}/src`)
+    ROOT_DIRS.add(path.join(root, 'src'))
   }
 
   const cwd = process.cwd()

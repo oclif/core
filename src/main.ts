@@ -11,6 +11,8 @@ import {Errors, flush} from '.'
 import {stdout} from './cli-ux/stream'
 import {Performance} from './performance'
 
+const debug = require('debug')('oclif:main')
+
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
   stdout.write(format(message, ...args) + '\n')
@@ -45,6 +47,10 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     await Performance.collect()
     Performance.debug()
   }
+
+  debug(`process.execPath: ${process.execPath}`)
+  debug(`process.execArgv: ${process.execArgv}`)
+  debug('process.argv: %O', process.argv)
 
   argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
