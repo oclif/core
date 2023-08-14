@@ -263,6 +263,40 @@ type CleanUpOptions = {
 
       await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
     })
+
+    // TODO: can I get this working?
+    // await test('Link CJS plugin to CJS root plugin', async () => {
+    //   const plugin = PLUGINS.esm2
+
+    //   const linkedPlugin = await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
+
+    //   // test bin/run
+    //   await runCommand({
+    //     executor: cjsExecutor,
+    //     plugin,
+    //     script: 'run',
+    //     expectStrings: [plugin.commandText, plugin.hookText],
+    //   })
+    //   // test un-compiled changes with bin/run
+    //   await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
+    //   await runCommand({
+    //     executor: cjsExecutor,
+    //     plugin,
+    //     script: 'run',
+    //     expectStrings: ['howdy', plugin.hookText],
+    //   })
+
+    //   // test un-compiled changes with bin/dev
+    //   await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
+    //   await runCommand({
+    //     executor: cjsExecutor,
+    //     plugin,
+    //     script: 'dev',
+    //     expectStrings: ['cheers', plugin.hookText],
+    //   })
+
+    //   await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
+    // })
   }
 
   const esmTests = async () => {

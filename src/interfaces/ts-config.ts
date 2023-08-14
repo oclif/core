@@ -9,6 +9,8 @@ export interface TSConfig {
     emitDecoratorMetadata?: boolean;
     module?: string;
     moduleResolution?: string;
+    sourceMap?: boolean;
+    jsx?: boolean;
   };
   'ts-node'?: {
     esm?: boolean;

@@ -42,7 +42,7 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interface
 }
 
 export class Executor {
-  public isESM = false
+  public usesJsScript = false
   public pluginDir: string
   public testFileName: string
   public parentDir: string
@@ -59,7 +59,7 @@ export class Executor {
 
   public clone(repo: string): Promise<Result> {
     const result = this.exec(`git clone ${repo} ${this.pluginDir} --depth 1`)
-    this.isESM = fs.existsSync(path.join(this.pluginDir, 'bin', 'run.js'))
+    this.usesJsScript = fs.existsSync(path.join(this.pluginDir, 'bin', 'run.js'))
     return result
   }
 
@@ -68,7 +68,7 @@ export class Executor {
   }
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run'): Promise<Result> {
-    const executable = process.platform === 'win32' ? path.join('bin', `${script}.cmd`) : path.join('bin', `${script}${this.isESM ? '.js' : ''}`)
+    const executable = process.platform === 'win32' ? path.join('bin', `${script}.cmd`) : path.join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
     return this.executeInTestDir(`${executable} ${cmd}`)
   }
 

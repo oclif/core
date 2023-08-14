@@ -9,10 +9,6 @@ import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
-const TYPE_ROOTS = new Set<string>([
-  path.join(__dirname, '..', 'node_modules', '@types'),
-])
-const ROOT_DIRS = new Set<string>()
 const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
@@ -53,14 +49,21 @@ function registerTSNode(root: string) {
   debug('ts-node path:', tsNodePath)
   const tsNode: typeof TSNode = require(tsNodePath)
 
-  TYPE_ROOTS.add(path.join(root, 'node_modules', '@types'))
+  const typeRoots = [
+    path.join(__dirname, '..', '..', 'node_modules', '@types'),
+    path.join(root, 'node_modules', '@types'),
+  ]
+
+  const rootDirs: string[] = []
 
   if (tsconfig.compilerOptions.rootDirs) {
     for (const r of tsconfig.compilerOptions.rootDirs) {
-      ROOT_DIRS.add(path.join(root, r))
+      rootDirs.push(path.join(root, r))
     }
+  } else if (tsconfig.compilerOptions.rootDir) {
+    rootDirs.push(path.join(root, tsconfig.compilerOptions.rootDir))
   } else {
-    ROOT_DIRS.add(path.join(root, 'src'))
+    rootDirs.push(path.join(root, 'src'))
   }
 
   const cwd = process.cwd()
@@ -69,14 +72,13 @@ function registerTSNode(root: string) {
     const conf: TSNode.RegisterOptions = {
       compilerOptions: {
         esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-        target: tsconfig.compilerOptions.target || 'es2017',
-        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators || false,
-        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata || false,
+        target: tsconfig.compilerOptions.target ?? 'es2017',
+        experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
+        emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
         module: tsconfig.compilerOptions.module ?? 'commonjs',
-        sourceMap: true,
-        rootDirs: [...ROOT_DIRS],
-        typeRoots: [...TYPE_ROOTS],
-        jsx: 'react',
+        sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
+        rootDirs,
+        typeRoots,
       },
       skipProject: true,
       transpileOnly: true,
@@ -87,6 +89,11 @@ function registerTSNode(root: string) {
     if (tsconfig.compilerOptions.moduleResolution) {
       // @ts-expect-error TSNode.RegisterOptions.compilerOptions is typed as a plain object
       conf.compilerOptions.moduleResolution = tsconfig.compilerOptions.moduleResolution
+    }
+
+    if (tsconfig.compilerOptions.jsx) {
+      // @ts-expect-error TSNode.RegisterOptions.compilerOptions is typed as a plain object
+      conf.compilerOptions.jsx = tsconfig.compilerOptions.jsx
     }
 
     tsNode.register(conf)
