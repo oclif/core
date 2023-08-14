@@ -147,7 +147,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
  * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', dir: import.meta.url})
+ *   await oclif.execute({type: 'cjs', dir: __dirname})
  * })()
  * ```
  */
