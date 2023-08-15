@@ -99,6 +99,7 @@ describe('Config with flexible taxonomy', () => {
       topics: [],
       valid: true,
       tag: 'tag',
+      moduleType: 'commonjs',
     }
 
     const pluginB: IPlugin = {
@@ -117,6 +118,7 @@ describe('Config with flexible taxonomy', () => {
       topics: [],
       valid: true,
       tag: 'tag',
+      moduleType: 'commonjs',
     }
     const plugins: IPlugin[] = [pluginA, pluginB]
 
