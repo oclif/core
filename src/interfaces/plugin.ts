@@ -53,6 +53,10 @@ export interface Plugin {
    */
   type: string;
   /**
+   * Plugin is written in ESM or CommonJS
+   */
+  moduleType: 'module' | 'commonjs';
+  /**
    * base path of plugin
    */
   root: string;

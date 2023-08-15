@@ -5,7 +5,7 @@ import * as fs from 'fs-extra'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
-import * as Config from './config'
+import {Config, tsPath} from './config'
 
 const getPackageType = require('get-package-type')
 
@@ -14,6 +14,10 @@ const getPackageType = require('get-package-type')
  */
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
+
+const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
+  return (<IPlugin>config).type !== undefined
+}
 
 /**
  * Provides a static class with several utility methods to work with Oclif config / plugin to load ESM or CJS Node
@@ -84,6 +88,11 @@ export default class ModuleLoader {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`)
       }
 
+      // If a linked plugin is an ESM module and the root plugin is CJS then throw a more specific error.
+      if (error.name === 'ReferenceError' && isPlugin(config) && config.type === 'link' && config.moduleType === 'module' && Config.rootPlugin.moduleType === 'commonjs') {
+        throw new ModuleLoadError(`Plugin ${config.name} is an ESM module and cannot be linked to a CJS root plugin.`)
+      }
+
       throw error
     }
   }
@@ -131,15 +140,11 @@ export default class ModuleLoader {
     let isESM: boolean
     let filePath: string
 
-    const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
-      return (<IPlugin>config).type !== undefined
-    }
-
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch {
-      filePath = isPlugin(config) ? Config.tsPath(config.root, modulePath, config.type) : Config.tsPath(config.root, modulePath)
+      filePath = isPlugin(config) ? tsPath(config.root, modulePath, config.type) : tsPath(config.root, modulePath)
 
       let fileExists = false
       let isDirectory = false
