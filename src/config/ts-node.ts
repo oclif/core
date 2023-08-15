@@ -72,7 +72,7 @@ function registerTSNode(root: string) {
     const conf: TSNode.RegisterOptions = {
       compilerOptions: {
         esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-        target: tsconfig.compilerOptions.target ?? 'es2017',
+        target: tsconfig.compilerOptions.target ?? 'es2019',
         experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
         emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
         module: tsconfig.compilerOptions.module ?? 'commonjs',
@@ -82,7 +82,7 @@ function registerTSNode(root: string) {
       },
       skipProject: true,
       transpileOnly: true,
-      esm: tsconfig['ts-node']?.esm ?? false,
+      esm: tsconfig['ts-node']?.esm ?? true,
       experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
     }
 
