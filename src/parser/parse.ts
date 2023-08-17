@@ -1,8 +1,24 @@
 /* eslint-disable no-await-in-loop */
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
-import {ArgToken, BooleanFlag, FlagToken, OptionFlag, OutputArgs, OutputFlags, ParserInput, ParserOutput, ParsingToken} from '../interfaces/parser'
+import {
+  ArgParserContext,
+  ArgToken,
+  BooleanFlag,
+  CompletableFlag,
+  FlagParserContext,
+  FlagToken,
+  Metadata,
+  MetadataFlag,
+  OptionFlag,
+  OutputArgs,
+  OutputFlags,
+  ParserContext,
+  ParserInput,
+  ParserOutput,
+  ParsingToken,
+} from '../interfaces/parser'
 import * as readline from 'readline'
-import {isTruthy, pickBy} from '../util'
+import {isTruthy, last, pickBy} from '../util'
 
 let debug: any
 try {
@@ -12,16 +28,44 @@ try {
   debug = () => {}
 }
 
-const readStdin = async (): Promise<string | null> => {
-  const {stdin, stdout} = process
-  debug('stdin.isTTY', stdin.isTTY)
+/**
+ * Support reading from stdin in Node 14 and older.
+ *
+ * This generally works for Node 14 and older EXCEPT when it's being
+ * run from another process, in which case it will hang indefinitely. Because
+ * of that issue we updated this to use AbortController but since AbortController
+ * is only available in Node 16 and newer, we have to keep this legacy version.
+ *
+ * See these issues for more details on the hanging indefinitely bug:
+ * https://github.com/oclif/core/issues/330
+ * https://github.com/oclif/core/pull/363
+ *
+ * @returns Promise<string | null>
+ */
+const readStdinLegacy = async (): Promise<string | null> => {
+  const {stdin} = process
+  let result
   if (stdin.isTTY) return null
+  result = ''
+  stdin.setEncoding('utf8')
+  for await (const chunk of stdin) {
+    result += chunk
+  }
+
+  return result
+}
+
+const readStdinWithTimeout = async (): Promise<string | null> => {
+  const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
   // process.stdin.isTTY is undefined when it's running in a pipe, e.g. echo 'foo' | my-cli command
   // process.stdin.isTTY is undefined when it's running in a spawned process, even if there's no pipe.
   // This means that reading from stdin could hang indefinitely while waiting for a non-existent pipe.
   // Because of this, we have to set a timeout to prevent the process from hanging.
+
+  if (stdin.isTTY) return null
+
   return new Promise(resolve => {
     let result = ''
     const ac = new AbortController()
@@ -53,6 +97,16 @@ const readStdin = async (): Promise<string | null> => {
   })
 }
 
+const readStdin = async (): Promise<string | null> => {
+  const {stdin, version} = process
+  debug('stdin.isTTY', stdin.isTTY)
+
+  const nodeMajorVersion = Number(version.split('.')[0].replace(/^v/, ''))
+  debug('node version', nodeMajorVersion)
+
+  return nodeMajorVersion > 14 ? readStdinWithTimeout() : readStdinLegacy()
+}
+
 function isNegativeNumber(input: string): boolean {
   return /^-\d/g.test(input)
 }
@@ -65,28 +119,24 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   private readonly booleanFlags: { [k: string]: BooleanFlag<any> }
   private readonly flagAliases: { [k: string]: BooleanFlag<any> | OptionFlag<any> }
 
-  private readonly context: any
-
-  private readonly metaData: any
+  private readonly context: ParserContext
 
   private currentFlag?: OptionFlag<any>
 
   constructor(private readonly input: T) {
-    this.context = input.context || {}
+    this.context = input.context ?? {} as ParserContext
     this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
     this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
       return (flag.aliases ?? []).map(a => [a, flag])
     }))
-
-    this.metaData = {}
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
-    const findLongFlag = (arg: string) => {
+    const findLongFlag = (arg: string):string | undefined => {
       const name = arg.slice(2)
       if (this.input.flags[name]) {
         return name
@@ -102,17 +152,23 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
     }
 
-    const findShortFlag = ([_, char]: string) => {
+    const findShortFlag = ([_, char]: string):string | undefined => {
       if (this.flagAliases[char]) {
         return this.flagAliases[char].name
       }
 
-      return Object.keys(this.input.flags).find(k => this.input.flags[k].char === char)
+      return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
+    }
+
+    const findFlag = (arg: string): { name?: string, isLong: boolean } => {
+      const isLong = arg.startsWith('--')
+      const short = isLong ? false : arg.startsWith('-')
+      const name = isLong ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
+      return {name, isLong}
     }
 
     const parseFlag = (arg: string): boolean => {
-      const long = arg.startsWith('--')
-      const name = long ? findLongFlag(arg) : findShortFlag(arg)
+      const {name, isLong} = findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -133,16 +189,17 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
       if (flag.type === 'option') {
         this.currentFlag = flag
-        const input = long || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        if (typeof input !== 'string') {
+        const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if ((typeof input !== 'string') || findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
-        this.raw.push({type: 'flag', flag: flag.name, input})
+        this.raw.push({type: 'flag', flag: flag.name, input: input})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
-        if (!long && arg.length > 2) {
+        if (!isLong && arg.length > 2) {
           this.argv.unshift(`-${arg.slice(2)}`)
         }
       }
@@ -193,8 +250,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       this.raw.push({type: 'arg', arg, input})
     }
 
-    const {argv, args} = await this._args()
-    const flags = await this._flags()
+    const [{argv, args}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
     this._debugOutput(argv, args, flags)
 
     const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
@@ -204,133 +260,234 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       flags,
       args: args as TArgs,
       raw: this.raw,
-      metadata: this.metaData,
+      metadata,
       nonExistentFlags,
     }
   }
 
-  // eslint-disable-next-line complexity
-  private async _flags(): Promise<TFlags & BFlags & { json: boolean | undefined }> {
-    const flags = {} as any
-    this.metaData.flags = {} as any
-    for (const token of this._flagTokens) {
-      const flag = this.input.flags[token.flag]
+  private async _flags(): Promise<{
+    flags: TFlags & BFlags & { json: boolean | undefined }, metadata: Metadata
+  }> {
+    type ValueFunction = (fws: FlagWithStrategy, flags?: Record<string, string>) => Promise<any>
 
-      if (!flag) throw new CLIError(`Unexpected flag ${token.flag}`)
+    const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
+      if (flag.options && !flag.options.includes(input))
+        throw new FlagInvalidOptionError(flag, input)
+      return input
+    }
 
-      if (flag.type === 'boolean') {
-        if (token.input === `--no-${flag.name}`) {
-          flags[token.flag] = false
-        } else {
-          flags[token.flag] = true
+    const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, context: ParserContext | undefined, token?: FlagToken) => {
+      if (!flag.parse) return input
+
+      const ctx = {
+        ...context,
+        token,
+        error: context?.error,
+        exit: context?.exit,
+        log: context?.log,
+        logToStderr: context?.logToStderr,
+        warn: context?.warn,
+      } as FlagParserContext
+
+      try {
+        if (flag.type === 'boolean') {
+          return await flag.parse(input, ctx, flag)
         }
 
-        flags[token.flag] = await this._parseFlag(flags[token.flag], flag, token)
-      } else {
-        const input = token.input
-
-        if (flag.delimiter && flag.multiple) {
-          // split, trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
-          const values = await Promise.all(
-            input.split(flag.delimiter).map(async v => this._parseFlag(v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'), flag, token)),
-          )
-          // then parse that each element aligns with the `options` property
-          for (const v of values) {
-            this._validateOptions(flag, v)
-          }
-
-          flags[token.flag] = flags[token.flag] || []
-          flags[token.flag].push(...values)
-        } else {
-          this._validateOptions(flag, input)
-          const value = await this._parseFlag(input, flag, token)
-          if (flag.multiple) {
-            flags[token.flag] = flags[token.flag] || []
-            flags[token.flag].push(value)
-          } else {
-            flags[token.flag] = value
-          }
-        }
+        return await flag.parse(input, ctx, flag)
+      } catch (error: any) {
+        error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
+        throw error
       }
     }
 
-    for (const k of Object.keys(this.input.flags)) {
-      const flag = this.input.flags[k]
-      if (flags[k]) continue
-      if (flag.env && Reflect.has(process.env, flag.env)) {
-        const input = process.env[flag.env]
-        if (flag.type === 'option') {
-          if (input) {
-            this._validateOptions(flag, input)
-
-            flags[k] = await this._parseFlag(input, flag)
+    /* Could add a valueFunction (if there is a value/env/default) and could metadata.
+    *  Value function can be resolved later.
+    */
+    const addValueFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
+      const tokenLength = fws.tokens?.length
+      // user provided some input
+      if (tokenLength) {
+        // boolean
+        if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
+              i.inputFlag.flag,
+              this.context,
+              last(i.tokens),
+            ),
           }
-        } else if (flag.type === 'boolean') {
-          // eslint-disable-next-line no-negated-condition
-          flags[k] = input !== undefined ? isTruthy(input) : false
+        }
+
+        // multiple with custom delimiter
+        if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.delimiter && fws.inputFlag.flag.multiple) {
+          return {
+            ...fws, valueFunction: async (i: FlagWithStrategy) => (await Promise.all(
+              ((i.tokens ?? []).flatMap(token => (token.input as string).split(i.inputFlag.flag.delimiter as string)))
+              // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
+              .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
+              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),
+            )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
+          }
+        }
+
+        // multiple in the oclif-core style
+        if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.multiple) {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) =>
+              Promise.all(
+                (fws.tokens ?? []).map(token => parseFlagOrThrowError(
+                  validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string),
+                  i.inputFlag.flag,
+                  this.context,
+                  token,
+                )),
+              ),
+          }
+        }
+
+        // simple option flag
+        if (fws.inputFlag.flag.type === 'option') {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string),
+              i.inputFlag.flag,
+              this.context,
+              last(fws.tokens),
+            ),
+          }
         }
       }
 
-      if (!(k in flags) && flag.default !== undefined) {
-        this.metaData.flags[k] = {...this.metaData.flags[k], setFromDefault: true}
-        const defaultValue = (typeof flag.default === 'function' ? await flag.default({options: flag, flags}) : flag.default)
-        flags[k] = defaultValue
+      // no input: env flags
+      if (fws.inputFlag.flag.env && process.env[fws.inputFlag.flag.env]) {
+        const valueFromEnv = process.env[fws.inputFlag.flag.env]
+        if (fws.inputFlag.flag.type === 'option' && valueFromEnv) {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+              validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv),
+              i.inputFlag.flag,
+              this.context,
+            ),
+          }
+        }
+
+        if (fws.inputFlag.flag.type === 'boolean') {
+          return {
+            ...fws,
+            valueFunction: async (i: FlagWithStrategy) => Promise.resolve(isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false')),
+          }
+        }
       }
+
+      // no input, but flag has default value
+      if (typeof fws.inputFlag.flag.default !== undefined) {
+        return {
+          ...fws, metadata: {setFromDefault: true},
+          valueFunction: typeof fws.inputFlag.flag.default === 'function' ?
+            (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags}) :
+            async () => fws.inputFlag.flag.default,
+        }
+      }
+
+      // base case (no value function)
+      return fws
     }
 
-    for (const k of Object.keys(this.input.flags)) {
-      if ((k in flags) && Reflect.has(this.input.flags[k], 'defaultHelp')) {
+    const addHelpFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
+      if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.defaultHelp) {
+        return {
+          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function' ?
+            // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
+            (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context) :
+            // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
+            (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
+        }
+      }
+
+      return fws
+    }
+
+    const addDefaultHelp = async (fwsArray: FlagWithStrategy[]): Promise<FlagWithStrategy[]> => {
+      const valueReferenceForHelp = fwsArrayToObject(flagsWithAllValues.filter(fws => !fws.metadata?.setFromDefault))
+      return Promise.all(fwsArray.map(async fws => {
         try {
-          const defaultHelpProperty = Reflect.get(this.input.flags[k], 'defaultHelp')
-          const defaultHelp = (typeof defaultHelpProperty === 'function' ? await defaultHelpProperty({
-            options: flags[k],
-            flags, ...this.context,
-          }) : defaultHelpProperty)
-          this.metaData.flags[k] = {...this.metaData.flags[k], defaultHelp}
+          if (fws.helpFunction) {
+            return {
+              ...fws,
+              metadata: {
+                ...fws.metadata,
+                defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context),
+              },
+            }
+          }
         } catch {
           // no-op
         }
-      }
+
+        return fws
+      }))
     }
 
-    return flags
-  }
+    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
+      fwsArray.filter(fws => fws.value !== undefined)
+      .map(fws => [fws.inputFlag.name, fws.value]),
+    )
 
-  private async _parseFlag(input: any, flag: BooleanFlag<any> | OptionFlag<any>, token?: FlagToken) {
-    if (!flag.parse) return input
-
-    try {
-      const ctx = this.context
-      ctx.token = token
-
-      if (flag.type === 'boolean') {
-        const ctx = this.context
-        ctx.token = token
-        return await flag.parse(input, ctx, flag)
+    type FlagWithStrategy = {
+      inputFlag: {
+        name: string,
+        flag: CompletableFlag<any>
       }
+      tokens?: FlagToken[],
+      valueFunction?: ValueFunction;
+      helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>;
+      metadata?: MetadataFlag
+      value?: any;
+    }
 
-      return flag.parse ? await flag.parse(input, ctx, flag) : input
-    } catch (error: any) {
-      error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
-      throw error
+    const flagTokenMap = this.mapAndValidateFlags()
+    const flagsWithValues = await Promise.all(Object.entries(this.input.flags)
+    // we check them if they have a token, or might have env, default, or defaultHelp.  Also include booleans so they get their default value
+    .filter(([name, flag]) => flag.type === 'boolean' || flag.env || flag.default !== undefined || 'defaultHelp' in flag || flagTokenMap.has(name))
+    // match each possible flag to its token, if there is one
+    .map(([name, flag]): FlagWithStrategy => ({inputFlag: {name, flag}, tokens: flagTokenMap.get(name)}))
+    .map(fws => addValueFunction(fws))
+    .filter(fws => fws.valueFunction !== undefined)
+    .map(fws => addHelpFunction(fws))
+    // we can't apply the default values until all the other flags are resolved because `flag.default` can reference other flags
+    .map(async fws => (fws.metadata?.setFromDefault ? fws : {...fws, value: await fws.valueFunction?.(fws)})))
+
+    const valueReference = fwsArrayToObject(flagsWithValues.filter(fws => !fws.metadata?.setFromDefault))
+
+    const flagsWithAllValues = await Promise.all(flagsWithValues
+    .map(async fws => (fws.metadata?.setFromDefault ? {...fws, value: await fws.valueFunction?.(fws, valueReference)} : fws)))
+
+    const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
+
+    return {
+      // @ts-ignore original version returned an any.  Not sure how to get to the return type for `flags` prop
+      flags: fwsArrayToObject(finalFlags),
+      metadata: {flags: Object.fromEntries(finalFlags.filter(fws => fws.metadata).map(fws => [fws.inputFlag.name, fws.metadata as MetadataFlag]))},
     }
   }
 
-  private _validateOptions(flag: OptionFlag<any>, input: string) {
-    if (flag.options && !flag.options.includes(input))
-      throw new FlagInvalidOptionError(flag, input)
-  }
-
-  private async _args(): Promise<{ argv: unknown[]; args: Record<string, unknown>}> {
+  private async _args(): Promise<{ argv: unknown[]; args: Record<string, unknown> }> {
     const argv: unknown[] = []
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
     let stdinRead = false
-    const ctx = this.context
+    const ctx = this.context as ArgParserContext
 
     for (const [name, arg] of Object.entries(this.input.args)) {
       const token = tokens.find(t => t.arg === name)
-      ctx.token = token
+      ctx.token = token!
+
       if (token) {
         if (arg.options && !arg.options.includes(token.input)) {
           throw new ArgInvalidOptionError(arg, token.input)
@@ -405,10 +562,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     return this.raw.filter(o => o.type === 'arg') as ArgToken[]
   }
 
-  private get _flagTokens(): FlagToken[] {
-    return this.raw.filter(o => o.type === 'flag') as FlagToken[]
-  }
-
   private _setNames() {
     for (const k of Object.keys(this.input.flags)) {
       this.input.flags[k].name = k
@@ -417,5 +570,20 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     for (const k of Object.keys(this.input.args)) {
       this.input.args[k].name = k
     }
+  }
+
+  private mapAndValidateFlags(): Map<string, FlagToken[]>  {
+    const flagTokenMap = new Map<string, FlagToken[]>()
+    for (const token of (this.raw.filter(o => o.type === 'flag') as FlagToken[])) {
+      // fail fast if there are any invalid flags
+      if (!(token.flag in this.input.flags)) {
+        throw new CLIError(`Unexpected flag ${token.flag}`)
+      }
+
+      const existing = flagTokenMap.get(token.flag) ?? []
+      flagTokenMap.set(token.flag, [...existing, token])
+    }
+
+    return flagTokenMap
   }
 }

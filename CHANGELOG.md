@@ -1,3 +1,160 @@
+## [2.11.8](https://github.com/oclif/core/compare/2.11.7...2.11.8) (2023-08-08)
+
+
+### Bug Fixes
+
+* handle lack of bin (happens in UT when stubbing config) ([#758](https://github.com/oclif/core/issues/758)) ([11e4f73](https://github.com/oclif/core/commit/11e4f73cf855f71294e4fc70c9d580c75bcef6e3))
+
+
+
+## [2.11.7](https://github.com/oclif/core/compare/2.11.6...2.11.7) (2023-08-03)
+
+
+### Bug Fixes
+
+* allow CONTENT_TYPE env to work for all oclif cmds ([71db0dc](https://github.com/oclif/core/commit/71db0dc63ad5d4a43df72ac4a040df2d92d3b0e1))
+
+
+
+## [2.11.6](https://github.com/oclif/core/compare/2.11.5...2.11.6) (2023-08-02)
+
+
+### Bug Fixes
+
+* add note to RequiredArgsError when there are flags with multiple=true ([#754](https://github.com/oclif/core/issues/754)) ([ed359a7](https://github.com/oclif/core/commit/ed359a72012b387c3d106be443be601f51a49225))
+
+
+
+## [2.11.5](https://github.com/oclif/core/compare/2.11.4...2.11.5) (2023-07-31)
+
+
+### Bug Fixes
+
+* set moduleResolution to Node16 ([#750](https://github.com/oclif/core/issues/750)) ([d7fdda8](https://github.com/oclif/core/commit/d7fdda8d23a20892d36ada847cfdc24ae76ca4b1))
+
+
+
+## [2.11.4](https://github.com/oclif/core/compare/2.11.3...2.11.4) (2023-07-31)
+
+
+### Bug Fixes
+
+* add missing properties to Interfaces.PJSON ([9b607f8](https://github.com/oclif/core/commit/9b607f881a78febc849e7307b9b896ee20abaf0e))
+
+
+
+## [2.11.3](https://github.com/oclif/core/compare/2.11.2...2.11.3) (2023-07-31)
+
+
+### Bug Fixes
+
+* node 14 stdin logic ([9c88715](https://github.com/oclif/core/commit/9c88715454e061cf4c10aab00c22bd52957a9e4c))
+
+
+
+## [2.11.2](https://github.com/oclif/core/compare/2.11.1...2.11.2) (2023-07-31)
+
+
+### Bug Fixes
+
+* node 14 stdin logic ([dfdea4e](https://github.com/oclif/core/commit/dfdea4ec237d847b3efdcd133c18f6ec0d5ee10b))
+
+
+
+## [2.11.1](https://github.com/oclif/core/compare/2.11.0...2.11.1) (2023-07-28)
+
+
+### Bug Fixes
+
+* fall back to scopedEnvVarKey if scopedEnvVarKeys is not defined ([#752](https://github.com/oclif/core/issues/752)) ([cc63a56](https://github.com/oclif/core/commit/cc63a56766118237e26cab54ea806625cf0bd73c))
+
+
+
+# [2.11.0](https://github.com/oclif/core/compare/2.10.1...2.11.0) (2023-07-28)
+
+
+### Features
+
+* deprecate scopedEnvVarKey for scopedEnvVarKeys which accounts for binAliases ([#751](https://github.com/oclif/core/issues/751)) ([4787248](https://github.com/oclif/core/commit/4787248655c39aaebb83eccd02bba3109921ccf7))
+
+
+
+## [2.10.1](https://github.com/oclif/core/compare/2.10.0...2.10.1) (2023-07-28)
+
+
+### Bug Fixes
+
+* support node 14 again ([#741](https://github.com/oclif/core/issues/741)) ([a80c4fd](https://github.com/oclif/core/commit/a80c4fd74c7c5dc7b8426e6f78fc60689c82eab7))
+
+
+
+# [2.10.0](https://github.com/oclif/core/compare/2.9.5...2.10.0) (2023-07-25)
+
+
+### Features
+
+* add extensions to esm checking ([#694](https://github.com/oclif/core/issues/694)) ([#743](https://github.com/oclif/core/issues/743)) ([427aa5b](https://github.com/oclif/core/commit/427aa5b877047bcd248bf1dbe0969c9bb0457e36))
+
+
+
+## [2.9.5](https://github.com/oclif/core/compare/2.9.4...2.9.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* corrected return type for Command.exit ([#715](https://github.com/oclif/core/issues/715)) ([#742](https://github.com/oclif/core/issues/742)) ([dd753f0](https://github.com/oclif/core/commit/dd753f045cde58d89b209e007926d4131f925570))
+
+
+
+## [2.9.4](https://github.com/oclif/core/compare/2.9.3...2.9.4) (2023-07-18)
+
+
+### Bug Fixes
+
+* correctly print help when only command found and passed with help ([#733](https://github.com/oclif/core/issues/733)) ([3c3b597](https://github.com/oclif/core/commit/3c3b5973903b401dbd00a4005cb9d9d289289f76))
+
+
+
+## [2.9.3](https://github.com/oclif/core/compare/2.9.2...2.9.3) (2023-07-13)
+
+
+
+## [2.9.2](https://github.com/oclif/core/compare/2.9.1...2.9.2) (2023-07-13)
+
+
+### Bug Fixes
+
+* **parser:** don't throw if defaultHelp func throws ([#732](https://github.com/oclif/core/issues/732)) ([7003b40](https://github.com/oclif/core/commit/7003b403a3cb9f6fe54a87de843dbc058f96be6c))
+
+
+
+## [2.9.1](https://github.com/oclif/core/compare/2.9.0...2.9.1) (2023-07-12)
+
+
+### Bug Fixes
+
+* flags omit undefined for boolean flags ([0a7e154](https://github.com/oclif/core/commit/0a7e15415f3514a4baad064478c76f0c17e9548a))
+
+
+
+# [2.9.0](https://github.com/oclif/core/compare/2.8.12...2.9.0) (2023-07-11)
+
+
+### Features
+
+* perf benchmarks ([9734b9f](https://github.com/oclif/core/commit/9734b9f9bce5ededc92c52c4eb14663a9e998893))
+
+
+
+## [2.8.12](https://github.com/oclif/core/compare/2.8.11...2.8.12) (2023-07-10)
+
+
+### Bug Fixes
+
+* properly truncate table cells that contain fullwidth characters or ANSI escape sequences ([db51bf2](https://github.com/oclif/core/commit/db51bf216b4b37d6c6e1d054e64b38dff0856d6d))
+
+
+
 ## [2.8.11](https://github.com/oclif/core/compare/2.8.10...2.8.11) (2023-07-01)
 
 

@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as url from 'url'
-import * as fs from 'fs-extra'
+import {existsSync, lstatSync} from 'fs'
 
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
@@ -14,12 +14,6 @@ const getPackageType = require('get-package-type')
  */
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
-
-/**
- * Provides a mechanism to use dynamic import / import() with tsconfig -> module: commonJS as otherwise import() gets
- * transpiled to require().
- */
-const _importDynamic = new Function('modulePath', 'return import(modulePath)') // eslint-disable-line no-new-func
 
 /**
  * Provides a static class with several utility methods to work with Oclif config / plugin to load ESM or CJS Node
@@ -46,12 +40,12 @@ export default class ModuleLoader {
    * @returns {Promise<*>} The entire ESM module from dynamic import or CJS module by require.
    */
   static async load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
-    let filePath
-    let isESM
+    let filePath: string | undefined
+    let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      // It is important to await on _importDynamic to catch the error code.
-      return isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+      // It is important to await on import to catch the error code.
+      return isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
@@ -79,11 +73,11 @@ export default class ModuleLoader {
    *                                                                   file path and whether the module is ESM.
    */
   static async loadWithData(config: IConfig|IPlugin, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
-    let filePath
-    let isESM
+    let filePath: string | undefined
+    let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      const module = isESM ? await _importDynamic(url.pathToFileURL(filePath)) : require(filePath)
+      const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -108,12 +102,13 @@ export default class ModuleLoader {
 
     switch (extension) {
     case '.js':
-      return getPackageType.sync(filePath) === 'module'
-
+    case '.jsx':
     case '.ts':
+    case '.tsx':
       return getPackageType.sync(filePath) === 'module'
 
     case '.mjs':
+    case '.mts':
       return true
 
     default:
@@ -148,10 +143,10 @@ export default class ModuleLoader {
 
       let fileExists = false
       let isDirectory = false
-      if (fs.existsSync(filePath)) {
+      if (existsSync(filePath)) {
         fileExists = true
         try {
-          if (fs.lstatSync(filePath)?.isDirectory?.()) {
+          if (lstatSync(filePath)?.isDirectory?.()) {
             fileExists = false
             isDirectory = true
           }
@@ -189,7 +184,7 @@ export default class ModuleLoader {
     for (const extension of s_EXTENSIONS) {
       const testPath = `${filePath}${extension}`
 
-      if (fs.existsSync(testPath)) {
+      if (existsSync(testPath)) {
         return testPath
       }
     }

@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 import {assert, expect, config} from 'chai'
 import * as fs from 'fs'
 
@@ -20,6 +19,29 @@ describe('parse', () => {
       },
     })
     expect(out).to.deep.include({flags: {bool: true}})
+  })
+
+  describe('undefined flags', () => {
+    it('omits undefined flags when no flags', async () => {
+      const out = await parse([], {
+        flags: {
+          bool: Flags.boolean(),
+        },
+      })
+      expect(out.flags).to.deep.equal({})
+    })
+
+    it('omits undefined flags when some flags exist', async () => {
+      const out = await parse(['--bool', '--str', 'k'], {
+        flags: {
+          bool: Flags.boolean(),
+          bool2: Flags.boolean(),
+          str: Flags.string(),
+          str2: Flags.string(),
+        },
+      })
+      expect(out.flags).to.deep.equal({bool: true, str: 'k'})
+    })
   })
 
   it('arg1', async () => {
@@ -82,6 +104,88 @@ describe('parse', () => {
         })
         expect(Boolean(out.flags.myflag)).to.equal(true)
         expect(Boolean(out.flags.myflag2)).to.equal(true)
+      })
+      it('doesn\' throw if defaultHelp func fails', async () => {
+        const out = await parse(['--foo', 'baz'], {
+          flags: {
+            foo: Flags.custom({
+              defaultHelp: async () => {
+                throw new Error('failed to get default help value')
+              },
+            })(),
+          },
+        })
+        expect(out.flags.foo).to.equal('baz')
+      })
+
+      it('doesn\'t throw when 2nd char in value matches a flag char', async () => {
+        const out =   await parse(['--myflag', 'Ishikawa', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('Ishikawa')
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when an unprefixed flag value contains a flag name', async () => {
+        const out =   await parse(['--myflag', 'a-second-place-finish', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('a-second-place-finish')
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('throws error when no value provided to required flag', async () => {
+        try {
+          await parse(['--myflag', '--second', 'value'], {
+            flags: {myflag: Flags.string({required: true}), second: Flags.string()},
+          })
+          assert.fail('should have thrown')
+        } catch (error) {
+          expect((error as CLIError).message).to.include('Flag --myflag expects a value')
+        }
+      })
+
+      it('throws error when no value provided to required flag before a short char flag', async () => {
+        try {
+          await parse(['--myflag', '-s', 'value'], {
+            flags: {myflag: Flags.string({required: true}), second: Flags.string({char: 's'})},
+          })
+          assert.fail('should have thrown')
+        } catch (error) {
+          expect((error as CLIError).message).to.include('Flag --myflag expects a value')
+        }
+      })
+
+      it('doesn\'t throw when boolean flag passed', async () => {
+        const out =   await parse(['--myflag', '--second', 'value'], {
+          flags: {myflag: Flags.boolean(), second: Flags.string()},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when negative number passed', async () => {
+        const out =   await parse(['--myflag', '-s', '-9'], {
+          flags: {myflag: Flags.boolean(), second: Flags.integer({char: 's'})},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal(-9)
+      })
+
+      it('doesn\'t throw when boolean short char is passed', async () => {
+        const out =   await parse(['--myflag', '-s', 'value'], {
+          flags: {myflag: Flags.boolean(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.be.true
+        expect(out.flags.second).to.equal('value')
+      })
+
+      it('doesn\'t throw when  short char is passed as a string value', async () => {
+        const out =   await parse(['--myflag', '\'-s\'', '-s', 'value'], {
+          flags: {myflag: Flags.string(), second: Flags.string({char: 's'})},
+        })
+        expect(out.flags.myflag).to.equal('\'-s\'')
+        expect(out.flags.second).to.equal('value')
       })
 
       it('parses short flags', async () => {
@@ -178,6 +282,53 @@ describe('parse', () => {
         expect(message).to.include(`Missing 2 required args:
 arg2  arg2 desc
 arg3  arg3 desc
+See more help with --help`)
+      })
+
+      it('warns about having one flag with multiple values when missing an arg', async () => {
+        let message = ''
+        try {
+          await parse(['--flag1', 'val1', 'arg1'], {
+            args: {
+              arg1: Args.string({required: true, description: 'arg1 desc'}),
+            },
+            flags: {
+              flag1: Flags.string({multiple: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include(`Missing 1 required arg:
+arg1  arg1 desc
+
+Note: --flag1 allows multiple values. Because of this you need to provide all arguments before providing that flag.
+Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
+See more help with --help`)
+      })
+
+      it('warns about having many flags with multiple values when missing an arg', async () => {
+        let message = ''
+        try {
+          await parse(['--flag1', 'val1', '--flag2', 'val1', 'val2', 'arg1'], {
+            args: {
+              arg1: Args.string({required: true, description: 'arg1 desc'}),
+            },
+            flags: {
+              flag1: Flags.string({multiple: true}),
+              flag2: Flags.string({multiple: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include(`Missing 1 required arg:
+arg1  arg1 desc
+
+Note: --flag1, --flag2 allow multiple values. Because of this you need to provide all arguments before providing those flags.
+Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
 See more help with --help`)
       })
 
@@ -864,6 +1015,25 @@ See more help with --help`)
         args: {baz: Args.boolean({default: false})},
       })
       expect(out.args).to.deep.include({baz: false})
+    })
+
+    it('accepts falsy flags', async () => {
+      const out = await parse([], {
+        flags: {
+          foo1: Flags.string({default: ''}),
+          foo2: Flags.string({default: '0'}),
+          foo3: Flags.string({default: 'false'}),
+          foo4: Flags.string({default: 'undefined'}),
+          bar: Flags.integer({default: 0}),
+          baz: Flags.boolean({default: false}),
+        },
+      })
+      expect(out.flags).to.deep.include({foo1: ''})
+      expect(out.flags).to.deep.include({foo2: '0'})
+      expect(out.flags).to.deep.include({foo3: 'false'})
+      expect(out.flags).to.deep.include({foo4: 'undefined'})
+      expect(out.flags).to.deep.include({bar: 0})
+      expect(out.flags).to.deep.include({baz: false})
     })
 
     it('default as function', async () => {

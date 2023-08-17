@@ -124,7 +124,11 @@ export class Help extends HelpBase {
     if (this.config.flexibleTaxonomy) {
       const matches = this.config.findMatches(subject, originalArgv)
       if (matches.length > 0) {
-        const result = await this.config.runHook('command_incomplete', {id: subject, argv: originalArgv, matches})
+        const result = await this.config.runHook('command_incomplete', {
+          id: subject,
+          argv: originalArgv.filter(o => !subject.split(':').includes(o)),
+          matches,
+        })
         if (result.successes.length > 0) return
       }
     }

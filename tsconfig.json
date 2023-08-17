@@ -13,6 +13,7 @@
     "target": "es2020",
     "allowSyntheticDefaultImports": true,
     "noErrorTruncation": true,
+    "moduleResolution": "Node16"
   },
   "include": [
     "./src/**/*"
