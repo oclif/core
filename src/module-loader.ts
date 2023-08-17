@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as url from 'url'
-import * as fs from 'fs-extra'
+import {existsSync, lstatSync} from 'node:fs'
 
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
@@ -143,10 +143,10 @@ export default class ModuleLoader {
 
       let fileExists = false
       let isDirectory = false
-      if (fs.existsSync(filePath)) {
+      if (existsSync(filePath)) {
         fileExists = true
         try {
-          if (fs.lstatSync(filePath)?.isDirectory?.()) {
+          if (lstatSync(filePath)?.isDirectory?.()) {
             fileExists = false
             isDirectory = true
           }
@@ -184,7 +184,7 @@ export default class ModuleLoader {
     for (const extension of s_EXTENSIONS) {
       const testPath = `${filePath}${extension}`
 
-      if (fs.existsSync(testPath)) {
+      if (existsSync(testPath)) {
         return testPath
       }
     }

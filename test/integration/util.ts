@@ -1,6 +1,6 @@
 
 import {rm} from 'shelljs'
-import {mkdirp} from 'fs-extra'
+import {mkdir} from 'node:fs/promises'
 import * as cp from 'child_process'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
@@ -87,7 +87,7 @@ export async function setup(testFile: string, options: Options): Promise<Executo
     return executor
   }
 
-  await mkdirp(location)
+  await mkdir(location, {recursive: true})
   rm('-rf', testDir)
 
   const clone = `git clone ${options.repo} ${testDir}`

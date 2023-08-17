@@ -1,5 +1,5 @@
-import * as fs from 'fs-extra'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import {dirname} from 'node:path'
 import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
@@ -34,7 +34,7 @@ export class Logger {
       if (this.buffer.length === 0) return
       const mylines = this.buffer
       this.buffer = []
-      await fs.mkdirp(path.dirname(this.file))
+      await fs.mkdir(dirname(this.file), {recursive: true})
       await fs.appendFile(this.file, mylines.join('\n') + '\n')
     })
     await this.flushing
