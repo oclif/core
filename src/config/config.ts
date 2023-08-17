@@ -607,18 +607,9 @@ export class Config implements IConfig {
           opts.root = plugin.root || opts.root
         }
 
-        const pluginMarker = Performance.mark(`plugin.load#${opts.name!}`)
         const instance = new Plugin.Plugin(opts)
         await instance.load()
-        pluginMarker?.addDetails({
-          hasManifest: instance.hasManifest,
-          commandCount: instance.commands.length,
-          topicCount: instance.topics.length,
-          type: instance.type,
-          usesMain: Boolean(instance.pjson.main),
-          name: instance.name,
-        })
-        pluginMarker?.stop()
+
         if (this.plugins.find(p => p.name === instance.name)) return
         this.plugins.push(instance)
         if (parent) {

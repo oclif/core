@@ -143,6 +143,8 @@ export class Plugin implements IPlugin {
    * @returns Promise<void>
    */
   public async load(isWritingManifest?: boolean): Promise<void> {
+    const pluginMarker = Performance.mark(`plugin.load#${this.options.name!}`)
+
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
@@ -176,6 +178,15 @@ export class Plugin implements IPlugin {
       load: async () => this.findCommand(id, {must: true}),
     }))
     .sort((a, b) => a.id.localeCompare(b.id))
+    pluginMarker?.addDetails({
+      hasManifest: this.hasManifest,
+      commandCount: this.commands.length,
+      topicCount: this.topics.length,
+      type: this.type,
+      usesMain: Boolean(this.pjson.main),
+      name: this.name,
+    })
+    pluginMarker?.stop()
   }
 
   public get topics(): Topic[] {
