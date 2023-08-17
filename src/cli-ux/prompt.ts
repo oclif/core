@@ -3,8 +3,6 @@ import config from './config'
 
 import * as chalk from 'chalk'
 import {stderr} from './stream'
-const ansiEscapes = require('ansi-escapes')
-const passwordPrompt = require('password-prompt')
 
 export interface IPromptOptions {
   prompt?: string;
@@ -78,6 +76,7 @@ async function single(options: IPromptConfig): Promise<string> {
 }
 
 function replacePrompt(prompt: string) {
+  const ansiEscapes = require('ansi-escapes')
   stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
     ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
 }
@@ -93,6 +92,8 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
     default: '',
     ...inputOptions,
   }
+  const passwordPrompt = require('password-prompt')
+
   switch (options.type) {
   case 'normal':
     return normal(options)

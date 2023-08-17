@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 import {assert, expect, config} from 'chai'
 import * as fs from 'fs'
 

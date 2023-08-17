@@ -18,8 +18,8 @@ import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
 import {settings} from '../settings'
-import {userInfo as osUserInfo} from 'node:os'
-import {sep} from 'node:path'
+import {userInfo as osUserInfo} from 'os'
+import {sep} from 'path'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()

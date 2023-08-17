@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as url from 'url'
-import {existsSync, lstatSync} from 'node:fs'
+import {existsSync, lstatSync} from 'fs'
 
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'

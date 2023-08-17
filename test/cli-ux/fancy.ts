@@ -1,6 +1,6 @@
 import {expect, fancy as base, FancyTypes} from 'fancy-test'
-import {rm} from 'node:fs/promises'
-import {join} from 'node:path'
+import {rm} from 'fs/promises'
+import {join} from 'path'
 
 import {ux} from '../../src'
 

@@ -1,5 +1,5 @@
-import * as fs from 'node:fs/promises'
-import {dirname} from 'node:path'
+import * as fs from 'fs/promises'
+import {dirname} from 'path'
 import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
