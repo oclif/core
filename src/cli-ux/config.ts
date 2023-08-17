@@ -1,12 +1,9 @@
-import * as semver from 'semver'
 import {PJSON} from '../interfaces/pjson'
 import {requireJson} from '../util'
 import spinner from './action/spinner'
 import simple from './action/spinner'
 import pride from './action/pride-spinner'
 import {ActionBase} from './action/base'
-
-const version = semver.parse(requireJson<PJSON>(__dirname, '..', '..', 'package.json').version)!
 
 export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
 
@@ -58,9 +55,10 @@ export class Config {
 }
 
 function fetch() {
-  if (globals[version.major]) return globals[version.major]
-  globals[version.major] = new Config()
-  return globals[version.major]
+  const major = requireJson<PJSON>(__dirname, '..', '..', 'package.json').version.split('.')[0]
+  if (globals[major]) return globals[major]
+  globals[major] = new Config()
+  return globals[major]
 }
 
 export const config: Config = fetch()
