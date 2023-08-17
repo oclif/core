@@ -280,35 +280,17 @@ export class Config implements IConfig {
       })
     }
 
-    const final = {
-      successes: [],
-      failures: [],
-    } as Hook.Result<Hooks[T]['return']>
-    const promises = this.plugins.map(async p => {
+    const context = buildHookContext(this)
+    type PluginResultEither = { plugin: IPlugin; result: any, error?: never } | { plugin: IPlugin; result?: never, error: Error }
+
+    const final = await Promise.all(this.plugins.flatMap((p): Array<Promise<PluginResultEither>>  => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
-      const context: Hook.Context = {
-        config: this,
-        debug,
-        exit(code = 0) {
-          exit(code)
-        },
-        log(message?: any, ...args: any[]) {
-          stdout.write(format(message, ...args) + '\n')
-        },
-        error(message, options: { code?: string; exit?: number } = {}) {
-          error(message, options)
-        },
-        warn(message: string) {
-          warn(message)
-        },
-      }
 
-      const hooks = p.hooks[event] || []
+      const hooks = p.hooks[event] ?? []
 
-      for (const hook of hooks) {
+      return hooks.map(async (hook: string): Promise<PluginResultEither> => {
         const marker = Performance.mark(`config.runHook#${p.name}(${hook})`)
         try {
-          /* eslint-disable no-await-in-loop */
           const {isESM, module, filePath} = await ModuleLoader.loadWithData(p, hook)
 
           debug('start', isESM ? '(import)' : '(require)', filePath)
@@ -316,34 +298,43 @@ export class Config implements IConfig {
           const result = timeout ?
             await withTimeout(timeout, search(module).call(context, {...opts as any, config: this})) :
             await search(module).call(context, {...opts as any, config: this})
-          final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
             this.insertLegacyPlugins(result as IPlugin[])
           }
 
           debug('done')
+          marker?.addDetails({
+            plugin: p.name,
+            event,
+            hook,
+          })
+          marker?.stop()
+          return ({plugin: p, result})
         } catch (error: any) {
-          final.failures.push({plugin: p, error: error as Error})
           debug(error)
-          if (!captureErrors && error.oclif?.exit !== undefined) throw error
+          if (!captureErrors && error.oclif?.exit !== undefined) {
+            throw error
+          } else {
+            marker?.addDetails({
+              plugin: p.name,
+              event,
+              hook,
+            })
+            marker?.stop()
+            return {plugin: p, error: error as Error}
+          }
         }
-
-        marker?.addDetails({
-          plugin: p.name,
-          event,
-          hook,
-        })
-        marker?.stop()
-      }
-    })
-
-    await Promise.all(promises)
+      })
+    }))
 
     debug('%s hook done', event)
 
     marker?.stop()
-    return final
+    return {
+      successes: final.filter(r => !r.error),
+      failures: final.filter(r => r.error),
+    } as Hook.Result<Hooks[T]['return']>
   }
 
   public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
@@ -951,3 +942,20 @@ const getFlags = async (c: Command.Class, isWritingManifest?: boolean): Promise<
       },
     }]))))
 }
+
+const buildHookContext = (config: Config): Hook.Context => ({
+  config,
+  debug,
+  exit(code = 0) {
+    exit(code)
+  },
+  log(message?: any, ...args: any[]) {
+    stdout.write(format(message, ...args) + '\n')
+  },
+  error(message, options: { code?: string; exit?: number } = {}) {
+    error(message, options)
+  },
+  warn(message: string) {
+    warn(message)
+  },
+})
