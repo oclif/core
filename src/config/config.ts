@@ -885,7 +885,7 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
 }
 
 export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Command.Cached> {
-  const [flags, args] = await Promise.all([getFlags(), getArgs()])
+  const [flags, args] = await Promise.all([getFlags(c, isWritingManifest), getArgs(c, isWritingManifest)])
   const stdProperties = {
     id: c.id,
     summary: c.summary,
@@ -907,58 +907,56 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
 
   // do not include these properties in manifest
   const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags', '_baseFlags']
-  const stdKeys = Object.keys(stdProperties)
-  const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  const additionalProperties: Record<string, unknown> = {}
-  for (const key of keysToAdd) {
-    additionalProperties[key] = (c as any)[key]
-  }
+  const stdKeysAndIgnored = new Set([...Object.keys(stdProperties), ...ignoreCommandProperties])
+  const keysToAdd = Object.keys(c).filter(property => !stdKeysAndIgnored.has(property))
+
+  const additionalProperties = Object.fromEntries(keysToAdd.map(key => [key, (c as any)[key]]))
 
   return {...stdProperties, ...additionalProperties}
+}
 
-  async function getArgs(): Promise<Record<string, Command.Arg.Cached>> {
-    return Object.fromEntries(await Promise.all(
-      Object.entries(ensureArgObject(c.args) ?? {})
-      .map(async ([name, arg]) => ([name, {
-        name,
-        description: arg.description,
-        required: arg.required,
-        options: arg.options,
-        default: await defaultArgToCached(arg, isWritingManifest),
-        hidden: arg.hidden,
-      }]))))
-  }
+const getArgs = async (c: Command.Class, isWritingManifest?: boolean): Promise<Record<string, Command.Arg.Cached>> => {
+  return Object.fromEntries(await Promise.all(
+    Object.entries(ensureArgObject(c.args) ?? {})
+    .map(async ([name, arg]) => ([name, {
+      name,
+      description: arg.description,
+      required: arg.required,
+      options: arg.options,
+      default: await defaultArgToCached(arg, isWritingManifest),
+      hidden: arg.hidden,
+    }]))))
+}
 
-  async function getFlags(): Promise<Record<string, Command.Flag.Cached>> {
-    return Object.fromEntries(await Promise.all(Object.entries(c.flags || {})
-    .map(async ([name, flag]) => ([name,
-      {
-        name,
-        type: flag.type,
-        char: flag.char,
-        summary: flag.summary,
-        hidden: flag.hidden,
-        required: flag.required,
-        helpLabel: flag.helpLabel,
-        helpGroup: flag.helpGroup,
-        description: flag.description,
-        dependsOn: flag.dependsOn,
-        relationships: flag.relationships,
-        exclusive: flag.exclusive,
-        deprecated: flag.deprecated,
-        deprecateAliases: c.deprecateAliases,
-        aliases: flag.aliases,
-        delimiter: flag.delimiter,
-        ...flag.type === 'boolean' ? {
-          allowNo: flag.allowNo,
-        } : {
-          helpValue: flag.helpValue,
-          multiple: flag.multiple,
-          options: flag.options,
-          default: await defaultFlagToCached(flag, isWritingManifest),
-          // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
-          ...typeof flag.defaultHelp === 'function' ? {hasDynamicHelp: true} : {},
-        },
-      }]))))
-  }
+const getFlags = async (c: Command.Class, isWritingManifest?: boolean): Promise<Record<string, Command.Flag.Cached>> => {
+  return Object.fromEntries(await Promise.all(Object.entries(c.flags || {})
+  .map(async ([name, flag]) => ([name,
+    {
+      name,
+      type: flag.type,
+      char: flag.char,
+      summary: flag.summary,
+      hidden: flag.hidden,
+      required: flag.required,
+      helpLabel: flag.helpLabel,
+      helpGroup: flag.helpGroup,
+      description: flag.description,
+      dependsOn: flag.dependsOn,
+      relationships: flag.relationships,
+      exclusive: flag.exclusive,
+      deprecated: flag.deprecated,
+      deprecateAliases: c.deprecateAliases,
+      aliases: flag.aliases,
+      delimiter: flag.delimiter,
+      ...flag.type === 'boolean' ? {
+        allowNo: flag.allowNo,
+      } : {
+        helpValue: flag.helpValue,
+        multiple: flag.multiple,
+        options: flag.options,
+        default: await defaultFlagToCached(flag, isWritingManifest),
+        // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
+        ...typeof flag.defaultHelp === 'function' ? {hasDynamicHelp: true} : {},
+      },
+    }]))))
 }
