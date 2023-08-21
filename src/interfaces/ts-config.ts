@@ -15,5 +15,6 @@ export interface TSConfig {
   'ts-node'?: {
     esm?: boolean;
     experimentalSpecifierResolution?: 'node' | 'explicit';
+    scope?: boolean;
   }
 }

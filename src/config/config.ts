@@ -129,8 +129,7 @@ export class Config implements IConfig {
     return config
   }
 
-  static get rootPlugin(): Plugin.Plugin {
-    if (!Config._rootPlugin) throw new CLIError('root plugin not set. Have you called Config.load()?')
+  static get rootPlugin(): Plugin.Plugin | undefined {
     return Config._rootPlugin
   }
 

@@ -5,7 +5,7 @@ import * as fs from 'fs-extra'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
-import {Config, tsPath} from './config'
+import {tsPath} from './config'
 
 const getPackageType = require('get-package-type')
 
@@ -85,12 +85,9 @@ export default class ModuleLoader {
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`)
-      }
-
-      // If a linked plugin is an ESM module and the root plugin is CJS then throw a more specific error.
-      if (error.name === 'ReferenceError' && isPlugin(config) && config.type === 'link' && config.moduleType === 'module' && Config.rootPlugin.moduleType === 'commonjs') {
-        throw new ModuleLoadError(`Plugin ${config.name} is an ESM module and cannot be linked to a CJS root plugin.`)
+        throw new ModuleLoadError(
+          `${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`,
+        )
       }
 
       throw error
@@ -138,13 +135,13 @@ export default class ModuleLoader {
    */
   static resolvePath(config: IConfig|IPlugin, modulePath: string): {isESM: boolean; filePath: string} {
     let isESM: boolean
-    let filePath: string
+    let filePath: string | undefined
 
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch {
-      filePath = isPlugin(config) ? tsPath(config.root, modulePath, config.type) : tsPath(config.root, modulePath)
+      filePath = (isPlugin(config) ? tsPath(config.root, modulePath, config) : tsPath(config.root, modulePath)) ?? modulePath
 
       let fileExists = false
       let isDirectory = false

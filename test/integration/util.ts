@@ -12,23 +12,25 @@ const debug = require('debug')('e2e')
 
 export type ExecError = cp.ExecException & { stderr: string; stdout: string };
 
-export interface Result {
+export type Result = {
   code: number;
   stdout?: string;
   stderr?: string;
   error?: ExecError
 }
 
-export interface SetupOptions {
+export type SetupOptions = {
   repo: string;
   plugins?: string[];
   subDir?: string;
 }
 
-export interface ExecutorOptions {
+export type ExecutorOptions = {
   pluginDir: string;
   testFileName: string;
 }
+
+export type ExecOptions = cp.ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
 
 function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
   const pkgJsonFile = path.join(testDir, 'package.json')
@@ -63,22 +65,27 @@ export class Executor {
     return result
   }
 
-  public executeInTestDir(cmd: string, silent = true): Promise<Result> {
-    return this.exec(cmd, this.pluginDir, silent)
+  public executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
+    return this.exec(cmd, {...options, cwd: this.pluginDir} as ExecOptions)
   }
 
-  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run'): Promise<Result> {
-    const executable = process.platform === 'win32' ? path.join('bin', `${script}.cmd`) : path.join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
-    return this.executeInTestDir(`${executable} ${cmd}`)
+  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
+    const executable = process.platform === 'win32' ?
+      path.join('bin', `${script}.cmd`) :
+      path.join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+    return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
-  public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
+  public exec(cmd: string, options?: ExecOptions): Promise<Result> {
+    const cwd = options?.cwd ?? process.cwd()
+    const silent = options?.silent ?? true
     return new Promise(resolve => {
       this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
           const r = cp.execSync(cmd, {
             stdio: 'pipe',
+            ...options,
             cwd,
           })
           const stdout = r.toString()

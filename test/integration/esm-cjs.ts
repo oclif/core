@@ -72,6 +72,7 @@ type RunCommandOptions = {
   plugin: Plugin;
   script: Script;
   expectStrings?: string[];
+  env?: Record<string, string>;
 }
 
 type ModifyCommandOptions = {
@@ -154,7 +155,8 @@ type CleanUpOptions = {
   }
 
   async function runCommand(options: RunCommandOptions): Promise<void> {
-    const result = await options.executor.executeCommand(options.plugin.command, options.script)
+    const env = {...process.env, ...options.env}
+    const result = await options.executor.executeCommand(options.plugin.command, options.script, {env})
     expect(result.code).to.equal(0)
 
     if (options.expectStrings) {
@@ -264,39 +266,29 @@ type CleanUpOptions = {
       await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
     })
 
-    // TODO: can I get this working?
-    // await test('Link CJS plugin to CJS root plugin', async () => {
-    //   const plugin = PLUGINS.esm2
+    await test('Link ESM plugin to CJS root plugin', async () => {
+      const plugin = PLUGINS.esm2
 
-    //   const linkedPlugin = await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
+      await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
 
-    //   // test bin/run
-    //   await runCommand({
-    //     executor: cjsExecutor,
-    //     plugin,
-    //     script: 'run',
-    //     expectStrings: [plugin.commandText, plugin.hookText],
-    //   })
-    //   // test un-compiled changes with bin/run
-    //   await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
-    //   await runCommand({
-    //     executor: cjsExecutor,
-    //     plugin,
-    //     script: 'run',
-    //     expectStrings: ['howdy', plugin.hookText],
-    //   })
+      // test bin/run
+      await runCommand({
+        executor: cjsExecutor,
+        plugin,
+        script: 'run',
+        expectStrings: [plugin.commandText, plugin.hookText],
+      })
 
-    //   // test un-compiled changes with bin/dev
-    //   await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
-    //   await runCommand({
-    //     executor: cjsExecutor,
-    //     plugin,
-    //     script: 'dev',
-    //     expectStrings: ['cheers', plugin.hookText],
-    //   })
+      // test bin/dev
+      await runCommand({
+        executor: cjsExecutor,
+        plugin,
+        script: 'dev',
+        expectStrings: [plugin.commandText, plugin.hookText],
+      })
 
-    //   await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
-    // })
+      await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
+    })
   }
 
   const esmTests = async () => {
@@ -375,6 +367,7 @@ type CleanUpOptions = {
 
       const linkedPlugin = await linkPlugin({executor: esmExecutor, plugin, script: 'run'})
       // test bin/run
+      // NOTE: this also tests that the compiled source is used when ts-node/esm loader is not specified
       await runCommand({
         executor: esmExecutor,
         plugin,
@@ -388,6 +381,7 @@ type CleanUpOptions = {
         plugin,
         script: 'run',
         expectStrings: ['howdy', plugin.hookText],
+        env: {NODE_OPTIONS: '--loader=ts-node/esm'},
       })
 
       // test un-compiled changes with bin/dev
@@ -397,6 +391,7 @@ type CleanUpOptions = {
         plugin,
         script: 'dev',
         expectStrings: ['cheers', plugin.hookText],
+        env: {NODE_OPTIONS: '--loader=ts-node/esm'},
       })
 
       await cleanUp({executor: esmExecutor, plugin, script: 'run'})

@@ -113,47 +113,42 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
  *
  * @example For ESM dev.js
  * ```
- * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
- * // eslint-disable-next-line node/shebang
+ * #!/usr/bin/env node
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', development: true, dir: import.meta.url})
+ *   await oclif.execute({development: true, dir: import.meta.url})
  * })()
  * ```
  *
  * @example For ESM run.js
  * ```
- * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
- * // eslint-disable-next-line node/shebang
+ * #!/usr/bin/env node
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', dir: import.meta.url})
+ *   await oclif.execute({dir: import.meta.url})
  * })()
  * ```
  *
  * @example For CJS dev.js
  * ```
- * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
- * // eslint-disable-next-line node/shebang
+ * #!/usr/bin/env node
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', development: true, dir: __dirname})
+ *   await oclif.execute({development: true, dir: __dirname})
  * })()
  * ```
  *
  * @example For CJS run.js
  * ```
- * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
- * // eslint-disable-next-line node/shebang
+ * #!/usr/bin/env node
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', dir: __dirname})
+ *   await oclif.execute({dir: __dirname})
  * })()
  * ```
  */
 export async function execute(
   options: {
-    type: 'cjs' | 'esm';
     dir: string;
     args?: string[];
     loadOptions?: Interfaces.LoadOptions;

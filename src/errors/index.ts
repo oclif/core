@@ -54,3 +54,10 @@ export function warn(input: string | Error): void {
   console.error(message)
   if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
 }
+
+const WARNINGS = new Set<string | Error>()
+export function memoizedWarn(input: string | Error): void {
+  if (!WARNINGS.has(input)) warn(input)
+
+  WARNINGS.add(input)
+}

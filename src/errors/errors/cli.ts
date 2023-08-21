@@ -24,11 +24,13 @@ export class CLIError extends Error implements OclifError {
   oclif: OclifError['oclif'] = {}
 
   code?: string
+  suggestions?: string[]
 
   constructor(error: string | Error, options: { exit?: number | false } & PrettyPrintableError = {}) {
     super(error instanceof Error ? error.message : error)
     addOclifExitCode(this, options)
     this.code = options.code
+    this.suggestions = options.suggestions
   }
 
   get stack(): string {

@@ -188,7 +188,7 @@ export class Plugin implements IPlugin {
   public get commandsDir(): string | undefined {
     if (this._commandsDir) return this._commandsDir
 
-    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this.type)
+    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this)
     return this._commandsDir
   }
 
