@@ -1,4 +1,4 @@
-import {settings} from '../settings'
+import settings from '../settings'
 import {Logger} from './logger'
 
 function displayWarnings() {

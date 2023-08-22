@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as TSNode from 'ts-node'
 
 import {TSConfig, Plugin} from '../interfaces'
-import {settings} from '../settings'
+import settings from '../settings'
 import {isProd} from '../util'
 import {Debug} from './util'
 import {Config} from './config'

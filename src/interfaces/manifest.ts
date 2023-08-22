@@ -1,6 +1,6 @@
-import {Command} from '../command'
+import {Cached} from '../command'
 
 export type Manifest = {
   version: string;
-  commands: {[id: string]: Command.Cached};
+  commands: {[id: string]: Cached};
 }

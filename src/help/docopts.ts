@@ -1,4 +1,4 @@
-import {Command} from '../command'
+import {Class, Cached, Loadable, Flag} from '../command'
 import {ensureArgObject} from '../util'
 /**
  * DocOpts - See http://docopt.org/.
@@ -57,11 +57,11 @@ import {ensureArgObject} from '../util'
  *
  */
 export class DocOpts {
-  private flagMap: {[index: string]: Command.Flag.Any}
+  private flagMap: {[index: string]: Flag.Any}
 
-  private flagList: Command.Flag.Any[]
+  private flagList: Flag.Any[]
 
-  public constructor(private cmd: Command.Class | Command.Loadable | Command.Cached) {
+  public constructor(private cmd: Class | Loadable | Cached) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -72,7 +72,7 @@ export class DocOpts {
     })
   }
 
-  public static generate(cmd: Command.Class | Command.Loadable | Command.Cached): string {
+  public static generate(cmd: Class | Loadable | Cached): string {
     return new DocOpts(cmd).toString()
   }
 
@@ -166,7 +166,7 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
-  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Command.Flag.Any[] = []): string[] {
+  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Flag.Any[] = []): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
       let type = ''

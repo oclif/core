@@ -13,11 +13,11 @@ import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} fr
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
-import {Command} from '../command'
+import {Class, Loadable, Cached, Flag, Arg as CommandArg} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
-import {settings} from '../settings'
+import settings from '../settings'
 import {userInfo as osUserInfo} from 'node:os'
 import {sep} from 'node:path'
 
@@ -105,7 +105,7 @@ export class Config implements IConfig {
 
   private topicPermutations = new Permutations()
 
-  private _commands = new Map<string, Command.Loadable>()
+  private _commands = new Map<string, Loadable>()
 
   private _topics = new Map<string, Topic>()
 
@@ -353,7 +353,7 @@ export class Config implements IConfig {
     return final
   }
 
-  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
+  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Loadable | null = null): Promise<T> {
     const marker = Performance.mark(`config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
@@ -433,11 +433,11 @@ export class Config implements IConfig {
       [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
-  public findCommand(id: string, opts: { must: true }): Command.Loadable
+  public findCommand(id: string, opts: { must: true }): Loadable
 
-  public findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
+  public findCommand(id: string, opts?: { must: boolean }): Loadable | undefined
 
-  public findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
+  public findCommand(id: string, opts: { must?: boolean } = {}): Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
@@ -468,7 +468,7 @@ export class Config implements IConfig {
    * @param argv string[] process.argv containing the flags and arguments provided by the user
    * @returns string[]
    */
-  public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
+  public findMatches(partialCmdId: string, argv: string[]): Loadable[] {
     const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
@@ -486,9 +486,9 @@ export class Config implements IConfig {
 
   /**
    * Returns an array of all commands. If flexible taxonomy is enabled then all permutations will be appended to the array.
-   * @returns Command.Loadable[]
+   * @returns Loadable[]
    */
-  public getAllCommands(): Command.Loadable[] {
+  public getAllCommands(): Loadable[] {
     const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
@@ -509,7 +509,7 @@ export class Config implements IConfig {
     return this.getAllCommands().map(c => c.id)
   }
 
-  public get commands(): Command.Loadable[] {
+  public get commands(): Loadable[] {
     return [...this._commands.values()]
   }
 
@@ -690,7 +690,7 @@ export class Config implements IConfig {
     return isProd()
   }
 
-  private isJitPluginCommand(c: Command.Loadable): boolean {
+  private isJitPluginCommand(c: Loadable): boolean {
     return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)
   }
 
@@ -790,9 +790,9 @@ export class Config implements IConfig {
    * plugin as discovered (will not change the order)
    *
    * @param commands commands to determine the priority of
-   * @returns command instance {Command.Loadable} or undefined
+   * @returns command instance {Loadable} or undefined
    */
-  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
+  private determinePriority(commands: Loadable[]): Loadable {
     const oclifPlugins = this.pjson.oclif?.plugins ?? []
     const commandPlugins = commands.sort((a, b) => {
       const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
@@ -895,8 +895,8 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Command.Cached> {
-  const flags = {} as {[k: string]: Command.Flag.Cached}
+export async function toCached(c: Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Cached> {
+  const flags = {} as {[k: string]: Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
     if (flag.type === 'boolean') {
@@ -949,7 +949,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
     }
   }
 
-  const args = {} as {[k: string]: Command.Arg.Cached}
+  const args = {} as {[k: string]: CommandArg.Cached}
   for (const [name, arg] of Object.entries(ensureArgObject(c.args))) {
     args[name] = {
       name,

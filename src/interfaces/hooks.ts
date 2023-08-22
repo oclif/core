@@ -1,4 +1,4 @@
-import {Command} from '../command'
+import {Class, Loadable} from '../command'
 import {Config} from './config'
 import {Plugin} from './plugin'
 
@@ -14,12 +14,12 @@ export interface Hooks {
     return: void;
   };
   prerun: {
-    options: { Command: Command.Class; argv: string[] };
+    options: { Command: Class; argv: string[] };
     return: void;
   };
   postrun: {
     options: {
-      Command: Command.Class;
+      Command: Class;
       result?: any;
       argv: string[];
     };
@@ -38,11 +38,11 @@ export interface Hooks {
     return: unknown;
   };
   'command_incomplete': {
-    options: {id: string; argv: string[], matches: Command.Loadable[]};
+    options: {id: string; argv: string[], matches: Loadable[]};
     return: unknown;
   };
   'jit_plugin_not_installed': {
-    options: {id: string; argv: string[]; command: Command.Loadable, pluginName: string; pluginVersion: string};
+    options: {id: string; argv: string[]; command: Loadable, pluginName: string; pluginVersion: string};
     return: unknown;
   };
   'plugins:preinstall': {

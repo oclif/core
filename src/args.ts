@@ -1,6 +1,6 @@
 import {URL} from 'url'
 import {Arg, ArgDefinition} from './interfaces/parser'
-import {Command} from './command'
+import Command from './command'
 import {dirExists, fileExists, isNotFalsy} from './util'
 
 /**

@@ -13,7 +13,7 @@ import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
-import {Command} from '../command'
+import {Class, Loadable, Cached} from '../command'
 import {Performance} from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -115,7 +115,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: Command.Loadable[]
+  commands!: Loadable[]
 
   hooks!: {[k: string]: string[]}
 
@@ -215,11 +215,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+  async findCommand(id: string, opts: {must: true}): Promise<Class>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
+  async findCommand(id: string, opts?: {must: boolean}): Promise<Class | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
     const fetch = async () => {
       if (!this.commandsDir) return
@@ -295,11 +295,11 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Command.Cached] => Boolean(f))
+      .filter((f): f is [string, Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: Command.Cached}),
+      }, {} as {[k: string]: Cached}),
     }
     marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
     marker?.stop()

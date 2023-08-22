@@ -1,7 +1,8 @@
 import * as semver from 'semver'
 
-import {Command} from './command'
-import {run, execute} from './main'
+import Command from './command'
+import run from './main'
+import execute from './execute'
 import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -11,14 +12,13 @@ import {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
-import {settings, Settings} from './settings'
+import settings, {Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
 import * as ux from './cli-ux'
 import {requireJson} from './util'
 import {stderr, stdout} from './cli-ux/stream'
 import {Performance} from './performance'
-
-const flush = ux.flush
+import flush from './cli-ux/flush'
 
 export {
   Args,
