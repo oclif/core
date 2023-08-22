@@ -3,6 +3,7 @@ import * as semver from 'semver'
 import Command from './command'
 import run from './main'
 import execute from './execute'
+import handle from './errors/handle'
 import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -17,7 +18,7 @@ import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help
 import * as ux from './cli-ux'
 import {requireJson} from './util'
 import {stderr, stdout} from './cli-ux/stream'
-import {Performance} from './performance'
+import Performance from './performance'
 import flush from './cli-ux/flush'
 
 export {
@@ -26,30 +27,31 @@ export {
   CommandHelp,
   Config,
   Errors,
+  execute,
   Flags,
-  loadHelpClass,
+  flush,
+  handle,
   Help,
   HelpBase,
   HelpSection,
-  HelpSectionRenderer,
   HelpSectionKeyValueTable,
+  HelpSectionRenderer,
   Hook,
   Interfaces,
+  loadHelpClass,
   Parser,
-  Plugin,
   Performance,
+  Plugin,
   run,
-  toCached,
-  tsPath,
-  toStandardizedId,
-  toConfiguredId,
   settings,
   Settings,
-  flush,
-  ux,
-  execute,
   stderr,
   stdout,
+  toCached,
+  toConfiguredId,
+  toStandardizedId,
+  tsPath,
+  ux,
 }
 
 function checkCWD() {

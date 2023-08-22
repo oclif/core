@@ -14,7 +14,7 @@ import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './u
 import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {Class, Loadable, Cached} from '../command'
-import {Performance} from '../performance'
+import Performance from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 

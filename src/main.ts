@@ -7,7 +7,7 @@ import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import {stdout} from './cli-ux/stream'
-import {Performance} from './performance'
+import Performance from './performance'
 
 const debug = require('debug')('oclif:main')
 

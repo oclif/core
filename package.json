@@ -100,7 +100,9 @@
     "./execute": "./lib/execute.js",
     "./flush": "./lib/cli-ux/flush.js",
     "./handle": "./lib/errors/handle.js",
+    "./help": "./lib/help/index.js",
     "./interfaces": "./lib/interfaces/index.js",
+    "./performance": "./lib/performance.js",
     "./run": "./lib/main.js",
     "./settings": "./lib/settings.js",
     "./ux": "./lib/cli-ux/index.js"
