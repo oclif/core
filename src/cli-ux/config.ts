@@ -3,7 +3,6 @@ import {PJSON} from '../interfaces/pjson'
 import {requireJson} from '../util'
 import spinner from './action/spinner'
 import simple from './action/spinner'
-import pride from './action/pride-spinner'
 import {ActionBase} from './action/base'
 
 const version = semver.parse(requireJson<PJSON>(__dirname, '..', '..', 'package.json').version)!
@@ -27,14 +26,11 @@ const actionType = (
 ) || 'simple'
 
 const Action = actionType === 'spinner' ? spinner : simple
-const PrideAction = actionType === 'spinner' ? pride : simple
 
 export class Config {
   outputLevel: Levels = 'info'
 
   action: ActionBase = new Action()
-
-  prideAction: ActionBase = new PrideAction()
 
   errorsHandled = false
 

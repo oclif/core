@@ -36,17 +36,13 @@ export class ux {
     return config.action
   }
 
-  public static get prideAction(): ActionBase {
-    return config.prideAction
-  }
-
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
-    this.info(styled.styledObject(obj, keys))
+    ux.info(styled.styledObject(obj, keys))
   }
 
   public static styledHeader(header: string): void {
-    this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
+    ux.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
@@ -74,13 +70,13 @@ export class ux {
   }
 
   public static trace(format: string, ...args: string[]): void {
-    if (this.config.outputLevel === 'trace') {
+    if (ux.config.outputLevel === 'trace') {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
-    if (['trace', 'debug'].includes(this.config.outputLevel)) {
+    if (['trace', 'debug'].includes(ux.config.outputLevel)) {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
@@ -90,15 +86,15 @@ export class ux {
   }
 
   public static log(format?: string, ...args: string[]): void {
-    this.info(format || '', ...args)
+    ux.info(format || '', ...args)
   }
 
   public static url(text: string, uri: string, params = {}): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
-      this.log(hyperlinker(text, uri, params))
+      ux.log(hyperlinker(text, uri, params))
     } else {
-      this.log(uri)
+      ux.log(uri)
     }
   }
 
@@ -106,9 +102,9 @@ export class ux {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
-      this.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
+      ux.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
     } else {
-      this.log(text)
+      ux.log(text)
     }
   }
 
@@ -127,7 +123,6 @@ const error = Errors.error
 const exit = Errors.exit
 const info = ux.info
 const log = ux.log
-const prideAction = ux.prideAction
 const progress = ux.progress
 const prompt = ux.prompt
 const styledHeader = ux.styledHeader
@@ -157,7 +152,6 @@ export {
   info,
   IPromptOptions,
   log,
-  prideAction,
   progress,
   prompt,
   styledHeader,
@@ -172,7 +166,7 @@ export {
   warn,
 }
 
-const cliuxProcessExitHandler = async () => {
+const uxProcessExitHandler = async () => {
   try {
     await ux.done()
   } catch (error) {
@@ -183,7 +177,7 @@ const cliuxProcessExitHandler = async () => {
 
 // to avoid MaxListenersExceededWarning
 // only attach named listener once
-const cliuxListener = process.listeners('exit').find(fn => fn.name === cliuxProcessExitHandler.name)
-if (!cliuxListener) {
-  process.once('exit', cliuxProcessExitHandler)
+const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExitHandler.name)
+if (!uxListener) {
+  process.once('exit', uxProcessExitHandler)
 }
