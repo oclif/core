@@ -6,7 +6,7 @@ import {Plugin as IPlugin} from '../../src/interfaces'
 
 import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
-import {Command} from '../../src/command'
+import Command, {Class, Loadable} from '../../src/command'
 
 interface Options {
   pjson?: any;
@@ -48,11 +48,11 @@ describe('Config with flexible taxonomy', () => {
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
-    const findCommand = async (): Promise<Command.Class> => {
+    const findCommand = async (): Promise<Class> => {
       return MyCommandClass
     }
 
-    const commandPluginA: Command.Loadable = {
+    const commandPluginA: Loadable = {
       strict: false,
       aliases: [],
       args: {},
@@ -61,13 +61,13 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[0],
-      async load(): Promise<Command.Class> {
+      async load(): Promise<Class> {
         return MyCommandClass
       },
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
     }
-    const commandPluginB: Command.Loadable = {
+    const commandPluginB: Loadable = {
       strict: false,
       aliases: [],
       args: {},
@@ -76,7 +76,7 @@ describe('Config with flexible taxonomy', () => {
       },
       hidden: false,
       id: commandIds[1],
-      async load(): Promise<Command.Class> {
+      async load(): Promise<Class> {
         return MyCommandClass
       },
       pluginType: types[1] ?? 'core',

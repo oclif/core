@@ -1,4 +1,4 @@
-import {Command} from '../../src'
+import Command, {Class} from '../../src/command'
 import {expect, test as base} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
@@ -9,12 +9,12 @@ import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
-  public formatCommands(commands: Command.Class[]) {
+  public formatCommands(commands: Class[]) {
     return super.formatCommands(commands)
   }
 }
 
-const formatCommands = (commands: Command.Class[]) => ({
+const formatCommands = (commands: Class[]) => ({
   run(ctx: {help: TestHelp; output: string}) {
     const help = ctx.help.formatCommands(commands)
     if (process.env.TEST_OUTPUT === '1') {

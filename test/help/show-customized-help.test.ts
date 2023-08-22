@@ -4,7 +4,8 @@ import * as path from 'path'
 
 import {CommandHelp, Help} from '../../src/help'
 import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
-import {Interfaces, Config, Command} from '../../src'
+import {Interfaces, Config} from '../../src'
+import {Class} from '../../src/command'
 import {monkeyPatchCommands} from './help-test-utils'
 
 const g: any = global
@@ -38,7 +39,7 @@ class TestHelp extends Help {
     this.opts.usageHeader = 'SYNOPSIS'
   }
 
-  summary(c: Command.Class): string {
+  summary(c: Class): string {
     // This will essentially ignore the summary
     return this.wrap(c.description || '')
   }

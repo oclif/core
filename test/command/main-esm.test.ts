@@ -2,7 +2,7 @@ import {expect, fancy} from 'fancy-test'
 import * as path from 'path'
 import * as url from 'url'
 
-import {run} from '../../src/main'
+import run from '../../src/main'
 
 // This tests file URL / import.meta.url simulation.
 const convertToFileURL = (filepath: string) => url.pathToFileURL(filepath).toString()
