@@ -90,6 +90,7 @@ describe('showHelp for root', () => {
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc, AppsCreate, AppsDestroy],
       topics: [],
     }])
@@ -121,6 +122,7 @@ COMMANDS
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc],
       topics: [],
     }])
@@ -151,6 +153,7 @@ describe('showHelp for a command', () => {
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate],
       topics: [AppsTopic],
     }])
@@ -180,6 +183,7 @@ CUSTOM
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc, AppsCreate, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }])

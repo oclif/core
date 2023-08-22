@@ -101,7 +101,7 @@ export interface Config {
    */
   npmRegistry?: string;
   userPJSON?: PJSON.User;
-  plugins: Plugin[];
+  plugins: Map<string, Plugin>;
   binPath?: string;
   /**
    * name of any bin aliases that will execute the cli

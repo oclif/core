@@ -83,11 +83,16 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{commands: Class[], topics: Interfaces.Topic[]}>) {
-  config.plugins = plugins
+export function monkeyPatchCommands(config: any, plugins: Array<{name: string, commands: Class[], topics: Interfaces.Topic[]}>) {
+  const pluginsMap = new Map()
+  for (const plugin of plugins) {
+    pluginsMap.set(plugin.name, plugin)
+  }
+
+  config.plugins = pluginsMap
   config._commands = new Map()
   config._topics = new Map()
-  for (const plugin of config.plugins) {
+  for (const plugin of config.plugins.values()) {
     config.loadCommands(plugin)
     config.loadTopics(plugin)
   }

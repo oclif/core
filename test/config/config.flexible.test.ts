@@ -120,7 +120,7 @@ describe('Config with flexible taxonomy', () => {
       tag: 'tag',
       moduleType: 'commonjs',
     }
-    const plugins: IPlugin[] = [pluginA, pluginB]
+    const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
 
     test = test.add('config', async () => {
       const config = await Config.load()
@@ -128,7 +128,7 @@ describe('Config with flexible taxonomy', () => {
       config.plugins = plugins
       config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
       config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
-      for (const plugin of config.plugins) {
+      for (const plugin of config.plugins.values()) {
         // @ts-expect-error private method
         config.loadCommands(plugin)
         // @ts-expect-error private method

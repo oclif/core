@@ -100,6 +100,7 @@ COMMANDS
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndex],
       topics: [],
     }])
@@ -129,6 +130,7 @@ describe('showHelp for a topic', () => {
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy],
       topics: [AppsTopic],
     }])
@@ -154,6 +156,7 @@ COMMANDS
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }])
@@ -182,6 +185,7 @@ COMMANDS
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy, AppsAdminIndex, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }])
@@ -210,6 +214,7 @@ COMMANDS
   .do(async ctx => {
     const config = ctx.config
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy, AppsAdminAdd, DbCreate],
       topics: [AppsTopic, AppsAdminTopic, DbTopic],
     }])
@@ -239,6 +244,7 @@ describe('showHelp for a command', () => {
   .do(async ctx => {
     const config = ctx.config
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate],
       topics: [AppsTopic],
     }])
@@ -264,6 +270,7 @@ DESCRIPTION
   .do(async ctx => {
     const config = ctx.config
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndex, AppsCreate, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }])

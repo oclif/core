@@ -87,7 +87,7 @@ export class Config implements IConfig {
   public npmRegistry?: string
   public pjson!: PJSON.CLI
   public platform!: PlatformTypes
-  public plugins: IPlugin[] = []
+  public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
   public topicSeparator: ':' | ' ' = ':'
@@ -139,7 +139,7 @@ export class Config implements IConfig {
     const plugin = new Plugin.Plugin({root: this.options.root})
     await plugin.load()
     Config._rootPlugin = plugin
-    this.plugins.push(plugin)
+    this.plugins.set(plugin.name, plugin)
     this.root = plugin.root
     this.pjson = plugin.pjson
     this.name = this.pjson.name
@@ -201,9 +201,9 @@ export class Config implements IConfig {
 
     debug('config done')
     marker?.addDetails({
-      plugins: this.plugins.length,
+      plugins: this.plugins.size,
       commandPermutations: this.commands.length,
-      commands: this.plugins.reduce((acc, p) => acc + p.commands.length, 0),
+      commands: [...this.plugins.values()].reduce((acc, p) => acc + p.commands.length, 0),
       topics: this.topics.length,
     })
     marker?.stop()
@@ -215,7 +215,7 @@ export class Config implements IConfig {
     await this.loadDevPlugins()
     await this.loadCorePlugins()
 
-    for (const plugin of this.plugins) {
+    for (const plugin of this.plugins.values()) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
@@ -291,7 +291,7 @@ export class Config implements IConfig {
       successes: [],
       failures: [],
     } as Hook.Result<Hooks[T]['return']>
-    const promises = this.plugins.map(async p => {
+    const promises = [...this.plugins.values()].map(async p => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -529,7 +529,7 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      pluginVersions: Object.fromEntries([...this.plugins.values()].map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
       osVersion: `${os.type()} ${os.release()}`,
       shell: this.shell,
       rootPath: this.root,
@@ -630,8 +630,8 @@ export class Config implements IConfig {
           name: instance.name,
         })
         pluginMarker?.stop()
-        if (this.plugins.find(p => p.name === instance.name)) return
-        this.plugins.push(instance)
+        if (this.plugins.has(instance.name)) return
+        this.plugins.set(instance.name, instance)
         if (parent) {
           instance.parent = parent
           if (!parent.children) parent.children = []
@@ -691,7 +691,8 @@ export class Config implements IConfig {
   }
 
   private isJitPluginCommand(c: Loadable): boolean {
-    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)
+    // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
+    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
   }
 
   private getCmdLookupId(id: string): string {
@@ -842,12 +843,13 @@ export class Config implements IConfig {
     */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
-      const idx = this.plugins.findIndex(p => p.name === plugin.name)
-      if (idx !== -1) {
-        // invalid plugin instance found in `this.plugins`
-        // replace with the oclif-compatible one
-        this.plugins.splice(idx, 1, plugin)
-      }
+      this.plugins.set(plugin.name, plugin)
+      // const idx = this.plugins.findIndex(p => p.name === plugin.name)
+      // if (idx !== -1) {
+      //   // invalid plugin instance found in `this.plugins`
+      //   // replace with the oclif-compatible one
+      //   this.plugins.splice(idx, 1, plugin)
+      // }
 
       this.loadCommands(plugin)
     }

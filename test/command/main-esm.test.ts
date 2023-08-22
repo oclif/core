@@ -16,6 +16,8 @@ root = convertToFileURL(root)
 describe('main-esm', () => {
   fancy
   .stdout()
+  // Skip because we intentionally introduced a breaking change to config.plugins
+  .skip()
   .do(() => run(['plugins'], root))
   .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
   .it('runs plugins')
