@@ -132,6 +132,7 @@ export interface Config {
   s3Url(key: string): string;
   s3Key(type: 'versioned' | 'unversioned', ext: '.tar.gz' | '.tar.xz', options?: Config.s3Key.Options): string;
   s3Key(type: keyof PJSON.S3.Templates, options?: Config.s3Key.Options): string;
+  getPluginsList(): Plugin[];
 }
 
 export namespace Config {

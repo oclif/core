@@ -429,7 +429,7 @@ export class Config implements IConfig {
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
-    return [this.bin, ...this.binAliases ?? []].map(alias =>
+    return [this.bin, ...this.binAliases ?? []].filter(alias => Boolean(alias)).map(alias =>
       [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
@@ -549,6 +549,10 @@ export class Config implements IConfig {
     const url = new URL(host)
     url.pathname = path.join(url.pathname, key)
     return url.toString()
+  }
+
+  public getPluginsList(): IPlugin[] {
+    return this.plugins
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {
