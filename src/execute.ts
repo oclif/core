@@ -13,7 +13,7 @@ import * as Interfaces from './interfaces'
  * @example For ESM dev.js
  * ```
  * #!/usr/bin/env node
- * (async () => {
+ * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: import.meta.url})
  * })()
@@ -22,7 +22,7 @@ import * as Interfaces from './interfaces'
  * @example For ESM run.js
  * ```
  * #!/usr/bin/env node
- * (async () => {
+ * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({dir: import.meta.url})
  * })()
@@ -31,7 +31,7 @@ import * as Interfaces from './interfaces'
  * @example For CJS dev.js
  * ```
  * #!/usr/bin/env node
- * (async () => {
+ * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: __dirname})
  * })()
@@ -40,7 +40,7 @@ import * as Interfaces from './interfaces'
  * @example For CJS run.js
  * ```
  * #!/usr/bin/env node
- * (async () => {
+ * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({dir: __dirname})
  * })()
