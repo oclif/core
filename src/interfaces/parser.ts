@@ -168,7 +168,7 @@ export type FlagProps = {
    * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
-  noCacheDefault: boolean;
+  noCacheDefault?: boolean;
 }
 
 export type ArgProps = {
@@ -194,7 +194,7 @@ export type ArgProps = {
    * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
-  noCacheDefault: boolean;
+  noCacheDefault?: boolean;
 }
 
 export type BooleanFlagProps = FlagProps & {

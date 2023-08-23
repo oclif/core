@@ -552,7 +552,7 @@ export class Config implements IConfig {
   }
 
   public getPluginsList(): IPlugin[] {
-    return this.plugins
+    return [...this.plugins.values()]
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {

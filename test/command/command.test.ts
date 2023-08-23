@@ -152,6 +152,7 @@ describe('command', () => {
             allowNo: false,
             type: 'boolean',
             delimiter: undefined,
+            noCacheDefault: undefined,
           },
           flagb: {
             aliases: undefined,
@@ -174,6 +175,7 @@ describe('command', () => {
             default: 'a',
             options: ['a', 'b'],
             delimiter: undefined,
+            noCacheDefault: undefined,
           },
           flagc: {
             aliases: undefined,
@@ -199,6 +201,7 @@ describe('command', () => {
             required: false,
             summary: undefined,
             type: 'option',
+            noCacheDefault: undefined,
           },
 
         },
@@ -210,6 +213,7 @@ describe('command', () => {
             required: true,
             options: ['af', 'b'],
             default: 'a',
+            noCacheDefault: undefined,
           },
         },
       })
