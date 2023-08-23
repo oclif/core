@@ -53,14 +53,17 @@ export default async function execute(
     loadOptions?: Interfaces.LoadOptions;
     development?: boolean;
   },
-): Promise<void> {
+): Promise<unknown> {
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins
     process.env.NODE_ENV = 'development'
     settings.debug = true
   }
 
-  await run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
-  .then(async () => flush())
+  return run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
+  .then(async result => {
+    flush()
+    return result
+  })
   .catch(async error => handle(error))
 }
