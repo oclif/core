@@ -844,24 +844,18 @@ export class Config implements IConfig {
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
       this.plugins.set(plugin.name, plugin)
-      // const idx = this.plugins.findIndex(p => p.name === plugin.name)
-      // if (idx !== -1) {
-      //   // invalid plugin instance found in `this.plugins`
-      //   // replace with the oclif-compatible one
-      //   this.plugins.splice(idx, 1, plugin)
-      // }
-
       this.loadCommands(plugin)
     }
   }
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingManifest = false) => {
-  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, respectNoCacheDefault: boolean) => {
+  if (respectNoCacheDefault && flag.noCacheDefault) return
+  // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
-      return await flag.defaultHelp({options: flag, flags: {}}, isWritingManifest)
+      return await flag.defaultHelp({options: flag, flags: {}})
     } catch {
       return
     }
@@ -870,18 +864,19 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingMa
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: flag, flags: {}}, isWritingManifest)
+      return await flag.default({options: flag, flags: {}})
     } catch {}
   } else {
     return flag.default
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Promise<any> => {
-  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
+  if (respectNoCacheDefault && arg.noCacheDefault) return
+  // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
-      return await arg.defaultHelp({options: arg, flags: {}}, isWritingManifest)
+      return await arg.defaultHelp({options: arg, flags: {}})
     } catch {
       return
     }
@@ -890,14 +885,14 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: arg, flags: {}}, isWritingManifest)
+      return await arg.default({options: arg, flags: {}})
     } catch {}
   } else {
     return arg.default
   }
 }
 
-export async function toCached(c: Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Cached> {
+export async function toCached(c: Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Cached> {
   const flags = {} as {[k: string]: Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
@@ -920,6 +915,7 @@ export async function toCached(c: Class, plugin?: IPlugin | undefined, isWriting
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
     } else {
       flags[name] = {
@@ -938,11 +934,12 @@ export async function toCached(c: Class, plugin?: IPlugin | undefined, isWriting
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, isWritingManifest),
+        default: await defaultFlagToCached(flag, respectNoCacheDefault),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
       // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
       if (typeof flag.defaultHelp === 'function') {
@@ -958,8 +955,9 @@ export async function toCached(c: Class, plugin?: IPlugin | undefined, isWriting
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg, isWritingManifest),
+      default: await defaultArgToCached(arg, respectNoCacheDefault),
       hidden: arg.hidden,
+      noCacheDefault: arg.noCacheDefault,
     }
   }
 

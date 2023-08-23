@@ -9,6 +9,7 @@ export interface PluginOptions {
   tag?: string;
   ignoreManifest?: boolean;
   errorOnManifestCreate?: boolean;
+  respectNoCacheDefault?: boolean;
   parent?: Plugin;
   children?: Plugin[];
 }
@@ -77,5 +78,5 @@ export interface Plugin {
 
   findCommand(id: string, opts: { must: true }): Promise<Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Class> | undefined;
-  load(isWritingManifest: boolean): Promise<void>;
+  load(): Promise<void>;
 }
