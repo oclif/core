@@ -609,7 +609,7 @@ export class Config implements IConfig {
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
       try {
-        const opts: Options = {type, root}
+        const opts: Options = {type, root, flexibleTaxonomy: this.flexibleTaxonomy}
         if (typeof plugin === 'string') {
           opts.name = plugin
         } else {
@@ -710,6 +710,7 @@ export class Config implements IConfig {
   private loadCommands(plugin: IPlugin) {
     const marker = Performance.mark(`config.loadCommands#${plugin.name}`, {plugin: plugin.name})
     for (const command of plugin.commands) {
+      // set canonical command id
       if (this._commands.has(command.id)) {
         const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
         this._commands.set(prioritizedCommand.id, prioritizedCommand)
@@ -717,11 +718,12 @@ export class Config implements IConfig {
         this._commands.set(command.id, command)
       }
 
-      const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(command.id) : [command.id]
-      for (const permutation of permutations) {
+      // set every permutation
+      for (const permutation of command.permutations ?? [command.id]) {
         this.commandPermutations.add(permutation, command.id)
       }
 
+      // set command aliases
       for (const alias of command.aliases ?? []) {
         if (this._commands.has(alias)) {
           const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
@@ -730,8 +732,8 @@ export class Config implements IConfig {
           this._commands.set(alias, {...command, id: alias})
         }
 
-        const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
-        for (const permutation of aliasPermutations) {
+        // set every permutation of the aliases
+        for (const permutation of command.aliasPermutations ?? [alias]) {
           this.commandPermutations.add(permutation, command.id)
         }
       }

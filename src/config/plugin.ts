@@ -5,7 +5,7 @@ import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {toCached} from './config'
-import {Debug} from './util'
+import {Debug, getCommandIdPermutations} from './util'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
@@ -131,6 +131,8 @@ export class Plugin implements IPlugin {
 
   private _commandsDir!: string | undefined
 
+  private flexibleTaxonomy!: boolean
+
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
@@ -138,11 +140,6 @@ export class Plugin implements IPlugin {
 
   constructor(public options: PluginOptions) {}
 
-  /**
-   * Loads a plugin
-   * default is false to maintain backwards compatibility
-   * @returns Promise<void>
-   */
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
@@ -151,6 +148,7 @@ export class Plugin implements IPlugin {
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json'))
+    this.flexibleTaxonomy = this.options.flexibleTaxonomy ?? this.pjson.oclif.flexibleTaxonomy ?? false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
@@ -291,7 +289,14 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)]
+          const cached = await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+          if (this.flexibleTaxonomy) {
+            const permutations = getCommandIdPermutations(id)
+            const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
+            return [id, {...cached, permutations, aliasPermutations} as Cached]
+          }
+
+          return [id, cached]
         } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)

@@ -12,6 +12,7 @@ export interface PluginOptions {
   respectNoCacheDefault?: boolean;
   parent?: Plugin;
   children?: Plugin[];
+  flexibleTaxonomy?: boolean;
 }
 
 export interface Options extends PluginOptions {

@@ -432,6 +432,8 @@ export type Cached = {
   flags: {[name: string]: Flag.Cached};
   args: {[name: string]: Arg.Cached};
   hasDynamicHelp?: boolean;
+  permutations?: string[]
+  aliasPermutations?: string[];
 }
 
 export type Flag = CompletableFlag<any>
