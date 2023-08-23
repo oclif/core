@@ -98,9 +98,11 @@
   "license": "MIT",
   "exports": {
     ".": "./lib/index.js",
+    "./args": "./lib/args.js",
     "./command": "./lib/command.js",
     "./errors": "./lib/errors/index.js",
     "./execute": "./lib/execute.js",
+    "./flags": "./lib/flags.js",
     "./flush": "./lib/cli-ux/flush.js",
     "./handle": "./lib/errors/handle.js",
     "./help": "./lib/help/index.js",
