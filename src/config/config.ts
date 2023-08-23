@@ -544,6 +544,10 @@ export class Config implements IConfig {
     return url.toString()
   }
 
+  public getPluginsList(): IPlugin[] {
+    return this.plugins
+  }
+
   protected dir(category: 'cache' | 'data' | 'config'): string {
     const base = process.env[`XDG_${category.toUpperCase()}_HOME`] ||
       (this.windows && process.env.LOCALAPPDATA) ||
