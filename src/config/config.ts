@@ -113,7 +113,9 @@ export class Config implements IConfig {
 
   private _commandIDs!: string[]
 
-  constructor(public options: Options) {}
+  constructor(public options: Options) {
+    if (options.config) Object.assign(this, options.config)
+  }
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -137,9 +139,7 @@ export class Config implements IConfig {
        */
       if (lt(incomingConfigBase, currentConfigBase)) {
         debug(`reloading config from ${opts._base} to ${BASE}`)
-        const config = new Config({...opts.options, config: opts})
-        await config.load()
-        return config
+        return new Config({...opts.options, config: opts})
       }
 
       return opts
@@ -152,10 +152,7 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
-    if (this.options.config) {
-      Object.assign(this, this.options.config)
-      return
-    }
+    if (this.options.config) return
 
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const plugin = new Plugin.Plugin({root: this.options.root})
