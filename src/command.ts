@@ -223,6 +223,7 @@ export abstract class Command {
   }
 
   protected async _run<T>(): Promise<T> {
+    await this.reloadConfig(this.config)
     let err: Error | undefined
     let result: T | undefined
     try {
@@ -401,6 +402,23 @@ export abstract class Command {
     }
 
     keys.map(key => delete process.env[key])
+  }
+
+  /**
+   * Reload the Config based on the version required by the command.
+   * This is needed because the command is given the Config instantiated
+   * by the root plugin, which may be a different version than the one
+   * required by the command.
+   *
+   * Doing this ensures that the command can freely use any method on Config that
+   * exists in the version of Config required by the command but may not exist on the
+   * root's instance of Config.
+   *
+   * @param config The Config to reload.
+   * @returns void
+   */
+  private async reloadConfig(config: Config): Promise<void> {
+    this.config = await Config.load(config, true)
   }
 }
 
