@@ -61,7 +61,6 @@ async function findSourcesRoot(root: string) {
  * https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
 async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
-  console.log(name)
   for (const next of up(root)) {
     let cur
     if (name) {
