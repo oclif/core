@@ -61,6 +61,7 @@ async function findSourcesRoot(root: string) {
  * https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
 async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
+  console.log(name)
   for (const next of up(root)) {
     let cur
     if (name) {
@@ -143,8 +144,10 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-    const root = await findRoot(this.options.name, this.options.root)
-    if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
+    const root = this.type === 'link' ?
+      this.options.root :
+      await findRoot(this.options.name, this.options.root)
+    if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json'))
@@ -153,7 +156,7 @@ export class Plugin implements IPlugin {
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
-    if (!this.name) throw new Error(`no name in ${pjsonPath}`)
+    if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
