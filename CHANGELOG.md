@@ -1,3 +1,12 @@
+## [2.11.11](https://github.com/oclif/core/compare/2.11.10...2.11.11) (2023-08-28)
+
+
+### Bug Fixes
+
+* use configured help class in --help ([#768](https://github.com/oclif/core/issues/768)) ([b6c69f1](https://github.com/oclif/core/commit/b6c69f1f4f1760aee119ae660128ac45d59c828e))
+
+
+
 ## [2.11.10](https://github.com/oclif/core/compare/2.11.9...2.11.10) (2023-08-23)
 
 
