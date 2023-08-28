@@ -94,7 +94,6 @@ async function findRoot(name: string | undefined, root: string) {
 }
 
 export class Plugin implements IPlugin {
-  // static loadedPlugins: {[name: string]: Plugin} = {}
   _base = `${_pjson.name}@${_pjson.version}`
 
   name!: string
@@ -214,11 +213,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<Class>
+  public async findCommand(id: string, opts: {must: true}): Promise<Class>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<Class | undefined>
+  public async findCommand(id: string, opts?: {must: boolean}): Promise<Class | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Class | undefined> {
+  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
     const fetch = async () => {
       if (!this.commandsDir) return
@@ -252,7 +251,7 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
-  protected async _manifest(): Promise<Manifest> {
+  private async _manifest(): Promise<Manifest> {
     const ignoreManifest = Boolean(this.options.ignoreManifest)
     const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
     const respectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
@@ -316,7 +315,7 @@ export class Plugin implements IPlugin {
     return manifest
   }
 
-  protected warn(err: string | Error | CLIError, scope?: string): void {
+  private warn(err: string | Error | CLIError, scope?: string): void {
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))
