@@ -1,3 +1,12 @@
+# [2.12.0](https://github.com/oclif/core/compare/2.11.11...2.12.0) (2023-08-28)
+
+
+### Features
+
+* reload Config before running command ([#770](https://github.com/oclif/core/issues/770)) ([efd1f54](https://github.com/oclif/core/commit/efd1f546079d5d0c9abe26df372ab657cfd389b0))
+
+
+
 ## [2.11.11](https://github.com/oclif/core/compare/2.11.10...2.11.11) (2023-08-28)
 
 
