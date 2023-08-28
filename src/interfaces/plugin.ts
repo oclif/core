@@ -9,6 +9,7 @@ export interface PluginOptions {
   tag?: string;
   ignoreManifest?: boolean;
   errorOnManifestCreate?: boolean;
+  respectNoCacheDefault?: boolean;
   parent?: Plugin;
   children?: Plugin[];
 }

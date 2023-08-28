@@ -911,6 +911,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
     } else {
       flags[name] = {
@@ -934,6 +935,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
       // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
       if (typeof flag.defaultHelp === 'function') {
@@ -951,6 +953,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
       options: arg.options,
       default: await defaultArgToCached(arg, isWritingManifest),
       hidden: arg.hidden,
+      noCacheDefault: arg.noCacheDefault,
     }
   }
 

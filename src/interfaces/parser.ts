@@ -226,6 +226,11 @@ export type FlagProps = {
    * separate on spaces.
    */
   delimiter?: ',',
+  /**
+   * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
+   * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
+   */
+  noCacheDefault?: boolean;
 }
 
 export type ArgProps = {
@@ -247,6 +252,11 @@ export type ArgProps = {
 
   options?: string[];
   ignoreStdin?: boolean;
+  /**
+   * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
+   * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
+   */
+  noCacheDefault?: boolean;
 }
 
 export type BooleanFlagProps = FlagProps & {

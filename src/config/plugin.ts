@@ -166,7 +166,7 @@ export class Plugin implements IPlugin {
 
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
 
-    this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate), isWritingManifest)
+    this.manifest = await this._manifest(isWritingManifest)
     this.commands = Object
     .entries(this.manifest.commands)
     .map(([id, c]) => ({
@@ -250,7 +250,11 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
-  protected async _manifest(ignoreManifest: boolean, errorOnManifestCreate = false, isWritingManifest = false): Promise<Manifest> {
+  protected async _manifest(isWritingManifest = false): Promise<Manifest> {
+    const ignoreManifest = Boolean(this.options.ignoreManifest)
+    const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
+    const respectNoCacheDefault = isWritingManifest ?? Boolean(this.options.respectNoCacheDefault)
+
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
         const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
@@ -285,7 +289,7 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, await toCached(await this.findCommand(id, {must: true}), this, isWritingManifest)]
+          return [id, await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)]
         } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
