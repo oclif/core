@@ -609,15 +609,19 @@ export class Config implements IConfig {
     debug('loading plugins', plugins)
     await Promise.all((plugins || []).map(async plugin => {
       try {
-        const opts: Options = {type, root, flexibleTaxonomy: this.flexibleTaxonomy}
-        if (typeof plugin === 'string') {
-          opts.name = plugin
-        } else {
-          opts.name = plugin.name || opts.name
+        const name = typeof plugin === 'string' ? plugin : plugin.name!
+        const opts: Options = {
+          name,
+          type,
+          root,
+          flexibleTaxonomy: this.flexibleTaxonomy,
+        }
+        if (typeof plugin !== 'string') {
           opts.tag = plugin.tag || opts.tag
           opts.root = plugin.root || opts.root
         }
 
+        if (this.plugins.has(name)) return
         const pluginMarker = Performance.mark(`plugin.load#${opts.name!}`)
         const instance = new Plugin.Plugin(opts)
         await instance.load()
@@ -630,7 +634,7 @@ export class Config implements IConfig {
           name: instance.name,
         })
         pluginMarker?.stop()
-        if (this.plugins.has(instance.name)) return
+
         this.plugins.set(instance.name, instance)
         if (parent) {
           instance.parent = parent
