@@ -20,11 +20,13 @@ import {Performance} from '../performance'
 import {settings} from '../settings'
 import {userInfo as osUserInfo} from 'node:os'
 import {sep} from 'node:path'
+import {lt} from 'semver'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const BASE = `${_pjson.name}@${_pjson.version}`
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
@@ -69,7 +71,7 @@ class Permutations extends Map<string, Set<string>> {
 }
 
 export class Config implements IConfig {
-  private _base = `${_pjson.name}@${_pjson.version}`
+  private _base = BASE
 
   public arch!: ArchTypes
   public bin!: string
@@ -111,7 +113,9 @@ export class Config implements IConfig {
 
   private _commandIDs!: string[]
 
-  constructor(public options: Options) {}
+  constructor(public options: Options) {
+    if (options.config) Object.assign(this, options.config)
+  }
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -120,7 +124,26 @@ export class Config implements IConfig {
     }
 
     if (typeof opts === 'string') opts = {root: opts}
-    if (isConfig(opts)) return opts
+    if (isConfig(opts)) {
+      const currentConfigBase = BASE.replace('@oclif/core@', '')
+      const incomingConfigBase = opts._base.replace('@oclif/core@', '')
+      /**
+       * Reload the Config based on the version required by the command.
+       * This is needed because the command is given the Config instantiated
+       * by the root plugin, which may be a different version than the one
+       * required by the command.
+       *
+       * Doing this ensures that the command can freely use any method on Config that
+       * exists in the version of Config required by the command but may not exist on the
+       * root's instance of Config.
+       */
+      if (lt(incomingConfigBase, currentConfigBase)) {
+        debug(`reloading config from ${opts._base} to ${BASE}`)
+        return new Config({...opts.options, config: opts})
+      }
+
+      return opts
+    }
 
     const config = new Config(opts)
     await config.load()
@@ -129,6 +152,8 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
+    if (this.options.config) return
+
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const plugin = new Plugin.Plugin({root: this.options.root})
     await plugin.load()

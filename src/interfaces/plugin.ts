@@ -1,3 +1,4 @@
+import {Config} from './config'
 import {Command} from '../command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
@@ -20,6 +21,7 @@ export interface Options extends PluginOptions {
   channel?: string;
   version?: string;
   enablePerf?: boolean;
+  config?: Config
 }
 
 export interface Plugin {
