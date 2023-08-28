@@ -150,7 +150,7 @@ export class Plugin implements IPlugin {
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json'))
-    this.flexibleTaxonomy = this.options.flexibleTaxonomy ?? this.pjson.oclif.flexibleTaxonomy ?? false
+    this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name

@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 import * as chalk from 'chalk'
 import {format, inspect} from 'util'
-import {ux} from './cli-ux'
+import ux from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'

@@ -14,7 +14,7 @@ import flush from './flush'
 
 const hyperlinker = require('hyperlinker')
 
-export class ux {
+export default class ux {
   public static config: Config = config
 
   public static get prompt(): typeof uxPrompt.prompt {
@@ -38,11 +38,11 @@ export class ux {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
-    ux.info(styled.styledObject(obj, keys))
+    this.log(styled.styledObject(obj, keys))
   }
 
   public static styledHeader(header: string): void {
-    ux.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
+    this.log(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
@@ -86,15 +86,15 @@ export class ux {
   }
 
   public static log(format?: string, ...args: string[]): void {
-    ux.info(format || '', ...args)
+    this.info(format || '', ...args)
   }
 
   public static url(text: string, uri: string, params = {}): void {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
-      ux.log(hyperlinker(text, uri, params))
+      this.log(hyperlinker(text, uri, params))
     } else {
-      ux.log(uri)
+      this.log(uri)
     }
   }
 
@@ -102,68 +102,36 @@ export class ux {
     const supports = require('supports-hyperlinks')
     if (supports.stdout) {
       // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
-      ux.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
+      this.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
     } else {
-      ux.log(text)
+      this.log(text)
     }
   }
 
   public static async flush(ms = 10_000): Promise<void> {
     await flush(ms)
   }
+
+  public static error(err: Error | string, options: {code?: string; exit?: number} = {}): never {
+    throw Errors.error(err, options)
+  }
+
+  public static exit(code = 0): never {
+    throw Errors.exit(code)
+  }
+
+  public static warn(err: Error | string): void {
+    Errors.warn(err)
+  }
 }
 
-const action = ux.action
-const annotation = ux.annotation
-const anykey = ux.anykey
-const confirm = ux.confirm
-const debug = ux.debug
-const done = ux.done
-const error = Errors.error
-const exit = Errors.exit
-const info = ux.info
-const log = ux.log
-const progress = ux.progress
-const prompt = ux.prompt
-const styledHeader = ux.styledHeader
-const styledJSON = ux.styledJSON
-const styledObject = ux.styledObject
-const table = ux.table
-const trace = ux.trace
-const tree = ux.tree
-const url = ux.url
-const wait = ux.wait
-const warn = Errors.warn
-
 export {
-  action,
   ActionBase,
-  annotation,
-  anykey,
   config,
   Config,
-  confirm,
-  debug,
-  done,
-  error,
-  exit,
   ExitError,
-  flush,
-  info,
   IPromptOptions,
-  log,
-  progress,
-  prompt,
-  styledHeader,
-  styledJSON,
-  styledObject,
-  table,
   Table,
-  trace,
-  tree,
-  url,
-  wait,
-  warn,
 }
 
 const uxProcessExitHandler = async () => {
