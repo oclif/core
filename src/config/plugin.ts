@@ -253,7 +253,7 @@ export class Plugin implements IPlugin {
   protected async _manifest(isWritingManifest = false): Promise<Manifest> {
     const ignoreManifest = Boolean(this.options.ignoreManifest)
     const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
-    const respectNoCacheDefault = isWritingManifest ?? Boolean(this.options.respectNoCacheDefault)
+    const respectNoCacheDefault = isWritingManifest || Boolean(this.options.respectNoCacheDefault)
 
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
