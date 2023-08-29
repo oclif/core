@@ -11,7 +11,9 @@ base library for oclif CLIs
 Migrating
 =====
 
-See the [migration guide](./MIGRATION.md) for an overview of breaking changes that occurred between v1 and v2.
+See the [v2 migration guide](./guides/V2_MIGRATION.md) for an overview of breaking changes that occurred between v1 and v2.
+
+See the [v3 migration guide](./guides/V3_MIGRATION.md) for an overview of breaking changes that occurred between v2 and v3.
 
 CLI UX
 =====
@@ -28,7 +30,7 @@ You can, however, use `@oclif/core` in a standalone script like this:
 #!/usr/bin/env ts-node
 
 import * as fs from 'fs'
-import {Command, Flags} from '@oclif/core'
+import {Command, Flags, flush, handle} from '@oclif/core'
 
 class LS extends Command {
   static description = 'List the files in a directory.'
@@ -50,10 +52,10 @@ class LS extends Command {
   }
 }
 
-LS.run().then(() => {
-  require('@oclif/core/flush')
-}, () => {
-  require('@oclif/core/handle')
+LS.run().then(async () => {
+  await flush()
+}, async (err) => {
+  await handle(err)
 })
 ```
 
