@@ -33,6 +33,8 @@ In order to support ESM and CommonJS plugin interoperability you will need to up
 
 [ESM Template](https://github.com/oclif/hello-world-esm/tree/main/bin)
 
+**You will also need to update any references to the bin scripts to include the .js extension.**
+
 If you'd like to migrate your plugin to ESM, please read our guide [here](https://oclif.io/docs/esm)
 
 ### `Config.plugins`
