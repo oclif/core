@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 
-import ux from '../../../src/cli-ux'
+import ux from '../../../src/ux'
 import * as screen from '../../../src/screen'
 
 /* eslint-disable camelcase */

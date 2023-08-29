@@ -16,7 +16,7 @@ See the [migration guide](./MIGRATION.md) for an overview of breaking changes th
 CLI UX
 =====
 
-The [ux README](./src/cli-ux/README.md) contains detailed usage examples of using the `ux` export.
+The [ux README](./src/ux/README.md) contains detailed usage examples of using the `ux` export.
 
 Usage
 =====

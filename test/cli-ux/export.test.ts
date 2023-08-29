@@ -1,4 +1,4 @@
-import ux, {Table, IPromptOptions, Config, ActionBase, ExitError} from '../../src/cli-ux'
+import ux, {Table, IPromptOptions, Config, ActionBase, ExitError} from '../../src/ux'
 import {expect} from 'chai'
 
 type MyColumns = Record<string, unknown>
@@ -6,7 +6,7 @@ const options: Table.table.Options = {}
 const columns: Table.table.Columns<MyColumns> = {}
 const iPromptOptions: IPromptOptions = {}
 
-describe('cli-ux exports', () => {
+describe('ux exports', () => {
   it('should have exported members on par with old cli-ux module', () => {
     expect(options).to.be.ok
     expect(columns).to.be.ok

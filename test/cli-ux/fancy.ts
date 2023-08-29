@@ -2,7 +2,7 @@ import {expect, fancy as base, FancyTypes} from 'fancy-test'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import ux from '../../src/cli-ux'
+import ux from '../../src/ux'
 
 export {
   expect,

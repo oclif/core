@@ -2,7 +2,7 @@ import {expect} from 'chai'
 
 import {stdout} from '../../../src'
 import {stub, SinonStub} from 'sinon'
-import ux from '../../../src/cli-ux'
+import ux from '../../../src/ux'
 
 describe('styled/header', () => {
   let writeStub: SinonStub

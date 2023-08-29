@@ -1,5 +1,5 @@
 import settings from './settings'
-import flush from './cli-ux/flush'
+import flush from './ux/flush'
 import handle from './errors/handle'
 import run from './main'
 import * as Interfaces from './interfaces'

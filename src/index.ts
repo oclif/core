@@ -15,11 +15,11 @@ import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
 import settings, {Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
-import ux from './cli-ux'
+import ux from './ux'
 import {requireJson} from './util'
-import {stderr, stdout} from './cli-ux/stream'
+import {stderr, stdout} from './ux/stream'
 import Performance from './performance'
-import flush from './cli-ux/flush'
+import flush from './ux/flush'
 
 export {
   Args,
