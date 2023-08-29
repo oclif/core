@@ -142,9 +142,7 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-    const root = this.type === 'link' ?
-      this.options.root :
-      await findRoot(this.options.name, this.options.root)
+    const root = await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
