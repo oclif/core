@@ -101,6 +101,7 @@
     ".": "./lib/index.js",
     "./args": "./lib/args.js",
     "./command": "./lib/command.js",
+    "./config": "./lib/config/index.js",
     "./errors": "./lib/errors/index.js",
     "./execute": "./lib/execute.js",
     "./flags": "./lib/flags.js",

@@ -3,8 +3,7 @@ import * as url from 'url'
 import * as fs from 'fs-extra'
 
 import {ModuleLoadError} from './errors'
-import {Config as IConfig} from './interfaces'
-import {Plugin as IPlugin} from './interfaces'
+import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {tsPath} from './config'
 
 const getPackageType = require('get-package-type')
