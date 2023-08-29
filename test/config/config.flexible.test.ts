@@ -7,6 +7,7 @@ import {Plugin as IPlugin} from '../../src/interfaces'
 import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
 import Command, {Class, Loadable} from '../../src/command'
+import {getCommandIdPermutations} from '../../src/config/util'
 
 interface Options {
   pjson?: any;
@@ -66,6 +67,7 @@ describe('Config with flexible taxonomy', () => {
       },
       pluginType: types[0] ?? 'core',
       pluginAlias: '@My/plugina',
+      permutations: getCommandIdPermutations(commandIds[0]),
     }
     const commandPluginB: Loadable = {
       strict: false,
@@ -81,6 +83,7 @@ describe('Config with flexible taxonomy', () => {
       },
       pluginType: types[1] ?? 'core',
       pluginAlias: '@My/pluginb',
+      permutations: getCommandIdPermutations(commandIds[1]),
     }
     const hooks = {}
     const pluginA: IPlugin = {

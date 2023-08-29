@@ -27,6 +27,7 @@ describe('util', () => {
     test
     .it('loads help class defined in pjson.oclif.helpClass', async () => {
       config.pjson.oclif.helpClass = '../test/help/_test-help-class'
+      // @ts-expect-error readonly property
       config.root = resolve(__dirname, '..')
 
       expect(configuredHelpClass).to.not.be.undefined

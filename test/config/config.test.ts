@@ -64,7 +64,9 @@ describe('Config', () => {
           // Config.load reads the package.json to determine the version and channel
           // In order to allow prerelease branches to pass, we need to strip the prerelease
           // tag from the version and switch the channel to stable.
+          // @ts-expect-error because readonly property
           config.version = config.version.replace(/-beta\.\d/g, '')
+          // @ts-expect-error because readonly property
           config.channel = 'stable'
 
           // eslint-disable-next-line prefer-const

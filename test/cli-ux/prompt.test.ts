@@ -2,7 +2,7 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-import {ux} from '../../src'
+import ux from '../../src/cli-ux'
 
 import {fancy} from './fancy'
 
