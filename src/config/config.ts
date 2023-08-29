@@ -114,7 +114,21 @@ export class Config implements IConfig {
   private _commandIDs!: string[]
 
   constructor(public options: Options) {
-    if (options.config) Object.assign(this, options.config)
+    if (options.config) {
+      if (Array.isArray(options.config.plugins) && Array.isArray(this.plugins)) {
+        // incoming config is v2 with plugins array and this config is v2 with plugins array
+        Object.assign(this, options.config)
+      } else if (Array.isArray(options.config.plugins) && !Array.isArray(this.plugins)) {
+        // incoming config is v2 with plugins array and this config is v3 with plugin Map
+        Object.assign(this, options.config, {plugins: new Map(options.config.plugins.map(p => [p.name, p]))})
+      } else if (!Array.isArray(options.config.plugins) && Array.isArray(this.plugins)) {
+        // incoming config is v3 with plugin Map and this config is v2 with plugins array
+        Object.assign(this, options.config, {plugins: options.config.getPluginsList()})
+      } else {
+        // incoming config is v3 with plugin Map and this config is v3 with plugin Map
+        Object.assign(this, options.config)
+      }
+    }
   }
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
