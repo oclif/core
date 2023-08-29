@@ -1,3 +1,12 @@
+# [2.13.0](https://github.com/oclif/core/compare/2.12.0...2.13.0) (2023-08-29)
+
+
+### Features
+
+* forwards compatibility for config reload ([#773](https://github.com/oclif/core/issues/773)) ([b751bbe](https://github.com/oclif/core/commit/b751bbecbbd25ebe56ef12f462f4f02e626e804b))
+
+
+
 # [2.12.0](https://github.com/oclif/core/compare/2.11.11...2.12.0) (2023-08-28)
 
 
