@@ -1,4 +1,3 @@
-import {Config} from './config'
 import {Command} from '../command'
 import {PJSON} from './pjson'
 import {Topic} from './topic'
@@ -21,7 +20,7 @@ export interface Options extends PluginOptions {
   channel?: string;
   version?: string;
   enablePerf?: boolean;
-  config?: Config
+  plugins?: Plugin[];
 }
 
 export interface Plugin {
@@ -75,5 +74,5 @@ export interface Plugin {
 
   findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
-  load(isWritingManifest: boolean): Promise<void>;
+  load(isWritingManifest?: boolean): Promise<void>;
 }

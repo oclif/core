@@ -8,8 +8,7 @@ import {format} from 'util'
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
+import {Debug, compact, collectUsableIds, getCommandIdPermutations} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
@@ -20,7 +19,7 @@ import {Performance} from '../performance'
 import {settings} from '../settings'
 import {userInfo as osUserInfo} from 'node:os'
 import {sep} from 'node:path'
-import {lt} from 'semver'
+import PluginLoader from './plugin-loader'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -112,24 +111,10 @@ export class Config implements IConfig {
   private _topics = new Map<string, Topic>()
 
   private _commandIDs!: string[]
+  private pluginLoader!: PluginLoader
+  private rootPlugin!: IPlugin
 
-  constructor(public options: Options) {
-    if (options.config) {
-      if (Array.isArray(options.config.plugins) && Array.isArray(this.plugins)) {
-        // incoming config is v2 with plugins array and this config is v2 with plugins array
-        Object.assign(this, options.config)
-      } else if (Array.isArray(options.config.plugins) && !Array.isArray(this.plugins)) {
-        // incoming config is v2 with plugins array and this config is v3 with plugin Map
-        Object.assign(this, options.config, {plugins: new Map(options.config.plugins.map(p => [p.name, p]))})
-      } else if (!Array.isArray(options.config.plugins) && Array.isArray(this.plugins)) {
-        // incoming config is v3 with plugin Map and this config is v2 with plugins array
-        Object.assign(this, options.config, {plugins: options.config.getPluginsList()})
-      } else {
-        // incoming config is v3 with plugin Map and this config is v3 with plugin Map
-        Object.assign(this, options.config)
-      }
-    }
-  }
+  constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -139,8 +124,6 @@ export class Config implements IConfig {
 
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) {
-      const currentConfigBase = BASE.replace('@oclif/core@', '')
-      const incomingConfigBase = opts._base.replace('@oclif/core@', '')
       /**
        * Reload the Config based on the version required by the command.
        * This is needed because the command is given the Config instantiated
@@ -151,9 +134,11 @@ export class Config implements IConfig {
        * exists in the version of Config required by the command but may not exist on the
        * root's instance of Config.
        */
-      if (lt(incomingConfigBase, currentConfigBase)) {
+      if (BASE !== opts._base) {
         debug(`reloading config from ${opts._base} to ${BASE}`)
-        return new Config({...opts.options, config: opts})
+        const config = new Config({...opts.options, plugins: opts.plugins})
+        await config.load()
+        return config
       }
 
       return opts
@@ -166,18 +151,15 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
-    if (this.options.config) return
-
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
-    const plugin = new Plugin.Plugin({root: this.options.root})
-    await plugin.load()
-    this.plugins.push(plugin)
-    this.root = plugin.root
-    this.pjson = plugin.pjson
+    this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
+    this.rootPlugin = await this.pluginLoader.loadRoot()
+    this.root = this.rootPlugin.root
+    this.pjson = this.rootPlugin.pjson
     this.name = this.pjson.name
     this.version = this.options.version || this.pjson.version || '0.0.0'
     this.channel = this.options.channel || channelFromVersion(this.version)
-    this.valid = plugin.valid
+    this.valid = this.rootPlugin.valid
 
     this.arch = (os.arch() === 'ia32' ? 'x86' : os.arch() as any)
     this.platform = WSL ? 'wsl' : os.platform() as any
@@ -241,54 +223,27 @@ export class Config implements IConfig {
     marker?.stop()
   }
 
-  async loadPluginsAndCommands(): Promise<void> {
+  async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
     const marker = Performance.mark('config.loadPluginsAndCommands')
-    await this.loadUserPlugins()
-    await this.loadDevPlugins()
-    await this.loadCorePlugins()
+    const {plugins, errors} = await this.pluginLoader.loadChildren({
+      devPlugins: this.options.devPlugins,
+      userPlugins: this.options.userPlugins,
+      dataDir: this.dataDir,
+      rootPlugin: this.rootPlugin,
+      force: opts?.force ?? false,
+    })
+    this.plugins = [...plugins.values()]
 
     for (const plugin of this.plugins) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
 
+    for (const error of errors) {
+      this.warn(error)
+    }
+
     marker?.stop()
-  }
-
-  public async loadCorePlugins(): Promise<void> {
-    if (this.pjson.oclif.plugins) {
-      await this.loadPlugins(this.root, 'core', this.pjson.oclif.plugins)
-    }
-  }
-
-  public async loadDevPlugins(): Promise<void> {
-    if (this.options.devPlugins !== false) {
-      // do not load oclif.devPlugins in production
-      if (this.isProd) return
-      try {
-        const devPlugins = this.pjson.oclif.devPlugins
-        if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-      } catch (error: any) {
-        process.emitWarning(error)
-      }
-    }
-  }
-
-  public async loadUserPlugins(): Promise<void> {
-    if (this.options.userPlugins !== false) {
-      try {
-        const userPJSONPath = path.join(this.dataDir, 'package.json')
-        debug('reading user plugins pjson %s', userPJSONPath)
-        const pjson = await loadJSON(userPJSONPath)
-        this.userPJSON = pjson
-        if (!pjson.oclif) pjson.oclif = {schema: 1}
-        if (!pjson.oclif.plugins) pjson.oclif.plugins = []
-        await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
-        await this.loadPlugins(userPJSONPath, 'link', pjson.oclif.plugins.filter((p: any) => p.type === 'link'))
-      } catch (error: any) {
-        if (error.code !== 'ENOENT') process.emitWarning(error)
-      }
-    }
   }
 
   public async runHook<T extends keyof Hooks>(
@@ -412,7 +367,7 @@ export class Config implements IConfig {
       })
       if (jitResult.failures[0]) throw jitResult.failures[0].error
       if (jitResult.successes[0]) {
-        await this.loadPluginsAndCommands()
+        await this.loadPluginsAndCommands({force: true})
         c = this.findCommand(id) ?? c
       } else {
         // this means that no jit_plugin_not_installed hook exists, so we should run the default behavior
@@ -633,51 +588,6 @@ export class Config implements IConfig {
     } catch {}
 
     return 0
-  }
-
-  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin): Promise<void> {
-    if (!plugins || plugins.length === 0) return
-    const mark = Performance.mark(`config.loadPlugins#${type}`)
-    debug('loading plugins', plugins)
-    await Promise.all((plugins || []).map(async plugin => {
-      try {
-        const opts: Options = {type, root}
-        if (typeof plugin === 'string') {
-          opts.name = plugin
-        } else {
-          opts.name = plugin.name || opts.name
-          opts.tag = plugin.tag || opts.tag
-          opts.root = plugin.root || opts.root
-        }
-
-        const pluginMarker = Performance.mark(`plugin.load#${opts.name!}`)
-        const instance = new Plugin.Plugin(opts)
-        await instance.load()
-        pluginMarker?.addDetails({
-          hasManifest: instance.hasManifest,
-          commandCount: instance.commands.length,
-          topicCount: instance.topics.length,
-          type: instance.type,
-          usesMain: Boolean(instance.pjson.main),
-          name: instance.name,
-        })
-        pluginMarker?.stop()
-        if (this.plugins.find(p => p.name === instance.name)) return
-        this.plugins.push(instance)
-        if (parent) {
-          instance.parent = parent
-          if (!parent.children) parent.children = []
-          parent.children.push(instance)
-        }
-
-        await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
-      } catch (error: any) {
-        this.warn(error, 'loadPlugins')
-      }
-    }))
-
-    mark?.addDetails({pluginCount: plugins.length})
-    mark?.stop()
   }
 
   protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
