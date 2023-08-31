@@ -1,7 +1,7 @@
 import * as url from 'url'
 import * as path from 'path'
 
-import Config from '../../src/config'
+import {Config} from '../../src/config'
 
 import {expect, fancy} from './test'
 import {getHelpFlagAdditions} from '../../src/help'

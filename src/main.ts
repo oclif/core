@@ -4,7 +4,7 @@ import {format, inspect} from 'util'
 
 import * as Interfaces from './interfaces'
 import {URL} from 'url'
-import Config from './config'
+import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import {stdout} from './ux/stream'
 import Performance from './performance'

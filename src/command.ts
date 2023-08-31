@@ -2,7 +2,7 @@ import {fileURLToPath} from 'url'
 import * as chalk from 'chalk'
 import {format, inspect} from 'util'
 import ux from './ux'
-import Config from './config'
+import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
@@ -53,7 +53,7 @@ const jsonFlag = {
  * in your project.
  */
 
-export default abstract class Command {
+export abstract class Command {
   private static readonly _base = `${pjson.name}@${pjson.version}`
 
   /** A command ID, used mostly in error or verbose reporting. */
@@ -121,7 +121,7 @@ export default abstract class Command {
    *     $ <%= config.bin => command flags
    * ```
    */
-  public static examples: Example[]
+  public static examples: Command.Example[]
 
   public static hasDynamicHelp = false
 
@@ -159,7 +159,7 @@ export default abstract class Command {
   /**
    * instantiate and run the command
    *
-   * @param {Class} this - the command class
+   * @param {Command.Class} this - the command class
    * @param {string[]} argv argv
    * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
@@ -404,53 +404,55 @@ export default abstract class Command {
   }
 }
 
-export type Class = typeof Command & {
-  id: string;
-  run(argv?: string[], config?: LoadOptions): Promise<any>;
-}
+export namespace Command {
+  export type Class = typeof Command & {
+    id: string;
+    run(argv?: string[], config?: LoadOptions): Promise<any>;
+  }
 
-export interface Loadable extends Cached {
-  load(): Promise<Class>
-}
+  export interface Loadable extends Cached {
+    load(): Promise<Command.Class>
+  }
 
-export type Cached = {
-  [key: string]: unknown;
-  id: string;
-  hidden: boolean;
-  state?: 'beta' | 'deprecated' | string;
-  deprecationOptions?: Deprecation;
-  aliases: string[];
-  summary?: string;
-  description?: string;
-  usage?: string | string[];
-  examples?: Example[];
-  strict?: boolean;
-  type?: string;
-  pluginName?: string;
-  pluginType?: string;
-  pluginAlias?: string;
-  flags: {[name: string]: Flag.Cached};
-  args: {[name: string]: Arg.Cached};
-  hasDynamicHelp?: boolean;
-  permutations?: string[]
-  aliasPermutations?: string[];
-}
+  export type Cached = {
+    [key: string]: unknown;
+    id: string;
+    hidden: boolean;
+    state?: 'beta' | 'deprecated' | string;
+    deprecationOptions?: Deprecation;
+    aliases: string[];
+    summary?: string;
+    description?: string;
+    usage?: string | string[];
+    examples?: Example[];
+    strict?: boolean;
+    type?: string;
+    pluginName?: string;
+    pluginType?: string;
+    pluginAlias?: string;
+    flags: {[name: string]: Flag.Cached};
+    args: {[name: string]: Arg.Cached};
+    hasDynamicHelp?: boolean;
+    permutations?: string[]
+    aliasPermutations?: string[];
+  }
 
-export type Flag = CompletableFlag<any>
+  export type Flag = CompletableFlag<any>
 
-export namespace Flag {
-  export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
-  export type Any = Flag | Cached
-}
+  export namespace Flag {
+    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
+    export type Any = Flag | Cached
+  }
 
-export type Arg = IArg<any>
+  export type Arg = IArg<any>
 
-export namespace Arg {
-  export type Cached = Omit<Arg, 'parse' | 'input'> & ArgProps
-  export type Any = Arg | Cached
-}
+  export namespace Arg {
+    export type Cached = Omit<Arg, 'parse' | 'input'> & ArgProps
+    export type Any = Arg | Cached
+  }
 
-export type Example = string | {
-  description: string;
-  command: string;
+  export type Example = string | {
+    description: string;
+    command: string;
+  }
 }

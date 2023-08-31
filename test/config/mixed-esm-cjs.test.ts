@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import Config from '../../src/config'
+import {Config} from '../../src/config'
 
 import {expect, fancy} from './test'
 

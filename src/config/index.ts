@@ -1,5 +1,4 @@
-import {Config} from './config'
-export default Config
+export {Config} from './config'
 export {toCached} from './config'
 export {Plugin} from './plugin'
 export {tsPath} from './ts-node'

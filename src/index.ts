@@ -1,10 +1,10 @@
 import * as semver from 'semver'
 
-import Command from './command'
+import {Command} from './command'
 import run from './main'
 import execute from './execute'
 import handle from './errors/handle'
-import Config, {Plugin, tsPath, toCached} from './config'
+import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import * as Flags from './flags'

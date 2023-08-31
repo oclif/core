@@ -5,8 +5,8 @@ import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
 
 import {expect, fancy} from './test'
-import {Command, Config, Interfaces} from '../../src'
-import {Class, Loadable} from '../../src/command'
+import {Config, Interfaces} from '../../src'
+import {Command} from '../../src/command'
 
 interface Options {
   pjson?: any;
@@ -249,21 +249,21 @@ describe('Config', () => {
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<Class> => {
+      const findCommand = async (): Promise<Command.Class> => {
         return MyCommandClass
       }
 
-      const commandPluginA: Loadable = {
+      const commandPluginA: Command.Loadable = {
         strict: false,
-        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Class> {
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
-      const commandPluginB: Loadable = {
+      const commandPluginB: Command.Loadable = {
         strict: false,
-        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Class> {
+        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[1] ?? 'core',

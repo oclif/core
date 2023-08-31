@@ -8,7 +8,7 @@ import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
-import {Class, Loadable, Cached} from '../command'
+import {Command} from '../command'
 import {stdout} from '../ux/stream'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
@@ -41,7 +41,7 @@ export abstract class HelpBase extends HelpFormatter {
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Class, topics: Interfaces.Topic[]): Promise<void>;
+  public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>;
 }
 
 export class Help extends HelpBase {
@@ -61,7 +61,7 @@ export class Help extends HelpBase {
     })
   }
 
-  protected get sortedCommands(): Loadable[] {
+  protected get sortedCommands(): Command.Loadable[] {
     let commands = this.config.commands
 
     commands = commands.filter(c => this.opts.all || !c.hidden)
@@ -136,7 +136,7 @@ export class Help extends HelpBase {
     error(`Command ${subject} not found.`)
   }
 
-  public async showCommandHelp(command: Class | Loadable | Cached): Promise<void> {
+  public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
 
@@ -169,7 +169,7 @@ export class Help extends HelpBase {
 
     if (subCommands.length > 0) {
       const aliases:string[] = []
-      const uniqueSubCommands: Loadable[] = subCommands.filter(p => {
+      const uniqueSubCommands: Command.Loadable[] = subCommands.filter(p => {
         aliases.push(...p.aliases)
         return !aliases.includes(p.id)
       })
@@ -239,7 +239,7 @@ export class Help extends HelpBase {
     return help.root()
   }
 
-  protected formatCommand(command: Class | Loadable | Cached): string {
+  protected formatCommand(command: Command.Class | Command.Loadable | Command.Cached): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replace(/:/g, this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
@@ -249,11 +249,11 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected getCommandHelpClass(command: Class | Loadable | Cached): CommandHelp {
+  protected getCommandHelpClass(command: Command.Class | Command.Loadable | Command.Cached): CommandHelp {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
-  protected formatCommands(commands: Array<Class | Loadable | Cached>): string {
+  protected formatCommands(commands: Array<Command.Class | Command.Loadable | Command.Cached>): string {
     if (commands.length === 0) return ''
 
     const body = this.renderList(commands.map(c => {
@@ -271,13 +271,13 @@ export class Help extends HelpBase {
     return this.section('COMMANDS', body)
   }
 
-  protected summary(c: Class | Loadable | Cached): string | undefined {
+  protected summary(c: Command.Class | Command.Loadable | Command.Cached): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
     return c.description && this.render(c.description).split('\n')[0]
   }
 
-  protected description(c: Class | Loadable | Cached): string {
+  protected description(c: Command.Class | Command.Loadable | Command.Cached): string {
     const description = this.render(c.description || '')
     if (c.summary) {
       return description
@@ -317,7 +317,7 @@ export class Help extends HelpBase {
     return this.section('TOPICS', body)
   }
 
-  protected command(command: Class): string {
+  protected command(command: Command.Class): string {
     return this.formatCommand(command)
   }
 

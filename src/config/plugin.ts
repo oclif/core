@@ -13,7 +13,7 @@ import {tsPath} from './ts-node'
 import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
 import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
-import {Class, Loadable, Cached} from '../command'
+import {Command} from '../command'
 import Performance from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -114,7 +114,7 @@ export class Plugin implements IPlugin {
 
   manifest!: Manifest
 
-  commands!: Loadable[]
+  commands!: Command.Loadable[]
 
   hooks!: {[k: string]: string[]}
 
@@ -211,11 +211,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  public async findCommand(id: string, opts: {must: true}): Promise<Class>
+  public async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
 
-  public async findCommand(id: string, opts?: {must: boolean}): Promise<Class | undefined>
+  public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
-  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Class | undefined> {
+  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
     const fetch = async () => {
       if (!this.commandsDir) return
@@ -292,7 +292,7 @@ export class Plugin implements IPlugin {
           if (this.flexibleTaxonomy) {
             const permutations = getCommandIdPermutations(id)
             const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
-            return [id, {...cached, permutations, aliasPermutations} as Cached]
+            return [id, {...cached, permutations, aliasPermutations} as Command.Cached]
           }
 
           return [id, cached]
@@ -302,11 +302,11 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
-      .filter((f): f is [string, Cached] => Boolean(f))
+      .filter((f): f is [string, Command.Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c
         return commands
-      }, {} as {[k: string]: Cached}),
+      }, {} as {[k: string]: Command.Cached}),
     }
     marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
     marker?.stop()
