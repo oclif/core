@@ -5,7 +5,15 @@ export type {HelpOptions} from './help'
 export type {Hook, Hooks} from './hooks'
 export type {Manifest} from './manifest'
 export type {S3Manifest} from './s3-manifest'
-export type {Arg, BooleanFlag, Flag, OptionFlag, Deprecation, CustomOptions} from './parser'
+export type {
+  Arg,
+  BooleanFlag,
+  CustomOptions,
+  Deprecation,
+  Flag,
+  FlagDefinition,
+  OptionFlag,
+} from './parser'
 export type {PJSON} from './pjson'
 export type {Plugin, PluginOptions, Options} from './plugin'
 export type {Topic} from './topic'
