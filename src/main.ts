@@ -8,9 +8,10 @@ import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import {settings} from './settings'
 import {Errors, flush} from '.'
-import {join, dirname} from 'path'
 import {stdout} from './cli-ux/stream'
 import {Performance} from './performance'
+
+const debug = require('debug')('oclif:main')
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
@@ -46,6 +47,10 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     await Performance.collect()
     Performance.debug()
   }
+
+  debug(`process.execPath: ${process.execPath}`)
+  debug(`process.execArgv: ${process.execArgv}`)
+  debug('process.argv: %O', process.argv)
 
   argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
@@ -100,10 +105,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   }
 }
 
-function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
-  return type === 'cjs' ? join(dir, '..', 'tsconfig.json') : join(dirname(fileURLToPath(dir)), '..', 'tsconfig.json')
-}
-
 /**
  * Load and run oclif CLI
  *
@@ -112,47 +113,42 @@ function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
  *
  * @example For ESM dev.js
  * ```
- * #!/usr/bin/env ts-node
- * // eslint-disable-next-line node/shebang
+ * #!/usr/bin/env node
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', development: true, dir: import.meta.url})
+ *   await oclif.execute({development: true, dir: import.meta.url})
  * })()
  * ```
  *
  * @example For ESM run.js
  * ```
  * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', dir: import.meta.url})
+ *   await oclif.execute({dir: import.meta.url})
  * })()
  * ```
  *
  * @example For CJS dev.js
  * ```
  * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', development: true, dir: __dirname})
+ *   await oclif.execute({development: true, dir: __dirname})
  * })()
  * ```
  *
  * @example For CJS run.js
  * ```
  * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
  * (async () => {
  *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', dir: import.meta.url})
+ *   await oclif.execute({dir: __dirname})
  * })()
  * ```
  */
 export async function execute(
   options: {
-    type: 'cjs' | 'esm';
     dir: string;
     args?: string[];
     loadOptions?: Interfaces.LoadOptions;
@@ -162,9 +158,6 @@ export async function execute(
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins
     process.env.NODE_ENV = 'development'
-    require('ts-node').register({
-      project: getTsConfigPath(options.dir, options.type),
-    })
     settings.debug = true
   }
 

@@ -111,6 +111,8 @@ export class Config implements IConfig {
 
   private _commandIDs!: string[]
 
+  private static _rootPlugin: Plugin.Plugin
+
   constructor(public options: Options) {}
 
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
@@ -127,11 +129,16 @@ export class Config implements IConfig {
     return config
   }
 
+  static get rootPlugin(): Plugin.Plugin | undefined {
+    return Config._rootPlugin
+  }
+
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const plugin = new Plugin.Plugin({root: this.options.root})
     await plugin.load()
+    Config._rootPlugin = plugin
     this.plugins.push(plugin)
     this.root = plugin.root
     this.pjson = plugin.pjson
@@ -542,6 +549,10 @@ export class Config implements IConfig {
     const url = new URL(host)
     url.pathname = path.join(url.pathname, key)
     return url.toString()
+  }
+
+  public getPluginsList(): IPlugin[] {
+    return this.plugins
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {

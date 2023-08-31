@@ -52,6 +52,29 @@ jobs:
       - run: yarn install --network-timeout 600000
       - run: yarn build
       - run: yarn test:e2e
+  esm-cjs-interop:
+    needs: linux-unit-tests
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+        node_version: [lts/-1, lts/*, latest]
+        exclude:
+          - os: windows-latest
+            node_version: lts/*
+          - os: windows-latest
+            node_version: lts/-1
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node_version }}
+          cache: yarn
+      - run: yarn install --network-timeout 600000
+      - run: yarn build
+      - run: yarn test:esm-cjs
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main

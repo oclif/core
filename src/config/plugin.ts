@@ -105,6 +105,8 @@ export class Plugin implements IPlugin {
 
   type!: string
 
+  moduleType!: 'module' | 'commonjs'
+
   root!: string
 
   alias!: string
@@ -150,6 +152,7 @@ export class Plugin implements IPlugin {
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json'))
+    this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
@@ -185,7 +188,7 @@ export class Plugin implements IPlugin {
   public get commandsDir(): string | undefined {
     if (this._commandsDir) return this._commandsDir
 
-    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this.type)
+    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this)
     return this._commandsDir
   }
 

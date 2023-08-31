@@ -282,6 +282,7 @@ describe('Config', () => {
         topics: [],
         valid: true,
         tag: 'tag',
+        moduleType: 'commonjs',
       }
 
       const pluginB: IPlugin = {
@@ -300,6 +301,7 @@ describe('Config', () => {
         topics: [],
         valid: true,
         tag: 'tag',
+        moduleType: 'commonjs',
       }
       const plugins: IPlugin[] = [pluginA, pluginB]
       let test = fancy

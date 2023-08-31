@@ -5,7 +5,7 @@ import * as fs from 'fs-extra'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig} from './interfaces'
 import {Plugin as IPlugin} from './interfaces'
-import * as Config from './config'
+import {tsPath} from './config'
 
 const getPackageType = require('get-package-type')
 
@@ -14,6 +14,10 @@ const getPackageType = require('get-package-type')
  */
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
+
+const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
+  return (<IPlugin>config).type !== undefined
+}
 
 /**
  * Provides a static class with several utility methods to work with Oclif config / plugin to load ESM or CJS Node
@@ -81,7 +85,9 @@ export default class ModuleLoader {
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-        throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`)
+        throw new ModuleLoadError(
+          `${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`,
+        )
       }
 
       throw error
@@ -129,17 +135,13 @@ export default class ModuleLoader {
    */
   static resolvePath(config: IConfig|IPlugin, modulePath: string): {isESM: boolean; filePath: string} {
     let isESM: boolean
-    let filePath: string
-
-    const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
-      return (<IPlugin>config).type !== undefined
-    }
+    let filePath: string | undefined
 
     try {
       filePath = require.resolve(modulePath)
       isESM = ModuleLoader.isPathModule(filePath)
     } catch {
-      filePath = isPlugin(config) ? Config.tsPath(config.root, modulePath, config.type) : Config.tsPath(config.root, modulePath)
+      filePath = (isPlugin(config) ? tsPath(config.root, modulePath, config) : tsPath(config.root, modulePath)) ?? modulePath
 
       let fileExists = false
       let isDirectory = false

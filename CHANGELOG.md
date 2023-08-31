@@ -1,3 +1,21 @@
+## [2.11.10](https://github.com/oclif/core/compare/2.11.9...2.11.10) (2023-08-23)
+
+
+### Bug Fixes
+
+* add getPluginsList to Config interface ([cba7a75](https://github.com/oclif/core/commit/cba7a755cf5d0ff4886edd0db33d911441979984))
+
+
+
+## [2.11.9](https://github.com/oclif/core/compare/2.11.8...2.11.9) (2023-08-23)
+
+
+### Bug Fixes
+
+* add getPluginsList ([b01083f](https://github.com/oclif/core/commit/b01083fb7132f3b3b35b98a6d43996b1713ca5ef))
+
+
+
 ## [2.11.8](https://github.com/oclif/core/compare/2.11.7...2.11.8) (2023-08-08)
 
 
