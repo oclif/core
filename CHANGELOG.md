@@ -1,3 +1,12 @@
+# [2.14.0](https://github.com/oclif/core/compare/2.13.0...2.14.0) (2023-08-31)
+
+
+### Features
+
+* **perf:** remove semver, fs-extra ([#762](https://github.com/oclif/core/issues/762)) ([fdab7b4](https://github.com/oclif/core/commit/fdab7b4f7cc798384c0af8d2bf25e3792da7fcc3))
+
+
+
 # [2.13.0](https://github.com/oclif/core/compare/2.12.0...2.13.0) (2023-08-29)
 
 
