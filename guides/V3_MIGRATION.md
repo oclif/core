@@ -10,7 +10,6 @@ Migrating to @oclif/core@V3
     - [Private methods on `Plugin`](#private-methods-on-plugin)
     - [`ux` exports](#ux-exports)
     - [`global['cli-ux']` -\> `global.ux`](#globalcli-ux---globalux)
-    - [types on `Commands`](#types-on-commands)
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
   - [Features 🎉](#features-)
@@ -103,22 +102,6 @@ import {
 
 The global `cli-ux` object has been renamed to `ux` to be consistent with the module's name
 
-### types on `Commands`
-
-In v2 you could access the following types on `Command`
-- `Command.Class`
-- `Command.Loadable`
-- `Command.Cached`
-- `Command.Flag`
-- `Command.Arg`
-- `Command.Example`
-
-These are now accessed through `@oclif/core/command`
-
-```typescript
-import {Class, Loadable, Cached, Flag, Arg, Example} from '@oclif/core/command'
-```
-
 ### `handle`
 
 The exported `handle` function for handling errors in bin scripts is now asynchronous
@@ -159,29 +142,21 @@ The `exports` property in the package.json are now used for exporting individual
 The main export should continue to work as it did in v2:
 
 ```typescript
-import {Command, Interfaces, ux} from '@oclif/core'
+import {Interfaces, ux} from '@oclif/core'
 ```
 
 But you can now import individual modules if desired:
 
 ```typescript
-import Command from '@oclif/core/command'
 import Interfaces from '@oclif/core/interfaces'
 import ux from '@oclif/core/ux'
 ```
 
 These are the exports that are available:
-`@oclif/core/args`
-`@oclif/core/command`
-`@oclif/core/config`
-`@oclif/core/errors`
 `@oclif/core/execute`
-`@oclif/core/flags`
 `@oclif/core/flush`
 `@oclif/core/handle`
-`@oclif/core/help`
 `@oclif/core/interfaces`
-`@oclif/core/performance`
 `@oclif/core/run`
 `@oclif/core/settings`
 `@oclif/core/ux`
