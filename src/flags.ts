@@ -3,6 +3,7 @@ import {Help} from './help'
 import {BooleanFlag} from './interfaces'
 import {FlagDefinition, OptionFlagDefaults, FlagParser} from './interfaces/parser'
 import {dirExists, fileExists} from './util'
+import {CLIError} from './errors'
 
 /**
  * Create a custom flag.
@@ -55,12 +56,12 @@ export function boolean<T = boolean>(
 export const integer = custom<number, {min?: number; max?: number;}>({
   parse: async (input, _, opts) => {
     if (!/^-?\d+$/.test(input))
-      throw new Error(`Expected an integer but received: ${input}`)
+      throw new CLIError(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
     if (opts.min !== undefined && num < opts.min)
-      throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
+      throw new CLIError(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
     if (opts.max !== undefined && num > opts.max)
-      throw new Error(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
+      throw new CLIError(`Expected an integer less than or equal to ${opts.max} but received: ${input}`)
     return num
   },
 })

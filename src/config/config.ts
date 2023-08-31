@@ -8,23 +8,24 @@ import {format} from 'util'
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import * as Plugin from './plugin'
-import {Debug, compact, loadJSON, collectUsableIds, getCommandIdPermutations} from './util'
+import {Debug, compact, collectUsableIds, getCommandIdPermutations} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
 import {CompletableOptionFlag, Arg} from '../interfaces/parser'
-import {stdout} from '../cli-ux/stream'
-import {Performance} from '../performance'
-import {settings} from '../settings'
+import {stdout} from '../ux/stream'
+import Performance from '../performance'
+import settings from '../settings'
 import {userInfo as osUserInfo} from 'node:os'
 import {sep} from 'node:path'
+import PluginLoader from './plugin-loader'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const BASE = `${_pjson.name}@${_pjson.version}`
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
@@ -69,7 +70,7 @@ class Permutations extends Map<string, Set<string>> {
 }
 
 export class Config implements IConfig {
-  private _base = `${_pjson.name}@${_pjson.version}`
+  private _base = BASE
 
   public arch!: ArchTypes
   public bin!: string
@@ -87,7 +88,7 @@ export class Config implements IConfig {
   public npmRegistry?: string
   public pjson!: PJSON.CLI
   public platform!: PlatformTypes
-  public plugins: IPlugin[] = []
+  public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
   public topicSeparator: ':' | ' ' = ':'
@@ -111,7 +112,9 @@ export class Config implements IConfig {
 
   private _commandIDs!: string[]
 
-  private static _rootPlugin: Plugin.Plugin
+  private pluginLoader!: PluginLoader
+
+  private static _rootPlugin: IPlugin
 
   constructor(public options: Options) {}
 
@@ -122,30 +125,52 @@ export class Config implements IConfig {
     }
 
     if (typeof opts === 'string') opts = {root: opts}
-    if (isConfig(opts)) return opts
+    if (isConfig(opts)) {
+      /**
+       * Reload the Config based on the version required by the command.
+       * This is needed because the command is given the Config instantiated
+       * by the root plugin, which may be a different version than the one
+       * required by the command.
+       *
+       * Doing this ensures that the command can freely use any method on Config that
+       * exists in the version of Config required by the command but may not exist on the
+       * root's instance of Config.
+       */
+      if (BASE !== opts._base) {
+        debug(`reloading config from ${opts._base} to ${BASE}`)
+        const config = new Config({...opts.options, plugins: opts.plugins})
+        await config.load()
+        return config
+      }
+
+      return opts
+    }
 
     const config = new Config(opts)
     await config.load()
     return config
   }
 
-  static get rootPlugin(): Plugin.Plugin | undefined {
+  static get rootPlugin(): IPlugin | undefined {
     return Config._rootPlugin
   }
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
-    const plugin = new Plugin.Plugin({root: this.options.root})
-    await plugin.load()
-    Config._rootPlugin = plugin
-    this.plugins.push(plugin)
-    this.root = plugin.root
-    this.pjson = plugin.pjson
+    this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
+    Config._rootPlugin = await this.pluginLoader.loadRoot()
+
+    this.root = Config._rootPlugin.root
+    this.pjson = Config._rootPlugin.pjson
+
+    this.plugins.set(Config._rootPlugin.name, Config._rootPlugin)
+    this.root = Config._rootPlugin.root
+    this.pjson = Config._rootPlugin.pjson
     this.name = this.pjson.name
     this.version = this.options.version || this.pjson.version || '0.0.0'
     this.channel = this.options.channel || channelFromVersion(this.version)
-    this.valid = plugin.valid
+    this.valid = Config._rootPlugin.valid
 
     this.arch = (os.arch() === 'ia32' ? 'x86' : os.arch() as any)
     this.platform = WSL ? 'wsl' : os.platform() as any
@@ -201,62 +226,35 @@ export class Config implements IConfig {
 
     debug('config done')
     marker?.addDetails({
-      plugins: this.plugins.length,
+      plugins: this.plugins.size,
       commandPermutations: this.commands.length,
-      commands: this.plugins.reduce((acc, p) => acc + p.commands.length, 0),
+      commands: [...this.plugins.values()].reduce((acc, p) => acc + p.commands.length, 0),
       topics: this.topics.length,
     })
     marker?.stop()
   }
 
-  async loadPluginsAndCommands(): Promise<void> {
+  async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
     const marker = Performance.mark('config.loadPluginsAndCommands')
-    await this.loadUserPlugins()
-    await this.loadDevPlugins()
-    await this.loadCorePlugins()
+    const {plugins, errors} = await this.pluginLoader.loadChildren({
+      devPlugins: this.options.devPlugins,
+      userPlugins: this.options.userPlugins,
+      dataDir: this.dataDir,
+      rootPlugin: Config._rootPlugin,
+      force: opts?.force ?? false,
+    })
 
-    for (const plugin of this.plugins) {
+    this.plugins = plugins
+    for (const plugin of this.plugins.values()) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
 
+    for (const error of errors) {
+      this.warn(error)
+    }
+
     marker?.stop()
-  }
-
-  public async loadCorePlugins(): Promise<void> {
-    if (this.pjson.oclif.plugins) {
-      await this.loadPlugins(this.root, 'core', this.pjson.oclif.plugins)
-    }
-  }
-
-  public async loadDevPlugins(): Promise<void> {
-    if (this.options.devPlugins !== false) {
-      // do not load oclif.devPlugins in production
-      if (this.isProd) return
-      try {
-        const devPlugins = this.pjson.oclif.devPlugins
-        if (devPlugins) await this.loadPlugins(this.root, 'dev', devPlugins)
-      } catch (error: any) {
-        process.emitWarning(error)
-      }
-    }
-  }
-
-  public async loadUserPlugins(): Promise<void> {
-    if (this.options.userPlugins !== false) {
-      try {
-        const userPJSONPath = path.join(this.dataDir, 'package.json')
-        debug('reading user plugins pjson %s', userPJSONPath)
-        const pjson = await loadJSON(userPJSONPath)
-        this.userPJSON = pjson
-        if (!pjson.oclif) pjson.oclif = {schema: 1}
-        if (!pjson.oclif.plugins) pjson.oclif.plugins = []
-        await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
-        await this.loadPlugins(userPJSONPath, 'link', pjson.oclif.plugins.filter((p: any) => p.type === 'link'))
-      } catch (error: any) {
-        if (error.code !== 'ENOENT') process.emitWarning(error)
-      }
-    }
   }
 
   public async runHook<T extends keyof Hooks>(
@@ -291,7 +289,7 @@ export class Config implements IConfig {
       successes: [],
       failures: [],
     } as Hook.Result<Hooks[T]['return']>
-    const promises = this.plugins.map(async p => {
+    const promises = [...this.plugins.values()].map(async p => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -380,7 +378,7 @@ export class Config implements IConfig {
       })
       if (jitResult.failures[0]) throw jitResult.failures[0].error
       if (jitResult.successes[0]) {
-        await this.loadPluginsAndCommands()
+        await this.loadPluginsAndCommands({force: true})
         c = this.findCommand(id) ?? c
       } else {
         // this means that no jit_plugin_not_installed hook exists, so we should run the default behavior
@@ -529,7 +527,7 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries(this.plugins.map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      pluginVersions: Object.fromEntries([...this.plugins.values()].map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
       osVersion: `${os.type()} ${os.release()}`,
       shell: this.shell,
       rootPath: this.root,
@@ -552,7 +550,7 @@ export class Config implements IConfig {
   }
 
   public getPluginsList(): IPlugin[] {
-    return this.plugins
+    return [...this.plugins.values()]
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {
@@ -603,51 +601,6 @@ export class Config implements IConfig {
     return 0
   }
 
-  protected async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin): Promise<void> {
-    if (!plugins || plugins.length === 0) return
-    const mark = Performance.mark(`config.loadPlugins#${type}`)
-    debug('loading plugins', plugins)
-    await Promise.all((plugins || []).map(async plugin => {
-      try {
-        const opts: Options = {type, root}
-        if (typeof plugin === 'string') {
-          opts.name = plugin
-        } else {
-          opts.name = plugin.name || opts.name
-          opts.tag = plugin.tag || opts.tag
-          opts.root = plugin.root || opts.root
-        }
-
-        const pluginMarker = Performance.mark(`plugin.load#${opts.name!}`)
-        const instance = new Plugin.Plugin(opts)
-        await instance.load()
-        pluginMarker?.addDetails({
-          hasManifest: instance.hasManifest,
-          commandCount: instance.commands.length,
-          topicCount: instance.topics.length,
-          type: instance.type,
-          usesMain: Boolean(instance.pjson.main),
-          name: instance.name,
-        })
-        pluginMarker?.stop()
-        if (this.plugins.find(p => p.name === instance.name)) return
-        this.plugins.push(instance)
-        if (parent) {
-          instance.parent = parent
-          if (!parent.children) parent.children = []
-          parent.children.push(instance)
-        }
-
-        await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
-      } catch (error: any) {
-        this.warn(error, 'loadPlugins')
-      }
-    }))
-
-    mark?.addDetails({pluginCount: plugins.length})
-    mark?.stop()
-  }
-
   protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
     if (this.warned) return
 
@@ -691,7 +644,8 @@ export class Config implements IConfig {
   }
 
   private isJitPluginCommand(c: Command.Loadable): boolean {
-    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && !this.plugins.find(p => p.name === c?.pluginName)
+    // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
+    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
   }
 
   private getCmdLookupId(id: string): string {
@@ -709,6 +663,7 @@ export class Config implements IConfig {
   private loadCommands(plugin: IPlugin) {
     const marker = Performance.mark(`config.loadCommands#${plugin.name}`, {plugin: plugin.name})
     for (const command of plugin.commands) {
+      // set canonical command id
       if (this._commands.has(command.id)) {
         const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
         this._commands.set(prioritizedCommand.id, prioritizedCommand)
@@ -716,11 +671,12 @@ export class Config implements IConfig {
         this._commands.set(command.id, command)
       }
 
-      const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(command.id) : [command.id]
-      for (const permutation of permutations) {
+      // set every permutation
+      for (const permutation of command.permutations ?? [command.id]) {
         this.commandPermutations.add(permutation, command.id)
       }
 
+      // set command aliases
       for (const alias of command.aliases ?? []) {
         if (this._commands.has(alias)) {
           const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
@@ -729,8 +685,8 @@ export class Config implements IConfig {
           this._commands.set(alias, {...command, id: alias})
         }
 
-        const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
-        for (const permutation of aliasPermutations) {
+        // set every permutation of the aliases
+        for (const permutation of command.aliasPermutations ?? [alias]) {
           this.commandPermutations.add(permutation, command.id)
         }
       }
@@ -842,24 +798,19 @@ export class Config implements IConfig {
     */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
-      const idx = this.plugins.findIndex(p => p.name === plugin.name)
-      if (idx !== -1) {
-        // invalid plugin instance found in `this.plugins`
-        // replace with the oclif-compatible one
-        this.plugins.splice(idx, 1, plugin)
-      }
-
+      this.plugins.set(plugin.name, plugin)
       this.loadCommands(plugin)
     }
   }
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingManifest = false) => {
-  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, respectNoCacheDefault: boolean) => {
+  if (respectNoCacheDefault && flag.noCacheDefault) return
+  // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
     try {
-      return await flag.defaultHelp({options: flag, flags: {}}, isWritingManifest)
+      return await flag.defaultHelp({options: flag, flags: {}})
     } catch {
       return
     }
@@ -868,18 +819,19 @@ const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, isWritingMa
   // if not specified, try the default function
   if (typeof flag.default === 'function') {
     try {
-      return await flag.default({options: flag, flags: {}}, isWritingManifest)
+      return await flag.default({options: flag, flags: {}})
     } catch {}
   } else {
     return flag.default
   }
 }
 
-const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Promise<any> => {
-  // Prefer the helpDefaultValue function (returns a friendly string for complex types)
+const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
+  if (respectNoCacheDefault && arg.noCacheDefault) return
+  // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof arg.defaultHelp === 'function') {
     try {
-      return await arg.defaultHelp({options: arg, flags: {}}, isWritingManifest)
+      return await arg.defaultHelp({options: arg, flags: {}})
     } catch {
       return
     }
@@ -888,14 +840,14 @@ const defaultArgToCached = async (arg: Arg<any>, isWritingManifest = false): Pro
   // if not specified, try the default function
   if (typeof arg.default === 'function') {
     try {
-      return await arg.default({options: arg, flags: {}}, isWritingManifest)
+      return await arg.default({options: arg, flags: {}})
     } catch {}
   } else {
     return arg.default
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, isWritingManifest?: boolean): Promise<Command.Cached> {
+export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
   const flags = {} as {[k: string]: Command.Flag.Cached}
 
   for (const [name, flag] of Object.entries(c.flags || {})) {
@@ -918,6 +870,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
     } else {
       flags[name] = {
@@ -936,11 +889,12 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, isWritingManifest),
+        default: await defaultFlagToCached(flag, respectNoCacheDefault),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
         delimiter: flag.delimiter,
+        noCacheDefault: flag.noCacheDefault,
       }
       // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
       if (typeof flag.defaultHelp === 'function') {
@@ -956,8 +910,9 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg, isWritingManifest),
+      default: await defaultArgToCached(arg, respectNoCacheDefault),
       hidden: arg.hidden,
+      noCacheDefault: arg.noCacheDefault,
     }
   }
 

@@ -1,12 +1,8 @@
-import * as semver from 'semver'
 import {PJSON} from '../interfaces/pjson'
 import {requireJson} from '../util'
 import spinner from './action/spinner'
 import simple from './action/spinner'
-import pride from './action/pride-spinner'
 import {ActionBase} from './action/base'
-
-const version = semver.parse(requireJson<PJSON>(__dirname, '..', '..', 'package.json').version)!
 
 export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
 
@@ -17,7 +13,7 @@ export interface ConfigMessage {
 }
 
 const g: any = global
-const globals = g['cli-ux'] || (g['cli-ux'] = {})
+const globals = g.ux || (g.ux = {})
 
 const actionType = (
   Boolean(process.stderr.isTTY) &&
@@ -27,14 +23,11 @@ const actionType = (
 ) || 'simple'
 
 const Action = actionType === 'spinner' ? spinner : simple
-const PrideAction = actionType === 'spinner' ? pride : simple
 
 export class Config {
   outputLevel: Levels = 'info'
 
   action: ActionBase = new Action()
-
-  prideAction: ActionBase = new PrideAction()
 
   errorsHandled = false
 
@@ -58,9 +51,10 @@ export class Config {
 }
 
 function fetch() {
-  if (globals[version.major]) return globals[version.major]
-  globals[version.major] = new Config()
-  return globals[version.major]
+  const major = requireJson<PJSON>(__dirname, '..', '..', 'package.json').version.split('.')[0]
+  if (globals[major]) return globals[major]
+  globals[major] = new Config()
+  return globals[major]
 }
 
 export const config: Config = fetch()

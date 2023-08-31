@@ -1,5 +1,5 @@
 export class ExitError extends Error {
-  public 'cli-ux': {
+  public ux: {
     exit: number;
   }
 
@@ -11,7 +11,7 @@ export class ExitError extends Error {
     const code = 'EEXIT'
     super(error ? error.message : `${code}: ${status}`)
     this.error = error
-    this['cli-ux'] = {exit: status}
+    this.ux = {exit: status}
     this.code = code
   }
 }

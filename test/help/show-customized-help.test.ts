@@ -4,7 +4,8 @@ import * as path from 'path'
 
 import {CommandHelp, Help} from '../../src/help'
 import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
-import {Interfaces, Config, Command} from '../../src'
+import {Interfaces, Config} from '../../src'
+import {Command} from '../../src/command'
 import {monkeyPatchCommands} from './help-test-utils'
 
 const g: any = global
@@ -89,6 +90,7 @@ describe('showHelp for root', () => {
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc, AppsCreate, AppsDestroy],
       topics: [],
     }])
@@ -120,6 +122,7 @@ COMMANDS
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc],
       topics: [],
     }])
@@ -150,6 +153,7 @@ describe('showHelp for a command', () => {
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsCreate],
       topics: [AppsTopic],
     }])
@@ -179,6 +183,7 @@ CUSTOM
     const config = ctx.config
 
     monkeyPatchCommands(config, [{
+      name: 'plugin-1',
       commands: [AppsIndexWithDesc, AppsCreate, AppsAdminAdd],
       topics: [AppsTopic, AppsAdminTopic],
     }])

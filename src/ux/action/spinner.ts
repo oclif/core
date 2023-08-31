@@ -2,7 +2,6 @@ import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
 const stripAnsi = require('strip-ansi')
 const ansiStyles = require('ansi-styles')
-const ansiEscapes = require('ansi-escapes')
 import {errtermwidth} from '../../screen'
 import spinners from './spinners'
 import {ActionBase, ActionType} from './base'
@@ -74,6 +73,7 @@ export default class SpinnerAction extends ActionBase {
 
   private _reset() {
     if (!this.output) return
+    const ansiEscapes = require('ansi-escapes')
     const lines = this._lines(this.output)
     this._write(this.std, ansiEscapes.cursorLeft + ansiEscapes.cursorUp(lines) + ansiEscapes.eraseDown)
     this.output = undefined

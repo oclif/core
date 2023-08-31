@@ -6,10 +6,8 @@ import * as Interfaces from './interfaces'
 import {URL} from 'url'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-import {settings} from './settings'
-import {Errors, flush} from '.'
-import {stdout} from './cli-ux/stream'
-import {Performance} from './performance'
+import {stdout} from './ux/stream'
+import Performance from './performance'
 
 const debug = require('debug')('oclif:main')
 
@@ -36,7 +34,7 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
+export default async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
   const marker = Performance.mark('main.run')
 
   const initMarker = Performance.mark('main.run#init')
@@ -103,65 +101,4 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   } finally {
     await collectPerf()
   }
-}
-
-/**
- * Load and run oclif CLI
- *
- * @param options - options to load the CLI
- * @returns Promise<void>
- *
- * @example For ESM dev.js
- * ```
- * #!/usr/bin/env node
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({development: true, dir: import.meta.url})
- * })()
- * ```
- *
- * @example For ESM run.js
- * ```
- * #!/usr/bin/env node
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({dir: import.meta.url})
- * })()
- * ```
- *
- * @example For CJS dev.js
- * ```
- * #!/usr/bin/env node
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({development: true, dir: __dirname})
- * })()
- * ```
- *
- * @example For CJS run.js
- * ```
- * #!/usr/bin/env node
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({dir: __dirname})
- * })()
- * ```
- */
-export async function execute(
-  options: {
-    dir: string;
-    args?: string[];
-    loadOptions?: Interfaces.LoadOptions;
-    development?: boolean;
-  },
-): Promise<void> {
-  if (options.development) {
-    // In dev mode -> use ts-node and dev plugins
-    process.env.NODE_ENV = 'development'
-    settings.debug = true
-  }
-
-  await run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
-  .then(async () => flush())
-  .catch(Errors.handle)
 }

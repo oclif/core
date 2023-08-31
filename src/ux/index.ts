@@ -10,34 +10,11 @@ import {Table} from './styled'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
 import {stdout} from './stream'
+import flush from './flush'
 
 const hyperlinker = require('hyperlinker')
 
-function timeout(p: Promise<any>, ms: number) {
-  function wait(ms: number, unref = false) {
-    return new Promise(resolve => {
-      const t: any = setTimeout(() => resolve(null), ms)
-      if (unref) t.unref()
-    })
-  }
-
-  return Promise.race([p, wait(ms, true).then(() => Errors.error('timed out'))])
-}
-
-async function _flush() {
-  const p = new Promise(resolve => {
-    stdout.once('drain', () => resolve(null))
-  })
-  const flushed = stdout.write('')
-
-  if (flushed) {
-    return Promise.resolve()
-  }
-
-  return p
-}
-
-export class ux {
+export default class ux {
   public static config: Config = config
 
   public static get prompt(): typeof uxPrompt.prompt {
@@ -59,17 +36,13 @@ export class ux {
     return config.action
   }
 
-  public static get prideAction(): ActionBase {
-    return config.prideAction
-  }
-
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
-    this.info(styled.styledObject(obj, keys))
+    this.log(styled.styledObject(obj, keys))
   }
 
   public static styledHeader(header: string): void {
-    this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
+    this.log(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
@@ -97,13 +70,13 @@ export class ux {
   }
 
   public static trace(format: string, ...args: string[]): void {
-    if (this.config.outputLevel === 'trace') {
+    if (ux.config.outputLevel === 'trace') {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
-    if (['trace', 'debug'].includes(this.config.outputLevel)) {
+    if (['trace', 'debug'].includes(ux.config.outputLevel)) {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
@@ -136,67 +109,32 @@ export class ux {
   }
 
   public static async flush(ms = 10_000): Promise<void> {
-    await timeout(_flush(), ms)
+    await flush(ms)
+  }
+
+  public static error(err: Error | string, options: {code?: string; exit?: number} = {}): never {
+    throw Errors.error(err, options)
+  }
+
+  public static exit(code = 0): never {
+    throw Errors.exit(code)
+  }
+
+  public static warn(err: Error | string): void {
+    Errors.warn(err)
   }
 }
 
-const action = ux.action
-const annotation = ux.annotation
-const anykey = ux.anykey
-const confirm = ux.confirm
-const debug = ux.debug
-const done = ux.done
-const error = Errors.error
-const exit = Errors.exit
-const flush = ux.flush
-const info = ux.info
-const log = ux.log
-const prideAction = ux.prideAction
-const progress = ux.progress
-const prompt = ux.prompt
-const styledHeader = ux.styledHeader
-const styledJSON = ux.styledJSON
-const styledObject = ux.styledObject
-const table = ux.table
-const trace = ux.trace
-const tree = ux.tree
-const url = ux.url
-const wait = ux.wait
-const warn = Errors.warn
-
 export {
-  action,
   ActionBase,
-  annotation,
-  anykey,
   config,
   Config,
-  confirm,
-  debug,
-  done,
-  error,
-  exit,
   ExitError,
-  flush,
-  info,
   IPromptOptions,
-  log,
-  prideAction,
-  progress,
-  prompt,
-  styledHeader,
-  styledJSON,
-  styledObject,
-  table,
   Table,
-  trace,
-  tree,
-  url,
-  wait,
-  warn,
 }
 
-const cliuxProcessExitHandler = async () => {
+const uxProcessExitHandler = async () => {
   try {
     await ux.done()
   } catch (error) {
@@ -207,7 +145,7 @@ const cliuxProcessExitHandler = async () => {
 
 // to avoid MaxListenersExceededWarning
 // only attach named listener once
-const cliuxListener = process.listeners('exit').find(fn => fn.name === cliuxProcessExitHandler.name)
-if (!cliuxListener) {
-  process.once('exit', cliuxProcessExitHandler)
+const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExitHandler.name)
+if (!uxListener) {
+  process.once('exit', uxProcessExitHandler)
 }

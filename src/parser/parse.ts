@@ -28,34 +28,7 @@ try {
   debug = () => {}
 }
 
-/**
- * Support reading from stdin in Node 14 and older.
- *
- * This generally works for Node 14 and older EXCEPT when it's being
- * run from another process, in which case it will hang indefinitely. Because
- * of that issue we updated this to use AbortController but since AbortController
- * is only available in Node 16 and newer, we have to keep this legacy version.
- *
- * See these issues for more details on the hanging indefinitely bug:
- * https://github.com/oclif/core/issues/330
- * https://github.com/oclif/core/pull/363
- *
- * @returns Promise<string | null>
- */
-const readStdinLegacy = async (): Promise<string | null> => {
-  const {stdin} = process
-  let result
-  if (stdin.isTTY) return null
-  result = ''
-  stdin.setEncoding('utf8')
-  for await (const chunk of stdin) {
-    result += chunk
-  }
-
-  return result
-}
-
-const readStdinWithTimeout = async (): Promise<string | null> => {
+const readStdin = async (): Promise<string | null> => {
   const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
@@ -95,16 +68,6 @@ const readStdinWithTimeout = async (): Promise<string | null> => {
       resolve(null)
     }, {once: true})
   })
-}
-
-const readStdin = async (): Promise<string | null> => {
-  const {stdin, version} = process
-  debug('stdin.isTTY', stdin.isTTY)
-
-  const nodeMajorVersion = Number(version.split('.')[0].replace(/^v/, ''))
-  debug('node version', nodeMajorVersion)
-
-  return nodeMajorVersion > 14 ? readStdinWithTimeout() : readStdinLegacy()
 }
 
 function isNegativeNumber(input: string): boolean {

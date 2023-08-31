@@ -1,6 +1,6 @@
 
 import {rm} from 'shelljs'
-import {mkdirp} from 'fs-extra'
+import {mkdir} from 'node:fs/promises'
 import * as cp from 'child_process'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
@@ -141,7 +141,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
     return executor
   }
 
-  await mkdirp(testDir)
+  await mkdir(testDir, {recursive: true})
   rm('-rf', pluginDir)
 
   await executor.clone(options.repo)
@@ -174,9 +174,9 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   const cacheDir = path.join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
   const configDir = path.join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
 
-  await mkdirp(dataDir)
-  await mkdirp(configDir)
-  await mkdirp(cacheDir)
+  await mkdir(dataDir, {recursive: true})
+  await mkdir(configDir, {recursive: true})
+  await mkdir(cacheDir, {recursive: true})
 
   process.env[`${bin}_DATA_DIR`] = dataDir
   process.env[`${bin}_CONFIG_DIR`] = configDir

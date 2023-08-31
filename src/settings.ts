@@ -40,4 +40,5 @@ export type Settings = {
 // Set global.oclif to the new object if it wasn't set before
 if (!(global as any).oclif) (global as any).oclif = {}
 
-export const settings: Settings = (global as any).oclif as Settings
+const settings: Settings = (global as any).oclif as Settings
+export default settings

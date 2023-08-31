@@ -9,7 +9,7 @@ import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFrom
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 import {Command} from '../command'
-import {stdout} from '../cli-ux/stream'
+import {stdout} from '../ux/stream'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 
@@ -106,7 +106,7 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
-        const dynamicCommand = await toCached(await command.load(), undefined, false)
+        const dynamicCommand = await toCached(await command.load())
         await this.showCommandHelp(dynamicCommand)
       } else {
         await this.showCommandHelp(command)
@@ -142,7 +142,7 @@ export class Help extends HelpBase {
 
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
     const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
-    const plugin = this.config.plugins.find(p => p.name === command.pluginName)
+    const plugin = this.config.plugins.get(command.pluginName!)
 
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
 

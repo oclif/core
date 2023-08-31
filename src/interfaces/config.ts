@@ -25,91 +25,90 @@ export type VersionDetails = {
 }
 
 export interface Config {
-  name: string;
-  version: string;
-  channel: string;
-  pjson: PJSON.CLI;
-  root: string;
+  readonly name: string;
+  readonly version: string;
+  readonly channel: string;
+  readonly pjson: PJSON.CLI;
+  readonly root: string;
   /**
    * process.arch
    */
-  arch: ArchTypes;
+  readonly arch: ArchTypes;
   /**
    * bin name of CLI command
    */
-  bin: string;
+  readonly bin: string;
   /**
    * cache directory to use for CLI
    *
    * example ~/Library/Caches/mycli or ~/.cache/mycli
    */
-  cacheDir: string;
+  readonly cacheDir: string;
   /**
    * config directory to use for CLI
    *
    * example: ~/.config/mycli
    */
-  configDir: string;
+  readonly configDir: string;
   /**
    * data directory to use for CLI
    *
    * example: ~/.local/share/mycli
    */
-  dataDir: string;
+  readonly dataDir: string;
   /**
    * base dirname to use in cacheDir/configDir/dataDir
    */
-  dirname: string;
+  readonly dirname: string;
   /**
    * points to a file that should be appended to for error logs
    *
    * example: ~/Library/Caches/mycli/error.log
    */
-  errlog: string;
+  readonly errlog: string;
   /**
    * path to home directory
    *
    * example: /home/myuser
    */
-  home: string;
+  readonly home: string;
   /**
    * process.platform
    */
-  platform: PlatformTypes;
+  readonly platform: PlatformTypes;
   /**
    * active shell
    */
-  shell: string;
+  readonly shell: string;
   /**
    * user agent to use for http calls
    *
    * example: mycli/1.2.3 (darwin-x64) node-9.0.0
    */
-  userAgent: string;
+  readonly userAgent: string;
   /**
    * if windows
    */
-  windows: boolean;
+  readonly windows: boolean;
   /**
    * debugging level
    *
    * set by ${BIN}_DEBUG or DEBUG=$BIN
    */
-  debug: number;
+  readonly debug: number;
   /**
    * npm registry to use for installing plugins
    */
-  npmRegistry?: string;
-  userPJSON?: PJSON.User;
-  plugins: Plugin[];
-  binPath?: string;
+  readonly npmRegistry?: string;
+  readonly plugins: Map<string, Plugin>;
+  readonly binPath?: string;
   /**
    * name of any bin aliases that will execute the cli
    */
-  binAliases?: string[];
-  nsisCustomization?: string;
-  valid: boolean;
-  flexibleTaxonomy?: boolean;
+  readonly binAliases?: string[];
+  readonly nsisCustomization?: string;
+  readonly valid: boolean;
+  readonly flexibleTaxonomy?: boolean;
   topicSeparator: ':' | ' ';
   readonly commands: Command.Loadable[];
   readonly topics: Topic[];

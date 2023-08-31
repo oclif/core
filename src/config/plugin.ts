@@ -5,7 +5,7 @@ import {inspect} from 'util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {toCached} from './config'
-import {Debug} from './util'
+import {Debug, getCommandIdPermutations} from './util'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
@@ -14,7 +14,7 @@ import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './u
 import {isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {Command} from '../command'
-import {Performance} from '../performance'
+import Performance from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
@@ -94,7 +94,6 @@ async function findRoot(name: string | undefined, root: string) {
 }
 
 export class Plugin implements IPlugin {
-  // static loadedPlugins: {[name: string]: Plugin} = {}
   _base = `${_pjson.name}@${_pjson.version}`
 
   name!: string
@@ -131,6 +130,8 @@ export class Plugin implements IPlugin {
 
   private _commandsDir!: string | undefined
 
+  private flexibleTaxonomy!: boolean
+
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
@@ -138,25 +139,20 @@ export class Plugin implements IPlugin {
 
   constructor(public options: PluginOptions) {}
 
-  /**
-   * Loads a plugin
-   * @param isWritingManifest - if true, exclude selected data from manifest
-   * default is false to maintain backwards compatibility
-   * @returns Promise<void>
-   */
-  public async load(isWritingManifest?: boolean): Promise<void> {
+  public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
     const root = await findRoot(this.options.name, this.options.root)
-    if (!root) throw new Error(`could not find package.json with ${inspect(this.options)}`)
+    if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
     this.pjson = await loadJSON(path.join(root, 'package.json'))
+    this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = path.join(root, 'package.json')
-    if (!this.name) throw new Error(`no name in ${pjsonPath}`)
+    if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
@@ -169,7 +165,7 @@ export class Plugin implements IPlugin {
 
     this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
 
-    this.manifest = await this._manifest(Boolean(this.options.ignoreManifest), Boolean(this.options.errorOnManifestCreate), isWritingManifest)
+    this.manifest = await this._manifest()
     this.commands = Object
     .entries(this.manifest.commands)
     .map(([id, c]) => ({
@@ -215,11 +211,11 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+  public async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
 
-  async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
+  public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
-  async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
     const fetch = async () => {
       if (!this.commandsDir) return
@@ -253,7 +249,11 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
-  protected async _manifest(ignoreManifest: boolean, errorOnManifestCreate = false, isWritingManifest = false): Promise<Manifest> {
+  private async _manifest(): Promise<Manifest> {
+    const ignoreManifest = Boolean(this.options.ignoreManifest)
+    const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
+    const respectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
+
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
         const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
@@ -288,7 +288,14 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          return [id, await toCached(await this.findCommand(id, {must: true}), this, isWritingManifest)]
+          const cached = await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+          if (this.flexibleTaxonomy) {
+            const permutations = getCommandIdPermutations(id)
+            const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
+            return [id, {...cached, permutations, aliasPermutations} as Command.Cached]
+          }
+
+          return [id, cached]
         } catch (error: any) {
           const scope = 'toCached'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
@@ -306,7 +313,7 @@ export class Plugin implements IPlugin {
     return manifest
   }
 
-  protected warn(err: string | Error | CLIError, scope?: string): void {
+  private warn(err: string | Error | CLIError, scope?: string): void {
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))

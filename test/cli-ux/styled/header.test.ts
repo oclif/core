@@ -1,7 +1,8 @@
 import {expect} from 'chai'
 
-import {ux, stdout} from '../../../src'
+import {stdout} from '../../../src'
 import {stub, SinonStub} from 'sinon'
+import ux from '../../../src/ux'
 
 describe('styled/header', () => {
   let writeStub: SinonStub

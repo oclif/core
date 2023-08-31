@@ -1,5 +1,5 @@
 import {PerformanceObserver, performance} from 'perf_hooks'
-import {settings} from './settings'
+import settings from './settings'
 
 type Details = Record<string, string | boolean | number | string[]>
 type PerfResult = {
@@ -58,7 +58,7 @@ class Marker {
   }
 }
 
-export class Performance {
+export default class Performance {
   private static markers: Record<string, Marker> = {}
   private static _results: PerfResult[] = []
   private static _highlights: PerfHighlights

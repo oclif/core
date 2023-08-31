@@ -1,4 +1,4 @@
-import {ux} from '../../src'
+import ux from '../../src/ux'
 
 import {expect, fancy} from './fancy'
 const hyperlinker = require('hyperlinker')

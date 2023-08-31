@@ -1,10 +1,10 @@
 import {expect, fancy} from 'fancy-test'
-import * as fs from 'fs-extra'
+import {readFileSync} from 'node:fs'
 import * as path from 'path'
 import * as process from 'process'
 
 import {CLIError, config, ExitError} from '../../src/errors'
-import {handle} from '../../src/errors/handle'
+import handle from '../../src/errors/handle'
 import {exit as exitErrorThrower} from '../../src/errors'
 
 const errlog = path.join(__dirname, '../tmp/mytest/error.log')
@@ -106,7 +106,7 @@ describe('handle', () => {
     handle(new CLIError('uh oh!'))
     expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!\n`)
     await config.errorLogger!.flush()
-    expect(fs.readFileSync(errlog, 'utf8')).to.contain('Error: uh oh!')
+    expect(readFileSync(errlog, 'utf8')).to.contain('Error: uh oh!')
     expect(process.exitCode).to.equal(2)
   })
 
