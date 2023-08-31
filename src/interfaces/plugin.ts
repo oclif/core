@@ -22,6 +22,7 @@ export interface Options extends PluginOptions {
   channel?: string;
   version?: string;
   enablePerf?: boolean;
+  plugins?: Map<string, Plugin>
 }
 
 export interface Plugin {
