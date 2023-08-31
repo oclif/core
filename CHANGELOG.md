@@ -1,3 +1,39 @@
+# [2.14.0](https://github.com/oclif/core/compare/2.13.0...2.14.0) (2023-08-31)
+
+
+### Features
+
+* **perf:** remove semver, fs-extra ([#762](https://github.com/oclif/core/issues/762)) ([fdab7b4](https://github.com/oclif/core/commit/fdab7b4f7cc798384c0af8d2bf25e3792da7fcc3))
+
+
+
+# [2.13.0](https://github.com/oclif/core/compare/2.12.0...2.13.0) (2023-08-29)
+
+
+### Features
+
+* forwards compatibility for config reload ([#773](https://github.com/oclif/core/issues/773)) ([b751bbe](https://github.com/oclif/core/commit/b751bbecbbd25ebe56ef12f462f4f02e626e804b))
+
+
+
+# [2.12.0](https://github.com/oclif/core/compare/2.11.11...2.12.0) (2023-08-28)
+
+
+### Features
+
+* reload Config before running command ([#770](https://github.com/oclif/core/issues/770)) ([efd1f54](https://github.com/oclif/core/commit/efd1f546079d5d0c9abe26df372ab657cfd389b0))
+
+
+
+## [2.11.11](https://github.com/oclif/core/compare/2.11.10...2.11.11) (2023-08-28)
+
+
+### Bug Fixes
+
+* use configured help class in --help ([#768](https://github.com/oclif/core/issues/768)) ([b6c69f1](https://github.com/oclif/core/commit/b6c69f1f4f1760aee119ae660128ac45d59c828e))
+
+
+
 ## [2.11.10](https://github.com/oclif/core/compare/2.11.9...2.11.10) (2023-08-23)
 
 
