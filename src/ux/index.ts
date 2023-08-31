@@ -39,11 +39,11 @@ export default class ux {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
-    this.log(styled.styledObject(obj, keys))
+    this.info(styled.styledObject(obj, keys))
   }
 
   public static styledHeader(header: string): void {
-    this.log(chalk.dim('=== ') + chalk.bold(header) + '\n')
+    this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
   public static get styledJSON(): typeof styled.styledJSON {
@@ -71,13 +71,13 @@ export default class ux {
   }
 
   public static trace(format: string, ...args: string[]): void {
-    if (ux.config.outputLevel === 'trace') {
+    if (this.config.outputLevel === 'trace') {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
-    if (['trace', 'debug'].includes(ux.config.outputLevel)) {
+    if (['trace', 'debug'].includes(this.config.outputLevel)) {
       stdout.write(util.format(format, ...args) + '\n')
     }
   }
@@ -111,18 +111,6 @@ export default class ux {
 
   public static async flush(ms = 10_000): Promise<void> {
     await _flush.default(ms)
-  }
-
-  public static error(err: Error | string, options: {code?: string; exit?: number} = {}): never {
-    throw Errors.error(err, options)
-  }
-
-  public static exit(code = 0): never {
-    throw Errors.exit(code)
-  }
-
-  public static warn(err: Error | string): void {
-    Errors.warn(err)
   }
 }
 
