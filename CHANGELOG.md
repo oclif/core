@@ -1,3 +1,48 @@
+# [2.13.0](https://github.com/oclif/core/compare/2.12.0...2.13.0) (2023-08-29)
+
+
+### Features
+
+* forwards compatibility for config reload ([#773](https://github.com/oclif/core/issues/773)) ([b751bbe](https://github.com/oclif/core/commit/b751bbecbbd25ebe56ef12f462f4f02e626e804b))
+
+
+
+# [2.12.0](https://github.com/oclif/core/compare/2.11.11...2.12.0) (2023-08-28)
+
+
+### Features
+
+* reload Config before running command ([#770](https://github.com/oclif/core/issues/770)) ([efd1f54](https://github.com/oclif/core/commit/efd1f546079d5d0c9abe26df372ab657cfd389b0))
+
+
+
+## [2.11.11](https://github.com/oclif/core/compare/2.11.10...2.11.11) (2023-08-28)
+
+
+### Bug Fixes
+
+* use configured help class in --help ([#768](https://github.com/oclif/core/issues/768)) ([b6c69f1](https://github.com/oclif/core/commit/b6c69f1f4f1760aee119ae660128ac45d59c828e))
+
+
+
+## [2.11.10](https://github.com/oclif/core/compare/2.11.9...2.11.10) (2023-08-23)
+
+
+### Bug Fixes
+
+* add getPluginsList to Config interface ([cba7a75](https://github.com/oclif/core/commit/cba7a755cf5d0ff4886edd0db33d911441979984))
+
+
+
+## [2.11.9](https://github.com/oclif/core/compare/2.11.8...2.11.9) (2023-08-23)
+
+
+### Bug Fixes
+
+* add getPluginsList ([b01083f](https://github.com/oclif/core/commit/b01083fb7132f3b3b35b98a6d43996b1713ca5ef))
+
+
+
 ## [2.11.8](https://github.com/oclif/core/compare/2.11.7...2.11.8) (2023-08-08)
 
 
