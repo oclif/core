@@ -174,9 +174,9 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   const cacheDir = path.join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
   const configDir = path.join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
 
-  await mkdir(dataDir)
-  await mkdir(configDir)
-  await mkdir(cacheDir)
+  await mkdir(dataDir, {recursive: true})
+  await mkdir(configDir, {recursive: true})
+  await mkdir(cacheDir, {recursive: true})
 
   process.env[`${bin}_DATA_DIR`] = dataDir
   process.env[`${bin}_CONFIG_DIR`] = configDir
