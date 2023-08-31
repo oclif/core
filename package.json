@@ -90,6 +90,7 @@
     "oclif"
   ],
   "license": "MIT",
+  "main": "./lib/index.js",
   "exports": {
     ".": "./lib/index.js",
     "./execute": "./lib/execute.js",
