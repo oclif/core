@@ -96,10 +96,8 @@
     "./execute": "./lib/execute.js",
     "./flush": "./lib/ux/flush.js",
     "./handle": "./lib/errors/handle.js",
-    "./interfaces": "./lib/interfaces/index.js",
     "./run": "./lib/main.js",
-    "./settings": "./lib/settings.js",
-    "./ux": "./lib/ux/index.js"
+    "./settings": "./lib/settings.js"
   },
   "repository": "oclif/core",
   "oclif": {

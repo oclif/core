@@ -8,7 +8,6 @@ Migrating to @oclif/core@V3
     - [`Config.plugins`](#configplugins)
     - [Readonly properties on `Config`](#readonly-properties-on-config)
     - [Private methods on `Plugin`](#private-methods-on-plugin)
-    - [`ux` exports](#ux-exports)
     - [`global['cli-ux']` -\> `global.ux`](#globalcli-ux---globalux)
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
@@ -74,29 +73,6 @@ Various properties on `Config` are now `readonly`
 ### Private methods on `Plugin`
 The `_manifest` and `warn` methods on `Plugin` are now `private`
 
-### `ux` exports
-
-The following exports are no longer available on `ux`:
-
-- `ActionBase`
-- `config`
-- `Config`
-- `ExitError`
-- `IPromptOptions`
-- `Table`
-
-If you still need these you can import them from `@oclif/core/ux`:
-
-```typescript
-import {
-  ActionBase,
-  config,
-  Config,
-  ExitError,
-  IPromptOptions,
-  Table,
-} from '@oclif/core/ux'
-```
 
 ### `global['cli-ux']` -> `global.ux`
 
@@ -122,7 +98,7 @@ export const mySensitiveFlag = Flags.string({
 });
 ```
 
-Version 3 removes the `isWritingManifest` parameter in favor of a flag and arg property, `noCacheDefault`. Setting it to true will automatically keep it from being cached in the manfiest.
+Version 3 removes the `isWritingManifest` parameter in favor of a flag and arg property, `noCacheDefault`. Setting it to true will automatically keep it from being cached in the manifest.
 
 ```typescript
 export const mySensitiveFlag = Flags.string({
@@ -137,29 +113,27 @@ export const mySensitiveFlag = Flags.string({
 ## Features 🎉
 
 ### Exports
-The `exports` property in the package.json are now used for exporting individual pieces of functionality.
+The `exports` property in the package.json are now used for exporting a few individual pieces of functionality.
 
 The main export should continue to work as it did in v2:
 
 ```typescript
-import {Interfaces, ux} from '@oclif/core'
+import {handle, flush} from '@oclif/core'
 ```
 
 But you can now import individual modules if desired:
 
 ```typescript
-import Interfaces from '@oclif/core/interfaces'
-import ux from '@oclif/core/ux'
+import handle from '@oclif/core/handle'
+import flush from '@oclif/core/flush'
 ```
 
 These are the exports that are available:
 `@oclif/core/execute`
 `@oclif/core/flush`
 `@oclif/core/handle`
-`@oclif/core/interfaces`
 `@oclif/core/run`
 `@oclif/core/settings`
-`@oclif/core/ux`
 
 **You will need to set moduleResolution to Node16 in your tsconfig.json to use this feature.**
 

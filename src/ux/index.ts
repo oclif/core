@@ -11,7 +11,7 @@ export * from './styled/table'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
 import {stdout} from './stream'
-import flush from './flush'
+import * as _flush from './flush'
 
 const hyperlinker = require('hyperlinker')
 
@@ -110,7 +110,7 @@ export default class ux {
   }
 
   public static async flush(ms = 10_000): Promise<void> {
-    await flush(ms)
+    await _flush.default(ms)
   }
 
   public static error(err: Error | string, options: {code?: string; exit?: number} = {}): never {
@@ -126,7 +126,52 @@ export default class ux {
   }
 }
 
+const action = ux.action
+const annotation = ux.annotation
+const anykey = ux.anykey
+const confirm = ux.confirm
+const debug = ux.debug
+const done = ux.done
+const error = Errors.error
+const exit = Errors.exit
+const flush = ux.flush
+const info = ux.info
+const log = ux.log
+const progress = ux.progress
+const prompt = ux.prompt
+const styledHeader = ux.styledHeader
+const styledJSON = ux.styledJSON
+const styledObject = ux.styledObject
+const table = ux.table
+const trace = ux.trace
+const tree = ux.tree
+const url = ux.url
+const wait = ux.wait
+const warn = Errors.warn
+
 export {
+  action,
+  annotation,
+  anykey,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
+  flush,
+  info,
+  log,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
+  trace,
+  tree,
+  url,
+  wait,
+  warn,
   ActionBase,
   config,
   Config,
