@@ -1,14 +1,8 @@
 import * as path from 'path'
 import * as url from 'url'
-import * as fs from 'fs-extra'
-
+import * as fs from 'fs'
 import {ModuleLoadError} from './errors'
-<<<<<<< HEAD
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
-=======
-import {Config as IConfig} from './interfaces'
-import {Plugin as IPlugin} from './interfaces'
->>>>>>> prerelease/v3
 import {tsPath} from './config'
 
 const getPackageType = require('get-package-type')
