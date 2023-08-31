@@ -18,9 +18,8 @@ import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import {Performance} from '../performance'
 import {settings} from '../settings'
-import {userInfo as osUserInfo} from 'node:os'
-import {sep} from 'node:path'
-import {lt} from 'semver'
+import {userInfo as osUserInfo} from 'os'
+import {sep} from 'path'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -139,6 +138,8 @@ export class Config implements IConfig {
 
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) {
+      const {lt} = await import('semver')
+
       const currentConfigBase = BASE.replace('@oclif/core@', '')
       const incomingConfigBase = opts._base.replace('@oclif/core@', '')
       /**
