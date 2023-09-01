@@ -100,7 +100,6 @@ export interface Config {
    * npm registry to use for installing plugins
    */
   npmRegistry?: string;
-  userPJSON?: PJSON.User;
   plugins: Plugin[];
   binPath?: string;
   /**
