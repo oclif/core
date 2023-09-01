@@ -1,3 +1,12 @@
+# [2.15.0](https://github.com/oclif/core/compare/2.14.0...2.15.0) (2023-09-01)
+
+
+### Features
+
+* add PluginLoader class ([#774](https://github.com/oclif/core/issues/774)) ([b31665d](https://github.com/oclif/core/commit/b31665d809f9cbaddcad0905bec466ebc738fb79))
+
+
+
 # [2.14.0](https://github.com/oclif/core/compare/2.13.0...2.14.0) (2023-08-31)
 
 
