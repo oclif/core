@@ -1,7 +1,7 @@
 import {fileURLToPath} from 'url'
 import * as chalk from 'chalk'
 import {format, inspect} from 'util'
-import ux from './ux'
+import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -27,7 +27,7 @@ import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
 import {requireJson} from './util'
 import {PJSON} from './interfaces'
-import {stdout, stderr} from './ux/stream'
+import {stdout, stderr} from './cli-ux/stream'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 

@@ -1,6 +1,6 @@
 import * as chalk from 'chalk'
 
-import ux from '../index'
+import {ux} from '../index'
 
 export default function styledJSON(obj: unknown): void {
   const json = JSON.stringify(obj, null, 2)

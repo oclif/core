@@ -2,7 +2,7 @@ import {expect, fancy as base, FancyTypes} from 'fancy-test'
 import {rm} from 'node:fs/promises'
 import {join} from 'node:path'
 
-import ux from '../../src/ux'
+import {ux} from '../../src/cli-ux'
 
 export {
   expect,

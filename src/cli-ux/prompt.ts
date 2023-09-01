@@ -93,6 +93,7 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
     ...inputOptions,
   }
   const passwordPrompt = require('password-prompt')
+
   switch (options.type) {
   case 'normal':
     return normal(options)

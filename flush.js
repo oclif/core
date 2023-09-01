@@ -1,1 +1,1 @@
-module.exports = require('./lib/ux/flush').flush
+module.exports = require('./lib/cli-ux/flush').flush

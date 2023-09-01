@@ -9,7 +9,7 @@ import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFrom
 import {HelpFormatter} from './formatter'
 import {toCached} from '../config/config'
 import {Command} from '../command'
-import {stdout} from '../ux/stream'
+import {stdout} from '../cli-ux/stream'
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 
