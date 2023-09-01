@@ -1,10 +1,10 @@
-import {CLIError, error, exit, warn} from '../errors'
-import * as ejs from 'ejs'
-import * as os from 'os'
-import * as path from 'path'
-import {fileURLToPath, URL} from 'url'
-import {format} from 'util'
+import {fileURLToPath, URL} from 'node:url'
+import {format} from 'node:util'
+import {userInfo as osUserInfo, arch, platform, homedir, tmpdir, type, release} from 'node:os'
+import {sep, join} from 'node:path'
 
+import * as ejs from 'ejs'
+import {CLIError, error, exit, warn} from '../errors'
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
@@ -17,8 +17,6 @@ import {CompletableOptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import Performance from '../performance'
 import {settings} from '../settings'
-import {userInfo as osUserInfo} from 'node:os'
-import {sep} from 'node:path'
 import PluginLoader from './plugin-loader'
 
 // eslint-disable-next-line new-cap
@@ -171,8 +169,8 @@ export class Config implements IConfig {
     this.channel = this.options.channel || channelFromVersion(this.version)
     this.valid = Config._rootPlugin.valid
 
-    this.arch = (os.arch() === 'ia32' ? 'x86' : os.arch() as any)
-    this.platform = WSL ? 'wsl' : os.platform() as any
+    this.arch = (arch() === 'ia32' ? 'x86' : arch() as any)
+    this.platform = WSL ? 'wsl' : platform() as any
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
@@ -186,11 +184,11 @@ export class Config implements IConfig {
     this.shell = this._shell()
     this.debug = this._debug()
 
-    this.home = process.env.HOME || (this.windows && this.windowsHome()) || os.homedir() || os.tmpdir()
+    this.home = process.env.HOME || (this.windows && this.windowsHome()) || homedir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
     this.configDir = this.scopedEnvVar('CONFIG_DIR') || this.dir('config')
     this.dataDir = this.scopedEnvVar('DATA_DIR') || this.dir('data')
-    this.errlog = path.join(this.cacheDir, 'error.log')
+    this.errlog = join(this.cacheDir, 'error.log')
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
@@ -527,7 +525,7 @@ export class Config implements IConfig {
       architecture,
       nodeVersion,
       pluginVersions: Object.fromEntries([...this.plugins.values()].map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
-      osVersion: `${os.type()} ${os.release()}`,
+      osVersion: `${type()} ${release()}`,
       shell: this.shell,
       rootPath: this.root,
     }
@@ -544,7 +542,7 @@ export class Config implements IConfig {
     const host = this.pjson.oclif.update.s3.host
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
-    url.pathname = path.join(url.pathname, key)
+    url.pathname = join(url.pathname, key)
     return url.toString()
   }
 
@@ -555,8 +553,8 @@ export class Config implements IConfig {
   protected dir(category: 'cache' | 'data' | 'config'): string {
     const base = process.env[`XDG_${category.toUpperCase()}_HOME`] ||
       (this.windows && process.env.LOCALAPPDATA) ||
-      path.join(this.home, category === 'data' ? '.local/share' : '.' + category)
-    return path.join(base, this.dirname)
+      join(this.home, category === 'data' ? '.local/share' : '.' + category)
+    return join(base, this.dirname)
   }
 
   protected windowsHome(): string | undefined {
@@ -564,7 +562,7 @@ export class Config implements IConfig {
   }
 
   protected windowsHomedriveHome(): string | undefined {
-    return (process.env.HOMEDRIVE && process.env.HOMEPATH && path.join(process.env.HOMEDRIVE!, process.env.HOMEPATH!))
+    return (process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!))
   }
 
   protected windowsUserprofileHome(): string | undefined {
@@ -572,7 +570,7 @@ export class Config implements IConfig {
   }
 
   protected macosCacheDir(): string | undefined {
-    return (this.platform === 'darwin' && path.join(this.home, 'Library', 'Caches', this.dirname)) || undefined
+    return (this.platform === 'darwin' && join(this.home, 'Library', 'Caches', this.dirname)) || undefined
   }
 
   protected _shell(): string {
