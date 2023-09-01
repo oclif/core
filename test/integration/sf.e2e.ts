@@ -15,7 +15,15 @@ describe('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
-    executor = await setup(__filename, {repo: 'https://github.com/salesforcecli/cli'})
+    executor = await setup(__filename, {
+      repo: 'https://github.com/salesforcecli/cli',
+      // Allowing failed install here because it let's attempt to run the tests
+      // even if there's a linting error caused by the code changes. This is only
+      // acceptable since we're crossing major versions at the moment. It should
+      // be removed as soon as sf uses v3.
+      allowFailedInstall: true,
+      compileCmd: 'yarn compile',
+    })
   })
 
   it('should show custom help', async () => {

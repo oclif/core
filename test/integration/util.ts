@@ -23,6 +23,8 @@ export type SetupOptions = {
   repo: string;
   plugins?: string[];
   subDir?: string;
+  allowFailedInstall?: boolean;
+  compileCmd?: string;
 }
 
 export type ExecutorOptions = {
@@ -187,15 +189,16 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
   const yarnInstallRes = await executor.executeInTestDir('yarn install --force')
-  if (yarnInstallRes.code !== 0) {
+  if (yarnInstallRes.code !== 0 && !options.allowFailedInstall) {
     console.error(yarnInstallRes?.error)
     throw new Error('Failed to run `yarn install`')
   }
 
-  const yarnBuildRes = await executor.executeInTestDir('yarn build')
-  if (yarnBuildRes.code !== 0) {
-    console.error(yarnBuildRes?.error)
-    throw new Error('Failed to run `yarn build`')
+  const compileCmd = options.compileCmd ?? 'yarn build'
+  const compileRes = await executor.executeInTestDir(compileCmd)
+  if (compileRes.code !== 0) {
+    console.error(compileRes?.error)
+    throw new Error(`Failed to run \`${compileCmd}\``)
   }
 
   return executor
