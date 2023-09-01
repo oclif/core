@@ -7,15 +7,14 @@ import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
 import * as styled from './styled'
 import {Table} from './styled'
-export * from './styled/table'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
 import {stdout} from './stream'
-import * as _flush from './flush'
+import {flush as _flush} from './flush'
 
 const hyperlinker = require('hyperlinker')
 
-export default class ux {
+export class ux {
   public static config: Config = config
 
   public static get prompt(): typeof uxPrompt.prompt {
@@ -110,7 +109,7 @@ export default class ux {
   }
 
   public static async flush(ms = 10_000): Promise<void> {
-    await _flush.default(ms)
+    await _flush(ms)
   }
 }
 
@@ -139,15 +138,20 @@ const warn = Errors.warn
 
 export {
   action,
+  ActionBase,
   annotation,
   anykey,
+  config,
+  Config,
   confirm,
   debug,
   done,
   error,
   exit,
+  ExitError,
   flush,
   info,
+  IPromptOptions,
   log,
   progress,
   prompt,
@@ -155,17 +159,12 @@ export {
   styledJSON,
   styledObject,
   table,
+  Table,
   trace,
   tree,
   url,
   wait,
   warn,
-  ActionBase,
-  config,
-  Config,
-  ExitError,
-  IPromptOptions,
-  Table,
 }
 
 const uxProcessExitHandler = async () => {

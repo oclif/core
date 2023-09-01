@@ -1,5 +1,5 @@
-import {stdout, stderr} from './ux/stream'
-import settings from './settings'
+import {stdout, stderr} from './cli-ux/stream'
+import {settings} from './settings'
 
 function termwidth(stream: any): number {
   if (!stream.isTTY) {

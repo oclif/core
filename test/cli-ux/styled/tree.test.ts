@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 
-import ux from '../../../src/ux'
+import {ux} from '../../../src/cli-ux'
 
 describe('styled/tree', () => {
   fancy

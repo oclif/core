@@ -24,6 +24,6 @@ async function _flush() {
   return p
 }
 
-export default async function flush(ms = 10_000): Promise<void> {
+export async function flush(ms = 10_000): Promise<void> {
   await timeout(_flush(), ms)
 }

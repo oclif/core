@@ -18,7 +18,7 @@ See the [v3 migration guide](./guides/V3_MIGRATION.md) for an overview of breaki
 CLI UX
 =====
 
-The [ux README](./src/ux/README.md) contains detailed usage examples of using the `ux` export.
+The [ux README](./src/cli-ux/README.md) contains detailed usage examples of using the `ux` export.
 
 Usage
 =====
