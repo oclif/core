@@ -111,7 +111,6 @@ export class Config implements IConfig {
   private _topics = new Map<string, Topic>()
 
   private _commandIDs!: string[]
-
   private pluginLoader!: PluginLoader
 
   private static _rootPlugin: IPlugin

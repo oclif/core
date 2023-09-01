@@ -80,5 +80,9 @@ export interface Plugin {
 
   findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;
+<<<<<<< HEAD
   load(): Promise<void>;
+=======
+  load(isWritingManifest?: boolean): Promise<void>;
+>>>>>>> main
 }
