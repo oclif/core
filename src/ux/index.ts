@@ -11,7 +11,7 @@ export * from './styled/table'
 import * as uxPrompt from './prompt'
 import uxWait from './wait'
 import {stdout} from './stream'
-import * as _flush from './flush'
+import {flush as _flush} from './flush'
 
 const hyperlinker = require('hyperlinker')
 
@@ -110,7 +110,7 @@ export default class ux {
   }
 
   public static async flush(ms = 10_000): Promise<void> {
-    await _flush.default(ms)
+    await _flush(ms)
   }
 }
 

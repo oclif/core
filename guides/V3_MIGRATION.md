@@ -12,7 +12,6 @@ Migrating to @oclif/core@V3
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
   - [Features 🎉](#features-)
-    - [Exports](#exports)
     - [Cache Flexible taxonomy Command Permutations](#cache-flexible-taxonomy-command-permutations)
 
 
@@ -111,31 +110,6 @@ export const mySensitiveFlag = Flags.string({
 
 
 ## Features 🎉
-
-### Exports
-The `exports` property in the package.json are now used for exporting a few individual pieces of functionality.
-
-The main export should continue to work as it did in v2:
-
-```typescript
-import {handle, flush} from '@oclif/core'
-```
-
-But you can now import individual modules if desired:
-
-```typescript
-import handle from '@oclif/core/handle'
-import flush from '@oclif/core/flush'
-```
-
-These are the exports that are available:
-`@oclif/core/execute`
-`@oclif/core/flush`
-`@oclif/core/handle`
-`@oclif/core/run`
-`@oclif/core/settings`
-
-**You will need to set moduleResolution to Node16 in your tsconfig.json to use this feature.**
 
 ### Cache Flexible taxonomy Command Permutations
 

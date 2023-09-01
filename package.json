@@ -83,7 +83,10 @@
     "node": ">=16.0.0"
   },
   "files": [
-    "/lib"
+    "/lib",
+    "/flush.js",
+    "/flush.d.ts",
+    "/handle.js"
   ],
   "homepage": "https://github.com/oclif/core",
   "keywords": [
@@ -91,14 +94,6 @@
   ],
   "license": "MIT",
   "main": "./lib/index.js",
-  "exports": {
-    ".": "./lib/index.js",
-    "./execute": "./lib/execute.js",
-    "./flush": "./lib/ux/flush.js",
-    "./handle": "./lib/errors/handle.js",
-    "./run": "./lib/main.js",
-    "./settings": "./lib/settings.js"
-  },
   "repository": "oclif/core",
   "oclif": {
     "bin": "oclif",

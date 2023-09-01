@@ -1,4 +1,4 @@
-export {default as handle} from './handle'
+export {handle} from './handle'
 export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
 export {CLIError} from './errors/cli'

@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as process from 'process'
 
 import {CLIError, config, ExitError} from '../../src/errors'
-import handle from '../../src/errors/handle'
+import {handle} from '../../src/errors/handle'
 import {exit as exitErrorThrower} from '../../src/errors'
 
 const errlog = path.join(__dirname, '../tmp/mytest/error.log')

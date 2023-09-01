@@ -1,7 +1,7 @@
 import {Command} from './command'
 import run from './main'
 import execute from './execute'
-import handle from './errors/handle'
+import {handle} from './errors/handle'
 import {Config, Plugin, tsPath, toCached} from './config'
 import * as Interfaces from './interfaces'
 import * as Errors from './errors'
@@ -11,12 +11,12 @@ import {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 import {toStandardizedId, toConfiguredId} from './help/util'
 import * as Parser from './parser'
 import {Hook} from './interfaces/hooks'
-import settings, {Settings} from './settings'
+import {settings, Settings} from './settings'
 import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
 import * as ux from './ux'
 import {stderr, stdout} from './ux/stream'
 import Performance from './performance'
-import flush from './ux/flush'
+import {flush} from './ux/flush'
 
 export {
   Args,

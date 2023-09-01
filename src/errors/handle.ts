@@ -7,7 +7,7 @@ import clean = require('clean-stack')
 import {CLIError} from './errors/cli'
 import {OclifError, PrettyPrintableError} from '../interfaces'
 
-export default async function handle(err: Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}): Promise<void> {
+export async function handle(err: Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}): Promise<void> {
   try {
     if (!err) err = new CLIError('no error?')
     if (err.message === 'SIGINT') process.exit(1)
