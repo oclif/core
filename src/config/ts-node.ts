@@ -6,7 +6,6 @@ import {TSConfig, Plugin} from '../interfaces'
 import {settings} from '../settings'
 import {isProd} from '../util'
 import {Debug} from './util'
-import {Config} from './config'
 import {memoizedWarn} from '../errors'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
@@ -110,7 +109,6 @@ function registerTSNode(root: string): TSConfig | undefined {
  */
 export function tsPath(root: string, orig: string, plugin: Plugin): string
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
-// eslint-disable-next-line complexity
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
   if (!orig) return orig
   orig = orig.startsWith(root) ? orig : path.join(root, orig)
@@ -122,30 +120,19 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
     return orig
   }
 
-  // Skip ts-node registration if plugin is an ESM plugin executing from a CJS plugin
-  if (plugin?.moduleType === 'module' && Config.rootPlugin?.moduleType === 'commonjs') {
+  // Skip ts-node registration for ESM plugins.
+  // The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
+  // See the following:
+  // - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
+  // - https://github.com/nodejs/node/issues/49432
+  // - https://github.com/nodejs/node/pull/49407
+  // - https://github.com/nodejs/node/issues/34049
+  if (plugin?.moduleType === 'module') {
     debug(`Skipping ts-node registration for ${root} because it's an ESM module but the root plugin is CommonJS`)
     if (plugin.type === 'link')
-      memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-compiled from a CommonJS root plugin. Existing compiled source will be used instead.`)
+      memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
 
     return orig
-  }
-
-  // If plugin is an ESM plugin being executed from an ESM root plugin, check to see if ts-node/esm loader has been set
-  // either in the NODE_OPTIONS env var or from the exec args. If the ts-node/esm loader has NOT been loaded then we want
-  // to skip ts-node registration so that it falls back on the compiled source.
-  if (plugin?.moduleType === 'module') {
-    const tsNodeEsmLoaderInExecArgv = process.execArgv.includes('--loader') && process.execArgv.includes('ts-node/esm')
-    const tsNodeEsmLoaderInNodeOptions = process.env.NODE_OPTIONS?.includes('--loader=ts-node/esm') ?? false
-    if (!tsNodeEsmLoaderInExecArgv && !tsNodeEsmLoaderInNodeOptions) {
-      debug(`Skipping ts-node registration for ${root} because it's an ESM module but the ts-node/esm loader hasn't been run`)
-      debug('try setting NODE_OPTIONS="--loader ts-node/esm" in your environment.')
-      if (plugin.type === 'link') {
-        memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-compiled without setting NODE_OPTIONS="--loader=ts-node/esm" in the environment. Existing compiled source will be used instead.`)
-      }
-
-      return orig
-    }
   }
 
   if (settings.tsnodeEnabled === undefined && isProd() && plugin?.type !== 'link') {

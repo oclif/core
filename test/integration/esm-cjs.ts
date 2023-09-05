@@ -365,34 +365,34 @@ type CleanUpOptions = {
     await test('Link ESM plugin to ESM root plugin', async () => {
       const plugin = PLUGINS.esm2
 
-      const linkedPlugin = await linkPlugin({executor: esmExecutor, plugin, script: 'run'})
+      await linkPlugin({executor: esmExecutor, plugin, script: 'run'})
       // test bin/run
-      // NOTE: this also tests that the compiled source is used when ts-node/esm loader is not specified
       await runCommand({
         executor: esmExecutor,
         plugin,
         script: 'run',
         expectStrings: [plugin.commandText, plugin.hookText],
       })
-      // test un-compiled changes with bin/run
-      await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
-      await runCommand({
-        executor: esmExecutor,
-        plugin,
-        script: 'run',
-        expectStrings: ['howdy', plugin.hookText],
-        env: {NODE_OPTIONS: '--loader=ts-node/esm'},
-      })
 
-      // test un-compiled changes with bin/dev
-      await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
-      await runCommand({
-        executor: esmExecutor,
-        plugin,
-        script: 'dev',
-        expectStrings: ['cheers', plugin.hookText],
-        env: {NODE_OPTIONS: '--loader=ts-node/esm'},
-      })
+      // Skipping these because we decided to not support auto-transpiling ESM plugins at this time.
+      // // test un-compiled changes with bin/run
+      // await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
+      // await runCommand({
+      //   executor: esmExecutor,
+      //   plugin,
+      //   script: 'run',
+      //   expectStrings: ['howdy', plugin.hookText],
+      //   env: {NODE_OPTIONS: '--loader=ts-node/esm'},
+      // })
+      // // test un-compiled changes with bin/dev
+      // await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
+      // await runCommand({
+      //   executor: esmExecutor,
+      //   plugin,
+      //   script: 'dev',
+      //   expectStrings: ['cheers', plugin.hookText],
+      //   env: {NODE_OPTIONS: '--loader=ts-node/esm'},
+      // })
 
       await cleanUp({executor: esmExecutor, plugin, script: 'run'})
     })
