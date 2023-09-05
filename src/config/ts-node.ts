@@ -128,7 +128,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   // - https://github.com/nodejs/node/pull/49407
   // - https://github.com/nodejs/node/issues/34049
   if (plugin?.moduleType === 'module') {
-    debug(`Skipping ts-node registration for ${root} because it's an ESM module but the root plugin is CommonJS`)
+    debug(`Skipping ts-node registration for ${root} because it's an ESM module`)
     if (plugin.type === 'link')
       memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
 
