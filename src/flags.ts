@@ -31,7 +31,7 @@ export function custom<T, P = Record<string, unknown>>(
 ): FlagDefinition<T, P>
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
-  return (options: any = defaults) => {
+  return (options: any = {}) => {
     return {
       parse: async (input, _ctx, _opts) => input,
       ...defaults,
@@ -151,7 +151,7 @@ export function option<T extends readonly string[] = readonly string[], P extend
 export function option<T extends readonly string[], P extends Record<string, unknown>>(
   defaults: Partial<OptionFlagDefaults<ElementType<T>, P>> & {options: T},
 ): FlagDefinition<typeof defaults.options[number], P> {
-  return (options: any = defaults) => {
+  return (options: any = {}) => {
     return {
       parse: async (input, _ctx, _opts) => input,
       ...defaults,
