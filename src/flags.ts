@@ -1,3 +1,4 @@
+/* eslint-disable valid-jsdoc */
 import {URL} from 'url'
 import {loadHelpClass} from './help'
 import {BooleanFlag} from './interfaces'
@@ -30,7 +31,7 @@ export function custom<T, P = Record<string, unknown>>(
 ): FlagDefinition<T, P>
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
-  return (options: any = {}) => {
+  return (options: any = defaults) => {
     return {
       parse: async (input, _ctx, _opts) => input,
       ...defaults,
@@ -91,7 +92,7 @@ export const url = custom<URL>({
     try {
       return new URL(input)
     } catch {
-      throw new Error(`Expected a valid url but received: ${input}`)
+      throw new CLIError(`Expected a valid url but received: ${input}`)
     }
   },
 })
@@ -120,4 +121,44 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
       cmd.exit(0)
     },
   })
+}
+
+type ElementType<T extends ArrayLike<unknown>> = T[number];
+
+export function option<T extends readonly string[], P extends Record<string, unknown>>(
+  defaults: {parse: FlagParser<ElementType<T>, string, P>, multiple: true, options: T} & Partial<OptionFlagDefaults<ElementType<T>, P, true>>,
+): FlagDefinition<typeof defaults.options[number], P>
+
+export function option<T extends readonly string[], P extends Record<string, unknown>>(
+  defaults: {parse: FlagParser<ElementType<T>, string, P>, options: T} & Partial<OptionFlagDefaults<ElementType<T>, P>>,
+): FlagDefinition<typeof defaults.options[number], P>
+
+export function option<T extends readonly string[] = readonly string[], P extends Record<string, unknown> = Record<string, unknown>>(
+  defaults: Partial<OptionFlagDefaults<ElementType<T>, P>> & {options: T}
+): FlagDefinition<typeof defaults.options[number], P>
+/**
+ * Create a custom flag that infers the flag type from the provided options.
+ *
+ * @example
+ * export default class MyCommand extends Command {
+ *   static flags = {
+ *     name: Flags.option({
+ *       options: ['foo', 'bar'] as const,
+ *     })(),
+ *   }
+ * }
+ */
+export function option<T extends readonly string[], P extends Record<string, unknown>>(
+  defaults: Partial<OptionFlagDefaults<ElementType<T>, P>> & {options: T},
+): FlagDefinition<typeof defaults.options[number], P> {
+  return (options: any = defaults) => {
+    return {
+      parse: async (input, _ctx, _opts) => input,
+      ...defaults,
+      ...options,
+      input: [] as string[],
+      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
+      type: 'option',
+    }
+  }
 }

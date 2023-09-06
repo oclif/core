@@ -209,7 +209,7 @@ export type BooleanFlagProps = FlagProps & {
 export type OptionFlagProps = FlagProps & {
   type: 'option';
   helpValue?: string;
-  options?: string[];
+  options?: readonly string[];
   multiple?: boolean;
 }
 

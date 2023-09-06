@@ -37,6 +37,8 @@ export const arrayFlag = Flags.custom<string[]>({
   multiple: true,
 })
 
+const options = ['foo', 'bar'] as const
+
 class MyCommand extends BaseCommand {
   static description = 'describe the command here'
 
@@ -124,6 +126,26 @@ class MyCommand extends BaseCommand {
     optionalArrayFlag: arrayFlag(),
     requiredArrayFlag: arrayFlag({required: true}),
     defaultArrayFlag: arrayFlag({default: ['foo', 'bar']}),
+
+    optionalOption: Flags.option({
+      options,
+    })(),
+    requiredOption: Flags.option({
+      options,
+    })({required: true}),
+    defaultOption: Flags.option({
+      options,
+    })({default: 'foo'}),
+
+    optionalMultiOption: Flags.option({
+      options,
+    })({multiple: true}),
+    requiredMultiOption: Flags.option({
+      options,
+    })({required: true, multiple: true}),
+    defaultMultiOption: Flags.option({
+      options,
+    })({default: ['foo'], multiple: true}),
   }
 
   public static '--' = true
@@ -227,6 +249,24 @@ class MyCommand extends BaseCommand {
     expectNotType<undefined>(this.flags.requiredCustomFlagWithRequiredProp)
     expectType<number>(this.flags.defaultCustomFlagWithRequiredProp)
     expectNotType<undefined>(this.flags.defaultCustomFlagWithRequiredProp)
+
+    expectType<string[]>(this.flags.requiredArrayFlag)
+    expectNotType<undefined>(this.flags.requiredArrayFlag)
+    expectType<string[]>(this.flags.defaultArrayFlag)
+    expectNotType<undefined>(this.flags.defaultArrayFlag)
+    expectType<string[] | undefined>(this.flags.optionalArrayFlag)
+
+    expectType<typeof options[number]>(this.flags.requiredOption)
+    expectNotType<undefined>(this.flags.requiredOption)
+    expectType<typeof options[number]>(this.flags.defaultOption)
+    expectNotType<undefined>(this.flags.defaultOption)
+    expectType<typeof options[number] | undefined>(this.flags.optionalOption)
+
+    expectType<typeof options[number][]>(this.flags.requiredMultiOption)
+    expectNotType<undefined>(this.flags.requiredMultiOption)
+    expectType<typeof options[number][]>(this.flags.defaultMultiOption)
+    expectNotType<undefined>(this.flags.defaultMultiOption)
+    expectType<typeof options[number][] | undefined>(this.flags.optionalMultiOption)
 
     return result.flags
   }
