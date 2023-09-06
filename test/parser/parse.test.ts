@@ -1748,5 +1748,16 @@ See more help with --help`)
       })
       expect(out.flags.foo).to.equal(true)
     })
+
+    it('works with aliased short char', async () => {
+      const out = await parse(['-b'], {
+        flags: {
+          foo: Flags.boolean({
+            charAliases: ['b'],
+          }),
+        },
+      })
+      expect(out.flags.foo).to.equal(true)
+    })
   })
 })

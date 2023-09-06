@@ -92,7 +92,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
     this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
-      return (flag.aliases ?? []).map(a => [a, flag])
+      return ([...flag.aliases ?? [], ...flag.charAliases ?? []]).map(a => [a, flag])
     }))
   }
 

@@ -155,6 +155,10 @@ export type FlagProps = {
    */
   aliases?: string[];
   /**
+     * Alternate short chars that can be used for this flag.
+     */
+  charAliases?: (AlphabetLowercase | AlphabetUppercase)[];
+  /**
    * Emit deprecation warning when a flag alias is provided
    */
   deprecateAliases?: boolean

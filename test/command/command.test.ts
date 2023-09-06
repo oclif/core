@@ -137,6 +137,7 @@ describe('command', () => {
           flaga: {
             aliases: undefined,
             char: undefined,
+            charAliases: undefined,
             description: undefined,
             dependsOn: undefined,
             deprecateAliases: undefined,
@@ -157,6 +158,7 @@ describe('command', () => {
           flagb: {
             aliases: undefined,
             char: 'b',
+            charAliases: undefined,
             description: 'flagb desc',
             dependsOn: undefined,
             deprecateAliases: undefined,
@@ -180,6 +182,7 @@ describe('command', () => {
           flagc: {
             aliases: undefined,
             char: 'c',
+            charAliases: undefined,
             default: 2,
             delimiter: undefined,
             dependsOn: undefined,

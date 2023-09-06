@@ -866,6 +866,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCach
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        charAliases: flag.charAliases,
         delimiter: flag.delimiter,
         noCacheDefault: flag.noCacheDefault,
       }
@@ -890,6 +891,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCach
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        charAliases: flag.charAliases,
         delimiter: flag.delimiter,
         noCacheDefault: flag.noCacheDefault,
       }

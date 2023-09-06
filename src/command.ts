@@ -315,7 +315,7 @@ export abstract class Command {
       }
 
       const deprecateAliases = flagDef?.deprecateAliases
-      const aliases = (flagDef?.aliases ?? []).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+      const aliases = ([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
       if (deprecateAliases && aliases.length > 0) {
         const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
         for (const alias of foundAliases) {
