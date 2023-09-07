@@ -137,7 +137,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
     return orig
   }
 
-  if (isProduction && plugin?.type !== 'link') {
+  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
     debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }
