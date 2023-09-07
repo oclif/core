@@ -112,6 +112,10 @@ export default class PluginLoader {
           opts.root = plugin.root || opts.root
         }
 
+        if (parent) {
+          opts.parent = parent
+        }
+
         if (this.plugins.has(name)) return
         const pluginMarker = Performance.mark(`plugin.load#${name}`)
         const instance = new Plugin.Plugin(opts)

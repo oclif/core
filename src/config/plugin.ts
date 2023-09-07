@@ -147,7 +147,11 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-    const root = await findRoot(this.options.name, this.options.root)
+    if (this.options.parent) this.parent = this.options.parent as Plugin
+    // Linked plugins already have a root so there's no need to search for it.
+    // However there could be child plugins nested inside the linked plugin, in which
+    // case we still need to search for the child plugin's root.
+    const root = this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
