@@ -668,8 +668,13 @@ export class Config implements IConfig {
         this._commands.set(command.id, command)
       }
 
+      // v3 moved command id permutations to the manifest, but some plugins may not have
+      // the new manifest yet. For those, we need to calculate the permutations here.
+      const permutations = this.flexibleTaxonomy && command.permutations === undefined ?
+        getCommandIdPermutations(command.id) :
+        command.permutations ?? [command.id]
       // set every permutation
-      for (const permutation of command.permutations ?? [command.id]) {
+      for (const permutation of permutations) {
         this.commandPermutations.add(permutation, command.id)
       }
 
@@ -683,7 +688,14 @@ export class Config implements IConfig {
         }
 
         // set every permutation of the aliases
-        for (const permutation of command.aliasPermutations ?? [alias]) {
+
+        // v3 moved command alias permutations to the manifest, but some plugins may not have
+        // the new manifest yet. For those, we need to calculate the permutations here.
+        const aliasPermutations = this.flexibleTaxonomy && command.aliasPermutations === undefined ?
+          getCommandIdPermutations(alias) :
+          command.permutations ?? [alias]
+        // set every permutation
+        for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
         }
       }
