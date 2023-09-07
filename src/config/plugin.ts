@@ -93,6 +93,11 @@ async function findRoot(name: string | undefined, root: string) {
   return findSourcesRoot(root)
 }
 
+function cachedCommandCanBeUsed(manifest: Manifest | undefined, id: string) {
+  if (process.env.OCLIF_BE_LAME) return false
+  return manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
+}
+
 export class Plugin implements IPlugin {
   _base = `${_pjson.name}@${_pjson.version}`
 
@@ -225,21 +230,25 @@ export class Plugin implements IPlugin {
         return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
       }
 
-      let m
+      let module
+      let isESM: boolean | undefined
+      let filePath: string | undefined
       try {
-        const p = path.join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))
-        const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
+        ({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id) ?
+          await ModuleLoader.loadWithDataFromManifest(this.manifest.commands[id], this.root) :
+          await ModuleLoader.loadWithData(this, path.join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
-        m = module
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
       }
 
-      const cmd = search(m)
+      const cmd = search(module)
       if (!cmd) return
       cmd.id = id
       cmd.plugin = this
+      cmd.isESM = isESM
+      cmd.relativePath = path.relative(this.root, filePath || '')
       return cmd
     }
 

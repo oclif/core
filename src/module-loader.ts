@@ -4,6 +4,7 @@ import {existsSync, lstatSync} from 'fs'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {tsPath} from './config'
+import {Command} from './command'
 
 const getPackageType = require('get-package-type')
 
@@ -79,6 +80,31 @@ export default class ModuleLoader {
     let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
+      const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
+      return {isESM, module, filePath}
+    } catch (error: any) {
+      if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new ModuleLoadError(
+          `${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`,
+        )
+      }
+
+      throw error
+    }
+  }
+
+  static async loadWithDataFromManifest(cached: Command.Cached, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
+    const {isESM, relativePath, id} = cached
+    if (!relativePath) {
+      throw new ModuleLoadError(`Cached command ${id} does not have a relative path`)
+    }
+
+    if (isESM === undefined) {
+      throw new ModuleLoadError(`Cached command ${id} does not have the isESM property set`)
+    }
+
+    const filePath = path.join(modulePath, relativePath)
+    try {
       const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {

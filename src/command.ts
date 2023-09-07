@@ -435,6 +435,8 @@ export namespace Command {
     hasDynamicHelp?: boolean;
     permutations?: string[]
     aliasPermutations?: string[];
+    isESM?: boolean;
+    relativePath?: string;
   }
 
   export type Flag = CompletableFlag<any>
