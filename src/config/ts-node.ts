@@ -7,6 +7,7 @@ import {settings} from '../settings'
 import {isProd} from '../util'
 import {Debug} from './util'
 import {memoizedWarn} from '../errors'
+import {Config} from './config'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
@@ -130,11 +131,11 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
    * - https://github.com/nodejs/node/pull/49407
    * - https://github.com/nodejs/node/issues/34049
    *
-   * We still register ts-node for ESM plugins IF they are a core plugin and NODE_ENV is "test" or "development".
+   * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM.
    * In other words, this allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
    */
-  if ((!isProduction && plugin?.type !== 'core') && plugin?.moduleType === 'module') {
-    debug(`Skipping ts-node registration for ${root} because it's an ESM module`)
+  if ((isProduction || Config.rootPlugin?.moduleType === 'commonjs') && plugin?.moduleType === 'module') {
+    debug(`Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${Config.rootPlugin?.moduleType})))`)
     if (plugin.type === 'link')
       memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
 
