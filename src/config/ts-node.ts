@@ -121,15 +121,19 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   }
 
   const isProduction = isProd()
-
-  // Skip ts-node registration for ESM plugins.
-  // The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
-  // See the following:
-  // - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
-  // - https://github.com/nodejs/node/issues/49432
-  // - https://github.com/nodejs/node/pull/49407
-  // - https://github.com/nodejs/node/issues/34049
-  if (!isProduction && plugin?.moduleType === 'module') {
+  /**
+   * Skip ts-node registration for ESM plugins.
+   * The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
+   * See the following:
+   * - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
+   * - https://github.com/nodejs/node/issues/49432
+   * - https://github.com/nodejs/node/pull/49407
+   * - https://github.com/nodejs/node/issues/34049
+   *
+   * We still register ts-node for ESM plugins IF they are a core plugin and NODE_ENV is "test" or "development".
+   * In other words, this allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
+   */
+  if ((!isProduction && plugin?.type !== 'core') && plugin?.moduleType === 'module') {
     debug(`Skipping ts-node registration for ${root} because it's an ESM module`)
     if (plugin.type === 'link')
       memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
