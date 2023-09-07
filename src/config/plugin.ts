@@ -94,7 +94,6 @@ async function findRoot(name: string | undefined, root: string) {
 }
 
 function cachedCommandCanBeUsed(manifest: Manifest | undefined, id: string) {
-  if (process.env.OCLIF_BE_LAME) return false
   return manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
 }
 
