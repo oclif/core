@@ -206,8 +206,8 @@ export default class Performance {
     debug('Total Time: %sms', Performance.highlights.runTime.toFixed(4))
     debug('Init Time: %sms', Performance.highlights.initTime.toFixed(4))
     debug('Config Load Time: %sms', Performance.highlights.configLoadTime.toFixed(4))
-    debug('Command Load Time: %sms', Performance.highlights.commandLoadTime.toFixed(4))
-    debug('Command Run Time: %sms', Performance.highlights.commandRunTime.toFixed(4))
+    debug('  • Plugins Load Time: %sms', Performance.getResult('config.loadAllPlugins')?.duration.toFixed(4) ?? 0)
+    debug('  • Commands Load Time: %sms', Performance.getResult('config.loadAllCommands')?.duration.toFixed(4) ?? 0)
     debug('Core Plugin Load Time: %sms', Performance.highlights.corePluginsLoadTime.toFixed(4))
     debug('User Plugin Load Time: %sms', Performance.highlights.userPluginsLoadTime.toFixed(4))
     debug('Linked Plugin Load Time: %sms', Performance.highlights.linkedPluginsLoadTime.toFixed(4))
@@ -223,5 +223,8 @@ export default class Performance {
         debug(`    ${plugin}: ${duration.toFixed(4)}ms`)
       }
     }
+
+    debug('Command Load Time: %sms', Performance.highlights.commandLoadTime.toFixed(4))
+    debug('Command Run Time: %sms', Performance.highlights.commandRunTime.toFixed(4))
   }
 }

@@ -42,8 +42,18 @@ export default class PluginLoader {
       const plugins = [...this.plugins.values()]
       rootPlugin = plugins.find(p => p.root === this.options.root) ?? plugins[0]
     } else {
+      const marker = Performance.mark('plugin.load#root')
       rootPlugin = new Plugin.Plugin({root: this.options.root})
       await rootPlugin.load()
+      marker?.addDetails({
+        hasManifest: rootPlugin.hasManifest ?? false,
+        commandCount: rootPlugin.commands.length,
+        topicCount: rootPlugin.topics.length,
+        type: rootPlugin.type,
+        usesMain: Boolean(rootPlugin.pjson.main),
+        name: rootPlugin.name,
+      })
+      marker?.stop()
     }
 
     this.plugins.set(rootPlugin.name, rootPlugin)

@@ -155,6 +155,7 @@ export class Config implements IConfig {
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    const marker = Performance.mark('config.load')
     this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
     Config._rootPlugin = await this.pluginLoader.loadRoot()
 
@@ -217,8 +218,6 @@ export class Config implements IConfig {
       },
     }
 
-    const marker = Performance.mark('config.load')
-
     await this.loadPluginsAndCommands()
 
     debug('config done')
@@ -232,7 +231,7 @@ export class Config implements IConfig {
   }
 
   async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
-    const marker = Performance.mark('config.loadPluginsAndCommands')
+    const pluginsMarker = Performance.mark('config.loadAllPlugins')
     const {plugins, errors} = await this.pluginLoader.loadChildren({
       devPlugins: this.options.devPlugins,
       userPlugins: this.options.userPlugins,
@@ -242,16 +241,19 @@ export class Config implements IConfig {
     })
 
     this.plugins = plugins
+    pluginsMarker?.stop()
+
+    const commandsMarker = Performance.mark('config.loadAllCommands')
     for (const plugin of this.plugins.values()) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
 
+    commandsMarker?.stop()
+
     for (const error of errors) {
       this.warn(error)
     }
-
-    marker?.stop()
   }
 
   public async runHook<T extends keyof Hooks>(
