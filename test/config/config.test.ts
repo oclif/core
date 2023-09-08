@@ -286,6 +286,7 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
         moduleType: 'commonjs',
+        hasManifest: false,
       }
 
       const pluginB: IPlugin = {
@@ -305,6 +306,7 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
         moduleType: 'commonjs',
+        hasManifest: false,
       }
       const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
       let test = fancy
