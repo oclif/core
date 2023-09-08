@@ -17,7 +17,7 @@ type PerfHighlights = {
   initTime: number;
   commandLoadTime: number;
   commandRunTime: number;
-  pluginLoadTimes: Record<string, number>;
+  pluginLoadTimes: Record<string, {duration: number, details: Details}>;
   corePluginsLoadTime: number;
   userPluginsLoadTime: number;
   linkedPluginsLoadTime: number;
@@ -141,7 +141,7 @@ export default class Performance {
         const pluginLoadTimes = Object.fromEntries(Performance.results
         .filter(({name}) => name.startsWith('plugin.load#'))
         .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration}) => [scope, duration]))
+        .map(({scope, duration, details}) => [scope, {duration, details}]))
 
         const hookRunTimes = Performance.results
         .filter(({name}) => name.startsWith('config.runHook#'))
@@ -212,8 +212,12 @@ export default class Performance {
     debug('User Plugin Load Time: %sms', Performance.highlights.userPluginsLoadTime.toFixed(4))
     debug('Linked Plugin Load Time: %sms', Performance.highlights.linkedPluginsLoadTime.toFixed(4))
     debug('Plugin Load Times:')
-    for (const [plugin, duration] of Object.entries(Performance.highlights.pluginLoadTimes)) {
-      debug(`  ${plugin}: ${duration.toFixed(4)}ms`)
+    for (const [plugin, result] of Object.entries(Performance.highlights.pluginLoadTimes)) {
+      if (result.details.hasManifest) {
+        debug(`  ${plugin}: ${result.duration.toFixed(4)}ms`)
+      } else {
+        debug(`  ${plugin}: ${result.duration.toFixed(4)}ms (no manifest!)`)
+      }
     }
 
     debug('Hook Run Times:')
