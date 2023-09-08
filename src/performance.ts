@@ -16,6 +16,7 @@ type PerfHighlights = {
   runTime: number;
   initTime: number;
   commandLoadTime: number;
+  commandRunTime: number;
   pluginLoadTimes: Record<string, number>;
   corePluginsLoadTime: number;
   userPluginsLoadTime: number;
@@ -163,10 +164,13 @@ export default class Performance {
         .sort((a, b) => b.duration - a.duration)
         .map(({scope, duration}) => [scope, duration]))
 
+        const commandRunTime = Performance.results.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0
+
         Performance._highlights = {
           configLoadTime: Performance.getResult('config.load')?.duration ?? 0,
           runTime: Performance.getResult('main.run')?.duration ?? 0,
           initTime: Performance.getResult('main.run#init')?.duration ?? 0,
+          commandRunTime,
           commandLoadTime,
           pluginLoadTimes,
           hookRunTimes,
@@ -199,11 +203,11 @@ export default class Performance {
     if (!Performance.enabled) return
 
     const debug = require('debug')('perf')
-
+    debug('Total Time: %sms', Performance.highlights.runTime.toFixed(4))
     debug('Init Time: %sms', Performance.highlights.initTime.toFixed(4))
     debug('Config Load Time: %sms', Performance.highlights.configLoadTime.toFixed(4))
     debug('Command Load Time: %sms', Performance.highlights.commandLoadTime.toFixed(4))
-    debug('Execution Time: %sms', Performance.highlights.runTime.toFixed(4))
+    debug('Command Run Time: %sms', Performance.highlights.commandRunTime.toFixed(4))
     debug('Core Plugin Load Time: %sms', Performance.highlights.corePluginsLoadTime.toFixed(4))
     debug('User Plugin Load Time: %sms', Performance.highlights.userPluginsLoadTime.toFixed(4))
     debug('Linked Plugin Load Time: %sms', Performance.highlights.linkedPluginsLoadTime.toFixed(4))

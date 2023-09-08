@@ -41,7 +41,7 @@ export default async function run(argv?: string[], options?: Interfaces.LoadOpti
 
   const collectPerf = async () => {
     marker?.stop()
-    initMarker?.stop()
+    if (!initMarker?.stopped) initMarker?.stop()
     await Performance.collect()
     Performance.debug()
   }
