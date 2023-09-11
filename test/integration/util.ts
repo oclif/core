@@ -21,10 +21,9 @@ export type Result = {
 
 export type SetupOptions = {
   repo: string;
+  branch?: string;
   plugins?: string[];
   subDir?: string;
-  allowFailedInstall?: boolean;
-  compileCmd?: string;
 }
 
 export type ExecutorOptions = {
@@ -61,8 +60,9 @@ export class Executor {
     this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
 
-  public clone(repo: string): Promise<Result> {
-    const result = this.exec(`git clone ${repo} ${this.pluginDir} --depth 1`)
+  public clone(repo: string, branch?: string): Promise<Result> {
+    const cmd = branch ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1` : `git clone ${repo} ${this.pluginDir} --depth 1`
+    const result = this.exec(cmd)
     this.usesJsScript = fs.existsSync(path.join(this.pluginDir, 'bin', 'run.js'))
     return result
   }
@@ -146,7 +146,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   await mkdir(testDir, {recursive: true})
   rm('-rf', pluginDir)
 
-  await executor.clone(options.repo)
+  await executor.clone(options.repo, options.branch)
 
   executor.debug('Updating package.json')
   const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
@@ -189,16 +189,15 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
   const yarnInstallRes = await executor.executeInTestDir('yarn install --force')
-  if (yarnInstallRes.code !== 0 && !options.allowFailedInstall) {
+  if (yarnInstallRes.code !== 0) {
     console.error(yarnInstallRes?.error)
-    throw new Error('Failed to run `yarn install`')
+    throw new Error('Failed to run `yarn install --force`')
   }
 
-  const compileCmd = options.compileCmd ?? 'yarn build'
-  const compileRes = await executor.executeInTestDir(compileCmd)
+  const compileRes = await executor.executeInTestDir('yarn build')
   if (compileRes.code !== 0) {
     console.error(compileRes?.error)
-    throw new Error(`Failed to run \`${compileCmd}\``)
+    throw new Error('Failed to run `yarn build`')
   }
 
   return executor
