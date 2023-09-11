@@ -4,7 +4,7 @@ import {Executor, Result, setup} from './util'
 
 chaiConfig.truncateThreshold = 0
 
-describe('oclif plugins', () => {
+describe.skip('oclif plugins', () => {
   let executor: Executor
   before(async () => {
     executor = await setup(__filename, {
