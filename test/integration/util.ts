@@ -188,7 +188,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
   executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
-  const yarnInstallRes = await executor.executeInTestDir('yarn install --force', {silent: false})
+  const yarnInstallRes = await executor.executeInTestDir('yarn install --force --network-timeout 600000', {silent: false})
   if (yarnInstallRes.code !== 0) {
     console.error(yarnInstallRes?.error)
     throw new Error('Failed to run `yarn install --force`')
