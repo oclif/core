@@ -251,7 +251,7 @@ export class Plugin implements IPlugin {
       cmd.id = id
       cmd.plugin = this
       cmd.isESM = isESM
-      cmd.relativePath = path.relative(this.root, filePath || '')
+      cmd.relativePath = path.relative(this.root, filePath || '').split(path.sep)
       return cmd
     }
 

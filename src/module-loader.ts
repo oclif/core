@@ -103,7 +103,7 @@ export default class ModuleLoader {
       throw new ModuleLoadError(`Cached command ${id} does not have the isESM property set`)
     }
 
-    const filePath = path.join(modulePath, relativePath)
+    const filePath = path.join(modulePath, relativePath.join(path.sep))
     try {
       const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
