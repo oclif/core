@@ -1,16 +1,16 @@
 
 import {rm} from 'shelljs'
 import {mkdir} from 'node:fs/promises'
-import * as cp from 'child_process'
+import {execSync, ExecSyncOptionsWithBufferEncoding, ExecException} from 'node:child_process'
 import * as chalk from 'chalk'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import {existsSync, readFileSync, writeFileSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {basename, dirname, join, resolve} from 'node:path'
 import {Interfaces} from '../../src'
 
 const debug = require('debug')('e2e')
 
-export type ExecError = cp.ExecException & { stderr: string; stdout: string };
+export type ExecError = ExecException & { stderr: string; stdout: string };
 
 export type Result = {
   code: number;
@@ -31,15 +31,15 @@ export type ExecutorOptions = {
   testFileName: string;
 }
 
-export type ExecOptions = cp.ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
+export type ExecOptions = ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
 
 function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
-  const pkgJsonFile = path.join(testDir, 'package.json')
-  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonFile, 'utf-8'))
+  const pkgJsonFile = join(testDir, 'package.json')
+  const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf-8'))
   obj.dependencies = Object.assign(pkgJson.dependencies || {}, obj.dependencies || {})
   obj.resolutions = Object.assign(pkgJson.resolutions || {}, obj.resolutions || {})
   const updated = Object.assign(pkgJson, obj)
-  fs.writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
+  writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
 
   return updated
 }
@@ -54,8 +54,8 @@ export class Executor {
   public constructor(options: ExecutorOptions) {
     this.pluginDir = options.pluginDir
     this.testFileName = options.testFileName
-    this.parentDir = path.basename(path.dirname(this.pluginDir))
-    this.pluginName = path.basename(this.pluginDir)
+    this.parentDir = basename(dirname(this.pluginDir))
+    this.pluginName = basename(this.pluginDir)
 
     this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
@@ -63,7 +63,7 @@ export class Executor {
   public clone(repo: string, branch?: string): Promise<Result> {
     const cmd = branch ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1` : `git clone ${repo} ${this.pluginDir} --depth 1`
     const result = this.exec(cmd)
-    this.usesJsScript = fs.existsSync(path.join(this.pluginDir, 'bin', 'run.js'))
+    this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
     return result
   }
 
@@ -73,8 +73,8 @@ export class Executor {
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
     const executable = process.platform === 'win32' ?
-      path.join('bin', `${script}.cmd`) :
-      path.join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+      join('bin', `${script}.cmd`) :
+      join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
     return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
@@ -85,11 +85,9 @@ export class Executor {
       this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
-          const r = cp.execSync(cmd, {
-            stdio: 'pipe',
-            ...options,
-            cwd,
-          })
+          const opts = {...options, stdio: 'pipe', cwd} satisfies ExecOptions
+          if (process.platform === 'win32') opts.shell = 'powershell.exe'
+          const r = execSync(cmd, opts)
           const stdout = r.toString()
           this.debug(stdout)
           resolve({code: 0, stdout})
@@ -105,7 +103,12 @@ export class Executor {
           })
         }
       } else {
-        cp.execSync(cmd, {stdio: 'inherit', cwd})
+        if (process.platform === 'win32') {
+          execSync(cmd, {...options, stdio: 'inherit', cwd, shell: 'powershell.exe'})
+        } else {
+          execSync(cmd, {...options, stdio: 'inherit', cwd})
+        }
+
         resolve({code: 0})
       }
     })
@@ -128,12 +131,12 @@ export class Executor {
  * - OCLIF_CORE_E2E_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
  */
 export async function setup(testFile: string, options: SetupOptions): Promise<Executor> {
-  const testFileName = path.basename(testFile)
-  const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir()
-  const testDir = options.subDir ? path.join(dir, testFileName, options.subDir) : path.join(dir, testFileName)
+  const testFileName = basename(testFile)
+  const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || tmpdir()
+  const testDir = options.subDir ? join(dir, testFileName, options.subDir) : join(dir, testFileName)
 
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
-  const pluginDir = path.join(testDir, name)
+  const pluginDir = join(testDir, name)
   const executor = new Executor({pluginDir, testFileName})
 
   executor.debug('plugin directory:', pluginDir)
@@ -149,20 +152,20 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   await executor.clone(options.repo, options.branch)
 
   executor.debug('Updating package.json')
-  const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
+  const dependencies = {'@oclif/core': `file:${resolve('.')}`}
 
   let pjson: Interfaces.PJSON
   if (options.plugins) {
     // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
     pjson = updatePkgJson(pluginDir, {
-      resolutions: {'@oclif/core': path.resolve('.')},
+      resolutions: {'@oclif/core': resolve('.')},
       dependencies: Object.assign(dependencies, pluginDeps),
       oclif: {plugins: options.plugins},
     })
   } else {
     pjson = updatePkgJson(pluginDir, {
-      resolutions: {'@oclif/core': path.resolve('.')},
+      resolutions: {'@oclif/core': resolve('.')},
       dependencies,
     })
   }
@@ -172,9 +175,9 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
 
   const bin = (pjson.oclif.bin ?? pjson.name.replace(/-/g, '_')).toUpperCase()
-  const dataDir = path.join(testDir, 'data', pjson.oclif.bin ?? pjson.name)
-  const cacheDir = path.join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
-  const configDir = path.join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
+  const dataDir = join(testDir, 'data', pjson.oclif.bin ?? pjson.name)
+  const cacheDir = join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
+  const configDir = join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
 
   await mkdir(dataDir, {recursive: true})
   await mkdir(configDir, {recursive: true})
