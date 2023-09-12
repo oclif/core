@@ -1,6 +1,5 @@
 import {Command} from '../command'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
-import {Config} from './config'
 
 export type FlagOutput = { [name: string]: any }
 export type ArgOutput = { [name: string]: any }
@@ -215,7 +214,8 @@ export type OptionFlagProps = FlagProps & {
 
 export type FlagParserContext = Command & {token: FlagToken}
 
-export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: FlagParserContext, opts: P & OptionFlag<T, P>) => Promise<T>
+export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: FlagParserContext, opts: P & OptionFlag<T, P>) =>
+  T extends Array<infer U> ? Promise<U> : Promise<T>
 
 export type ArgParserContext = Command & {token: ArgToken}
 
@@ -242,32 +242,118 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
   parse: (input: boolean, context: FlagParserContext, opts: FlagProps & BooleanFlagProps) => Promise<T>
 }
 
-export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
-  parse: FlagParser<T, string, P>
-  defaultHelp?: FlagDefaultHelp<T>;
-  input: string[];
-  default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
-}
-
 export type OptionFlag<T, P = CustomOptions> = FlagProps & OptionFlagProps & {
   parse: FlagParser<T, string, P>
   defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
-} & ({
   default?: FlagDefault<T | undefined, P>;
-  multiple: false;
-} | {
-  default?: FlagDefault<T[] | undefined, P>;
-  multiple: true;
-})
+}
 
-export type FlagDefinition<T, P = CustomOptions> = {
+type ReturnTypeSwitches = {multiple: boolean; requiredOrDefaulted: boolean}
+
+/**
+ * The logic here is as follows:
+ * - If requiredOrDefaulted is true && multiple is true, then the return type is T[]
+ *    - It's possible that T extends an Array, if so we want to return T so that the return isn't T[][]
+ * - If requiredOrDefaulted is true && multiple is false, then the return type is T
+ * - If requiredOrDefaulted is false && multiple is true, then the return type is T[] | undefined
+ *    - It's possible that T extends an Array, if so we want to return T so that the return isn't T[][]
+ * - If requiredOrDefaulted is false && multiple is false, then the return type is T | undefined
+ */
+type FlagReturnType<T, R extends ReturnTypeSwitches> =
+  R['requiredOrDefaulted'] extends true ?
+  R['multiple'] extends true ?
+  [T] extends [Array<unknown>] ? T :
+  T[] :
+  T :
+  R['multiple'] extends true ?
+  [T] extends [Array<unknown>] ? T | undefined :
+  T[] | undefined :
+  T | undefined
+
+/**
+ * FlagDefinition types a function that takes `options` and returns an OptionFlag<T>.
+ *
+ * This is returned by `Flags.custom()` and `Flags.option()`, which each take a `defaults` object
+ * that mirrors the OptionFlag interface.
+ *
+ * The `T` in the `OptionFlag<T>` return type is determined by a combination of the provided defaults for
+ * `multiple`, `required`, and `default` and the provided options for those same properties. If these properties
+ * are provided in the options, they override the defaults.
+ *
+ * no options or defaults -> T | undefined
+ * `required` -> T
+ * `default` -> T
+ * `multiple` -> T[] | undefined
+ * `required` + `multiple` -> T[]
+ * `default` + `multiple` -> T[]
+ */
+export type FlagDefinition<
+  T,
+  P = CustomOptions,
+  R extends ReturnTypeSwitches = {multiple: false, requiredOrDefaulted: false}
+> = {
   (
-    options: P & { multiple: true } & ({ required: true } | { default: FlagDefault<T[]> }) & Partial<OptionFlag<T, P>>
-  ): OptionFlag<T[]>;
-  (options: P & { multiple: true } & Partial<OptionFlag<T>>): OptionFlag<T[] | undefined>;
-  (options: P & ({ required: true } | { default: FlagDefault<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
-  (options?: P & Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
+    // `multiple` is set to false and `required` is set to true in options, potentially overriding the default
+    options: P & { multiple: false; required: true } & Partial<OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: true}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: true}>>;
+  (
+    // `multiple` is set to true and `required` is set to false in options, potentially overriding the default
+    options: P & { multiple: true; required: false } & Partial<OptionFlag<FlagReturnType<T, {multiple: true, requiredOrDefaulted: false}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: true, requiredOrDefaulted: false}>>;
+  (
+    // `multiple` is set to true and `required` is set to false in options, potentially overriding the default
+    options: P & { multiple: false; required: false } & Partial<OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: false}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: false}>>;
+  (
+    options: R['multiple'] extends true ?
+      // `multiple` is defaulted to true and either `required=true` or `default` are provided in options
+      P & (
+        { required: true } |
+        { default: OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>['default'] }
+      ) & Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>> :
+      // `multiple` is NOT defaulted to true and either `required=true` or `default` are provided in options
+      P & { multiple?: false | undefined } & (
+        { required: true } |
+        { default: OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>['default'] }
+      ) & Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>>;
+  (
+    options: R['multiple'] extends true ?
+      // `multiple` is defaulted to true and either `required=true` or `default` are provided in options
+      P & (
+        { required: true } |
+        { default: OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>['default'] }
+      ) & Partial<OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>> :
+      // `multiple` is NOT defaulted to true but `multiple=true` and either `required=true` or `default` are provided in options
+      P & { multiple: true } & (
+        { required: true } |
+        { default: OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>['default'] }
+      ) & Partial<OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>>;
+  (
+    // `multiple` is not provided in options but either `required=true` or `default` are provided
+    options: P & { multiple?: false | undefined; } & (
+      { required: true } |
+      { default: OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>['default'] }
+    ) & Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>>;
+  (
+    // `required` is set to false in options, potentially overriding the default
+    options: P & { required: false } & Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: false}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: false}>>;
+  (
+    // `multiple` is set to false in options, potentially overriding the default
+    options: P & { multiple: false } & Partial<OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: R['requiredOrDefaulted']}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: false, requiredOrDefaulted: R['requiredOrDefaulted']}>>;
+  (
+    // Catch all for when `multiple` is not set in the options
+    options?: P & { multiple?: false | undefined } & Partial<OptionFlag<FlagReturnType<T, R>, P>>
+  ): OptionFlag<FlagReturnType<T, R>>;
+  (
+    // `multiple` is set to true in options, potentially overriding the default
+    options: P & { multiple: true } & Partial<OptionFlag<FlagReturnType<T, {multiple: true, requiredOrDefaulted: R['requiredOrDefaulted']}>, P>>
+  ): OptionFlag<FlagReturnType<T, {multiple: true, requiredOrDefaulted: R['requiredOrDefaulted']}>>;
 }
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
@@ -294,26 +380,6 @@ export type ParserContext = Command & {
   token?: FlagToken | ArgToken;
 }
 
-export type CompletionContext = {
-  args?: { [name: string]: string };
-  flags?: { [name: string]: string };
-  argv?: string[];
-  config: Config;
-}
-
-export type Completion = {
-  skipCache?: boolean;
-  cacheDuration?: number;
-  cacheKey?(ctx: CompletionContext): Promise<string>;
-  options(ctx: CompletionContext): Promise<string[]>;
-}
-
-export type CompletableOptionFlag<T> = OptionFlag<T> & {
-  completion?: Completion;
-}
-
-export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
-
-export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in keyof T]: CompletableFlag<T[P]> }
+export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in keyof T]: Flag<T[P]> }
 
 export type ArgInput<T extends ArgOutput = { [arg: string]: any }> = { [P in keyof T]: Arg<T[P]> }

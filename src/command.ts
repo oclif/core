@@ -7,18 +7,18 @@ import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {
-  BooleanFlagProps,
-  CompletableFlag,
-  Deprecation,
   Arg as IArg,
   ArgInput,
+  ArgOutput,
+  ArgProps,
+  BooleanFlagProps,
+  Deprecation,
+  Flag as IFlag,
   FlagInput,
   FlagOutput,
   Input,
-  ArgProps,
   OptionFlagProps,
   ParserOutput,
-  ArgOutput,
 } from './interfaces/parser'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId, normalizeArgv} from './help/util'
 import {Plugin} from './interfaces/plugin'
@@ -439,7 +439,7 @@ export namespace Command {
     relativePath?: string[];
   }
 
-  export type Flag = CompletableFlag<any>
+  export type Flag = IFlag<any>
 
   export namespace Flag {
     export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)

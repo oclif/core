@@ -4,7 +4,7 @@ import {
   ArgParserContext,
   ArgToken,
   BooleanFlag,
-  CompletableFlag,
+  Flag,
   FlagParserContext,
   FlagToken,
   Metadata,
@@ -405,7 +405,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     type FlagWithStrategy = {
       inputFlag: {
         name: string,
-        flag: CompletableFlag<any>
+        flag: Flag<any>
       }
       tokens?: FlagToken[],
       valueFunction?: ValueFunction;

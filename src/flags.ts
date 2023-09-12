@@ -1,11 +1,45 @@
 /* eslint-disable valid-jsdoc */
 import {URL} from 'url'
 import {loadHelpClass} from './help'
-import {BooleanFlag} from './interfaces'
-import {FlagDefinition, OptionFlagDefaults, FlagParser} from './interfaces/parser'
+import {BooleanFlag, CustomOptions, OptionFlag, FlagDefinition} from './interfaces'
 import {dirExists, fileExists} from './util'
 import {CLIError} from './errors'
 
+type NotArray<T> = T extends Array<any> ? never: T;
+
+export function custom<T = string, P extends CustomOptions = CustomOptions>(
+  defaults: Partial<OptionFlag<T[], P>> & {
+    multiple: true
+  } & (
+    {required: true} | {default: OptionFlag<T[], P>['default']}
+  ),
+): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: true}>
+
+export function custom<T = string, P extends CustomOptions = CustomOptions>(
+  defaults: Partial<OptionFlag<T, P>> & {
+    multiple?: false | undefined;
+  } & (
+    {required: true} | {default: OptionFlag<NotArray<T>, P>['default']}
+  ),
+): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: true}>
+
+export function custom<T = string, P extends CustomOptions = CustomOptions>(
+  defaults: Partial<OptionFlag<T, P>> & {
+    default?: OptionFlag<NotArray<T>, P>['default'] | undefined;
+    multiple?: false | undefined;
+    required?: false | undefined;
+  },
+): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: false}>
+
+export function custom<T = string, P extends CustomOptions = CustomOptions>(
+  defaults: Partial<OptionFlag<T[], P>> & {
+    multiple: true;
+    default?: OptionFlag<T[], P>['default'] | undefined;
+    required?: false | undefined;
+  },
+): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: false}>
+
+export function custom<T = string, P extends CustomOptions = CustomOptions>(): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: false}>
 /**
  * Create a custom flag.
  *
@@ -23,21 +57,16 @@ import {CLIError} from './errors'
  *   },
  * })
  */
-export function custom<T, P = Record<string, unknown>>(
-    defaults: {parse: FlagParser<T, string, P>, multiple: true} & Partial<OptionFlagDefaults<T, P, true>>,
-): FlagDefinition<T, P>
-export function custom<T, P = Record<string, unknown>>(
-  defaults: {parse: FlagParser<T, string, P>} & Partial<OptionFlagDefaults<T, P>>,
-): FlagDefinition<T, P>
-export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P>
-export function custom<T, P = Record<string, unknown>>(defaults: Partial<OptionFlagDefaults<T, P>>): FlagDefinition<T, P> {
+export function custom<T = string, P extends CustomOptions = CustomOptions>(
+  defaults?: Partial<OptionFlag<T, P>>,
+): FlagDefinition<T, P, {multiple: boolean; requiredOrDefaulted: boolean}> {
   return (options: any = {}) => {
     return {
       parse: async (input, _ctx, _opts) => input,
       ...defaults,
       ...options,
       input: [] as string[],
-      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
+      multiple: Boolean(options.multiple === undefined ? defaults?.multiple ?? false : options.multiple),
       type: 'option',
     }
   }
@@ -97,7 +126,7 @@ export const url = custom<URL>({
   },
 })
 
-const stringFlag = custom({})
+const stringFlag = custom()
 export {stringFlag as string}
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
@@ -125,17 +154,44 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
 
 type ElementType<T extends ArrayLike<unknown>> = T[number];
 
-export function option<T extends readonly string[], P extends Record<string, unknown>>(
-  defaults: {parse: FlagParser<ElementType<T>, string, P>, multiple: true, options: T} & Partial<OptionFlagDefaults<ElementType<T>, P, true>>,
-): FlagDefinition<typeof defaults.options[number], P>
+export function option<T extends readonly string[], P extends CustomOptions>(
+  defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
+    options: T;
+    multiple: true
+  } & (
+    {required: true} | {
+      default: OptionFlag<ElementType<T>[], P>['default'] | undefined;
+    }
+  ),
+): FlagDefinition<typeof defaults.options[number], P, {multiple: true; requiredOrDefaulted: true}>
 
-export function option<T extends readonly string[], P extends Record<string, unknown>>(
-  defaults: {parse: FlagParser<ElementType<T>, string, P>, options: T} & Partial<OptionFlagDefaults<ElementType<T>, P>>,
-): FlagDefinition<typeof defaults.options[number], P>
+export function option<T extends readonly string[], P extends CustomOptions>(
+  defaults: Partial<OptionFlag<ElementType<T>, P>> & {
+    options: T;
+    multiple?: false | undefined;
+  } & (
+    {required: true} | {default: OptionFlag<ElementType<T>, P>['default']}
+  ),
+): FlagDefinition<typeof defaults.options[number], P, {multiple: false; requiredOrDefaulted: true}>
 
-export function option<T extends readonly string[] = readonly string[], P extends Record<string, unknown> = Record<string, unknown>>(
-  defaults: Partial<OptionFlagDefaults<ElementType<T>, P>> & {options: T}
-): FlagDefinition<typeof defaults.options[number], P>
+export function option<T extends readonly string[], P extends CustomOptions>(
+  defaults: Partial<OptionFlag<ElementType<T>, P>> & {
+    options: T;
+    default?: OptionFlag<ElementType<T>, P>['default'] | undefined;
+    multiple?: false | undefined;
+    required?: false | undefined;
+  },
+): FlagDefinition<typeof defaults.options[number], P, {multiple: false; requiredOrDefaulted: false}>
+
+export function option<T extends readonly string[], P extends CustomOptions>(
+  defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
+    options: T;
+    multiple: true;
+    default?: OptionFlag<ElementType<T>[], P>['default'] | undefined;
+    required?: false | undefined;
+  },
+): FlagDefinition<typeof defaults.options[number], P, {multiple: true; requiredOrDefaulted: false}>
+
 /**
  * Create a custom flag that infers the flag type from the provided options.
  *
@@ -148,9 +204,9 @@ export function option<T extends readonly string[] = readonly string[], P extend
  *   }
  * }
  */
-export function option<T extends readonly string[], P extends Record<string, unknown>>(
-  defaults: Partial<OptionFlagDefaults<ElementType<T>, P>> & {options: T},
-): FlagDefinition<typeof defaults.options[number], P> {
+export function option<T extends readonly string[], P extends CustomOptions>(
+  defaults: Partial<OptionFlag<ElementType<T>, P>> & {options: T},
+): FlagDefinition<typeof defaults.options[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
   return (options: any = {}) => {
     return {
       parse: async (input, _ctx, _opts) => input,

@@ -6,7 +6,7 @@ import {
   FailedFlagValidationError,
   NonExistentFlagsError,
 } from './errors'
-import {Arg, CompletableFlag, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
+import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../config/util'
 
 export async function validate(parse: {
@@ -172,7 +172,7 @@ export async function validate(parse: {
     return {...base, status: 'success'}
   }
 
-  function validateRelationships(name: string, flag: CompletableFlag<any>): Promise<Validation>[] {
+  function validateRelationships(name: string, flag: Flag<any>): Promise<Validation>[] {
     return ((flag.relationships ?? []).map(relationship => {
       switch (relationship.type) {
       case 'all':

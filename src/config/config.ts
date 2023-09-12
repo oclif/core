@@ -13,7 +13,7 @@ import {ensureArgObject, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
-import {CompletableOptionFlag, Arg} from '../interfaces/parser'
+import {OptionFlag, Arg} from '../interfaces/parser'
 import {stdout} from '../cli-ux/stream'
 import Performance from '../performance'
 import {settings} from '../settings'
@@ -815,7 +815,7 @@ export class Config implements IConfig {
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, respectNoCacheDefault: boolean) => {
+const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {
   if (respectNoCacheDefault && flag.noCacheDefault) return
   // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
