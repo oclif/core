@@ -1,5 +1,5 @@
 import stripAnsi = require('strip-ansi')
-import * as util from 'util'
+import {format} from 'node:util'
 import * as Interfaces from '../interfaces'
 import {error} from '../errors'
 import CommandHelp from './command'
@@ -322,6 +322,6 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]): void {
-    stdout.write(util.format.apply(this, args) + '\n')
+    stdout.write(format.apply(this, args) + '\n')
   }
 }

@@ -17,7 +17,7 @@ import {
   ParserOutput,
   ParsingToken,
 } from '../interfaces/parser'
-import * as readline from 'readline'
+import {createInterface} from 'node:readline'
 import {isTruthy, last, pickBy} from '../util'
 
 let debug: any
@@ -45,7 +45,7 @@ const readStdin = async (): Promise<string | null> => {
     const signal = ac.signal
     const timeout = setTimeout(() => ac.abort(), 100)
 
-    const rl = readline.createInterface({
+    const rl = createInterface({
       input: stdin,
       output: stdout,
       terminal: false,

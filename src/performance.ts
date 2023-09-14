@@ -1,4 +1,4 @@
-import {PerformanceObserver, performance} from 'perf_hooks'
+import {PerformanceObserver, performance} from 'node:perf_hooks'
 import {settings} from './settings'
 
 type Details = Record<string, string | boolean | number | string[]>

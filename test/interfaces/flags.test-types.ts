@@ -4,7 +4,7 @@
 
 import {Command, Flags, Interfaces} from '../../src'
 import {expectType, expectNotType} from 'tsd'
-import {URL} from 'url'
+import {URL} from 'node:url'
 
 abstract class BaseCommand extends Command {
   static enableJsonFlag = true

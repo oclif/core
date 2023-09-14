@@ -1,4 +1,4 @@
-import * as assert from 'assert'
+import {fail} from 'node:assert'
 import {expect} from 'chai'
 import {CLIError} from '../../src/errors'
 
@@ -53,7 +53,7 @@ describe('validate', () => {
     try {
       // @ts-expect-error
       await validate({input, output})
-      assert.fail('should have thrown')
+      fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
@@ -145,7 +145,7 @@ describe('validate', () => {
     try {
       // @ts-expect-error
       await validate({input, output})
-      assert.fail('should have thrown')
+      fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Missing required flag')
@@ -268,7 +268,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -316,7 +316,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -364,7 +364,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
@@ -445,7 +445,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -493,7 +493,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -541,7 +541,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
@@ -629,7 +629,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
@@ -686,7 +686,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
@@ -820,7 +820,7 @@ describe('validate', () => {
       try {
         // @ts-expect-error
         await validate({input, output})
-        assert.fail('should have thrown')
+        fail('should have thrown')
       } catch (error) {
         const err = error as CLIError
         expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
@@ -926,7 +926,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --cake')

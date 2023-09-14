@@ -3,7 +3,7 @@
  */
 import {Command, Args, Interfaces} from '../../src'
 import {expectType, expectNotType} from 'tsd'
-import {URL} from 'url'
+import {URL} from 'node:url'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 

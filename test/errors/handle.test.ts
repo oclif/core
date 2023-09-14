@@ -1,13 +1,13 @@
 import {expect, fancy} from 'fancy-test'
 import {readFileSync} from 'node:fs'
-import * as path from 'path'
-import * as process from 'process'
+import {join} from 'node:path'
+import * as process from 'node:process'
 
 import {CLIError, config, ExitError} from '../../src/errors'
 import {handle} from '../../src/errors/handle'
 import {exit as exitErrorThrower} from '../../src/errors'
 
-const errlog = path.join(__dirname, '../tmp/mytest/error.log')
+const errlog = join(__dirname, '../tmp/mytest/error.log')
 const x = process.platform === 'win32' ? '»' : '›'
 
 const originalExit = process.exit

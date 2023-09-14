@@ -1,5 +1,5 @@
 /* eslint-disable valid-jsdoc */
-import {URL} from 'url'
+import {URL} from 'node:url'
 import {loadHelpClass} from './help'
 import {BooleanFlag, CustomOptions, OptionFlag, FlagDefinition} from './interfaces'
 import {dirExists, fileExists} from './util'

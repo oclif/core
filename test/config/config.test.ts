@@ -1,5 +1,5 @@
-import * as os from 'os'
-import * as path from 'path'
+import * as os from 'node:os'
+import {join} from 'node:path'
 
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as util from '../../src/config/util'
@@ -50,7 +50,7 @@ describe('Config', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
+    .stub(os, 'homedir', () => join(homedir))
     .stub(os, 'platform', () => platform)
 
     if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
@@ -96,11 +96,11 @@ describe('Config', () => {
 
   describe('darwin', () => {
     testConfig()
-    .hasProperty('cacheDir', path.join('/my/home/Library/Caches/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
+    .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
+    .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('binAliases', () => {
@@ -160,11 +160,11 @@ describe('Config', () => {
 
   describe('linux', () => {
     testConfig({platform: 'linux'})
-    .hasProperty('cacheDir', path.join('/my/home/.cache/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/.cache/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/.cache/@oclif/core'))
+    .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', join('/my/home/.cache/@oclif/core/error.log'))
+    .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('win32', () => {
@@ -172,11 +172,11 @@ describe('Config', () => {
       platform: 'win32',
       env: {LOCALAPPDATA: '/my/home/localappdata'},
     })
-    .hasProperty('cacheDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('configDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('errlog', path.join('/my/home/localappdata/@oclif\\core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('configDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
+    .hasProperty('dataDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('s3Key', () => {
@@ -312,7 +312,7 @@ describe('Config', () => {
       let test = fancy
       .resetConfig()
       .env(env, {clear: true})
-      .stub(os, 'homedir', () => path.join(homedir))
+      .stub(os, 'homedir', () => join(homedir))
       .stub(os, 'platform', () => platform)
 
       if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))

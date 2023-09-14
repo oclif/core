@@ -1,4 +1,4 @@
-import * as Chalk from 'chalk'
+import * as chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 import {Command} from '../command'
@@ -11,9 +11,6 @@ const width = require('string-width')
 const widestLine = require('widest-line')
 
 const wrap = require('wrap-ansi')
-const {
-  bold,
-} = Chalk
 
 export type HelpSectionKeyValueTable = {name: string; description: string}[]
 export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
@@ -202,7 +199,7 @@ export class HelpFormatter {
     }
 
     const output = [
-      bold(header),
+      chalk.bold(header),
       this.indent(Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody),
     ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output

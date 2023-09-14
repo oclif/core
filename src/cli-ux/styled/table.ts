@@ -4,7 +4,7 @@ import {stdtermwidth} from '../../screen'
 import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
 import {safeDump} from 'js-yaml'
-import {inspect} from 'util'
+import {inspect} from 'node:util'
 import {stdout} from '../stream'
 
 const sw = require('string-width')

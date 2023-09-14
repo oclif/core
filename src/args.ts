@@ -1,4 +1,4 @@
-import {URL} from 'url'
+import {URL} from 'node:url'
 import {Arg, ArgDefinition} from './interfaces/parser'
 import {Command} from './command'
 import {dirExists, fileExists, isNotFalsy} from './util'

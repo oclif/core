@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import {existsSync, readFileSync} from 'node:fs'
+import {join, relative as pathRelative} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import {TSConfig, Plugin} from '../interfaces'
@@ -11,25 +11,25 @@ import {Config} from './config'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
-const TS_CONFIGS: Record<string, TSConfig> = {}
+export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
 function loadTSConfig(root: string): TSConfig | undefined {
   if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-  const tsconfigPath = path.join(root, 'tsconfig.json')
+  const tsconfigPath = join(root, 'tsconfig.json')
   let typescript: typeof import('typescript') | undefined
   try {
     typescript = require('typescript')
   } catch {
     try {
-      typescript = require(path.join(root, 'node_modules', 'typescript'))
+      typescript = require(join(root, 'node_modules', 'typescript'))
     } catch {}
   }
 
-  if (fs.existsSync(tsconfigPath) && typescript) {
+  if (existsSync(tsconfigPath) && typescript) {
     const tsconfig = typescript.parseConfigFileTextToJson(
       tsconfigPath,
-      fs.readFileSync(tsconfigPath, 'utf8'),
+      readFileSync(tsconfigPath, 'utf8'),
     ).config
     if (!tsconfig || !tsconfig.compilerOptions) {
       throw new Error(
@@ -52,19 +52,19 @@ function registerTSNode(root: string): TSConfig | undefined {
   const tsNode: typeof TSNode = require(tsNodePath)
 
   const typeRoots = [
-    path.join(root, 'node_modules', '@types'),
+    join(root, 'node_modules', '@types'),
   ]
 
   const rootDirs: string[] = []
 
   if (tsconfig.compilerOptions.rootDirs) {
     for (const r of tsconfig.compilerOptions.rootDirs) {
-      rootDirs.push(path.join(root, r))
+      rootDirs.push(join(root, r))
     }
   } else if (tsconfig.compilerOptions.rootDir) {
-    rootDirs.push(path.join(root, tsconfig.compilerOptions.rootDir))
+    rootDirs.push(join(root, tsconfig.compilerOptions.rootDir))
   } else {
-    rootDirs.push(path.join(root, 'src'))
+    rootDirs.push(join(root, 'src'))
   }
 
   const conf: TSNode.RegisterOptions = {
@@ -112,7 +112,7 @@ export function tsPath(root: string, orig: string, plugin: Plugin): string
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
   if (!orig) return orig
-  orig = orig.startsWith(root) ? orig : path.join(root, orig)
+  orig = orig.startsWith(root) ? orig : join(root, orig)
 
   // NOTE: The order of these checks matter!
 
@@ -154,17 +154,17 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
     const rootDirPath = rootDir || (rootDirs || [])[0]
     if (!rootDirPath || !outDir) return orig
     // rewrite path from ./lib/foo to ./src/foo
-    const lib = path.join(root, outDir) // ./lib
-    const src = path.join(root, rootDirPath) // ./src
-    const relative = path.relative(lib, orig) // ./commands
+    const lib = join(root, outDir) // ./lib
+    const src = join(root, rootDirPath) // ./src
+    const relative = pathRelative(lib, orig) // ./commands
     // For hooks, it might point to a js file, not a module. Something like "./hooks/myhook.js" which doesn't need the js.
-    const out = path.join(src, relative).replace(/\.js$/, '') // ./src/commands
+    const out = join(src, relative).replace(/\.js$/, '') // ./src/commands
     // this can be a directory of commands or point to a hook file
     // if it's a directory, we check if the path exists. If so, return the path to the directory.
     // For hooks, it might point to a module, not a file. Something like "./hooks/myhook"
     // That file doesn't exist, and the real file is "./hooks/myhook.ts"
     // In that case we attempt to resolve to the filename. If it fails it will revert back to the lib path
-    if (fs.existsSync(out) || fs.existsSync(out + '.ts')) return out
+    if (existsSync(out) || existsSync(out + '.ts')) return out
     return orig
   } catch (error: any) {
     debug(error)

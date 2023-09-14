@@ -12,9 +12,6 @@ import {Command} from '../command'
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
 
-const {
-  underline,
-} = chalk
 let {
   dim,
 } = chalk
@@ -270,7 +267,7 @@ export class CommandHelp extends HelpFormatter {
       }
 
       if (flag.multiple) value += '...'
-      if (!value.includes('|')) value = underline(value)
+      if (!value.includes('|')) value = chalk.underline(value)
       label += `=${value}`
     }
 

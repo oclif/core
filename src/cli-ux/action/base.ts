@@ -1,4 +1,4 @@
-import {inspect} from 'util'
+import {inspect} from 'node:util'
 import {castArray} from '../../util'
 import {stderr, stdout} from '../stream'
 

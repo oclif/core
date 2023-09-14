@@ -1,4 +1,4 @@
-import * as os from 'os'
+import {arch} from 'node:os'
 import {expect} from 'chai'
 import {Executor, setup} from './util'
 import StripAnsi = require('strip-ansi')
@@ -82,7 +82,7 @@ describe('Salesforce CLI (sf)', () => {
     const version = await executor.executeCommand('-v')
     expect(version.stdout).to.include('@salesforce/cli')
     expect(version.stdout).to.include(process.platform)
-    expect(version.stdout).to.include(os.arch())
+    expect(version.stdout).to.include(arch())
     expect(version.stdout).to.include(process.version)
   })
 

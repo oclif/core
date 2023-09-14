@@ -1,6 +1,6 @@
-import * as path from 'path'
-import * as url from 'url'
-import {existsSync, lstatSync} from 'fs'
+import {join, sep, extname} from 'node:path'
+import {pathToFileURL} from 'node:url'
+import {existsSync, lstatSync} from 'node:fs'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {tsPath} from './config'
@@ -48,7 +48,7 @@ export default class ModuleLoader {
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
       // It is important to await on import to catch the error code.
-      return isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
+      return isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
         throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
@@ -80,7 +80,7 @@ export default class ModuleLoader {
     let isESM: boolean | undefined
     try {
       ({isESM, filePath} = ModuleLoader.resolvePath(config, modulePath))
-      const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
+      const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -103,9 +103,9 @@ export default class ModuleLoader {
       throw new ModuleLoadError(`Cached command ${id} does not have the isESM property set`)
     }
 
-    const filePath = path.join(modulePath, relativePath.join(path.sep))
+    const filePath = join(modulePath, relativePath.join(sep))
     try {
-      const module = isESM ? await import(url.pathToFileURL(filePath).href) : require(filePath)
+      const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
       return {isESM, module, filePath}
     } catch (error: any) {
       if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -128,7 +128,7 @@ export default class ModuleLoader {
    * @see https://www.npmjs.com/package/get-package-type
    */
   static isPathModule(filePath: string): boolean {
-    const extension = path.extname(filePath).toLowerCase()
+    const extension = extname(filePath).toLowerCase()
 
     switch (extension) {
     case '.js':
@@ -184,7 +184,7 @@ export default class ModuleLoader {
         let foundPath = ModuleLoader.findFile(filePath)
         if (!foundPath && isDirectory) {
           // Since filePath is a directory, try looking for index file.
-          foundPath = ModuleLoader.findFile(path.join(filePath, 'index'))
+          foundPath = ModuleLoader.findFile(join(filePath, 'index'))
         }
 
         if (foundPath) {

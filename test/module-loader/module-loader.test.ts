@@ -1,4 +1,4 @@
-import * as path from 'path'
+import {resolve} from 'node:path'
 
 import {assert, expect} from 'chai'
 
@@ -15,14 +15,14 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/errors/bad_path.js',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] import() failed to load ${path.resolve('./test/module-loader/fixtures/esm/errors/bad_path.js')}`,
+      message: `[MODULE_NOT_FOUND] import() failed to load ${resolve('./test/module-loader/fixtures/esm/errors/bad_path.js')}`,
       isESM: true,
     },
     // Non-existent path / no extension
     {
       path: './test/module-loader/fixtures/esm/errors/bad_path',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${path.resolve('./test/module-loader/fixtures/esm/errors/bad_path')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/esm/errors/bad_path')}`,
       isESM: true,
     },
 
@@ -30,14 +30,14 @@ const data = {
     {
       path: './test/module-loader/fixtures/cjs/errors/bad_path.cjs',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${path.resolve('./test/module-loader/fixtures/cjs/errors/bad_path.cjs')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/cjs/errors/bad_path.cjs')}`,
       isESM: false,
     },
     // Non-existent path / no extension
     {
       path: './test/module-loader/fixtures/cjs/errors/bad_path',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${path.resolve('./test/module-loader/fixtures/cjs/errors/bad_path')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/cjs/errors/bad_path')}`,
       isESM: false,
     },
 
@@ -62,21 +62,21 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/success.js',
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/success.js')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/success.js')}`,
       isESM: true,
     },
     // ESM source file loaded due to mjs file type.
     {
       path: './test/module-loader/fixtures/esm/empty-package/success-ext.mjs',
       defaultModule: '{"default":"SUCCESS_MJS","namedExport":"SUCCESS_NAMED_MJS"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/empty-package/success-ext.mjs')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/empty-package/success-ext.mjs')}`,
       isESM: true,
     },
     // No extension / ESM source file. Loads package.json in './test/module-loader/fixtures/esm/' for getPackageType check.
     {
       path: './test/module-loader/fixtures/esm/success',
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/success.js')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/success.js')}`,
       isESM: true,
       isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
     },
@@ -84,7 +84,7 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/empty-package/success-ext',
       defaultModule: '{"default":"SUCCESS_MJS","namedExport":"SUCCESS_NAMED_MJS"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/empty-package/success-ext.mjs')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/empty-package/success-ext.mjs')}`,
       isESM: true,
       isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
     },
@@ -93,28 +93,28 @@ const data = {
     {
       path: './test/module-loader/fixtures/cjs/success.js',
       defaultModule: '["SUCCESS"]',
-      filePath: `${path.resolve('./test/module-loader/fixtures/cjs/success.js')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/cjs/success.js')}`,
       isESM: false,
     },
     // CJS source file loaded due to cjs file type.
     {
       path: './test/module-loader/fixtures/cjs/success-ext.cjs',
       defaultModule: '["SUCCESS_CJS"]',
-      filePath: `${path.resolve('./test/module-loader/fixtures/cjs/success-ext.cjs')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/cjs/success-ext.cjs')}`,
       isESM: false,
     },
     // No extension / CJS source loaded from package.json in './test/module-loader/fixtures/cjs/' which doesn't have "type": "module".
     {
       path: './test/module-loader/fixtures/cjs/success',
       defaultModule: '["SUCCESS"]',
-      filePath: `${path.resolve('./test/module-loader/fixtures/cjs/success.js')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/cjs/success.js')}`,
       isESM: false,
     },
     // No extension / CJS source file loaded due to cjs file type.
     {
       path: './test/module-loader/fixtures/cjs/success-ext',
       defaultModule: '["SUCCESS_CJS"]',
-      filePath: `${path.resolve('./test/module-loader/fixtures/cjs/success-ext.cjs')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/cjs/success-ext.cjs')}`,
       isESM: false,
     },
 
@@ -122,7 +122,7 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/index/js',
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/index/js/index.js')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/index/js/index.js')}`,
       isESM: true,
       isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
     },
@@ -130,7 +130,7 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/index/mjs',
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
-      filePath: `${path.resolve('./test/module-loader/fixtures/esm/index/mjs/index.mjs')}`,
+      filePath: `${resolve('./test/module-loader/fixtures/esm/index/mjs/index.mjs')}`,
       isESM: true,
       isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
     },

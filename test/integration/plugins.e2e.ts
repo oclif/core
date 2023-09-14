@@ -1,4 +1,4 @@
-import * as os from 'os'
+import {arch} from 'node:os'
 import {expect, config as chaiConfig} from 'chai'
 import {Executor, Result, setup} from './util'
 
@@ -257,7 +257,7 @@ describe.skip('oclif plugins', () => {
 
     it('should show version', () => expect(version.stdout).to.include('oclif-hello-world/0.0.0'))
     it('should show platform', () => expect(version.stdout).to.include(process.platform))
-    it('should show arch', () => expect(version.stdout).to.include(os.arch()))
+    it('should show arch', () => expect(version.stdout).to.include(arch()))
     it('should show node version', () => expect(version.stdout).to.include(process.version))
   })
 

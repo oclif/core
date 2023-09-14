@@ -1,5 +1,6 @@
-import * as fs from 'fs'
-import {join} from 'path'
+import {readFileSync} from 'node:fs'
+import {access, stat} from 'node:fs/promises'
+import {join} from 'node:path'
 import {Command} from './command'
 import {ArgInput} from './interfaces/parser'
 
@@ -78,12 +79,21 @@ export function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
 }
 
+export async function exists(path: string): Promise<boolean> {
+  try {
+    await access(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export const dirExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
+  if (!await exists(input)) {
     throw new Error(`No directory found at ${input}`)
   }
 
-  if (!(await fs.promises.stat(input)).isDirectory()) {
+  if (!(await stat(input)).isDirectory()) {
     throw new Error(`${input} exists but is not a directory`)
   }
 
@@ -91,11 +101,11 @@ export const dirExists = async (input: string): Promise<string> => {
 }
 
 export const fileExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
+  if (!await exists(input)) {
     throw new Error(`No file found at ${input}`)
   }
 
-  if (!(await fs.promises.stat(input)).isFile()) {
+  if (!(await stat(input)).isFile()) {
     throw new Error(`${input} exists but is not a file`)
   }
 
@@ -111,7 +121,7 @@ export function isNotFalsy(input: string): boolean {
 }
 
 export function requireJson<T>(...pathParts: string[]): T {
-  return JSON.parse(fs.readFileSync(join(...pathParts), 'utf8'))
+  return JSON.parse(readFileSync(join(...pathParts), 'utf8'))
 }
 
 /**

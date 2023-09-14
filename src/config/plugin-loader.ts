@@ -1,10 +1,11 @@
-import * as path from 'path'
+import {join} from 'node:path'
 
 import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import * as Plugin from './plugin'
 import {loadJSON, Debug} from './util'
 import {isProd} from '../util'
 import Performance from '../performance'
+import {PJSON} from '../interfaces'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -92,9 +93,9 @@ export default class PluginLoader {
   private async loadUserPlugins(opts: LoadOpts): Promise<void> {
     if (opts.userPlugins !== false) {
       try {
-        const userPJSONPath = path.join(opts.dataDir, 'package.json')
+        const userPJSONPath = join(opts.dataDir, 'package.json')
         debug('reading user plugins pjson %s', userPJSONPath)
-        const pjson = await loadJSON(userPJSONPath)
+        const pjson = await loadJSON<PJSON>(userPJSONPath)
         if (!pjson.oclif) pjson.oclif = {schema: 1}
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))

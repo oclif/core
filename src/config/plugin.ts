@@ -1,17 +1,24 @@
 import {CLIError, error} from '../errors'
 import * as globby from 'globby'
-import * as path from 'path'
-import {inspect} from 'util'
+import {dirname, join, parse, relative, sep} from 'node:path'
+import {inspect} from 'node:util'
 
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {toCached} from './config'
-import {Debug, getCommandIdPermutations} from './util'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
 import {tsPath} from './ts-node'
-import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
-import {isProd, requireJson} from '../util'
+import {
+  compact,
+  Debug,
+  flatMap,
+  getCommandIdPermutations,
+  loadJSON,
+  mapValues,
+  resolvePackage,
+} from './util'
+import {exists, isProd, requireJson} from '../util'
 import ModuleLoader from '../module-loader'
 import {Command} from '../command'
 import Performance from '../performance'
@@ -33,9 +40,9 @@ function topicsToArray(input: any, base?: string): Topic[] {
 
 // essentially just "cd .."
 function * up(from: string) {
-  while (path.dirname(from) !== from) {
+  while (dirname(from) !== from) {
     yield from
-    from = path.dirname(from)
+    from = dirname(from)
   }
 
   yield from
@@ -43,9 +50,9 @@ function * up(from: string) {
 
 async function findSourcesRoot(root: string) {
   for (const next of up(root)) {
-    const cur = path.join(next, 'package.json')
+    const cur = join(next, 'package.json')
     // eslint-disable-next-line no-await-in-loop
-    if (await exists(cur)) return path.dirname(cur)
+    if (await exists(cur)) return dirname(cur)
   }
 }
 
@@ -64,18 +71,18 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
   for (const next of up(root)) {
     let cur
     if (name) {
-      cur = path.join(next, 'node_modules', name, 'package.json')
+      cur = join(next, 'node_modules', name, 'package.json')
       // eslint-disable-next-line no-await-in-loop
-      if (await exists(cur)) return path.dirname(cur)
+      if (await exists(cur)) return dirname(cur)
       try {
         // eslint-disable-next-line no-await-in-loop
-        const pkg = await loadJSON(path.join(next, 'package.json'))
+        const pkg = await loadJSON<PJSON>(join(next, 'package.json'))
         if (pkg.name === name) return next
       } catch {}
     } else {
-      cur = path.join(next, 'package.json')
+      cur = join(next, 'package.json')
       // eslint-disable-next-line no-await-in-loop
-      if (await exists(cur)) return path.dirname(cur)
+      if (await exists(cur)) return dirname(cur)
     }
   }
 }
@@ -87,7 +94,7 @@ async function findRoot(name: string | undefined, root: string) {
       pkgPath = resolvePackage(name, {paths: [root]})
     } catch {}
 
-    return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
+    return pkgPath ? findSourcesRoot(dirname(pkgPath)) : findRootLegacy(name, root)
   }
 
   return findSourcesRoot(root)
@@ -154,12 +161,12 @@ export class Plugin implements IPlugin {
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json'))
+    this.pjson = await loadJSON(join(root, 'package.json'))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = path.join(root, 'package.json')
+    const pjsonPath = join(root, 'package.json')
     if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
@@ -207,7 +214,7 @@ export class Plugin implements IPlugin {
     ]
     const ids = globby.sync(patterns, {cwd: this.commandsDir})
     .map(file => {
-      const p = path.parse(file)
+      const p = parse(file)
       const topics = p.dir.split('/')
       const command = p.name !== 'index' && p.name
       const id = [...topics, command].filter(f => f).join(':')
@@ -239,7 +246,7 @@ export class Plugin implements IPlugin {
       try {
         ({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id) ?
           await ModuleLoader.loadWithDataFromManifest(this.manifest.commands[id], this.root) :
-          await ModuleLoader.loadWithData(this, path.join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          await ModuleLoader.loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
@@ -251,7 +258,7 @@ export class Plugin implements IPlugin {
       cmd.id = id
       cmd.plugin = this
       cmd.isESM = isESM
-      cmd.relativePath = path.relative(this.root, filePath || '').split(path.sep)
+      cmd.relativePath = relative(this.root, filePath || '').split(sep)
       return cmd
     }
 
@@ -268,8 +275,8 @@ export class Plugin implements IPlugin {
 
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
-        const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
-        const manifest: Manifest = await loadJSON(p)
+        const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
+        const manifest = await loadJSON<Manifest>(p)
         if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
           process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
         } else {

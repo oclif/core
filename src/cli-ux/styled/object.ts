@@ -1,5 +1,5 @@
 import * as chalk from 'chalk'
-import * as util from 'util'
+import {inspect} from 'node:util'
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function styledObject(obj: any, keys?: string[]): string {
@@ -10,11 +10,11 @@ export default function styledObject(obj: any, keys?: string[]): string {
     if (typeof obj === 'string' || typeof obj === 'number') return obj
     if (typeof obj === 'object') {
       return Object.keys(obj)
-      .map(k => k + ': ' + util.inspect(obj[k]))
+      .map(k => k + ': ' + inspect(obj[k]))
       .join(', ')
     }
 
-    return util.inspect(obj)
+    return inspect(obj)
   }
 
   const logKeyValue = (key: string, value: any): string => {

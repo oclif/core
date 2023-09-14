@@ -1,6 +1,6 @@
-import {fileURLToPath} from 'url'
+import {fileURLToPath} from 'node:url'
 import * as chalk from 'chalk'
-import {format, inspect} from 'util'
+import {format, inspect} from 'node:util'
 import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'

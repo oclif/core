@@ -5,7 +5,6 @@
   ],
   "rules": {
     "unicorn/prefer-module": "off",
-    "unicorn/prefer-node-protocol": "off",
     "unicorn/import-style": "off",
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-array-reduce": "off",

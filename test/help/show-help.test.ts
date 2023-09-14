@@ -1,6 +1,6 @@
 import {test as base} from '@oclif/test'
 import {stub, SinonStub} from 'sinon'
-import * as path from 'path'
+import {resolve} from 'node:path'
 
 import {Help} from '../../src/help'
 import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
@@ -34,7 +34,7 @@ const test = base
     }
 
     // use devPlugins: true to bring in plugins-plugin with topic commands for testing
-    const config = await Config.load({devPlugins: true, root: path.resolve(__dirname, '..')})
+    const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
     ctx.help = new TestHelp(config)
   },
   finally(ctx) {
@@ -58,7 +58,7 @@ describe('showHelp for root', () => {
   .loadConfig()
   .stdout()
   .do(async () => {
-    const config = await Config.load({root: path.resolve(__dirname, '..')});
+    const config = await Config.load({root: resolve(__dirname, '..')});
 
     (config as any).plugins = [{
       commands: [AppsIndex, AppsCreate, AppsDestroy],

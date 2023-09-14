@@ -1,5 +1,5 @@
 import * as Errors from '../errors'
-import * as util from 'util'
+import {format as utilFormat} from 'node:util'
 import * as chalk from 'chalk'
 import {ActionBase} from './action/base'
 import {config, Config} from './config'
@@ -71,18 +71,18 @@ export class ux {
 
   public static trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
-      stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(utilFormat(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
-      stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(utilFormat(format, ...args) + '\n')
     }
   }
 
   public static info(format: string, ...args: string[]): void {
-    stdout.write(util.format(format, ...args) + '\n')
+    stdout.write(utilFormat(format, ...args) + '\n')
   }
 
   public static log(format?: string, ...args: string[]): void {

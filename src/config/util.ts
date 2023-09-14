@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import {readFile} from 'node:fs'
 
 const debug = require('debug')
 
@@ -14,22 +14,17 @@ export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in ke
   }, {} as any)
 }
 
-export function exists(path: string): Promise<boolean> {
-  // eslint-disable-next-line no-promise-executor-return
-  return new Promise(resolve => resolve(fs.existsSync(path)))
-}
-
 export function resolvePackage(id: string, paths: { paths: string[] }): string {
   return require.resolve(id, paths)
 }
 
-export function loadJSON(path: string): Promise<any> {
+export function loadJSON<T = unknown>(path: string): Promise<T> {
   debug('config')('loadJSON %s', path)
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: any, d: any) => {
+    readFile(path, 'utf8', (err: any, d: any) => {
       try {
         if (err) reject(err)
-        else resolve(JSON.parse(d))
+        else resolve(JSON.parse(d) as T)
       } catch (error: any) {
         reject(error)
       }
@@ -108,15 +103,15 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @returns string[]
  */
 export function collectUsableIds(commandIds: string[]): Set<string> {
-  const usuableIds: string[] = []
+  const usableIds: string[] = []
   for (const id of commandIds) {
     const parts = id.split(':')
     while (parts.length > 0) {
       const name = parts.join(':')
-      if (name) usuableIds.push(name)
+      if (name) usableIds.push(name)
       parts.pop()
     }
   }
 
-  return new Set(usuableIds)
+  return new Set(usableIds)
 }

@@ -1,10 +1,10 @@
 import {assert, expect, config} from 'chai'
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 
 import {parse} from '../../src/parser'
 import {Args, Flags} from '../../src'
 import {FlagDefault} from '../../src/interfaces/parser'
-import {URL} from 'url'
+import {URL} from 'node:url'
 import * as sinon from 'sinon'
 import {CLIError} from '../../src/errors'
 
@@ -1556,11 +1556,11 @@ See more help with --help`)
 
   describe('fs flags', () => {
     const sandbox = sinon.createSandbox()
-    let existsStub: sinon.SinonStub
+    let accessStub: sinon.SinonStub
     let statStub: sinon.SinonStub
 
     beforeEach(() => {
-      existsStub = sandbox.stub(fs, 'existsSync')
+      accessStub = sandbox.stub(fs.promises, 'access')
       statStub = sandbox.stub(fs.promises, 'stat')
     })
 
@@ -1574,18 +1574,18 @@ See more help with --help`)
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory({exists: false})},
         })
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it('passes if dir !exists but exists not defined', async () => {
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory()},
         })
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it('passes when dir exists', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isDirectory: () => true})
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory({exists: true})},
@@ -1593,7 +1593,7 @@ See more help with --help`)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it("fails when dir doesn't exist", async () => {
-        existsStub.returns(false)
+        accessStub.throws()
         try {
           const out = await parse([`--dir=${testDir}`], {
             flags: {dir: Flags.directory({exists: true})},
@@ -1607,7 +1607,7 @@ See more help with --help`)
         }
       })
       it('fails when dir exists but is not a dir', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isDirectory: () => false})
         try {
           const out = await parse([`--dir=${testDir}`], {
@@ -1623,7 +1623,7 @@ See more help with --help`)
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
         it('accepts custom parse that passes', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isDirectory: () => true})
           const out = await parse([`--dir=${testDir}`], {
             flags: {dir: Flags.directory({exists: true, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
@@ -1632,7 +1632,7 @@ See more help with --help`)
         })
 
         it('accepts custom parse that fails', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isDirectory: () => true})
           try {
             const out = await parse([`--dir=${testDir}`], {
@@ -1655,17 +1655,17 @@ See more help with --help`)
           flags: {file: Flags.file({exists: false})},
         })
         expect(out.flags).to.deep.include({file: testFile})
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
       })
       it('passes if file doesn\'t exist but not exists not defined', async () => {
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file()},
         })
         expect(out.flags).to.deep.include({file: testFile})
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
       })
       it('passes when file exists', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isFile: () => true})
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file({exists: true})},
@@ -1673,7 +1673,7 @@ See more help with --help`)
         expect(out.flags).to.deep.include({file: testFile})
       })
       it("fails when dir doesn't exist", async () => {
-        existsStub.returns(false)
+        accessStub.throws()
         try {
           const out = await parse([`--file=${testFile}`], {
             flags: {file: Flags.file({exists: true})},
@@ -1685,7 +1685,7 @@ See more help with --help`)
         }
       })
       it('fails when file exists but is not a file', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isFile: () => false})
         try {
           const out = await parse([`--file=${testFile}`], {
@@ -1700,7 +1700,7 @@ See more help with --help`)
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
         it('accepts custom parse that passes', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isFile: () => true})
           const out = await parse([`--dir=${testFile}`], {
             flags: {dir: Flags.file({exists: false, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
@@ -1709,7 +1709,7 @@ See more help with --help`)
         })
 
         it('accepts custom parse that fails', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isFile: () => true})
           try {
             const out = await parse([`--dir=${testFile}`], {

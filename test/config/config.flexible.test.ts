@@ -1,5 +1,5 @@
-import * as os from 'os'
-import * as path from 'path'
+import * as os from 'node:os'
+import {join} from 'node:path'
 
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
@@ -45,7 +45,7 @@ describe('Config with flexible taxonomy', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
+    .stub(os, 'homedir', () => join(homedir))
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
