@@ -197,7 +197,7 @@ describe('oclif plugins', () => {
       it('should install the plugin', async () => {
         const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available 2>&1')
         expect(result.code).to.equal(0)
-        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available... installed v')
+        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available@latest... installed v')
 
         const pluginsResult = await executor.executeCommand('plugins')
         expect(pluginsResult.code).to.equal(0)
@@ -224,7 +224,7 @@ describe('oclif plugins', () => {
       it('should install the plugin', async () => {
         const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available --force 2>&1')
         expect(result.code).to.equal(0)
-        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available... installed v')
+        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available@latest... installed v')
 
         const pluginsResult = await executor.executeCommand('plugins')
         expect(pluginsResult.code).to.equal(0)
