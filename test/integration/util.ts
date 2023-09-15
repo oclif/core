@@ -203,5 +203,6 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
     throw new Error('Failed to run `yarn build`')
   }
 
+  executor.debug('Setup complete')
   return executor
 }

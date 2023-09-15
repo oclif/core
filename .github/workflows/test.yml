@@ -14,7 +14,7 @@ jobs:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/unitTestsWindows.yml@main
   e2e:
-    # needs: linux-unit-tests
+    needs: linux-unit-tests
     strategy:
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
@@ -35,6 +35,45 @@ jobs:
       - run: yarn install --network-timeout 600000
       - run: yarn build
       - run: yarn test:e2e
+      - run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+        env:
+          DEBUG: e2e:*
+  windows-sf-e2e:
+    # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
+    # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: yarn
+      - run: yarn install --network-timeout 600000
+      - run: yarn build
+      - run: yarn link
+      - run: New-Item -Path D:\a -Name "e2e" -ItemType "directory"
+      - run: New-Item -Path D:\a\e2e -Name "sf.e2e.ts" -ItemType "directory"
+      - run: |
+          git clone https://github.com/salesforcecli/cli.git --branch mdonnalley/esm
+          cd cli
+
+          $Json = Get-Content package.json | ConvertFrom-Json
+          $Json.resolutions | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\e2e\sf.e2e.ts\cli"
+          $Json | ConvertTo-Json -Depth 9 | Out-File package.json
+
+          yarn install --network-timeout 600000
+          yarn link @oclif/core
+          yarn build
+        working-directory: D:\a\e2e\sf.e2e.ts
+      - run: yarn mocha --forbid-only "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+        env:
+          OCLIF_CORE_E2E_SKIP_SETUP: true
+          OCLIF_CORE_E2E_TEST_DIR: D:\a\e2e
+          DEBUG: e2e:*
+
   esm-cjs-interop:
     needs: linux-unit-tests
     strategy:
