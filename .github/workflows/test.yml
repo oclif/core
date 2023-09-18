@@ -34,19 +34,12 @@ jobs:
           cache: yarn
       - run: yarn install --network-timeout 600000
       - run: yarn build
-      # - run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
-      - run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            yarn mocha --forbid-only "test/**/*.e2e.ts" --parallel --timeout 1200000
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
-          else
-              echo "$RUNNER_OS not supported"
-              exit 1
-          fi
-        shell: bash
+      - if: runner.os == 'Windows'
+        run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
         env:
           DEBUG: e2e:*
+      - if: runner.os == 'Linux'
+        run: yarn test:e2e
   windows-sf-e2e:
     # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
     # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
