@@ -34,8 +34,16 @@ jobs:
           cache: yarn
       - run: yarn install --network-timeout 600000
       - run: yarn build
-      - run: yarn test:e2e
-      - run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+      # - run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+      - run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            yarn mocha --forbid-only "test/**/*.e2e.ts" --parallel --timeout 1200000
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+          else
+              echo "$RUNNER_OS not supported"
+              exit 1
+          fi
         env:
           DEBUG: e2e:*
   windows-sf-e2e:
@@ -61,7 +69,8 @@ jobs:
           cd cli
 
           $Json = Get-Content package.json | ConvertFrom-Json
-          $Json.resolutions | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\e2e\sf.e2e.ts\cli"
+          $Json.dependencies | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\core\core"
+          $Json.resolutions | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "D:\a\core\core"
           $Json | ConvertTo-Json -Depth 9 | Out-File package.json
 
           yarn install --network-timeout 600000
