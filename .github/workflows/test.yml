@@ -44,6 +44,7 @@ jobs:
               echo "$RUNNER_OS not supported"
               exit 1
           fi
+        shell: bash
         env:
           DEBUG: e2e:*
   windows-sf-e2e:
