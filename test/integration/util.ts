@@ -85,9 +85,7 @@ export class Executor {
       this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
-          const opts = {...options, stdio: 'pipe', cwd} satisfies ExecOptions
-          if (process.platform === 'win32') opts.shell = 'powershell.exe'
-          const r = execSync(cmd, opts)
+          const r = execSync(cmd, {...options, stdio: 'pipe', cwd})
           const stdout = r.toString()
           this.debug(stdout)
           resolve({code: 0, stdout})
@@ -103,12 +101,7 @@ export class Executor {
           })
         }
       } else {
-        if (process.platform === 'win32') {
-          execSync(cmd, {...options, stdio: 'inherit', cwd, shell: 'powershell.exe'})
-        } else {
-          execSync(cmd, {...options, stdio: 'inherit', cwd})
-        }
-
+        execSync(cmd, {...options, stdio: 'inherit', cwd})
         resolve({code: 0})
       }
     })
