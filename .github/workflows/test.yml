@@ -17,13 +17,11 @@ jobs:
     needs: linux-unit-tests
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
+        os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
         exclude:
           - os: windows-latest
             node_version: lts/*
-          - os: windows-latest
-            node_version: lts/-1
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -44,7 +42,7 @@ jobs:
     needs: linux-unit-tests
     strategy:
       fail-fast: false
-    runs-on: "windows-latest"
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -79,13 +77,11 @@ jobs:
     needs: linux-unit-tests
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
-        node_version: [lts/-1, lts/*, latest]
+        os: [ubuntu-latest, windows-latest]
+        node_version: [lts/*, latest]
         exclude:
           - os: windows-latest
             node_version: lts/*
-          - os: windows-latest
-            node_version: lts/-1
       fail-fast: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -104,7 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
+        os: [ubuntu-latest, windows-latest]
         externalProjectGitUrl:
           - https://github.com/salesforcecli/plugin-auth
           - https://github.com/salesforcecli/plugin-data
