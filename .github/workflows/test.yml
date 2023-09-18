@@ -36,8 +36,6 @@ jobs:
       - run: yarn build
       - if: runner.os == 'Windows'
         run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
-        env:
-          DEBUG: e2e:*
       - if: runner.os == 'Linux'
         run: yarn test:e2e
   windows-sf-e2e:
