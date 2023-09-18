@@ -69,7 +69,7 @@ jobs:
           cd cli
 
           $Json = Get-Content package.json | ConvertFrom-Json
-          $Json.dependencies | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\core\core"
+          $Json.dependencies | Add-Member -Force -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\core\core"
           $Json.resolutions | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "D:\a\core\core"
           $Json | ConvertTo-Json -Depth 9 | Out-File package.json
 
