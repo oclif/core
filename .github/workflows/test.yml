@@ -76,7 +76,7 @@ jobs:
     needs: linux-unit-tests
     strategy:
       matrix:
-        os: [ubuntu-latests, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
         test: [esm, cjs, precore, coreV1, coreV2]
         exclude:
