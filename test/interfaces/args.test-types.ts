@@ -2,6 +2,7 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 import {Command, Args, Interfaces} from '../../src'
+// eslint-disable-next-line node/no-missing-import
 import {expectType, expectNotType} from 'tsd'
 import {URL} from 'node:url'
 

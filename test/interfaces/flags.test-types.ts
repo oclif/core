@@ -3,6 +3,7 @@
  */
 
 import {Command, Flags, Interfaces} from '../../src'
+// eslint-disable-next-line node/no-missing-import
 import {expectType, expectNotType} from 'tsd'
 import {URL} from 'node:url'
 
