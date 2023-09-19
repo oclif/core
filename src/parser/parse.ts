@@ -129,7 +129,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
 
       const flag = this.input.flags[name]
+
       if (flag.type === 'option') {
+        if (!flag.multiple && this.raw.some(o => o.type === 'flag' && o.flag === name)) {
+          throw new CLIError(`Flag --${name} can only be specified once`)
+        }
+
         this.currentFlag = flag
         const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
