@@ -14,7 +14,9 @@ export default class SimpleAction extends ActionBase {
     else this._flush()
   }
 
-  protected _resume(): void {}
+  protected _resume(): void {
+    // Not implemented
+  }
 
   protected _updateStatus(status: string, prevStatus?: string, newline = false): void {
     const task = this.task

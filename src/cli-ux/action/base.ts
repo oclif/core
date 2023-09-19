@@ -143,7 +143,9 @@ export class ActionBase {
     throw new Error('not implemented')
   }
 
-  protected _updateStatus(_: string | undefined, __?: string): void {}
+  protected _updateStatus(_: string | undefined, __?: string): void {
+    // Not implemented
+  }
 
   // mock out stdout/stderr so it doesn't screw up the rendering
   protected _stdout(toggle: boolean): void {

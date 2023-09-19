@@ -214,7 +214,9 @@ export abstract class Command {
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
     } catch {
-      this.debug = () => {}
+      this.debug = () => {
+        // noop
+      }
     }
   }
 

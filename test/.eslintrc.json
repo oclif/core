@@ -1,6 +1,7 @@
 {
   "extends": "../.eslintrc.json",
   "rules": {
-    "unicorn/consistent-function-scoping": "off"
+    "unicorn/consistent-function-scoping": "off",
+    "@typescript-eslint/no-empty-function": "off"
   }
 }

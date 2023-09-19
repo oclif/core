@@ -45,7 +45,10 @@ function displayWarnings() {
 }
 
 export function Debug(...scope: string[]): (..._: any) => void {
-  if (!debug) return (..._: any[]) => {}
+  if (!debug) return (..._: any[]) => {
+    // noop
+  }
+
   const d = debug(['config', ...scope].join(':'))
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)

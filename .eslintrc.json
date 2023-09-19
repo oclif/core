@@ -15,7 +15,6 @@
     ],
     "unicorn/no-array-reduce": "off",
     "unicorn/prefer-array-some": "off",
-    "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "no-useless-constructor": "off"

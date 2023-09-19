@@ -23,9 +23,13 @@ import {isTruthy, last, pickBy} from '../util'
 let debug: any
 try {
   // eslint-disable-next-line no-negated-condition
-  debug = process.env.CLI_FLAGS_DEBUG !== '1' ? () => {} : require('debug')('../parser')
+  debug = process.env.CLI_FLAGS_DEBUG !== '1' ? () => {
+    // noop
+  } : require('debug')('../parser')
 } catch {
-  debug = () => {}
+  debug = () => {
+    // noop
+  }
 }
 
 const readStdin = async (): Promise<string | null> => {
