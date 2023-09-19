@@ -221,7 +221,7 @@ type PluginConfig = {
   }
 
   console.log('Node version:', process.version)
-  if (skips.length > 0) console.log(`🚨 Skipping ${skips.join(', ')} tests 🚨`)
+  console.log('Running tests:', runTests)
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
