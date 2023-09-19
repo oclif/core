@@ -1310,11 +1310,17 @@ See more help with --help`)
     })
   })
 
-  it('parses multiple flags', async () => {
-    const out = await parse(['--foo=a', '--foo', 'b'], {
-      flags: {foo: Flags.string()},
-    })
-    expect(out.flags.foo).to.equal('b')
+  it('throws an error when multiple flags of non-multiple flag is provided', async () => {
+    let message = ''
+    try {
+      await parse(['--foo=a', '--foo', 'b'], {
+        flags: {foo: Flags.string()},
+      })
+    } catch (error: any) {
+      message = error.message
+    }
+
+    expect(message).to.include('can only be specified once')
   })
 
   describe('dependsOn', () => {
