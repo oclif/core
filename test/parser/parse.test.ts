@@ -1755,15 +1755,58 @@ See more help with --help`)
       expect(out.flags.foo).to.equal(true)
     })
 
-    it('works with aliased short char', async () => {
-      const out = await parse(['-b'], {
-        flags: {
-          foo: Flags.boolean({
-            charAliases: ['b'],
-          }),
-        },
+    describe('aliased short char', () => {
+      it('boolean', async () => {
+        const out = await parse(['-b'], {
+          flags: {
+            foo: Flags.boolean({
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal(true)
       })
-      expect(out.flags.foo).to.equal(true)
+      it('string', async () => {
+        const out = await parse(['-b', 'hello'], {
+          flags: {
+            foo: Flags.string({
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hello')
+      })
+      it('empty charAliases', async () => {
+        const out = await parse(['--foo', 'hello'], {
+          flags: {
+            foo: Flags.string({
+              charAliases: [],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hello')
+      })
+      it('duplicated flag via charAliases and full name (last in wins', async () => {
+        const out = await parse(['--foo', 'hello', '--foo', 'hi'], {
+          flags: {
+            foo: Flags.string({
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hi')
+      })
+      it('duplicated via aliases charAliases (last in wins', async () => {
+        const out = await parse(['-b', 'hello', '-b', 'hi'], {
+          flags: {
+            foo: Flags.string({
+              aliases: ['b'],
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hi')
+      })
     })
   })
 })
