@@ -11,9 +11,11 @@ base library for oclif CLIs
 Migrating
 =====
 
+See the [v3 migration guide](./guides/V3_MIGRATION.md) for an overview of breaking changes that occurred between v2 and v3.
+
 See the [v2 migration guide](./guides/V2_MIGRATION.md) for an overview of breaking changes that occurred between v1 and v2.
 
-See the [v3 migration guide](./guides/V3_MIGRATION.md) for an overview of breaking changes that occurred between v2 and v3.
+Migrating from `@oclif/config` and `@oclif/command`? See the [v1 migration guide](./guides/PRE_CORE_MIGRATION.md).
 
 CLI UX
 =====
