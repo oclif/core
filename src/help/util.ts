@@ -1,7 +1,7 @@
 import * as ejs from 'ejs'
 import {Config as IConfig, HelpOptions, Deprecation} from '../interfaces'
 import {Help, HelpBase} from '.'
-import ModuleLoader from '../module-loader'
+import {load} from '../module-loader'
 import {collectUsableIds} from '../config/util'
 
 interface HelpBaseDerived {
@@ -18,7 +18,7 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
 
   if (configuredClass) {
     try {
-      const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
+      const exported = await load(config, configuredClass) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
     } catch (error: any) {
       throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)

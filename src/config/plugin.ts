@@ -19,7 +19,7 @@ import {
   resolvePackage,
 } from './util'
 import {exists, isProd, requireJson} from '../util'
-import ModuleLoader from '../module-loader'
+import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
 import Performance from '../performance'
 
@@ -244,8 +244,8 @@ export class Plugin implements IPlugin {
       let filePath: string | undefined
       try {
         ({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id) ?
-          await ModuleLoader.loadWithDataFromManifest(this.manifest.commands[id], this.root) :
-          await ModuleLoader.loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          await loadWithDataFromManifest(this.manifest.commands[id], this.root) :
+          await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return

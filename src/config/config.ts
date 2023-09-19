@@ -10,7 +10,7 @@ import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Debug, compact, collectUsableIds, getCommandIdPermutations} from './util'
 import {ensureArgObject, isProd, requireJson} from '../util'
-import ModuleLoader from '../module-loader'
+import {loadWithData} from '../module-loader'
 import {getHelpFlagAdditions} from '../help'
 import {Command} from '../command'
 import {OptionFlag, Arg} from '../interfaces/parser'
@@ -313,7 +313,7 @@ export class Config implements IConfig {
         const marker = Performance.mark(`config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {isESM, module, filePath} = await ModuleLoader.loadWithData(p, join(p.root, hook))
+          const {isESM, module, filePath} = await loadWithData(p, join(p.root, hook))
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout ?
