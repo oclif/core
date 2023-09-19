@@ -373,7 +373,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
       fwsArray.filter(fws => fws.value !== undefined)
       .map(fws => [fws.inputFlag.name, fws.value]),
-    )
+    ) as TFlags & BFlags & { json: boolean | undefined }
 
     type FlagWithStrategy = {
       inputFlag: {
@@ -407,7 +407,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
 
     return {
-      // @ts-ignore original version returned an any.  Not sure how to get to the return type for `flags` prop
       flags: fwsArrayToObject(finalFlags),
       metadata: {flags: Object.fromEntries(finalFlags.filter(fws => fws.metadata).map(fws => [fws.inputFlag.name, fws.metadata as MetadataFlag]))},
     }
