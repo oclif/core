@@ -8,11 +8,11 @@ export class AppsCreate extends Command {
 
   static summary = 'Create an app'
 
-  static description = 'this only shows up in command help under DESCRIPTION';
+  static description = 'this only shows up in command help under DESCRIPTION'
 
-  static flags = {};
+  static flags = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -23,11 +23,11 @@ export class AppsDestroy extends Command {
   static id = 'apps:destroy'
 
   static description = `Destroy an app
-  this only shows up in command help under DESCRIPTION`;
+  this only shows up in command help under DESCRIPTION`
 
-  static flags: Record<string, never> = {};
+  static flags: Record<string, never> = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -37,11 +37,11 @@ export class AppsDestroy extends Command {
 export class AppsIndex extends Command {
   static id = 'apps'
 
-  static summary = 'List all apps (app index command)';
+  static summary = 'List all apps (app index command)'
 
-  static flags: Record<string, never> = {};
+  static flags: Record<string, never> = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -52,11 +52,11 @@ export class AppsIndexWithDesc extends Command {
   static id = 'apps'
 
   static description = `List all apps (app index command)
-this only shows up in command help under DESCRIPTION`;
+this only shows up in command help under DESCRIPTION`
 
-  static flags: Record<string, never> = {};
+  static flags: Record<string, never> = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -79,11 +79,11 @@ export class AppsAdminIndex extends Command {
   static id = 'apps:admin'
 
   static description = `List of admins for an app
-  this only shows up in command help under DESCRIPTION`;
+  this only shows up in command help under DESCRIPTION`
 
-  static flags: Record<string, never> = {};
+  static flags: Record<string, never> = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -94,11 +94,11 @@ export class AppsAdminAdd extends Command {
   static id = 'apps:admin:add'
 
   static description = `Add user to an app
-  this only shows up in command help under DESCRIPTION`;
+  this only shows up in command help under DESCRIPTION`
 
-  static flags: Record<string, never> = {};
+  static flags: Record<string, never> = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'
@@ -111,11 +111,11 @@ export class DbCreate extends Command {
   static id = 'db:create'
 
   static description = `Create a db
-  this only shows up in command help under DESCRIPTION`;
+  this only shows up in command help under DESCRIPTION`
 
-  static flags = {};
+  static flags = {}
 
-  static args = {};
+  static args = {}
 
   async run(): Promise<void> {
     'run'

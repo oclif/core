@@ -33,8 +33,8 @@ function loadTSConfig(root: string): TSConfig | undefined {
     ).config
     if (!tsconfig || !tsconfig.compilerOptions) {
       throw new Error(
-        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it ` +
-        'did not contain a "compilerOptions" section.')
+        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it `
+        + 'did not contain a "compilerOptions" section.')
     }
 
     TS_CONFIGS[root] = tsconfig

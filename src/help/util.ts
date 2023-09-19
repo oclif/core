@@ -13,7 +13,7 @@ function extractClass(exported: any): HelpBaseDerived {
 }
 
 export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
-  const pjson = config.pjson
+  const {pjson} = config
   const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
 
   if (configuredClass) {
@@ -28,7 +28,6 @@ export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
   return Help
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function template(context: any): (t: string) => string {
   function render(t: string): string {
     return ejs.render(t, context)

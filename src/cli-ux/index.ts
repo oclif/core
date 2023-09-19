@@ -5,9 +5,6 @@ import * as styled from './styled'
 import * as uxPrompt from './prompt'
 import {Config, config} from './config'
 import {ActionBase} from './action/base'
-import {ExitError} from './exit'
-import {IPromptOptions} from './prompt'
-import {Table} from './styled'
 import {flush as _flush} from './flush'
 import {stdout} from './stream'
 import {format as utilFormat} from 'node:util'
@@ -37,7 +34,6 @@ export class ux {
     return config.action
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
     this.info(styled.styledObject(obj, keys))
   }
@@ -114,45 +110,15 @@ export class ux {
   }
 }
 
-const action = ux.action
-const annotation = ux.annotation
-const anykey = ux.anykey
-const confirm = ux.confirm
-const debug = ux.debug
-const done = ux.done
-const error = Errors.error
-const exit = Errors.exit
-const flush = ux.flush
-const info = ux.info
-const log = ux.log
-const progress = ux.progress
-const prompt = ux.prompt
-const styledHeader = ux.styledHeader
-const styledJSON = ux.styledJSON
-const styledObject = ux.styledObject
-const table = ux.table
-const trace = ux.trace
-const tree = ux.tree
-const url = ux.url
-const wait = ux.wait
-const warn = Errors.warn
-
-export {
+const {
   action,
-  ActionBase,
   annotation,
   anykey,
-  config,
-  Config,
   confirm,
   debug,
   done,
-  error,
-  exit,
-  ExitError,
   flush,
   info,
-  IPromptOptions,
   log,
   progress,
   prompt,
@@ -160,7 +126,31 @@ export {
   styledJSON,
   styledObject,
   table,
-  Table,
+  trace,
+  tree,
+  url,
+  wait,
+} = ux
+const {error, exit, warn} = Errors
+
+export {
+  action,
+  annotation,
+  anykey,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
+  flush,
+  info,
+  log,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
   trace,
   tree,
   url,
@@ -183,3 +173,9 @@ const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExi
 if (!uxListener) {
   process.once('exit', uxProcessExitHandler)
 }
+
+export {ExitError} from './exit'
+export {IPromptOptions} from './prompt'
+export {Table} from './styled'
+export {ActionBase} from './action/base'
+export {config, Config} from './config'

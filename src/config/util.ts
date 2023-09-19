@@ -32,10 +32,6 @@ export function loadJSON<T = unknown>(path: string): Promise<T> {
   })
 }
 
-export function compact<T>(a: (T | undefined)[]): T[] {
-  return a.filter((a): a is T => Boolean(a))
-}
-
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
   process.on('warning', (warning: any) => {
@@ -102,6 +98,4 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @returns string[]
  */
 export const collectUsableIds = (commandIds: string[]): Set<string> =>
-  new Set(commandIds.flatMap(id => {
-    return id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))
-  }))
+  new Set(commandIds.flatMap(id => id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))))

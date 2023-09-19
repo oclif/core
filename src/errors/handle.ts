@@ -17,7 +17,7 @@ export async function handle(err: Error & Partial<PrettyPrintableError> & Partia
     const stack = clean(err.stack || '', {pretty: true})
 
     if (shouldPrint) {
-      console.error(pretty ? pretty : stack)
+      console.error(pretty ?? stack)
     }
 
     const exitCode = err.oclif?.exit !== undefined && err.oclif?.exit !== false ? err.oclif?.exit : 1

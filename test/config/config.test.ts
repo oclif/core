@@ -69,7 +69,6 @@ describe('Config', () => {
           // @ts-expect-error because readonly property
           config.channel = 'stable'
 
-          // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
             bin: 'oclif-cli',
@@ -235,23 +234,21 @@ describe('Config', () => {
       types = [],
     }: Options = {}) => {
       class MyCommandClass extends Command {
-      _base = ''
+        _base = ''
 
-      aliases: string[] = []
+        aliases: string[] = []
 
-      hidden = false
+        hidden = false
 
-      id = 'foo:bar'
+        id = 'foo:bar'
 
-      run(): Promise<any> {
-        return Promise.resolve()
-      }
+        run(): Promise<any> {
+          return Promise.resolve()
+        }
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<Command.Class> => {
-        return MyCommandClass
-      }
+      const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
       const commandPluginA: Command.Loadable = {
         strict: false,

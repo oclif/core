@@ -3,9 +3,8 @@ import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import * as process from 'node:process'
 
-import {CLIError, ExitError, config} from '../../src/errors'
+import {CLIError, ExitError, config, exit as exitErrorThrower} from '../../src/errors'
 import {handle} from '../../src/errors/handle'
-import {exit as exitErrorThrower} from '../../src/errors'
 
 const errlog = join(__dirname, '../tmp/mytest/error.log')
 const x = process.platform === 'win32' ? '»' : '›'

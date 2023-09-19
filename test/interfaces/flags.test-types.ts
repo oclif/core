@@ -3,7 +3,7 @@
  */
 
 import {Command, Flags, Interfaces} from '../../src'
-// eslint-disable-next-line node/no-missing-import
+
 import {expectNotType, expectType} from 'tsd'
 import {URL} from 'node:url'
 
@@ -24,9 +24,9 @@ type MyType = {
 }
 
 export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' | 'seconds'}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     const value = opts.unit === 'minutes' ? new Date(input).getMinutes() : new Date(input).getSeconds()
-    return Promise.resolve(value)
+    return value
   },
   default: async _ctx => _ctx.options.unit === 'minutes' ? 1 : 2,
   defaultHelp: async _ctx => _ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds',

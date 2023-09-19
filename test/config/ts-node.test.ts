@@ -35,8 +35,10 @@ describe('tsPath', () => {
     sandbox.restore()
     // Clear caches so that unit tests don't affect each other
     // @ts-expect-error because TS_CONFIGS is not exported
+    // eslint-disable-next-line import/namespace
     configTsNode.TS_CONFIGS = {}
     // @ts-expect-error because REGISTERED is not exported
+    // eslint-disable-next-line import/namespace
     configTsNode.REGISTERED = new Set()
   })
 

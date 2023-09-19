@@ -22,10 +22,9 @@ import {createInterface} from 'node:readline'
 
 let debug: any
 try {
-  // eslint-disable-next-line no-negated-condition
-  debug = process.env.CLI_FLAGS_DEBUG !== '1' ? () => {
+  debug = process.env.CLI_FLAGS_DEBUG === '1' ? require('debug')('../parser') : () => {
     // noop
-  } : require('debug')('../parser')
+  }
 } catch {
   debug = () => {
     // noop
@@ -46,7 +45,7 @@ const readStdin = async (): Promise<string | null> => {
   return new Promise(resolve => {
     let result = ''
     const ac = new AbortController()
-    const signal = ac.signal
+    const {signal} = ac
     const timeout = setTimeout(() => ac.abort(), 100)
 
     const rl = createInterface({
@@ -101,9 +100,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
-    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
-      return ([...flag.aliases ?? [], ...flag.charAliases ?? []]).map(a => [a, flag])
-    }))
+    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => ([...flag.aliases ?? [], ...flag.charAliases ?? []]).map(a => [a, flag])))
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
@@ -142,7 +139,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
-        this.raw.push({type: 'flag', flag: flag.name, input: input})
+        this.raw.push({type: 'flag', flag: flag.name, input})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
@@ -270,6 +267,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
               // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
               .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
               .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),
+            // eslint-disable-next-line unicorn/no-await-expression-member
             )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
@@ -321,18 +319,19 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'boolean') {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => Promise.resolve(isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false')),
+            valueFunction: async (i: FlagWithStrategy) => isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'),
           }
         }
       }
 
       // no input, but flag has default value
+      // eslint-disable-next-line no-constant-binary-expression, valid-typeof
       if (typeof fws.inputFlag.flag.default !== undefined) {
         return {
           ...fws, metadata: {setFromDefault: true},
-          valueFunction: typeof fws.inputFlag.flag.default === 'function' ?
-            (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags}) :
-            async () => fws.inputFlag.flag.default,
+          valueFunction: typeof fws.inputFlag.flag.default === 'function'
+            ? (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags})
+            : async () => fws.inputFlag.flag.default,
         }
       }
 
@@ -343,11 +342,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const addHelpFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
       if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.defaultHelp) {
         return {
-          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function' ?
+          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function'
             // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context) :
+            ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
             // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
+            : (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
         }
       }
 
@@ -465,7 +464,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       argv.push(token.input)
     }
 
-    return {argv, args: args}
+    return {argv, args}
   }
 
   private _debugOutput(args: any, flags: any, argv: any) {

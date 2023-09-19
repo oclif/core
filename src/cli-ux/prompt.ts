@@ -1,6 +1,6 @@
 import * as Errors from '../errors'
 import * as chalk from 'chalk'
-import config from './config'
+import {config} from './config'
 import {stderr} from './stream'
 
 export interface IPromptOptions {
@@ -76,8 +76,8 @@ async function single(options: IPromptConfig): Promise<string> {
 
 function replacePrompt(prompt: string) {
   const ansiEscapes = require('ansi-escapes')
-  stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt +
-    ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
+  stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt
+    + ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
 }
 
 async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
@@ -94,11 +94,15 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
   const passwordPrompt = require('password-prompt')
 
   switch (options.type) {
-  case 'normal':
+  case 'normal': {
     return normal(options)
-  case 'single':
+  }
+
+  case 'single': {
     return single(options)
-  case 'mask':
+  }
+
+  case 'mask': {
     return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
@@ -107,14 +111,19 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
       replacePrompt(getPrompt(name, 'hide', inputOptions.default))
       return value
     })
-  case 'hide':
+  }
+
+  case 'hide': {
     return passwordPrompt(options.prompt, {
       method: options.type,
       required: options.required,
       default: options.default,
     })
-  default:
+  }
+
+  default: {
     throw new Error(`unexpected type ${options.type}`)
+  }
   }
 }
 
@@ -125,9 +134,7 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
  * @returns Promise<string>
  */
 export async function prompt(name: string, options: IPromptOptions = {}): Promise<string> {
-  return config.action.pauseAsync(() => {
-    return _prompt(name, options)
-  }, chalk.cyan('?'))
+  return config.action.pauseAsync(() => _prompt(name, options), chalk.cyan('?'))
 }
 
 /**
@@ -138,7 +145,8 @@ export async function prompt(name: string, options: IPromptOptions = {}): Promis
 export function confirm(message: string): Promise<boolean> {
   return config.action.pauseAsync(async () => {
     const confirm = async (): Promise<boolean> => {
-      const response = (await _prompt(message)).toLowerCase()
+      const raw = await _prompt(message)
+      const response = raw.toLowerCase()
       if (['n', 'no'].includes(response)) return false
       if (['y', 'yes'].includes(response)) return true
       return confirm()
@@ -156,9 +164,9 @@ export function confirm(message: string): Promise<boolean> {
 export async function anykey(message?: string): Promise<string> {
   const tty = Boolean(process.stdin.setRawMode)
   if (!message) {
-    message = tty ?
-      `Press any key to continue or ${chalk.yellow('q')} to exit` :
-      `Press enter to continue or ${chalk.yellow('q')} to exit`
+    message = tty
+      ? `Press any key to continue or ${chalk.yellow('q')} to exit`
+      : `Press enter to continue or ${chalk.yellow('q')} to exit`
   }
 
   const char = await prompt(message, {type: 'single', required: false})

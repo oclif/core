@@ -1,6 +1,6 @@
 import * as chai from 'chai'
 
-const expect = chai.expect
+const {expect} = chai
 
 import {ux} from '../../src/cli-ux'
 

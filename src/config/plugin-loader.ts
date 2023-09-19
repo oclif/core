@@ -81,7 +81,7 @@ export default class PluginLoader {
       // do not load oclif.devPlugins in production
       if (isProd()) return
       try {
-        const devPlugins = opts.rootPlugin.pjson.oclif.devPlugins
+        const {devPlugins} = opts.rootPlugin.pjson.oclif
         if (devPlugins) await this.loadPlugins(opts.rootPlugin.root, 'dev', devPlugins)
       } catch (error: any) {
         process.emitWarning(error)

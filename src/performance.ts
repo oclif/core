@@ -25,10 +25,10 @@ type PerfHighlights = {
 }
 
 class Marker {
-  public module: string;
-  public method: string;
-  public scope: string;
-  public stopped = false;
+  public module: string
+  public method: string
+  public scope: string
+  public stopped = false
 
   private startMarker: string
   private stopMarker: string

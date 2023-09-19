@@ -119,15 +119,15 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected usage(): string {
-    const usage = this.command.usage
+    const {usage} = this.command
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
     .map(u => {
       const allowedSpacing = this.opts.maxWidth - this.indentSpacing
       const line = `$ ${this.config.bin} ${u}`.trim()
       if (line.length > allowedSpacing) {
         const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
-        return line.slice(0, Math.max(0, splitIndex)) + '\n' +
-            this.indent(this.wrap(line.slice(Math.max(0, splitIndex)), this.indentSpacing * 2))
+        return line.slice(0, Math.max(0, splitIndex)) + '\n'
+            + this.indent(this.wrap(line.slice(Math.max(0, splitIndex)), this.indentSpacing * 2))
       }
 
       return this.wrap(line)
@@ -182,7 +182,7 @@ export class CommandHelp extends HelpFormatter {
       if (typeof a === 'string') {
         const lines = a
         .split(POSSIBLE_LINE_FEED)
-        .filter(line => Boolean(line))
+        .filter(Boolean)
         // If the example is <description>\n<command> then format correctly
         if (lines.length >= 2 && !this.isCommand(lines[0]) && lines.slice(1).every(i => this.isCommand(i))) {
           description = lines[0]
@@ -195,19 +195,19 @@ export class CommandHelp extends HelpFormatter {
         commands = [a.command]
       }
 
-      const multilineSeparator =
-        this.config.platform === 'win32' ?
-          (this.config.shell.includes('powershell') ? '`' : '^') :
-          '\\'
+      const multilineSeparator
+        = this.config.platform === 'win32'
+          ? (this.config.shell.includes('powershell') ? '`' : '^')
+          : '\\'
 
       // The command will be indented in the section, which is also indented
       const finalIndentedSpacing = this.indentSpacing * 2
-      const multilineCommands = commands.map(c => {
+      const multilineCommands = commands.map(c =>
         // First indent keeping room for escaped newlines
-        return this.indent(this.wrap(this.formatIfCommand(c), finalIndentedSpacing + 4))
+        this.indent(this.wrap(this.formatIfCommand(c), finalIndentedSpacing + 4))
         // Then add the escaped newline
-        .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
-      }).join('\n')
+        .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `),
+      ).join('\n')
 
       return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
     }).join('\n\n')

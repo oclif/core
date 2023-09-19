@@ -5,7 +5,7 @@ import {parse} from '../../src/parser'
 import {Args, Flags} from '../../src'
 import {FlagDefault} from '../../src/interfaces/parser'
 import {URL} from 'node:url'
-import * as sinon from 'sinon'
+import {createSandbox, SinonStub} from 'sinon'
 import {CLIError} from '../../src/errors'
 
 config.truncateThreshold = 0
@@ -109,7 +109,7 @@ describe('parse', () => {
         const out = await parse(['--foo', 'baz'], {
           flags: {
             foo: Flags.custom({
-              defaultHelp: async () => {
+              async defaultHelp() {
                 throw new Error('failed to get default help value')
               },
             })(),
@@ -831,7 +831,7 @@ See more help with --help`)
 
     describe('parse with a default/value of another type (class)', async () => {
       class TestClass {
-        public prop: string;
+        public prop: string
         constructor(input: string) {
           this.prop = input
         }
@@ -1561,9 +1561,9 @@ See more help with --help`)
   })
 
   describe('fs flags', () => {
-    const sandbox = sinon.createSandbox()
-    let accessStub: sinon.SinonStub
-    let statStub: sinon.SinonStub
+    const sandbox = createSandbox()
+    let accessStub: SinonStub
+    let statStub: SinonStub
 
     beforeEach(() => {
       accessStub = sandbox.stub(fs.promises, 'access')

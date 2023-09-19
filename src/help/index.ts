@@ -2,7 +2,7 @@ import * as Interfaces from '../interfaces'
 import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {Command} from '../command'
-import CommandHelp from './command'
+import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {error} from '../errors'
@@ -64,7 +64,7 @@ export class Help extends HelpBase {
   }
 
   protected get sortedCommands(): Command.Loadable[] {
-    let commands = this.config.commands
+    let {commands} = this.config
 
     commands = commands.filter(c => this.opts.all || !c.hidden)
     commands = sortBy(commands, c => c.id)
@@ -150,9 +150,9 @@ export class Help extends HelpBase {
 
     if (state) {
       this.log(
-        state === 'deprecated' ?
-          `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}` :
-          `This command is in ${state}.\n`,
+        state === 'deprecated'
+          ? `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}`
+          : `This command is in ${state}.\n`,
       )
     }
 
@@ -187,9 +187,9 @@ export class Help extends HelpBase {
     const state = this.config.pjson?.oclif?.state
     if (state) {
       this.log(
-        state === 'deprecated' ?
-          `${this.config.bin} is deprecated` :
-          `${this.config.bin} is in ${state}.\n`,
+        state === 'deprecated'
+          ? `${this.config.bin} is deprecated`
+          : `${this.config.bin} is in ${state}.\n`,
       )
     }
 
@@ -214,7 +214,7 @@ export class Help extends HelpBase {
   }
 
   protected async showTopicHelp(topic: Interfaces.Topic): Promise<void> {
-    const name = topic.name
+    const {name} = topic
     const depth = name.split(':').length
 
     const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)

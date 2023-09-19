@@ -16,10 +16,10 @@ const g: any = global
 const globals = g.ux || (g.ux = {})
 
 const actionType = (
-  Boolean(process.stderr.isTTY) &&
-  !process.env.CI &&
-  !['dumb', 'emacs-color'].includes(process.env.TERM!) &&
-  'spinner'
+  Boolean(process.stderr.isTTY)
+  && !process.env.CI
+  && !['dumb', 'emacs-color'].includes(process.env.TERM!)
+  && 'spinner'
 ) || 'simple'
 
 const Action = actionType === 'spinner' ? spinner : simple

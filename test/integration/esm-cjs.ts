@@ -98,6 +98,7 @@ type PluginConfig = {
   hookText: string;
 }
 
+// eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
   const PLUGINS: Record<string, PluginConfig> = {
     esm1: {
@@ -202,7 +203,8 @@ type PluginConfig = {
 
   async function cleanUp(options: CleanUpOptions): Promise<void> {
     await options.executor.executeCommand(`plugins:uninstall ${options.plugin.package}`)
-    expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin.package)
+    const {stdout} = await options.executor.executeCommand('plugins')
+    expect(stdout).to.not.include(options.plugin.package)
   }
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)

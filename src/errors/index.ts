@@ -10,7 +10,6 @@ export {ModuleLoadError} from './errors/module-load'
 export {CLIError} from './errors/cli'
 export {Logger} from './logger'
 export {config} from './config'
-export {PrettyPrintableError}
 
 export function exit(code = 0): never {
   throw new ExitError(code)
@@ -60,3 +59,5 @@ export function memoizedWarn(input: string | Error): void {
 
   WARNINGS.add(input)
 }
+
+export {PrettyPrintableError} from '../interfaces'

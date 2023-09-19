@@ -49,9 +49,7 @@ describe('Config with flexible taxonomy', () => {
     .stub(os, 'platform', () => platform)
 
     const load = async (): Promise<void> => {}
-    const findCommand = async (): Promise<Command.Class> => {
-      return MyCommandClass
-    }
+    const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
     const commandPluginA: Command.Loadable = {
       strict: false,
@@ -163,7 +161,7 @@ describe('Config with flexible taxonomy', () => {
   })
   .it('has populated command permutation index', config => {
     // @ts-expect-error because private member
-    const commandPermutations = config.commandPermutations
+    const {commandPermutations} = config
     expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
     expect(commandPermutations.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
     expect(commandPermutations.get('bar')).to.deep.equal(new Set(['foo:bar']))

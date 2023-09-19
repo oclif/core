@@ -13,6 +13,7 @@ export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyo
 }
 
 export function compact<T>(a: (T | undefined)[]): T[] {
+  // eslint-disable-next-line unicorn/prefer-native-coercion-functions
   return a.filter((a): a is T => Boolean(a))
 }
 
@@ -25,7 +26,7 @@ export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
 
 export function last<T>(arr?: T[]): T | undefined {
   if (!arr) return
-  return arr.slice(-1)[0]
+  return arr.at(-1)
 }
 
 type SortTypes = string | number | undefined | boolean
@@ -93,7 +94,8 @@ export const dirExists = async (input: string): Promise<string> => {
     throw new Error(`No directory found at ${input}`)
   }
 
-  if (!(await stat(input)).isDirectory()) {
+  const fileStat = await stat(input)
+  if (!fileStat.isDirectory()) {
     throw new Error(`${input} exists but is not a directory`)
   }
 
@@ -105,7 +107,8 @@ export const fileExists = async (input: string): Promise<string> => {
     throw new Error(`No file found at ${input}`)
   }
 
-  if (!(await stat(input)).isFile()) {
+  const fileStat = await stat(input)
+  if (!fileStat.isFile()) {
     throw new Error(`${input} exists but is not a file`)
   }
 
@@ -132,9 +135,7 @@ export function requireJson<T>(...pathParts: string[]): T {
  * @returns ArgInput
  */
 export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Command.Arg.Cached}): ArgInput {
-  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => {
-    return {...x, [y.name]: y}
-  }, {} as ArgInput) : args ?? {}) as ArgInput
+  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => ({...x, [y.name]: y}), {} as ArgInput) : args ?? {}) as ArgInput
 }
 
 export function uniq<T>(arr: T[]): T[] {

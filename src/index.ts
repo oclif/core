@@ -1,56 +1,4 @@
-import * as Args from './args'
-import * as Errors from './errors'
-import * as Flags from './flags'
-import * as Interfaces from './interfaces'
-import * as Parser from './parser'
-import * as ux from './cli-ux'
-import {CommandHelp, Help, HelpBase, loadHelpClass} from './help'
-import {Config, Plugin, toCached, tsPath} from './config'
-import {HelpSection, HelpSectionKeyValueTable, HelpSectionRenderer} from './help/formatter'
-import {Settings, settings} from './settings'
-import {stderr, stdout} from './cli-ux/stream'
-import {toConfiguredId, toStandardizedId} from './help/util'
-
-import {Command} from './command'
-import {Hook} from './interfaces/hooks'
-import Performance from './performance'
-import execute from './execute'
-import {flush} from './cli-ux/flush'
-import {handle} from './errors/handle'
-import run from './main'
-
-export {
-  Args,
-  Command,
-  CommandHelp,
-  Config,
-  Errors,
-  execute,
-  Flags,
-  flush,
-  handle,
-  Help,
-  HelpBase,
-  HelpSection,
-  HelpSectionKeyValueTable,
-  HelpSectionRenderer,
-  Hook,
-  Interfaces,
-  loadHelpClass,
-  Parser,
-  Performance,
-  Plugin,
-  run,
-  settings,
-  Settings,
-  stderr,
-  stdout,
-  toCached,
-  toConfiguredId,
-  toStandardizedId,
-  tsPath,
-  ux,
-}
+import {stderr} from './cli-ux/stream'
 
 function checkCWD() {
   try {
@@ -63,3 +11,23 @@ function checkCWD() {
 }
 
 checkCWD()
+
+export * as Args from './args'
+export * as Errors from './errors'
+export * as Flags from './flags'
+export * as Interfaces from './interfaces'
+export * as Parser from './parser'
+export * as ux from './cli-ux'
+export {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
+export {Config, toCached, Plugin, tsPath} from './config'
+export {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
+export {Settings, settings} from './settings'
+export {stdout, stderr} from './cli-ux/stream'
+export {toConfiguredId, toStandardizedId} from './help/util'
+export {Command} from './command'
+export {Hook} from './interfaces/hooks'
+export {default as Performance} from './performance'
+export {default as execute} from './execute'
+export {flush} from './cli-ux/flush'
+export {handle} from './errors/handle'
+export {default as run} from './main'

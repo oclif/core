@@ -32,7 +32,7 @@ ${this.indent(this.wrap('force  it '.repeat(29)))}`,
 class TestHelp extends Help {
   CommandHelpClass = TestCommandHelp
 
-  public config: any;
+  public config: any
 
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)
@@ -87,7 +87,7 @@ describe('showHelp for root', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -119,7 +119,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -150,7 +150,7 @@ describe('showHelp for a command', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -180,7 +180,7 @@ CUSTOM
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',

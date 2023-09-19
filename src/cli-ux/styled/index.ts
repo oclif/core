@@ -1,13 +1,6 @@
-import * as Table from './table'
-import progress from './progress'
-import styledJSON from './json'
-import styledObject from './object'
-import tree from './tree'
 
-export {
-  styledJSON,
-  styledObject,
-  Table,
-  tree,
-  progress,
-}
+export * as Table from './table'
+export {default as progress} from './progress'
+export {default as styledJSON} from './json'
+export {default as styledObject} from './object'
+export {default as tree} from './tree'
