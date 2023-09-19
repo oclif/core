@@ -1786,26 +1786,38 @@ See more help with --help`)
         })
         expect(out.flags.foo).to.equal('hello')
       })
-      it('duplicated flag via charAliases and full name (last in wins', async () => {
-        const out = await parse(['--foo', 'hello', '--foo', 'hi'], {
-          flags: {
-            foo: Flags.string({
-              charAliases: ['b'],
-            }),
-          },
-        })
-        expect(out.flags.foo).to.equal('hi')
+      it('duplicated flag via charAliases and full name throws error', async () => {
+        let message = ''
+        try {
+          await parse(['--foo', 'hello', '--foo', 'hi'], {
+            flags: {
+              foo: Flags.string({
+                charAliases: ['b'],
+              }),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('can only be specified once')
       })
-      it('duplicated via aliases charAliases (last in wins', async () => {
-        const out = await parse(['-b', 'hello', '-b', 'hi'], {
-          flags: {
-            foo: Flags.string({
-              aliases: ['b'],
-              charAliases: ['b'],
-            }),
-          },
-        })
-        expect(out.flags.foo).to.equal('hi')
+      it('duplicated via aliases charAliases throws error', async () => {
+        let message = ''
+        try {
+          await parse(['-b', 'hello', '-b', 'hi'], {
+            flags: {
+              foo: Flags.string({
+                aliases: ['b'],
+                charAliases: ['b'],
+              }),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('can only be specified once')
       })
     })
   })
