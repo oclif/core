@@ -1,5 +1,5 @@
-import {Command} from '../command'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
+import {Command} from '../command'
 
 export type FlagOutput = { [name: string]: any }
 export type ArgOutput = { [name: string]: any }

@@ -1,12 +1,12 @@
-import {
-  InvalidArgsSpecError,
-  RequiredArgsError,
-  Validation,
-  UnexpectedArgsError,
-  FailedFlagValidationError,
-  NonExistentFlagsError,
-} from './errors'
 import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
+import {
+  FailedFlagValidationError,
+  InvalidArgsSpecError,
+  NonExistentFlagsError,
+  RequiredArgsError,
+  UnexpectedArgsError,
+  Validation,
+} from './errors'
 import {uniq} from '../util'
 
 export async function validate(parse: {

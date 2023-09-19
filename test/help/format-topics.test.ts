@@ -1,4 +1,4 @@
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 
 import {TestHelp, topicsHelp} from './help-test-utils'
 

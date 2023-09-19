@@ -1,9 +1,8 @@
+import * as Interfaces from '../interfaces'
 import * as chalk from 'chalk'
 import indent = require('indent-string')
 import stripAnsi = require('strip-ansi')
 import {Command} from '../command'
-
-import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
 import {template} from './util'
 

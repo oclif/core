@@ -1,6 +1,7 @@
+import {ArgInput, FlagInput, Input, OutputArgs, OutputFlags, ParserOutput} from '../interfaces/parser'
 import {Parser} from './parse'
 import {validate} from './validate'
-import {ArgInput, FlagInput, Input, OutputArgs, OutputFlags, ParserOutput} from '../interfaces/parser'
+
 export {flagUsages} from './help'
 
 export async function parse<

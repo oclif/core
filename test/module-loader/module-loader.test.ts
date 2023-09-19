@@ -3,7 +3,7 @@ import {resolve} from 'node:path'
 import {assert, expect} from 'chai'
 
 import {Config} from '../../src'
-import {load, loadWithData, isPathModule} from '../../src/module-loader'
+import {isPathModule, load, loadWithData} from '../../src/module-loader'
 import {ModuleLoadError} from '../../src/errors'
 
 // The following data object contains an array of module loading data for errors and successful loading conditions and

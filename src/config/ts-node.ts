@@ -1,13 +1,13 @@
+import * as TSNode from 'ts-node'
+import {Plugin, TSConfig} from '../interfaces'
 import {existsSync, readFileSync} from 'node:fs'
 import {join, relative as pathRelative} from 'node:path'
-import * as TSNode from 'ts-node'
-
-import {TSConfig, Plugin} from '../interfaces'
-import {settings} from '../settings'
-import {isProd} from '../util'
-import {Debug} from './util'
-import {memoizedWarn} from '../errors'
 import {Config} from './config'
+import {Debug} from './util'
+import {isProd} from '../util'
+import {memoizedWarn} from '../errors'
+import {settings} from '../settings'
+
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 

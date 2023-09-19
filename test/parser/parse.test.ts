@@ -1,4 +1,4 @@
-import {assert, expect, config} from 'chai'
+import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
 
 import {parse} from '../../src/parser'

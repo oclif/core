@@ -1,5 +1,5 @@
-import {spy, SinonSpy} from 'sinon'
-import {Interfaces, HelpBase} from '../../../../../src'
+import {SinonSpy, spy} from 'sinon'
+import {HelpBase, Interfaces} from '../../../../../src'
 
 export type TestHelpClassConfig = Interfaces.Config & { showCommandHelpSpy?: SinonSpy; showHelpSpy?: SinonSpy }
 

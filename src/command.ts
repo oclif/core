@@ -1,33 +1,34 @@
-import {fileURLToPath} from 'node:url'
-import * as chalk from 'chalk'
-import {format, inspect} from 'node:util'
-import {ux} from './cli-ux'
-import {Config} from './config'
+
 import * as Errors from './errors'
-import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
+import * as chalk from 'chalk'
 import {
-  Arg as IArg,
   ArgInput,
   ArgOutput,
   ArgProps,
   BooleanFlagProps,
   Deprecation,
-  Flag as IFlag,
   FlagInput,
   FlagOutput,
+  Arg as IArg,
+  Flag as IFlag,
   Input,
   OptionFlagProps,
   ParserOutput,
 } from './interfaces/parser'
-import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId, normalizeArgv} from './help/util'
-import {Plugin} from './interfaces/plugin'
-import {LoadOptions} from './interfaces/config'
-import {CommandError} from './interfaces/errors'
-import {boolean} from './flags'
+import {format, inspect} from 'node:util'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
 import {requireJson, uniq} from './util'
+import {stderr, stdout} from './cli-ux/stream'
+import {CommandError} from './interfaces/errors'
+import {Config} from './config'
+import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
-import {stdout, stderr} from './cli-ux/stream'
+import {Plugin} from './interfaces/plugin'
+import {PrettyPrintableError} from './errors'
+import {boolean} from './flags'
+import {fileURLToPath} from 'node:url'
+import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 

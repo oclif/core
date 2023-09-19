@@ -1,4 +1,4 @@
-import {mkdir, appendFile} from 'node:fs/promises'
+import {appendFile, mkdir} from 'node:fs/promises'
 import {dirname} from 'node:path'
 import stripAnsi = require('strip-ansi')
 

@@ -1,10 +1,10 @@
-import {expect, test as base} from '@oclif/test'
-import {stub, SinonStub} from 'sinon'
+import {test as base, expect} from '@oclif/test'
+import {SinonStub, stub} from 'sinon'
 import {resolve} from 'node:path'
 
 import {CommandHelp, Help} from '../../src/help'
-import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
-import {Interfaces, Config} from '../../src'
+import {AppsAdminAdd, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndexWithDesc, AppsTopic} from './fixtures/fixtures'
+import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {monkeyPatchCommands} from './help-test-utils'
 

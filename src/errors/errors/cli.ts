@@ -1,11 +1,10 @@
 import * as chalk from 'chalk'
-import * as indent from 'indent-string'
 import * as cs from 'clean-stack'
-import * as wrap from 'wrap-ansi'
-
+import * as indent from 'indent-string'
 import * as screen from '../../screen'
+import * as wrap from 'wrap-ansi'
+import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
 import {config} from '../config'
-import {PrettyPrintableError, OclifError} from '../../interfaces/errors'
 
 /**
  * properties specific to internal oclif error handling

@@ -1,9 +1,8 @@
+import * as screen from '../../screen'
 import * as wrap from 'wrap-ansi'
 import indent = require('indent-string')
-
-import * as screen from '../../screen'
-import {config} from '../config'
 import {PrettyPrintableError} from '../../interfaces/errors'
+import {config} from '../config'
 
 // These exist for backwards compatibility with CLIError
 type CLIErrorDisplayOptions = { name?: string; bang?: string }

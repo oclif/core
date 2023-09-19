@@ -1,6 +1,6 @@
-import {inspect} from 'node:util'
-import {castArray} from '../../util'
 import {stderr, stdout} from '../stream'
+import {castArray} from '../../util'
+import {inspect} from 'node:util'
 
 export interface ITask {
   action: string;

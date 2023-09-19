@@ -1,11 +1,10 @@
+import * as Interfaces from '../interfaces'
 import * as chalk from 'chalk'
 import stripAnsi = require('strip-ansi')
-
-import {castArray, compact, ensureArgObject, sortBy} from '../util'
-import * as Interfaces from '../interfaces'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
-import {DocOpts} from './docopts'
+import {castArray, compact, ensureArgObject, sortBy} from '../util'
 import {Command} from '../command'
+import {DocOpts} from './docopts'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be

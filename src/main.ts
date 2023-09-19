@@ -1,11 +1,11 @@
+import * as Interfaces from './interfaces'
 import {URL, fileURLToPath} from 'node:url'
 import {format, inspect} from 'node:util'
-
-import * as Interfaces from './interfaces'
-import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-import {stdout} from './cli-ux/stream'
+
+import {Config} from './config'
 import Performance from './performance'
+import {stdout} from './cli-ux/stream'
 
 const debug = require('debug')('oclif:main')
 

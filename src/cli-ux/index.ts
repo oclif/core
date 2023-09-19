@@ -1,16 +1,17 @@
+
 import * as Errors from '../errors'
-import {format as utilFormat} from 'node:util'
 import * as chalk from 'chalk'
+import * as styled from './styled'
+import * as uxPrompt from './prompt'
+import {Config, config} from './config'
 import {ActionBase} from './action/base'
-import {config, Config} from './config'
 import {ExitError} from './exit'
 import {IPromptOptions} from './prompt'
-import * as styled from './styled'
 import {Table} from './styled'
-import * as uxPrompt from './prompt'
-import uxWait from './wait'
-import {stdout} from './stream'
 import {flush as _flush} from './flush'
+import {stdout} from './stream'
+import {format as utilFormat} from 'node:util'
+import uxWait from './wait'
 
 const hyperlinker = require('hyperlinker')
 

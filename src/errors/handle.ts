@@ -1,11 +1,11 @@
 /* eslint-disable no-process-exit */
 /* eslint-disable unicorn/no-process-exit */
+import {OclifError, PrettyPrintableError} from '../interfaces'
+import {CLIError} from './errors/cli'
+import {ExitError} from '.'
 import {config} from './config'
 import prettyPrint from './errors/pretty-print'
-import {ExitError} from '.'
 import clean = require('clean-stack')
-import {CLIError} from './errors/cli'
-import {OclifError, PrettyPrintableError} from '../interfaces'
 
 export async function handle(err: Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}): Promise<void> {
   try {

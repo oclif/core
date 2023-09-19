@@ -1,4 +1,4 @@
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 import {Help} from '../../src/help'

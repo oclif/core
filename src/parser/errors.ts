@@ -1,11 +1,10 @@
+import * as chalk from 'chalk'
+import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
+import {Flag, OptionFlag} from '../interfaces'
 import {CLIError} from '../errors'
-
 import {flagUsages} from './help'
 import {renderList} from '../cli-ux/list'
-import * as chalk from 'chalk'
-import {OptionFlag, Flag} from '../interfaces'
 import {uniq} from '../util'
-import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
 
 export {CLIError} from '../errors'
 

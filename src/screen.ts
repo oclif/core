@@ -1,4 +1,4 @@
-import {stdout, stderr} from './cli-ux/stream'
+import {stderr, stdout} from './cli-ux/stream'
 import {settings} from './settings'
 
 function termwidth(stream: any): number {

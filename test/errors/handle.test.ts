@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import * as process from 'node:process'
 
-import {CLIError, config, ExitError} from '../../src/errors'
+import {CLIError, ExitError, config} from '../../src/errors'
 import {handle} from '../../src/errors/handle'
 import {exit as exitErrorThrower} from '../../src/errors'
 

@@ -1,4 +1,4 @@
-import {expect, fancy as base, FancyTypes} from 'fancy-test'
+import {FancyTypes, fancy as base, expect} from 'fancy-test'
 import {rm} from 'node:fs/promises'
 import {join} from 'node:path'
 

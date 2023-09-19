@@ -1,7 +1,6 @@
 import * as Errors from '../errors'
-import config from './config'
-
 import * as chalk from 'chalk'
+import config from './config'
 import {stderr} from './stream'
 
 export interface IPromptOptions {

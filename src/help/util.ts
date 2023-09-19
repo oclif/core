@@ -1,8 +1,8 @@
 import * as ejs from 'ejs'
-import {Config as IConfig, HelpOptions, Deprecation} from '../interfaces'
+import {Deprecation, HelpOptions, Config as IConfig} from '../interfaces'
 import {Help, HelpBase} from '.'
-import {load} from '../module-loader'
 import {collectUsableIds} from '../config/util'
+import {load} from '../module-loader'
 
 interface HelpBaseDerived {
   new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;

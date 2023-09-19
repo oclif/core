@@ -1,11 +1,10 @@
-import {join} from 'node:path'
-
-import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import * as Plugin from './plugin'
-import {loadJSON, Debug} from './util'
-import {isProd} from '../util'
-import Performance from '../performance'
+import {Debug, loadJSON} from './util'
+import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {PJSON} from '../interfaces'
+import Performance from '../performance'
+import {isProd} from '../util'
+import {join} from 'node:path'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()

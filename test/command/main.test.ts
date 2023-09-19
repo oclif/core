@@ -1,7 +1,7 @@
 
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-import {createSandbox, SinonSandbox, SinonStub} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi = require('strip-ansi')
 import {requireJson} from '../../src/util'
 import run from '../../src/main'

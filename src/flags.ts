@@ -1,9 +1,9 @@
 /* eslint-disable valid-jsdoc */
-import {URL} from 'node:url'
-import {loadHelpClass} from './help'
-import {BooleanFlag, CustomOptions, OptionFlag, FlagDefinition} from './interfaces'
+import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfaces'
 import {dirExists, fileExists} from './util'
 import {CLIError} from './errors'
+import {URL} from 'node:url'
+import {loadHelpClass} from './help'
 
 type NotArray<T> = T extends Array<any> ? never: T;
 

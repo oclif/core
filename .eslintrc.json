@@ -4,6 +4,7 @@
     "oclif-typescript"
   ],
   "rules": {
+    "sort-imports": "error",
     "unicorn/prefer-module": "off",
     "unicorn/import-style": [
       "error",

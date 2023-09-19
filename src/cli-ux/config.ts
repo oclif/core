@@ -1,8 +1,8 @@
+import {ActionBase} from './action/base'
 import {PJSON} from '../interfaces/pjson'
 import {requireJson} from '../util'
+import simple from './action/simple'
 import spinner from './action/spinner'
-import simple from './action/spinner'
-import {ActionBase} from './action/base'
 
 export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
 

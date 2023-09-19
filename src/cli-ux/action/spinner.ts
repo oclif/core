@@ -2,9 +2,9 @@ import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
 const stripAnsi = require('strip-ansi')
 const ansiStyles = require('ansi-styles')
+import {ActionBase, ActionType} from './base'
 import {errtermwidth} from '../../screen'
 import spinners from './spinners'
-import {ActionBase, ActionType} from './base'
 
 function color(s: string): string {
   if (!supportsColor) return s

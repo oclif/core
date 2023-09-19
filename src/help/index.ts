@@ -1,15 +1,17 @@
-import stripAnsi = require('strip-ansi')
-import {format} from 'node:util'
 import * as Interfaces from '../interfaces'
-import {error} from '../errors'
-import CommandHelp from './command'
-import RootHelp from './root'
 import {compact, sortBy, uniqBy} from '../util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
-import {HelpFormatter} from './formatter'
-import {toCached} from '../config/config'
 import {Command} from '../command'
+import CommandHelp from './command'
+import {HelpFormatter} from './formatter'
+import RootHelp from './root'
+import {error} from '../errors'
+import {format} from 'node:util'
 import {stdout} from '../cli-ux/stream'
+import {toCached} from '../config/config'
+
+import stripAnsi = require('strip-ansi')
+
 export {CommandHelp} from './command'
 export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
 

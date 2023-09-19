@@ -1,8 +1,8 @@
-import {PJSON} from './pjson'
-import {Hooks, Hook} from './hooks'
-import {Plugin, Options} from './plugin'
-import {Topic} from './topic'
+import {Hook, Hooks} from './hooks'
+import {Options, Plugin} from './plugin'
 import {Command} from '../command'
+import {PJSON} from './pjson'
+import {Topic} from './topic'
 
 export type LoadOptions = Options | string | Config | undefined
 export type PlatformTypes = 'darwin' | 'linux' | 'win32' | 'aix' | 'freebsd' | 'openbsd' | 'sunos' | 'wsl'

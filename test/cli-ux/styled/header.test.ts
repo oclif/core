@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import {stdout} from '../../../src'
-import {stub, SinonStub} from 'sinon'
+import {SinonStub, stub} from 'sinon'
 import {ux} from '../../../src/cli-ux'
 
 describe('styled/header', () => {

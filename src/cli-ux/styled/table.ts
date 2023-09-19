@@ -1,11 +1,11 @@
-import * as Interfaces from '../../interfaces'
 import * as F from '../../flags'
-import {stdtermwidth} from '../../screen'
+import * as Interfaces from '../../interfaces'
 import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
-import {safeDump} from 'js-yaml'
 import {inspect} from 'node:util'
+import {safeDump} from 'js-yaml'
 import {stdout} from '../stream'
+import {stdtermwidth} from '../../screen'
 
 const sw = require('string-width')
 const {orderBy} = require('natural-orderby')

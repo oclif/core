@@ -1,27 +1,26 @@
-import {CLIError, error} from '../errors'
 import * as globby from 'globby'
-import {dirname, join, parse, relative, sep} from 'node:path'
-import {inspect} from 'node:util'
-
-import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {toCached} from './config'
-import {Manifest} from '../interfaces/manifest'
-import {PJSON} from '../interfaces/pjson'
-import {Topic} from '../interfaces/topic'
-import {tsPath} from './ts-node'
+import {CLIError, error} from '../errors'
 import {
-  compact,
   Debug,
+  compact,
   flatMap,
   getCommandIdPermutations,
   loadJSON,
   mapValues,
   resolvePackage,
 } from './util'
+import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
+import {dirname, join, parse, relative, sep} from 'node:path'
 import {exists, isProd, requireJson} from '../util'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
+import {Manifest} from '../interfaces/manifest'
+import {PJSON} from '../interfaces/pjson'
 import Performance from '../performance'
+import {Topic} from '../interfaces/topic'
+import {inspect} from 'node:util'
+import {toCached} from './config'
+import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 

@@ -1,8 +1,8 @@
-import {settings} from './settings'
+import {LoadOptions} from './interfaces'
 import {flush} from './cli-ux/flush'
 import {handle} from './errors/handle'
 import run from './main'
-import * as Interfaces from './interfaces'
+import {settings} from './settings'
 
 /**
  * Load and run oclif CLI
@@ -50,7 +50,7 @@ export default async function execute(
   options: {
     dir: string;
     args?: string[];
-    loadOptions?: Interfaces.LoadOptions;
+    loadOptions?: LoadOptions;
     development?: boolean;
   },
 ): Promise<unknown> {

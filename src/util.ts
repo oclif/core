@@ -1,8 +1,8 @@
-import {readFileSync} from 'node:fs'
 import {access, stat} from 'node:fs/promises'
-import {join} from 'node:path'
-import {Command} from './command'
 import {ArgInput} from './interfaces/parser'
+import {Command} from './command'
+import {join} from 'node:path'
+import {readFileSync} from 'node:fs'
 
 export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)

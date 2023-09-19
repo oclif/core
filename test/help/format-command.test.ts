@@ -1,7 +1,7 @@
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 
 import {Args, Command as Base, Flags as flags} from '../../src'
-import {commandHelp, TestHelp} from './help-test-utils'
+import {TestHelp, commandHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80

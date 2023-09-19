@@ -1,5 +1,5 @@
-import {dim} from 'chalk'
 import {Flag, FlagUsageOptions} from '../interfaces/parser'
+import {dim} from 'chalk'
 import {sortBy} from '../util'
 
 export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [string, string | undefined] {

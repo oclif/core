@@ -1,9 +1,9 @@
 /**
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
-import {Command, Args, Interfaces} from '../../src'
+import {Args, Command, Interfaces} from '../../src'
 // eslint-disable-next-line node/no-missing-import
-import {expectType, expectNotType} from 'tsd'
+import {expectNotType, expectType} from 'tsd'
 import {URL} from 'node:url'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
