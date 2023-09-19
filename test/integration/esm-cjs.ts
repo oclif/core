@@ -343,7 +343,7 @@ type PluginConfig = {
     })
 
     await test('Install ESM plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.esm2, cjsExecutor)
+      await installTest(PLUGINS.esm2, esmExecutor)
     })
 
     await test('Link CJS plugin to ESM root plugin', async () => {
