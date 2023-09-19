@@ -3,7 +3,7 @@ import {resolve} from 'node:path'
 import {assert, expect} from 'chai'
 
 import {Config} from '../../src'
-import ModuleLoader from '../../src/module-loader'
+import {load, loadWithData, isPathModule} from '../../src/module-loader'
 import {ModuleLoadError} from '../../src/errors'
 
 // The following data object contains an array of module loading data for errors and successful loading conditions and
@@ -151,7 +151,7 @@ describe('ModuleLoader:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        const result = await ModuleLoader.load(config, module.path)
+        const result = await load(config, module.path)
 
         // Test that the default module as a string.
         if (module.defaultModule) {
@@ -167,7 +167,7 @@ describe('ModuleLoader:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        const result = await ModuleLoader.loadWithData(config, module.path)
+        const result = await loadWithData(config, module.path)
 
         // Test the exported module as a string.
         if (module.defaultModule) {
@@ -188,7 +188,7 @@ describe('ModuleLoader:', () => {
   describe('isPathModule:', () => {
     for (const module of data.modules) {
       it(`${module.path}`,  () => {
-        const result = ModuleLoader.isPathModule(module.path)
+        const result = isPathModule(module.path)
 
         // For extensionless ESM data `isPathModule` will return false
         const test = typeof module.isESMOverride === 'boolean' ? module.isESMOverride : module.isESM
@@ -208,7 +208,7 @@ describe('ModuleLoader Failures:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        await expect(ModuleLoader.load(
+        await expect(load(
           config, error.path)).to.eventually.be.rejectedWith(error.message).and.be.an.instanceOf(error.type)
       })
     }
@@ -220,7 +220,7 @@ describe('ModuleLoader Failures:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        await expect(ModuleLoader.loadWithData(
+        await expect(loadWithData(
           config, error.path)).to.eventually.be.rejectedWith(error.message).and.be.an.instanceOf(error.type)
       })
     }

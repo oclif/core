@@ -133,7 +133,7 @@ export async function loadWithDataFromManifest(cached: Command.Cached, modulePat
    * @returns {boolean} The modulePath is an ES Module.
    * @see https://www.npmjs.com/package/get-package-type
    */
-function isPathModule(filePath: string): boolean {
+export function isPathModule(filePath: string): boolean {
   const extension = extname(filePath).toLowerCase()
 
   switch (extension) {

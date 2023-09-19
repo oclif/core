@@ -177,15 +177,6 @@ export class CommandHelp extends HelpFormatter {
   protected examples(examples: Command.Example[] | undefined | string): string | undefined {
     if (!examples || examples.length === 0) return
 
-    const formatIfCommand = (example: string): string => {
-      example = this.render(example)
-      if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
-      if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
-      return example
-    }
-
-    const isCommand = (example: string) => stripAnsi(formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
-
     const body = castArray(examples).map(a => {
       let description
       let commands
@@ -194,12 +185,11 @@ export class CommandHelp extends HelpFormatter {
         .split(POSSIBLE_LINE_FEED)
         .filter(line => Boolean(line))
         // If the example is <description>\n<command> then format correctly
-        // eslint-disable-next-line unicorn/no-array-callback-reference
-        if (lines.length >= 2 && !isCommand(lines[0]) && lines.slice(1).every(isCommand)) {
+        if (lines.length >= 2 && !this.isCommand(lines[0]) && lines.slice(1).every(i => this.isCommand(i))) {
           description = lines[0]
           commands = lines.slice(1)
         } else {
-          return lines.map(line => formatIfCommand(line)).join('\n')
+          return lines.map(line => this.formatIfCommand(line)).join('\n')
         }
       } else {
         description = a.description
@@ -215,7 +205,7 @@ export class CommandHelp extends HelpFormatter {
       const finalIndentedSpacing = this.indentSpacing * 2
       const multilineCommands = commands.map(c => {
         // First indent keeping room for escaped newlines
-        return this.indent(this.wrap(formatIfCommand(c), finalIndentedSpacing + 4))
+        return this.indent(this.wrap(this.formatIfCommand(c), finalIndentedSpacing + 4))
         // Then add the escaped newline
         .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `)
       }).join('\n')
@@ -308,6 +298,17 @@ export class CommandHelp extends HelpFormatter {
     }).join('\n\n')
 
     return body
+  }
+
+  private formatIfCommand(example: string): string {
+    example = this.render(example)
+    if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
+    if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
+    return example
+  }
+
+  private isCommand(example: string): boolean {
+    return stripAnsi(this.formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
   }
 }
 export default CommandHelp

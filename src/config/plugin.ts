@@ -103,6 +103,12 @@ async function findRoot(name: string | undefined, root: string) {
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
   Boolean(manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id]))
 
+const search = (cmd: any) => {
+  if (typeof cmd.run === 'function') return cmd
+  if (cmd.default && cmd.default.run) return cmd.default
+  return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
+}
+
 export class Plugin implements IPlugin {
   _base = `${_pjson.name}@${_pjson.version}`
 
@@ -231,14 +237,9 @@ export class Plugin implements IPlugin {
 
   public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
+
     const fetch = async () => {
       if (!this.commandsDir) return
-      const search = (cmd: any) => {
-        if (typeof cmd.run === 'function') return cmd
-        if (cmd.default && cmd.default.run) return cmd.default
-        return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
-      }
-
       let module
       let isESM: boolean | undefined
       let filePath: string | undefined

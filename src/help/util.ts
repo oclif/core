@@ -37,6 +37,9 @@ export function template(context: any): (t: string) => string {
   return render
 }
 
+const isFlag = (s: string) => s.startsWith('-')
+const isArgWithValue = (s: string) => s.includes('=')
+
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
 
@@ -45,8 +48,6 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
     const final: string[] = []
     const idPresent = (id: string) => ids.has(id)
-    const isFlag = (s: string) => s.startsWith('-')
-    const isArgWithValue = (s: string) => s.includes('=')
     const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
 
     const hasArgs = () => {

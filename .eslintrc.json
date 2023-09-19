@@ -5,8 +5,14 @@
   ],
   "rules": {
     "unicorn/prefer-module": "off",
-    "unicorn/import-style": "off",
-    "unicorn/consistent-function-scoping": "off",
+    "unicorn/import-style": [
+      "error",
+      {
+        "styles": {
+          "chalk": false
+        }
+      }
+    ],
     "unicorn/no-array-reduce": "off",
     "unicorn/prefer-array-some": "off",
     "node/no-missing-import": "off",

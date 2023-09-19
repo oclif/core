@@ -1,0 +1,6 @@
+{
+  "extends": "../.eslintrc.json",
+  "rules": {
+    "unicorn/consistent-function-scoping": "off"
+  }
+}

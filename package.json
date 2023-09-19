@@ -107,7 +107,7 @@
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "compile": "tsc",
-    "lint": "eslint . --ext .ts --config .eslintrc",
+    "lint": "eslint . --ext .ts",
     "posttest": "yarn lint",
     "prepack": "yarn run build",
     "pretest": "yarn build --noEmit && tsc -p test --noEmit --skipLibCheck",

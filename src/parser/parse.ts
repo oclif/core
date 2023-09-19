@@ -74,6 +74,12 @@ function isNegativeNumber(input: string): boolean {
   return /^-\d/g.test(input)
 }
 
+const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
+  if (flag.options && !flag.options.includes(input))
+    throw new FlagInvalidOptionError(flag, input)
+  return input
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -99,39 +105,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
-    const findLongFlag = (arg: string):string | undefined => {
-      const name = arg.slice(2)
-      if (this.input.flags[name]) {
-        return name
-      }
-
-      if (this.flagAliases[name]) {
-        return this.flagAliases[name].name
-      }
-
-      if (arg.startsWith('--no-')) {
-        const flag = this.booleanFlags[arg.slice(5)]
-        if (flag && flag.allowNo) return flag.name
-      }
-    }
-
-    const findShortFlag = ([_, char]: string):string | undefined => {
-      if (this.flagAliases[char]) {
-        return this.flagAliases[char].name
-      }
-
-      return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
-    }
-
-    const findFlag = (arg: string): { name?: string, isLong: boolean } => {
-      const isLong = arg.startsWith('--')
-      const short = isLong ? false : arg.startsWith('-')
-      const name = isLong ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
-      return {name, isLong}
-    }
-
     const parseFlag = (arg: string): boolean => {
-      const {name, isLong} = findFlag(arg)
+      const {name, isLong} = this.findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -154,7 +129,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         this.currentFlag = flag
         const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
-        if ((typeof input !== 'string') || findFlag(input).name) {
+        if ((typeof input !== 'string') || this.findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
@@ -232,12 +207,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     flags: TFlags & BFlags & { json: boolean | undefined }, metadata: Metadata
   }> {
     type ValueFunction = (fws: FlagWithStrategy, flags?: Record<string, string>) => Promise<any>
-
-    const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
-      if (flag.options && !flag.options.includes(input))
-        throw new FlagInvalidOptionError(flag, input)
-      return input
-    }
 
     const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, context: ParserContext | undefined, token?: FlagToken) => {
       if (!flag.parse) return input
@@ -548,5 +517,36 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     return flagTokenMap
+  }
+
+  private findLongFlag(arg: string): string | undefined {
+    const name = arg.slice(2)
+    if (this.input.flags[name]) {
+      return name
+    }
+
+    if (this.flagAliases[name]) {
+      return this.flagAliases[name].name
+    }
+
+    if (arg.startsWith('--no-')) {
+      const flag = this.booleanFlags[arg.slice(5)]
+      if (flag && flag.allowNo) return flag.name
+    }
+  }
+
+  private findShortFlag([_, char]: string):string | undefined {
+    if (this.flagAliases[char]) {
+      return this.flagAliases[char].name
+    }
+
+    return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
+  }
+
+  private findFlag(arg: string): { name?: string, isLong: boolean } {
+    const isLong = arg.startsWith('--')
+    const short = isLong ? false : arg.startsWith('-')
+    const name = isLong ? this.findLongFlag(arg) : (short ? this.findShortFlag(arg) : undefined)
+    return {name, isLong}
   }
 }
