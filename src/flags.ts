@@ -126,14 +126,13 @@ export const url = custom<URL>({
   },
 })
 
-const stringFlag = custom()
-export {stringFlag as string}
+export const string = custom()
 
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
   return boolean({
     description: 'Show CLI version.',
     ...opts,
-    parse: async (_: any, ctx) => {
+    parse: async (_, ctx) => {
       ctx.log(ctx.config.userAgent)
       ctx.exit(0)
     },
@@ -152,7 +151,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   })
 }
 
-type ElementType<T extends ArrayLike<unknown>> = T[number];
+type ElementType<T extends ReadonlyArray<unknown>> = T[number];
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>[], P>> & {

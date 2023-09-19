@@ -100,9 +100,8 @@ async function findRoot(name: string | undefined, root: string) {
   return findSourcesRoot(root)
 }
 
-function cachedCommandCanBeUsed(manifest: Manifest | undefined, id: string) {
-  return manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
-}
+const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
+  Boolean(manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id]))
 
 export class Plugin implements IPlugin {
   _base = `${_pjson.name}@${_pjson.version}`

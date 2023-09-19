@@ -36,10 +36,6 @@ export function compact<T>(a: (T | undefined)[]): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
 
-export function uniq<T>(arr: T[]): T[] {
-  return [...new Set(arr)].sort()
-}
-
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
   process.on('warning', (warning: any) => {
@@ -102,16 +98,7 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @param commandIds string[]
  * @returns string[]
  */
-export function collectUsableIds(commandIds: string[]): Set<string> {
-  const usableIds: string[] = []
-  for (const id of commandIds) {
-    const parts = id.split(':')
-    while (parts.length > 0) {
-      const name = parts.join(':')
-      if (name) usableIds.push(name)
-      parts.pop()
-    }
-  }
-
-  return new Set(usableIds)
-}
+export const collectUsableIds = (commandIds: string[]): Set<string> =>
+  new Set(commandIds.flatMap(id => {
+    return id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))
+  }))

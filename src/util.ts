@@ -136,3 +136,7 @@ export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Comm
     return {...x, [y.name]: y}
   }, {} as ArgInput) : args ?? {}) as ArgInput
 }
+
+export function uniq<T>(arr: T[]): T[] {
+  return [...new Set(arr)].sort()
+}

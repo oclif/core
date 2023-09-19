@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
-      - run: yarn install --network-timeout 600000
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
       - if: runner.os == 'Windows'
         run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: latest
           cache: yarn
-      - run: yarn install --network-timeout 600000
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
       - run: yarn link
       - run: New-Item -Path D:\a -Name "e2e" -ItemType "directory"
@@ -91,7 +91,7 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
-      - run: yarn install --network-timeout 600000
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
       - run: yarn test:esm-cjs
   nuts:

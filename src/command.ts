@@ -25,7 +25,7 @@ import {Plugin} from './interfaces/plugin'
 import {LoadOptions} from './interfaces/config'
 import {CommandError} from './interfaces/errors'
 import {boolean} from './flags'
-import {requireJson} from './util'
+import {requireJson, uniq} from './util'
 import {PJSON} from './interfaces'
 import {stdout, stderr} from './cli-ux/stream'
 
@@ -315,8 +315,10 @@ export abstract class Command {
       }
 
       const deprecateAliases = flagDef?.deprecateAliases
-      const aliases = ([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
-      if (deprecateAliases && aliases.length > 0) {
+      if (deprecateAliases) {
+        const aliases = uniq([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+        if (aliases.length === 0) return
+
         const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
         for (const alias of foundAliases) {
           let preferredUsage = `--${flagDef?.name}`

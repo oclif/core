@@ -7,7 +7,7 @@ import {
   NonExistentFlagsError,
 } from './errors'
 import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
-import {uniq} from '../config/util'
+import {uniq} from '../util'
 
 export async function validate(parse: {
   input: ParserInput;
