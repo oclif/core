@@ -6,8 +6,8 @@ import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {URL, fileURLToPath} from 'node:url'
-import {arch, homedir, userInfo as osUserInfo, platform, release, tmpdir, type} from 'node:os'
-import {compact, ensureArgObject, isProd, requireJson} from '../util'
+import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
+import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} from '../util'
 import {join, sep} from 'node:path'
 
 import {Command} from '../command'
@@ -171,7 +171,7 @@ export class Config implements IConfig {
     this.valid = Config._rootPlugin.valid
 
     this.arch = (arch() === 'ia32' ? 'x86' : arch() as any)
-    this.platform = WSL ? 'wsl' : platform() as any
+    this.platform = WSL ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
@@ -185,7 +185,7 @@ export class Config implements IConfig {
     this.shell = this._shell()
     this.debug = this._debug()
 
-    this.home = process.env.HOME || (this.windows && this.windowsHome()) || homedir() || tmpdir()
+    this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
     this.configDir = this.scopedEnvVar('CONFIG_DIR') || this.dir('config')
     this.dataDir = this.scopedEnvVar('DATA_DIR') || this.dir('data')

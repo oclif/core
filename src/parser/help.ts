@@ -1,5 +1,5 @@
 import {Flag, FlagUsageOptions} from '../interfaces/parser'
-import {dim} from 'chalk'
+import chalk from 'chalk'
 import {sortBy} from '../util'
 
 export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [string, string | undefined] {
@@ -16,7 +16,7 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
 
   let description: string | undefined = flag.summary || flag.description || ''
   if (options.displayRequired && flag.required) description = `(required) ${description}`
-  description = description ? dim(description) : undefined
+  description = description ? chalk.dim(description) : undefined
 
   return [` ${label.join(',').trim()}${usage}`, description] as [string, string | undefined]
 }

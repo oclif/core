@@ -3,12 +3,11 @@ import {
   Debug,
   flatMap,
   getCommandIdPermutations,
-  loadJSON,
   mapValues,
   resolvePackage,
 } from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {compact, exists, isProd, requireJson} from '../util'
+import {compact, exists, isProd, readJson, requireJson} from '../util'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
@@ -74,7 +73,7 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
       if (await exists(cur)) return dirname(cur)
       try {
         // eslint-disable-next-line no-await-in-loop
-        const pkg = await loadJSON<PJSON>(join(next, 'package.json'))
+        const pkg = await readJson<PJSON>(join(next, 'package.json'))
         if (pkg.name === name) return next
       } catch {}
     } else {
@@ -164,7 +163,7 @@ export class Plugin implements IPlugin {
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(join(root, 'package.json'))
+    this.pjson = await readJson(join(root, 'package.json'))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
@@ -274,7 +273,7 @@ export class Plugin implements IPlugin {
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
         const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
-        const manifest = await loadJSON<Manifest>(p)
+        const manifest = await readJson<Manifest>(p)
         if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
           process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
         } else {

@@ -1,4 +1,4 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {inspect} from 'node:util'
 
 export default function styledObject(obj: any, keys?: string[]): string {

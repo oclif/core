@@ -1,11 +1,11 @@
 
 import * as Errors from '../errors'
-import * as chalk from 'chalk'
 import * as styled from './styled'
 import * as uxPrompt from './prompt'
 import {Config, config} from './config'
 import {ActionBase} from './action/base'
 import {flush as _flush} from './flush'
+import chalk from 'chalk'
 import {stdout} from './stream'
 import {format as utilFormat} from 'node:util'
 import uxWait from './wait'

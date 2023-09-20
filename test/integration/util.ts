@@ -1,7 +1,7 @@
 
 import {mkdir, rm} from 'node:fs/promises'
 import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {basename, dirname, join, resolve} from 'node:path'

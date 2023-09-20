@@ -1,8 +1,11 @@
 import {access, stat} from 'node:fs/promises'
+import {homedir, platform} from 'node:os'
+import {readFile, readFileSync} from 'node:fs'
 import {ArgInput} from './interfaces/parser'
 import {Command} from './command'
 import {join} from 'node:path'
-import {readFileSync} from 'node:fs'
+
+const debug = require('debug')
 
 export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)
@@ -140,4 +143,49 @@ export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Comm
 
 export function uniq<T>(arr: T[]): T[] {
   return [...new Set(arr)].sort()
+}
+
+/**
+ * Call os.homedir() and return the result
+ *
+ * Wrapping this allows us to stub these in tests since os.homedir() is
+ * non-configurable and non-writable.
+ *
+ * @returns The user's home directory
+ */
+export function getHomeDir(): string {
+  return homedir()
+}
+
+/**
+ * Call os.platform() and return the result
+ *
+ * Wrapping this allows us to stub these in tests since os.platform() is
+ * non-configurable and non-writable.
+ *
+ * @returns The process' platform
+ */
+export function getPlatform(): NodeJS.Platform {
+  return platform()
+}
+
+export function readJson<T = unknown>(path: string): Promise<T> {
+  debug('config')('readJson %s', path)
+  return new Promise((resolve, reject) => {
+    readFile(path, 'utf8', (err: any, d: any) => {
+      try {
+        if (err) reject(err)
+        else resolve(JSON.parse(d) as T)
+      } catch (error: any) {
+        reject(error)
+      }
+    })
+  })
+}
+
+export function readJsonSync(path: string, parse: false): string
+export function readJsonSync<T = unknown>(path: string, parse?: true): T
+export function readJsonSync<T = unknown>(path: string, parse = true): T | string {
+  const contents = readFileSync(path, 'utf8')
+  return parse ? JSON.parse(contents) as T : contents
 }

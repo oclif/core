@@ -10,7 +10,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import {Executor, setup} from './util'
 import {expect} from 'chai'
-import {bold, green, red} from 'chalk'
+import chalk from 'chalk'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
@@ -19,28 +19,28 @@ async function test(name: string, fn: () => Promise<void>) {
   try {
     await fn()
     PASSED.push(name)
-    console.log(green('✓'), name)
+    console.log(chalk.green('✓'), name)
   } catch (error) {
     FAILED.push(name)
-    console.log(red('𐄂'), name)
+    console.log(chalk.red('𐄂'), name)
     console.log(error)
   }
 }
 
 function exit(): never {
   console.log()
-  console.log(bold('#### Summary ####'))
+  console.log(chalk.bold('#### Summary ####'))
 
   for (const name of PASSED) {
-    console.log(green('✓'), name)
+    console.log(chalk.green('✓'), name)
   }
 
   for (const name of FAILED) {
-    console.log(red('𐄂'), name)
+    console.log(chalk.red('𐄂'), name)
   }
 
-  console.log(`${green('Passed:')} ${PASSED.length}`)
-  console.log(`${red('Failed:')} ${FAILED.length}`)
+  console.log(`${chalk.green('Passed:')} ${PASSED.length}`)
+  console.log(`${chalk.red('Failed:')} ${FAILED.length}`)
 
   // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
   process.exit(FAILED.length)

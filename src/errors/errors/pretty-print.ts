@@ -1,8 +1,8 @@
-import * as screen from '../../screen'
-import * as wrap from 'wrap-ansi'
-import indent = require('indent-string')
 import {PrettyPrintableError} from '../../interfaces/errors'
 import {config} from '../config'
+import {errtermwidth} from '../../screen'
+import indent from 'indent-string'
+import wrap from 'wrap-ansi'
 
 // These exist for backwards compatibility with CLIError
 type CLIErrorDisplayOptions = { name?: string; bang?: string }
@@ -47,7 +47,7 @@ export default function prettyPrint(error: Error & PrettyPrintableError & CLIErr
   .filter(Boolean)
   .join('\n')
 
-  let output = wrap(formatted, screen.errtermwidth - 6, {trim: false, hard: true} as any)
+  let output = wrap(formatted, errtermwidth - 6, {trim: false, hard: true} as any)
   output = indent(output, 3)
   output = indent(output, 1, {indent: bang || '', includeEmptyLines: true} as any)
   output = indent(output, 1)

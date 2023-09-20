@@ -5,6 +5,7 @@ import {SinonSandbox, createSandbox} from 'sinon'
 
 import {Interfaces, settings} from '../../src'
 import * as configTsNode from '../../src/config/ts-node'
+import * as util from '../../src/util'
 import {expect} from 'chai'
 
 const root = resolve(__dirname, 'fixtures/typescript')
@@ -43,31 +44,31 @@ describe('tsPath', () => {
   })
 
   it('should resolve a .js file to ts src', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
     const result = configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, tsModule))
   })
 
   it('should resolve a module file to ts src', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
     const result = configTsNode.tsPath(root, jsCompiledModule)
     expect(result).to.equal(join(root, tsModule))
   })
 
   it('should resolve a .ts file', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
     const result = configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
   })
 
   it('should resolve .js with no rootDir or outDir', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify({compilerOptions: {}}))
+    sandbox.stub(util, 'readJsonSync').returns({compilerOptions: {}})
     const result = configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
   })
 
   it('should resolve to .ts file if enabled and prod', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
     settings.tsnodeEnabled = true
     const originalNodeEnv = process.env.NODE_ENV
     delete process.env.NODE_ENV
@@ -80,7 +81,7 @@ describe('tsPath', () => {
   })
 
   it('should resolve to js if disabled', () => {
-    sandbox.stub(fs, 'readFileSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
     settings.tsnodeEnabled = false
     const result = configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))

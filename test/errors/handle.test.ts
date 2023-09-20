@@ -4,91 +4,53 @@ import {join} from 'node:path'
 import * as process from 'node:process'
 
 import {CLIError, ExitError, config, exit as exitErrorThrower} from '../../src/errors'
-import {handle} from '../../src/errors/handle'
+import {Exit, handle} from '../../src/errors/handle'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 const errlog = join(__dirname, '../tmp/mytest/error.log')
 const x = process.platform === 'win32' ? '»' : '›'
 
-const originalExit = process.exit
-const originalExitCode = process.exitCode
-
 describe('handle', () => {
+  let sandbox: SinonSandbox
+  let exitStub: SinonStub
+
   beforeEach(() => {
-    (process as any).exitCode = undefined;
-    (process as any).exit = (code: any) => {
-      (process as any).exitCode = code
-    }
+    sandbox = createSandbox()
+    exitStub = sandbox.stub(Exit, 'exit')
   })
+
   afterEach(() => {
-    (process as any).exit = originalExit;
-    (process as any).exitCode = originalExitCode
+    sandbox.restore()
   })
-
-  // fancy
-  // .stderr()
-  // .finally(() => delete process.exitCode)
-  // .it('displays an error from root handle module', ctx => {
-  //   handle(new Error('x'))
-  //   expect(ctx.stderr).to.contain('Error: x')
-  //   expect(process.exitCode).to.equal(1)
-  // })
-
-  // fancy
-  // .stderr()
-  // .finally(() => delete process.exitCode)
-  // .it('shows an unhandled error', ctx => {
-  //   handle(new Error('x'))
-  //   expect(ctx.stderr).to.contain('Error: x')
-  //   expect(process.exitCode).to.equal(1)
-  // })
-
-  // fancy
-  // .stderr()
-  // .finally(() => delete process.exitCode)
-  // .it('handles a badly formed error object', () => {
-  //   handle({status: 400} as any)
-  //   expect(process.exitCode).to.equal(1)
-  // })
-
-  // fancy
-  // .stderr()
-  // .finally(() => delete process.exitCode)
-  // .it('shows a cli error', ctx => {
-  //   handle(new CLIError('x'))
-  //   expect(ctx.stderr).to.equal(` ${x}   Error: x\n`)
-  //   expect(process.exitCode).to.equal(2)
-  // })
 
   fancy
   .stdout()
   .stderr()
-  .it('hides an exit error', ctx => {
-    handle(new ExitError(0))
+  .it('hides an exit error', async ctx => {
+    await handle(new ExitError(0))
     expect(ctx.stdout).to.equal('')
     expect(ctx.stderr).to.equal('')
-    expect(process.exitCode).to.equal(0)
+    expect(exitStub.firstCall.firstArg).to.equal(0)
   })
 
   fancy
-  .skip()
   .stdout()
   .stderr()
-  .it('prints error', ctx => {
+  .it('prints error', async ctx => {
     const error = new Error('foo bar baz') as Error & {skipOclifErrorHandling: boolean}
     error.skipOclifErrorHandling = false
-    handle(error)
+    await handle(error)
     expect(ctx.stdout).to.equal('')
     expect(ctx.stderr).to.include('foo bar baz')
   })
 
   fancy
   .stdout()
-  .skip()
   .stderr()
-  .it('should not print error when skipOclifErrorHandling is true', ctx => {
+  .it('should not print error when skipOclifErrorHandling is true', async ctx => {
     const error = new Error('foo bar baz') as Error & {skipOclifErrorHandling: boolean}
     error.skipOclifErrorHandling = true
-    handle(error)
+    await handle(error)
     expect(ctx.stdout).to.equal('')
     expect(ctx.stderr).to.equal('')
   })
@@ -102,28 +64,27 @@ describe('handle', () => {
     config.errlog = undefined
   })
   .it('logs when errlog is set', async ctx => {
-    handle(new CLIError('uh oh!'))
+    await handle(new CLIError('uh oh!'))
     expect(ctx.stderr).to.equal(` ${x}   Error: uh oh!\n`)
     await config.errorLogger!.flush()
     expect(readFileSync(errlog, 'utf8')).to.contain('Error: uh oh!')
-    expect(process.exitCode).to.equal(2)
+    expect(exitStub.firstCall.firstArg).to.equal(2)
   })
 
   describe('exit', () => {
     fancy
     .stderr()
-    .skip()
     .stdout()
-    .it('exits without displaying anything', ctx => {
+    .it('exits without displaying anything', async ctx => {
       try {
         exitErrorThrower(9000)
       } catch (error: any) {
-        handle(error)
+        await handle(error)
       }
 
       expect(ctx.stdout).to.equal('')
       expect(ctx.stderr).to.equal('')
-      expect(process.exitCode).to.be.equal(9000)
+      expect(exitStub.firstCall.firstArg).to.equal(9000)
     })
   })
 })

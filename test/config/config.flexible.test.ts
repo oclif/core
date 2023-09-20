@@ -1,6 +1,3 @@
-import * as os from 'node:os'
-import {join} from 'node:path'
-
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
 
@@ -8,6 +5,7 @@ import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {getCommandIdPermutations} from '../../src/config/util'
+import * as util from '../../src/util'
 
 interface Options {
   pjson?: any;
@@ -45,8 +43,8 @@ describe('Config with flexible taxonomy', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => join(homedir))
-    .stub(os, 'platform', () => platform)
+    .stub(util, 'getHomeDir', stub => stub.returns(homedir))
+    .stub(util, 'getPlatform', stub => stub.returns(platform))
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<Command.Class> => MyCommandClass

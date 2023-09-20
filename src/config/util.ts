@@ -1,5 +1,3 @@
-import {readFile} from 'node:fs'
-
 const debug = require('debug')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
@@ -16,20 +14,6 @@ export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in ke
 
 export function resolvePackage(id: string, paths: { paths: string[] }): string {
   return require.resolve(id, paths)
-}
-
-export function loadJSON<T = unknown>(path: string): Promise<T> {
-  debug('config')('loadJSON %s', path)
-  return new Promise((resolve, reject) => {
-    readFile(path, 'utf8', (err: any, d: any) => {
-      try {
-        if (err) reject(err)
-        else resolve(JSON.parse(d) as T)
-      } catch (error: any) {
-        reject(error)
-      }
-    })
-  })
 }
 
 function displayWarnings() {

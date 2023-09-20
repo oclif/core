@@ -1,7 +1,6 @@
 
 import * as Errors from './errors'
 import * as Parser from './parser'
-import * as chalk from 'chalk'
 import {
   ArgInput,
   ArgOutput,
@@ -27,6 +26,7 @@ import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
 import {boolean} from './flags'
+import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
 import {ux} from './cli-ux'
 

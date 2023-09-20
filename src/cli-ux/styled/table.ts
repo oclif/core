@@ -1,15 +1,14 @@
 import * as F from '../../flags'
 import * as Interfaces from '../../interfaces'
-import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
+import chalk from 'chalk'
 import {inspect} from 'node:util'
+import {orderBy} from 'natural-orderby'
 import {safeDump} from 'js-yaml'
+import sliceAnsi from 'slice-ansi'
 import {stdout} from '../stream'
 import {stdtermwidth} from '../../screen'
-
-const sw = require('string-width')
-const {orderBy} = require('natural-orderby')
-const sliceAnsi = require('slice-ansi')
+import sw from 'string-width'
 
 class Table<T extends Record<string, unknown>> {
   options: table.Options & { printLine(s: any): any }

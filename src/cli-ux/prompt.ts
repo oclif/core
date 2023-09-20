@@ -1,5 +1,5 @@
 import * as Errors from '../errors'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {config} from './config'
 import {stderr} from './stream'
 
