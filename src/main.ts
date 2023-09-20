@@ -4,7 +4,7 @@ import {format, inspect} from 'node:util'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 
 import {Config} from './config'
-import Performance from './performance'
+import {Performance} from './performance'
 import {stdout} from './cli-ux/stream'
 
 const debug = require('debug')('oclif:main')
@@ -32,7 +32,7 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
   return false
 }
 
-export default async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
+export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
   const marker = Performance.mark('main.run')
 
   const initMarker = Performance.mark('main.run#init')

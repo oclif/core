@@ -59,7 +59,7 @@ class Marker {
   }
 }
 
-export default class Performance {
+export class Performance {
   private static markers: Record<string, Marker> = {}
   private static _results: PerfResult[] = []
   private static _highlights: PerfHighlights

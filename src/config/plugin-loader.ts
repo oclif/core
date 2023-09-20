@@ -3,7 +3,7 @@ import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {isProd, readJson} from '../util'
 import {Debug} from './util'
 import {PJSON} from '../interfaces'
-import Performance from '../performance'
+import {Performance} from '../performance'
 import {join} from 'node:path'
 
 // eslint-disable-next-line new-cap

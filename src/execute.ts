@@ -1,7 +1,7 @@
 import {LoadOptions} from './interfaces'
 import {flush} from './cli-ux/flush'
 import {handle} from './errors/handle'
-import run from './main'
+import {run} from './main'
 import {settings} from './settings'
 
 /**
@@ -46,7 +46,7 @@ import {settings} from './settings'
  * })()
  * ```
  */
-export default async function execute(
+export async function execute(
   options: {
     dir: string;
     args?: string[];

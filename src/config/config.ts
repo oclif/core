@@ -11,7 +11,7 @@ import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} 
 import {join, sep} from 'node:path'
 
 import {Command} from '../command'
-import Performance from '../performance'
+import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
 import {format} from 'node:util'
 import {getHelpFlagAdditions} from '../help'
