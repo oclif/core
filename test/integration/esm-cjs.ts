@@ -294,7 +294,7 @@ type PluginConfig = {
       expectStrings: ['cheers', plugin.hookText],
     })
 
-    await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
+    await cleanUp({executor, plugin, script: 'run'})
   }
 
   const cjsTests = async () => {
