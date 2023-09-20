@@ -49,7 +49,7 @@ describe('Config', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(util, 'getHomeDir', stub => stub.returns(homedir))
+    .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
     .stub(util, 'getPlatform', stub => stub.returns(platform))
     if (pjson) test = test.stub(util, 'readJson', stub => stub.resolves(pjson))
 
