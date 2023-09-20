@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /**
  * These integration tests do not use mocha because we encountered an issue with
  * spawning child processes for testing root ESM plugins with linked ESM plugins.
@@ -208,21 +207,22 @@ type PluginConfig = {
   }
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
-  const runInParallel = args.includes('--parallel')
-  const skip = args.find(arg => arg.startsWith('--skip='))
+  const providedSkips = args.find(arg => arg.startsWith('--skip='))
+  const providedTests = args.find(arg => arg.startsWith('--test=')) ?? '=cjs,esm,precore,coreV1,coreV2'
 
-  const skips = skip ? skip.split('=')[1].split(',') : []
+  const skips = providedSkips ? providedSkips.split('=')[1].split(',') : []
+  const tests = providedTests ? providedTests.split('=')[1].split(',') : []
+
   const runTests = {
-    esm: !skips.includes('esm'),
-    cjs: !skips.includes('cjs'),
-    precore: !skips.includes('precore'),
-    coreV1: !skips.includes('coreV1'),
-    coreV2: !skips.includes('coreV2'),
+    esm: tests.includes('esm') && !skips.includes('esm'),
+    cjs: tests.includes('cjs') && !skips.includes('cjs'),
+    precore: tests.includes('precore') && !skips.includes('precore'),
+    coreV1: tests.includes('coreV1') && !skips.includes('coreV1'),
+    coreV2: tests.includes('coreV2') && !skips.includes('coreV2'),
   }
 
   console.log('Node version:', process.version)
-  console.log(runInParallel ? '🐇 Running tests in parallel' : '🐢 Running tests sequentially')
-  if (skips.length > 0) console.log(`🚨 Skipping ${skips.join(', ')} tests 🚨`)
+  console.log('Running tests:', runTests)
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
@@ -295,7 +295,7 @@ type PluginConfig = {
       expectStrings: ['cheers', plugin.hookText],
     })
 
-    await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
+    await cleanUp({executor, plugin, script: 'run'})
   }
 
   const cjsTests = async () => {
@@ -344,7 +344,7 @@ type PluginConfig = {
     })
 
     await test('Install ESM plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.esm2, cjsExecutor)
+      await installTest(PLUGINS.esm2, esmExecutor)
     })
 
     await test('Link CJS plugin to ESM root plugin', async () => {
@@ -441,35 +441,17 @@ type PluginConfig = {
     })
   }
 
-  if (runInParallel) {
-    await Promise.all([
-      runTests.cjs ? cjsBefore() : Promise.resolve(),
-      runTests.esm ? esmBefore() : Promise.resolve(),
-      runTests.precore ? precoreBefore() : Promise.resolve(),
-      runTests.coreV1 ? coreV1Before() : Promise.resolve(),
-      runTests.coreV2 ? coreV2Before() : Promise.resolve(),
-    ])
+  if (runTests.cjs) await cjsBefore()
+  if (runTests.esm) await esmBefore()
+  if (runTests.precore) await precoreBefore()
+  if (runTests.coreV1) await coreV1Before()
+  if (runTests.coreV2) await coreV2Before()
 
-    await Promise.all([
-      runTests.cjs ? cjsTests() : Promise.resolve(),
-      runTests.esm ? esmTests() : Promise.resolve(),
-      runTests.precore ? preCoreTests() : Promise.resolve(),
-      runTests.coreV1 ? coreV1Tests() : Promise.resolve(),
-      runTests.coreV2 ? coreV2Tests() : Promise.resolve(),
-    ])
-  } else {
-    if (runTests.cjs) await cjsBefore()
-    if (runTests.esm) await esmBefore()
-    if (runTests.precore) await precoreBefore()
-    if (runTests.coreV1) await coreV1Before()
-    if (runTests.coreV2) await coreV2Before()
-
-    if (runTests.cjs) await cjsTests()
-    if (runTests.esm) await esmTests()
-    if (runTests.precore) await preCoreTests()
-    if (runTests.coreV1) await coreV1Tests()
-    if (runTests.coreV2) await coreV2Tests()
-  }
+  if (runTests.cjs) await cjsTests()
+  if (runTests.esm) await esmTests()
+  if (runTests.precore) await preCoreTests()
+  if (runTests.coreV1) await coreV1Tests()
+  if (runTests.coreV2) await coreV2Tests()
 
   exit()
 })()

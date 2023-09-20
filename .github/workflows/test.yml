@@ -72,19 +72,19 @@ jobs:
           OCLIF_CORE_E2E_SKIP_SETUP: true
           OCLIF_CORE_E2E_TEST_DIR: D:\a\e2e
           DEBUG: e2e:*
-
   esm-cjs-interop:
     needs: linux-unit-tests
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
+        test: [esm, cjs, precore, coreV1, coreV2]
         exclude:
           - os: windows-latest
             node_version: lts/*
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -93,7 +93,7 @@ jobs:
           cache: yarn
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs
+      - run: yarn test:esm-cjs --test=${{ matrix.test }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
