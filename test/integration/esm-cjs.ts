@@ -65,14 +65,17 @@ type LinkPluginOptions = {
   executor: Executor;
   plugin: Plugin;
   script: Script;
+  noLinkCore?: boolean;
 }
 
 type RunCommandOptions = {
   executor: Executor;
   plugin: Plugin;
   script: Script;
-  expectStrings?: string[];
+  expectStrings?: string[]
+  expectJson?: Record<string, any>
   env?: Record<string, string>;
+  args?: Array<string | boolean>;
 }
 
 type ModifyCommandOptions = {
@@ -95,10 +98,49 @@ type PluginConfig = {
   repo: string;
   commandText: string;
   hookText: string;
+  expectJson: {
+    whenProvided: {
+      args: Record<string, string | boolean>;
+      flags: Record<string, string | boolean>;
+    };
+    whenNotProvided: {
+      args: Record<string, string | null | boolean>;
+      flags: Record<string, string | null | boolean>;
+    };
+  }
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
+  const commonProps = {
+    expectJson: {
+      whenProvided: {
+        args: {
+          optionalArg: 'arg1',
+          defaultArg: 'arg2',
+          defaultFnArg: 'arg3',
+        },
+        flags: {
+          optionalString: 'flag1',
+          defaultString: 'flag2',
+          defaultFnString: 'flag3',
+          json: true,
+        },
+      },
+      whenNotProvided: {
+        args: {
+          defaultArg: 'simple string default',
+          defaultFnArg: 'async fn default',
+        },
+        flags: {
+          defaultString: 'simple string default',
+          defaultFnString: 'async fn default',
+          json: true,
+        },
+      },
+    },
+  }
+
   const PLUGINS: Record<string, PluginConfig> = {
     esm1: {
       name: 'plugin-test-esm-1',
@@ -107,6 +149,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-esm-1',
       commandText: 'hello I am an ESM plugin',
       hookText: 'Greetings! from plugin-test-esm-1 init hook',
+      ...commonProps,
     },
     esm2: {
       name: 'plugin-test-esm-2',
@@ -115,6 +158,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-esm-2',
       commandText: 'hello I am an ESM plugin',
       hookText: 'Greetings! from plugin-test-esm-2 init hook',
+      ...commonProps,
     },
     cjs1: {
       name: 'plugin-test-cjs-1',
@@ -123,6 +167,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-cjs-1',
       commandText: 'hello I am a CJS plugin',
       hookText: 'Greetings! from plugin-test-cjs-1 init hook',
+      ...commonProps,
     },
     cjs2: {
       name: 'plugin-test-cjs-2',
@@ -131,6 +176,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-cjs-2',
       commandText: 'hello I am a CJS plugin',
       hookText: 'Greetings! from plugin-test-cjs-2 init hook',
+      ...commonProps,
     },
     precore: {
       name: 'plugin-test-pre-core',
@@ -139,6 +185,20 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-pre-core',
       commandText: 'hello I am a pre-core plugin',
       hookText: 'Greetings! from plugin-test-pre-core init hook',
+      expectJson: {
+        whenProvided: commonProps.expectJson.whenNotProvided,
+        whenNotProvided: {
+          args: {
+            defaultArg: 'simple string default',
+            defaultFnArg: 'fn default',
+          },
+          flags: {
+            defaultString: 'simple string default',
+            defaultFnString: 'fn default',
+            json: true,
+          },
+        },
+      },
     },
     coreV1: {
       name: 'plugin-test-core-v1',
@@ -147,6 +207,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-core-v1',
       commandText: 'hello I am an @oclif/core@v1 plugin',
       hookText: 'Greetings! from plugin-test-core-v1 init hook',
+      ...commonProps,
     },
     coreV2: {
       name: 'plugin-test-core-v2',
@@ -155,6 +216,7 @@ type PluginConfig = {
       repo: 'https://github.com/oclif/plugin-test-core-v2',
       commandText: 'hello I am an @oclif/core@v2 plugin',
       hookText: 'Greetings! from plugin-test-core-v2 init hook',
+      ...commonProps,
     },
   }
 
@@ -170,6 +232,7 @@ type PluginConfig = {
     const pluginExecutor = await setup(__filename, {
       repo: options.plugin.repo,
       subDir: options.executor.parentDir,
+      noLinkCore: options.noLinkCore ?? false,
     })
 
     const result = await options.executor.executeCommand(`plugins:link ${pluginExecutor.pluginDir}`, options.script)
@@ -190,13 +253,25 @@ type PluginConfig = {
 
   async function runCommand(options: RunCommandOptions): Promise<void> {
     const env = {...process.env, ...options.env}
-    const result = await options.executor.executeCommand(options.plugin.command, options.script, {env})
+    const result = await options.executor.executeCommand(
+      `${options.plugin.command} ${options.args?.join(' ') ?? ''}`,
+      options.script,
+      {env},
+    )
     expect(result.code).to.equal(0)
 
     if (options.expectStrings) {
       for (const expectString of options.expectStrings) {
         expect(result.stdout).to.include(expectString)
       }
+    }
+
+    if (options.expectJson && options.args?.includes('--json')) {
+      // clear any non-json output from hooks
+      const split = result.stdout?.split('\n') ?? []
+      const idx = split.findIndex(i => i.startsWith('{'))
+      const json = JSON.parse(split.slice(idx).join('\n'))
+      expect(json).to.deep.equal(options.expectJson)
     }
   }
 
@@ -252,23 +327,54 @@ type PluginConfig = {
 
   const installTest = async (plugin: PluginConfig, executor: Executor) => {
     await installPlugin({executor, plugin, script: 'run'})
+
+    // test that the root plugin's bin/run can execute the installed plugin
     await runCommand({
       executor,
       plugin,
       script: 'run',
       expectStrings: [plugin.commandText],
     })
+
+    // test that the root plugin's bin/run can execute the installed plugin
+    // and that args and flags work as expected when no values are provided
+    await runCommand({
+      executor,
+      plugin,
+      script: 'run',
+      args: ['--json'],
+      expectJson: plugin.expectJson.whenNotProvided,
+    })
+
+    // test that the root plugin's bin/run can execute the installed plugin
+    // and that args and flags work as expected when values are provided
+    await runCommand({
+      executor,
+      plugin,
+      script: 'run',
+      args: [
+        ...Object.values(plugin.expectJson.whenProvided.args),
+        ...Object.entries(plugin.expectJson.whenProvided.flags).map(([flag, value]) => {
+          if (flag === 'json') return '--json'
+          return `--${flag} ${value}`
+        }),
+      ],
+      expectJson: plugin.expectJson.whenProvided,
+    })
+
+    // test that the root plugin's bin/dev can execute the installed plugin
     await runCommand({
       executor,
       plugin,
       script: 'dev',
       expectStrings: [plugin.commandText],
     })
+
     await cleanUp({executor, plugin, script: 'run'})
   }
 
-  const linkTest = async (plugin: PluginConfig, executor: Executor) => {
-    const linkedPlugin = await linkPlugin({executor, plugin, script: 'run'})
+  const linkTest = async (plugin: PluginConfig, executor: Executor, noLinkCore = false) => {
+    const linkedPlugin = await linkPlugin({executor, plugin, script: 'run', noLinkCore})
 
     // test bin/run
     await runCommand({
@@ -397,11 +503,15 @@ type PluginConfig = {
     })
 
     await test('Link pre-core plugin to CJS root plugin', async () => {
-      await linkTest(PLUGINS.precore, cjsExecutor)
+      // Pass in true to skip linking the local version of @oclif/core
+      // to the test pre-core plugin since it doesn't use core.
+      await linkTest(PLUGINS.precore, cjsExecutor, true)
     })
 
     await test('Link pre-core plugin to ESM root plugin', async () => {
-      await linkTest(PLUGINS.precore, esmExecutor)
+      // Pass in true to skip linking the local version of @oclif/core
+      // to the test pre-core plugin since it doesn't use core.
+      await linkTest(PLUGINS.precore, esmExecutor, true)
     })
   }
 
@@ -415,28 +525,36 @@ type PluginConfig = {
     })
 
     await test('Link core v1 plugin to CJS root plugin', async () => {
-      await linkTest(PLUGINS.coreV1, cjsExecutor)
+      // Pass in true to skip linking the local version of @oclif/core
+      // to plugin-test-core-v1. There are breaking changes to how
+      // args are defined in a command so the plugin won't compile if
+      // we link the local version of core.
+      await linkTest(PLUGINS.coreV1, cjsExecutor, true)
     })
 
     await test('Link core v1 plugin to ESM root plugin', async () => {
-      await linkTest(PLUGINS.coreV1, esmExecutor)
+      // Pass in true to skip linking the local version of @oclif/core
+      // to plugin-test-core-v1. There are breaking changes to how
+      // args are defined in a command so the plugin won't compile if
+      // we link the local version of core.
+      await linkTest(PLUGINS.coreV1, esmExecutor, true)
     })
   }
 
   const coreV2Tests = async () => {
-    await test('Install core v1 plugin to ESM root plugin', async () => {
+    await test('Install core v2 plugin to ESM root plugin', async () => {
       await installTest(PLUGINS.coreV2, esmExecutor)
     })
 
-    await test('Install core v1 plugin to CJS root plugin', async () => {
+    await test('Install core v2 plugin to CJS root plugin', async () => {
       await installTest(PLUGINS.coreV2, cjsExecutor)
     })
 
-    await test('Link core v1 plugin to CJS root plugin', async () => {
+    await test('Link core v2 plugin to CJS root plugin', async () => {
       await linkTest(PLUGINS.coreV2, cjsExecutor)
     })
 
-    await test('Link core v1 plugin to ESM root plugin', async () => {
+    await test('Link core v2 plugin to ESM root plugin', async () => {
       await linkTest(PLUGINS.coreV2, esmExecutor)
     })
   }

@@ -23,6 +23,7 @@ export type SetupOptions = {
   branch?: string;
   plugins?: string[];
   subDir?: string;
+  noLinkCore?: boolean;
 }
 
 export type ExecutorOptions = {
@@ -55,7 +56,7 @@ export class Executor {
     this.testFileName = options.testFileName
     this.parentDir = basename(dirname(this.pluginDir))
     this.pluginName = basename(this.pluginDir)
-
+    this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
     this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
 
@@ -144,20 +145,20 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   await executor.clone(options.repo, options.branch)
 
   executor.debug('Updating package.json')
-  const dependencies = {'@oclif/core': `file:${resolve('.')}`}
+  const dependencies = options.noLinkCore ? {} : {'@oclif/core': `file:${resolve('.')}`}
 
   let pjson: Interfaces.PJSON
   if (options.plugins) {
     // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
     pjson = updatePkgJson(pluginDir, {
-      resolutions: {'@oclif/core': resolve('.')},
-      dependencies: Object.assign(dependencies, pluginDeps),
+      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
+      dependencies: {...dependencies, ...pluginDeps},
       oclif: {plugins: options.plugins},
     })
   } else {
     pjson = updatePkgJson(pluginDir, {
-      resolutions: {'@oclif/core': resolve('.')},
+      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
       dependencies,
     })
   }
