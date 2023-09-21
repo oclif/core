@@ -4,7 +4,7 @@ import {resolve} from 'node:path'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi = require('strip-ansi')
 import {requireJson} from '../../src/util'
-import run from '../../src/main'
+import {run} from '../../src/main'
 import {Interfaces, stdout} from '../../src/index'
 
 const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', '..', 'package.json')
