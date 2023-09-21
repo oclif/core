@@ -1,10 +1,10 @@
 import * as TSNode from 'ts-node'
 import {Plugin, TSConfig} from '../interfaces'
-import {existsSync, readFileSync} from 'node:fs'
+import {isProd, readJsonSync} from '../util'
 import {join, relative as pathRelative} from 'node:path'
 import {Config} from './config'
 import {Debug} from './util'
-import {isProd} from '../util'
+import {existsSync} from 'node:fs'
 import {memoizedWarn} from '../errors'
 import {settings} from '../settings'
 
@@ -29,12 +29,12 @@ function loadTSConfig(root: string): TSConfig | undefined {
   if (existsSync(tsconfigPath) && typescript) {
     const tsconfig = typescript.parseConfigFileTextToJson(
       tsconfigPath,
-      readFileSync(tsconfigPath, 'utf8'),
+      readJsonSync(tsconfigPath, false),
     ).config
     if (!tsconfig || !tsconfig.compilerOptions) {
       throw new Error(
-        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it ` +
-        'did not contain a "compilerOptions" section.')
+        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it `
+        + 'did not contain a "compilerOptions" section.')
     }
 
     TS_CONFIGS[root] = tsconfig

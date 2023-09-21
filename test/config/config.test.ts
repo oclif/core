@@ -1,8 +1,7 @@
-import * as os from 'node:os'
 import {join} from 'node:path'
 
 import {Plugin as IPlugin} from '../../src/interfaces'
-import * as util from '../../src/config/util'
+import * as util from '../../src/util'
 
 import {expect, fancy} from './test'
 import {Config, Interfaces} from '../../src'
@@ -50,10 +49,9 @@ describe('Config', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => join(homedir))
-    .stub(os, 'platform', () => platform)
-
-    if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+    .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
+    .stub(util, 'getPlatform', stub => stub.returns(platform))
+    if (pjson) test = test.stub(util, 'readJson', stub => stub.resolves(pjson))
 
     test = test.add('config', () => Config.load())
 
@@ -69,7 +67,6 @@ describe('Config', () => {
           // @ts-expect-error because readonly property
           config.channel = 'stable'
 
-          // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
             bin: 'oclif-cli',
@@ -235,23 +232,21 @@ describe('Config', () => {
       types = [],
     }: Options = {}) => {
       class MyCommandClass extends Command {
-      _base = ''
+        _base = ''
 
-      aliases: string[] = []
+        aliases: string[] = []
 
-      hidden = false
+        hidden = false
 
-      id = 'foo:bar'
+        id = 'foo:bar'
 
-      run(): Promise<any> {
-        return Promise.resolve()
-      }
+        run(): Promise<any> {
+          return Promise.resolve()
+        }
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<Command.Class> => {
-        return MyCommandClass
-      }
+      const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
       const commandPluginA: Command.Loadable = {
         strict: false,
@@ -312,10 +307,10 @@ describe('Config', () => {
       let test = fancy
       .resetConfig()
       .env(env, {clear: true})
-      .stub(os, 'homedir', () => join(homedir))
-      .stub(os, 'platform', () => platform)
+      .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
+      .stub(util, 'getPlatform', stub => stub.returns(platform))
 
-      if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+      if (pjson) test = test.stub(util, 'readJson', stub => stub.resolves(pjson))
       test = test.add('config', async () => {
         const config = await Config.load()
         config.plugins = plugins

@@ -1,10 +1,10 @@
-import * as chalk from 'chalk'
-import * as cs from 'clean-stack'
-import * as indent from 'indent-string'
-import * as screen from '../../screen'
-import * as wrap from 'wrap-ansi'
 import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
+import chalk from 'chalk'
 import {config} from '../config'
+import cs from 'clean-stack'
+import {errtermwidth} from '../../screen'
+import indent from 'indent-string'
+import wrap from 'wrap-ansi'
 
 /**
  * properties specific to internal oclif error handling
@@ -46,7 +46,7 @@ export class CLIError extends Error implements OclifError {
     }
 
     let output = `${this.name}: ${this.message}`
-    output = wrap(output, screen.errtermwidth - 6, {trim: false, hard: true} as any)
+    output = wrap(output, errtermwidth - 6, {trim: false, hard: true} as any)
     output = indent(output, 3)
     output = indent(output, 1, {indent: this.bang, includeEmptyLines: true} as any)
     output = indent(output, 1)

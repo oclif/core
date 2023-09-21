@@ -60,16 +60,14 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(): F
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults?: Partial<OptionFlag<T, P>>,
 ): FlagDefinition<T, P, {multiple: boolean; requiredOrDefaulted: boolean}> {
-  return (options: any = {}) => {
-    return {
-      parse: async (input, _ctx, _opts) => input,
-      ...defaults,
-      ...options,
-      input: [] as string[],
-      multiple: Boolean(options.multiple === undefined ? defaults?.multiple ?? false : options.multiple),
-      type: 'option',
-    }
-  }
+  return (options: any = {}) => ({
+    parse: async (input, _ctx, _opts) => input,
+    ...defaults,
+    ...options,
+    input: [] as string[],
+    multiple: Boolean(options.multiple === undefined ? defaults?.multiple ?? false : options.multiple),
+    type: 'option',
+  })
 }
 
 export function boolean<T = boolean>(
@@ -84,7 +82,7 @@ export function boolean<T = boolean>(
 }
 
 export const integer = custom<number, {min?: number; max?: number;}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (!/^-?\d+$/.test(input))
       throw new CLIError(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
@@ -97,7 +95,7 @@ export const integer = custom<number, {min?: number; max?: number;}>({
 })
 
 export const directory = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return dirExists(input)
 
     return input
@@ -105,7 +103,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 export const file = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return fileExists(input)
 
     return input
@@ -117,7 +115,7 @@ export const file = custom<string, {exists?: boolean}>({
  * if the string is not a valid URL.
  */
 export const url = custom<URL>({
-  parse: async input => {
+  async parse(input) {
     try {
       return new URL(input)
     } catch {
@@ -128,28 +126,24 @@ export const url = custom<URL>({
 
 export const string = custom()
 
-export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
-  return boolean({
-    description: 'Show CLI version.',
-    ...opts,
-    parse: async (_, ctx) => {
-      ctx.log(ctx.config.userAgent)
-      ctx.exit(0)
-    },
-  })
-}
+export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => boolean({
+  description: 'Show CLI version.',
+  ...opts,
+  async parse(_, ctx) {
+    ctx.log(ctx.config.userAgent)
+    ctx.exit(0)
+  },
+})
 
-export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => {
-  return boolean({
-    description: 'Show CLI help.',
-    ...opts,
-    parse: async (_, cmd) => {
-      const Help = await loadHelpClass(cmd.config)
-      await new Help(cmd.config, cmd.config.pjson.helpOptions).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
-      cmd.exit(0)
-    },
-  })
-}
+export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => boolean({
+  description: 'Show CLI help.',
+  ...opts,
+  async parse(_, cmd) {
+    const Help = await loadHelpClass(cmd.config)
+    await new Help(cmd.config, cmd.config.pjson.helpOptions).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
+    cmd.exit(0)
+  },
+})
 
 type ElementType<T extends ReadonlyArray<unknown>> = T[number];
 
@@ -206,14 +200,12 @@ export function option<T extends readonly string[], P extends CustomOptions>(
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {options: T},
 ): FlagDefinition<typeof defaults.options[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
-  return (options: any = {}) => {
-    return {
-      parse: async (input, _ctx, _opts) => input,
-      ...defaults,
-      ...options,
-      input: [] as string[],
-      multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
-      type: 'option',
-    }
-  }
+  return (options: any = {}) => ({
+    parse: async (input, _ctx, _opts) => input,
+    ...defaults,
+    ...options,
+    input: [] as string[],
+    multiple: Boolean(options.multiple === undefined ? defaults.multiple : options.multiple),
+    type: 'option',
+  })
 }

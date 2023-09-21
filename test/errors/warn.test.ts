@@ -18,7 +18,6 @@ describe('warn', () => {
   .it('warns', async ctx => {
     warn('foo!')
     expect(ctx.stderr).to.contain('Warning: foo!')
-    expect(process.exitCode).to.be.undefined
     await config.errorLogger!.flush()
     expect(await readFile(errlog, 'utf8')).to.contain('Warning: foo!')
   })

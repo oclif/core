@@ -1,5 +1,3 @@
-import {readFile} from 'node:fs'
-
 const debug = require('debug')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
@@ -16,24 +14,6 @@ export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in ke
 
 export function resolvePackage(id: string, paths: { paths: string[] }): string {
   return require.resolve(id, paths)
-}
-
-export function loadJSON<T = unknown>(path: string): Promise<T> {
-  debug('config')('loadJSON %s', path)
-  return new Promise((resolve, reject) => {
-    readFile(path, 'utf8', (err: any, d: any) => {
-      try {
-        if (err) reject(err)
-        else resolve(JSON.parse(d) as T)
-      } catch (error: any) {
-        reject(error)
-      }
-    })
-  })
-}
-
-export function compact<T>(a: (T | undefined)[]): T[] {
-  return a.filter((a): a is T => Boolean(a))
 }
 
 function displayWarnings() {
@@ -102,6 +82,4 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @returns string[]
  */
 export const collectUsableIds = (commandIds: string[]): Set<string> =>
-  new Set(commandIds.flatMap(id => {
-    return id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))
-  }))
+  new Set(commandIds.flatMap(id => id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))))

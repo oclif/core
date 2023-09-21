@@ -1,15 +1,14 @@
 import * as F from '../../flags'
 import * as Interfaces from '../../interfaces'
-import * as chalk from 'chalk'
 import {capitalize, sumBy} from '../../util'
+import chalk from 'chalk'
 import {inspect} from 'node:util'
+import {orderBy} from 'natural-orderby'
 import {safeDump} from 'js-yaml'
+import sliceAnsi from 'slice-ansi'
 import {stdout} from '../stream'
 import {stdtermwidth} from '../../screen'
-
-const sw = require('string-width')
-const {orderBy} = require('natural-orderby')
-const sliceAnsi = require('slice-ansi')
+import sw from 'string-width'
 
 class Table<T extends Record<string, unknown>> {
   options: table.Options & { printLine(s: any): any }
@@ -66,7 +65,6 @@ class Table<T extends Record<string, unknown>> {
 
     // filter rows
     if (this.options.filter) {
-      /* eslint-disable-next-line prefer-const */
       let [header, regex] = this.options.filter!.split('=')
       const isNot = header[0] === '-'
       if (isNot) header = header.slice(1)
@@ -84,9 +82,7 @@ class Table<T extends Record<string, unknown>> {
     if (this.options.sort) {
       const sorters = this.options.sort!.split(',')
       const sortHeaders = sorters.map(k => k[0] === '-' ? k.slice(1) : k)
-      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map(c => {
-        return ((v: any) => v[c.key])
-      })
+      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map(c => ((v: any) => v[c.key]))
       const sortKeysOrder = sorters.map(k => k[0] === '-' ? 'desc' : 'asc')
       rows = orderBy(rows, sortKeys, sortKeysOrder)
     }
@@ -103,17 +99,24 @@ class Table<T extends Record<string, unknown>> {
     this.data = rows
 
     switch (this.options.output) {
-    case 'csv':
+    case 'csv': {
       this.outputCSV()
       break
-    case 'json':
+    }
+
+    case 'json': {
       this.outputJSON()
       break
-    case 'yaml':
+    }
+
+    case 'yaml': {
       this.outputYAML()
       break
-    default:
+    }
+
+    default: {
       this.outputTable()
+    }
     }
   }
 
@@ -141,15 +144,10 @@ class Table<T extends Record<string, unknown>> {
 
   private resolveColumnsToObjectArray() {
     const {data, columns} = this
-    return data.map((d: any) => {
-      // eslint-disable-next-line unicorn/prefer-object-from-entries
-      return columns.reduce((obj, col) => {
-        return {
-          ...obj,
-          [col.key]: d[col.key] ?? '',
-        }
-      }, {})
-    })
+    return data.map((d: any) =>
+
+      Object.fromEntries(columns.map(col => [col.key, d[col.key] ?? ''])),
+    )
   }
 
   private outputJSON() {
@@ -338,7 +336,7 @@ export namespace table {
   export function flags(): IFlags
   export function flags<Z extends keyof IFlags = keyof IFlags>(opts: { except: Z | Z[] }): ExcludeFlags<IFlags, Z>
   export function flags<K extends keyof IFlags = keyof IFlags>(opts: { only: K | K[] }): IncludeFlags<IFlags, K>
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
   export function flags(opts?: any): any {
     if (opts) {
       const f = {}
@@ -380,12 +378,10 @@ export namespace table {
   }
 }
 
-const getWidestColumnWith = (data: any[], columnKey: string): number => {
-  return data.reduce((previous, current) => {
-    const d = current[columnKey]
-    // convert multi-line cell to single longest line
-    // for width calculations
-    const manyLines = (d as string).split('\n')
-    return Math.max(previous, manyLines.length > 1 ? Math.max(...manyLines.map((r: string) => sw(r))) : sw(d))
-  }, 0)
-}
+const getWidestColumnWith = (data: any[], columnKey: string): number => data.reduce((previous, current) => {
+  const d = current[columnKey]
+  // convert multi-line cell to single longest line
+  // for width calculations
+  const manyLines = (d as string).split('\n')
+  return Math.max(previous, manyLines.length > 1 ? Math.max(...manyLines.map((r: string) => sw(r))) : sw(d))
+}, 0)

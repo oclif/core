@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /**
  * These integration tests do not use mocha because we encountered an issue with
  * spawning child processes for testing root ESM plugins with linked ESM plugins.
@@ -11,7 +10,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import {Executor, setup} from './util'
 import {expect} from 'chai'
-import {bold, green, red} from 'chalk'
+import chalk from 'chalk'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
@@ -20,28 +19,28 @@ async function test(name: string, fn: () => Promise<void>) {
   try {
     await fn()
     PASSED.push(name)
-    console.log(green('✓'), name)
+    console.log(chalk.green('✓'), name)
   } catch (error) {
     FAILED.push(name)
-    console.log(red('𐄂'), name)
+    console.log(chalk.red('𐄂'), name)
     console.log(error)
   }
 }
 
 function exit(): never {
   console.log()
-  console.log(bold('#### Summary ####'))
+  console.log(chalk.bold('#### Summary ####'))
 
   for (const name of PASSED) {
-    console.log(green('✓'), name)
+    console.log(chalk.green('✓'), name)
   }
 
   for (const name of FAILED) {
-    console.log(red('𐄂'), name)
+    console.log(chalk.red('𐄂'), name)
   }
 
-  console.log(`${green('Passed:')} ${PASSED.length}`)
-  console.log(`${red('Failed:')} ${FAILED.length}`)
+  console.log(`${chalk.green('Passed:')} ${PASSED.length}`)
+  console.log(`${chalk.red('Failed:')} ${FAILED.length}`)
 
   // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
   process.exit(FAILED.length)
@@ -98,6 +97,7 @@ type PluginConfig = {
   hookText: string;
 }
 
+// eslint-disable-next-line unicorn/prefer-top-level-await
 (async () => {
   const PLUGINS: Record<string, PluginConfig> = {
     esm1: {
@@ -202,7 +202,8 @@ type PluginConfig = {
 
   async function cleanUp(options: CleanUpOptions): Promise<void> {
     await options.executor.executeCommand(`plugins:uninstall ${options.plugin.package}`)
-    expect((await options.executor.executeCommand('plugins')).stdout).to.not.include(options.plugin.package)
+    const {stdout} = await options.executor.executeCommand('plugins')
+    expect(stdout).to.not.include(options.plugin.package)
   }
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)

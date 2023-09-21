@@ -13,7 +13,7 @@ g.oclif.columns = 80
 
 // extension makes previously protected methods public
 class TestHelp extends Help {
-  public config: any;
+  public config: any
 
   public async showRootHelp() {
     return super.showRootHelp()
@@ -97,7 +97,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -127,7 +127,7 @@ describe('showHelp for a topic', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -153,7 +153,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -182,7 +182,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -212,7 +212,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy, AppsAdminAdd, DbCreate],
@@ -242,7 +242,7 @@ describe('showHelp for a command', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsCreate],
@@ -268,7 +268,7 @@ DESCRIPTION
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsIndex, AppsCreate, AppsAdminAdd],

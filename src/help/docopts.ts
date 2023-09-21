@@ -79,9 +79,7 @@ export class DocOpts {
   public toString(): string {
     const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
     if (this.cmd.args) {
-      const a = Object.values(ensureArgObject(this.cmd.args)).map(arg => {
-        return arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`
-      }) || []
+      const a = Object.values(ensureArgObject(this.cmd.args)).map(arg => arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`) || []
       opts.push(...a)
     }
 
@@ -156,11 +154,7 @@ export class DocOpts {
       delete this.flagMap[toCombine]
     }
 
-    if (isRequired) {
-      elementMap[flagName] = `(${elementMap[flagName] || ''})`
-    } else {
-      elementMap[flagName] = `[${elementMap[flagName] || ''}]`
-    }
+    elementMap[flagName] = isRequired ? `(${elementMap[flagName] || ''})` : `[${elementMap[flagName] || ''}]`
 
     // We handled this flag, don't handle it again
     delete this.flagMap[flagName]

@@ -48,15 +48,13 @@ USAGE
 
   describe('description', () => {
     test
-    .rootHelp(config => {
-      return {
-        ...config,
-        pjson: {
-          ...config.pjson,
-          description: 'This is the top-level description that appears in the root\nThis appears in the description section after usage',
-        },
-      }
-    })
+    .rootHelp(config => ({
+      ...config,
+      pjson: {
+        ...config.pjson,
+        description: 'This is the top-level description that appears in the root\nThis appears in the description section after usage',
+      },
+    }))
     .it('splits on \\n for the description into the top-level and description sections', ctx => {
       expect(ctx.commandHelp).to.equal(`This is the top-level description that appears in the root
 
@@ -71,15 +69,13 @@ DESCRIPTION
     })
 
     test
-    .rootHelp(config => {
-      return {
-        ...config,
-        pjson: {
-          ...config.pjson,
-          description: 'This is the top-level description for <%= config.bin %>\nThis <%= config.bin %> appears in the description section after usage',
-        },
-      }
-    })
+    .rootHelp(config => ({
+      ...config,
+      pjson: {
+        ...config.pjson,
+        description: 'This is the top-level description for <%= config.bin %>\nThis <%= config.bin %> appears in the description section after usage',
+      },
+    }))
     .it('shows description from a template', ctx => {
       expect(ctx.commandHelp).to.equal(`This is the top-level description for oclif
 
@@ -94,19 +90,17 @@ DESCRIPTION
     })
 
     test
-    .rootHelp(config => {
-      return {
-        ...config,
-        pjson: {
-          ...config.pjson,
-          description: 'THIS IS THE PJSON DESCRIPTION',
-          oclif: {
-            ...config.pjson?.oclif,
-            description: 'THIS IS THE OCLIF DESCRIPTION IN PJSON',
-          },
+    .rootHelp(config => ({
+      ...config,
+      pjson: {
+        ...config.pjson,
+        description: 'THIS IS THE PJSON DESCRIPTION',
+        oclif: {
+          ...config.pjson?.oclif,
+          description: 'THIS IS THE OCLIF DESCRIPTION IN PJSON',
         },
-      }
-    })
+      },
+    }))
     .it('prefers the oclif description over the package.json description', ctx => {
       expect(ctx.commandHelp).to.equal(`THIS IS THE OCLIF DESCRIPTION IN PJSON
 
@@ -118,19 +112,17 @@ USAGE
     })
 
     test
-    .rootHelp(config => {
-      return {
-        ...config,
-        pjson: {
-          ...config.pjson,
-          description: 'THIS IS THE PJSON DESCRIPTION',
-          oclif: {
-            ...config.pjson?.oclif,
-            description: undefined,
-          },
+    .rootHelp(config => ({
+      ...config,
+      pjson: {
+        ...config.pjson,
+        description: 'THIS IS THE PJSON DESCRIPTION',
+        oclif: {
+          ...config.pjson?.oclif,
+          description: undefined,
         },
-      }
-    })
+      },
+    }))
     .it('uses package.json description when the oclif description is not set', ctx => {
       expect(ctx.commandHelp).to.equal(`THIS IS THE PJSON DESCRIPTION
 

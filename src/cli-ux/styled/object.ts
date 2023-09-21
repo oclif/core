@@ -1,7 +1,6 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {inspect} from 'node:util'
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function styledObject(obj: any, keys?: string[]): string {
   const output: string[] = []
   const keyLengths = Object.keys(obj).map(key => key.toString().length)
@@ -17,9 +16,7 @@ export default function styledObject(obj: any, keys?: string[]): string {
     return inspect(obj)
   }
 
-  const logKeyValue = (key: string, value: any): string => {
-    return `${chalk.blue(key)}:` + ' '.repeat(maxKeyLength - key.length - 1) + pp(value)
-  }
+  const logKeyValue = (key: string, value: any): string => `${chalk.blue(key)}:` + ' '.repeat(maxKeyLength - key.length - 1) + pp(value)
 
   for (const key of keys || Object.keys(obj).sort()) {
     const value = obj[key]

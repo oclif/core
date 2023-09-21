@@ -14,9 +14,7 @@ const getPackageType = require('get-package-type')
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
 
-const isPlugin = (config: IConfig|IPlugin): config is IPlugin => {
-  return (<IPlugin>config).type !== undefined
-}
+const isPlugin = (config: IConfig|IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
 
 /**
  * Loads and returns a module.
@@ -140,15 +138,18 @@ export function isPathModule(filePath: string): boolean {
   case '.js':
   case '.jsx':
   case '.ts':
-  case '.tsx':
+  case '.tsx': {
     return getPackageType.sync(filePath) === 'module'
+  }
 
   case '.mjs':
-  case '.mts':
+  case '.mts': {
     return true
+  }
 
-  default:
+  default: {
     return false
+  }
   }
 }
 

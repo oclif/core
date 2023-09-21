@@ -2,7 +2,7 @@ import {expect, fancy} from 'fancy-test'
 import {resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
-import run from '../../src/main'
+import {run} from '../../src/main'
 
 // This tests file URL / import.meta.url simulation.
 const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString()
@@ -16,7 +16,6 @@ root = convertToFileURL(root)
 describe('main-esm', () => {
   fancy
   .stdout()
-  .skip() // skip until oclif/test is on v3
   .do(() => run(['plugins'], root))
   .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
   .it('runs plugins')

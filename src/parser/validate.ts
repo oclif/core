@@ -175,14 +175,21 @@ export async function validate(parse: {
   function validateRelationships(name: string, flag: Flag<any>): Promise<Validation>[] {
     return ((flag.relationships ?? []).map(relationship => {
       switch (relationship.type) {
-      case 'all':
+      case 'all': {
         return validateDependsOn(name, relationship.flags)
-      case 'some':
+      }
+
+      case 'some': {
         return validateSome(name, relationship.flags)
-      case 'none':
+      }
+
+      case 'none': {
         return validateExclusive(name, relationship.flags)
-      default:
+      }
+
+      default: {
         throw new Error(`Unknown relationship type: ${relationship.type}`)
+      }
       }
     }))
   }

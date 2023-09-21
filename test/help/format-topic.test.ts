@@ -6,9 +6,7 @@ g.oclif.columns = 80
 
 const test = base
 .loadConfig()
-.add('help', ctx => {
-  return new TestHelp(ctx.config as any)
-})
+.add('help', ctx => new TestHelp(ctx.config as any))
 .register('topicHelp', topicHelp)
 
 describe('formatHelp', () => {

@@ -1,9 +1,9 @@
 import * as Plugin from './plugin'
-import {Debug, loadJSON} from './util'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
+import {isProd, readJson} from '../util'
+import {Debug} from './util'
 import {PJSON} from '../interfaces'
-import Performance from '../performance'
-import {isProd} from '../util'
+import {Performance} from '../performance'
 import {join} from 'node:path'
 
 // eslint-disable-next-line new-cap
@@ -81,7 +81,7 @@ export default class PluginLoader {
       // do not load oclif.devPlugins in production
       if (isProd()) return
       try {
-        const devPlugins = opts.rootPlugin.pjson.oclif.devPlugins
+        const {devPlugins} = opts.rootPlugin.pjson.oclif
         if (devPlugins) await this.loadPlugins(opts.rootPlugin.root, 'dev', devPlugins)
       } catch (error: any) {
         process.emitWarning(error)
@@ -94,7 +94,7 @@ export default class PluginLoader {
       try {
         const userPJSONPath = join(opts.dataDir, 'package.json')
         debug('reading user plugins pjson %s', userPJSONPath)
-        const pjson = await loadJSON<PJSON>(userPJSONPath)
+        const pjson = await readJson<PJSON>(userPJSONPath)
         if (!pjson.oclif) pjson.oclif = {schema: 1}
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))

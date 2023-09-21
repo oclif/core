@@ -1,10 +1,10 @@
-import * as chalk from 'chalk'
 import * as supportsColor from 'supports-color'
-const stripAnsi = require('strip-ansi')
-const ansiStyles = require('ansi-styles')
 import {ActionBase, ActionType} from './base'
+import ansiStyles from 'ansi-styles'
+import chalk from 'chalk'
 import {errtermwidth} from '../../screen'
 import spinners from './spinners'
+import stripAnsi from 'strip-ansi'
 
 function color(s: string): string {
   if (!supportsColor) return s
@@ -61,14 +61,14 @@ export default class SpinnerAction extends ActionBase {
   }
 
   private _render(icon?: string) {
-    const task = this.task
+    const {task, std, output} = this
     if (!task) return
     this._reset()
     this._flushStdout()
     const frame = icon === 'spinner' ? ` ${this._frame()}` : icon || ''
     const status = task.status ? ` ${task.status}` : ''
     this.output = `${task.action}...${frame}${status}\n`
-    this._write(this.std, this.output)
+    this._write(std, output!)
   }
 
   private _reset() {

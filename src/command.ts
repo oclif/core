@@ -1,7 +1,6 @@
 
 import * as Errors from './errors'
 import * as Parser from './parser'
-import * as chalk from 'chalk'
 import {
   ArgInput,
   ArgOutput,
@@ -27,6 +26,7 @@ import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
 import {boolean} from './flags'
+import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
 import {ux} from './cli-ux'
 
@@ -64,7 +64,7 @@ export abstract class Command {
    * The tweet-sized description for your class, used in a parent-commands
    * sub-command listing and as the header for the command help.
    */
-  public static summary?: string;
+  public static summary?: string
 
   /**
    * A full description of how to use the command.
@@ -77,9 +77,9 @@ export abstract class Command {
   public static hidden: boolean
 
   /** Mark the command as a given state (e.g. beta or deprecated) in help */
-  public static state?: 'beta' | 'deprecated' | string;
+  public static state?: 'beta' | 'deprecated' | string
 
-  public static deprecationOptions?: Deprecation;
+  public static deprecationOptions?: Deprecation
 
   /**
    * Emit deprecation warning when a command alias is used
@@ -104,9 +104,9 @@ export abstract class Command {
 
   public static plugin: Plugin | undefined
 
-  public static readonly pluginName?: string;
-  public static readonly pluginType?: string;
-  public static readonly pluginAlias?: string;
+  public static readonly pluginName?: string
+  public static readonly pluginType?: string
+  public static readonly pluginAlias?: string
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -191,6 +191,7 @@ export abstract class Command {
   }
 
   static set baseFlags(flags: FlagInput) {
+    // eslint-disable-next-line prefer-object-spread
     this._baseFlags = Object.assign({}, this.baseFlags, flags)
     this.flags = {} // force the flags setter to run
   }
@@ -203,6 +204,7 @@ export abstract class Command {
   }
 
   public static set flags(flags: FlagInput) {
+    // eslint-disable-next-line prefer-object-spread
     this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
   }
 
@@ -378,7 +380,7 @@ export abstract class Command {
 
   protected async finally(_: Error | undefined): Promise<any> {
     try {
-      const config = Errors.config
+      const {config} = Errors
       if (config.errorLogger) await config.errorLogger.flush()
     } catch (error: any) {
       console.error(error)

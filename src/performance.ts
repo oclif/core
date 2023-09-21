@@ -25,10 +25,10 @@ type PerfHighlights = {
 }
 
 class Marker {
-  public module: string;
-  public method: string;
-  public scope: string;
-  public stopped = false;
+  public module: string
+  public method: string
+  public scope: string
+  public stopped = false
 
   private startMarker: string
   private stopMarker: string
@@ -59,7 +59,7 @@ class Marker {
   }
 }
 
-export default class Performance {
+export class Performance {
   private static markers: Record<string, Marker> = {}
   private static _results: PerfResult[] = []
   private static _highlights: PerfHighlights

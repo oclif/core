@@ -1,8 +1,7 @@
 
-import {rm} from 'shelljs'
-import {mkdir} from 'node:fs/promises'
+import {mkdir, rm} from 'node:fs/promises'
 import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {basename, dirname, join, resolve} from 'node:path'
@@ -35,7 +34,7 @@ export type ExecOptions = ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
 
 function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
   const pkgJsonFile = join(testDir, 'package.json')
-  const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf-8'))
+  const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf8'))
   obj.dependencies = Object.assign(pkgJson.dependencies || {}, obj.dependencies || {})
   obj.resolutions = Object.assign(pkgJson.resolutions || {}, obj.resolutions || {})
   const updated = Object.assign(pkgJson, obj)
@@ -72,9 +71,9 @@ export class Executor {
   }
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
-    const executable = process.platform === 'win32' ?
-      join('bin', `${script}.cmd`) :
-      join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+    const executable = process.platform === 'win32'
+      ? join('bin', `${script}.cmd`)
+      : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
     return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
@@ -140,7 +139,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   }
 
   await mkdir(testDir, {recursive: true})
-  rm('-rf', pluginDir)
+  await rm(pluginDir, {recursive: true, force: true})
 
   await executor.clone(options.repo, options.branch)
 

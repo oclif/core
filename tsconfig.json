@@ -3,7 +3,7 @@
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "module": "commonjs",
+    "module": "Node16",
     "outDir": "./lib",
     "pretty": true,
     "rootDirs": [

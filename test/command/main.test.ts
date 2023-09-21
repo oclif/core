@@ -4,7 +4,7 @@ import {resolve} from 'node:path'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi = require('strip-ansi')
 import {requireJson} from '../../src/util'
-import run from '../../src/main'
+import {run} from '../../src/main'
 import {Interfaces, stdout} from '../../src/index'
 
 const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', '..', 'package.json')
@@ -23,10 +23,9 @@ describe('main', () => {
     sandbox.restore()
   })
 
-  // need to skip until the stdout change is merged and used in plugin-plugins
-  it.skip('should run plugins', async () => {
-    await run(['plugins'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.firstCall.firstArg).to.equal('No plugins installed.\n')
+  it('should run plugins', async () => {
+    const result = await run(['plugins'], resolve(__dirname, '../../package.json'))
+    expect(result).to.deep.equal([])
   })
 
   it('should run version', async () => {
