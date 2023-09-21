@@ -18,7 +18,9 @@ export const Exit = {
   },
 }
 
-export async function handle(err: Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}): Promise<void> {
+type ErrorToHandle = Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}
+
+export async function handle(err: ErrorToHandle): Promise<void> {
   try {
     if (!err) err = new CLIError('no error?')
     if (err.message === 'SIGINT') Exit.exit(1)
@@ -31,7 +33,7 @@ export async function handle(err: Error & Partial<PrettyPrintableError> & Partia
       console.error(pretty ?? stack)
     }
 
-    const exitCode = err.oclif?.exit !== undefined && err.oclif?.exit !== false ? err.oclif?.exit : 1
+    const exitCode = err.oclif?.exit ?? 1
 
     if (config.errorLogger && err.code !== 'EEXIT') {
       if (stack) {
