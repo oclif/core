@@ -20,28 +20,30 @@ const test = base
 describe('formatCommand', () => {
   test
   .commandHelp(class extends Command {
-    static id = 'apps:create'
+    static {
+      this.id = 'apps:create'
 
-    static aliases = ['app:init', 'create']
+      this.aliases = ['app:init', 'create']
 
-    static description = `first line
+      this.description = `first line
 
-multiline help`
+  multiline help`
 
-    static enableJsonFlag = true
+      this.enableJsonFlag = true
 
-    static args = {
-      // eslint-disable-next-line camelcase
-      app_name: Args.string({description: 'app to use'}),
-    }
+      this.args = {
+        // eslint-disable-next-line camelcase
+        app_name: Args.string({description: 'app to use'}),
+      }
 
-    static flags = {
-      app: flags.string({char: 'a', hidden: true}),
-      foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
-      force: flags.boolean({description: 'force  it '.repeat(15)}),
-      ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
-      remote: flags.string({char: 'r'}),
-      label: flags.string({char: 'l', helpLabel: '-l'}),
+      this.flags = {
+        app: flags.string({char: 'a', hidden: true}),
+        foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
+        force: flags.boolean({description: 'force  it '.repeat(15)}),
+        ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+        remote: flags.string({char: 'r'}),
+        label: flags.string({char: 'l', helpLabel: '-l'}),
+      }
     }
   })
   .it('handles multi-line help output', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
@@ -79,25 +81,27 @@ ALIASES
   describe('arg and flag multiline handling', () => {
     test
     .commandHelp(class extends Command {
-      static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-      static description = 'description of apps:create'
+        this.description = 'description of apps:create'
 
-      static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-      static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-      static args = {
-        // eslint-disable-next-line camelcase
-        app_name: Args.string({description: 'app to use'.repeat(35)}),
-      }
+        this.args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'.repeat(35)}),
+        }
 
-      static flags = {
-        app: flags.string({char: 'a', hidden: true}),
-        foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
-        force: flags.boolean({description: 'force  it '.repeat(15)}),
-        ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
-        remote: flags.string({char: 'r'}),
+        this.flags = {
+          app: flags.string({char: 'a', hidden: true}),
+          foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
+          force: flags.boolean({description: 'force  it '.repeat(15)}),
+          ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+          remote: flags.string({char: 'r'}),
+        }
       }
     })
     .it('show args and flags side by side when their output do not exceed 4 lines ', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
@@ -136,25 +140,27 @@ ALIASES
 
     test
     .commandHelp(class extends Command {
-      static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-      static description = 'description of apps:create'
+        this.description = 'description of apps:create'
 
-      static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-      static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-      static args = {
-        // eslint-disable-next-line camelcase
-        app_name: Args.string({description: 'app to use'.repeat(35)}),
-      }
+        this.args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'.repeat(35)}),
+        }
 
-      static flags = {
-        app: flags.string({char: 'a', hidden: true}),
-        foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
-        force: flags.boolean({description: 'force  it '.repeat(29)}),
-        ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
-        remote: flags.string({char: 'r'}),
+        this.flags = {
+          app: flags.string({char: 'a', hidden: true}),
+          foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
+          force: flags.boolean({description: 'force  it '.repeat(29)}),
+          ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
+          remote: flags.string({char: 'r'}),
+        }
       }
     })
     .it('shows stacked args and flags when the lines exceed 4', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
@@ -230,21 +236,23 @@ DESCRIPTION
   describe('description', () => {
     test
     .commandHelp(class extends Command {
-      static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-      static description = 'description of apps:create\n\nthese values are after and will show up in the command description'
+        this.description = 'description of apps:create\n\nthese values are after and will show up in the command description'
 
-      static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-      static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-      static args = {
-        // eslint-disable-next-line camelcase
-        app_name: Args.string({description: 'app to use'}),
-      }
+        this.args = {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'}),
+        }
 
-      static flags = {
-        force: flags.boolean({description: 'forces'}),
+        this.flags = {
+          force: flags.boolean({description: 'forces'}),
+        }
       }
     })
     .it('outputs command description with values after a \\n newline character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
@@ -303,13 +311,15 @@ DESCRIPTION
   describe(('flags'), () => {
     test
     .commandHelp(class extends Command {
-      static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-      static flags = {
-        myenum: flags.string({
-          description: 'the description',
-          options: myEnumValues,
-        }),
+        this.flags = {
+          myenum: flags.string({
+            description: 'the description',
+            options: myEnumValues,
+          }),
+        }
       }
     })
     .it('outputs flag enum', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE

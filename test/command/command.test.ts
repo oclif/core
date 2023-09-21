@@ -570,8 +570,11 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-        static enableJsonFlag = true
-        static '--' = true
+        // static initialization block is required whenever using ES2022
+        static {
+          this.enableJsonFlag = true
+          this['--'] = true
+        }
 
         async run() {
           const {flags} = await cmd.parse(CMD, ['--', '--json'])
