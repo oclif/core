@@ -32,7 +32,7 @@ ${this.indent(this.wrap('force  it '.repeat(29)))}`,
 class TestHelp extends Help {
   CommandHelpClass = TestCommandHelp
 
-  public config: any
+  public declare config: any
 
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)

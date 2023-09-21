@@ -13,7 +13,7 @@ g.oclif.columns = 80
 
 // extension makes previously protected methods public
 class TestHelp extends Help {
-  public config: any
+  public declare config: any
 
   public async showRootHelp() {
     return super.showRootHelp()
