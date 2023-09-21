@@ -166,7 +166,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
   executor.debug('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
 
-  const bin = (pjson.oclif.bin ?? pjson.name.replace(/-/g, '_')).toUpperCase()
+  const bin = (pjson.oclif.bin ?? pjson.name.replaceAll('-', '_')).toUpperCase()
   const dataDir = join(testDir, 'data', pjson.oclif.bin ?? pjson.name)
   const cacheDir = join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
   const configDir = join(testDir, 'config', pjson.oclif.bin ?? pjson.name)

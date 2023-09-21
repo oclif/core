@@ -63,7 +63,7 @@ describe('Config', () => {
           // In order to allow prerelease branches to pass, we need to strip the prerelease
           // tag from the version and switch the channel to stable.
           // @ts-expect-error because readonly property
-          config.version = config.version.replace(/-beta\.\d/g, '')
+          config.version = config.version.replaceAll(/-beta\.\d/g, '')
           // @ts-expect-error because readonly property
           config.channel = 'stable'
 

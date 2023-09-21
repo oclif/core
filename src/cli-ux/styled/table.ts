@@ -22,7 +22,7 @@ class Table<T extends Record<string, unknown>> {
       const extended = col.extended ?? false
       // turn null and undefined into empty strings by default
       const get = col.get ?? ((row: any) => row[key] ?? '')
-      const header = typeof col.header === 'string' ? col.header : capitalize(key.replace(/_/g, ' '))
+      const header = typeof col.header === 'string' ? col.header : capitalize(key.replaceAll('_', ' '))
       const minWidth = Math.max(col.minWidth ?? 0, sw(header) + 1)
 
       return {

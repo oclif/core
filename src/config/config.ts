@@ -414,7 +414,7 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
-    .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
+    .map(p => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
   }
@@ -426,7 +426,7 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKeys(k: string): string[] {
     return [this.bin, ...this.binAliases ?? []].filter(Boolean).map(alias =>
-      [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
+      [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
   public findCommand(id: string, opts: { must: true }): Command.Loadable
@@ -465,7 +465,7 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
-    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
+    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replaceAll('-', ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
     const matches = possibleMatches.filter(command => {

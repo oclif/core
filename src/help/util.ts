@@ -78,12 +78,12 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 }
 
 export function toStandardizedId(commandID: string, config: IConfig): string {
-  return commandID.replace(new RegExp(config.topicSeparator, 'g'), ':')
+  return commandID.replaceAll(new RegExp(config.topicSeparator, 'g'), ':')
 }
 
 export function toConfiguredId(commandID: string, config: IConfig): string {
   const defaultTopicSeparator = ':'
-  return commandID.replace(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
+  return commandID.replaceAll(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {

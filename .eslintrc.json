@@ -9,7 +9,6 @@
     "unicorn/import-style": "error",
     "unicorn/no-array-reduce": "off",
     "unicorn/prefer-array-some": "off",
-    "no-useless-constructor": "off",
-    "unicorn/prefer-string-replace-all": "off"
+    "no-useless-constructor": "off"
   }
 }

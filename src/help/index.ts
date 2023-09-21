@@ -243,8 +243,8 @@ export class Help extends HelpBase {
 
   protected formatCommand(command: Command.Class | Command.Loadable | Command.Cached): string {
     if (this.config.topicSeparator !== ':') {
-      command.id = command.id.replace(/:/g, this.config.topicSeparator)
-      command.aliases = command.aliases && command.aliases.map(a => a.replace(/:/g, this.config.topicSeparator))
+      command.id = command.id.replaceAll(':', this.config.topicSeparator)
+      command.aliases = command.aliases && command.aliases.map(a => a.replaceAll(':', this.config.topicSeparator))
     }
 
     const help = this.getCommandHelpClass(command)
@@ -259,7 +259,7 @@ export class Help extends HelpBase {
     if (commands.length === 0) return ''
 
     const body = this.renderList(commands.map(c => {
-      if (this.config.topicSeparator !== ':') c.id = c.id.replace(/:/g, this.config.topicSeparator)
+      if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
       return [
         c.id,
         this.summary(c),
@@ -293,7 +293,7 @@ export class Help extends HelpBase {
     const summary = description.split('\n')[0]
     description = description.split('\n').slice(1).join('\n')
     let topicID = `${topic.name}:COMMAND`
-    if (this.config.topicSeparator !== ':') topicID = topicID.replace(/:/g, this.config.topicSeparator)
+    if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
     let output = compact([
       summary,
       this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
@@ -306,7 +306,7 @@ export class Help extends HelpBase {
   protected formatTopics(topics: Interfaces.Topic[]): string {
     if (topics.length === 0) return ''
     const body = this.renderList(topics.map(c => {
-      if (this.config.topicSeparator !== ':') c.name = c.name.replace(/:/g, this.config.topicSeparator)
+      if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
       return [
         c.name,
         c.description && this.render(c.description.split('\n')[0]),
