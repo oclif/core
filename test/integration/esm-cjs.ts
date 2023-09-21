@@ -186,7 +186,7 @@ type PluginConfig = {
       commandText: 'hello I am a pre-core plugin',
       hookText: 'Greetings! from plugin-test-pre-core init hook',
       expectJson: {
-        whenProvided: commonProps.expectJson.whenNotProvided,
+        whenProvided: commonProps.expectJson.whenProvided,
         whenNotProvided: {
           args: {
             defaultArg: 'simple string default',
