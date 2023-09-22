@@ -1,5 +1,6 @@
 import * as supportsColor from 'supports-color'
 import {ActionBase, ActionType} from './base'
+import {Options} from './types'
 import ansiStyles from 'ansi-styles'
 import chalk from 'chalk'
 import {errtermwidth} from '../../screen'
@@ -17,17 +18,19 @@ export default class SpinnerAction extends ActionBase {
 
   spinner?: NodeJS.Timeout
 
-  frames: any
+  frames: string[]
 
   frameIndex: number
 
   constructor() {
     super()
-    this.frames = spinners[process.platform === 'win32' ? 'line' : 'dots2'].frames
+    this.frames = this.getFrames()
     this.frameIndex = 0
   }
 
-  protected _start(): void {
+  protected _start(opts: Options): void {
+    if (opts.style) this.frames = this.getFrames(opts)
+
     this._reset()
     if (this.spinner) clearInterval(this.spinner)
     this._render()
@@ -60,15 +63,21 @@ export default class SpinnerAction extends ActionBase {
     return color(frame)
   }
 
+  private getFrames(opts?: Options) {
+    if (opts?.style) return spinners[process.platform === 'win32' ? 'line' : opts.style].frames
+
+    return spinners[process.platform === 'win32' ? 'line' : 'dots2'].frames
+  }
+
   private _render(icon?: string) {
-    const {task, std, output} = this
-    if (!task) return
+    if (!this.task) return
     this._reset()
     this._flushStdout()
     const frame = icon === 'spinner' ? ` ${this._frame()}` : icon || ''
-    const status = task.status ? ` ${task.status}` : ''
-    this.output = `${task.action}...${frame}${status}\n`
-    this._write(std, output!)
+    const status = this.task.status ? ` ${this.task.status}` : ''
+    this.output = `${this.task.action}...${frame}${status}\n`
+
+    this._write(this.std, this.output)
   }
 
   private _reset() {

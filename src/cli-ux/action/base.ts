@@ -1,4 +1,5 @@
 import {stderr, stdout} from '../stream'
+import {Options} from './types'
 import {castArray} from '../../util'
 import {inspect} from 'node:util'
 
@@ -9,10 +10,6 @@ export interface ITask {
 }
 
 export type ActionType = 'spinner' | 'simple' | 'debug'
-
-export interface Options {
-  stdout?: boolean;
-}
 
 export class ActionBase {
   type!: ActionType
@@ -31,7 +28,7 @@ export class ActionBase {
     const task = {action, status, active: Boolean(this.task && this.task.active)}
     this.task = task
 
-    this._start()
+    this._start(opts)
     task.active = true
     this._stdout(true)
   }
@@ -127,7 +124,7 @@ export class ActionBase {
     return ret
   }
 
-  protected _start(): void {
+  protected _start(_opts: Options): void {
     throw new Error('not implemented')
   }
 
