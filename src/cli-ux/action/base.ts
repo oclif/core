@@ -1,6 +1,6 @@
-import {inspect} from 'util'
-import {castArray} from '../../util'
 import {stderr, stdout} from '../stream'
+import {castArray} from '../../util'
+import {inspect} from 'node:util'
 
 export interface ITask {
   action: string;
@@ -37,7 +37,7 @@ export class ActionBase {
   }
 
   public stop(msg = 'done'): void {
-    const task = this.task
+    const {task} = this
     if (!task) {
       return
     }
@@ -80,7 +80,7 @@ export class ActionBase {
   }
 
   set status(status: string | undefined) {
-    const task = this.task
+    const {task} = this
     if (!task) {
       return
     }
@@ -93,8 +93,8 @@ export class ActionBase {
     task.status = status
   }
 
-  public async pauseAsync<T extends any>(fn: () => Promise<T>, icon?: string): Promise<T> {
-    const task = this.task
+  public async pauseAsync<T>(fn: () => Promise<T>, icon?: string): Promise<T> {
+    const {task} = this
     const active = task && task.active
     if (task && active) {
       this._pause(icon)
@@ -111,7 +111,7 @@ export class ActionBase {
   }
 
   public pause(fn: () => any, icon?: string): Promise<any> {
-    const task = this.task
+    const {task} = this
     const active = task && task.active
     if (task && active) {
       this._pause(icon)
@@ -143,7 +143,9 @@ export class ActionBase {
     throw new Error('not implemented')
   }
 
-  protected _updateStatus(_: string | undefined, __?: string): void {}
+  protected _updateStatus(_: string | undefined, __?: string): void {
+    // Not implemented
+  }
 
   // mock out stdout/stderr so it doesn't screw up the rendering
   protected _stdout(toggle: boolean): void {
@@ -191,7 +193,7 @@ export class ActionBase {
       // add newline if there isn't one already
       // otherwise we'll just overwrite it when we render
 
-      if (output && std && output[output.length - 1] !== '\n') {
+      if (output && std && output.at(-1) !== '\n') {
         this._write(std, '\n')
       }
     } catch (error) {
@@ -202,14 +204,19 @@ export class ActionBase {
   // write to the real stdout/stderr
   protected _write(std: 'stdout' | 'stderr', s: string | string[]): void {
     switch (std) {
-    case 'stdout':
+    case 'stdout': {
       this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
       break
-    case 'stderr':
+    }
+
+    case 'stderr': {
       this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
       break
-    default:
+    }
+
+    default: {
       throw new Error(`invalid std: ${std}`)
+    }
     }
   }
 }

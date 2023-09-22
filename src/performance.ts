@@ -1,4 +1,4 @@
-import {PerformanceObserver, performance} from 'perf_hooks'
+import {PerformanceObserver, performance} from 'node:perf_hooks'
 import {settings} from './settings'
 
 type Details = Record<string, string | boolean | number | string[]>
@@ -16,7 +16,8 @@ type PerfHighlights = {
   runTime: number;
   initTime: number;
   commandLoadTime: number;
-  pluginLoadTimes: Record<string, number>;
+  commandRunTime: number;
+  pluginLoadTimes: Record<string, {duration: number, details: Details}>;
   corePluginsLoadTime: number;
   userPluginsLoadTime: number;
   linkedPluginsLoadTime: number;
@@ -24,10 +25,10 @@ type PerfHighlights = {
 }
 
 class Marker {
-  public module: string;
-  public method: string;
-  public scope: string;
-  public stopped = false;
+  public module: string
+  public method: string
+  public scope: string
+  public stopped = false
 
   private startMarker: string
   private stopMarker: string
@@ -58,7 +59,7 @@ class Marker {
   }
 }
 
-export default class Performance {
+export class Performance {
   private static markers: Record<string, Marker> = {}
   private static _results: PerfResult[] = []
   private static _highlights: PerfHighlights
@@ -140,7 +141,7 @@ export default class Performance {
         const pluginLoadTimes = Object.fromEntries(Performance.results
         .filter(({name}) => name.startsWith('plugin.load#'))
         .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration}) => [scope, duration]))
+        .map(({scope, duration, details}) => [scope, {duration, details}]))
 
         const hookRunTimes = Performance.results
         .filter(({name}) => name.startsWith('config.runHook#'))
@@ -163,10 +164,13 @@ export default class Performance {
         .sort((a, b) => b.duration - a.duration)
         .map(({scope, duration}) => [scope, duration]))
 
+        const commandRunTime = Performance.results.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0
+
         Performance._highlights = {
           configLoadTime: Performance.getResult('config.load')?.duration ?? 0,
           runTime: Performance.getResult('main.run')?.duration ?? 0,
           initTime: Performance.getResult('main.run#init')?.duration ?? 0,
+          commandRunTime,
           commandLoadTime,
           pluginLoadTimes,
           hookRunTimes,
@@ -199,17 +203,21 @@ export default class Performance {
     if (!Performance.enabled) return
 
     const debug = require('debug')('perf')
-
+    debug('Total Time: %sms', Performance.highlights.runTime.toFixed(4))
     debug('Init Time: %sms', Performance.highlights.initTime.toFixed(4))
     debug('Config Load Time: %sms', Performance.highlights.configLoadTime.toFixed(4))
-    debug('Command Load Time: %sms', Performance.highlights.commandLoadTime.toFixed(4))
-    debug('Execution Time: %sms', Performance.highlights.runTime.toFixed(4))
+    debug('  • Plugins Load Time: %sms', Performance.getResult('config.loadAllPlugins')?.duration.toFixed(4) ?? 0)
+    debug('  • Commands Load Time: %sms', Performance.getResult('config.loadAllCommands')?.duration.toFixed(4) ?? 0)
     debug('Core Plugin Load Time: %sms', Performance.highlights.corePluginsLoadTime.toFixed(4))
     debug('User Plugin Load Time: %sms', Performance.highlights.userPluginsLoadTime.toFixed(4))
     debug('Linked Plugin Load Time: %sms', Performance.highlights.linkedPluginsLoadTime.toFixed(4))
     debug('Plugin Load Times:')
-    for (const [plugin, duration] of Object.entries(Performance.highlights.pluginLoadTimes)) {
-      debug(`  ${plugin}: ${duration.toFixed(4)}ms`)
+    for (const [plugin, result] of Object.entries(Performance.highlights.pluginLoadTimes)) {
+      if (result.details.hasManifest) {
+        debug(`  ${plugin}: ${result.duration.toFixed(4)}ms`)
+      } else {
+        debug(`  ${plugin}: ${result.duration.toFixed(4)}ms (no manifest!)`)
+      }
     }
 
     debug('Hook Run Times:')
@@ -219,5 +227,8 @@ export default class Performance {
         debug(`    ${plugin}: ${duration.toFixed(4)}ms`)
       }
     }
+
+    debug('Command Load Time: %sms', Performance.highlights.commandLoadTime.toFixed(4))
+    debug('Command Run Time: %sms', Performance.highlights.commandRunTime.toFixed(4))
   }
 }

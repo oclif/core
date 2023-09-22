@@ -4,7 +4,7 @@ import {
   ArgParserContext,
   ArgToken,
   BooleanFlag,
-  CompletableFlag,
+  Flag,
   FlagParserContext,
   FlagToken,
   Metadata,
@@ -17,15 +17,18 @@ import {
   ParserOutput,
   ParsingToken,
 } from '../interfaces/parser'
-import * as readline from 'readline'
 import {isTruthy, last, pickBy} from '../util'
+import {createInterface} from 'node:readline'
 
 let debug: any
 try {
-  // eslint-disable-next-line no-negated-condition
-  debug = process.env.CLI_FLAGS_DEBUG !== '1' ? () => {} : require('debug')('../parser')
+  debug = process.env.CLI_FLAGS_DEBUG === '1' ? require('debug')('../parser') : () => {
+    // noop
+  }
 } catch {
-  debug = () => {}
+  debug = () => {
+    // noop
+  }
 }
 
 const readStdin = async (): Promise<string | null> => {
@@ -42,10 +45,10 @@ const readStdin = async (): Promise<string | null> => {
   return new Promise(resolve => {
     let result = ''
     const ac = new AbortController()
-    const signal = ac.signal
+    const {signal} = ac
     const timeout = setTimeout(() => ac.abort(), 100)
 
-    const rl = readline.createInterface({
+    const rl = createInterface({
       input: stdin,
       output: stdout,
       terminal: false,
@@ -74,6 +77,12 @@ function isNegativeNumber(input: string): boolean {
   return /^-\d/g.test(input)
 }
 
+const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
+  if (flag.options && !flag.options.includes(input))
+    throw new FlagInvalidOptionError(flag, input)
+  return input
+}
+
 export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
   private readonly argv: string[]
 
@@ -91,47 +100,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     this.argv = [...input.argv]
     this._setNames()
     this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
-    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => {
-      return (flag.aliases ?? []).map(a => [a, flag])
-    }))
+    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => ([...flag.aliases ?? [], ...flag.charAliases ?? []]).map(a => [a, flag])))
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
-    const findLongFlag = (arg: string):string | undefined => {
-      const name = arg.slice(2)
-      if (this.input.flags[name]) {
-        return name
-      }
-
-      if (this.flagAliases[name]) {
-        return this.flagAliases[name].name
-      }
-
-      if (arg.startsWith('--no-')) {
-        const flag = this.booleanFlags[arg.slice(5)]
-        if (flag && flag.allowNo) return flag.name
-      }
-    }
-
-    const findShortFlag = ([_, char]: string):string | undefined => {
-      if (this.flagAliases[char]) {
-        return this.flagAliases[char].name
-      }
-
-      return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
-    }
-
-    const findFlag = (arg: string): { name?: string, isLong: boolean } => {
-      const isLong = arg.startsWith('--')
-      const short = isLong ? false : arg.startsWith('-')
-      const name = isLong ? findLongFlag(arg) : (short ? findShortFlag(arg) : undefined)
-      return {name, isLong}
-    }
-
     const parseFlag = (arg: string): boolean => {
-      const {name, isLong} = findFlag(arg)
+      const {name, isLong} = this.findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
         if (i !== -1) {
@@ -150,15 +126,20 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       }
 
       const flag = this.input.flags[name]
+
       if (flag.type === 'option') {
+        if (!flag.multiple && this.raw.some(o => o.type === 'flag' && o.flag === name)) {
+          throw new CLIError(`Flag --${name} can only be specified once`)
+        }
+
         this.currentFlag = flag
         const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
-        if ((typeof input !== 'string') || findFlag(input).name) {
+        if ((typeof input !== 'string') || this.findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
-        this.raw.push({type: 'flag', flag: flag.name, input: input})
+        this.raw.push({type: 'flag', flag: flag.name, input})
       } else {
         this.raw.push({type: 'flag', flag: flag.name, input: arg})
         // push the rest of the short characters back on the stack
@@ -233,12 +214,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   }> {
     type ValueFunction = (fws: FlagWithStrategy, flags?: Record<string, string>) => Promise<any>
 
-    const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
-      if (flag.options && !flag.options.includes(input))
-        throw new FlagInvalidOptionError(flag, input)
-      return input
-    }
-
     const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, context: ParserContext | undefined, token?: FlagToken) => {
       if (!flag.parse) return input
 
@@ -292,6 +267,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
               // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
               .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
               .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),
+            // eslint-disable-next-line unicorn/no-await-expression-member
             )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
@@ -343,18 +319,19 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'boolean') {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => Promise.resolve(isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false')),
+            valueFunction: async (i: FlagWithStrategy) => isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'),
           }
         }
       }
 
       // no input, but flag has default value
+      // eslint-disable-next-line no-constant-binary-expression, valid-typeof
       if (typeof fws.inputFlag.flag.default !== undefined) {
         return {
           ...fws, metadata: {setFromDefault: true},
-          valueFunction: typeof fws.inputFlag.flag.default === 'function' ?
-            (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags}) :
-            async () => fws.inputFlag.flag.default,
+          valueFunction: typeof fws.inputFlag.flag.default === 'function'
+            ? (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags})
+            : async () => fws.inputFlag.flag.default,
         }
       }
 
@@ -365,11 +342,11 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const addHelpFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
       if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.defaultHelp) {
         return {
-          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function' ?
+          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function'
             // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context) :
+            ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
             // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
+            : (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
         }
       }
 
@@ -400,12 +377,12 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
       fwsArray.filter(fws => fws.value !== undefined)
       .map(fws => [fws.inputFlag.name, fws.value]),
-    )
+    ) as TFlags & BFlags & { json: boolean | undefined }
 
     type FlagWithStrategy = {
       inputFlag: {
         name: string,
-        flag: CompletableFlag<any>
+        flag: Flag<any>
       }
       tokens?: FlagToken[],
       valueFunction?: ValueFunction;
@@ -434,7 +411,6 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
 
     return {
-      // @ts-ignore original version returned an any.  Not sure how to get to the return type for `flags` prop
       flags: fwsArrayToObject(finalFlags),
       metadata: {flags: Object.fromEntries(finalFlags.filter(fws => fws.metadata).map(fws => [fws.inputFlag.name, fws.metadata as MetadataFlag]))},
     }
@@ -488,7 +464,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       argv.push(token.input)
     }
 
-    return {argv, args: args}
+    return {argv, args}
   }
 
   private _debugOutput(args: any, flags: any, argv: any) {
@@ -548,5 +524,36 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     return flagTokenMap
+  }
+
+  private findLongFlag(arg: string): string | undefined {
+    const name = arg.slice(2)
+    if (this.input.flags[name]) {
+      return name
+    }
+
+    if (this.flagAliases[name]) {
+      return this.flagAliases[name].name
+    }
+
+    if (arg.startsWith('--no-')) {
+      const flag = this.booleanFlags[arg.slice(5)]
+      if (flag && flag.allowNo) return flag.name
+    }
+  }
+
+  private findShortFlag([_, char]: string):string | undefined {
+    if (this.flagAliases[char]) {
+      return this.flagAliases[char].name
+    }
+
+    return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
+  }
+
+  private findFlag(arg: string): { name?: string, isLong: boolean } {
+    const isLong = arg.startsWith('--')
+    const short = isLong ? false : arg.startsWith('-')
+    const name = isLong ? this.findLongFlag(arg) : (short ? this.findShortFlag(arg) : undefined)
+    return {name, isLong}
   }
 }

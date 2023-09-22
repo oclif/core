@@ -1,13 +1,13 @@
+import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {
-  InvalidArgsSpecError,
-  RequiredArgsError,
-  Validation,
-  UnexpectedArgsError,
   FailedFlagValidationError,
+  InvalidArgsSpecError,
   NonExistentFlagsError,
+  RequiredArgsError,
+  UnexpectedArgsError,
+  Validation,
 } from './errors'
-import {Arg, CompletableFlag, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
-import {uniq} from '../config/util'
+import {uniq} from '../util'
 
 export async function validate(parse: {
   input: ParserInput;
@@ -172,17 +172,24 @@ export async function validate(parse: {
     return {...base, status: 'success'}
   }
 
-  function validateRelationships(name: string, flag: CompletableFlag<any>): Promise<Validation>[] {
+  function validateRelationships(name: string, flag: Flag<any>): Promise<Validation>[] {
     return ((flag.relationships ?? []).map(relationship => {
       switch (relationship.type) {
-      case 'all':
+      case 'all': {
         return validateDependsOn(name, relationship.flags)
-      case 'some':
+      }
+
+      case 'some': {
         return validateSome(name, relationship.flags)
-      case 'none':
+      }
+
+      case 'none': {
         return validateExclusive(name, relationship.flags)
-      default:
+      }
+
+      default: {
         throw new Error(`Unknown relationship type: ${relationship.type}`)
+      }
       }
     }))
   }

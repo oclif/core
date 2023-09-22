@@ -1,33 +1,34 @@
-import {fileURLToPath} from 'url'
-import * as chalk from 'chalk'
-import {format, inspect} from 'util'
-import {ux} from './cli-ux'
-import {Config} from './config'
+
 import * as Errors from './errors'
-import {PrettyPrintableError} from './errors'
 import * as Parser from './parser'
 import {
-  BooleanFlagProps,
-  CompletableFlag,
-  Deprecation,
-  Arg as IArg,
   ArgInput,
+  ArgOutput,
+  ArgProps,
+  BooleanFlagProps,
+  Deprecation,
   FlagInput,
   FlagOutput,
+  Arg as IArg,
+  Flag as IFlag,
   Input,
-  ArgProps,
   OptionFlagProps,
   ParserOutput,
-  ArgOutput,
 } from './interfaces/parser'
-import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, toConfiguredId, normalizeArgv} from './help/util'
-import {Plugin} from './interfaces/plugin'
-import {LoadOptions} from './interfaces/config'
+import {format, inspect} from 'node:util'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
+import {requireJson, uniq} from './util'
+import {stderr, stdout} from './cli-ux/stream'
 import {CommandError} from './interfaces/errors'
-import {boolean} from './flags'
-import {requireJson} from './util'
+import {Config} from './config'
+import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
-import {stdout, stderr} from './cli-ux/stream'
+import {Plugin} from './interfaces/plugin'
+import {PrettyPrintableError} from './errors'
+import {boolean} from './flags'
+import chalk from 'chalk'
+import {fileURLToPath} from 'node:url'
+import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
@@ -63,7 +64,7 @@ export abstract class Command {
    * The tweet-sized description for your class, used in a parent-commands
    * sub-command listing and as the header for the command help.
    */
-  public static summary?: string;
+  public static summary?: string
 
   /**
    * A full description of how to use the command.
@@ -76,9 +77,9 @@ export abstract class Command {
   public static hidden: boolean
 
   /** Mark the command as a given state (e.g. beta or deprecated) in help */
-  public static state?: 'beta' | 'deprecated' | string;
+  public static state?: 'beta' | 'deprecated' | string
 
-  public static deprecationOptions?: Deprecation;
+  public static deprecationOptions?: Deprecation
 
   /**
    * Emit deprecation warning when a command alias is used
@@ -103,9 +104,9 @@ export abstract class Command {
 
   public static plugin: Plugin | undefined
 
-  public static readonly pluginName?: string;
-  public static readonly pluginType?: string;
-  public static readonly pluginAlias?: string;
+  public static readonly pluginName?: string
+  public static readonly pluginType?: string
+  public static readonly pluginAlias?: string
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -190,6 +191,7 @@ export abstract class Command {
   }
 
   static set baseFlags(flags: FlagInput) {
+    // eslint-disable-next-line prefer-object-spread
     this._baseFlags = Object.assign({}, this.baseFlags, flags)
     this.flags = {} // force the flags setter to run
   }
@@ -202,6 +204,7 @@ export abstract class Command {
   }
 
   public static set flags(flags: FlagInput) {
+    // eslint-disable-next-line prefer-object-spread
     this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
   }
 
@@ -214,7 +217,9 @@ export abstract class Command {
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
     } catch {
-      this.debug = () => {}
+      this.debug = () => {
+        // noop
+      }
     }
   }
 
@@ -315,8 +320,10 @@ export abstract class Command {
       }
 
       const deprecateAliases = flagDef?.deprecateAliases
-      const aliases = (flagDef?.aliases ?? []).map(a => a.length === 1 ? `-${a}` : `--${a}`)
-      if (deprecateAliases && aliases.length > 0) {
+      if (deprecateAliases) {
+        const aliases = uniq([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+        if (aliases.length === 0) return
+
         const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
         for (const alias of foundAliases) {
           let preferredUsage = `--${flagDef?.name}`
@@ -373,7 +380,7 @@ export abstract class Command {
 
   protected async finally(_: Error | undefined): Promise<any> {
     try {
-      const config = Errors.config
+      const {config} = Errors
       if (config.errorLogger) await config.errorLogger.flush()
     } catch (error: any) {
       console.error(error)
@@ -435,9 +442,11 @@ export namespace Command {
     hasDynamicHelp?: boolean;
     permutations?: string[]
     aliasPermutations?: string[];
+    isESM?: boolean;
+    relativePath?: string[];
   }
 
-  export type Flag = CompletableFlag<any>
+  export type Flag = IFlag<any>
 
   export namespace Flag {
     export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)

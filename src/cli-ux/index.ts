@@ -1,16 +1,14 @@
+
 import * as Errors from '../errors'
-import * as util from 'util'
-import * as chalk from 'chalk'
-import {ActionBase} from './action/base'
-import {config, Config} from './config'
-import {ExitError} from './exit'
-import {IPromptOptions} from './prompt'
 import * as styled from './styled'
-import {Table} from './styled'
 import * as uxPrompt from './prompt'
-import uxWait from './wait'
-import {stdout} from './stream'
+import {Config, config} from './config'
+import {ActionBase} from './action/base'
 import {flush as _flush} from './flush'
+import chalk from 'chalk'
+import {stdout} from './stream'
+import {format as utilFormat} from 'node:util'
+import uxWait from './wait'
 
 const hyperlinker = require('hyperlinker')
 
@@ -36,7 +34,6 @@ export class ux {
     return config.action
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public static styledObject(obj: any, keys?: string[]): void {
     this.info(styled.styledObject(obj, keys))
   }
@@ -71,18 +68,18 @@ export class ux {
 
   public static trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
-      stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(utilFormat(format, ...args) + '\n')
     }
   }
 
   public static debug(format: string, ...args: string[]): void {
     if (['trace', 'debug'].includes(this.config.outputLevel)) {
-      stdout.write(util.format(format, ...args) + '\n')
+      stdout.write(utilFormat(format, ...args) + '\n')
     }
   }
 
   public static info(format: string, ...args: string[]): void {
-    stdout.write(util.format(format, ...args) + '\n')
+    stdout.write(utilFormat(format, ...args) + '\n')
   }
 
   public static log(format?: string, ...args: string[]): void {
@@ -113,45 +110,15 @@ export class ux {
   }
 }
 
-const action = ux.action
-const annotation = ux.annotation
-const anykey = ux.anykey
-const confirm = ux.confirm
-const debug = ux.debug
-const done = ux.done
-const error = Errors.error
-const exit = Errors.exit
-const flush = ux.flush
-const info = ux.info
-const log = ux.log
-const progress = ux.progress
-const prompt = ux.prompt
-const styledHeader = ux.styledHeader
-const styledJSON = ux.styledJSON
-const styledObject = ux.styledObject
-const table = ux.table
-const trace = ux.trace
-const tree = ux.tree
-const url = ux.url
-const wait = ux.wait
-const warn = Errors.warn
-
-export {
+const {
   action,
-  ActionBase,
   annotation,
   anykey,
-  config,
-  Config,
   confirm,
   debug,
   done,
-  error,
-  exit,
-  ExitError,
   flush,
   info,
-  IPromptOptions,
   log,
   progress,
   prompt,
@@ -159,7 +126,31 @@ export {
   styledJSON,
   styledObject,
   table,
-  Table,
+  trace,
+  tree,
+  url,
+  wait,
+} = ux
+const {error, exit, warn} = Errors
+
+export {
+  action,
+  annotation,
+  anykey,
+  confirm,
+  debug,
+  done,
+  error,
+  exit,
+  flush,
+  info,
+  log,
+  progress,
+  prompt,
+  styledHeader,
+  styledJSON,
+  styledObject,
+  table,
   trace,
   tree,
   url,
@@ -182,3 +173,9 @@ const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExi
 if (!uxListener) {
   process.once('exit', uxProcessExitHandler)
 }
+
+export {ExitError} from './exit'
+export {IPromptOptions} from './prompt'
+export {Table} from './styled'
+export {ActionBase} from './action/base'
+export {config, Config} from './config'

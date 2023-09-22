@@ -1,4 +1,4 @@
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 import {TestHelp, topicHelp} from './help-test-utils'
 
 const g: any = global
@@ -6,9 +6,7 @@ g.oclif.columns = 80
 
 const test = base
 .loadConfig()
-.add('help', ctx => {
-  return new TestHelp(ctx.config as any)
-})
+.add('help', ctx => new TestHelp(ctx.config as any))
 .register('topicHelp', topicHelp)
 
 describe('formatHelp', () => {

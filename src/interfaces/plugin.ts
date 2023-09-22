@@ -77,6 +77,7 @@ export interface Plugin {
   hooks: { [k: string]: string[] };
   readonly commandIDs: string[];
   readonly topics: Topic[];
+  readonly hasManifest: boolean;
 
   findCommand(id: string, opts: { must: true }): Promise<Command.Class>;
   findCommand(id: string, opts?: { must: boolean }): Promise<Command.Class> | undefined;

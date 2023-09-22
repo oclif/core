@@ -1,10 +1,10 @@
-import * as path from 'path'
-
-import {Options, Plugin as IPlugin} from '../interfaces/plugin'
 import * as Plugin from './plugin'
-import {loadJSON, Debug} from './util'
-import {isProd} from '../util'
-import Performance from '../performance'
+import {Plugin as IPlugin, Options} from '../interfaces/plugin'
+import {isProd, readJson} from '../util'
+import {Debug} from './util'
+import {PJSON} from '../interfaces'
+import {Performance} from '../performance'
+import {join} from 'node:path'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -42,8 +42,18 @@ export default class PluginLoader {
       const plugins = [...this.plugins.values()]
       rootPlugin = plugins.find(p => p.root === this.options.root) ?? plugins[0]
     } else {
+      const marker = Performance.mark('plugin.load#root')
       rootPlugin = new Plugin.Plugin({root: this.options.root})
       await rootPlugin.load()
+      marker?.addDetails({
+        hasManifest: rootPlugin.hasManifest ?? false,
+        commandCount: rootPlugin.commands.length,
+        topicCount: rootPlugin.topics.length,
+        type: rootPlugin.type,
+        usesMain: Boolean(rootPlugin.pjson.main),
+        name: rootPlugin.name,
+      })
+      marker?.stop()
     }
 
     this.plugins.set(rootPlugin.name, rootPlugin)
@@ -71,7 +81,7 @@ export default class PluginLoader {
       // do not load oclif.devPlugins in production
       if (isProd()) return
       try {
-        const devPlugins = opts.rootPlugin.pjson.oclif.devPlugins
+        const {devPlugins} = opts.rootPlugin.pjson.oclif
         if (devPlugins) await this.loadPlugins(opts.rootPlugin.root, 'dev', devPlugins)
       } catch (error: any) {
         process.emitWarning(error)
@@ -82,9 +92,9 @@ export default class PluginLoader {
   private async loadUserPlugins(opts: LoadOpts): Promise<void> {
     if (opts.userPlugins !== false) {
       try {
-        const userPJSONPath = path.join(opts.dataDir, 'package.json')
+        const userPJSONPath = join(opts.dataDir, 'package.json')
         debug('reading user plugins pjson %s', userPJSONPath)
-        const pjson = await loadJSON(userPJSONPath)
+        const pjson = await readJson<PJSON>(userPJSONPath)
         if (!pjson.oclif) pjson.oclif = {schema: 1}
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
@@ -110,6 +120,10 @@ export default class PluginLoader {
         if (typeof plugin !== 'string') {
           opts.tag = plugin.tag || opts.tag
           opts.root = plugin.root || opts.root
+        }
+
+        if (parent) {
+          opts.parent = parent
         }
 
         if (this.plugins.has(name)) return

@@ -1,5 +1,5 @@
-import {settings} from '../settings'
 import {Logger} from './logger'
+import {settings} from '../settings'
 
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return

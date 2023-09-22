@@ -1,7 +1,7 @@
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 
 import {Args, Command as Base, Flags as flags} from '../../src'
-import {commandHelp, TestHelp} from './help-test-utils'
+import {TestHelp, commandHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
@@ -20,22 +20,23 @@ const test = base
 describe('formatCommand', () => {
   test
   .commandHelp(class extends Command {
-      static id = 'apps:create'
+    static {
+      this.id = 'apps:create'
 
-      static aliases = ['app:init', 'create']
+      this.aliases = ['app:init', 'create']
 
-      static description = `first line
+      this.description = `first line
 
-multiline help`
+  multiline help`
 
-      static enableJsonFlag = true
+      this.enableJsonFlag = true
 
-      static args = {
+      this.args = {
         // eslint-disable-next-line camelcase
         app_name: Args.string({description: 'app to use'}),
       }
 
-      static flags = {
+      this.flags = {
         app: flags.string({char: 'a', hidden: true}),
         foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
         force: flags.boolean({description: 'force  it '.repeat(15)}),
@@ -43,6 +44,7 @@ multiline help`
         remote: flags.string({char: 'r'}),
         label: flags.string({char: 'l', helpLabel: '-l'}),
       }
+    }
   })
   .it('handles multi-line help output', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
@@ -79,26 +81,28 @@ ALIASES
   describe('arg and flag multiline handling', () => {
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-        static description = 'description of apps:create'
+        this.description = 'description of apps:create'
 
-        static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-        static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-        static args = {
+        this.args = {
           // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use'.repeat(35)}),
         }
 
-        static flags = {
+        this.flags = {
           app: flags.string({char: 'a', hidden: true}),
           foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
           force: flags.boolean({description: 'force  it '.repeat(15)}),
           ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
           remote: flags.string({char: 'r'}),
         }
+      }
     })
     .it('show args and flags side by side when their output do not exceed 4 lines ', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
@@ -136,26 +140,28 @@ ALIASES
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-        static description = 'description of apps:create'
+        this.description = 'description of apps:create'
 
-        static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-        static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-        static args = {
+        this.args = {
           // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use'.repeat(35)}),
         }
 
-        static flags = {
+        this.flags = {
           app: flags.string({char: 'a', hidden: true}),
           foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
           force: flags.boolean({description: 'force  it '.repeat(29)}),
           ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
           remote: flags.string({char: 'r'}),
         }
+      }
     })
     .it('shows stacked args and flags when the lines exceed 4', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [--json] [-f <value>] [--force] [--ss]
@@ -230,22 +236,24 @@ DESCRIPTION
   describe('description', () => {
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-        static description = 'description of apps:create\n\nthese values are after and will show up in the command description'
+        this.description = 'description of apps:create\n\nthese values are after and will show up in the command description'
 
-        static aliases = ['app:init', 'create']
+        this.aliases = ['app:init', 'create']
 
-        static enableJsonFlag = true
+        this.enableJsonFlag = true
 
-        static args = {
+        this.args = {
           // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use'}),
         }
 
-        static flags = {
+        this.flags = {
           force: flags.boolean({description: 'forces'}),
         }
+      }
     })
     .it('outputs command description with values after a \\n newline character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [--json] [--force]
@@ -270,9 +278,9 @@ ALIASES
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static description = 'root part of the description\n\nThe <%= config.bin %> CLI has <%= command.id %>'
+      static description = 'root part of the description\n\nThe <%= config.bin %> CLI has <%= command.id %>'
     })
     .it('renders template string from description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
@@ -284,9 +292,9 @@ DESCRIPTION
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static description = 'root part of the description\r\n\nusing both carriage \n\nreturn and new line'
+      static description = 'root part of the description\r\n\nusing both carriage \n\nreturn and new line'
     })
     .it('splits on carriage return and new lines', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create
@@ -303,14 +311,16 @@ DESCRIPTION
   describe(('flags'), () => {
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static {
+        this.id = 'apps:create'
 
-        static flags = {
+        this.flags = {
           myenum: flags.string({
             description: 'the description',
             options: myEnumValues,
           }),
         }
+      }
     })
     .it('outputs flag enum', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--myenum a|b|c]
@@ -321,14 +331,14 @@ FLAGS
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static flags = {
-          myenum: flags.string({
-            options: myEnumValues,
-            helpValue: myEnumValues.join('|'),
-          }),
-        }
+      static flags = {
+        myenum: flags.string({
+          options: myEnumValues,
+          helpValue: myEnumValues.join('|'),
+        }),
+      }
     })
     .it('outputs flag enum with helpValue', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--myenum a|b|c]
@@ -367,11 +377,11 @@ FLAGS
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static flags = {
-          opt: flags.boolean({allowNo: true}),
-        }
+      static flags = {
+        opt: flags.boolean({allowNo: true}),
+      }
     })
     .it('outputs with with no options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--opt]
@@ -381,14 +391,14 @@ FLAGS
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary',
-            description: 'multiline\ndescription',
-          }),
-        }
+      static flags = {
+        opt: flags.string({
+          summary: 'one line summary',
+          description: 'multiline\ndescription',
+        }),
+      }
     })
     .it('outputs flag summary and description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--opt <value>]
@@ -404,14 +414,14 @@ FLAG DESCRIPTIONS
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary',
-            description: 'single line description',
-          }),
-        }
+      static flags = {
+        opt: flags.string({
+          summary: 'one line summary',
+          description: 'single line description',
+        }),
+      }
     })
     .it('outputs flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--opt <value>]
@@ -426,14 +436,14 @@ FLAG DESCRIPTIONS
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static flags = {
-          opt: flags.string({
-            summary: 'one line summary'.repeat(15),
-            description: 'single line description',
-          }),
-        }
+      static flags = {
+        opt: flags.string({
+          summary: 'one line summary'.repeat(15),
+          description: 'single line description',
+        }),
+      }
     })
     .it('outputs long flag summary and single line description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [--opt <value>]
@@ -458,11 +468,11 @@ FLAG DESCRIPTIONS
   describe('args', () =>  {
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static args = {
-          arg1: Args.string({description: 'Show the options', options: ['option1', 'option2']}),
-        }
+      static args = {
+        arg1: Args.string({description: 'Show the options', options: ['option1', 'option2']}),
+      }
     })
     .it('outputs with arg options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif apps:create [ARG1]
@@ -474,18 +484,18 @@ ARGUMENTS
   describe('usage', () => {
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static usage = '<%= config.bin %> <%= command.id %> usage'
+      static usage = '<%= config.bin %> <%= command.id %> usage'
     })
     .it('outputs usage with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif apps:create usage`))
 
     test
     .commandHelp(class extends Command {
-        static id = 'apps:create'
+      static id = 'apps:create'
 
-        static usage = ['<%= config.bin %>', '<%= command.id %> usage']
+      static usage = ['<%= config.bin %>', '<%= command.id %> usage']
     })
     .it('outputs usage arrays with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif
@@ -504,7 +514,7 @@ ARGUMENTS
   describe('examples', () => {
     test
     .commandHelp(class extends Command {
-        static examples = ['it handles a list of examples', 'more example text']
+      static examples = ['it handles a list of examples', 'more example text']
     })
     .it('outputs multiple examples', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -516,7 +526,7 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static examples = ['it handles a single example']
+      static examples = ['it handles a single example']
     })
     .it('outputs a single example', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif
@@ -526,9 +536,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
+      static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
     })
     .it('outputs examples using templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -540,9 +550,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = ['<%= config.bin %> <%= command.id %> --help']
+      static examples = ['<%= config.bin %> <%= command.id %> --help']
     })
     .it('formats if command', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -552,9 +562,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help']
+      static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help']
     })
     .it('formats if command with description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -566,9 +576,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help\n<%= config.bin %> <%= command.id %> --help']
+      static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help\n<%= config.bin %> <%= command.id %> --help']
     })
     .it('formats if multiple command with description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -581,9 +591,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}]
+      static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}]
     })
     .it('formats example object', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -595,9 +605,9 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = [{description: 'force  it '.repeat(15), command: '<%= config.bin %> <%= command.id %> --help'}]
+      static examples = [{description: 'force  it '.repeat(15), command: '<%= config.bin %> <%= command.id %> --help'}]
     })
     .it('formats example object with long description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
@@ -610,15 +620,15 @@ EXAMPLES
 
     test
     .commandHelp(class extends Command {
-        static id = 'oclif:command'
+      static id = 'oclif:command'
 
-        static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> ' + 'force  it '.repeat(15)}]
+      static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> ' + 'force  it '.repeat(15)}]
     })
     .it('formats example object with long command', (ctx: any) => {
-      const multilineSeparator =
-        ctx.config.platform === 'win32' ?
-          (ctx.config.shell.includes('powershell') ? '`' : '^') :
-          '\\'
+      const multilineSeparator
+        = ctx.config.platform === 'win32'
+          ? (ctx.config.shell.includes('powershell') ? '`' : '^')
+          : '\\'
       expect(ctx.commandHelp).to.equal(`USAGE
   $ oclif oclif:command
 

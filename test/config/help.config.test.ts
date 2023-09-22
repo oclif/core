@@ -1,5 +1,5 @@
-import * as url from 'url'
-import * as path from 'path'
+import {pathToFileURL} from 'node:url'
+import {resolve} from 'node:path'
 
 import {Config} from '../../src/config'
 
@@ -7,11 +7,11 @@ import {expect, fancy} from './test'
 import {getHelpFlagAdditions} from '../../src/help'
 import {helpAddition, versionAddition} from '../../src/main'
 
-const root = path.resolve(__dirname, 'fixtures/help')
+const root = resolve(__dirname, 'fixtures/help')
 // const p = (p: string) => path.join(root, p)
 
 // This tests file URL / import.meta.url simulation.
-const rootAsFileURL = url.pathToFileURL(root).toString()
+const rootAsFileURL = pathToFileURL(root).toString()
 
 const withConfig = fancy
 .add('config', () => Config.load(rootAsFileURL))

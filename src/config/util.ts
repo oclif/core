@@ -1,5 +1,3 @@
-import * as fs from 'fs'
-
 const debug = require('debug')
 
 export function flatMap<T, U>(arr: T[], fn: (i: T) => U[]): U[] {
@@ -14,35 +12,8 @@ export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in ke
   }, {} as any)
 }
 
-export function exists(path: string): Promise<boolean> {
-  // eslint-disable-next-line no-promise-executor-return
-  return new Promise(resolve => resolve(fs.existsSync(path)))
-}
-
 export function resolvePackage(id: string, paths: { paths: string[] }): string {
   return require.resolve(id, paths)
-}
-
-export function loadJSON(path: string): Promise<any> {
-  debug('config')('loadJSON %s', path)
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err: any, d: any) => {
-      try {
-        if (err) reject(err)
-        else resolve(JSON.parse(d))
-      } catch (error: any) {
-        reject(error)
-      }
-    })
-  })
-}
-
-export function compact<T>(a: (T | undefined)[]): T[] {
-  return a.filter((a): a is T => Boolean(a))
-}
-
-export function uniq<T>(arr: T[]): T[] {
-  return [...new Set(arr)].sort()
 }
 
 function displayWarnings() {
@@ -54,7 +25,10 @@ function displayWarnings() {
 }
 
 export function Debug(...scope: string[]): (..._: any) => void {
-  if (!debug) return (..._: any[]) => {}
+  if (!debug) return (..._: any[]) => {
+    // noop
+  }
+
   const d = debug(['config', ...scope].join(':'))
   if (d.enabled) displayWarnings()
   return (...args: any[]) => d(...args)
@@ -107,16 +81,5 @@ export function getCommandIdPermutations(commandId: string): string[] {
  * @param commandIds string[]
  * @returns string[]
  */
-export function collectUsableIds(commandIds: string[]): Set<string> {
-  const usuableIds: string[] = []
-  for (const id of commandIds) {
-    const parts = id.split(':')
-    while (parts.length > 0) {
-      const name = parts.join(':')
-      if (name) usuableIds.push(name)
-      parts.pop()
-    }
-  }
-
-  return new Set(usuableIds)
-}
+export const collectUsableIds = (commandIds: string[]): Set<string> =>
+  new Set(commandIds.flatMap(id => id.split(':').map((_, i, a) => a.slice(0, i + 1).join(':'))))

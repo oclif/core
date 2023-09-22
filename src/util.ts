@@ -1,7 +1,11 @@
-import * as fs from 'fs'
-import {join} from 'path'
-import {Command} from './command'
+import {access, stat} from 'node:fs/promises'
+import {homedir, platform} from 'node:os'
+import {readFile, readFileSync} from 'node:fs'
 import {ArgInput} from './interfaces/parser'
+import {Command} from './command'
+import {join} from 'node:path'
+
+const debug = require('debug')
 
 export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
   return Object.entries(obj)
@@ -12,6 +16,7 @@ export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyo
 }
 
 export function compact<T>(a: (T | undefined)[]): T[] {
+  // eslint-disable-next-line unicorn/prefer-native-coercion-functions
   return a.filter((a): a is T => Boolean(a))
 }
 
@@ -24,28 +29,28 @@ export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
 
 export function last<T>(arr?: T[]): T | undefined {
   if (!arr) return
-  return arr.slice(-1)[0]
+  return arr.at(-1)
 }
 
 type SortTypes = string | number | undefined | boolean
 
-export function sortBy<T>(arr: T[], fn: (i: T) => SortTypes | SortTypes[]): T[] {
-  function compare(a: SortTypes | SortTypes[], b: SortTypes | SortTypes[]): number {
-    a = a === undefined ? 0 : a
-    b = b === undefined ? 0 : b
+function compare(a: SortTypes | SortTypes[], b: SortTypes | SortTypes[]): number {
+  a = a === undefined ? 0 : a
+  b = b === undefined ? 0 : b
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length === 0 && b.length === 0) return 0
-      const diff = compare(a[0], b[0])
-      if (diff !== 0) return diff
-      return compare(a.slice(1), b.slice(1))
-    }
-
-    if (a < b) return -1
-    if (a > b) return 1
-    return 0
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length === 0 && b.length === 0) return 0
+    const diff = compare(a[0], b[0])
+    if (diff !== 0) return diff
+    return compare(a.slice(1), b.slice(1))
   }
 
+  if (a < b) return -1
+  if (a > b) return 1
+  return 0
+}
+
+export function sortBy<T>(arr: T[], fn: (i: T) => SortTypes | SortTypes[]): T[] {
   return arr.sort((a, b) => compare(fn(a), fn(b)))
 }
 
@@ -78,12 +83,22 @@ export function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
 }
 
+export async function exists(path: string): Promise<boolean> {
+  try {
+    await access(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export const dirExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
+  if (!await exists(input)) {
     throw new Error(`No directory found at ${input}`)
   }
 
-  if (!(await fs.promises.stat(input)).isDirectory()) {
+  const fileStat = await stat(input)
+  if (!fileStat.isDirectory()) {
     throw new Error(`${input} exists but is not a directory`)
   }
 
@@ -91,11 +106,12 @@ export const dirExists = async (input: string): Promise<string> => {
 }
 
 export const fileExists = async (input: string): Promise<string> => {
-  if (!fs.existsSync(input)) {
+  if (!await exists(input)) {
     throw new Error(`No file found at ${input}`)
   }
 
-  if (!(await fs.promises.stat(input)).isFile()) {
+  const fileStat = await stat(input)
+  if (!fileStat.isFile()) {
     throw new Error(`${input} exists but is not a file`)
   }
 
@@ -111,7 +127,7 @@ export function isNotFalsy(input: string): boolean {
 }
 
 export function requireJson<T>(...pathParts: string[]): T {
-  return JSON.parse(fs.readFileSync(join(...pathParts), 'utf8'))
+  return JSON.parse(readFileSync(join(...pathParts), 'utf8'))
 }
 
 /**
@@ -122,7 +138,54 @@ export function requireJson<T>(...pathParts: string[]): T {
  * @returns ArgInput
  */
 export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Command.Arg.Cached}): ArgInput {
-  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => {
-    return {...x, [y.name]: y}
-  }, {} as ArgInput) : args ?? {}) as ArgInput
+  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => ({...x, [y.name]: y}), {} as ArgInput) : args ?? {}) as ArgInput
+}
+
+export function uniq<T>(arr: T[]): T[] {
+  return [...new Set(arr)].sort()
+}
+
+/**
+ * Call os.homedir() and return the result
+ *
+ * Wrapping this allows us to stub these in tests since os.homedir() is
+ * non-configurable and non-writable.
+ *
+ * @returns The user's home directory
+ */
+export function getHomeDir(): string {
+  return homedir()
+}
+
+/**
+ * Call os.platform() and return the result
+ *
+ * Wrapping this allows us to stub these in tests since os.platform() is
+ * non-configurable and non-writable.
+ *
+ * @returns The process' platform
+ */
+export function getPlatform(): NodeJS.Platform {
+  return platform()
+}
+
+export function readJson<T = unknown>(path: string): Promise<T> {
+  debug('config')('readJson %s', path)
+  return new Promise((resolve, reject) => {
+    readFile(path, 'utf8', (err: any, d: any) => {
+      try {
+        if (err) reject(err)
+        else resolve(JSON.parse(d) as T)
+      } catch (error: any) {
+        reject(error)
+      }
+    })
+  })
+}
+
+export function readJsonSync(path: string, parse: false): string
+export function readJsonSync<T = unknown>(path: string, parse?: true): T
+export function readJsonSync<T = unknown>(path: string, parse = true): T | string {
+  const contents = readFileSync(path, 'utf8')
+  return parse ? JSON.parse(contents) as T : contents
 }

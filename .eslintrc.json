@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "oclif",
+    "oclif-typescript"
+  ],
+  "rules": {
+    "sort-imports": "error",
+    "unicorn/prefer-module": "off",
+    "unicorn/import-style": "error",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/prefer-array-some": "off",
+    "no-useless-constructor": "off"
+  }
+}

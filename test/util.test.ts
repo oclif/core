@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {maxBy, sumBy, capitalize, ensureArgObject, last} from '../src/util'
+import {capitalize, ensureArgObject, last, maxBy, sumBy} from '../src/util'
 
 describe('capitalize', () => {
   it('capitalizes the string', () => {

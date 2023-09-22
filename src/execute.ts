@@ -1,8 +1,8 @@
-import {settings} from './settings'
+import {LoadOptions} from './interfaces'
 import {flush} from './cli-ux/flush'
 import {handle} from './errors/handle'
-import run from './main'
-import * as Interfaces from './interfaces'
+import {run} from './main'
+import {settings} from './settings'
 
 /**
  * Load and run oclif CLI
@@ -12,7 +12,7 @@ import * as Interfaces from './interfaces'
  *
  * @example For ESM dev.js
  * ```
- * #!/usr/bin/env node
+ * #!/usr/bin/env ts-node
  * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: import.meta.url})
@@ -30,7 +30,7 @@ import * as Interfaces from './interfaces'
  *
  * @example For CJS dev.js
  * ```
- * #!/usr/bin/env node
+ * #!/usr/bin/env ts-node
  * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: __dirname})
@@ -46,11 +46,11 @@ import * as Interfaces from './interfaces'
  * })()
  * ```
  */
-export default async function execute(
+export async function execute(
   options: {
     dir: string;
     args?: string[];
-    loadOptions?: Interfaces.LoadOptions;
+    loadOptions?: LoadOptions;
     development?: boolean;
   },
 ): Promise<unknown> {

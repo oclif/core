@@ -17,7 +17,7 @@ suite
 .add('simple',
   {
     defer: true,
-    fn: function (deferred: { resolve: () => any }) {
+    fn(deferred: { resolve: () => any }) {
       parse(['--bool'], {
         flags: {
           bool: Flags.boolean(),
@@ -27,17 +27,17 @@ suite
   })
 .add('multiple async flags that take time', {
   defer: true,
-  fn: function (deferred: { resolve: () => any }) {
+  fn(deferred: { resolve: () => any }) {
     parse(['--flagA', 'foo', '--flagA', 'bar'], {
       flags: {
         flagA: Flags.string({
-          parse: async input => {
+          async parse(input) {
             await delay100()
             return input
           },
         }),
         flagB: Flags.string({
-          parse: async input => {
+          async parse(input) {
             await delay100()
             return input
           },
@@ -49,7 +49,7 @@ suite
 
 .add('flagstravaganza', {
   defer: true,
-  fn: function (deferred: { resolve: () => any }) {
+  fn(deferred: { resolve: () => any }) {
     const flags = [
       ['--bool'],
       ['-S', 'foo'],

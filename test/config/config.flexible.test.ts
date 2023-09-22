@@ -1,6 +1,3 @@
-import * as os from 'os'
-import * as path from 'path'
-
 import {Config} from '../../src/config/config'
 import {Plugin as IPlugin} from '../../src/interfaces'
 
@@ -8,6 +5,8 @@ import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {getCommandIdPermutations} from '../../src/config/util'
+import * as util from '../../src/util'
+import {join} from 'node:path'
 
 interface Options {
   pjson?: any;
@@ -45,13 +44,11 @@ describe('Config with flexible taxonomy', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
-    .stub(os, 'platform', () => platform)
+    .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
+    .stub(util, 'getPlatform', stub => stub.returns(platform))
 
     const load = async (): Promise<void> => {}
-    const findCommand = async (): Promise<Command.Class> => {
-      return MyCommandClass
-    }
+    const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
     const commandPluginA: Command.Loadable = {
       strict: false,
@@ -103,6 +100,7 @@ describe('Config with flexible taxonomy', () => {
       valid: true,
       tag: 'tag',
       moduleType: 'commonjs',
+      hasManifest: false,
     }
 
     const pluginB: IPlugin = {
@@ -122,6 +120,7 @@ describe('Config with flexible taxonomy', () => {
       valid: true,
       tag: 'tag',
       moduleType: 'commonjs',
+      hasManifest: false,
     }
     const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
 
@@ -161,7 +160,7 @@ describe('Config with flexible taxonomy', () => {
   })
   .it('has populated command permutation index', config => {
     // @ts-expect-error because private member
-    const commandPermutations = config.commandPermutations
+    const {commandPermutations} = config
     expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
     expect(commandPermutations.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
     expect(commandPermutations.get('bar')).to.deep.equal(new Set(['foo:bar']))

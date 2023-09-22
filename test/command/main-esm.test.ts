@@ -1,13 +1,13 @@
 import {expect, fancy} from 'fancy-test'
-import * as path from 'path'
-import * as url from 'url'
+import {resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
 
-import run from '../../src/main'
+import {run} from '../../src/main'
 
 // This tests file URL / import.meta.url simulation.
-const convertToFileURL = (filepath: string) => url.pathToFileURL(filepath).toString()
+const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString()
 
-let root = path.resolve(__dirname, '../../package.json')
+let root = resolve(__dirname, '../../package.json')
 const pjson = require(root)
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
 
@@ -16,7 +16,6 @@ root = convertToFileURL(root)
 describe('main-esm', () => {
   fancy
   .stdout()
-  .skip() // skip until oclif/test is on v3
   .do(() => run(['plugins'], root))
   .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
   .it('runs plugins')
@@ -50,7 +49,7 @@ COMMANDS
 
   fancy
   .stdout()
-  .do(() => run(['--help', 'foo'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
+  .do(() => run(['--help', 'foo'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
   .do((output: any) => expect(output.stdout).to.equal(`foo topic description
 
 USAGE
@@ -67,7 +66,7 @@ COMMANDS
 
   fancy
   .stdout()
-  .do(() => run(['foo', 'bar', '--help'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
+  .do(() => run(['foo', 'bar', '--help'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
   .do((output: any) => expect(output.stdout).to.equal(`foo bar topic description
 
 USAGE
@@ -82,13 +81,13 @@ COMMANDS
 
   fancy
   .stdout()
-  .do(() => run(['foo', 'baz'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
+  .do(() => run(['foo', 'baz'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
   .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
   .it('runs foo:baz with space separator')
 
   fancy
   .stdout()
-  .do(() => run(['foo', 'bar', 'succeed'], convertToFileURL(path.resolve(__dirname, 'fixtures/esm/package.json'))))
+  .do(() => run(['foo', 'bar', 'succeed'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
   .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
   .it('runs foo:bar:succeed with space separator')
 })

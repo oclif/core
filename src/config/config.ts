@@ -1,23 +1,23 @@
-import {fileURLToPath, URL} from 'node:url'
-import {format} from 'node:util'
-import {userInfo as osUserInfo, arch, platform, homedir, tmpdir, type, release} from 'node:os'
-import {sep, join} from 'node:path'
-
 import * as ejs from 'ejs'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
+import {Arg, OptionFlag} from '../interfaces/parser'
 import {CLIError, error, exit, warn} from '../errors'
-import {Options, Plugin as IPlugin} from '../interfaces/plugin'
-import {Config as IConfig, ArchTypes, PlatformTypes, LoadOptions, VersionDetails} from '../interfaces/config'
+import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {Debug, compact, collectUsableIds, getCommandIdPermutations} from './util'
-import {ensureArgObject, isProd, requireJson} from '../util'
-import ModuleLoader from '../module-loader'
-import {getHelpFlagAdditions} from '../help'
+import {Plugin as IPlugin, Options} from '../interfaces/plugin'
+import {URL, fileURLToPath} from 'node:url'
+import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
+import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} from '../util'
+import {join, sep} from 'node:path'
+
 import {Command} from '../command'
-import {CompletableOptionFlag, Arg} from '../interfaces/parser'
-import {stdout} from '../cli-ux/stream'
-import Performance from '../performance'
-import {settings} from '../settings'
+import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
+import {format} from 'node:util'
+import {getHelpFlagAdditions} from '../help'
+import {loadWithData} from '../module-loader'
+import {settings} from '../settings'
+import {stdout} from '../cli-ux/stream'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
@@ -95,8 +95,8 @@ export class Config implements IConfig {
   public valid!: boolean
   public version!: string
   public windows!: boolean
-  public binAliases?: string[];
-  public nsisCustomization?:string;
+  public binAliases?: string[]
+  public nsisCustomization?:string
 
   protected warned = false
 
@@ -155,6 +155,7 @@ export class Config implements IConfig {
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
     settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    const marker = Performance.mark('config.load')
     this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
     Config._rootPlugin = await this.pluginLoader.loadRoot()
 
@@ -170,7 +171,7 @@ export class Config implements IConfig {
     this.valid = Config._rootPlugin.valid
 
     this.arch = (arch() === 'ia32' ? 'x86' : arch() as any)
-    this.platform = WSL ? 'wsl' : platform() as any
+    this.platform = WSL ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
@@ -184,7 +185,7 @@ export class Config implements IConfig {
     this.shell = this._shell()
     this.debug = this._debug()
 
-    this.home = process.env.HOME || (this.windows && this.windowsHome()) || homedir() || tmpdir()
+    this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
     this.configDir = this.scopedEnvVar('CONFIG_DIR') || this.dir('config')
     this.dataDir = this.scopedEnvVar('DATA_DIR') || this.dir('data')
@@ -217,8 +218,6 @@ export class Config implements IConfig {
       },
     }
 
-    const marker = Performance.mark('config.load')
-
     await this.loadPluginsAndCommands()
 
     debug('config done')
@@ -232,7 +231,7 @@ export class Config implements IConfig {
   }
 
   async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
-    const marker = Performance.mark('config.loadPluginsAndCommands')
+    const pluginsMarker = Performance.mark('config.loadAllPlugins')
     const {plugins, errors} = await this.pluginLoader.loadChildren({
       devPlugins: this.options.devPlugins,
       userPlugins: this.options.userPlugins,
@@ -242,16 +241,19 @@ export class Config implements IConfig {
     })
 
     this.plugins = plugins
+    pluginsMarker?.stop()
+
+    const commandsMarker = Performance.mark('config.loadAllCommands')
     for (const plugin of this.plugins.values()) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
     }
 
+    commandsMarker?.stop()
+
     for (const error of errors) {
       this.warn(error)
     }
-
-    marker?.stop()
   }
 
   public async runHook<T extends keyof Hooks>(
@@ -311,13 +313,12 @@ export class Config implements IConfig {
         const marker = Performance.mark(`config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {isESM, module, filePath} = await ModuleLoader.loadWithData(p, hook)
-
+          const {isESM, module, filePath} = await loadWithData(p, join(p.root, hook))
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
-          const result = timeout ?
-            await withTimeout(timeout, search(module).call(context, {...opts as any, config: this})) :
-            await search(module).call(context, {...opts as any, config: this})
+          const result = timeout
+            ? await withTimeout(timeout, search(module).call(context, {...opts as any, config: this}))
+            : await search(module).call(context, {...opts as any, config: this})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
@@ -354,9 +355,9 @@ export class Config implements IConfig {
     let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
       const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
-      const hookResult = this.flexibleTaxonomy && matches.length > 0 ?
-        await this.runHook('command_incomplete', {id, argv, matches}) :
-        await this.runHook('command_not_found', {id, argv})
+      const hookResult = this.flexibleTaxonomy && matches.length > 0
+        ? await this.runHook('command_incomplete', {id, argv, matches})
+        : await this.runHook('command_not_found', {id, argv})
 
       if (hookResult.successes[0]) return hookResult.successes[0].result as T
       if (hookResult.failures[0]) throw hookResult.failures[0].error
@@ -413,7 +414,7 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
-    .map(p => p.replace(/@/g, '').replace(/[/-]/g, '_'))
+    .map(p => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
     .join('_')
     .toUpperCase()
   }
@@ -424,8 +425,8 @@ export class Config implements IConfig {
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
-    return [this.bin, ...this.binAliases ?? []].filter(alias => Boolean(alias)).map(alias =>
-      [alias.replace(/@/g, '').replace(/[/-]/g, '_'), k].join('_').toUpperCase())
+    return [this.bin, ...this.binAliases ?? []].filter(Boolean).map(alias =>
+      [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
   public findCommand(id: string, opts: { must: true }): Command.Loadable
@@ -464,13 +465,11 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
-    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replace(/-/g, ''))
+    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replaceAll('-', ''))
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
 
     const matches = possibleMatches.filter(command => {
-      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => {
-        return def.char ? [def.char, flag] : [flag]
-      }) as string[]
+      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => def.char ? [def.char, flag] : [flag]) as string[]
 
       // A command is a match if the provided flags belong to the full command
       return flags.every(f => cmdFlags.includes(f))
@@ -539,7 +538,7 @@ export class Config implements IConfig {
   }
 
   public s3Url(key: string): string {
-    const host = this.pjson.oclif.update.s3.host
+    const {host} = this.pjson.oclif.update.s3
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
     url.pathname = join(url.pathname, key)
@@ -551,9 +550,9 @@ export class Config implements IConfig {
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {
-    const base = process.env[`XDG_${category.toUpperCase()}_HOME`] ||
-      (this.windows && process.env.LOCALAPPDATA) ||
-      join(this.home, category === 'data' ? '.local/share' : '.' + category)
+    const base = process.env[`XDG_${category.toUpperCase()}_HOME`]
+      || (this.windows && process.env.LOCALAPPDATA)
+      || join(this.home, category === 'data' ? '.local/share' : '.' + category)
     return join(base, this.dirname)
   }
 
@@ -575,7 +574,7 @@ export class Config implements IConfig {
 
   protected _shell(): string {
     let shellPath
-    const COMSPEC = process.env.COMSPEC
+    const {COMSPEC} = process.env
     const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
@@ -585,7 +584,7 @@ export class Config implements IConfig {
       shellPath = ['unknown']
     }
 
-    return shellPath[shellPath.length - 1]
+    return shellPath.at(-1) ?? 'unknown'
   }
 
   protected _debug(): number {
@@ -668,8 +667,13 @@ export class Config implements IConfig {
         this._commands.set(command.id, command)
       }
 
+      // v3 moved command id permutations to the manifest, but some plugins may not have
+      // the new manifest yet. For those, we need to calculate the permutations here.
+      const permutations = this.flexibleTaxonomy && command.permutations === undefined
+        ? getCommandIdPermutations(command.id)
+        : command.permutations ?? [command.id]
       // set every permutation
-      for (const permutation of command.permutations ?? [command.id]) {
+      for (const permutation of permutations) {
         this.commandPermutations.add(permutation, command.id)
       }
 
@@ -683,7 +687,14 @@ export class Config implements IConfig {
         }
 
         // set every permutation of the aliases
-        for (const permutation of command.aliasPermutations ?? [alias]) {
+
+        // v3 moved command alias permutations to the manifest, but some plugins may not have
+        // the new manifest yet. For those, we need to calculate the permutations here.
+        const aliasPermutations = this.flexibleTaxonomy && command.aliasPermutations === undefined
+          ? getCommandIdPermutations(alias)
+          : command.permutations ?? [alias]
+        // set every permutation
+        for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
         }
       }
@@ -802,7 +813,7 @@ export class Config implements IConfig {
 }
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: CompletableOptionFlag<any>, respectNoCacheDefault: boolean) => {
+const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {
   if (respectNoCacheDefault && flag.noCacheDefault) return
   // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof flag.defaultHelp === 'function') {
@@ -866,6 +877,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCach
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        charAliases: flag.charAliases,
         delimiter: flag.delimiter,
         noCacheDefault: flag.noCacheDefault,
       }
@@ -890,6 +902,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCach
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
+        charAliases: flag.charAliases,
         delimiter: flag.delimiter,
         noCacheDefault: flag.noCacheDefault,
       }

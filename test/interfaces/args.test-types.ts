@@ -1,9 +1,10 @@
 /**
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
-import {Command, Args, Interfaces} from '../../src'
-import {expectType, expectNotType} from 'tsd'
-import {URL} from 'url'
+import {Args, Command, Interfaces} from '../../src'
+
+import {expectNotType, expectType} from 'tsd'
+import {URL} from 'node:url'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 

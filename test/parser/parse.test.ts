@@ -1,11 +1,11 @@
-import {assert, expect, config} from 'chai'
-import * as fs from 'fs'
+import {assert, config, expect} from 'chai'
+import * as fs from 'node:fs'
 
 import {parse} from '../../src/parser'
 import {Args, Flags} from '../../src'
 import {FlagDefault} from '../../src/interfaces/parser'
-import {URL} from 'url'
-import * as sinon from 'sinon'
+import {URL} from 'node:url'
+import {createSandbox, SinonStub} from 'sinon'
 import {CLIError} from '../../src/errors'
 
 config.truncateThreshold = 0
@@ -109,7 +109,7 @@ describe('parse', () => {
         const out = await parse(['--foo', 'baz'], {
           flags: {
             foo: Flags.custom({
-              defaultHelp: async () => {
+              async defaultHelp() {
                 throw new Error('failed to get default help value')
               },
             })(),
@@ -831,7 +831,7 @@ See more help with --help`)
 
     describe('parse with a default/value of another type (class)', async () => {
       class TestClass {
-        public prop: string;
+        public prop: string
         constructor(input: string) {
           this.prop = input
         }
@@ -1310,11 +1310,17 @@ See more help with --help`)
     })
   })
 
-  it('parses multiple flags', async () => {
-    const out = await parse(['--foo=a', '--foo', 'b'], {
-      flags: {foo: Flags.string()},
-    })
-    expect(out.flags.foo).to.equal('b')
+  it('throws an error when multiple flags of non-multiple flag is provided', async () => {
+    let message = ''
+    try {
+      await parse(['--foo=a', '--foo', 'b'], {
+        flags: {foo: Flags.string()},
+      })
+    } catch (error: any) {
+      message = error.message
+    }
+
+    expect(message).to.include('can only be specified once')
   })
 
   describe('dependsOn', () => {
@@ -1555,12 +1561,12 @@ See more help with --help`)
   })
 
   describe('fs flags', () => {
-    const sandbox = sinon.createSandbox()
-    let existsStub: sinon.SinonStub
-    let statStub: sinon.SinonStub
+    const sandbox = createSandbox()
+    let accessStub: SinonStub
+    let statStub: SinonStub
 
     beforeEach(() => {
-      existsStub = sandbox.stub(fs, 'existsSync')
+      accessStub = sandbox.stub(fs.promises, 'access')
       statStub = sandbox.stub(fs.promises, 'stat')
     })
 
@@ -1574,18 +1580,18 @@ See more help with --help`)
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory({exists: false})},
         })
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it('passes if dir !exists but exists not defined', async () => {
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory()},
         })
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it('passes when dir exists', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isDirectory: () => true})
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory({exists: true})},
@@ -1593,7 +1599,7 @@ See more help with --help`)
         expect(out.flags).to.deep.include({dir: testDir})
       })
       it("fails when dir doesn't exist", async () => {
-        existsStub.returns(false)
+        accessStub.throws()
         try {
           const out = await parse([`--dir=${testDir}`], {
             flags: {dir: Flags.directory({exists: true})},
@@ -1607,7 +1613,7 @@ See more help with --help`)
         }
       })
       it('fails when dir exists but is not a dir', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isDirectory: () => false})
         try {
           const out = await parse([`--dir=${testDir}`], {
@@ -1623,7 +1629,7 @@ See more help with --help`)
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
         it('accepts custom parse that passes', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isDirectory: () => true})
           const out = await parse([`--dir=${testDir}`], {
             flags: {dir: Flags.directory({exists: true, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
@@ -1632,7 +1638,7 @@ See more help with --help`)
         })
 
         it('accepts custom parse that fails', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isDirectory: () => true})
           try {
             const out = await parse([`--dir=${testDir}`], {
@@ -1655,17 +1661,17 @@ See more help with --help`)
           flags: {file: Flags.file({exists: false})},
         })
         expect(out.flags).to.deep.include({file: testFile})
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
       })
       it('passes if file doesn\'t exist but not exists not defined', async () => {
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file()},
         })
         expect(out.flags).to.deep.include({file: testFile})
-        expect(existsStub.callCount).to.equal(0)
+        expect(accessStub.callCount).to.equal(0)
       })
       it('passes when file exists', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isFile: () => true})
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file({exists: true})},
@@ -1673,7 +1679,7 @@ See more help with --help`)
         expect(out.flags).to.deep.include({file: testFile})
       })
       it("fails when dir doesn't exist", async () => {
-        existsStub.returns(false)
+        accessStub.throws()
         try {
           const out = await parse([`--file=${testFile}`], {
             flags: {file: Flags.file({exists: true})},
@@ -1685,7 +1691,7 @@ See more help with --help`)
         }
       })
       it('fails when file exists but is not a file', async () => {
-        existsStub.returns(true)
+        accessStub.resolves()
         statStub.returns({isFile: () => false})
         try {
           const out = await parse([`--file=${testFile}`], {
@@ -1700,7 +1706,7 @@ See more help with --help`)
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
         it('accepts custom parse that passes', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isFile: () => true})
           const out = await parse([`--dir=${testFile}`], {
             flags: {dir: Flags.file({exists: false, parse: async input => input.includes('some') ? input : assert.fail(customParseException)})},
@@ -1709,7 +1715,7 @@ See more help with --help`)
         })
 
         it('accepts custom parse that fails', async () => {
-          existsStub.returns(true)
+          accessStub.resolves()
           statStub.returns({isFile: () => true})
           try {
             const out = await parse([`--dir=${testFile}`], {
@@ -1747,6 +1753,72 @@ See more help with --help`)
         },
       })
       expect(out.flags.foo).to.equal(true)
+    })
+
+    describe('aliased short char', () => {
+      it('boolean', async () => {
+        const out = await parse(['-b'], {
+          flags: {
+            foo: Flags.boolean({
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal(true)
+      })
+      it('string', async () => {
+        const out = await parse(['-b', 'hello'], {
+          flags: {
+            foo: Flags.string({
+              charAliases: ['b'],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hello')
+      })
+      it('empty charAliases', async () => {
+        const out = await parse(['--foo', 'hello'], {
+          flags: {
+            foo: Flags.string({
+              charAliases: [],
+            }),
+          },
+        })
+        expect(out.flags.foo).to.equal('hello')
+      })
+      it('duplicated flag via charAliases and full name throws error', async () => {
+        let message = ''
+        try {
+          await parse(['--foo', 'hello', '--foo', 'hi'], {
+            flags: {
+              foo: Flags.string({
+                charAliases: ['b'],
+              }),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('can only be specified once')
+      })
+      it('duplicated via aliases charAliases throws error', async () => {
+        let message = ''
+        try {
+          await parse(['-b', 'hello', '-b', 'hi'], {
+            flags: {
+              foo: Flags.string({
+                aliases: ['b'],
+                charAliases: ['b'],
+              }),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('can only be specified once')
+      })
     })
   })
 })

@@ -17,9 +17,7 @@ async function _flush() {
   })
   const flushed = stdout.write('')
 
-  if (flushed) {
-    return Promise.resolve()
-  }
+  if (flushed) return
 
   return p
 }

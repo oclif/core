@@ -1,8 +1,7 @@
-import stripAnsi = require('strip-ansi')
-
-import {compact} from '../util'
 import * as Interfaces from '../interfaces'
 import {HelpFormatter} from './formatter'
+import {compact} from '../util'
+import stripAnsi = require('strip-ansi')
 
 export default class RootHelp extends HelpFormatter {
   constructor(public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {

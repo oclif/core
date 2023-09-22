@@ -1,17 +1,15 @@
+import {CLIError, addOclifExitCode} from './errors/cli'
+import {OclifError, PrettyPrintableError} from '../interfaces'
+import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
+import {ExitError} from './errors/exit'
+import {config} from './config'
+
 export {handle} from './handle'
 export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
 export {CLIError} from './errors/cli'
 export {Logger} from './logger'
 export {config} from './config'
-
-import {config} from './config'
-import {CLIError, addOclifExitCode} from './errors/cli'
-import {ExitError} from './errors/exit'
-import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
-import {OclifError, PrettyPrintableError} from '../interfaces'
-
-export {PrettyPrintableError}
 
 export function exit(code = 0): never {
   throw new ExitError(code)
@@ -61,3 +59,5 @@ export function memoizedWarn(input: string | Error): void {
 
   WARNINGS.add(input)
 }
+
+export {PrettyPrintableError} from '../interfaces'

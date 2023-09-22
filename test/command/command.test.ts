@@ -31,11 +31,11 @@ describe('command', () => {
   fancy
   .do(async () => {
     class Command extends Base {
-        static description = 'test command'
+      static description = 'test command'
 
-        async run() {
-          return 101
-        }
+      async run() {
+        return 101
+      }
     }
 
     expect(await Command.run([])).to.equal(101)
@@ -73,45 +73,45 @@ describe('command', () => {
     fancy
     .do(async () => {
       class C extends Command {
-          static id = 'foo:bar'
-          static title = 'cmd title'
-          static type = 'mytype'
-          static usage = ['$ usage']
-          static description = 'test command'
-          static aliases = ['alias1', 'alias2']
-          static hidden = true
-          // @ts-ignore
-          static flags = {
-            flaga: Flags.boolean(),
-            flagb: Flags.string({
-              char: 'b',
-              hidden: true,
-              required: false,
-              description: 'flagb desc',
-              options: ['a', 'b'],
-              default: async () => 'a',
-            }),
-            flagc: Flags.integer({
-              char: 'c',
-              min: 1,
-              max: 10,
-              required: false,
-              description: 'flagc desc',
-              options: ['a', 'b'],
-              // @ts-expect-error: context is any
-              default: async context => context.options.min + 1,
-            }),
-          }
+        static id = 'foo:bar'
+        static title = 'cmd title'
+        static type = 'mytype'
+        static usage = ['$ usage']
+        static description = 'test command'
+        static aliases = ['alias1', 'alias2']
+        static hidden = true
+        // @ts-ignore
+        static flags = {
+          flaga: Flags.boolean(),
+          flagb: Flags.string({
+            char: 'b',
+            hidden: true,
+            required: false,
+            description: 'flagb desc',
+            options: ['a', 'b'],
+            default: async () => 'a',
+          }),
+          flagc: Flags.integer({
+            char: 'c',
+            min: 1,
+            max: 10,
+            required: false,
+            description: 'flagc desc',
+            options: ['a', 'b'],
+            // @ts-expect-error: context is any
+            default: async context => context.options.min + 1,
+          }),
+        }
 
-          static args = {
-            arg1: Args.string({
-              description: 'arg1 desc',
-              required: true,
-              hidden: false,
-              options: ['af', 'b'],
-              default: async () => 'a',
-            }),
-          }
+        static args = {
+          arg1: Args.string({
+            description: 'arg1 desc',
+            required: true,
+            hidden: false,
+            options: ['af', 'b'],
+            default: async () => 'a',
+          }),
+        }
       }
 
       const c = await toCached(C, undefined, false)
@@ -137,6 +137,7 @@ describe('command', () => {
           flaga: {
             aliases: undefined,
             char: undefined,
+            charAliases: undefined,
             description: undefined,
             dependsOn: undefined,
             deprecateAliases: undefined,
@@ -157,6 +158,7 @@ describe('command', () => {
           flagb: {
             aliases: undefined,
             char: 'b',
+            charAliases: undefined,
             description: 'flagb desc',
             dependsOn: undefined,
             deprecateAliases: undefined,
@@ -180,6 +182,7 @@ describe('command', () => {
           flagc: {
             aliases: undefined,
             char: 'c',
+            charAliases: undefined,
             default: 2,
             delimiter: undefined,
             dependsOn: undefined,
@@ -273,14 +276,14 @@ describe('command', () => {
     .stdout()
     .it('has a flag', async ctx => {
       class CMD extends Base {
-          static flags = {
-            foo: Flags.string(),
-          }
+        static flags = {
+          foo: Flags.string(),
+        }
 
-          async run() {
-            const {flags} = await this.parse(CMD)
-            this.log(flags.foo)
-          }
+        async run() {
+          const {flags} = await this.parse(CMD)
+          this.log(flags.foo)
+        }
       }
 
       await CMD.run(['--foo=bar'])
@@ -370,20 +373,20 @@ describe('command', () => {
     .stderr()
     .do(async () => {
       class CMD extends Command {
-          static flags = {
-            name: Flags.string({
-              deprecated: {
-                to: '--full-name',
-                version: '2.0.0',
-              },
-            }),
-            force: Flags.boolean(),
-          }
+        static flags = {
+          name: Flags.string({
+            deprecated: {
+              to: '--full-name',
+              version: '2.0.0',
+            },
+          }),
+          force: Flags.boolean(),
+        }
 
-          async run() {
-            await this.parse(CMD)
-            this.log('running command')
-          }
+        async run() {
+          await this.parse(CMD)
+          this.log('running command')
+        }
       }
 
       await CMD.run(['--name', 'astro'])
@@ -398,20 +401,20 @@ describe('command', () => {
     .stderr()
     .do(async () => {
       class CMD extends Command {
-          static flags = {
-            name: Flags.string({
-              deprecated: {
-                to: '--full-name',
-                version: '2.0.0',
-              },
-            }),
-            force: Flags.boolean(),
-          }
+        static flags = {
+          name: Flags.string({
+            deprecated: {
+              to: '--full-name',
+              version: '2.0.0',
+            },
+          }),
+          force: Flags.boolean(),
+        }
 
-          async run() {
-            await this.parse(CMD)
-            this.log('running command')
-          }
+        async run() {
+          await this.parse(CMD)
+          this.log('running command')
+        }
       }
 
       await CMD.run(['--force'])
@@ -426,12 +429,12 @@ describe('command', () => {
     .stderr()
     .do(async () => {
       class CMD extends Command {
-          static id = 'my:command'
-          static state = 'deprecated'
+        static id = 'my:command'
+        static state = 'deprecated'
 
-          async run() {
-            this.log('running command')
-          }
+        async run() {
+          this.log('running command')
+        }
       }
 
       await CMD.run([])
@@ -446,16 +449,16 @@ describe('command', () => {
     .stderr()
     .do(async () => {
       class CMD extends Command {
-          static id = 'my:command'
-          static state = 'deprecated'
-          static deprecationOptions = {
-            version: '2.0.0',
-            to: 'my:other:command',
-          }
+        static id = 'my:command'
+        static state = 'deprecated'
+        static deprecationOptions = {
+          version: '2.0.0',
+          to: 'my:other:command',
+        }
 
-          async run() {
-            this.log('running command')
-          }
+        async run() {
+          this.log('running command')
+        }
       }
 
       await CMD.run([])
@@ -503,11 +506,11 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
+        static enableJsonFlag = true
 
-          async run() {
-            this.log('not json output')
-          }
+        async run() {
+          this.log('not json output')
+        }
       }
 
       const cmd = new CMD([], {} as any)
@@ -519,9 +522,9 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
+        static enableJsonFlag = true
 
-          async run() {}
+        async run() {}
       }
 
       const cmd = new CMD(['--json'], {} as any)
@@ -533,8 +536,8 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          async run() {}
+        static enableJsonFlag = true
+        async run() {}
       }
 
       // mock a scopedEnvVar being set to JSON
@@ -549,13 +552,13 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          static '--' = true
+        static enableJsonFlag = true
+        static '--' = true
 
-          async run() {
-            const {flags} = await cmd.parse(CMD, ['--json'])
-            expect(flags.json).to.equal(true, 'json flag should be true')
-          }
+        async run() {
+          const {flags} = await cmd.parse(CMD, ['--json'])
+          expect(flags.json).to.equal(true, 'json flag should be true')
+        }
       }
 
       const cmd = new CMD(['--json'], {} as any)
@@ -567,14 +570,17 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          static '--' = true
+        // static initialization block is required whenever using ES2022
+        static {
+          this.enableJsonFlag = true
+          this['--'] = true
+        }
 
-          async run() {
-            const {flags} = await cmd.parse(CMD, ['--', '--json'])
-            expect(flags.json).to.equal(false, 'json flag should be false')
-            expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
-          }
+        async run() {
+          const {flags} = await cmd.parse(CMD, ['--', '--json'])
+          expect(flags.json).to.equal(false, 'json flag should be false')
+          expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
+        }
       }
 
       const cmd = new CMD(['--', '--json'], {} as any)
@@ -586,13 +592,13 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          static '--' = true
+        static enableJsonFlag = true
+        static '--' = true
 
-          async run() {
-            const {flags} = await cmd.parse(CMD, ['--foo', '--json'])
-            expect(flags.json).to.equal(true, 'json flag should be true')
-          }
+        async run() {
+          const {flags} = await cmd.parse(CMD, ['--foo', '--json'])
+          expect(flags.json).to.equal(true, 'json flag should be true')
+        }
       }
 
       const cmd = new CMD(['foo', '--json'], {} as any)
@@ -604,14 +610,14 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          static '--' = true
+        static enableJsonFlag = true
+        static '--' = true
 
-          async run() {
-            const {flags} = await cmd.parse(CMD, ['--foo', '--', '--json'])
-            expect(flags.json).to.equal(false, 'json flag should be false')
-            expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
-          }
+        async run() {
+          const {flags} = await cmd.parse(CMD, ['--foo', '--', '--json'])
+          expect(flags.json).to.equal(false, 'json flag should be false')
+          expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
+        }
       }
 
       const cmd = new CMD(['--foo', '--', '--json'], {} as any)
@@ -623,10 +629,10 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = true
-          static '--' = true
+        static enableJsonFlag = true
+        static '--' = true
 
-          async run() {}
+        async run() {}
       }
 
       const cmd = new CMD(['--json', '--'], {} as any)
@@ -638,10 +644,10 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-          static enableJsonFlag = false
-          static '--' = true
+        static enableJsonFlag = false
+        static '--' = true
 
-          async run() {}
+        async run() {}
       }
 
       const cmd = new CMD(['--json'], {} as any)

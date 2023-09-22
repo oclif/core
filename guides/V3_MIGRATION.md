@@ -13,6 +13,8 @@ Migrating to @oclif/core@V3
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
   - [Features 🎉](#features-)
     - [Cache Flexible taxonomy Command Permutations](#cache-flexible-taxonomy-command-permutations)
+    - [charAliases Flag Property](#charaliases-flag-property)
+    - [Flags.option](#flagsoption)
 
 
 ## BREAKING CHANGES ❗
@@ -114,3 +116,36 @@ export const mySensitiveFlag = Flags.string({
 ### Cache Flexible taxonomy Command Permutations
 
 The command permutations for flexible taxonomy are now cached in the oclif.manifest.json allowing for quicker startup times.
+
+### charAliases Flag Property
+
+You can now define single character flag aliases using the `charAliases` property.
+
+### Flags.option
+
+There's a new flag type that infers the flag's type from the provided options.
+
+In v2 you would have needed to do something like this,
+
+```typescript
+type Options = 'foo' | 'bar'
+export default class MyCommand extends Command {
+  static flags = {
+    name: Flags.custom<Options>({
+      options: ['foo', 'bar'],
+    })(),
+  }
+}
+```
+
+Now in v3 you can do this,
+
+```typescript
+export default class MyCommand extends Command {
+  static flags = {
+    name: Flags.option({
+      options: ['foo', 'bar'] as const,
+    })(),
+  }
+}
+```

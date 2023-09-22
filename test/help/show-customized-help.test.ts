@@ -1,10 +1,10 @@
-import {expect, test as base} from '@oclif/test'
-import {stub, SinonStub} from 'sinon'
-import * as path from 'path'
+import {test as base, expect} from '@oclif/test'
+import {SinonStub, stub} from 'sinon'
+import {resolve} from 'node:path'
 
 import {CommandHelp, Help} from '../../src/help'
-import {AppsIndexWithDesc, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd} from './fixtures/fixtures'
-import {Interfaces, Config} from '../../src'
+import {AppsAdminAdd, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndexWithDesc, AppsTopic} from './fixtures/fixtures'
+import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {monkeyPatchCommands} from './help-test-utils'
 
@@ -32,7 +32,7 @@ ${this.indent(this.wrap('force  it '.repeat(29)))}`,
 class TestHelp extends Help {
   CommandHelpClass = TestCommandHelp
 
-  public config: any;
+  public declare config: any
 
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)
@@ -63,7 +63,7 @@ const test = base
     }
 
     // use devPlugins: true to bring in plugins-plugin with topic commands for testing
-    const config = await Config.load({devPlugins: true, root: path.resolve(__dirname, '..')})
+    const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
     ctx.help = new TestHelp(config)
   },
   finally(ctx) {
@@ -87,7 +87,7 @@ describe('showHelp for root', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -119,7 +119,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -150,7 +150,7 @@ describe('showHelp for a command', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -180,7 +180,7 @@ CUSTOM
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',

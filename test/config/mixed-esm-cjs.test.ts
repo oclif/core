@@ -1,11 +1,11 @@
-import * as path from 'path'
+import {join, resolve} from 'node:path'
 
 import {Config} from '../../src/config'
 
 import {expect, fancy} from './test'
 
-const root = path.resolve(__dirname, 'fixtures/mixed-esm-cjs')
-const p = (p: string) => path.join(root, p)
+const root = resolve(__dirname, 'fixtures/mixed-esm-cjs')
+const p = (p: string) => join(root, p)
 
 const withConfig = fancy
 .add('config', () => Config.load(root))

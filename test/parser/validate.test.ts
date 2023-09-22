@@ -1,4 +1,4 @@
-import * as assert from 'assert'
+import {fail} from 'node:assert'
 import {expect} from 'chai'
 import {CLIError} from '../../src/errors'
 
@@ -53,7 +53,7 @@ describe('validate', () => {
     try {
       // @ts-expect-error
       await validate({input, output})
-      assert.fail('should have thrown')
+      fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
@@ -145,7 +145,7 @@ describe('validate', () => {
     try {
       // @ts-expect-error
       await validate({input, output})
-      assert.fail('should have thrown')
+      fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Missing required flag')
@@ -207,7 +207,7 @@ describe('validate', () => {
                   type: 'all',
                   flags: [
                     'cookies',
-                    {name: 'sprinkles', when: async () => Promise.resolve(false)},
+                    {name: 'sprinkles', when: async () => false},
                   ],
                 },
               ],
@@ -268,7 +268,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -292,7 +292,7 @@ describe('validate', () => {
                     'cookies',
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -316,7 +316,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -340,7 +340,7 @@ describe('validate', () => {
                     'cookies',
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -364,7 +364,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
@@ -445,7 +445,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -469,7 +469,7 @@ describe('validate', () => {
                     'cookies',
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -493,7 +493,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies, --sprinkles')
@@ -517,7 +517,7 @@ describe('validate', () => {
                     'cookies',
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -541,7 +541,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
@@ -629,7 +629,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
@@ -652,7 +652,7 @@ describe('validate', () => {
                   flags: [
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -686,7 +686,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
@@ -709,7 +709,7 @@ describe('validate', () => {
                   flags: [
                     {
                       name: 'sprinkles',
-                      when: async (flags: {birthday: boolean}) => Promise.resolve(flags.birthday),
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
                     },
                   ],
                 },
@@ -759,7 +759,7 @@ describe('validate', () => {
                 type: 'all',
                 flags: [
                   'sprinkles',
-                  {name: 'cookies', when: async () => Promise.resolve(true)},
+                  {name: 'cookies', when: async () => true},
                 ],
               },
             ],
@@ -796,7 +796,7 @@ describe('validate', () => {
           dessert: {
             input: [],
             name: 'dessert',
-            exclusive: [{name: 'cookies', when: async () => Promise.resolve(true)}],
+            exclusive: [{name: 'cookies', when: async () => true}],
           },
         },
         args: [],
@@ -820,7 +820,7 @@ describe('validate', () => {
       try {
         // @ts-expect-error
         await validate({input, output})
-        assert.fail('should have thrown')
+        fail('should have thrown')
       } catch (error) {
         const err = error as CLIError
         expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
@@ -848,24 +848,24 @@ describe('validate', () => {
                 type: 'all',
                 flags: [
                   'cookies',
-                  {name: 'sprinkles', when: async () => Promise.resolve(false)},
-                  {name: 'cake', when: async () => Promise.resolve(true)},
+                  {name: 'sprinkles', when: async () => false},
+                  {name: 'cake', when: async () => true},
                 ],
               },
               {
                 type: 'some',
                 flags: [
                   'brownies',
-                  {name: 'pie', when: async () => Promise.resolve(false)},
-                  {name: 'fudge', when: async () => Promise.resolve(true)},
+                  {name: 'pie', when: async () => false},
+                  {name: 'fudge', when: async () => true},
                 ],
               },
               {
                 type: 'none',
                 flags: [
                   'cupcake',
-                  {name: 'muffin', when: async () => Promise.resolve(false)},
-                  {name: 'scone', when: async () => Promise.resolve(true)},
+                  {name: 'muffin', when: async () => false},
+                  {name: 'scone', when: async () => true},
                 ],
               },
             ],
@@ -926,7 +926,7 @@ describe('validate', () => {
         try {
           // @ts-expect-error
           await validate({input, output})
-          assert.fail('should have thrown')
+          fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies, --cake')

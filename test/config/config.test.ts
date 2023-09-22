@@ -1,8 +1,7 @@
-import * as os from 'os'
-import * as path from 'path'
+import {join} from 'node:path'
 
 import {Plugin as IPlugin} from '../../src/interfaces'
-import * as util from '../../src/config/util'
+import * as util from '../../src/util'
 
 import {expect, fancy} from './test'
 import {Config, Interfaces} from '../../src'
@@ -50,10 +49,9 @@ describe('Config', () => {
     let test = fancy
     .resetConfig()
     .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
-    .stub(os, 'platform', () => platform)
-
-    if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+    .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
+    .stub(util, 'getPlatform', stub => stub.returns(platform))
+    if (pjson) test = test.stub(util, 'readJson', stub => stub.resolves(pjson))
 
     test = test.add('config', () => Config.load())
 
@@ -65,11 +63,10 @@ describe('Config', () => {
           // In order to allow prerelease branches to pass, we need to strip the prerelease
           // tag from the version and switch the channel to stable.
           // @ts-expect-error because readonly property
-          config.version = config.version.replace(/-beta\.\d/g, '')
+          config.version = config.version.replaceAll(/-beta\.\d/g, '')
           // @ts-expect-error because readonly property
           config.channel = 'stable'
 
-          // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
             bin: 'oclif-cli',
@@ -96,11 +93,11 @@ describe('Config', () => {
 
   describe('darwin', () => {
     testConfig()
-    .hasProperty('cacheDir', path.join('/my/home/Library/Caches/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
+    .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
+    .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('binAliases', () => {
@@ -160,11 +157,11 @@ describe('Config', () => {
 
   describe('linux', () => {
     testConfig({platform: 'linux'})
-    .hasProperty('cacheDir', path.join('/my/home/.cache/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/.cache/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/.cache/@oclif/core'))
+    .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+    .hasProperty('errlog', join('/my/home/.cache/@oclif/core/error.log'))
+    .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('win32', () => {
@@ -172,11 +169,11 @@ describe('Config', () => {
       platform: 'win32',
       env: {LOCALAPPDATA: '/my/home/localappdata'},
     })
-    .hasProperty('cacheDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('configDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('errlog', path.join('/my/home/localappdata/@oclif\\core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('home', path.join('/my/home'))
+    .hasProperty('cacheDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('configDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
+    .hasProperty('dataDir', join('/my/home/localappdata/@oclif\\core'))
+    .hasProperty('home', join('/my/home'))
   })
 
   describe('s3Key', () => {
@@ -235,23 +232,21 @@ describe('Config', () => {
       types = [],
     }: Options = {}) => {
       class MyCommandClass extends Command {
-      _base = ''
+        _base = ''
 
-      aliases: string[] = []
+        aliases: string[] = []
 
-      hidden = false
+        hidden = false
 
-      id = 'foo:bar'
+        id = 'foo:bar'
 
-      run(): Promise<any> {
-        return Promise.resolve()
-      }
+        run(): Promise<any> {
+          return Promise.resolve()
+        }
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<Command.Class> => {
-        return MyCommandClass
-      }
+      const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
       const commandPluginA: Command.Loadable = {
         strict: false,
@@ -286,6 +281,7 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
         moduleType: 'commonjs',
+        hasManifest: false,
       }
 
       const pluginB: IPlugin = {
@@ -305,15 +301,16 @@ describe('Config', () => {
         valid: true,
         tag: 'tag',
         moduleType: 'commonjs',
+        hasManifest: false,
       }
       const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
       let test = fancy
       .resetConfig()
       .env(env, {clear: true})
-      .stub(os, 'homedir', () => path.join(homedir))
-      .stub(os, 'platform', () => platform)
+      .stub(util, 'getHomeDir', stub => stub.returns(join(homedir)))
+      .stub(util, 'getPlatform', stub => stub.returns(platform))
 
-      if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+      if (pjson) test = test.stub(util, 'readJson', stub => stub.resolves(pjson))
       test = test.add('config', async () => {
         const config = await Config.load()
         config.plugins = plugins

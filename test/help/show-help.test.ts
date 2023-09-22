@@ -1,10 +1,10 @@
 import {test as base} from '@oclif/test'
-import {stub, SinonStub} from 'sinon'
-import * as path from 'path'
+import {SinonStub, stub} from 'sinon'
+import {resolve} from 'node:path'
 
 import {Help} from '../../src/help'
-import {AppsIndex, AppsDestroy, AppsCreate, AppsTopic, AppsAdminTopic, AppsAdminAdd, AppsAdminIndex, DbCreate, DbTopic} from './fixtures/fixtures'
-import {Interfaces, Config} from '../../src'
+import {AppsAdminAdd, AppsAdminIndex, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndex, AppsTopic, DbCreate, DbTopic} from './fixtures/fixtures'
+import {Config, Interfaces} from '../../src'
 import {monkeyPatchCommands} from './help-test-utils'
 import {expect} from 'chai'
 
@@ -13,7 +13,7 @@ g.oclif.columns = 80
 
 // extension makes previously protected methods public
 class TestHelp extends Help {
-  public config: any;
+  public declare config: any
 
   public async showRootHelp() {
     return super.showRootHelp()
@@ -34,7 +34,7 @@ const test = base
     }
 
     // use devPlugins: true to bring in plugins-plugin with topic commands for testing
-    const config = await Config.load({devPlugins: true, root: path.resolve(__dirname, '..')})
+    const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
     ctx.help = new TestHelp(config)
   },
   finally(ctx) {
@@ -58,7 +58,7 @@ describe('showHelp for root', () => {
   .loadConfig()
   .stdout()
   .do(async () => {
-    const config = await Config.load({root: path.resolve(__dirname, '..')});
+    const config = await Config.load({root: resolve(__dirname, '..')});
 
     (config as any).plugins = [{
       commands: [AppsIndex, AppsCreate, AppsDestroy],
@@ -97,7 +97,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -127,7 +127,7 @@ describe('showHelp for a topic', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -153,7 +153,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -182,7 +182,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
 
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
@@ -212,7 +212,7 @@ COMMANDS
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsCreate, AppsDestroy, AppsAdminAdd, DbCreate],
@@ -242,7 +242,7 @@ describe('showHelp for a command', () => {
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsCreate],
@@ -268,7 +268,7 @@ DESCRIPTION
   .loadConfig()
   .stdout()
   .do(async ctx => {
-    const config = ctx.config
+    const {config} = ctx
     monkeyPatchCommands(config, [{
       name: 'plugin-1',
       commands: [AppsIndex, AppsCreate, AppsAdminAdd],

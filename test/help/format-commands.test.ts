@@ -1,11 +1,11 @@
 import {Command} from '../../src/command'
-import {expect, test as base} from '@oclif/test'
+import {test as base, expect} from '@oclif/test'
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.oclif.columns = 80
 import {Help} from '../../src/help'
-import {AppsDestroy, AppsCreate} from './fixtures/fixtures'
+import {AppsCreate, AppsDestroy} from './fixtures/fixtures'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {

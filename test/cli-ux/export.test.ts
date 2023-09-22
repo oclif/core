@@ -1,4 +1,4 @@
-import {ux, Table, IPromptOptions, Config, ActionBase, ExitError} from '../../src/cli-ux'
+import {ActionBase, Config, ExitError, IPromptOptions, Table, ux} from '../../src/cli-ux'
 import {expect} from 'chai'
 
 type MyColumns = Record<string, unknown>

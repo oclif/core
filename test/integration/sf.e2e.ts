@@ -1,4 +1,4 @@
-import * as os from 'os'
+import {arch} from 'node:os'
 import {expect} from 'chai'
 import {Executor, setup} from './util'
 import StripAnsi = require('strip-ansi')
@@ -17,12 +17,7 @@ describe('Salesforce CLI (sf)', () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
     executor = await setup(__filename, {
       repo: 'https://github.com/salesforcecli/cli',
-      // Allowing failed install here because it let's attempt to run the tests
-      // even if there's a linting error caused by the code changes. This is only
-      // acceptable since we're crossing major versions at the moment. It should
-      // be removed as soon as sf uses v3.
-      allowFailedInstall: true,
-      compileCmd: 'yarn compile',
+      branch: 'mdonnalley/esm',
     })
   })
 
@@ -87,7 +82,7 @@ describe('Salesforce CLI (sf)', () => {
     const version = await executor.executeCommand('-v')
     expect(version.stdout).to.include('@salesforce/cli')
     expect(version.stdout).to.include(process.platform)
-    expect(version.stdout).to.include(os.arch())
+    expect(version.stdout).to.include(arch())
     expect(version.stdout).to.include(process.version)
   })
 

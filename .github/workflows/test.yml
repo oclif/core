@@ -17,13 +17,11 @@ jobs:
     needs: linux-unit-tests
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
-        node_version: [lts/-1, lts/*, latest]
+        os: [ubuntu-latest, windows-latest]
+        node_version: [lts/*, latest]
         exclude:
           - os: windows-latest
             node_version: lts/*
-          - os: windows-latest
-            node_version: lts/-1
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -32,39 +30,77 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
-      - run: yarn install --network-timeout 600000
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:e2e
+      - if: runner.os == 'Windows'
+        run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+      - if: runner.os == 'Linux'
+        run: yarn test:e2e
+  windows-sf-e2e:
+    # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
+    # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: yarn
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
+      - run: yarn build
+      - run: yarn link
+      - run: New-Item -Path D:\a -Name "e2e" -ItemType "directory"
+      - run: New-Item -Path D:\a\e2e -Name "sf.e2e.ts" -ItemType "directory"
+      - run: |
+          git clone https://github.com/salesforcecli/cli.git --branch mdonnalley/esm
+          cd cli
+
+          $Json = Get-Content package.json | ConvertFrom-Json
+          $Json.dependencies | Add-Member -Force -MemberType NoteProperty -Name "@oclif/core" -Value "file:D:\a\core\core"
+          $Json.resolutions | Add-Member -MemberType NoteProperty -Name "@oclif/core" -Value "D:\a\core\core"
+          $Json | ConvertTo-Json -Depth 9 | Out-File package.json
+
+          yarn install --network-timeout 600000
+          yarn link @oclif/core
+          yarn build
+        working-directory: D:\a\e2e\sf.e2e.ts
+      - run: yarn mocha --forbid-only "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+        env:
+          OCLIF_CORE_E2E_SKIP_SETUP: true
+          OCLIF_CORE_E2E_TEST_DIR: D:\a\e2e
+          DEBUG: e2e:*
   esm-cjs-interop:
     needs: linux-unit-tests
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
-        node_version: [lts/-1, lts/*, latest]
+        os: [ubuntu-latest, windows-latest]
+        node_version: [lts/*, latest]
+        test: [esm, cjs, precore, coreV1, coreV2]
         exclude:
           - os: windows-latest
             node_version: lts/*
-          - os: windows-latest
-            node_version: lts/-1
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
-      - run: yarn install --network-timeout 600000
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs
+      - run: yarn test:esm-cjs --test=${{ matrix.test }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
+        os: [ubuntu-latest, windows-latest]
         externalProjectGitUrl:
           - https://github.com/salesforcecli/plugin-auth
           - https://github.com/salesforcecli/plugin-data

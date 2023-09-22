@@ -1,20 +1,24 @@
 import {CLIError, error} from '../errors'
-import * as globby from 'globby'
-import * as path from 'path'
-import {inspect} from 'util'
-
+import {
+  Debug,
+  flatMap,
+  getCommandIdPermutations,
+  mapValues,
+  resolvePackage,
+} from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {toCached} from './config'
-import {Debug, getCommandIdPermutations} from './util'
+import {compact, exists, isProd, readJson, requireJson} from '../util'
+import {dirname, join, parse, relative, sep} from 'node:path'
+import {loadWithData, loadWithDataFromManifest} from '../module-loader'
+import {Command} from '../command'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
+import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
+import {inspect} from 'node:util'
+import {sync} from 'globby'
+import {toCached} from './config'
 import {tsPath} from './ts-node'
-import {compact, exists, resolvePackage, flatMap, loadJSON, mapValues} from './util'
-import {isProd, requireJson} from '../util'
-import ModuleLoader from '../module-loader'
-import {Command} from '../command'
-import Performance from '../performance'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
@@ -33,9 +37,9 @@ function topicsToArray(input: any, base?: string): Topic[] {
 
 // essentially just "cd .."
 function * up(from: string) {
-  while (path.dirname(from) !== from) {
+  while (dirname(from) !== from) {
     yield from
-    from = path.dirname(from)
+    from = dirname(from)
   }
 
   yield from
@@ -43,9 +47,9 @@ function * up(from: string) {
 
 async function findSourcesRoot(root: string) {
   for (const next of up(root)) {
-    const cur = path.join(next, 'package.json')
+    const cur = join(next, 'package.json')
     // eslint-disable-next-line no-await-in-loop
-    if (await exists(cur)) return path.dirname(cur)
+    if (await exists(cur)) return dirname(cur)
   }
 }
 
@@ -64,18 +68,18 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
   for (const next of up(root)) {
     let cur
     if (name) {
-      cur = path.join(next, 'node_modules', name, 'package.json')
+      cur = join(next, 'node_modules', name, 'package.json')
       // eslint-disable-next-line no-await-in-loop
-      if (await exists(cur)) return path.dirname(cur)
+      if (await exists(cur)) return dirname(cur)
       try {
         // eslint-disable-next-line no-await-in-loop
-        const pkg = await loadJSON(path.join(next, 'package.json'))
+        const pkg = await readJson<PJSON>(join(next, 'package.json'))
         if (pkg.name === name) return next
       } catch {}
     } else {
-      cur = path.join(next, 'package.json')
+      cur = join(next, 'package.json')
       // eslint-disable-next-line no-await-in-loop
-      if (await exists(cur)) return path.dirname(cur)
+      if (await exists(cur)) return dirname(cur)
     }
   }
 }
@@ -87,10 +91,19 @@ async function findRoot(name: string | undefined, root: string) {
       pkgPath = resolvePackage(name, {paths: [root]})
     } catch {}
 
-    return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root)
+    return pkgPath ? findSourcesRoot(dirname(pkgPath)) : findRootLegacy(name, root)
   }
 
   return findSourcesRoot(root)
+}
+
+const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
+  Boolean(manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id]))
+
+const search = (cmd: any) => {
+  if (typeof cmd.run === 'function') return cmd
+  if (cmd.default && cmd.default.run) return cmd.default
+  return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
 }
 
 export class Plugin implements IPlugin {
@@ -142,16 +155,20 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
-    const root = await findRoot(this.options.name, this.options.root)
+    if (this.options.parent) this.parent = this.options.parent as Plugin
+    // Linked plugins already have a root so there's no need to search for it.
+    // However there could be child plugins nested inside the linked plugin, in which
+    // case we still need to search for the child plugin's root.
+    const root = this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
-    this.pjson = await loadJSON(path.join(root, 'package.json'))
+    this.pjson = await readJson(join(root, 'package.json'))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = path.join(root, 'package.json')
+    const pjsonPath = join(root, 'package.json')
     if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
     if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
@@ -197,12 +214,12 @@ export class Plugin implements IPlugin {
       '**/*.+(js|cjs|mjs|ts|tsx)',
       '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js)?(x)',
     ]
-    const ids = globby.sync(patterns, {cwd: this.commandsDir})
+    const ids = sync(patterns, {cwd: this.commandsDir})
     .map(file => {
-      const p = path.parse(file)
+      const p = parse(file)
       const topics = p.dir.split('/')
       const command = p.name !== 'index' && p.name
-      const id = [...topics, command].filter(f => f).join(':')
+      const id = [...topics, command].filter(Boolean).join(':')
       return id === '' ? '.' : id
     })
     this._debug('found commands', ids)
@@ -217,29 +234,28 @@ export class Plugin implements IPlugin {
 
   public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
+
     const fetch = async () => {
       if (!this.commandsDir) return
-      const search = (cmd: any) => {
-        if (typeof cmd.run === 'function') return cmd
-        if (cmd.default && cmd.default.run) return cmd.default
-        return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
-      }
-
-      let m
+      let module
+      let isESM: boolean | undefined
+      let filePath: string | undefined
       try {
-        const p = path.join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))
-        const {isESM, module, filePath} = await ModuleLoader.loadWithData(this, p)
+        ({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id)
+          ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
+          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
-        m = module
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
         throw error
       }
 
-      const cmd = search(m)
+      const cmd = search(module)
       if (!cmd) return
       cmd.id = id
       cmd.plugin = this
+      cmd.isESM = isESM
+      cmd.relativePath = relative(this.root, filePath || '').split(sep)
       return cmd
     }
 
@@ -256,8 +272,8 @@ export class Plugin implements IPlugin {
 
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
-        const p = path.join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
-        const manifest: Manifest = await loadJSON(p)
+        const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
+        const manifest = await readJson<Manifest>(p)
         if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
           process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
         } else {
@@ -302,6 +318,7 @@ export class Plugin implements IPlugin {
           else throw this.addErrorScope(error, scope)
         }
       })))
+      // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
       .filter((f): f is [string, Command.Cached] => Boolean(f))
       .reduce((commands, [id, c]) => {
         commands[id] = c

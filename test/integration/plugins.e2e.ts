@@ -1,5 +1,5 @@
-import * as os from 'os'
-import {expect, config as chaiConfig} from 'chai'
+import {arch} from 'node:os'
+import {config as chaiConfig, expect} from 'chai'
 import {Executor, Result, setup} from './util'
 
 chaiConfig.truncateThreshold = 0
@@ -197,7 +197,7 @@ describe('oclif plugins', () => {
       it('should install the plugin', async () => {
         const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available 2>&1')
         expect(result.code).to.equal(0)
-        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available... installed v')
+        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available@latest... installed v')
 
         const pluginsResult = await executor.executeCommand('plugins')
         expect(pluginsResult.code).to.equal(0)
@@ -224,7 +224,7 @@ describe('oclif plugins', () => {
       it('should install the plugin', async () => {
         const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available --force 2>&1')
         expect(result.code).to.equal(0)
-        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available... installed v')
+        expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available@latest... installed v')
 
         const pluginsResult = await executor.executeCommand('plugins')
         expect(pluginsResult.code).to.equal(0)
@@ -257,7 +257,7 @@ describe('oclif plugins', () => {
 
     it('should show version', () => expect(version.stdout).to.include('oclif-hello-world/0.0.0'))
     it('should show platform', () => expect(version.stdout).to.include(process.platform))
-    it('should show arch', () => expect(version.stdout).to.include(os.arch()))
+    it('should show arch', () => expect(version.stdout).to.include(arch()))
     it('should show node version', () => expect(version.stdout).to.include(process.version))
   })
 

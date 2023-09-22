@@ -2,7 +2,7 @@ export type CommandError = Error & {exitCode?: number};
 
 export interface OclifError {
   oclif: {
-    exit?: number | false;
+    exit?: number;
   };
 }
 

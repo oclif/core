@@ -1,7 +1,8 @@
-import {URL} from 'url'
+
 import {Arg, ArgDefinition} from './interfaces/parser'
-import {Command} from './command'
 import {dirExists, fileExists, isNotFalsy} from './util'
+import {Command} from './command'
+import {URL} from 'node:url'
 
 /**
  * Create a custom arg.
@@ -22,15 +23,13 @@ import {dirExists, fileExists, isNotFalsy} from './util'
  */
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P> {
-  return (options: any = {}) => {
-    return {
-      parse: async (i: string, _context: Command, _opts: P) => i,
-      ...defaults,
-      ...options,
-      input: [] as string[],
-      type: 'option',
-    }
-  }
+  return (options: any = {}) => ({
+    parse: async (i: string, _context: Command, _opts: P) => i,
+    ...defaults,
+    ...options,
+    input: [] as string[],
+    type: 'option',
+  })
 }
 
 export const boolean = custom<boolean>({
@@ -38,7 +37,7 @@ export const boolean = custom<boolean>({
 })
 
 export const integer = custom<number, {min?: number; max?: number;}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (!/^-?\d+$/.test(input))
       throw new Error(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
@@ -51,7 +50,7 @@ export const integer = custom<number, {min?: number; max?: number;}>({
 })
 
 export const directory = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return dirExists(input)
 
     return input
@@ -59,7 +58,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 export const file = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return fileExists(input)
 
     return input
@@ -71,7 +70,7 @@ export const file = custom<string, {exists?: boolean}>({
  * if the string is not a valid URL.
  */
 export const url = custom<URL>({
-  parse: async input => {
+  async parse(input) {
     try {
       return new URL(input)
     } catch {
