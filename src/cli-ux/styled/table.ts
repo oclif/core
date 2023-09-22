@@ -309,11 +309,11 @@ export namespace table {
     columns: Interfaces.OptionFlag<string | undefined>;
     sort: Interfaces.OptionFlag<string | undefined>;
     filter: Interfaces.OptionFlag<string | undefined>;
-    csv: Interfaces.Flag<boolean>;
+    csv: Interfaces.BooleanFlag<boolean>;
     output: Interfaces.OptionFlag<string | undefined>;
-    extended: Interfaces.Flag<boolean>;
-    'no-truncate': Interfaces.Flag<boolean>;
-    'no-header': Interfaces.Flag<boolean>;
+    extended: Interfaces.BooleanFlag<boolean>;
+    'no-truncate': Interfaces.BooleanFlag<boolean>;
+    'no-header': Interfaces.BooleanFlag<boolean>;
   } = {
     columns: F.string({exclusive: ['extended'], description: 'only show provided columns (comma-separated)'}),
     sort: F.string({description: 'property to sort by (prepend \'-\' for descending)'}),

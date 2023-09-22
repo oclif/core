@@ -215,7 +215,7 @@ export type OptionFlagProps = FlagProps & {
 export type FlagParserContext = Command & {token: FlagToken}
 
 export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: FlagParserContext, opts: P & OptionFlag<T, P>) =>
-  T extends Array<infer U> ? Promise<U> : Promise<T>
+  T extends Array<infer U> ? Promise<U | undefined> : Promise<T | undefined>
 
 export type ArgParserContext = Command & {token: ArgToken}
 
