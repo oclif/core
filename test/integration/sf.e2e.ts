@@ -115,7 +115,7 @@ describe('Salesforce CLI (sf)', () => {
 
     expect(results.failures).to.be.empty
 
-    const unset = await executor.executeCommand('config unset disable-telemetry org-api-version --global')
+    const unset = await executor.executeCommand('config unset disable-telemetry org-api-version --global --json')
     const unsetParsed = parseJson(unset.stdout!)
     expect(unsetParsed.status).to.equal(0)
   })
