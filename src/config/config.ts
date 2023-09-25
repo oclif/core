@@ -12,9 +12,9 @@ import {join, sep} from 'node:path'
 import {Command} from '../command'
 import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
-import {boolean} from '../flags'
 import {format} from 'node:util'
 import {getHelpFlagAdditions} from '../help'
+import {json} from '../flags'
 import {loadWithData} from '../module-loader'
 import {settings} from '../settings'
 import {stdout} from '../cli-ux/stream'
@@ -870,12 +870,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
   const c = mergePrototype(cmd, cmd)
 
   const cmdFlags = {
-    ...(c.enableJsonFlag ? {
-      json: boolean({
-        description: 'Format output as json.',
-        helpGroup: 'GLOBAL',
-      }),
-    } : {}),
+    ...(c.enableJsonFlag ? {json} : {}),
     ...c.flags,
     ...c.baseFlags,
   } as typeof c['flags']

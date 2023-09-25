@@ -25,9 +25,9 @@ import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
-import {boolean} from './flags'
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
+import {json} from './flags'
 import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
@@ -41,13 +41,6 @@ stdout.on('error', (err: any) => {
     return
   throw err
 })
-
-export const jsonFlag = {
-  json: boolean({
-    description: 'Format output as json.',
-    helpGroup: 'GLOBAL',
-  }),
-}
 
 /**
  * An abstract class which acts as the base for each command
@@ -328,7 +321,7 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
-      flags: (options.enableJsonFlag ? {...combinedFlags, ...jsonFlag} : combinedFlags) as FlagInput<F>,
+      flags: (options.enableJsonFlag ? {...combinedFlags, json} : combinedFlags) as FlagInput<F>,
     }
 
     const results = await Parser.parse<F, B, A>(argv, opts)

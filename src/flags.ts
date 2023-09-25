@@ -209,3 +209,8 @@ export function option<T extends readonly string[], P extends CustomOptions>(
     type: 'option',
   })
 }
+
+export const json = boolean({
+  description: 'Format output as json.',
+  helpGroup: 'GLOBAL',
+})
