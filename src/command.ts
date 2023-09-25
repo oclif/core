@@ -42,7 +42,7 @@ stdout.on('error', (err: any) => {
   throw err
 })
 
-const jsonFlag = {
+export const jsonFlag = {
   json: boolean({
     description: 'Format output as json.',
     helpGroup: 'GLOBAL',
@@ -128,22 +128,7 @@ export abstract class Command {
 
   protected static '_--' = false
 
-  protected static _enableJsonFlag = false
-
-  public static get enableJsonFlag(): boolean {
-    return this._enableJsonFlag
-  }
-
-  public static set enableJsonFlag(value: boolean) {
-    this._enableJsonFlag = value
-    if (value === true) {
-      this.baseFlags = jsonFlag
-    } else {
-      delete this.baseFlags?.json
-      this.flags = {} // force the flags setter to run
-      delete this.flags?.json
-    }
-  }
+  public static enableJsonFlag = false
 
   public static get '--'(): boolean {
     return Command['_--']
@@ -184,29 +169,10 @@ export abstract class Command {
     return cmd._run<ReturnType<T['run']>>()
   }
 
-  protected static _baseFlags: FlagInput
-
-  static get baseFlags(): FlagInput {
-    return this._baseFlags
-  }
-
-  static set baseFlags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._baseFlags = Object.assign({}, this.baseFlags, flags)
-    this.flags = {} // force the flags setter to run
-  }
+  public static baseFlags: FlagInput
 
   /** A hash of flags for the command */
-  protected static _flags: FlagInput
-
-  public static get flags(): FlagInput {
-    return this._flags
-  }
-
-  public static set flags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
-  }
+  public static flags: FlagInput
 
   public id: string | undefined
 
@@ -352,12 +318,19 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, B, A>,
+    argv = this.argv,
+  ): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
-    const opts = {context: this, ...options}
-    // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
-    opts.args = options?.args
+    const combinedFlags = {...options.baseFlags, ...options.flags}
+
+    const opts = {
+      context: this,
+      ...options,
+      flags: (options.enableJsonFlag ? {...combinedFlags, ...jsonFlag} : combinedFlags) as FlagInput<F>,
+    }
+
     const results = await Parser.parse<F, B, A>(argv, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 

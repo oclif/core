@@ -7,12 +7,12 @@ import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {URL, fileURLToPath} from 'node:url'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} from '../util'
+import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, pickBy, requireJson} from '../util'
 import {join, sep} from 'node:path'
-
 import {Command} from '../command'
 import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
+import {boolean} from '../flags'
 import {format} from 'node:util'
 import {getHelpFlagAdditions} from '../help'
 import {loadWithData} from '../module-loader'
@@ -855,10 +855,32 @@ const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean)
   }
 }
 
-export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
+export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
   const flags = {} as {[k: string]: Command.Flag.Cached}
 
-  for (const [name, flag] of Object.entries(c.flags || {})) {
+  // In order to collect static properties up the inheritance chain, we need to recursively
+  // access the prototypes until there's nothing left. This allows us to combine baseFlags
+  // and flags as well as add in the json flag if enableJsonFlag is enabled.
+  const mergePrototype = (result: Command.Class, cmd: Command.Class): Command.Class => {
+    const proto = Object.getPrototypeOf(cmd)
+    const filteredProto = pickBy(proto, v => v !== undefined) as Command.Class
+    return Object.keys(proto).length > 0 ? mergePrototype({...filteredProto, ...result} as Command.Class, proto) : result
+  }
+
+  const c = mergePrototype(cmd, cmd)
+
+  const cmdFlags = {
+    ...(c.enableJsonFlag ? {
+      json: boolean({
+        description: 'Format output as json.',
+        helpGroup: 'GLOBAL',
+      }),
+    } : {}),
+    ...c.flags,
+    ...c.baseFlags,
+  } as typeof c['flags']
+
+  for (const [name, flag] of Object.entries(cmdFlags || {})) {
     if (flag.type === 'boolean') {
       flags[name] = {
         name,
@@ -946,7 +968,16 @@ export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCach
   }
 
   // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags', '_baseFlags']
+  const ignoreCommandProperties = [
+    'plugin',
+    '_flags',
+    '_enableJsonFlag',
+    '_globalFlags',
+    '_baseFlags',
+    'baseFlags',
+    '_--',
+    '_base',
+  ]
   const stdKeys = Object.keys(stdProperties)
   const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
   const additionalProperties: Record<string, unknown> = {}

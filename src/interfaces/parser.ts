@@ -243,7 +243,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
 }
 
 export type OptionFlag<T, P = CustomOptions> = FlagProps & OptionFlagProps & {
-  parse: FlagParser<T, string, P>
+  parse: FlagParser<T | undefined, string, P>
   defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
   default?: FlagDefault<T | undefined, P>;
@@ -361,6 +361,7 @@ export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
   flags?: FlagInput<TFlags>;
   baseFlags?: FlagInput<BFlags>;
+  enableJsonFlag?: true | false;
   args?: ArgInput<AFlags>;
   strict?: boolean;
   context?: ParserContext;

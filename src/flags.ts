@@ -9,14 +9,14 @@ type NotArray<T> = T extends Array<any> ? never: T;
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
-    multiple: true
+    multiple: true;
   } & (
     {required: true} | {default: OptionFlag<T[], P>['default']}
   ),
 ): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
-  defaults: Partial<OptionFlag<T, P>> & {
+  defaults: Partial<OptionFlag<NotArray<T>, P>> & {
     multiple?: false | undefined;
   } & (
     {required: true} | {default: OptionFlag<NotArray<T>, P>['default']}
@@ -24,7 +24,7 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(
 ): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
-  defaults: Partial<OptionFlag<T, P>> & {
+  defaults: Partial<OptionFlag<NotArray<T>, P>> & {
     default?: OptionFlag<NotArray<T>, P>['default'] | undefined;
     multiple?: false | undefined;
     required?: false | undefined;

@@ -80,7 +80,6 @@ describe('command', () => {
         static description = 'test command'
         static aliases = ['alias1', 'alias2']
         static hidden = true
-        // @ts-ignore
         static flags = {
           flaga: Flags.boolean(),
           flagb: Flags.string({
@@ -98,8 +97,7 @@ describe('command', () => {
             required: false,
             description: 'flagc desc',
             options: ['a', 'b'],
-            // @ts-expect-error: context is any
-            default: async context => context.options.min + 1,
+            default: async context => (context.options.min ?? 1) + 1,
           }),
         }
 
@@ -133,6 +131,8 @@ describe('command', () => {
         deprecateAliases: undefined,
         summary: undefined,
         strict: true,
+        enableJsonFlag: false,
+        hasDynamicHelp: false,
         flags: {
           flaga: {
             aliases: undefined,
@@ -224,51 +224,108 @@ describe('command', () => {
     .it('converts to cached with everything set')
 
     fancy
-    // .skip()
     .do(async () => {
-      // const c = class extends Command {
-      // }.convertToCached()
-      // expect(await c.load()).to.have.property('run')
-      // delete c.load
-      // expect(c).to.deep.equal({
-      //   _base: `@oclif/command@${pjson.version}`,
-      //   id: undefined,
-      //   type: undefined,
-      //   hidden: undefined,
-      //   pluginName: undefined,
-      //   description: 'test command',
-      //   aliases: [],
-      //   title: undefined,
-      //   usage: undefined,
-      //   flags: {},
-      //   args: [],
-      // })
+      class Base extends Command {
+        public static enableJsonFlag = true
+        public static baseFlags = {
+          parentFlag: Flags.boolean(),
+        }
+      }
+
+      class Child extends Base {
+        static flags = {
+          childFlag: Flags.boolean(),
+        }
+      }
+
+      const cached = await toCached(Child, undefined, false)
+
+      expect(cached).to.deep.equal({
+        id: 'command',
+        summary: undefined,
+        description: 'test command',
+        strict: true,
+        usage: undefined,
+        pluginName: undefined,
+        pluginAlias: undefined,
+        pluginType: undefined,
+        hidden: undefined,
+        state: undefined,
+        aliases: [],
+        examples: undefined,
+        deprecationOptions: undefined,
+        deprecateAliases: undefined,
+        flags: {
+          json: {
+            name: 'json',
+            type: 'boolean',
+            char: undefined,
+            summary: undefined,
+            description: 'Format output as json.',
+            hidden: undefined,
+            required: undefined,
+            helpLabel: undefined,
+            helpGroup: 'GLOBAL',
+            allowNo: false,
+            dependsOn: undefined,
+            relationships: undefined,
+            exclusive: undefined,
+            deprecated: undefined,
+            deprecateAliases: undefined,
+            aliases: undefined,
+            charAliases: undefined,
+            delimiter: undefined,
+            noCacheDefault: undefined,
+          },
+          childFlag: {
+            name: 'childFlag',
+            type: 'boolean',
+            char: undefined,
+            summary: undefined,
+            description: undefined,
+            hidden: undefined,
+            required: undefined,
+            helpLabel: undefined,
+            helpGroup: undefined,
+            allowNo: false,
+            dependsOn: undefined,
+            relationships: undefined,
+            exclusive: undefined,
+            deprecated: undefined,
+            deprecateAliases: undefined,
+            aliases: undefined,
+            charAliases: undefined,
+            delimiter: undefined,
+            noCacheDefault: undefined,
+          },
+          parentFlag: {
+            name: 'parentFlag',
+            type: 'boolean',
+            char: undefined,
+            summary: undefined,
+            description: undefined,
+            hidden: undefined,
+            required: undefined,
+            helpLabel: undefined,
+            helpGroup: undefined,
+            allowNo: false,
+            dependsOn: undefined,
+            relationships: undefined,
+            exclusive: undefined,
+            deprecated: undefined,
+            deprecateAliases: undefined,
+            aliases: undefined,
+            charAliases: undefined,
+            delimiter: undefined,
+            noCacheDefault: undefined,
+          },
+        },
+        args: {},
+        hasDynamicHelp: false,
+        enableJsonFlag: true,
+      })
     })
-
-    .it('adds plugin name')
-
-    fancy
-    // .skip()
-    // .do(async () => {
-    //   const c = class extends Command {
-    //   }.convertToCached({pluginName: 'myplugin'})
-    //   expect(await c.load()).to.have.property('run')
-    //   delete c.load
-    //   expect(c).to.deep.equal({
-    //     _base: `@oclif/command@${pjson.version}`,
-    //     type: undefined,
-    //     id: undefined,
-    //     hidden: undefined,
-    //     pluginName: 'myplugin',
-    //     description: 'test command',
-    //     aliases: [],
-    //     title: undefined,
-    //     usage: undefined,
-    //     flags: {},
-    //     args: [],
-    //   })
-    // })
-    .it('converts to cached with nothing set')
+    .it('converts to cached with multiple Command classes in inheritance chain')
   })
 
   describe('parse', () => {
