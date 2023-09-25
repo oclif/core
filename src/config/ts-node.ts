@@ -23,7 +23,11 @@ function loadTSConfig(root: string): TSConfig | undefined {
   } catch {
     try {
       typescript = require(join(root, 'node_modules', 'typescript'))
-    } catch {}
+    } catch {
+      debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
+      memoizedWarn('Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.')
+      return
+    }
   }
 
   if (existsSync(tsconfigPath) && typescript) {
@@ -49,7 +53,15 @@ function registerTSNode(root: string): TSConfig | undefined {
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   debug('ts-node path:', tsNodePath)
-  const tsNode: typeof TSNode = require(tsNodePath)
+  let tsNode: typeof TSNode
+
+  try {
+    tsNode = require(tsNodePath)
+  } catch {
+    debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
+    memoizedWarn(`Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`)
+    return
+  }
 
   const typeRoots = [
     join(root, 'node_modules', '@types'),
