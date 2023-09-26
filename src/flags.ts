@@ -145,12 +145,16 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   },
 })
 
+/**
+ * Boolean flag for enabling JSON output. We strongly discourage using this flag directly
+ * and instead recommend setting the `enableJsonFlag` property on the Command class.
+ */
 export const json = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<boolean> => boolean({
   description: 'Format output as json.',
   helpGroup: 'GLOBAL',
   ...opts,
-  async parse(input, cmd) {
-    if (input) process.env[cmd.config.scopedEnvVarKey('JSON_FLAG_OVERRIDE')] = 'true'
+  async parse(input, {config}) {
+    if (input) process.env[config.scopedEnvVarKey('JSON_FLAG_OVERRIDE')] = 'true'
     return input
   },
 })

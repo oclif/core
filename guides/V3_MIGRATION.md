@@ -5,6 +5,7 @@ Migrating to @oclif/core@V3
   - [BREAKING CHANGES ❗](#breaking-changes-)
     - [Dropping node 14 and node 16 support](#dropping-node-14-and-node-16-support)
     - [Bin Scripts for ESM/CJS Interoperability](#bin-scripts-for-esmcjs-interoperability)
+    - [Dropped `ts-node` as a dependency](#dropped-ts-node-as-a-dependency)
     - [`Config.plugins`](#configplugins)
     - [Readonly properties on `Config`](#readonly-properties-on-config)
     - [Private methods on `Plugin`](#private-methods-on-plugin)
@@ -12,9 +13,10 @@ Migrating to @oclif/core@V3
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
   - [Features 🎉](#features-)
-    - [Cache Flexible taxonomy Command Permutations](#cache-flexible-taxonomy-command-permutations)
+    - [Performance Improvements](#performance-improvements)
     - [charAliases Flag Property](#charaliases-flag-property)
     - [Flags.option](#flagsoption)
+    - [Set spinner styles](#set-spinner-styles)
 
 
 ## BREAKING CHANGES ❗
@@ -35,6 +37,10 @@ In order to support ESM and CommonJS plugin interoperability you will need to up
 **You will also need to update any references to the bin scripts to include the .js extension.**
 
 If you'd like to migrate your plugin to ESM, please read our guide [here](https://oclif.io/docs/esm)
+
+### Dropped `ts-node` as a dependency
+
+We removed `ts-node` as a dependency to reduce the package size. By doing this, it means that linked plugin **must** have `ts-node` as a `devDependency` in order for auto-transpilation to work.
 
 ### `Config.plugins`
 `Config.plugins` is now a `Map` where the keys are the plugin names and the values are the loaded `Plugin` instances. Previously it was an array of loaded `Plugin` instances.
@@ -113,9 +119,12 @@ export const mySensitiveFlag = Flags.string({
 
 ## Features 🎉
 
-### Cache Flexible taxonomy Command Permutations
+### Performance Improvements
 
-The command permutations for flexible taxonomy are now cached in the oclif.manifest.json allowing for quicker startup times.
+- Cache command permutations for flexible taxonomy in the `oclif.manifest.json`
+- Cache additional command properties (`isESM`, `relativePath`) in the `oclif.manifest.json`
+- Improved accuracy in the `DEBUG=perf` output.
+- Remove `ts-node` from `dependencies` to reduce the package size.
 
 ### charAliases Flag Property
 
@@ -148,4 +157,16 @@ export default class MyCommand extends Command {
     })(),
   }
 }
+```
+
+### Set spinner styles
+
+You can now configure the style of the spinner when using `ux.action.start`. See [spinners](https://github.com/oclif/core/blob/main/src/cli-ux/action/spinners.ts) for all the different options.
+
+```typescript
+ux.action.start('starting spinner', 'spinning', {style: 'arc'})
+await ux.wait(2500)
+ux.action.status = 'still going'
+await ux.wait(2500)
+ux.action.stop()
 ```

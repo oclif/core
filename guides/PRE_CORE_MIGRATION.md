@@ -5,6 +5,7 @@ Migrating to `@oclif/core` from the deprecated oclif libraries (`@oclif/config`,
 
 - [Migrating to @oclif/core from deprecated libraries](#migrating-to-oclifcore-from-deprecated-libraries)
   - [Update Imports](#update-imports)
+  - [Update Command Args](#update-command-args)
   - [Update your bin scripts](#update-your-bin-scripts)
   - [Add `main` to your package.json](#add-main-to-your-packagejson)
   - [Restore `-h`, `-v`, and `version`](#restore--h--v-and-version)
@@ -29,6 +30,50 @@ With this import:
 ```typescript
 import {Command, Flags, Topic, Help} from '@oclif/core';
 ```
+
+## Update Command Args
+
+We updated the `Command.args` to more closely resemble flags
+
+**Before**
+
+```typescript
+import { Command } from '@oclif/core'
+
+export default MyCommand extends Command {
+  static args = [{name: arg1, description: 'an argument', required: true}]
+
+  public async run(): Promise<void> {
+    const {args} = await this.parse(MyCommand) // args is useless {[name: string]: any}
+  }
+}
+```
+
+**After**
+
+```typescript
+import { Command, Args } from '@oclif/core'
+
+export default MyCommand extends Command {
+  static args = {
+    arg1: Args.string({description: 'an argument', required: true})
+  }
+
+  public async run(): Promise<void> {
+    const {args} = await this.parse(MyCommand) // args is { arg1: string }
+  }
+}
+```
+
+These are the available Args:
+- string
+- integer
+- boolean
+- url
+- file
+- directory
+- custom
+
 
 ## Update your bin scripts
 
