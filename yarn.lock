@@ -524,6 +524,38 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
+"@oclif/core@^3.0.0-beta.17":
+  version "3.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.0.0-beta.17.tgz#a6f0d22703647743aba6c9e53f0560724aba3ccb"
+  integrity sha512-knoDpfAVYgbVeuoUpX/es8os1GeVp//gNczB3mgNPotENXMALOZKgIv7rBbKpHa1xmpGdEf0n31WrBq3HigKwQ==
+  dependencies:
+    "@types/cli-progress" "^3.11.0"
+    ansi-escapes "^4.3.2"
+    ansi-styles "^4.3.0"
+    cardinal "^2.1.1"
+    chalk "^4.1.2"
+    clean-stack "^3.0.1"
+    cli-progress "^3.12.0"
+    debug "^4.3.4"
+    ejs "^3.1.8"
+    get-package-type "^0.1.0"
+    globby "^11.1.0"
+    hyperlinker "^1.0.0"
+    indent-string "^4.0.0"
+    is-wsl "^2.2.0"
+    js-yaml "^3.14.1"
+    natural-orderby "^2.0.3"
+    object-treeify "^1.1.33"
+    password-prompt "^1.1.2"
+    slice-ansi "^4.0.0"
+    string-width "^4.2.3"
+    strip-ansi "^6.0.1"
+    supports-color "^8.1.1"
+    supports-hyperlinks "^2.2.0"
+    widest-line "^3.1.0"
+    wordwrap "^1.0.0"
+    wrap-ansi "^7.0.0"
+
 "@oclif/plugin-help@^5.2.8":
   version "5.2.8"
   resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.2.8.tgz#25821ea8588b59e5554187611ce58b8a95d4e90d"
@@ -550,13 +582,13 @@
     validate-npm-package-name "^5.0.0"
     yarn "^1.22.18"
 
-"@oclif/test@^2.4.7":
-  version "2.4.7"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-2.4.7.tgz#4372270157aa6598c0d1b61349b2eff4e2003193"
-  integrity sha512-r18sKGNUm/VGQ8BkSF9Kn7QeMGjGMDUrLxTDPzL5ERaBF5YSi+O9CT3mKhcFdrMwGnCqPVvlAdX4U/6gtYPy1A==
+"@oclif/test@^3.0.0-beta.1":
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.0.0-beta.1.tgz#37beca545657eaf04413652f3b3db4f946c9804a"
+  integrity sha512-f/cuHO1GboGWBvBCxApkm+EtNjTLIT710XANPChdqPrQ5zF2zLicU6Kt7asH4HPsRKYl+LjJUgF1299t6333LA==
   dependencies:
-    "@oclif/core" "^2.11.10"
-    fancy-test "^2.0.34"
+    "@oclif/core" "^3.0.0-beta.17"
+    fancy-test "^3.0.1"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -2254,10 +2286,10 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-fancy-test@^2.0.34:
-  version "2.0.35"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-2.0.35.tgz#18c0ccd767a7332bea186369a7e7a79a3b4582bb"
-  integrity sha512-XE0L7yAFOKY2jDnkBDDQ3JBD7xbBFwAFl1Z/5WNKBeVNlaEP08wuRTPE3xj2k+fnUp2CMUfD+6aiIS+4pcrjwg==
+fancy-test@^3.0.0-beta.2:
+  version "3.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.0-beta.2.tgz#a6b6b4f3ae30200ce64ff8dd79c73fcefba0058f"
+  integrity sha512-bXffX78q50U/dm9E0RVesZUQ0IZPmRkMhKJdbipuVOm/WuzdoYXZnT/sr0uyzyGaxtjFcatKhZgPRDk49DlXTw==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
@@ -2266,12 +2298,13 @@ fancy-test@^2.0.34:
     lodash "^4.17.13"
     mock-stdin "^1.0.0"
     nock "^13.3.3"
+    sinon "^16.0.0"
     stdout-stderr "^0.1.9"
 
-fancy-test@^3.0.0-beta.2:
-  version "3.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.0-beta.2.tgz#a6b6b4f3ae30200ce64ff8dd79c73fcefba0058f"
-  integrity sha512-bXffX78q50U/dm9E0RVesZUQ0IZPmRkMhKJdbipuVOm/WuzdoYXZnT/sr0uyzyGaxtjFcatKhZgPRDk49DlXTw==
+fancy-test@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.1.tgz#8b19ed4ccc8b0625475eabf36fd743e1d0168abb"
+  integrity sha512-Ke1IFOGEBxP2dNg0X7ZYPUSwKSRr5GNn3xM/2DpHkP86riF3MFDpesXJuD1TGm7gcfwBtYpuSzuw3m704bThVg==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"

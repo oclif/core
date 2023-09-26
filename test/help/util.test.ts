@@ -4,6 +4,7 @@ import {test} from '@oclif/test'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
 import {expect} from 'chai'
+import * as util from '../../src/config/util'
 
 describe('util', () => {
   let config: Interfaces.Config
@@ -52,7 +53,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space', () => {
       config.topicSeparator = ' '
       const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
@@ -60,7 +61,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and command is misspelled', () => {
       config.topicSeparator = ' '
       const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
@@ -68,7 +69,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has args and command is misspelled', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -81,7 +82,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has args', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -94,7 +95,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has variable arguments', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -107,7 +108,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -120,7 +121,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return full id when topic separator is a space and does not have arguments', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -134,7 +135,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has arg with value', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -144,7 +145,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has variable args with value', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -154,7 +155,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has flags', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
@@ -164,7 +165,7 @@ describe('util', () => {
     })
 
     test
-    .stub(Config.prototype, 'collectUsableIds', () => ['foo', 'foo:bar'])
+    .stub(util, 'collectUsableIds', stub => stub.returns(new Set(['foo', 'foo:bar'])))
     .it('should return standardized id when topic separator is a space and has flags, arg, and arg with value', () => {
       config.topicSeparator = ' '
       // @ts-expect-error private member
