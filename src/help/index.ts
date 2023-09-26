@@ -8,7 +8,7 @@ import RootHelp from './root'
 import {error} from '../errors'
 import {format} from 'node:util'
 import {stdout} from '../cli-ux/stream'
-import {toCached} from '../config/config'
+import {toCached} from '../to-cached'
 
 import stripAnsi = require('strip-ansi')
 

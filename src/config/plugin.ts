@@ -17,7 +17,7 @@ import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
 import {inspect} from 'node:util'
 import {sync} from 'globby'
-import {toCached} from './config'
+import {toCached} from '../to-cached'
 import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
