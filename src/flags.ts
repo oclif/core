@@ -145,6 +145,16 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   },
 })
 
+export const json = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<boolean> => boolean({
+  description: 'Format output as json.',
+  helpGroup: 'GLOBAL',
+  ...opts,
+  async parse(input, cmd) {
+    if (input) process.env[cmd.config.scopedEnvVarKey('JSON_FLAG_OVERRIDE')] = 'true'
+    return input
+  },
+})
+
 type ElementType<T extends ReadonlyArray<unknown>> = T[number];
 
 export function option<T extends readonly string[], P extends CustomOptions>(
@@ -209,8 +219,3 @@ export function option<T extends readonly string[], P extends CustomOptions>(
     type: 'option',
   })
 }
-
-export const json = boolean({
-  description: 'Format output as json.',
-  helpGroup: 'GLOBAL',
-})

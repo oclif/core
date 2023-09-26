@@ -1,15 +1,3 @@
-import {
-  boolean,
-  custom,
-  directory,
-  file,
-  help,
-  integer,
-  option,
-  string,
-  url,
-  version,
-} from './flags'
 import {stderr} from './cli-ux/stream'
 
 function checkCWD() {
@@ -27,22 +15,10 @@ checkCWD()
 export * as Args from './args'
 export * as Errors from './errors'
 
-export const Flags = {
-  custom,
-  option,
-  boolean,
-  string,
-  url,
-  integer,
-  directory,
-  file,
-  help,
-  version,
-}
-
 export * as Interfaces from './interfaces'
 export * as Parser from './parser'
 export * as ux from './cli-ux'
+export * as Flags from './flags'
 export {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 export {Config, toCached, Plugin, tsPath} from './config'
 export {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'

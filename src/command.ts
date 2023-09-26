@@ -243,8 +243,13 @@ export abstract class Command {
    * @returns {boolean} true if the command supports json and the --json flag is present
    */
   public jsonEnabled(): boolean {
+    const flagOverride = this.config.scopedEnvVarTrue?.('JSON_FLAG_OVERRIDE')
+
+    if (flagOverride) return true
+
     // if the command doesn't support json, return false
     if (!this.ctor.enableJsonFlag) return false
+
     // if the command parameter pass through is enabled, return true if the --json flag is before the '--' separator
     if (this.passThroughEnabled) {
       const ptIndex = this.argv.indexOf('--')
@@ -321,7 +326,7 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
-      flags: (options.enableJsonFlag ? {...combinedFlags, json} : combinedFlags) as FlagInput<F>,
+      flags: (options.enableJsonFlag ? {...combinedFlags, json: json()} : combinedFlags) as FlagInput<F>,
     }
 
     const results = await Parser.parse<F, B, A>(argv, opts)

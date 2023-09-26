@@ -711,5 +711,39 @@ describe('command', () => {
       expect(cmd.jsonEnabled()).to.equal(false)
     })
     .it('json disabled/pass through enable/--json flag before --/jsonEnabled() should be false')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+        static flags = {
+          json: Flags.json(),
+        }
+
+        async run() {}
+      }
+
+      const cmd = new CMD(['--json'], {
+        bin: 'FOO', scopedEnvVarTrue: (foo: string) => foo.includes('JSON_FLAG_OVERRIDE'),
+      } as any)
+      expect(cmd.jsonEnabled()).to.equal(true)
+    })
+    .it('Flags.json to enable json, enableJsonFlag not set')
+
+    fancy
+    .stdout()
+    .do(async () => {
+      class CMD extends Command {
+        static flags = {
+          json: Flags.json(),
+        }
+
+        async run() {}
+      }
+
+      const cmd = new CMD([], {} as any)
+      expect(cmd.jsonEnabled()).to.equal(false)
+    })
+    .it('Flags.json in flags definition but not used, enableJsonFlag not set')
   })
 })
