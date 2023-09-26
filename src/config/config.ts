@@ -870,9 +870,9 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
   const c = mergePrototype(cmd, cmd)
 
   const cmdFlags = {
+    ...(c.enableJsonFlag ? {json: json()} : {}),
     ...c.baseFlags,
     ...c.flags,
-    ...(c.enableJsonFlag ? {json: json()} : {}),
   } as typeof c['flags']
 
   for (const [name, flag] of Object.entries(cmdFlags || {})) {
