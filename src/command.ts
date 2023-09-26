@@ -264,8 +264,13 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
+    const allFlags = this.aggregateFlags(
+      this.ctor.flags,
+      this.ctor.baseFlags,
+      this.ctor.enableJsonFlag,
+    )
     for (const flag of Object.keys(flags)) {
-      const flagDef = this.ctor.flags[flag]
+      const flagDef = allFlags[flag]
       const deprecated = flagDef?.deprecated
       if (deprecated) {
         this.warn(formatFlagDeprecationWarning(flag, deprecated))
@@ -309,12 +314,15 @@ export abstract class Command {
     argv = this.argv,
   ): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
-    const combinedFlags = {...options.baseFlags, ...options.flags}
 
     const opts = {
       context: this,
       ...options,
-      flags: (options.enableJsonFlag ? {...combinedFlags, json: json()} : combinedFlags) as FlagInput<F>,
+      flags: this.aggregateFlags<F, B>(
+        options.flags,
+        options.baseFlags,
+        options.enableJsonFlag,
+      ),
     }
 
     const results = await Parser.parse<F, B, A>(argv, opts)
@@ -367,6 +375,17 @@ export abstract class Command {
     }
 
     keys.map(key => delete process.env[key])
+  }
+
+  private aggregateFlags<F extends FlagOutput, B extends FlagOutput>(
+    flags: FlagInput<F> | undefined,
+    baseFlags: FlagInput<B> | undefined,
+    enableJsonFlag: boolean | undefined,
+  ): FlagInput<F> {
+    const combinedFlags = {...baseFlags, ...flags}
+    return (enableJsonFlag
+      ? {...combinedFlags, json: json()}
+      : combinedFlags) as FlagInput<F>
   }
 }
 
