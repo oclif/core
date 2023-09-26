@@ -119,22 +119,7 @@ export abstract class Command {
 
   public static hasDynamicHelp = false
 
-  protected static '_--' = false
-
   public static enableJsonFlag = false
-
-  public static get '--'(): boolean {
-    return Command['_--']
-  }
-
-  public static set '--'(value: boolean) {
-    Command['_--'] = value
-  }
-
-  public get passThroughEnabled(): boolean {
-    return Command['_--']
-  }
-
   /**
    * instantiate and run the command
    *
@@ -243,21 +228,24 @@ export abstract class Command {
    * @returns {boolean} true if the command supports json and the --json flag is present
    */
   public jsonEnabled(): boolean {
-    const flagOverride = this.config.scopedEnvVarTrue?.('JSON_FLAG_OVERRIDE')
+    // If the JSON_FLAG_OVERRIDE env var (set by Flags.json parse) is set to true, return true
+    // Checking for this first allows commands to define a --json flag using Flags.json()
+    // without setting enableJsonFlag static property.
+    if (this.config.scopedEnvVarTrue?.('JSON_FLAG_OVERRIDE')) return true
 
-    if (flagOverride) return true
-
-    // if the command doesn't support json, return false
+    // If the command doesn't support json, return false
     if (!this.ctor.enableJsonFlag) return false
 
-    // if the command parameter pass through is enabled, return true if the --json flag is before the '--' separator
-    if (this.passThroughEnabled) {
-      const ptIndex = this.argv.indexOf('--')
-      const jsonIndex = this.argv.indexOf('--json')
-      return jsonIndex > -1 && (ptIndex === -1 || jsonIndex < ptIndex)
-    }
+    // If the CONTENT_TYPE env var is set to json, return true
+    if (this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json') return true
 
-    return this.argv.includes('--json') || this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json'
+    const passThroughIndex = this.argv.indexOf('--')
+    const jsonIndex = this.argv.indexOf('--json')
+    return passThroughIndex === -1
+      // If '--' is not present, then check for `--json` in this.argv
+      ? jsonIndex > -1
+      // If '--' is present, return true only the --json flag exists and is before the '--'
+      : jsonIndex > -1 && jsonIndex < passThroughIndex
   }
 
   /**
