@@ -64,7 +64,7 @@ export default class SpinnerAction extends ActionBase {
   }
 
   private getFrames(opts?: Options) {
-    if (opts?.style) return spinners[process.platform === 'win32' ? 'line' : opts.style].frames
+    if (opts?.style) return spinners[opts.style].frames
 
     return spinners[process.platform === 'win32' ? 'line' : 'dots2'].frames
   }
