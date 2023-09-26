@@ -14,11 +14,10 @@ checkCWD()
 
 export * as Args from './args'
 export * as Errors from './errors'
-
 export * as Interfaces from './interfaces'
+export * as Flags from './flags'
 export * as Parser from './parser'
 export * as ux from './cli-ux'
-export * as Flags from './flags'
 export {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
 export {Config, toCached, Plugin, tsPath} from './config'
 export {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
