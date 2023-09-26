@@ -13,6 +13,7 @@ export interface PluginOptions {
   parent?: Plugin;
   children?: Plugin[];
   flexibleTaxonomy?: boolean;
+  isRoot?: boolean;
 }
 
 export interface Options extends PluginOptions {
@@ -72,6 +73,11 @@ export interface Plugin {
    * if it appears to be an npm package but does not look like it's really a CLI plugin, this is set to false
    */
   valid: boolean;
+
+  /**
+   * True if the plugin is the root plugin.
+   */
+  isRoot: boolean;
 
   commands: Command.Loadable[];
   hooks: { [k: string]: string[] };

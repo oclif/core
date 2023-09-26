@@ -141,6 +141,8 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
+  isRoot = false
+
   private _commandsDir!: string | undefined
 
   private flexibleTaxonomy!: boolean
@@ -155,6 +157,7 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
+    this.isRoot = this.options.isRoot ?? false
     if (this.options.parent) this.parent = this.options.parent as Plugin
     // Linked plugins already have a root so there's no need to search for it.
     // However there could be child plugins nested inside the linked plugin, in which

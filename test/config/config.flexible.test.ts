@@ -101,6 +101,7 @@ describe('Config with flexible taxonomy', () => {
       tag: 'tag',
       moduleType: 'commonjs',
       hasManifest: false,
+      isRoot: false,
     }
 
     const pluginB: IPlugin = {
@@ -121,6 +122,7 @@ describe('Config with flexible taxonomy', () => {
       tag: 'tag',
       moduleType: 'commonjs',
       hasManifest: false,
+      isRoot: false,
     }
     const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
 

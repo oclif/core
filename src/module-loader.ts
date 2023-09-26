@@ -4,7 +4,7 @@ import {extname, join, sep} from 'node:path'
 import {Command} from './command'
 import {ModuleLoadError} from './errors'
 import {pathToFileURL} from 'node:url'
-import {tsPath} from './config'
+import {tsPath} from './config/ts-node'
 
 const getPackageType = require('get-package-type')
 
