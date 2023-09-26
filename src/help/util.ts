@@ -1,32 +1,6 @@
 import * as ejs from 'ejs'
-import {Deprecation, HelpOptions, Config as IConfig} from '../interfaces'
-import {Help, HelpBase} from '.'
+import {Deprecation, Config as IConfig} from '../interfaces'
 import {collectUsableIds} from '../config/util'
-import {load} from '../module-loader'
-
-interface HelpBaseDerived {
-  new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
-}
-
-function extractClass(exported: any): HelpBaseDerived {
-  return exported && exported.default ? exported.default : exported
-}
-
-export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
-  const {pjson} = config
-  const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
-
-  if (configuredClass) {
-    try {
-      const exported = await load(config, configuredClass) as HelpBaseDerived
-      return extractClass(exported) as HelpBaseDerived
-    } catch (error: any) {
-      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
-    }
-  }
-
-  return Help
-}
 
 export function template(context: any): (t: string) => string {
   function render(t: string): string {

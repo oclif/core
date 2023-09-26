@@ -7,13 +7,13 @@ import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {error} from '../errors'
 import {format} from 'node:util'
+import {load} from '../module-loader'
 import {stdout} from '../cli-ux/stream'
+import stripAnsi from 'strip-ansi'
 import {toCached} from '../to-cached'
 
-import stripAnsi = require('strip-ansi')
-
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
+export {standardizeIDFromArgv, getHelpFlagAdditions, normalizeArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
@@ -326,4 +326,28 @@ export class Help extends HelpBase {
   protected log(...args: string[]): void {
     stdout.write(format.apply(this, args) + '\n')
   }
+}
+
+interface HelpBaseDerived {
+  new(config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>): HelpBase;
+}
+
+function extractClass(exported: any): HelpBaseDerived {
+  return exported && exported.default ? exported.default : exported
+}
+
+export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
+  const {pjson} = config
+  const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
+
+  if (configuredClass) {
+    try {
+      const exported = await load(config, configuredClass) as HelpBaseDerived
+      return extractClass(exported) as HelpBaseDerived
+    } catch (error: any) {
+      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
+    }
+  }
+
+  return Help
 }
