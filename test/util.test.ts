@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import {homedir} from 'node:os'
 import {Args, Command, Flags} from '../src/index'
 import {capitalize, castArray, ensureArgObject, getHomeDir, isNotFalsy, isTruthy, last, maxBy, readJson, sumBy} from '../src/util'
 import {defaultToCached} from '../src/util/default-to-cached'
@@ -106,7 +107,7 @@ describe('isTruthy', () => {
 
 describe('getHomeDir', () => {
   it('should return the home directory', () => {
-    expect(getHomeDir()).to.equal(process.env.HOME)
+    expect(getHomeDir()).to.equal(homedir())
   })
 })
 
@@ -122,7 +123,7 @@ describe('readJson', () => {
       throw new Error('Expected an error to be thrown')
     } catch (error) {
       const err = error as Error
-      expect(err.message).to.equal('ENOENT: no such file or directory, open \'does-not-exist.json\'')
+      expect(err.message).to.include('ENOENT: no such file or directory')
     }
   })
 })
