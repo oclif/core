@@ -2,9 +2,9 @@ import * as Interfaces from './interfaces'
 import {URL, fileURLToPath} from 'node:url'
 import {format, inspect} from 'node:util'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-
+// eslint-disable-next-line sort-imports
+import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {Config} from './config'
-import {Performance} from './performance'
 import {stdout} from './cli-ux/stream'
 
 const debug = require('debug')('oclif:main')
@@ -33,9 +33,9 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
 }
 
 export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
-  const marker = Performance.mark('main.run')
+  const marker = Performance.mark(OCLIF_MARKER_OWNER, 'main.run')
 
-  const initMarker = Performance.mark('main.run#init')
+  const initMarker = Performance.mark(OCLIF_MARKER_OWNER, 'main.run#init')
 
   const collectPerf = async () => {
     marker?.stop()

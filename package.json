@@ -59,7 +59,7 @@
     "chai-as-promised": "^7.1.1",
     "commitlint": "^12.1.4",
     "cross-env": "^7.0.3",
-    "eslint": "^8.49.0",
+    "eslint": "^8.50.0",
     "eslint-config-oclif": "^5.0.0",
     "eslint-config-oclif-typescript": "^2.0.1",
     "fancy-test": "^3.0.0-beta.2",
@@ -69,8 +69,8 @@
     "nock": "^13.3.0",
     "shx": "^0.3.4",
     "sinon": "^11.1.2",
-    "tsd": "^0.29.0",
     "ts-node": "^10.9.1",
+    "tsd": "^0.29.0",
     "tslib": "^2.5.0",
     "typescript": "^5"
   },
