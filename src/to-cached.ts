@@ -1,31 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import {Arg, OptionFlag} from './interfaces/parser'
 import {ensureArgObject, pickBy} from './util'
+import {Arg} from './interfaces/parser'
 import {Command} from './command'
 import {Plugin as IPlugin} from './interfaces/plugin'
+import {defaultFlagToCached} from './default-flag-to-cached'
 import {json} from './flags'
-
-// when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {
-  if (respectNoCacheDefault && flag.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof flag.defaultHelp === 'function') {
-    try {
-      return await flag.defaultHelp({options: flag, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof flag.default === 'function') {
-    try {
-      return await flag.default({options: flag, flags: {}})
-    } catch {}
-  } else {
-    return flag.default
-  }
-}
 
 const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
   if (respectNoCacheDefault && arg.noCacheDefault) return

@@ -2,8 +2,9 @@
 import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 
-import {Interfaces, toCached} from '../../src'
+import {Interfaces} from '../../src'
 import {CommandHelp, Help} from '../../src/help'
+import {toCached} from '../../src/to-cached'
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
