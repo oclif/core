@@ -71,6 +71,7 @@
     "madge": "^6.1.0",
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
+    "nyc": "^15.1.0",
     "shx": "^0.3.4",
     "sinon": "^11.1.2",
     "tsd": "^0.29.0",
@@ -114,7 +115,7 @@
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
     "test:esm-cjs": "cross-env DEBUG=e2e:* ts-node test/integration/esm-cjs.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\""
+    "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"
 }
