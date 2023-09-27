@@ -3,8 +3,8 @@ import {ensureArgObject, pickBy} from './index'
 import {Arg} from '../interfaces/parser'
 import {Command} from '../command'
 import {Plugin as IPlugin} from '../interfaces/plugin'
+import {aggregateFlags} from './aggregate-flags'
 import {defaultFlagToCached} from './default-flag-to-cached'
-import {json} from '../flags'
 
 const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
   if (respectNoCacheDefault && arg.noCacheDefault) return
@@ -41,11 +41,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
 
   const c = mergePrototype(cmd, cmd)
 
-  const cmdFlags = {
-    ...(c.enableJsonFlag ? {json: json()} : {}),
-    ...c.baseFlags,
-    ...c.flags,
-  } as typeof c['flags']
+  const cmdFlags = aggregateFlags(c.flags, c.baseFlags, c.enableJsonFlag)
 
   for (const [name, flag] of Object.entries(cmdFlags || {})) {
     if (flag.type === 'boolean') {

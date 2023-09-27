@@ -25,9 +25,9 @@ import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
+import {aggregateFlags} from './util/aggregate-flags'
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
-import {json} from './flags'
 import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
@@ -228,11 +228,6 @@ export abstract class Command {
    * @returns {boolean} true if the command supports json and the --json flag is present
    */
   public jsonEnabled(): boolean {
-    // If the JSON_FLAG_OVERRIDE env var (set by Flags.json parse) is set to true, return true
-    // Checking for this first allows commands to define a --json flag using Flags.json()
-    // without setting enableJsonFlag static property.
-    if (this.config.scopedEnvVarTrue?.('JSON_FLAG_OVERRIDE')) return true
-
     // If the command doesn't support json, return false
     if (!this.ctor.enableJsonFlag) return false
 
@@ -264,7 +259,7 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
-    const allFlags = this.aggregateFlags(
+    const allFlags = aggregateFlags(
       this.ctor.flags,
       this.ctor.baseFlags,
       this.ctor.enableJsonFlag,
@@ -318,7 +313,7 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
-      flags: this.aggregateFlags<F, B>(
+      flags: aggregateFlags<F, B>(
         options.flags,
         options.baseFlags,
         options.enableJsonFlag,
@@ -375,17 +370,6 @@ export abstract class Command {
     }
 
     keys.map(key => delete process.env[key])
-  }
-
-  private aggregateFlags<F extends FlagOutput, B extends FlagOutput>(
-    flags: FlagInput<F> | undefined,
-    baseFlags: FlagInput<B> | undefined,
-    enableJsonFlag: boolean | undefined,
-  ): FlagInput<F> {
-    const combinedFlags = {...baseFlags, ...flags}
-    return (enableJsonFlag
-      ? {...combinedFlags, json: json()}
-      : combinedFlags) as FlagInput<F>
   }
 }
 
