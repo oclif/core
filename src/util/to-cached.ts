@@ -1,31 +1,9 @@
 /* eslint-disable no-await-in-loop */
 import {ensureArgObject, pickBy} from './index'
-import {Arg} from '../interfaces/parser'
 import {Command} from '../command'
 import {Plugin as IPlugin} from '../interfaces/plugin'
 import {aggregateFlags} from './aggregate-flags'
-import {defaultFlagToCached} from './default-flag-to-cached'
-
-const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
-  if (respectNoCacheDefault && arg.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof arg.defaultHelp === 'function') {
-    try {
-      return await arg.defaultHelp({options: arg, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof arg.default === 'function') {
-    try {
-      return await arg.default({options: arg, flags: {}})
-    } catch {}
-  } else {
-    return arg.default
-  }
-}
+import {defaultToCached} from './default-to-cached'
 
 export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
   const flags = {} as {[k: string]: Command.Flag.Cached}
@@ -43,7 +21,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
 
   const cmdFlags = aggregateFlags(c.flags, c.baseFlags, c.enableJsonFlag)
 
-  for (const [name, flag] of Object.entries(cmdFlags || {})) {
+  for (const [name, flag] of Object.entries(cmdFlags)) {
     if (flag.type === 'boolean') {
       flags[name] = {
         name,
@@ -83,7 +61,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, respectNoCacheDefault),
+        default: await defaultToCached(flag, respectNoCacheDefault),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
@@ -105,7 +83,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultArgToCached(arg, respectNoCacheDefault),
+      default: await defaultToCached(arg, respectNoCacheDefault),
       hidden: arg.hidden,
       noCacheDefault: arg.noCacheDefault,
     }

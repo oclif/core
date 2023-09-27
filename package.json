@@ -110,7 +110,7 @@
     "lint": "eslint . --ext .ts",
     "posttest": "yarn lint && yarn test:circular-deps",
     "prepack": "yarn run build",
-    "pretest": "yarn build && tsc -p test --skipLibCheck",
+    "pretest": "yarn build && tsc -p test --noEmit --skipLibCheck",
     "test:circular-deps": "madge lib/ -c",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
     "test:esm-cjs": "cross-env DEBUG=e2e:* ts-node test/integration/esm-cjs.ts",

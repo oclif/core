@@ -1,9 +1,9 @@
-import {access, stat} from 'node:fs/promises'
+import {access, readFile, stat} from 'node:fs/promises'
 import {homedir, platform} from 'node:os'
-import {readFile, readFileSync} from 'node:fs'
 import {ArgInput} from '../interfaces/parser'
 import {Command} from '../command'
 import {join} from 'node:path'
+import {readFileSync} from 'node:fs'
 
 const debug = require('debug')
 
@@ -169,18 +169,10 @@ export function getPlatform(): NodeJS.Platform {
   return platform()
 }
 
-export function readJson<T = unknown>(path: string): Promise<T> {
+export async function readJson<T = unknown>(path: string): Promise<T> {
   debug('config')('readJson %s', path)
-  return new Promise((resolve, reject) => {
-    readFile(path, 'utf8', (err: any, d: any) => {
-      try {
-        if (err) reject(err)
-        else resolve(JSON.parse(d) as T)
-      } catch (error: any) {
-        reject(error)
-      }
-    })
-  })
+  const contents = await readFile(path, 'utf8')
+  return JSON.parse(contents) as T
 }
 
 export function readJsonSync(path: string, parse: false): string

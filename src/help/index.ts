@@ -5,7 +5,7 @@ import {Command} from '../command'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {defaultFlagToCached} from '../util/default-flag-to-cached'
+import {defaultToCached} from '../util/default-to-cached'
 import {error} from '../errors'
 import {format} from 'node:util'
 import {load} from '../module-loader'
@@ -112,7 +112,7 @@ export class Help extends HelpBase {
         for (const flag of Object.values(loaded.flags)) {
           if (flag.type === 'boolean') continue
           // eslint-disable-next-line no-await-in-loop
-          flag.default = await defaultFlagToCached(flag, false)
+          flag.default = await defaultToCached(flag, false)
         }
 
         await this.showCommandHelp(command)
