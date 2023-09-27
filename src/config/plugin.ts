@@ -1,13 +1,11 @@
 import {CLIError, error} from '../errors'
 import {
   Debug,
-  flatMap,
   getCommandIdPermutations,
-  mapValues,
   resolvePackage,
 } from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {compact, exists, isProd, readJson, requireJson} from '../util'
+import {compact, exists, isProd, mapValues, readJson, requireJson} from '../util'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
@@ -17,7 +15,7 @@ import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
 import {inspect} from 'node:util'
 import {sync} from 'globby'
-import {toCached} from '../to-cached'
+import {toCached} from '../util/to-cached'
 import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -26,10 +24,10 @@ function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
   if (Array.isArray(input)) {
-    return [...input, ...flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`))]
+    return [...input, input.flatMap(t => topicsToArray(t.subtopics, `${base}${t.name}`))]
   }
 
-  return flatMap(Object.keys(input), k => {
+  return Object.keys(input).flatMap(k => {
     input[k].name = k
     return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })

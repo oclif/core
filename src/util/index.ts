@@ -1,8 +1,8 @@
 import {access, stat} from 'node:fs/promises'
 import {homedir, platform} from 'node:os'
 import {readFile, readFileSync} from 'node:fs'
-import {ArgInput} from './interfaces/parser'
-import {Command} from './command'
+import {ArgInput} from '../interfaces/parser'
+import {Command} from '../command'
 import {join} from 'node:path'
 
 const debug = require('debug')
@@ -188,4 +188,12 @@ export function readJsonSync<T = unknown>(path: string, parse?: true): T
 export function readJsonSync<T = unknown>(path: string, parse = true): T | string {
   const contents = readFileSync(path, 'utf8')
   return parse ? JSON.parse(contents) as T : contents
+}
+
+export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in keyof T]: T[P]}, fn: (i: T[keyof T], k: keyof T) => TResult): {[P in keyof T]: TResult} {
+  return Object.entries(obj)
+  .reduce((o, [k, v]) => {
+    o[k] = fn(v as any, k as any)
+    return o
+  }, {} as any)
 }

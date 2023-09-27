@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import {ensureArgObject, pickBy} from './util'
-import {Arg} from './interfaces/parser'
-import {Command} from './command'
-import {Plugin as IPlugin} from './interfaces/plugin'
+import {ensureArgObject, pickBy} from './index'
+import {Arg} from '../interfaces/parser'
+import {Command} from '../command'
+import {Plugin as IPlugin} from '../interfaces/plugin'
 import {defaultFlagToCached} from './default-flag-to-cached'
-import {json} from './flags'
+import {json} from '../flags'
 
 const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
   if (respectNoCacheDefault && arg.noCacheDefault) return

@@ -1,4 +1,4 @@
-import {OptionFlag} from './interfaces/parser'
+import {OptionFlag} from '../interfaces/parser'
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
 export const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {

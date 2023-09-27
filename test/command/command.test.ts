@@ -1,7 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 import {Args, Command as Base, Flags} from '../../src'
-import {toCached} from '../../src/to-cached'
+import {toCached} from '../../src/util/to-cached'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
