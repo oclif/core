@@ -20,4 +20,3 @@ describe('ux exports', () => {
     expect(typeof ExitError).to.be.equal('function')
   })
 })
-

@@ -29,7 +29,7 @@ describe('cacheCommand', () => {
           required: false,
           description: 'flagc desc',
           options: ['a', 'b'],
-          default: async context => (context.options.min ?? 1) + 1,
+          default: async (context) => (context.options.min ?? 1) + 1,
         }),
       }
 
@@ -128,10 +128,7 @@ describe('cacheCommand', () => {
           hidden: undefined,
           multiple: false,
           name: 'flagc',
-          options: [
-            'a',
-            'b',
-          ],
+          options: ['a', 'b'],
           relationships: undefined,
           required: false,
           summary: undefined,
@@ -139,7 +136,6 @@ describe('cacheCommand', () => {
           noCacheDefault: undefined,
           hasDynamicHelp: false,
         },
-
       },
       args: {
         arg1: {

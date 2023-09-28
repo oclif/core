@@ -20,23 +20,24 @@ describe('cacheDefaultValue', () => {
   })
 
   it('should return undefined if defaultHelp throws', async () => {
-    const flag = {async defaultHelp() {
-      throw new Error('foo')
-    }}
+    const flag = {
+      async defaultHelp() {
+        throw new Error('foo')
+      },
+    }
     const result = await cacheDefaultValue(flag as any, false)
     expect(result).to.be.undefined
   })
 
-  it('should return the result of the default if it\'s a function', async () => {
+  it("should return the result of the default if it's a function", async () => {
     const flag = {default: async () => 'foo'}
     const result = await cacheDefaultValue(flag as any, false)
     expect(result).to.equal('foo')
   })
 
-  it('should return the result of the default if it\'s a simple value', async () => {
+  it("should return the result of the default if it's a simple value", async () => {
     const flag = {default: 'foo'}
     const result = await cacheDefaultValue(flag as any, false)
     expect(result).to.equal('foo')
   })
 })
-

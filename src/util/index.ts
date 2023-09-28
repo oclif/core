@@ -7,9 +7,11 @@ import {readFileSync} from 'node:fs'
 
 const debug = require('debug')
 
-export function pickBy<T extends { [s: string]: T[keyof T]; } | ArrayLike<T[keyof T]>>(obj: T, fn: (i: T[keyof T]) => boolean): Partial<T> {
-  return Object.entries(obj)
-  .reduce((o, [k, v]) => {
+export function pickBy<T extends {[s: string]: T[keyof T]} | ArrayLike<T[keyof T]>>(
+  obj: T,
+  fn: (i: T[keyof T]) => boolean,
+): Partial<T> {
+  return Object.entries(obj).reduce((o, [k, v]) => {
     if (fn(v)) o[k] = v
     return o
   }, {} as any)
@@ -93,7 +95,7 @@ export async function exists(path: string): Promise<boolean> {
 }
 
 export const dirExists = async (input: string): Promise<string> => {
-  if (!await exists(input)) {
+  if (!(await exists(input))) {
     throw new Error(`No directory found at ${input}`)
   }
 
@@ -106,7 +108,7 @@ export const dirExists = async (input: string): Promise<string> => {
 }
 
 export const fileExists = async (input: string): Promise<string> => {
-  if (!await exists(input)) {
+  if (!(await exists(input))) {
     throw new Error(`No file found at ${input}`)
   }
 
@@ -137,8 +139,10 @@ export function requireJson<T>(...pathParts: string[]): T {
  * @param args Either an array of args or an object of args
  * @returns ArgInput
  */
-export function ensureArgObject(args?: any[] | ArgInput | { [name: string]: Command.Arg.Cached}): ArgInput {
-  return (Array.isArray(args) ? (args ?? []).reduce((x, y) => ({...x, [y.name]: y}), {} as ArgInput) : args ?? {}) as ArgInput
+export function ensureArgObject(args?: any[] | ArgInput | {[name: string]: Command.Arg.Cached}): ArgInput {
+  return (
+    Array.isArray(args) ? (args ?? []).reduce((x, y) => ({...x, [y.name]: y}), {} as ArgInput) : args ?? {}
+  ) as ArgInput
 }
 
 export function uniq<T>(arr: T[]): T[] {
@@ -179,12 +183,14 @@ export function readJsonSync(path: string, parse: false): string
 export function readJsonSync<T = unknown>(path: string, parse?: true): T
 export function readJsonSync<T = unknown>(path: string, parse = true): T | string {
   const contents = readFileSync(path, 'utf8')
-  return parse ? JSON.parse(contents) as T : contents
+  return parse ? (JSON.parse(contents) as T) : contents
 }
 
-export function mapValues<T extends Record<string, any>, TResult>(obj: {[P in keyof T]: T[P]}, fn: (i: T[keyof T], k: keyof T) => TResult): {[P in keyof T]: TResult} {
-  return Object.entries(obj)
-  .reduce((o, [k, v]) => {
+export function mapValues<T extends Record<string, any>, TResult>(
+  obj: {[P in keyof T]: T[P]},
+  fn: (i: T[keyof T], k: keyof T) => TResult,
+): {[P in keyof T]: TResult} {
+  return Object.entries(obj).reduce((o, [k, v]) => {
     o[k] = fn(v as any, k as any)
     return o
   }, {} as any)

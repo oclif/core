@@ -47,71 +47,71 @@ function exit(): never {
 }
 
 type Plugin = {
-  name: string;
-  command: string;
-  package: string;
-  repo: string;
+  name: string
+  command: string
+  package: string
+  repo: string
 }
 
 type Script = 'run' | 'dev'
 
 type InstallPluginOptions = {
-  executor: Executor;
-  plugin: Plugin;
-  script: Script;
+  executor: Executor
+  plugin: Plugin
+  script: Script
 }
 
 type LinkPluginOptions = {
-  executor: Executor;
-  plugin: Plugin;
-  script: Script;
-  noLinkCore?: boolean;
+  executor: Executor
+  plugin: Plugin
+  script: Script
+  noLinkCore?: boolean
 }
 
 type RunCommandOptions = {
-  executor: Executor;
-  plugin: Plugin;
-  script: Script;
+  executor: Executor
+  plugin: Plugin
+  script: Script
   expectStrings?: string[]
   expectJson?: Record<string, any>
-  env?: Record<string, string>;
-  args?: Array<string | boolean>;
+  env?: Record<string, string>
+  args?: Array<string | boolean>
 }
 
 type ModifyCommandOptions = {
-  executor: Executor;
-  plugin: Plugin;
-  from: string;
-  to: string;
+  executor: Executor
+  plugin: Plugin
+  from: string
+  to: string
 }
 
 type CleanUpOptions = {
-  executor: Executor;
-  script: Script;
-  plugin: Plugin;
+  executor: Executor
+  script: Script
+  plugin: Plugin
 }
 
 type PluginConfig = {
-  name: string;
-  command: string;
-  package: string;
-  repo: string;
-  commandText: string;
-  hookText: string;
+  name: string
+  command: string
+  package: string
+  repo: string
+  commandText: string
+  hookText: string
   expectJson: {
     whenProvided: {
-      args: Record<string, string | boolean>;
-      flags: Record<string, string | boolean>;
-    };
+      args: Record<string, string | boolean>
+      flags: Record<string, string | boolean>
+    }
     whenNotProvided: {
-      args: Record<string, string | null | boolean>;
-      flags: Record<string, string | null | boolean>;
-    };
+      args: Record<string, string | null | boolean>
+      flags: Record<string, string | null | boolean>
+    }
   }
 }
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-(async () => {
+;(async () => {
   const commonProps = {
     expectJson: {
       whenProvided: {
@@ -269,7 +269,7 @@ type PluginConfig = {
     if (options.expectJson && options.args?.includes('--json')) {
       // clear any non-json output from hooks
       const split = result.stdout?.split('\n') ?? []
-      const idx = split.findIndex(i => i.startsWith('{'))
+      const idx = split.findIndex((i) => i.startsWith('{'))
       const json = JSON.parse(split.slice(idx).join('\n'))
       expect(json).to.deep.equal(options.expectJson)
     }
@@ -282,8 +282,8 @@ type PluginConfig = {
   }
 
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
-  const providedSkips = args.find(arg => arg.startsWith('--skip='))
-  const providedTests = args.find(arg => arg.startsWith('--test=')) ?? '=cjs,esm,precore,coreV1,coreV2'
+  const providedSkips = args.find((arg) => arg.startsWith('--skip='))
+  const providedTests = args.find((arg) => arg.startsWith('--test=')) ?? '=cjs,esm,precore,coreV1,coreV2'
 
   const skips = providedSkips ? providedSkips.split('=')[1].split(',') : []
   const tests = providedTests ? providedTests.split('=')[1].split(',') : []
@@ -573,4 +573,3 @@ type PluginConfig = {
 
   exit()
 })()
-

@@ -5,7 +5,7 @@
 
 import {HelpBase} from '../../src'
 
-export default class extends HelpBase  {
+export default class extends HelpBase {
   async showHelp(): Promise<void> {
     console.log('help')
   }

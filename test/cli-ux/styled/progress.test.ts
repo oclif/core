@@ -3,8 +3,7 @@ import {ux} from '../../../src/cli-ux'
 
 describe('progress', () => {
   // single bar
-  fancy
-  .end('single bar has default settings', _ => {
+  fancy.end('single bar has default settings', (_) => {
     const b1 = ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
     // @ts-expect-error because private member
     expect(b1.options.format).to.contain('Example 1: Progress')
@@ -13,8 +12,7 @@ describe('progress', () => {
   })
 
   // testing no settings passed, default settings created
-  fancy
-  .end('single bar, no bars array', _ => {
+  fancy.end('single bar, no bars array', (_) => {
     const b1 = ux.progress({})
     // @ts-expect-error because private member
     expect(b1.options.format).to.contain('progress')
@@ -24,9 +22,8 @@ describe('progress', () => {
     expect(b1.options.noTTYOutput).to.not.be.null
   })
   // testing getProgressBar returns correct type
-  fancy
-  .end('typeof progress bar is object', _ => {
+  fancy.end('typeof progress bar is object', (_) => {
     const b1 = ux.progress({format: 'Example 1: Progress {bar} | {percentage}%'})
-    expect(typeof (b1)).to.equal('object')
+    expect(typeof b1).to.equal('object')
   })
 })

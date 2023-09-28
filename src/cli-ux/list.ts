@@ -15,8 +15,8 @@ export function renderList(items: IListItem[]): string {
     return ''
   }
 
-  const maxLength = maxBy(items, item => item[0].length)?.[0].length ?? 0
-  const lines = items.map(i => {
+  const maxLength = maxBy(items, (item) => item[0].length)?.[0].length ?? 0
+  const lines = items.map((i) => {
     let left = i[0]
     let right = i[1]
     if (!right) {

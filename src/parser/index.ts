@@ -7,7 +7,7 @@ export {flagUsages} from './help'
 export async function parse<
   TFlags extends OutputFlags<any>,
   BFlags extends OutputFlags<any>,
-  TArgs extends OutputArgs<any>
+  TArgs extends OutputArgs<any>,
 >(argv: string[], options: Input<TFlags, BFlags, TArgs>): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
   const input = {
     argv,
@@ -22,4 +22,3 @@ export async function parse<
   await validate({input, output})
   return output as ParserOutput<TFlags, BFlags, TArgs>
 }
-

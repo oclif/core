@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./lib",
-    "rootDirs": [
-      "./src"
-    ]
+    "rootDirs": ["./src"]
   },
-  "include": [
-    "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }

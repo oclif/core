@@ -1,4 +1,3 @@
-
 import {expect} from 'chai'
 import {resolve} from 'node:path'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
@@ -35,7 +34,7 @@ describe('main', () => {
 
   it('should run help', async () => {
     await run(['--help'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.args.map(a => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -55,7 +54,7 @@ COMMANDS
 
   it('should show help for topics with spaces', async () => {
     await run(['--help', 'foo'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map(a => stripAnsi(a[0])).join('')).to.equal(`foo topic description
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -71,7 +70,7 @@ COMMANDS
 
   it('should run spaced topic help v2', async () => {
     await run(['foo', 'bar', '--help'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map(a => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
 
 USAGE
   $ oclif foo bar COMMAND

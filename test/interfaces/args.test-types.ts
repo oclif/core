@@ -9,15 +9,13 @@ import {URL} from 'node:url'
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 
 type MyType = {
-  foo: boolean;
+  foo: boolean
 }
 
 class MyCommand extends Command {
   static description = 'describe the command here'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   static args = {
     requiredString: Args.string({required: true}),
@@ -109,4 +107,3 @@ class MyCommand extends Command {
     return result.args
   }
 }
-

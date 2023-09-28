@@ -4,9 +4,9 @@ import {castArray} from '../../util'
 import {inspect} from 'node:util'
 
 export interface ITask {
-  action: string;
-  status: string | undefined;
-  active: boolean;
+  action: string
+  status: string | undefined
+  active: boolean
 }
 
 export type ActionType = 'spinner' | 'simple' | 'debug'
@@ -45,8 +45,8 @@ export class ActionBase {
     this._stdout(false)
   }
 
-  private get globals(): { action: { task?: ITask }; output: string | undefined } {
-    (global as any).ux = (global as any).ux || {}
+  private get globals(): {action: {task?: ITask}; output: string | undefined} {
+    ;(global as any).ux = (global as any).ux || {}
     const globals = (global as any).ux
     globals.action = globals.action || {}
     return globals
@@ -201,19 +201,19 @@ export class ActionBase {
   // write to the real stdout/stderr
   protected _write(std: 'stdout' | 'stderr', s: string | string[]): void {
     switch (std) {
-    case 'stdout': {
-      this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
-      break
-    }
+      case 'stdout': {
+        this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
+        break
+      }
 
-    case 'stderr': {
-      this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
-      break
-    }
+      case 'stderr': {
+        this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
+        break
+      }
 
-    default: {
-      throw new Error(`invalid std: ${std}`)
-    }
+      default: {
+        throw new Error(`invalid std: ${std}`)
+      }
     }
   }
 }

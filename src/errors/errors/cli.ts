@@ -10,9 +10,9 @@ import wrap from 'wrap-ansi'
  * properties specific to internal oclif error handling
  */
 
-export function addOclifExitCode(error: Record<string, any>, options?: { exit?: number | false }): OclifError {
+export function addOclifExitCode(error: Record<string, any>, options?: {exit?: number | false}): OclifError {
   if (!('oclif' in error)) {
-    (error as unknown as OclifError).oclif = {}
+    ;(error as unknown as OclifError).oclif = {}
   }
 
   error.oclif.exit = options?.exit === undefined ? 2 : options.exit
@@ -25,7 +25,7 @@ export class CLIError extends Error implements OclifError {
   code?: string
   suggestions?: string[]
 
-  constructor(error: string | Error, options: { exit?: number | false } & PrettyPrintableError = {}) {
+  constructor(error: string | Error, options: {exit?: number | false} & PrettyPrintableError = {}) {
     super(error instanceof Error ? error.message : error)
     addOclifExitCode(this, options)
     this.code = options.code

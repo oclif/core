@@ -4,4 +4,3 @@ export default class Command {
     return 'returned success!'
   }
 }
-

@@ -3,7 +3,7 @@ import {stdout} from './stream'
 
 function timeout(p: Promise<any>, ms: number) {
   function wait(ms: number, unref = false) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const t: any = setTimeout(() => resolve(null), ms)
       if (unref) t.unref()
     })
@@ -13,7 +13,7 @@ function timeout(p: Promise<any>, ms: number) {
 }
 
 async function _flush() {
-  const p = new Promise(resolve => {
+  const p = new Promise((resolve) => {
     stdout.once('drain', () => resolve(null))
   })
   const flushed = stdout.write('')
