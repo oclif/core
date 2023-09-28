@@ -820,10 +820,10 @@
     validate-npm-package-name "^5.0.0"
     yarn "^1.22.18"
 
-"@oclif/prettier-config@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.1.1.tgz#424b7f631b96917efe8b9a925b068cd2218a00f2"
-  integrity sha512-fxsIwtHCu8V6+WmsN0w/s6QM3z/VJtvTEXTiY8F8l1Oj9S+nOC0eTaQp2YSDFlgpFvDJ5NwC5ssdZAdFE3PyDg==
+"@oclif/prettier-config@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.0.tgz#ce4fd25fa43da802c74706b6872fd9c166ebf3f1"
+  integrity sha512-kFjaP1ZU+kGx+9dS/xo8fgDdZDWXeFPRusantF9ZI2NznoHPfiP6ljgPik7UyQ4hOlStMkRSj8YHwG1bhXplYQ==
 
 "@oclif/test@^3.0.0-beta.1":
   version "3.0.0-beta.1"
@@ -2627,6 +2627,11 @@ eslint-config-oclif@^5.0.0:
     eslint-plugin-mocha "^10.1.0"
     eslint-plugin-node "^11.1.0"
     eslint-plugin-unicorn "^48.0.1"
+
+eslint-config-prettier@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-9.0.0.tgz#eb25485946dd0c66cd216a46232dc05451518d1f"
+  integrity sha512-IcJsTkJae2S35pRsRAwoCE+925rJJStOdkKnLVgtE+tEpqU0EVVM7OqrwxqgptKdX29NUwC82I5pXsGFIgSevw==
 
 eslint-config-xo-space@^0.34.0:
   version "0.34.0"
@@ -5433,6 +5438,11 @@ prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
+
+prettier@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.3.tgz#432a51f7ba422d1469096c0fdc28e235db8f9643"
+  integrity sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==
 
 pretty-format@^29.7.0:
   version "29.7.0"

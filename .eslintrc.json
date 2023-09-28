@@ -3,6 +3,9 @@
     "oclif",
     "oclif-typescript"
   ],
+  "plugins": [
+    "eslint-config-prettier"
+  ],
   "rules": {
     "sort-imports": "error",
     "unicorn/prefer-module": "off",
