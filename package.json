@@ -36,7 +36,7 @@
     "@commitlint/config-conventional": "^12.1.4",
     "@oclif/plugin-help": "^5.2.8",
     "@oclif/plugin-plugins": "^3.3.0",
-    "@oclif/prettier-config": "^0.2.0",
+    "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^3.0.0-beta.1",
     "@types/ansi-styles": "^3.2.1",
     "@types/benchmark": "^2.1.2",
@@ -64,9 +64,11 @@
     "eslint-config-oclif": "^5.0.0",
     "eslint-config-oclif-typescript": "^2.0.1",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "5.0.0",
     "fancy-test": "^3.0.0-beta.2",
     "globby": "^11.1.0",
     "husky": "6",
+    "lint-staged": "^14.0.1",
     "madge": "^6.1.0",
     "mocha": "^10.2.0",
     "nock": "^13.3.0",
@@ -120,5 +122,9 @@
     "test:perf": "ts-node test/perf/parser.perf.ts",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
-  "types": "lib/index.d.ts"
+  "types": "lib/index.d.ts",
+  "lint-staged": {
+    "+(src|test)/**/*.+(ts|js|json)": ["prettier --write"],
+    "*.ts": ["eslint --fix"]
+  }
 }
