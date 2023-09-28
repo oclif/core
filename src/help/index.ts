@@ -5,7 +5,7 @@ import {Command} from '../command'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {defaultToCached} from '../util/default-to-cached'
+import {cacheDefaultValue} from '../util/cache-default-value'
 import {error} from '../errors'
 import {format} from 'node:util'
 import {load} from '../module-loader'
@@ -112,7 +112,7 @@ export class Help extends HelpBase {
         for (const flag of Object.values(loaded.flags)) {
           if (flag.type === 'boolean') continue
           // eslint-disable-next-line no-await-in-loop
-          flag.default = await defaultToCached(flag, false)
+          flag.default = await cacheDefaultValue(flag, false)
         }
 
         await this.showCommandHelp(command)
@@ -344,7 +344,7 @@ function extractClass(exported: any): HelpBaseDerived {
 
 export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
   const {pjson} = config
-  const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
+  const configuredClass = pjson.oclif?.helpClass
 
   if (configuredClass) {
     try {

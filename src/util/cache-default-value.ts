@@ -1,7 +1,7 @@
 import {Arg, OptionFlag} from '../interfaces/parser'
 
 // when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-export const defaultToCached = async (flagOrArg: OptionFlag<any> | Arg<any>, respectNoCacheDefault: boolean) => {
+export const cacheDefaultValue = async (flagOrArg: OptionFlag<any> | Arg<any>, respectNoCacheDefault: boolean) => {
   if (respectNoCacheDefault && flagOrArg.noCacheDefault) return
   // Prefer the defaultHelp function (returns a friendly string for complex types)
   if (typeof flagOrArg.defaultHelp === 'function') {

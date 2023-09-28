@@ -1,7 +1,7 @@
 import {FlagInput, FlagOutput} from '../interfaces/parser'
 import {boolean} from '../flags'
 
-export const json = boolean({
+const json = boolean({
   description: 'Format output as json.',
   helpGroup: 'GLOBAL',
 })

@@ -13,9 +13,9 @@ import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
+import {cacheCommand} from '../util/cache-command'
 import {inspect} from 'node:util'
 import {sync} from 'globby'
-import {toCached} from '../util/to-cached'
 import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -305,7 +305,7 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          const cached = await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+          const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
           if (this.flexibleTaxonomy) {
             const permutations = getCommandIdPermutations(id)
             const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
@@ -314,7 +314,7 @@ export class Plugin implements IPlugin {
 
           return [id, cached]
         } catch (error: any) {
-          const scope = 'toCached'
+          const scope = 'cacheCommand'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
           else throw this.addErrorScope(error, scope)
         }

@@ -4,7 +4,7 @@ import stripAnsi = require('strip-ansi')
 
 import {Interfaces} from '../../src'
 import {CommandHelp, Help} from '../../src/help'
-import {toCached} from '../../src/util/to-cached'
+import {cacheCommand} from '../../src/util/cache-command'
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
@@ -48,7 +48,7 @@ export class TestHelp extends Help {
 
 export const commandHelp = (command?: any) => ({
   async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await toCached(command!, {} as any, false)
+    const cached = await cacheCommand(command!, {} as any, false)
     const help = ctx.help.formatCommand(cached)
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)

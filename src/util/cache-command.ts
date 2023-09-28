@@ -3,9 +3,9 @@ import {ensureArgObject, pickBy} from './index'
 import {Command} from '../command'
 import {Plugin as IPlugin} from '../interfaces/plugin'
 import {aggregateFlags} from './aggregate-flags'
-import {defaultToCached} from './default-to-cached'
+import {cacheDefaultValue} from './cache-default-value'
 
-export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
+export async function cacheCommand(cmd: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
   const flags = {} as {[k: string]: Command.Flag.Cached}
 
   // In order to collect static properties up the inheritance chain, we need to recursively
@@ -61,7 +61,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
         dependsOn: flag.dependsOn,
         relationships: flag.relationships,
         exclusive: flag.exclusive,
-        default: await defaultToCached(flag, respectNoCacheDefault),
+        default: await cacheDefaultValue(flag, respectNoCacheDefault),
         deprecated: flag.deprecated,
         deprecateAliases: c.deprecateAliases,
         aliases: flag.aliases,
@@ -83,7 +83,7 @@ export async function toCached(cmd: Command.Class, plugin?: IPlugin, respectNoCa
       description: arg.description,
       required: arg.required,
       options: arg.options,
-      default: await defaultToCached(arg, respectNoCacheDefault),
+      default: await cacheDefaultValue(arg, respectNoCacheDefault),
       hidden: arg.hidden,
       noCacheDefault: arg.noCacheDefault,
     }

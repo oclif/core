@@ -12,6 +12,7 @@ Migrating to @oclif/core@V3
     - [`global['cli-ux']` -\> `global.ux`](#globalcli-ux---globalux)
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
+    - [Removed `toCached` export](#removed-tocached-export)
   - [Features 🎉](#features-)
     - [Performance Improvements](#performance-improvements)
     - [charAliases Flag Property](#charaliases-flag-property)
@@ -116,6 +117,9 @@ export const mySensitiveFlag = Flags.string({
 });
 ```
 
+### Removed `toCached` export
+
+We removed the `toCached` export since there's no need for consumers of `@oclif/core` to use this function.
 
 ## Features 🎉
 
