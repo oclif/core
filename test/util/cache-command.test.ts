@@ -84,7 +84,6 @@ describe('cacheCommand', () => {
           relationships: undefined,
           allowNo: false,
           type: 'boolean',
-          delimiter: undefined,
           noCacheDefault: undefined,
         },
         flagb: {
@@ -110,6 +109,7 @@ describe('cacheCommand', () => {
           options: ['a', 'b'],
           delimiter: undefined,
           noCacheDefault: undefined,
+          hasDynamicHelp: false,
         },
         flagc: {
           aliases: undefined,
@@ -137,6 +137,7 @@ describe('cacheCommand', () => {
           summary: undefined,
           type: 'option',
           noCacheDefault: undefined,
+          hasDynamicHelp: false,
         },
 
       },
@@ -213,7 +214,6 @@ describe('cacheCommand', () => {
           deprecateAliases: undefined,
           aliases: undefined,
           charAliases: undefined,
-          delimiter: undefined,
           noCacheDefault: undefined,
         },
         childFlag: {
@@ -234,7 +234,6 @@ describe('cacheCommand', () => {
           deprecateAliases: undefined,
           aliases: undefined,
           charAliases: undefined,
-          delimiter: undefined,
           noCacheDefault: undefined,
         },
         parentFlag: {
@@ -255,7 +254,6 @@ describe('cacheCommand', () => {
           deprecateAliases: undefined,
           aliases: undefined,
           charAliases: undefined,
-          delimiter: undefined,
           noCacheDefault: undefined,
         },
       },
@@ -279,5 +277,22 @@ describe('cacheCommand', () => {
     }
     const c = await cacheCommand(C, undefined, false)
     expect(c.hasDynamicHelp).to.be.true
+    expect(c.flags.flagb.hasDynamicHelp).to.be.true
+  })
+
+  it('should add additional command properties', async () => {
+    class C extends Command {
+      static id = 'foo:bar'
+      static flags = {
+        flaga: Flags.boolean(),
+      }
+
+      static envVars = ['FOO_BAR']
+
+      public async run(): Promise<void> {}
+    }
+
+    const c = await cacheCommand(C, undefined, false)
+    expect(c.envVars).to.deep.equal(['FOO_BAR'])
   })
 })

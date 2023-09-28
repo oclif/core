@@ -109,10 +109,10 @@ export class Help extends HelpBase {
     if (command) {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
         const loaded = await command.load()
-        for (const flag of Object.values(loaded.flags)) {
-          if (flag.type === 'boolean') continue
+        for (const [name, flag] of Object.entries(loaded.flags)) {
+          if (flag.type === 'boolean' || !command.flags[name].hasDynamicHelp) continue
           // eslint-disable-next-line no-await-in-loop
-          flag.default = await cacheDefaultValue(flag, false)
+          command.flags[name].default = await cacheDefaultValue(flag, false)
         }
 
         await this.showCommandHelp(command)

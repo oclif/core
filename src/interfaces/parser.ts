@@ -162,12 +162,6 @@ export type FlagProps = {
    */
   deprecateAliases?: boolean
   /**
-   * Delimiter to separate the values for a multiple value flag.
-   * Only respected if multiple is set to true. Default behavior is to
-   * separate on spaces.
-   */
-  delimiter?: ',',
-  /**
    * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
@@ -210,6 +204,12 @@ export type OptionFlagProps = FlagProps & {
   helpValue?: string;
   options?: readonly string[];
   multiple?: boolean;
+    /**
+   * Delimiter to separate the values for a multiple value flag.
+   * Only respected if multiple is set to true. Default behavior is to
+   * separate on spaces.
+   */
+  delimiter?: ',',
 }
 
 export type FlagParserContext = Command & {token: FlagToken}

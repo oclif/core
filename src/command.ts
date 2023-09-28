@@ -411,7 +411,7 @@ export namespace Command {
   export type Flag = IFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
+    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
     export type Any = Flag | Cached
   }
 
