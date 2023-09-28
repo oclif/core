@@ -162,12 +162,6 @@ export type FlagProps = {
    */
   deprecateAliases?: boolean
   /**
-   * Delimiter to separate the values for a multiple value flag.
-   * Only respected if multiple is set to true. Default behavior is to
-   * separate on spaces.
-   */
-  delimiter?: ',',
-  /**
    * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
@@ -210,6 +204,12 @@ export type OptionFlagProps = FlagProps & {
   helpValue?: string;
   options?: readonly string[];
   multiple?: boolean;
+    /**
+   * Delimiter to separate the values for a multiple value flag.
+   * Only respected if multiple is set to true. Default behavior is to
+   * separate on spaces.
+   */
+  delimiter?: ',',
 }
 
 export type FlagParserContext = Command & {token: FlagToken}
@@ -243,7 +243,7 @@ export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
 }
 
 export type OptionFlag<T, P = CustomOptions> = FlagProps & OptionFlagProps & {
-  parse: FlagParser<T, string, P>
+  parse: FlagParser<T | undefined, string, P>
   defaultHelp?: FlagDefaultHelp<T, P>;
   input: string[];
   default?: FlagDefault<T | undefined, P>;
@@ -361,6 +361,7 @@ export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
   flags?: FlagInput<TFlags>;
   baseFlags?: FlagInput<BFlags>;
+  enableJsonFlag?: true | false;
   args?: ArgInput<AFlags>;
   strict?: boolean;
   context?: ParserContext;

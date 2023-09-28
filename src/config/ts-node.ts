@@ -2,7 +2,6 @@ import * as TSNode from 'ts-node'
 import {Plugin, TSConfig} from '../interfaces'
 import {isProd, readJsonSync} from '../util'
 import {join, relative as pathRelative} from 'node:path'
-import {Config} from './config'
 import {Debug} from './util'
 import {existsSync} from 'node:fs'
 import {memoizedWarn} from '../errors'
@@ -13,6 +12,11 @@ const debug = Debug('ts-node')
 
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
+/**
+ * Cache the root plugin so that we can reference it later when determining if
+ * we should skip ts-node registration for an ESM plugin.
+ */
+let ROOT_PLUGIN: Plugin | undefined
 
 function loadTSConfig(root: string): TSConfig | undefined {
   if (TS_CONFIGS[root]) return TS_CONFIGS[root]
@@ -123,6 +127,8 @@ function registerTSNode(root: string): TSConfig | undefined {
 export function tsPath(root: string, orig: string, plugin: Plugin): string
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
+  if (plugin?.isRoot) ROOT_PLUGIN = plugin
+
   if (!orig) return orig
   orig = orig.startsWith(root) ? orig : join(root, orig)
 
@@ -146,8 +152,8 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
    * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM.
    * In other words, this allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
    */
-  if ((isProduction || Config.rootPlugin?.moduleType === 'commonjs') && plugin?.moduleType === 'module') {
-    debug(`Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${Config.rootPlugin?.moduleType})))`)
+  if ((isProduction || ROOT_PLUGIN?.moduleType === 'commonjs') && plugin?.moduleType === 'module') {
+    debug(`Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${ROOT_PLUGIN?.moduleType})))`)
     if (plugin.type === 'link')
       memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
 

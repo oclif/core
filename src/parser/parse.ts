@@ -250,7 +250,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
+            valueFunction: async i => parseFlagOrThrowError(
               last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
               i.inputFlag.flag,
               this.context,
@@ -262,8 +262,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         // multiple with custom delimiter
         if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.delimiter && fws.inputFlag.flag.multiple) {
           return {
-            ...fws, valueFunction: async (i: FlagWithStrategy) => (await Promise.all(
-              ((i.tokens ?? []).flatMap(token => (token.input as string).split(i.inputFlag.flag.delimiter as string)))
+            ...fws,
+            valueFunction: async i => (await Promise.all(
+              ((i.tokens ?? []).flatMap(token => token.input.split((i.inputFlag.flag as OptionFlag<any>).delimiter ?? ',')))
               // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
               .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
               .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),

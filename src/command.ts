@@ -25,7 +25,7 @@ import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
-import {boolean} from './flags'
+import {aggregateFlags} from './util/aggregate-flags'
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
 import {ux} from './cli-ux'
@@ -41,13 +41,6 @@ stdout.on('error', (err: any) => {
     return
   throw err
 })
-
-const jsonFlag = {
-  json: boolean({
-    description: 'Format output as json.',
-    helpGroup: 'GLOBAL',
-  }),
-}
 
 /**
  * An abstract class which acts as the base for each command
@@ -126,37 +119,7 @@ export abstract class Command {
 
   public static hasDynamicHelp = false
 
-  protected static '_--' = false
-
-  protected static _enableJsonFlag = false
-
-  public static get enableJsonFlag(): boolean {
-    return this._enableJsonFlag
-  }
-
-  public static set enableJsonFlag(value: boolean) {
-    this._enableJsonFlag = value
-    if (value === true) {
-      this.baseFlags = jsonFlag
-    } else {
-      delete this.baseFlags?.json
-      this.flags = {} // force the flags setter to run
-      delete this.flags?.json
-    }
-  }
-
-  public static get '--'(): boolean {
-    return Command['_--']
-  }
-
-  public static set '--'(value: boolean) {
-    Command['_--'] = value
-  }
-
-  public get passThroughEnabled(): boolean {
-    return Command['_--']
-  }
-
+  public static enableJsonFlag = false
   /**
    * instantiate and run the command
    *
@@ -184,29 +147,10 @@ export abstract class Command {
     return cmd._run<ReturnType<T['run']>>()
   }
 
-  protected static _baseFlags: FlagInput
-
-  static get baseFlags(): FlagInput {
-    return this._baseFlags
-  }
-
-  static set baseFlags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._baseFlags = Object.assign({}, this.baseFlags, flags)
-    this.flags = {} // force the flags setter to run
-  }
+  public static baseFlags: FlagInput
 
   /** A hash of flags for the command */
-  protected static _flags: FlagInput
-
-  public static get flags(): FlagInput {
-    return this._flags
-  }
-
-  public static set flags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
-  }
+  public static flags: FlagInput
 
   public id: string | undefined
 
@@ -284,16 +228,19 @@ export abstract class Command {
    * @returns {boolean} true if the command supports json and the --json flag is present
    */
   public jsonEnabled(): boolean {
-    // if the command doesn't support json, return false
+    // If the command doesn't support json, return false
     if (!this.ctor.enableJsonFlag) return false
-    // if the command parameter pass through is enabled, return true if the --json flag is before the '--' separator
-    if (this.passThroughEnabled) {
-      const ptIndex = this.argv.indexOf('--')
-      const jsonIndex = this.argv.indexOf('--json')
-      return jsonIndex > -1 && (ptIndex === -1 || jsonIndex < ptIndex)
-    }
 
-    return this.argv.includes('--json') || this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json'
+    // If the CONTENT_TYPE env var is set to json, return true
+    if (this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json') return true
+
+    const passThroughIndex = this.argv.indexOf('--')
+    const jsonIndex = this.argv.indexOf('--json')
+    return passThroughIndex === -1
+      // If '--' is not present, then check for `--json` in this.argv
+      ? jsonIndex > -1
+      // If '--' is present, return true only the --json flag exists and is before the '--'
+      : jsonIndex > -1 && jsonIndex < passThroughIndex
   }
 
   /**
@@ -312,8 +259,13 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
+    const allFlags = aggregateFlags(
+      this.ctor.flags,
+      this.ctor.baseFlags,
+      this.ctor.enableJsonFlag,
+    )
     for (const flag of Object.keys(flags)) {
-      const flagDef = this.ctor.flags[flag]
+      const flagDef = allFlags[flag]
       const deprecated = flagDef?.deprecated
       if (deprecated) {
         this.warn(formatFlagDeprecationWarning(flag, deprecated))
@@ -352,12 +304,22 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, B, A>,
+    argv = this.argv,
+  ): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
-    const opts = {context: this, ...options}
-    // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
-    opts.args = options?.args
+
+    const opts = {
+      context: this,
+      ...options,
+      flags: aggregateFlags<F, B>(
+        options.flags,
+        options.baseFlags,
+        options.enableJsonFlag,
+      ),
+    }
+
     const results = await Parser.parse<F, B, A>(argv, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
@@ -449,7 +411,7 @@ export namespace Command {
   export type Flag = IFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
+    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
     export type Any = Flag | Cached
   }
 

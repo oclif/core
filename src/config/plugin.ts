@@ -1,13 +1,11 @@
 import {CLIError, error} from '../errors'
 import {
   Debug,
-  flatMap,
   getCommandIdPermutations,
-  mapValues,
   resolvePackage,
 } from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {compact, exists, isProd, readJson, requireJson} from '../util'
+import {compact, exists, isProd, mapValues, readJson, requireJson} from '../util'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
@@ -15,9 +13,9 @@ import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
+import {cacheCommand} from '../util/cache-command'
 import {inspect} from 'node:util'
 import {sync} from 'globby'
-import {toCached} from './config'
 import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -26,10 +24,10 @@ function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
   if (Array.isArray(input)) {
-    return [...input, ...flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`))]
+    return [...input, input.flatMap(t => topicsToArray(t.subtopics, `${base}${t.name}`))]
   }
 
-  return flatMap(Object.keys(input), k => {
+  return Object.keys(input).flatMap(k => {
     input[k].name = k
     return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })
@@ -141,6 +139,8 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
+  isRoot = false
+
   private _commandsDir!: string | undefined
 
   private flexibleTaxonomy!: boolean
@@ -155,6 +155,7 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
+    this.isRoot = this.options.isRoot ?? false
     if (this.options.parent) this.parent = this.options.parent as Plugin
     // Linked plugins already have a root so there's no need to search for it.
     // However there could be child plugins nested inside the linked plugin, in which
@@ -304,7 +305,7 @@ export class Plugin implements IPlugin {
       version: this.version,
       commands: (await Promise.all(this.commandIDs.map(async id => {
         try {
-          const cached = await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+          const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
           if (this.flexibleTaxonomy) {
             const permutations = getCommandIdPermutations(id)
             const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
@@ -313,7 +314,7 @@ export class Plugin implements IPlugin {
 
           return [id, cached]
         } catch (error: any) {
-          const scope = 'toCached'
+          const scope = 'cacheCommand'
           if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
           else throw this.addErrorScope(error, scope)
         }

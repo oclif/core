@@ -1,4 +1,5 @@
-import {Errors, stdout} from '..'
+import {error} from '../errors'
+import {stdout} from './stream'
 
 function timeout(p: Promise<any>, ms: number) {
   function wait(ms: number, unref = false) {
@@ -8,7 +9,7 @@ function timeout(p: Promise<any>, ms: number) {
     })
   }
 
-  return Promise.race([p, wait(ms, true).then(() => Errors.error('timed out'))])
+  return Promise.race([p, wait(ms, true).then(() => error('timed out'))])
 }
 
 async function _flush() {

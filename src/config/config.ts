@@ -1,20 +1,19 @@
 import * as ejs from 'ejs'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
-import {Arg, OptionFlag} from '../interfaces/parser'
 import {CLIError, error, exit, warn} from '../errors'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {URL, fileURLToPath} from 'node:url'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} from '../util'
+import {compact, getHomeDir, getPlatform, isProd, requireJson} from '../util'
 import {join, sep} from 'node:path'
-
 import {Command} from '../command'
 import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
+import WSL from 'is-wsl'
 import {format} from 'node:util'
-import {getHelpFlagAdditions} from '../help'
+import {getHelpFlagAdditions} from '../help/util'
 import {loadWithData} from '../module-loader'
 import {settings} from '../settings'
 import {stdout} from '../cli-ux/stream'
@@ -29,8 +28,6 @@ function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
   return (m && m[1]) || 'stable'
 }
-
-const WSL = require('is-wsl')
 
 function isConfig(o: any): o is Config {
   return o && Boolean(o._base)
@@ -812,147 +809,3 @@ export class Config implements IConfig {
   }
 }
 
-// when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {
-  if (respectNoCacheDefault && flag.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof flag.defaultHelp === 'function') {
-    try {
-      return await flag.defaultHelp({options: flag, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof flag.default === 'function') {
-    try {
-      return await flag.default({options: flag, flags: {}})
-    } catch {}
-  } else {
-    return flag.default
-  }
-}
-
-const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
-  if (respectNoCacheDefault && arg.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof arg.defaultHelp === 'function') {
-    try {
-      return await arg.defaultHelp({options: arg, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof arg.default === 'function') {
-    try {
-      return await arg.default({options: arg, flags: {}})
-    } catch {}
-  } else {
-    return arg.default
-  }
-}
-
-export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
-  const flags = {} as {[k: string]: Command.Flag.Cached}
-
-  for (const [name, flag] of Object.entries(c.flags || {})) {
-    if (flag.type === 'boolean') {
-      flags[name] = {
-        name,
-        type: flag.type,
-        char: flag.char,
-        summary: flag.summary,
-        description: flag.description,
-        hidden: flag.hidden,
-        required: flag.required,
-        helpLabel: flag.helpLabel,
-        helpGroup: flag.helpGroup,
-        allowNo: flag.allowNo,
-        dependsOn: flag.dependsOn,
-        relationships: flag.relationships,
-        exclusive: flag.exclusive,
-        deprecated: flag.deprecated,
-        deprecateAliases: c.deprecateAliases,
-        aliases: flag.aliases,
-        charAliases: flag.charAliases,
-        delimiter: flag.delimiter,
-        noCacheDefault: flag.noCacheDefault,
-      }
-    } else {
-      flags[name] = {
-        name,
-        type: flag.type,
-        char: flag.char,
-        summary: flag.summary,
-        description: flag.description,
-        hidden: flag.hidden,
-        required: flag.required,
-        helpLabel: flag.helpLabel,
-        helpValue: flag.helpValue,
-        helpGroup: flag.helpGroup,
-        multiple: flag.multiple,
-        options: flag.options,
-        dependsOn: flag.dependsOn,
-        relationships: flag.relationships,
-        exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, respectNoCacheDefault),
-        deprecated: flag.deprecated,
-        deprecateAliases: c.deprecateAliases,
-        aliases: flag.aliases,
-        charAliases: flag.charAliases,
-        delimiter: flag.delimiter,
-        noCacheDefault: flag.noCacheDefault,
-      }
-      // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
-      if (typeof flag.defaultHelp === 'function') {
-        c.hasDynamicHelp = true
-      }
-    }
-  }
-
-  const args = {} as {[k: string]: Command.Arg.Cached}
-  for (const [name, arg] of Object.entries(ensureArgObject(c.args))) {
-    args[name] = {
-      name,
-      description: arg.description,
-      required: arg.required,
-      options: arg.options,
-      default: await defaultArgToCached(arg, respectNoCacheDefault),
-      hidden: arg.hidden,
-      noCacheDefault: arg.noCacheDefault,
-    }
-  }
-
-  const stdProperties = {
-    id: c.id,
-    summary: c.summary,
-    description: c.description,
-    strict: c.strict,
-    usage: c.usage,
-    pluginName: plugin && plugin.name,
-    pluginAlias: plugin && plugin.alias,
-    pluginType: plugin && plugin.type,
-    hidden: c.hidden,
-    state: c.state,
-    aliases: c.aliases || [],
-    examples: c.examples || (c as any).example,
-    deprecationOptions: c.deprecationOptions,
-    deprecateAliases: c.deprecateAliases,
-    flags,
-    args,
-  }
-
-  // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags', '_baseFlags']
-  const stdKeys = Object.keys(stdProperties)
-  const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  const additionalProperties: Record<string, unknown> = {}
-  for (const key of keysToAdd) {
-    additionalProperties[key] = (c as any)[key]
-  }
-
-  return {...stdProperties, ...additionalProperties}
-}

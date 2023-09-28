@@ -1,6 +1,6 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
-import {Args, Command as Base, Flags, toCached} from '../../src'
+import {Command as Base, Flags} from '../../src'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -68,208 +68,6 @@ describe('command', () => {
   })
   .catch(/EEXIT: 0/)
   .it('exits with 0')
-
-  describe('toCached', () => {
-    fancy
-    .do(async () => {
-      class C extends Command {
-        static id = 'foo:bar'
-        static title = 'cmd title'
-        static type = 'mytype'
-        static usage = ['$ usage']
-        static description = 'test command'
-        static aliases = ['alias1', 'alias2']
-        static hidden = true
-        // @ts-ignore
-        static flags = {
-          flaga: Flags.boolean(),
-          flagb: Flags.string({
-            char: 'b',
-            hidden: true,
-            required: false,
-            description: 'flagb desc',
-            options: ['a', 'b'],
-            default: async () => 'a',
-          }),
-          flagc: Flags.integer({
-            char: 'c',
-            min: 1,
-            max: 10,
-            required: false,
-            description: 'flagc desc',
-            options: ['a', 'b'],
-            // @ts-expect-error: context is any
-            default: async context => context.options.min + 1,
-          }),
-        }
-
-        static args = {
-          arg1: Args.string({
-            description: 'arg1 desc',
-            required: true,
-            hidden: false,
-            options: ['af', 'b'],
-            default: async () => 'a',
-          }),
-        }
-      }
-
-      const c = await toCached(C, undefined, false)
-
-      expect(c).to.deep.equal({
-        id: 'foo:bar',
-        type: 'mytype',
-        hidden: true,
-        pluginName: undefined,
-        pluginAlias: undefined,
-        pluginType: undefined,
-        state: undefined,
-        description: 'test command',
-        aliases: ['alias1', 'alias2'],
-        title: 'cmd title',
-        usage: ['$ usage'],
-        examples: undefined,
-        deprecationOptions: undefined,
-        deprecateAliases: undefined,
-        summary: undefined,
-        strict: true,
-        flags: {
-          flaga: {
-            aliases: undefined,
-            char: undefined,
-            charAliases: undefined,
-            description: undefined,
-            dependsOn: undefined,
-            deprecateAliases: undefined,
-            deprecated: undefined,
-            exclusive: undefined,
-            helpGroup: undefined,
-            helpLabel: undefined,
-            summary: undefined,
-            name: 'flaga',
-            hidden: undefined,
-            required: undefined,
-            relationships: undefined,
-            allowNo: false,
-            type: 'boolean',
-            delimiter: undefined,
-            noCacheDefault: undefined,
-          },
-          flagb: {
-            aliases: undefined,
-            char: 'b',
-            charAliases: undefined,
-            description: 'flagb desc',
-            dependsOn: undefined,
-            deprecateAliases: undefined,
-            deprecated: undefined,
-            exclusive: undefined,
-            helpGroup: undefined,
-            helpLabel: undefined,
-            summary: undefined,
-            name: 'flagb',
-            hidden: true,
-            required: false,
-            multiple: false,
-            relationships: undefined,
-            type: 'option',
-            helpValue: undefined,
-            default: 'a',
-            options: ['a', 'b'],
-            delimiter: undefined,
-            noCacheDefault: undefined,
-          },
-          flagc: {
-            aliases: undefined,
-            char: 'c',
-            charAliases: undefined,
-            default: 2,
-            delimiter: undefined,
-            dependsOn: undefined,
-            deprecateAliases: undefined,
-            deprecated: undefined,
-            description: 'flagc desc',
-            exclusive: undefined,
-            helpGroup: undefined,
-            helpLabel: undefined,
-            helpValue: undefined,
-            hidden: undefined,
-            multiple: false,
-            name: 'flagc',
-            options: [
-              'a',
-              'b',
-            ],
-            relationships: undefined,
-            required: false,
-            summary: undefined,
-            type: 'option',
-            noCacheDefault: undefined,
-          },
-
-        },
-        args: {
-          arg1: {
-            description: 'arg1 desc',
-            name: 'arg1',
-            hidden: false,
-            required: true,
-            options: ['af', 'b'],
-            default: 'a',
-            noCacheDefault: undefined,
-          },
-        },
-      })
-    })
-    .it('converts to cached with everything set')
-
-    fancy
-    // .skip()
-    .do(async () => {
-      // const c = class extends Command {
-      // }.convertToCached()
-      // expect(await c.load()).to.have.property('run')
-      // delete c.load
-      // expect(c).to.deep.equal({
-      //   _base: `@oclif/command@${pjson.version}`,
-      //   id: undefined,
-      //   type: undefined,
-      //   hidden: undefined,
-      //   pluginName: undefined,
-      //   description: 'test command',
-      //   aliases: [],
-      //   title: undefined,
-      //   usage: undefined,
-      //   flags: {},
-      //   args: [],
-      // })
-    })
-
-    .it('adds plugin name')
-
-    fancy
-    // .skip()
-    // .do(async () => {
-    //   const c = class extends Command {
-    //   }.convertToCached({pluginName: 'myplugin'})
-    //   expect(await c.load()).to.have.property('run')
-    //   delete c.load
-    //   expect(c).to.deep.equal({
-    //     _base: `@oclif/command@${pjson.version}`,
-    //     type: undefined,
-    //     id: undefined,
-    //     hidden: undefined,
-    //     pluginName: 'myplugin',
-    //     description: 'test command',
-    //     aliases: [],
-    //     title: undefined,
-    //     usage: undefined,
-    //     flags: {},
-    //     args: [],
-    //   })
-    // })
-    .it('converts to cached with nothing set')
-  })
 
   describe('parse', () => {
     fancy
@@ -553,7 +351,6 @@ describe('command', () => {
     .do(async () => {
       class CMD extends Command {
         static enableJsonFlag = true
-        static '--' = true
 
         async run() {
           const {flags} = await cmd.parse(CMD, ['--json'])
@@ -570,16 +367,12 @@ describe('command', () => {
     .stdout()
     .do(async () => {
       class CMD extends Command {
-        // static initialization block is required whenever using ES2022
-        static {
-          this.enableJsonFlag = true
-          this['--'] = true
-        }
+        static enableJsonFlag = true
 
         async run() {
           const {flags} = await cmd.parse(CMD, ['--', '--json'])
           expect(flags.json).to.equal(false, 'json flag should be false')
-          expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
+          // expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
         }
       }
 
@@ -593,7 +386,6 @@ describe('command', () => {
     .do(async () => {
       class CMD extends Command {
         static enableJsonFlag = true
-        static '--' = true
 
         async run() {
           const {flags} = await cmd.parse(CMD, ['--foo', '--json'])
@@ -611,12 +403,11 @@ describe('command', () => {
     .do(async () => {
       class CMD extends Command {
         static enableJsonFlag = true
-        static '--' = true
 
         async run() {
           const {flags} = await cmd.parse(CMD, ['--foo', '--', '--json'])
           expect(flags.json).to.equal(false, 'json flag should be false')
-          expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
+          // expect(this.passThroughEnabled).to.equal(true, 'pass through should be true')
         }
       }
 
@@ -630,7 +421,6 @@ describe('command', () => {
     .do(async () => {
       class CMD extends Command {
         static enableJsonFlag = true
-        static '--' = true
 
         async run() {}
       }

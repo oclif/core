@@ -43,7 +43,7 @@ export default class PluginLoader {
       rootPlugin = plugins.find(p => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark('plugin.load#root')
-      rootPlugin = new Plugin.Plugin({root: this.options.root})
+      rootPlugin = new Plugin.Plugin({root: this.options.root, isRoot: true})
       await rootPlugin.load()
       marker?.addDetails({
         hasManifest: rootPlugin.hasManifest ?? false,

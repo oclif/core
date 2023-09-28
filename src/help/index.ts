@@ -5,15 +5,15 @@ import {Command} from '../command'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
+import {cacheDefaultValue} from '../util/cache-default-value'
 import {error} from '../errors'
 import {format} from 'node:util'
+import {load} from '../module-loader'
 import {stdout} from '../cli-ux/stream'
-import {toCached} from '../config/config'
-
-import stripAnsi = require('strip-ansi')
+import stripAnsi from 'strip-ansi'
 
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, loadHelpClass, getHelpFlagAdditions, normalizeArgv} from './util'
+export {standardizeIDFromArgv, getHelpFlagAdditions, normalizeArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
@@ -108,8 +108,14 @@ export class Help extends HelpBase {
     const command = this.config.findCommand(subject)
     if (command) {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
-        const dynamicCommand = await toCached(await command.load())
-        await this.showCommandHelp(dynamicCommand)
+        const loaded = await command.load()
+        for (const [name, flag] of Object.entries(loaded.flags)) {
+          if (flag.type === 'boolean' || !command.flags[name].hasDynamicHelp) continue
+          // eslint-disable-next-line no-await-in-loop
+          command.flags[name].default = await cacheDefaultValue(flag, false)
+        }
+
+        await this.showCommandHelp(command)
       } else {
         await this.showCommandHelp(command)
       }
@@ -326,4 +332,28 @@ export class Help extends HelpBase {
   protected log(...args: string[]): void {
     stdout.write(format.apply(this, args) + '\n')
   }
+}
+
+interface HelpBaseDerived {
+  new(config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>): HelpBase;
+}
+
+function extractClass(exported: any): HelpBaseDerived {
+  return exported && exported.default ? exported.default : exported
+}
+
+export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
+  const {pjson} = config
+  const configuredClass = pjson.oclif?.helpClass
+
+  if (configuredClass) {
+    try {
+      const exported = await load(config, configuredClass) as HelpBaseDerived
+      return extractClass(exported) as HelpBaseDerived
+    } catch (error: any) {
+      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
+    }
+  }
+
+  return Help
 }
