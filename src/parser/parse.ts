@@ -391,8 +391,8 @@ export class Parser<
           ...fws,
           helpFunction:
             typeof fws.inputFlag.flag.defaultHelp === 'function'
-              ? // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-                (i: FlagWithStrategy, flags: Record<string, string>, ...context) =>
+              ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) =>
+                  // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
                   i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
               : // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
                 (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
