@@ -5,7 +5,7 @@ import {expect, fancy} from './test'
 import {Flags, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {getCommandIdPermutations} from '../../src/config/util'
-import * as util from '../../src/util'
+import * as os from '../../src/util/os'
 import {join} from 'node:path'
 
 interface Options {
@@ -44,8 +44,8 @@ describe('Config with flexible taxonomy', () => {
     let test = fancy
       .resetConfig()
       .env(env, {clear: true})
-      .stub(util, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-      .stub(util, 'getPlatform', (stub) => stub.returns(platform))
+      .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
+      .stub(os, 'getPlatform', (stub) => stub.returns(platform))
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<Command.Class> => MyCommandClass

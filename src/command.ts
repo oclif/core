@@ -16,7 +16,6 @@ import {
 } from './interfaces/parser'
 import {format, inspect} from 'node:util'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
-import {requireJson, uniq} from './util/index'
 import {stderr, stdout} from './cli-ux/stream'
 import {CommandError} from './interfaces/errors'
 import {Config} from './config'
@@ -27,6 +26,8 @@ import {PrettyPrintableError} from './errors'
 import {aggregateFlags} from './util/aggregate-flags'
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
+import {requireJson} from './util/fs'
+import {uniq} from './util/util'
 import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')

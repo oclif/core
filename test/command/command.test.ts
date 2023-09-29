@@ -1,6 +1,7 @@
 import {expect, fancy} from 'fancy-test'
 // import path = require('path')
 import {Command as Base, Flags} from '../../src'
+import {ensureArgObject} from '../../src/util/ensure-arg-object'
 // import {TestHelpClassConfig} from './helpers/test-help-in-src/src/test-help-plugin'
 
 // const pjson = require('../package.json')
@@ -447,5 +448,24 @@ describe('command', () => {
         expect(cmd.jsonEnabled()).to.equal(false)
       })
       .it('json disabled/pass through enable/--json flag before --/jsonEnabled() should be false')
+  })
+})
+
+describe('ensureArgObject', () => {
+  it('should convert array of arguments to an object', () => {
+    const args = [
+      {name: 'foo', description: 'foo desc', required: true},
+      {name: 'bar', description: 'bar desc'},
+    ]
+    const expected = {foo: args[0], bar: args[1]}
+    expect(ensureArgObject(args)).to.deep.equal(expected)
+  })
+
+  it('should do nothing to an arguments object', () => {
+    const args = {
+      foo: {name: 'foo', description: 'foo desc', required: true},
+      bar: {name: 'bar', description: 'bar desc'},
+    }
+    expect(ensureArgObject(args)).to.deep.equal(args)
   })
 })

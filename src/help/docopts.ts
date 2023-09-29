@@ -1,5 +1,5 @@
 import {Command} from '../command'
-import {ensureArgObject} from '../util/index'
+import {ensureArgObject} from '../util/ensure-arg-object'
 /**
  * DocOpts - See http://docopt.org/.
  *

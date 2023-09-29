@@ -1,5 +1,5 @@
 import * as Interfaces from '../interfaces'
-import {compact, sortBy, uniqBy} from '../util/index'
+import {compact, sortBy, uniqBy} from '../util/util'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 import {Command} from '../command'
 import {CommandHelp} from './command'
