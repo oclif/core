@@ -63,7 +63,6 @@
     "eslint-config-oclif": "^5.0.0",
     "eslint-config-oclif-typescript": "^2.0.1",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
     "fancy-test": "^3.0.1",
     "globby": "^11.1.0",
     "husky": "^8",

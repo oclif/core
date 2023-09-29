@@ -4,9 +4,6 @@
     "oclif-typescript",
     "prettier"
   ],
-  "plugins": [
-    "prettier"
-  ],
   "rules": {
     "sort-imports": "error",
     "unicorn/prefer-module": "off",
