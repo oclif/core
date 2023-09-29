@@ -13,6 +13,7 @@ import {
   AppsTopic,
   DbCreate,
   DbTopic,
+  DeprecateAliases,
 } from './fixtures/fixtures'
 import {Config, Interfaces} from '../../src'
 import {monkeyPatchCommands} from './help-test-utils'
@@ -256,6 +257,32 @@ TOPICS
 COMMANDS
   apps:create   Create an app
   apps:destroy  Destroy an app`)
+    })
+
+  test
+    .loadConfig()
+    .stdout()
+    .do(async (ctx) => {
+      const {config} = ctx
+      monkeyPatchCommands(config, [
+        {
+          name: 'plugin-1',
+          commands: [DeprecateAliases],
+          topics: [],
+        },
+      ])
+
+      const help = new TestHelp(config as any)
+      await help.showHelp(['foo:bar:alias'])
+    })
+    .it('show deprecation warning when using alias', ({stdout}) => {
+      expect(stdout.trim()).to.equal(`The "foo:bar:alias" command has been deprecated. Use "foo:bar" instead.
+
+USAGE
+  $ oclif foo:bar:alias
+
+ALIASES
+  $ oclif foo:bar:alias`)
     })
 })
 
