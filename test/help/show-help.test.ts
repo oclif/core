@@ -52,25 +52,6 @@ const test = base
       for (const stub of Object.values(ctx.stubs)) stub.restore()
     },
   }))
-  .register('setupDeprecatedAliasesHelp', () => ({
-    async run(ctx: {help: TestHelp; stubs: {[k: string]: SinonStub}}) {
-      ctx.stubs = {
-        showRootHelp: stub(TestHelp.prototype, 'showRootHelp').resolves(),
-        showTopicHelp: stub(TestHelp.prototype, 'showTopicHelp').resolves(),
-        showCommandHelp: stub(TestHelp.prototype, 'showCommandHelp').resolves(),
-      }
-
-      // use devPlugins: true to bring in plugins-plugin with topic commands for testing
-      const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
-      const pluginPlugins = config.plugins.get('@oclif/plugin-plugins')!
-      const pluginsInstall = pluginPlugins.commands.find((c) => c.id === 'plugins:install')!
-      pluginPlugins.commands = [...pluginPlugins.commands, {...pluginsInstall, deprecateAliases: true}]
-      ctx.help = new TestHelp(config)
-    },
-    finally(ctx) {
-      for (const stub of Object.values(ctx.stubs)) stub.restore()
-    },
-  }))
   .register('makeTopicsWithoutCommand', () => ({
     async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
       // by returning no matching command for a subject, it becomes a topic only
