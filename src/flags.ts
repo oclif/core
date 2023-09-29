@@ -5,41 +5,41 @@ import {CLIError} from './errors'
 import {URL} from 'node:url'
 import {loadHelpClass} from './help'
 
-type NotArray<T> = T extends Array<any> ? never: T;
+type NotArray<T> = T extends Array<any> ? never : T
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
-    multiple: true;
-  } & (
-    {required: true} | {default: OptionFlag<T[], P>['default']}
-  ),
+    multiple: true
+  } & ({required: true} | {default: OptionFlag<T[], P>['default']}),
 ): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<NotArray<T>, P>> & {
-    multiple?: false | undefined;
-  } & (
-    {required: true} | {default: OptionFlag<NotArray<T>, P>['default']}
-  ),
+    multiple?: false | undefined
+  } & ({required: true} | {default: OptionFlag<NotArray<T>, P>['default']}),
 ): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<NotArray<T>, P>> & {
-    default?: OptionFlag<NotArray<T>, P>['default'] | undefined;
-    multiple?: false | undefined;
-    required?: false | undefined;
+    default?: OptionFlag<NotArray<T>, P>['default'] | undefined
+    multiple?: false | undefined
+    required?: false | undefined
   },
 ): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: false}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
-    multiple: true;
-    default?: OptionFlag<T[], P>['default'] | undefined;
-    required?: false | undefined;
+    multiple: true
+    default?: OptionFlag<T[], P>['default'] | undefined
+    required?: false | undefined
   },
 ): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: false}>
 
-export function custom<T = string, P extends CustomOptions = CustomOptions>(): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: false}>
+export function custom<T = string, P extends CustomOptions = CustomOptions>(): FlagDefinition<
+  T,
+  P,
+  {multiple: false; requiredOrDefaulted: false}
+>
 /**
  * Create a custom flag.
  *
@@ -70,9 +70,7 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(
   })
 }
 
-export function boolean<T = boolean>(
-  options: Partial<BooleanFlag<T>> = {},
-): BooleanFlag<T> {
+export function boolean<T = boolean>(options: Partial<BooleanFlag<T>> = {}): BooleanFlag<T> {
   return {
     parse: async (b, _) => b,
     ...options,
@@ -81,10 +79,9 @@ export function boolean<T = boolean>(
   } as BooleanFlag<T>
 }
 
-export const integer = custom<number, {min?: number; max?: number;}>({
+export const integer = custom<number, {min?: number; max?: number}>({
   async parse(input, _, opts) {
-    if (!/^-?\d+$/.test(input))
-      throw new CLIError(`Expected an integer but received: ${input}`)
+    if (!/^-?\d+$/.test(input)) throw new CLIError(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
     if (opts.min !== undefined && num < opts.min)
       throw new CLIError(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
@@ -126,64 +123,65 @@ export const url = custom<URL>({
 
 export const string = custom()
 
-export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => boolean({
-  description: 'Show CLI version.',
-  ...opts,
-  async parse(_, ctx) {
-    ctx.log(ctx.config.userAgent)
-    ctx.exit(0)
-  },
-})
+export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> =>
+  boolean({
+    description: 'Show CLI version.',
+    ...opts,
+    async parse(_, ctx) {
+      ctx.log(ctx.config.userAgent)
+      ctx.exit(0)
+    },
+  })
 
-export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> => boolean({
-  description: 'Show CLI help.',
-  ...opts,
-  async parse(_, cmd) {
-    const Help = await loadHelpClass(cmd.config)
-    await new Help(cmd.config, cmd.config.pjson.helpOptions).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
-    cmd.exit(0)
-  },
-})
+export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> =>
+  boolean({
+    description: 'Show CLI help.',
+    ...opts,
+    async parse(_, cmd) {
+      const Help = await loadHelpClass(cmd.config)
+      await new Help(cmd.config, cmd.config.pjson.helpOptions).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
+      cmd.exit(0)
+    },
+  })
 
-type ElementType<T extends ReadonlyArray<unknown>> = T[number];
+type ElementType<T extends ReadonlyArray<unknown>> = T[number]
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
-    options: T;
+    options: T
     multiple: true
   } & (
-    {required: true} | {
-      default: OptionFlag<ElementType<T>[], P>['default'] | undefined;
-    }
-  ),
-): FlagDefinition<typeof defaults.options[number], P, {multiple: true; requiredOrDefaulted: true}>
+      | {required: true}
+      | {
+          default: OptionFlag<ElementType<T>[], P>['default'] | undefined
+        }
+    ),
+): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {
-    options: T;
-    multiple?: false | undefined;
-  } & (
-    {required: true} | {default: OptionFlag<ElementType<T>, P>['default']}
-  ),
-): FlagDefinition<typeof defaults.options[number], P, {multiple: false; requiredOrDefaulted: true}>
+    options: T
+    multiple?: false | undefined
+  } & ({required: true} | {default: OptionFlag<ElementType<T>, P>['default']}),
+): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {
-    options: T;
-    default?: OptionFlag<ElementType<T>, P>['default'] | undefined;
-    multiple?: false | undefined;
-    required?: false | undefined;
+    options: T
+    default?: OptionFlag<ElementType<T>, P>['default'] | undefined
+    multiple?: false | undefined
+    required?: false | undefined
   },
-): FlagDefinition<typeof defaults.options[number], P, {multiple: false; requiredOrDefaulted: false}>
+): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: false}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
-    options: T;
-    multiple: true;
-    default?: OptionFlag<ElementType<T>[], P>['default'] | undefined;
-    required?: false | undefined;
+    options: T
+    multiple: true
+    default?: OptionFlag<ElementType<T>[], P>['default'] | undefined
+    required?: false | undefined
   },
-): FlagDefinition<typeof defaults.options[number], P, {multiple: true; requiredOrDefaulted: false}>
+): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: false}>
 
 /**
  * Create a custom flag that infers the flag type from the provided options.
@@ -199,7 +197,7 @@ export function option<T extends readonly string[], P extends CustomOptions>(
  */
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {options: T},
-): FlagDefinition<typeof defaults.options[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
+): FlagDefinition<(typeof defaults.options)[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
   return (options: any = {}) => ({
     parse: async (input, _ctx, _opts) => input,
     ...defaults,

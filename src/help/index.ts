@@ -36,14 +36,14 @@ export abstract class HelpBase extends HelpFormatter {
    * Show help, used in multi-command CLIs
    * @param args passed into your command, useful for determining which type of help to display
    */
-  public abstract showHelp(argv: string[]): Promise<void>;
+  public abstract showHelp(argv: string[]): Promise<void>
 
   /**
    * Show help for an individual command
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>;
+  public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>
 }
 
 export class Help extends HelpBase {
@@ -58,7 +58,7 @@ export class Help extends HelpBase {
   private get _topics(): Interfaces.Topic[] {
     return this.config.topics.filter((topic: Interfaces.Topic) => {
       // it is assumed a topic has a child if it has children
-      const hasChild = this.config.topics.some(subTopic => subTopic.name.includes(`${topic.name}:`))
+      const hasChild = this.config.topics.some((subTopic) => subTopic.name.includes(`${topic.name}:`))
       return hasChild
     })
   }
@@ -66,18 +66,18 @@ export class Help extends HelpBase {
   protected get sortedCommands(): Command.Loadable[] {
     let {commands} = this.config
 
-    commands = commands.filter(c => this.opts.all || !c.hidden)
-    commands = sortBy(commands, c => c.id)
-    commands = uniqBy(commands, c => c.id)
+    commands = commands.filter((c) => this.opts.all || !c.hidden)
+    commands = sortBy(commands, (c) => c.id)
+    commands = uniqBy(commands, (c) => c.id)
 
     return commands
   }
 
   protected get sortedTopics(): Interfaces.Topic[] {
     let topics = this._topics
-    topics = topics.filter(t => this.opts.all || !t.hidden)
-    topics = sortBy(topics, t => t.name)
-    topics = uniqBy(topics, t => t.name)
+    topics = topics.filter((t) => this.opts.all || !t.hidden)
+    topics = sortBy(topics, (t) => t.name)
+    topics = uniqBy(topics, (t) => t.name)
 
     return topics
   }
@@ -88,7 +88,7 @@ export class Help extends HelpBase {
 
   public async showHelp(argv: string[]): Promise<void> {
     const originalArgv = argv.slice(1)
-    argv = argv.filter(arg => !getHelpFlagAdditions(this.config).includes(arg))
+    argv = argv.filter((arg) => !getHelpFlagAdditions(this.config).includes(arg))
 
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv, this.config)
@@ -134,7 +134,7 @@ export class Help extends HelpBase {
       if (matches.length > 0) {
         const result = await this.config.runHook('command_incomplete', {
           id: subject,
-          argv: originalArgv.filter(o => !subject.split(':').includes(o)),
+          argv: originalArgv.filter((o) => !subject.split(':').includes(o)),
           matches,
         })
         if (result.successes.length > 0) return
@@ -148,8 +148,12 @@ export class Help extends HelpBase {
     const name = command.id
     const depth = name.split(':').length
 
-    const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
-    const subCommands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
+    const subTopics = this.sortedTopics.filter(
+      (t) => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1,
+    )
+    const subCommands = this.sortedCommands.filter(
+      (c) => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1,
+    )
     const plugin = this.config.plugins.get(command.pluginName!)
 
     const state = this.config.pjson?.oclif?.state || plugin?.pjson?.oclif?.state || command.state
@@ -157,9 +161,15 @@ export class Help extends HelpBase {
     if (state) {
       this.log(
         state === 'deprecated'
-          ? `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}`
+          ? `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}\n`
           : `This command is in ${state}.\n`,
       )
+    }
+
+    if (command.deprecateAliases && command.aliases.includes(name)) {
+      const actualCmd = this.config.commands.find((c) => c.aliases.includes(name))
+      const opts = {...command.deprecationOptions, ...(actualCmd ? {to: actualCmd.id} : {})}
+      this.log(`${formatCommandDeprecationWarning(toConfiguredId(name, this.config), opts)}\n`)
     }
 
     const summary = this.summary(command)
@@ -176,8 +186,8 @@ export class Help extends HelpBase {
     }
 
     if (subCommands.length > 0) {
-      const aliases:string[] = []
-      const uniqueSubCommands: Command.Loadable[] = subCommands.filter(p => {
+      const aliases: string[] = []
+      const uniqueSubCommands: Command.Loadable[] = subCommands.filter((p) => {
         aliases.push(...p.aliases)
         return !aliases.includes(p.id)
       })
@@ -192,19 +202,15 @@ export class Help extends HelpBase {
 
     const state = this.config.pjson?.oclif?.state
     if (state) {
-      this.log(
-        state === 'deprecated'
-          ? `${this.config.bin} is deprecated`
-          : `${this.config.bin} is in ${state}.\n`,
-      )
+      this.log(state === 'deprecated' ? `${this.config.bin} is deprecated` : `${this.config.bin} is in ${state}.\n`)
     }
 
     this.log(this.formatRoot())
     this.log('')
 
     if (!this.opts.all) {
-      rootTopics = rootTopics.filter(t => !t.name.includes(':'))
-      rootCommands = rootCommands.filter(c => !c.id.includes(':'))
+      rootTopics = rootTopics.filter((t) => !t.name.includes(':'))
+      rootCommands = rootCommands.filter((c) => !c.id.includes(':'))
     }
 
     if (rootTopics.length > 0) {
@@ -213,7 +219,7 @@ export class Help extends HelpBase {
     }
 
     if (rootCommands.length > 0) {
-      rootCommands = rootCommands.filter(c => c.id)
+      rootCommands = rootCommands.filter((c) => c.id)
       this.log(this.formatCommands(rootCommands))
       this.log('')
     }
@@ -223,8 +229,12 @@ export class Help extends HelpBase {
     const {name} = topic
     const depth = name.split(':').length
 
-    const subTopics = this.sortedTopics.filter(t => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1)
-    const commands = this.sortedCommands.filter(c => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1)
+    const subTopics = this.sortedTopics.filter(
+      (t) => t.name.startsWith(name + ':') && t.name.split(':').length === depth + 1,
+    )
+    const commands = this.sortedCommands.filter(
+      (c) => c.id.startsWith(name + ':') && c.id.split(':').length === depth + 1,
+    )
 
     const state = this.config.pjson?.oclif?.state
     if (state) this.log(`This topic is in ${state}.\n`)
@@ -250,7 +260,7 @@ export class Help extends HelpBase {
   protected formatCommand(command: Command.Class | Command.Loadable | Command.Cached): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replaceAll(':', this.config.topicSeparator)
-      command.aliases = command.aliases && command.aliases.map(a => a.replaceAll(':', this.config.topicSeparator))
+      command.aliases = command.aliases && command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
     }
 
     const help = this.getCommandHelpClass(command)
@@ -264,17 +274,17 @@ export class Help extends HelpBase {
   protected formatCommands(commands: Array<Command.Class | Command.Loadable | Command.Cached>): string {
     if (commands.length === 0) return ''
 
-    const body = this.renderList(commands.map(c => {
-      if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
-      return [
-        c.id,
-        this.summary(c),
-      ]
-    }), {
-      spacer: '\n',
-      stripAnsi: this.opts.stripAnsi,
-      indentation: 2,
-    })
+    const body = this.renderList(
+      commands.map((c) => {
+        if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
+        return [c.id, this.summary(c)]
+      }),
+      {
+        spacer: '\n',
+        stripAnsi: this.opts.stripAnsi,
+        indentation: 2,
+      },
+    )
 
     return this.section('COMMANDS', body)
   }
@@ -311,17 +321,17 @@ export class Help extends HelpBase {
 
   protected formatTopics(topics: Interfaces.Topic[]): string {
     if (topics.length === 0) return ''
-    const body = this.renderList(topics.map(c => {
-      if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
-      return [
-        c.name,
-        c.description && this.render(c.description.split('\n')[0]),
-      ]
-    }), {
-      spacer: '\n',
-      stripAnsi: this.opts.stripAnsi,
-      indentation: 2,
-    })
+    const body = this.renderList(
+      topics.map((c) => {
+        if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
+        return [c.name, c.description && this.render(c.description.split('\n')[0])]
+      }),
+      {
+        spacer: '\n',
+        stripAnsi: this.opts.stripAnsi,
+        indentation: 2,
+      },
+    )
     return this.section('TOPICS', body)
   }
 
@@ -335,7 +345,7 @@ export class Help extends HelpBase {
 }
 
 interface HelpBaseDerived {
-  new(config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>): HelpBase;
+  new (config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>): HelpBase
 }
 
 function extractClass(exported: any): HelpBaseDerived {
@@ -348,10 +358,12 @@ export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBase
 
   if (configuredClass) {
     try {
-      const exported = await load(config, configuredClass) as HelpBaseDerived
+      const exported = (await load(config, configuredClass)) as HelpBaseDerived
       return extractClass(exported) as HelpBaseDerived
     } catch (error: any) {
-      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
+      throw new Error(
+        `Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`,
+      )
     }
   }
 

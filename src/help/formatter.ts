@@ -10,8 +10,13 @@ import width from 'string-width'
 import wrap from 'wrap-ansi'
 
 export type HelpSectionKeyValueTable = {name: string; description: string}[]
-export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Command.Arg.Any[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
+export type HelpSection =
+  | {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined}
+  | undefined
+export type HelpSectionRenderer = (
+  data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Command.Arg.Any[]},
+  header: string,
+) => HelpSection | HelpSection[] | string | undefined
 
 export class HelpFormatter {
   indentSpacing = 2
@@ -101,7 +106,10 @@ export class HelpFormatter {
     return indent(body, spacing)
   }
 
-  public renderList(input: (string | undefined)[][], opts: {indentation: number; multiline?: boolean; stripAnsi?: boolean; spacer?: string}): string {
+  public renderList(
+    input: (string | undefined)[][],
+    opts: {indentation: number; multiline?: boolean; stripAnsi?: boolean; spacer?: string},
+  ): string {
     if (input.length === 0) {
       return ''
     }
@@ -128,7 +136,7 @@ export class HelpFormatter {
     }
 
     if (opts.multiline) return renderMultiline()
-    const maxLength = widestLine(input.map(i => i[0]).join('\n'))
+    const maxLength = widestLine(input.map((i) => i[0]).join('\n'))
     let output = ''
     let spacer = opts.spacer || '\n'
     let cur = ''
@@ -149,7 +157,7 @@ export class HelpFormatter {
       if (opts.stripAnsi) right = stripAnsi(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
-      const [first, ...lines] = right!.split('\n').map(s => s.trim())
+      const [first, ...lines] = right!.split('\n').map((s) => s.trim())
       cur += ' '.repeat(maxLength - width(cur) + 2)
       cur += first
       if (lines.length === 0) {
@@ -172,32 +180,37 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | HelpSection | HelpSectionKeyValueTable | [string, string | undefined][]): string {
+  public section(
+    header: string,
+    body: string | HelpSection | HelpSectionKeyValueTable | [string, string | undefined][],
+  ): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
     if (typeof body! === 'string') {
       newBody = this.render(body!)
     } else if (Array.isArray(body)) {
-      newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map(entry => {
+      newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map((entry) => {
         if ('name' in entry) {
           const tableEntry = entry as unknown as {name: string; description: string}
-          return ([this.render(tableEntry.name), this.render(tableEntry.description)])
+          return [this.render(tableEntry.name), this.render(tableEntry.description)]
         }
 
         const [left, right] = entry
-        return ([this.render(left), right && this.render(right as string)])
+        return [this.render(left), right && this.render(right as string)]
       })
     } else if ('header' in body!) {
       return this.section(body!.header, body!.body)
     } else {
       newBody = (body! as unknown as HelpSectionKeyValueTable)
-      .map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
-      .map(([left, right]) => ([this.render(left), right && this.render(right)]))
+        .map((entry: {name: string; description: string}) => [entry.name, entry.description])
+        .map(([left, right]) => [this.render(left), right && this.render(right)])
     }
 
     const output = [
       chalk.bold(header),
-      this.indent(Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody),
+      this.indent(
+        Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody,
+      ),
     ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output
   }

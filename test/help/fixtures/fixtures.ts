@@ -126,3 +126,20 @@ export const DbTopic: Topic = {
   name: 'db',
   description: 'This topic is for the db topic',
 }
+
+// deprecateAliases
+export class DeprecateAliases extends Command {
+  static id = 'foo:bar'
+
+  static aliases = ['foo:bar:alias']
+
+  static deprecateAliases = true
+
+  static flags = {}
+
+  static args = {}
+
+  async run(): Promise<void> {
+    'run'
+  }
+}

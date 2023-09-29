@@ -11,9 +11,7 @@ import stripAnsi from 'strip-ansi'
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
 
-let {
-  dim,
-} = chalk
+let {dim} = chalk
 
 if (process.env.ConEmuANSI === 'ON') {
   // eslint-disable-next-line unicorn/consistent-destructuring
@@ -24,35 +22,46 @@ export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Command.Class | Command.Loadable | Command.Cached,
     public config: Interfaces.Config,
-    public opts: Interfaces.HelpOptions) {
+    public opts: Interfaces.HelpOptions,
+  ) {
     super(config, opts)
   }
 
   generate(): string {
     const cmd = this.command
-    const flags = sortBy(Object.entries(cmd.flags || {})
-    .filter(([, v]) => !v.hidden)
-    .map(([k, v]) => {
-      v.name = k
-      return v
-    }), f => [!f.char, f.char, f.name])
+    const flags = sortBy(
+      Object.entries(cmd.flags || {})
+        .filter(([, v]) => !v.hidden)
+        .map(([k, v]) => {
+          v.name = k
+          return v
+        }),
+      (f) => [!f.char, f.char, f.name],
+    )
 
-    const args = Object.values(ensureArgObject(cmd.args)).filter(a => !a.hidden)
-    const output = compact(this.sections().map(({header, generate}) => {
-      const body = generate({cmd, flags, args}, header)
-      // Generate can return a list of sections
-      if (Array.isArray(body)) {
-        return body.map(helpSection => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body)).join('\n\n')
-      }
+    const args = Object.values(ensureArgObject(cmd.args)).filter((a) => !a.hidden)
+    const output = compact(
+      this.sections().map(({header, generate}) => {
+        const body = generate({cmd, flags, args}, header)
+        // Generate can return a list of sections
+        if (Array.isArray(body)) {
+          return body
+            .map((helpSection) => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body))
+            .join('\n\n')
+        }
 
-      return body && this.section(header, body)
-    })).join('\n\n')
+        return body && this.section(header, body)
+      }),
+    ).join('\n\n')
     return output
   }
 
-  protected groupFlags(flags: Array<Command.Flag.Any>): {mainFlags: Array<Command.Flag.Any>; flagGroups: {[name: string]: Array<Command.Flag.Any>}} {
+  protected groupFlags(flags: Array<Command.Flag.Any>): {
+    mainFlags: Array<Command.Flag.Any>
+    flagGroups: {[name: string]: Array<Command.Flag.Any>}
+  } {
     const mainFlags: Array<Command.Flag.Any> = []
-    const flagGroups: { [index: string]: Array<Command.Flag.Any> } = {}
+    const flagGroups: {[index: string]: Array<Command.Flag.Any>} = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup
@@ -68,7 +77,7 @@ export class CommandHelp extends HelpFormatter {
     return {mainFlags, flagGroups}
   }
 
-  protected sections(): Array<{ header: string; generate: HelpSectionRenderer }> {
+  protected sections(): Array<{header: string; generate: HelpSectionRenderer}> {
     return [
       {
         header: this.opts.usageHeader || 'USAGE',
@@ -121,18 +130,21 @@ export class CommandHelp extends HelpFormatter {
   protected usage(): string {
     const {usage} = this.command
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
-    .map(u => {
-      const allowedSpacing = this.opts.maxWidth - this.indentSpacing
-      const line = `$ ${this.config.bin} ${u}`.trim()
-      if (line.length > allowedSpacing) {
-        const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
-        return line.slice(0, Math.max(0, splitIndex)) + '\n'
-            + this.indent(this.wrap(line.slice(Math.max(0, splitIndex)), this.indentSpacing * 2))
-      }
+      .map((u) => {
+        const allowedSpacing = this.opts.maxWidth - this.indentSpacing
+        const line = `$ ${this.config.bin} ${u}`.trim()
+        if (line.length > allowedSpacing) {
+          const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
+          return (
+            line.slice(0, Math.max(0, splitIndex)) +
+            '\n' +
+            this.indent(this.wrap(line.slice(Math.max(0, splitIndex)), this.indentSpacing * 2))
+          )
+        }
 
-      return this.wrap(line)
-    })
-    .join('\n')
+        return this.wrap(line)
+      })
+      .join('\n')
     return body
   }
 
@@ -144,7 +156,10 @@ export class CommandHelp extends HelpFormatter {
 
     return compact([
       this.command.id,
-      Object.values(this.command.args ?? {})?.filter(a => !a.hidden).map(a => this.arg(a)).join(' '),
+      Object.values(this.command.args ?? {})
+        ?.filter((a) => !a.hidden)
+        .map((a) => this.arg(a))
+        .join(' '),
     ]).join(' ')
   }
 
@@ -156,10 +171,9 @@ export class CommandHelp extends HelpFormatter {
       description = (cmd.description || '').split(POSSIBLE_LINE_FEED).slice(1)
     } else if (cmd.description) {
       const summary = cmd.summary ? `${cmd.summary}\n` : null
-      description = summary ? [
-        ...summary.split(POSSIBLE_LINE_FEED),
-        ...(cmd.description || '').split(POSSIBLE_LINE_FEED),
-      ] : (cmd.description || '').split(POSSIBLE_LINE_FEED)
+      description = summary
+        ? [...summary.split(POSSIBLE_LINE_FEED), ...(cmd.description || '').split(POSSIBLE_LINE_FEED)]
+        : (cmd.description || '').split(POSSIBLE_LINE_FEED)
     }
 
     if (description) {
@@ -169,55 +183,56 @@ export class CommandHelp extends HelpFormatter {
 
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
-    const body = aliases.map(a => ['$', this.config.bin, a].join(' ')).join('\n')
+    const body = aliases.map((a) => ['$', this.config.bin, a].join(' ')).join('\n')
     return body
   }
 
   protected examples(examples: Command.Example[] | undefined | string): string | undefined {
     if (!examples || examples.length === 0) return
 
-    const body = castArray(examples).map(a => {
-      let description
-      let commands
-      if (typeof a === 'string') {
-        const lines = a
-        .split(POSSIBLE_LINE_FEED)
-        .filter(Boolean)
-        // If the example is <description>\n<command> then format correctly
-        if (lines.length >= 2 && !this.isCommand(lines[0]) && lines.slice(1).every(i => this.isCommand(i))) {
-          description = lines[0]
-          commands = lines.slice(1)
+    const body = castArray(examples)
+      .map((a) => {
+        let description
+        let commands
+        if (typeof a === 'string') {
+          const lines = a.split(POSSIBLE_LINE_FEED).filter(Boolean)
+          // If the example is <description>\n<command> then format correctly
+          if (lines.length >= 2 && !this.isCommand(lines[0]) && lines.slice(1).every((i) => this.isCommand(i))) {
+            description = lines[0]
+            commands = lines.slice(1)
+          } else {
+            return lines.map((line) => this.formatIfCommand(line)).join('\n')
+          }
         } else {
-          return lines.map(line => this.formatIfCommand(line)).join('\n')
+          description = a.description
+          commands = [a.command]
         }
-      } else {
-        description = a.description
-        commands = [a.command]
-      }
 
-      const multilineSeparator
-        = this.config.platform === 'win32'
-          ? (this.config.shell.includes('powershell') ? '`' : '^')
-          : '\\'
+        const multilineSeparator =
+          this.config.platform === 'win32' ? (this.config.shell.includes('powershell') ? '`' : '^') : '\\'
 
-      // The command will be indented in the section, which is also indented
-      const finalIndentedSpacing = this.indentSpacing * 2
-      const multilineCommands = commands.map(c =>
-        // First indent keeping room for escaped newlines
-        this.indent(this.wrap(this.formatIfCommand(c), finalIndentedSpacing + 4))
-        // Then add the escaped newline
-        .split(POSSIBLE_LINE_FEED).join(` ${multilineSeparator}\n  `),
-      ).join('\n')
+        // The command will be indented in the section, which is also indented
+        const finalIndentedSpacing = this.indentSpacing * 2
+        const multilineCommands = commands
+          .map((c) =>
+            // First indent keeping room for escaped newlines
+            this.indent(this.wrap(this.formatIfCommand(c), finalIndentedSpacing + 4))
+              // Then add the escaped newline
+              .split(POSSIBLE_LINE_FEED)
+              .join(` ${multilineSeparator}\n  `),
+          )
+          .join('\n')
 
-      return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
-    }).join('\n\n')
+        return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
+      })
+      .join('\n\n')
     return body
   }
 
   protected args(args: Command.Arg.Any[]): [string, string | undefined][] | undefined {
-    if (args.filter(a => a.description).length === 0) return
+    if (args.filter((a) => a.description).length === 0) return
 
-    return args.map(a => {
+    return args.map((a) => {
       const name = a.name.toUpperCase()
       let description = a.description || ''
       if (a.default) description = `[default: ${a.default}] ${description}`
@@ -266,7 +281,7 @@ export class CommandHelp extends HelpFormatter {
   protected flags(flags: Array<Command.Flag.Any>): [string, string | undefined][] | undefined {
     if (flags.length === 0) return
 
-    return flags.map(flag => {
+    return flags.map((flag) => {
       const left = this.flagHelpLabel(flag)
 
       let right = flag.summary || flag.description || ''
@@ -285,16 +300,21 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected flagsDescriptions(flags: Array<Command.Flag.Any>): string | undefined {
-    const flagsWithExtendedDescriptions = flags.filter(flag => flag.summary && flag.description)
+    const flagsWithExtendedDescriptions = flags.filter((flag) => flag.summary && flag.description)
     if (flagsWithExtendedDescriptions.length === 0) return
 
-    const body = flagsWithExtendedDescriptions.map(flag => {
-      // Guaranteed to be set because of the filter above, but make ts happy
-      const summary = flag.summary || ''
-      let flagHelp = this.flagHelpLabel(flag, true)
-      flagHelp += flagHelp.length + summary.length + 2 < this.opts.maxWidth ? '  ' + summary : '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
-      return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
-    }).join('\n\n')
+    const body = flagsWithExtendedDescriptions
+      .map((flag) => {
+        // Guaranteed to be set because of the filter above, but make ts happy
+        const summary = flag.summary || ''
+        let flagHelp = this.flagHelpLabel(flag, true)
+        flagHelp +=
+          flagHelp.length + summary.length + 2 < this.opts.maxWidth
+            ? '  ' + summary
+            : '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
+        return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
+      })
+      .join('\n\n')
 
     return body
   }

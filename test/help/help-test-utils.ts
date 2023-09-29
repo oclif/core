@@ -1,4 +1,3 @@
-
 import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 
@@ -9,7 +8,7 @@ import {cacheCommand} from '../../src/util/cache-command'
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
     const sections = super.sections()
-    const flagSection = sections.find(section => section.header === 'FLAGS')
+    const flagSection = sections.find((section) => section.header === 'FLAGS')
     if (flagSection) flagSection.header = 'OPTIONS'
     return sections
   }
@@ -54,7 +53,10 @@ export const commandHelp = (command?: any) => ({
       console.log(help)
     }
 
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(help)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has commandHelp'
   },
 })
@@ -67,7 +69,10 @@ export const topicsHelp = (topics: Interfaces.Topic[]) => ({
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicsHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicsHelp'
   },
 })
@@ -79,12 +84,18 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
       console.log(topicHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicHelp'
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{name: string, commands: Command.Class[], topics: Interfaces.Topic[]}>) {
+export function monkeyPatchCommands(
+  config: any,
+  plugins: Array<{name: string; commands: Command.Class[]; topics: Interfaces.Topic[]}>,
+) {
   const pluginsMap = new Map()
   for (const plugin of plugins) {
     pluginsMap.set(plugin.name, plugin)

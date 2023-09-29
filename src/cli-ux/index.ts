@@ -1,4 +1,3 @@
-
 import * as Errors from '../errors'
 import * as styled from './styled'
 import * as uxPrompt from './prompt'
@@ -169,7 +168,7 @@ const uxProcessExitHandler = async () => {
 
 // to avoid MaxListenersExceededWarning
 // only attach named listener once
-const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExitHandler.name)
+const uxListener = process.listeners('exit').find((fn) => fn.name === uxProcessExitHandler.name)
 if (!uxListener) {
   process.once('exit', uxProcessExitHandler)
 }

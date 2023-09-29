@@ -1,7 +1,7 @@
 const treeify = require('object-treeify')
 
 export class Tree {
-  nodes: { [key: string]: Tree } = {}
+  nodes: {[key: string]: Tree} = {}
 
   insert(child: string, value: Tree = new Tree()): Tree {
     this.nodes[child] = value
@@ -21,7 +21,7 @@ export class Tree {
 
   display(logger: any = console.log): void {
     const addNodes = function (nodes: any) {
-      const tree: { [key: string]: any } = {}
+      const tree: {[key: string]: any} = {}
       for (const p of Object.keys(nodes)) {
         tree[p] = addNodes(nodes[p].nodes)
       }

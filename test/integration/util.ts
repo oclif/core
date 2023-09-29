@@ -1,4 +1,3 @@
-
 import {mkdir, rm} from 'node:fs/promises'
 import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
 import chalk from 'chalk'
@@ -9,26 +8,26 @@ import {Interfaces} from '../../src'
 
 const debug = require('debug')('e2e')
 
-export type ExecError = ExecException & { stderr: string; stdout: string };
+export type ExecError = ExecException & {stderr: string; stdout: string}
 
 export type Result = {
-  code: number;
-  stdout?: string;
-  stderr?: string;
+  code: number
+  stdout?: string
+  stderr?: string
   error?: ExecError
 }
 
 export type SetupOptions = {
-  repo: string;
-  branch?: string;
-  plugins?: string[];
-  subDir?: string;
-  noLinkCore?: boolean;
+  repo: string
+  branch?: string
+  plugins?: string[]
+  subDir?: string
+  noLinkCore?: boolean
 }
 
 export type ExecutorOptions = {
-  pluginDir: string;
-  testFileName: string;
+  pluginDir: string
+  testFileName: string
 }
 
 export type ExecOptions = ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
@@ -61,7 +60,9 @@ export class Executor {
   }
 
   public clone(repo: string, branch?: string): Promise<Result> {
-    const cmd = branch ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1` : `git clone ${repo} ${this.pluginDir} --depth 1`
+    const cmd = branch
+      ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1`
+      : `git clone ${repo} ${this.pluginDir} --depth 1`
     const result = this.exec(cmd)
     this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
     return result
@@ -72,16 +73,17 @@ export class Executor {
   }
 
   public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
-    const executable = process.platform === 'win32'
-      ? join('bin', `${script}.cmd`)
-      : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+    const executable =
+      process.platform === 'win32'
+        ? join('bin', `${script}.cmd`)
+        : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
     return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
   public exec(cmd: string, options?: ExecOptions): Promise<Result> {
     const cwd = options?.cwd ?? process.cwd()
     const silent = options?.silent ?? true
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
@@ -184,7 +186,9 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
   executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
 
-  const yarnInstallRes = await executor.executeInTestDir('yarn install --force --network-timeout 600000', {silent: false})
+  const yarnInstallRes = await executor.executeInTestDir('yarn install --force --network-timeout 600000', {
+    silent: false,
+  })
   if (yarnInstallRes.code !== 0) {
     console.error(yarnInstallRes?.error)
     throw new Error('Failed to run `yarn install --force`')

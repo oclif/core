@@ -12,7 +12,5 @@ export function aggregateFlags<F extends FlagOutput, B extends FlagOutput>(
   enableJsonFlag: boolean | undefined,
 ): FlagInput<F> {
   const combinedFlags = {...baseFlags, ...flags}
-  return (enableJsonFlag
-    ? {json, ...combinedFlags}
-    : combinedFlags) as FlagInput<F>
+  return (enableJsonFlag ? {json, ...combinedFlags} : combinedFlags) as FlagInput<F>
 }

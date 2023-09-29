@@ -3,25 +3,25 @@ import {settings} from './settings'
 
 type Details = Record<string, string | boolean | number | string[]>
 type PerfResult = {
-  name: string;
+  name: string
   duration: number
   details: Details
-  module: string;
-  method: string | undefined;
-  scope: string | undefined;
+  module: string
+  method: string | undefined
+  scope: string | undefined
 }
 
 type PerfHighlights = {
-  configLoadTime: number;
-  runTime: number;
-  initTime: number;
-  commandLoadTime: number;
-  commandRunTime: number;
-  pluginLoadTimes: Record<string, {duration: number, details: Details}>;
-  corePluginsLoadTime: number;
-  userPluginsLoadTime: number;
-  linkedPluginsLoadTime: number;
-  hookRunTimes: Record<string, Record<string, number>>;
+  configLoadTime: number
+  runTime: number
+  initTime: number
+  commandLoadTime: number
+  commandRunTime: number
+  pluginLoadTimes: Record<string, {duration: number; details: Details}>
+  corePluginsLoadTime: number
+  userPluginsLoadTime: number
+  linkedPluginsLoadTime: number
+  hookRunTimes: Record<string, Record<string, number>>
 }
 
 class Marker {
@@ -33,7 +33,10 @@ class Marker {
   private startMarker: string
   private stopMarker: string
 
-  constructor(public name: string, public details: Details = {}) {
+  constructor(
+    public name: string,
+    public details: Details = {},
+  ) {
     this.startMarker = `${this.name}-start`
     this.stopMarker = `${this.name}-stop`
     const [caller, scope] = name.split('#')
@@ -76,7 +79,7 @@ export class Performance {
   }
 
   public static getResult(name: string): PerfResult | undefined {
-    return Performance.results.find(r => r.name === name)
+    return Performance.results.find((r) => r.name === name)
   }
 
   public static get highlights(): PerfHighlights {
@@ -115,12 +118,12 @@ export class Performance {
     const markers = Object.values(Performance.markers)
     if (markers.length === 0) return
 
-    for (const marker of markers.filter(m => !m.stopped)) {
+    for (const marker of markers.filter((m) => !m.stopped)) {
       marker.stop()
     }
 
-    return new Promise(resolve => {
-      const perfObserver = new PerformanceObserver(items => {
+    return new Promise((resolve) => {
+      const perfObserver = new PerformanceObserver((items) => {
         for (const entry of items.getEntries()) {
           if (Performance.markers[entry.name]) {
             const marker = Performance.markers[entry.name]
@@ -135,36 +138,47 @@ export class Performance {
           }
         }
 
-        const command = Performance.results.find(r => r.name.startsWith('config.runCommand'))
-        const commandLoadTime = command ? Performance.getResult(`plugin.findCommand#${command.details.plugin}.${command.details.command}`)?.duration ?? 0 : 0
+        const command = Performance.results.find((r) => r.name.startsWith('config.runCommand'))
+        const commandLoadTime = command
+          ? Performance.getResult(`plugin.findCommand#${command.details.plugin}.${command.details.command}`)
+              ?.duration ?? 0
+          : 0
 
-        const pluginLoadTimes = Object.fromEntries(Performance.results
-        .filter(({name}) => name.startsWith('plugin.load#'))
-        .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration, details}) => [scope, {duration, details}]))
+        const pluginLoadTimes = Object.fromEntries(
+          Performance.results
+            .filter(({name}) => name.startsWith('plugin.load#'))
+            .sort((a, b) => b.duration - a.duration)
+            .map(({scope, duration, details}) => [scope, {duration, details}]),
+        )
 
         const hookRunTimes = Performance.results
-        .filter(({name}) => name.startsWith('config.runHook#'))
-        .reduce((acc, perfResult) => {
-          const event = perfResult.details.event as string
-          if (event) {
-            if (!acc[event]) acc[event] = {}
-            acc[event][perfResult.scope!] = perfResult.duration
-          } else {
-            const event = perfResult.scope!
-            if (!acc[event]) acc[event] = {}
-            acc[event].total = perfResult.duration
-          }
+          .filter(({name}) => name.startsWith('config.runHook#'))
+          .reduce(
+            (acc, perfResult) => {
+              const event = perfResult.details.event as string
+              if (event) {
+                if (!acc[event]) acc[event] = {}
+                acc[event][perfResult.scope!] = perfResult.duration
+              } else {
+                const event = perfResult.scope!
+                if (!acc[event]) acc[event] = {}
+                acc[event].total = perfResult.duration
+              }
 
-          return acc
-        }, {} as Record<string, Record<string, number>>)
+              return acc
+            },
+            {} as Record<string, Record<string, number>>,
+          )
 
-        const pluginLoadTimeByType = Object.fromEntries(Performance.results
-        .filter(({name}) => name.startsWith('config.loadPlugins#'))
-        .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration}) => [scope, duration]))
+        const pluginLoadTimeByType = Object.fromEntries(
+          Performance.results
+            .filter(({name}) => name.startsWith('config.loadPlugins#'))
+            .sort((a, b) => b.duration - a.duration)
+            .map(({scope, duration}) => [scope, duration]),
+        )
 
-        const commandRunTime = Performance.results.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0
+        const commandRunTime =
+          Performance.results.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0
 
         Performance._highlights = {
           configLoadTime: Performance.getResult('config.load')?.duration ?? 0,

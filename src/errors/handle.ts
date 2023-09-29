@@ -40,9 +40,10 @@ export async function handle(err: ErrorToHandle): Promise<void> {
         config.errorLogger.log(stack)
       }
 
-      await config.errorLogger.flush()
-      .then(() => Exit.exit(exitCode))
-      .catch(console.error)
+      await config.errorLogger
+        .flush()
+        .then(() => Exit.exit(exitCode))
+        .catch(console.error)
     } else Exit.exit(exitCode)
   } catch (error: any) {
     console.error(err.stack)

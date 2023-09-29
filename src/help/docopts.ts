@@ -65,11 +65,11 @@ export class DocOpts {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
-    .filter(([_, flag]) => !flag.hidden)
-    .map(([name, flag]) => {
-      this.flagMap[name] = flag
-      return flag
-    })
+      .filter(([_, flag]) => !flag.hidden)
+      .map(([name, flag]) => {
+        this.flagMap[name] = flag
+        return flag
+      })
   }
 
   public static generate(cmd: Command.Class | Command.Loadable | Command.Cached): string {
@@ -79,7 +79,10 @@ export class DocOpts {
   public toString(): string {
     const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
     if (this.cmd.args) {
-      const a = Object.values(ensureArgObject(this.cmd.args)).map(arg => arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`) || []
+      const a =
+        Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
+          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
+        ) || []
       opts.push(...a)
     }
 
@@ -87,11 +90,13 @@ export class DocOpts {
       opts.push(...Object.values(this.groupFlagElements()))
     } catch {
       // If there is an error, just return no usage so we don't fail command help.
-      opts.push(...this.flagList.map(flag => {
-        const name = flag.char ? `-${flag.char}` : `--${flag.name}`
-        if (flag.type === 'boolean') return name
-        return `${name}=<value>`
-      }))
+      opts.push(
+        ...this.flagList.map((flag) => {
+          const name = flag.char ? `-${flag.char}` : `--${flag.name}`
+          if (flag.type === 'boolean') return name
+          return `${name}=<value>`
+        }),
+      )
     }
 
     return opts.join(' ')
@@ -102,9 +107,15 @@ export class DocOpts {
 
     // Generate all doc opt elements for combining
     // Show required flags first
-    this.generateElements(elementMap, this.flagList.filter(flag => flag.required))
+    this.generateElements(
+      elementMap,
+      this.flagList.filter((flag) => flag.required),
+    )
     // Then show optional flags
-    this.generateElements(elementMap, this.flagList.filter(flag => !flag.required))
+    this.generateElements(
+      elementMap,
+      this.flagList.filter((flag) => !flag.required),
+    )
 
     for (const flag of this.flagList) {
       if (Array.isArray(flag.dependsOn)) {

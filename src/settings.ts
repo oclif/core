@@ -5,20 +5,20 @@ export type Settings = {
    * Useful to set in the ./bin/dev script.
    * oclif.settings.debug = true;
    */
-  debug?: boolean;
+  debug?: boolean
   /**
    * The path to the error.log file.
    *
    * NOTE: This is read-only and setting it will have no effect.
    */
-  errlog?: string;
+  errlog?: string
   /**
    * Set the terminal width to a specified number of columns (characters)
    *
    * Environment Variable:
    *   OCLIF_COLUMNS=80
    */
-  columns?: number;
+  columns?: number
   /**
    * Try to use ts-node to load typescript source files instead of
    * javascript files.
@@ -29,13 +29,13 @@ export type Settings = {
    * Environment Variable:
    *   NODE_ENV=development
    */
-  tsnodeEnabled?: boolean;
+  tsnodeEnabled?: boolean
   /**
    * Enable performance tracking. Resulting data is available in the `perf` property of the `Config` class.
    * This will be overridden by the `enablePerf` property passed into Config constructor.
    */
-  performanceEnabled?: boolean;
-};
+  performanceEnabled?: boolean
+}
 
 // Set global.oclif to the new object if it wasn't set before
 if (!(global as any).oclif) (global as any).oclif = {}

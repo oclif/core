@@ -4,7 +4,10 @@ import {compact} from '../util'
 import stripAnsi from 'strip-ansi'
 
 export default class RootHelp extends HelpFormatter {
-  constructor(public config: Interfaces.Config, public opts: Interfaces.HelpOptions) {
+  constructor(
+    public config: Interfaces.Config,
+    public opts: Interfaces.HelpOptions,
+  ) {
     super(config, opts)
   }
 
@@ -12,12 +15,7 @@ export default class RootHelp extends HelpFormatter {
     let description = this.config.pjson.oclif.description || this.config.pjson.description || ''
     description = this.render(description)
     description = description.split('\n')[0]
-    let output = compact([
-      description,
-      this.version(),
-      this.usage(),
-      this.description(),
-    ]).join('\n\n')
+    let output = compact([description, this.version(), this.usage(), this.description()]).join('\n\n')
     if (this.opts.stripAnsi) output = stripAnsi(output)
     return output
   }

@@ -46,14 +46,12 @@ import {settings} from './settings'
  * })()
  * ```
  */
-export async function execute(
-  options: {
-    dir: string;
-    args?: string[];
-    loadOptions?: LoadOptions;
-    development?: boolean;
-  },
-): Promise<unknown> {
+export async function execute(options: {
+  dir: string
+  args?: string[]
+  loadOptions?: LoadOptions
+  development?: boolean
+}): Promise<unknown> {
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins
     process.env.NODE_ENV = 'development'
@@ -61,9 +59,9 @@ export async function execute(
   }
 
   return run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
-  .then(async result => {
-    flush()
-    return result
-  })
-  .catch(async error => handle(error))
+    .then(async (result) => {
+      flush()
+      return result
+    })
+    .catch(async (error) => handle(error))
 }

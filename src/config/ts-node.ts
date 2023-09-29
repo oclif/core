@@ -29,20 +29,20 @@ function loadTSConfig(root: string): TSConfig | undefined {
       typescript = require(join(root, 'node_modules', 'typescript'))
     } catch {
       debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
-      memoizedWarn('Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.')
+      memoizedWarn(
+        'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
+      )
       return
     }
   }
 
   if (existsSync(tsconfigPath) && typescript) {
-    const tsconfig = typescript.parseConfigFileTextToJson(
-      tsconfigPath,
-      readJsonSync(tsconfigPath, false),
-    ).config
+    const tsconfig = typescript.parseConfigFileTextToJson(tsconfigPath, readJsonSync(tsconfigPath, false)).config
     if (!tsconfig || !tsconfig.compilerOptions) {
       throw new Error(
-        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it `
-        + 'did not contain a "compilerOptions" section.')
+        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it ` +
+          'did not contain a "compilerOptions" section.',
+      )
     }
 
     TS_CONFIGS[root] = tsconfig
@@ -63,13 +63,13 @@ function registerTSNode(root: string): TSConfig | undefined {
     tsNode = require(tsNodePath)
   } catch {
     debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
-    memoizedWarn(`Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`)
+    memoizedWarn(
+      `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
+    )
     return
   }
 
-  const typeRoots = [
-    join(root, 'node_modules', '@types'),
-  ]
+  const typeRoots = [join(root, 'node_modules', '@types')]
 
   const rootDirs: string[] = []
 
@@ -153,9 +153,13 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
    * In other words, this allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
    */
   if ((isProduction || ROOT_PLUGIN?.moduleType === 'commonjs') && plugin?.moduleType === 'module') {
-    debug(`Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${ROOT_PLUGIN?.moduleType})))`)
+    debug(
+      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${ROOT_PLUGIN?.moduleType})))`,
+    )
     if (plugin.type === 'link')
-      memoizedWarn(`${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`)
+      memoizedWarn(
+        `${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
+      )
 
     return orig
   }

@@ -11,11 +11,15 @@ import {stdtermwidth} from '../../screen'
 import sw from 'string-width'
 
 class Table<T extends Record<string, unknown>> {
-  options: table.Options & { printLine(s: any): any }
+  options: table.Options & {printLine(s: any): any}
 
-  columns: (table.Column<T> & { key: string; width?: number; maxWidth?: number })[]
+  columns: (table.Column<T> & {key: string; width?: number; maxWidth?: number})[]
 
-  constructor(private data: T[], columns: table.Columns<T>, options: table.Options = {}) {
+  constructor(
+    private data: T[],
+    columns: table.Columns<T>,
+    options: table.Options = {},
+  ) {
     // assign columns
     this.columns = Object.keys(columns).map((key: string) => {
       const col = columns[key]
@@ -52,7 +56,7 @@ class Table<T extends Record<string, unknown>> {
 
   display() {
     // build table rows from input array data
-    let rows = this.data.map(d => {
+    let rows = this.data.map((d) => {
       const row: any = {}
       for (const col of this.columns) {
         let val = col.get(d)
@@ -81,9 +85,9 @@ class Table<T extends Record<string, unknown>> {
     // sort rows
     if (this.options.sort) {
       const sorters = this.options.sort!.split(',')
-      const sortHeaders = sorters.map(k => k[0] === '-' ? k.slice(1) : k)
-      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map(c => ((v: any) => v[c.key]))
-      const sortKeysOrder = sorters.map(k => k[0] === '-' ? 'desc' : 'asc')
+      const sortHeaders = sorters.map((k) => (k[0] === '-' ? k.slice(1) : k))
+      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map((c) => (v: any) => v[c.key])
+      const sortKeysOrder = sorters.map((k) => (k[0] === '-' ? 'desc' : 'asc'))
       rows = orderBy(rows, sortKeys, sortKeysOrder)
     }
 
@@ -93,43 +97,47 @@ class Table<T extends Record<string, unknown>> {
       this.columns = this.filterColumnsFromHeaders(filters)
     } else if (!this.options.extended) {
       // show extented columns/properties
-      this.columns = this.columns.filter(c => !c.extended)
+      this.columns = this.columns.filter((c) => !c.extended)
     }
 
     this.data = rows
 
     switch (this.options.output) {
-    case 'csv': {
-      this.outputCSV()
-      break
-    }
+      case 'csv': {
+        this.outputCSV()
+        break
+      }
 
-    case 'json': {
-      this.outputJSON()
-      break
-    }
+      case 'json': {
+        this.outputJSON()
+        break
+      }
 
-    case 'yaml': {
-      this.outputYAML()
-      break
-    }
+      case 'yaml': {
+        this.outputYAML()
+        break
+      }
 
-    default: {
-      this.outputTable()
-    }
+      default: {
+        this.outputTable()
+      }
     }
   }
 
-  private findColumnFromHeader(header: string): (table.Column<T> & { key: string; width?: number; maxWidth?: number }) | undefined {
-    return this.columns.find(c => c.header.toLowerCase() === header.toLowerCase())
+  private findColumnFromHeader(
+    header: string,
+  ): (table.Column<T> & {key: string; width?: number; maxWidth?: number}) | undefined {
+    return this.columns.find((c) => c.header.toLowerCase() === header.toLowerCase())
   }
 
-  private filterColumnsFromHeaders(filters: string[]): (table.Column<T> & { key: string; width?: number; maxWidth?: number })[] {
+  private filterColumnsFromHeaders(
+    filters: string[],
+  ): (table.Column<T> & {key: string; width?: number; maxWidth?: number})[] {
     // unique
-    filters = [...(new Set(filters))]
+    filters = [...new Set(filters)]
     const cols: (table.Column<T> & {key: string; width?: number; maxWidth?: number})[] = []
     for (const f of filters) {
-      const c = this.columns.find(c => c.header.toLowerCase() === f.toLowerCase())
+      const c = this.columns.find((c) => c.header.toLowerCase() === f.toLowerCase())
       if (c) cols.push(c)
     }
 
@@ -137,17 +145,16 @@ class Table<T extends Record<string, unknown>> {
   }
 
   private getCSVRow(d: any): string[] {
-    const values = this.columns.map(col => d[col.key] || '')
-    const lineToBeEscaped = values.find((e: string) => e.includes('"') || e.includes('\n') || e.includes('\r\n') || e.includes('\r') || e.includes(','))
-    return values.map(e => lineToBeEscaped ? `"${e.replace('"', '""')}"` : e)
+    const values = this.columns.map((col) => d[col.key] || '')
+    const lineToBeEscaped = values.find(
+      (e: string) => e.includes('"') || e.includes('\n') || e.includes('\r\n') || e.includes('\r') || e.includes(','),
+    )
+    return values.map((e) => (lineToBeEscaped ? `"${e.replace('"', '""')}"` : e))
   }
 
   private resolveColumnsToObjectArray() {
     const {data, columns} = this
-    return data.map((d: any) =>
-
-      Object.fromEntries(columns.map(col => [col.key, d[col.key] ?? ''])),
-    )
+    return data.map((d: any) => Object.fromEntries(columns.map((col) => [col.key, d[col.key] ?? ''])))
   }
 
   private outputJSON() {
@@ -162,7 +169,7 @@ class Table<T extends Record<string, unknown>> {
     const {data, columns, options} = this
 
     if (!options['no-header']) {
-      options.printLine(columns.map(c => c.header).join(','))
+      options.printLine(columns.map((c) => c.header).join(','))
     }
 
     for (const d of data) {
@@ -176,7 +183,7 @@ class Table<T extends Record<string, unknown>> {
     // column truncation
     //
     // find max width for each column
-    const columns = this.columns.map(c => {
+    const columns = this.columns.map((c) => {
       const maxWidth = Math.max(sw('.'.padEnd(c.minWidth! - 1)), sw(c.header), getWidestColumnWith(data, c.key)) + 1
       return {
         ...c,
@@ -193,7 +200,7 @@ class Table<T extends Record<string, unknown>> {
       if (options['no-truncate'] || (!stdout.isTTY && !process.env.CLI_UX_SKIP_TTY_CHECK)) return
 
       // don't shorten if there is enough screen width
-      const dataMaxWidth = sumBy(columns, c => c.width!)
+      const dataMaxWidth = sumBy(columns, (c) => c.width!)
       const overWidth = dataMaxWidth - maxWidth
       if (overWidth <= 0) return
 
@@ -205,15 +212,17 @@ class Table<T extends Record<string, unknown>> {
       // if sum(minWidth's) is greater than term width
       // nothing can be done so
       // display all as minWidth
-      const dataMinWidth = sumBy(columns, c => c.minWidth!)
+      const dataMinWidth = sumBy(columns, (c) => c.minWidth!)
       if (dataMinWidth >= maxWidth) return
 
       // some wiggle room left, add it back to "needy" columns
       let wiggleRoom = maxWidth - dataMinWidth
-      const needyCols = columns.map(c => ({key: c.key, needs: c.maxWidth! - c.width!})).sort((a, b) => a.needs - b.needs)
+      const needyCols = columns
+        .map((c) => ({key: c.key, needs: c.maxWidth! - c.width!}))
+        .sort((a, b) => a.needs - b.needs)
       for (const {key, needs} of needyCols) {
         if (!needs) continue
-        const col = columns.find(c => key === c.key)
+        const col = columns.find((c) => key === c.key)
         if (!col) continue
         if (wiggleRoom > needs) {
           col.width = col.width! + needs
@@ -231,7 +240,12 @@ class Table<T extends Record<string, unknown>> {
     if (options.title) {
       options.printLine(options.title)
       // print title divider
-      options.printLine(''.padEnd(columns.reduce((sum, col) => sum + col.width!, 1), '='))
+      options.printLine(
+        ''.padEnd(
+          columns.reduce((sum, col) => sum + col.width!, 1),
+          '=',
+        ),
+      )
 
       options.rowStart = '| '
     }
@@ -280,9 +294,9 @@ class Table<T extends Record<string, unknown>> {
           let d = (row as any)[col.key]
           d = d.split('\n')[i] || ''
           const visualWidth = sw(d)
-          const colorWidth = (d.length - visualWidth)
+          const colorWidth = d.length - visualWidth
           let cell = d.padEnd(width + colorWidth)
-          if ((cell.length - colorWidth) > width || visualWidth === width) {
+          if (cell.length - colorWidth > width || visualWidth === width) {
             // truncate the cell, preserving ANSI escape sequences, and keeping
             // into account the width of fullwidth unicode characters
             cell = sliceAnsi(cell, 0, width - 2) + '… '
@@ -300,23 +314,27 @@ class Table<T extends Record<string, unknown>> {
   }
 }
 
-export function table<T extends Record<string, unknown>>(data: T[], columns: table.Columns<T>, options: table.Options = {}): void {
+export function table<T extends Record<string, unknown>>(
+  data: T[],
+  columns: table.Columns<T>,
+  options: table.Options = {},
+): void {
   new Table(data, columns, options).display()
 }
 
 export namespace table {
   export const Flags: {
-    columns: Interfaces.OptionFlag<string | undefined>;
-    sort: Interfaces.OptionFlag<string | undefined>;
-    filter: Interfaces.OptionFlag<string | undefined>;
-    csv: Interfaces.BooleanFlag<boolean>;
-    output: Interfaces.OptionFlag<string | undefined>;
-    extended: Interfaces.BooleanFlag<boolean>;
-    'no-truncate': Interfaces.BooleanFlag<boolean>;
-    'no-header': Interfaces.BooleanFlag<boolean>;
+    columns: Interfaces.OptionFlag<string | undefined>
+    sort: Interfaces.OptionFlag<string | undefined>
+    filter: Interfaces.OptionFlag<string | undefined>
+    csv: Interfaces.BooleanFlag<boolean>
+    output: Interfaces.OptionFlag<string | undefined>
+    extended: Interfaces.BooleanFlag<boolean>
+    'no-truncate': Interfaces.BooleanFlag<boolean>
+    'no-header': Interfaces.BooleanFlag<boolean>
   } = {
     columns: F.string({exclusive: ['extended'], description: 'only show provided columns (comma-separated)'}),
-    sort: F.string({description: 'property to sort by (prepend \'-\' for descending)'}),
+    sort: F.string({description: "property to sort by (prepend '-' for descending)"}),
     filter: F.string({description: 'filter property by partial string matching, ex: name=foo'}),
     csv: F.boolean({exclusive: ['no-truncate'], description: 'output is csv format [alias: --output=csv]'}),
     output: F.string({
@@ -334,8 +352,8 @@ export namespace table {
   type IncludeFlags<T, K extends keyof T> = Pick<T, K>
 
   export function flags(): IFlags
-  export function flags<Z extends keyof IFlags = keyof IFlags>(opts: { except: Z | Z[] }): ExcludeFlags<IFlags, Z>
-  export function flags<K extends keyof IFlags = keyof IFlags>(opts: { only: K | K[] }): IncludeFlags<IFlags, K>
+  export function flags<Z extends keyof IFlags = keyof IFlags>(opts: {except: Z | Z[]}): ExcludeFlags<IFlags, Z>
+  export function flags<K extends keyof IFlags = keyof IFlags>(opts: {only: K | K[]}): IncludeFlags<IFlags, K>
 
   export function flags(opts?: any): any {
     if (opts) {
@@ -344,7 +362,7 @@ export namespace table {
       const e = (opts.except && typeof opts.except === 'string' ? [opts.except] : opts.except) || []
       for (const key of o) {
         if (!(e as any[]).includes(key)) {
-          (f as any)[key] = (Flags as any)[key]
+          ;(f as any)[key] = (Flags as any)[key]
         }
       }
 
@@ -355,33 +373,34 @@ export namespace table {
   }
 
   export interface Column<T extends Record<string, unknown>> {
-    header: string;
-    extended: boolean;
-    minWidth: number;
-    get(row: T): any;
+    header: string
+    extended: boolean
+    minWidth: number
+    get(row: T): any
   }
 
-  export type Columns<T extends Record<string, unknown>> = { [key: string]: Partial<Column<T>> }
+  export type Columns<T extends Record<string, unknown>> = {[key: string]: Partial<Column<T>>}
 
   // export type OutputType = 'csv' | 'json' | 'yaml'
 
   export interface Options {
-    [key: string]: any;
-    sort?: string;
-    filter?: string;
-    columns?: string;
-    extended?: boolean;
-    'no-truncate'?: boolean;
-    output?: string;
-    'no-header'?: boolean;
-    printLine?(s: any): any;
+    [key: string]: any
+    sort?: string
+    filter?: string
+    columns?: string
+    extended?: boolean
+    'no-truncate'?: boolean
+    output?: string
+    'no-header'?: boolean
+    printLine?(s: any): any
   }
 }
 
-const getWidestColumnWith = (data: any[], columnKey: string): number => data.reduce((previous, current) => {
-  const d = current[columnKey]
-  // convert multi-line cell to single longest line
-  // for width calculations
-  const manyLines = (d as string).split('\n')
-  return Math.max(previous, manyLines.length > 1 ? Math.max(...manyLines.map((r: string) => sw(r))) : sw(d))
-}, 0)
+const getWidestColumnWith = (data: any[], columnKey: string): number =>
+  data.reduce((previous, current) => {
+    const d = current[columnKey]
+    // convert multi-line cell to single longest line
+    // for width calculations
+    const manyLines = (d as string).split('\n')
+    return Math.max(previous, manyLines.length > 1 ? Math.max(...manyLines.map((r: string) => sw(r))) : sw(d))
+  }, 0)

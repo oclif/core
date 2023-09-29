@@ -4,24 +4,24 @@ import {config} from './config'
 import {stderr} from './stream'
 
 export interface IPromptOptions {
-  prompt?: string;
-  type?: 'normal' | 'mask' | 'hide' | 'single';
-  timeout?: number;
+  prompt?: string
+  type?: 'normal' | 'mask' | 'hide' | 'single'
+  timeout?: number
   /**
    * Requires user input if true, otherwise allows empty input
    */
-  required?: boolean;
-  default?: string;
+  required?: boolean
+  default?: string
 }
 
 interface IPromptConfig {
-  name: string;
-  prompt: string;
-  type: 'normal' | 'mask' | 'hide' | 'single';
-  isTTY: boolean;
-  required: boolean;
-  default?: string;
-  timeout?: number;
+  name: string
+  prompt: string
+  type: 'normal' | 'mask' | 'hide' | 'single'
+  isTTY: boolean
+  required: boolean
+  default?: string
+  timeout?: number
 }
 
 function normal(options: IPromptConfig, retries = 100): Promise<string> {
@@ -39,14 +39,14 @@ function normal(options: IPromptConfig, retries = 100): Promise<string> {
     process.stdin.setEncoding('utf8')
     stderr.write(options.prompt)
     process.stdin.resume()
-    process.stdin.once('data', b => {
+    process.stdin.once('data', (b) => {
       if (timer) clearTimeout(timer)
       process.stdin.pause()
       const data: string = (typeof b === 'string' ? b : b.toString()).trim()
       if (!options.default && options.required && data === '') {
         resolve(normal(options, retries - 1))
       } else {
-        resolve(data || options.default as string)
+        resolve(data || (options.default as string))
       }
     })
   })
@@ -76,8 +76,15 @@ async function single(options: IPromptConfig): Promise<string> {
 
 function replacePrompt(prompt: string) {
   const ansiEscapes = require('ansi-escapes')
-  stderr.write(ansiEscapes.cursorHide + ansiEscapes.cursorUp(1) + ansiEscapes.cursorLeft + prompt
-    + ansiEscapes.cursorDown(1) + ansiEscapes.cursorLeft + ansiEscapes.cursorShow)
+  stderr.write(
+    ansiEscapes.cursorHide +
+      ansiEscapes.cursorUp(1) +
+      ansiEscapes.cursorLeft +
+      prompt +
+      ansiEscapes.cursorDown(1) +
+      ansiEscapes.cursorLeft +
+      ansiEscapes.cursorShow,
+  )
 }
 
 async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
@@ -94,36 +101,36 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
   const passwordPrompt = require('password-prompt')
 
   switch (options.type) {
-  case 'normal': {
-    return normal(options)
-  }
+    case 'normal': {
+      return normal(options)
+    }
 
-  case 'single': {
-    return single(options)
-  }
+    case 'single': {
+      return single(options)
+    }
 
-  case 'mask': {
-    return passwordPrompt(options.prompt, {
-      method: options.type,
-      required: options.required,
-      default: options.default,
-    }).then((value: string) => {
-      replacePrompt(getPrompt(name, 'hide', inputOptions.default))
-      return value
-    })
-  }
+    case 'mask': {
+      return passwordPrompt(options.prompt, {
+        method: options.type,
+        required: options.required,
+        default: options.default,
+      }).then((value: string) => {
+        replacePrompt(getPrompt(name, 'hide', inputOptions.default))
+        return value
+      })
+    }
 
-  case 'hide': {
-    return passwordPrompt(options.prompt, {
-      method: options.type,
-      required: options.required,
-      default: options.default,
-    })
-  }
+    case 'hide': {
+      return passwordPrompt(options.prompt, {
+        method: options.type,
+        required: options.required,
+        default: options.default,
+      })
+    }
 
-  default: {
-    throw new Error(`unexpected type ${options.type}`)
-  }
+    default: {
+      throw new Error(`unexpected type ${options.type}`)
+    }
   }
 }
 

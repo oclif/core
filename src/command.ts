@@ -1,4 +1,3 @@
-
 import * as Errors from './errors'
 import * as Parser from './parser'
 import {
@@ -37,8 +36,7 @@ const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
  * this occurs when stdout closes such as when piping to head
  */
 stdout.on('error', (err: any) => {
-  if (err && err.code === 'EPIPE')
-    return
+  if (err && err.code === 'EPIPE') return
   throw err
 })
 
@@ -128,7 +126,11 @@ export abstract class Command {
    * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
    */
-  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<ReturnType<T['run']>> {
+  public static async run<T extends Command>(
+    this: new (argv: string[], config: Config) => T,
+    argv?: string[],
+    opts?: LoadOptions,
+  ): Promise<ReturnType<T['run']>> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -156,7 +158,10 @@ export abstract class Command {
 
   protected debug: (...args: any[]) => void
 
-  public constructor(public argv: string[], public config: Config) {
+  public constructor(
+    public argv: string[],
+    public config: Config,
+  ) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -204,7 +209,10 @@ export abstract class Command {
 
   public error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
 
-  public error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
+  public error(
+    input: string | Error,
+    options: {code?: string; exit?: number | false} & PrettyPrintableError = {},
+  ): void {
     return Errors.error(input, options as any)
   }
 
@@ -237,10 +245,10 @@ export abstract class Command {
     const passThroughIndex = this.argv.indexOf('--')
     const jsonIndex = this.argv.indexOf('--json')
     return passThroughIndex === -1
-      // If '--' is not present, then check for `--json` in this.argv
-      ? jsonIndex > -1
-      // If '--' is present, return true only the --json flag exists and is before the '--'
-      : jsonIndex > -1 && jsonIndex < passThroughIndex
+      ? // If '--' is not present, then check for `--json` in this.argv
+        jsonIndex > -1
+      : // If '--' is present, return true only the --json flag exists and is before the '--'
+        jsonIndex > -1 && jsonIndex < passThroughIndex
   }
 
   /**
@@ -259,11 +267,7 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
-    const allFlags = aggregateFlags(
-      this.ctor.flags,
-      this.ctor.baseFlags,
-      this.ctor.enableJsonFlag,
-    )
+    const allFlags = aggregateFlags(this.ctor.flags, this.ctor.baseFlags, this.ctor.enableJsonFlag)
     for (const flag of Object.keys(flags)) {
       const flagDef = allFlags[flag]
       const deprecated = flagDef?.deprecated
@@ -273,10 +277,12 @@ export abstract class Command {
 
       const deprecateAliases = flagDef?.deprecateAliases
       if (deprecateAliases) {
-        const aliases = uniq([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+        const aliases = uniq([...(flagDef?.aliases ?? []), ...(flagDef?.charAliases ?? [])]).map((a) =>
+          a.length === 1 ? `-${a}` : `--${a}`,
+        )
         if (aliases.length === 0) return
 
-        const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
+        const foundAliases = aliases.filter((alias) => this.argv.some((a) => a.startsWith(alias)))
         for (const alias of foundAliases) {
           let preferredUsage = `--${flagDef?.name}`
           if (flagDef?.char) {
@@ -313,11 +319,7 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
-      flags: aggregateFlags<F, B>(
-        options.flags,
-        options.baseFlags,
-        options.enableJsonFlag,
-      ),
+      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
     }
 
     const results = await Parser.parse<F, B, A>(argv, opts)
@@ -369,14 +371,14 @@ export abstract class Command {
       keys.push(this.config.scopedEnvVarKey(envVar))
     }
 
-    keys.map(key => delete process.env[key])
+    keys.map((key) => delete process.env[key])
   }
 }
 
 export namespace Command {
   export type Class = typeof Command & {
-    id: string;
-    run(argv?: string[], config?: LoadOptions): Promise<any>;
+    id: string
+    run(argv?: string[], config?: LoadOptions): Promise<any>
   }
 
   export interface Loadable extends Cached {
@@ -384,34 +386,35 @@ export namespace Command {
   }
 
   export type Cached = {
-    [key: string]: unknown;
-    id: string;
-    hidden: boolean;
-    state?: 'beta' | 'deprecated' | string;
-    deprecationOptions?: Deprecation;
-    aliases: string[];
-    summary?: string;
-    description?: string;
-    usage?: string | string[];
-    examples?: Example[];
-    strict?: boolean;
-    type?: string;
-    pluginName?: string;
-    pluginType?: string;
-    pluginAlias?: string;
-    flags: {[name: string]: Flag.Cached};
-    args: {[name: string]: Arg.Cached};
-    hasDynamicHelp?: boolean;
+    [key: string]: unknown
+    id: string
+    hidden: boolean
+    state?: 'beta' | 'deprecated' | string
+    deprecationOptions?: Deprecation
+    aliases: string[]
+    summary?: string
+    description?: string
+    usage?: string | string[]
+    examples?: Example[]
+    strict?: boolean
+    type?: string
+    pluginName?: string
+    pluginType?: string
+    pluginAlias?: string
+    flags: {[name: string]: Flag.Cached}
+    args: {[name: string]: Arg.Cached}
+    hasDynamicHelp?: boolean
     permutations?: string[]
-    aliasPermutations?: string[];
-    isESM?: boolean;
-    relativePath?: string[];
+    aliasPermutations?: string[]
+    isESM?: boolean
+    relativePath?: string[]
   }
 
   export type Flag = IFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
+    export type Cached = Omit<Flag, 'parse' | 'input'> &
+      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
     export type Any = Flag | Cached
   }
 
@@ -422,8 +425,10 @@ export namespace Command {
     export type Any = Arg | Cached
   }
 
-  export type Example = string | {
-    description: string;
-    command: string;
-  }
+  export type Example =
+    | string
+    | {
+        description: string
+        command: string
+      }
 }

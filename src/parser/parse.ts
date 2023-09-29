@@ -22,9 +22,12 @@ import {createInterface} from 'node:readline'
 
 let debug: any
 try {
-  debug = process.env.CLI_FLAGS_DEBUG === '1' ? require('debug')('../parser') : () => {
-    // noop
-  }
+  debug =
+    process.env.CLI_FLAGS_DEBUG === '1'
+      ? require('debug')('../parser')
+      : () => {
+          // noop
+        }
 } catch {
   debug = () => {
     // noop
@@ -42,7 +45,7 @@ const readStdin = async (): Promise<string | null> => {
 
   if (stdin.isTTY) return null
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     let result = ''
     const ac = new AbortController()
     const {signal} = ac
@@ -54,7 +57,7 @@ const readStdin = async (): Promise<string | null> => {
       terminal: false,
     })
 
-    rl.on('line', line => {
+    rl.on('line', (line) => {
       result += line
     })
 
@@ -64,12 +67,16 @@ const readStdin = async (): Promise<string | null> => {
       resolve(result)
     })
 
-    signal.addEventListener('abort', () => {
-      debug('stdin aborted')
-      clearTimeout(timeout)
-      rl.close()
-      resolve(null)
-    }, {once: true})
+    signal.addEventListener(
+      'abort',
+      () => {
+        debug('stdin aborted')
+        clearTimeout(timeout)
+        rl.close()
+        resolve(null)
+      },
+      {once: true},
+    )
   })
 }
 
@@ -77,30 +84,38 @@ function isNegativeNumber(input: string): boolean {
   return /^-\d/g.test(input)
 }
 
-const validateOptions = (flag: OptionFlag<any>, input: string): string =>  {
-  if (flag.options && !flag.options.includes(input))
-    throw new FlagInvalidOptionError(flag, input)
+const validateOptions = (flag: OptionFlag<any>, input: string): string => {
+  if (flag.options && !flag.options.includes(input)) throw new FlagInvalidOptionError(flag, input)
   return input
 }
 
-export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']>, BFlags extends OutputFlags<T['flags']>, TArgs extends OutputArgs<T['args']>> {
+export class Parser<
+  T extends ParserInput,
+  TFlags extends OutputFlags<T['flags']>,
+  BFlags extends OutputFlags<T['flags']>,
+  TArgs extends OutputArgs<T['args']>,
+> {
   private readonly argv: string[]
 
   private readonly raw: ParsingToken[] = []
 
-  private readonly booleanFlags: { [k: string]: BooleanFlag<any> }
-  private readonly flagAliases: { [k: string]: BooleanFlag<any> | OptionFlag<any> }
+  private readonly booleanFlags: {[k: string]: BooleanFlag<any>}
+  private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
 
   private readonly context: ParserContext
 
   private currentFlag?: OptionFlag<any>
 
   constructor(private readonly input: T) {
-    this.context = input.context ?? {} as ParserContext
+    this.context = input.context ?? ({} as ParserContext)
     this.argv = [...input.argv]
     this._setNames()
-    this.booleanFlags = pickBy(input.flags, f => f.type === 'boolean') as any
-    this.flagAliases = Object.fromEntries(Object.values(input.flags).flatMap(flag => ([...flag.aliases ?? [], ...flag.charAliases ?? []]).map(a => [a, flag])))
+    this.booleanFlags = pickBy(input.flags, (f) => f.type === 'boolean') as any
+    this.flagAliases = Object.fromEntries(
+      Object.values(input.flags).flatMap((flag) =>
+        [...(flag.aliases ?? []), ...(flag.charAliases ?? [])].map((a) => [a, flag]),
+      ),
+    )
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
@@ -128,14 +143,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       const flag = this.input.flags[name]
 
       if (flag.type === 'option') {
-        if (!flag.multiple && this.raw.some(o => o.type === 'flag' && o.flag === name)) {
+        if (!flag.multiple && this.raw.some((o) => o.type === 'flag' && o.flag === name)) {
           throw new CLIError(`Flag --${name} can only be specified once`)
         }
 
         this.currentFlag = flag
-        const input = isLong || arg.length < 3 ? this.argv.shift()  : arg.slice(arg[2] === '=' ? 3 : 2)
+        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
-        if ((typeof input !== 'string') || this.findFlag(input).name) {
+        if (typeof input !== 'string' || this.findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
@@ -210,11 +225,17 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
   }
 
   private async _flags(): Promise<{
-    flags: TFlags & BFlags & { json: boolean | undefined }, metadata: Metadata
+    flags: TFlags & BFlags & {json: boolean | undefined}
+    metadata: Metadata
   }> {
     type ValueFunction = (fws: FlagWithStrategy, flags?: Record<string, string>) => Promise<any>
 
-    const parseFlagOrThrowError = async (input: any, flag: BooleanFlag<any> | OptionFlag<any>, context: ParserContext | undefined, token?: FlagToken) => {
+    const parseFlagOrThrowError = async (
+      input: any,
+      flag: BooleanFlag<any> | OptionFlag<any>,
+      context: ParserContext | undefined,
+      token?: FlagToken,
+    ) => {
       if (!flag.parse) return input
 
       const ctx = {
@@ -240,8 +261,8 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     /* Could add a valueFunction (if there is a value/env/default) and could metadata.
-    *  Value function can be resolved later.
-    */
+     *  Value function can be resolved later.
+     */
     const addValueFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
       const tokenLength = fws.tokens?.length
       // user provided some input
@@ -250,12 +271,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
           return {
             ...fws,
-            valueFunction: async i => parseFlagOrThrowError(
-              last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
-              i.inputFlag.flag,
-              this.context,
-              last(i.tokens),
-            ),
+            valueFunction: async (i) =>
+              parseFlagOrThrowError(
+                last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
+                i.inputFlag.flag,
+                this.context,
+                last(i.tokens),
+              ),
           }
         }
 
@@ -263,13 +285,28 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.delimiter && fws.inputFlag.flag.multiple) {
           return {
             ...fws,
-            valueFunction: async i => (await Promise.all(
-              ((i.tokens ?? []).flatMap(token => token.input.split((i.inputFlag.flag as OptionFlag<any>).delimiter ?? ',')))
-              // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
-              .map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1'))
-              .map(async v => parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {...last(i.tokens) as FlagToken, input: v})),
-            // eslint-disable-next-line unicorn/no-await-expression-member
-            )).map(v => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
+            valueFunction: async (i) =>
+              (
+                await Promise.all(
+                  (i.tokens ?? [])
+                    .flatMap((token) => token.input.split((i.inputFlag.flag as OptionFlag<any>).delimiter ?? ','))
+                    // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
+                    .map((v) =>
+                      v
+                        .trim()
+                        .replace(/^"(.*)"$/, '$1')
+                        .replace(/^'(.*)'$/, '$1'),
+                    )
+                    .map(async (v) =>
+                      parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {
+                        ...(last(i.tokens) as FlagToken),
+                        input: v,
+                      }),
+                    ),
+                )
+              )
+                // eslint-disable-next-line unicorn/no-await-expression-member
+                .map((v) => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
 
@@ -279,12 +316,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
             ...fws,
             valueFunction: async (i: FlagWithStrategy) =>
               Promise.all(
-                (fws.tokens ?? []).map(token => parseFlagOrThrowError(
-                  validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string),
-                  i.inputFlag.flag,
-                  this.context,
-                  token,
-                )),
+                (fws.tokens ?? []).map((token) =>
+                  parseFlagOrThrowError(
+                    validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string),
+                    i.inputFlag.flag,
+                    this.context,
+                    token,
+                  ),
+                ),
               ),
           }
         }
@@ -293,12 +332,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'option') {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
-              validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string),
-              i.inputFlag.flag,
-              this.context,
-              last(fws.tokens),
-            ),
+            valueFunction: async (i: FlagWithStrategy) =>
+              parseFlagOrThrowError(
+                validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string),
+                i.inputFlag.flag,
+                this.context,
+                last(fws.tokens),
+              ),
           }
         }
       }
@@ -309,18 +349,20 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
         if (fws.inputFlag.flag.type === 'option' && valueFromEnv) {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => parseFlagOrThrowError(
-              validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv),
-              i.inputFlag.flag,
-              this.context,
-            ),
+            valueFunction: async (i: FlagWithStrategy) =>
+              parseFlagOrThrowError(
+                validateOptions(i.inputFlag.flag as OptionFlag<any>, valueFromEnv),
+                i.inputFlag.flag,
+                this.context,
+              ),
           }
         }
 
         if (fws.inputFlag.flag.type === 'boolean') {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) => isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'),
+            valueFunction: async (i: FlagWithStrategy) =>
+              isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'),
           }
         }
       }
@@ -329,10 +371,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
       // eslint-disable-next-line no-constant-binary-expression, valid-typeof
       if (typeof fws.inputFlag.flag.default !== undefined) {
         return {
-          ...fws, metadata: {setFromDefault: true},
-          valueFunction: typeof fws.inputFlag.flag.default === 'function'
-            ? (i: FlagWithStrategy, allFlags = {}) => fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags})
-            : async () => fws.inputFlag.flag.default,
+          ...fws,
+          metadata: {setFromDefault: true},
+          valueFunction:
+            typeof fws.inputFlag.flag.default === 'function'
+              ? (i: FlagWithStrategy, allFlags = {}) =>
+                  fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags})
+              : async () => fws.inputFlag.flag.default,
         }
       }
 
@@ -343,11 +388,14 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const addHelpFunction = (fws: FlagWithStrategy): FlagWithStrategy => {
       if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.defaultHelp) {
         return {
-          ...fws, helpFunction: typeof fws.inputFlag.flag.defaultHelp === 'function'
-            // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) => i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
-            // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-            : (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
+          ...fws,
+          helpFunction:
+            typeof fws.inputFlag.flag.defaultHelp === 'function'
+              ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) =>
+                  // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
+                  i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
+              : // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
+                (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
         }
       }
 
@@ -355,69 +403,89 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
 
     const addDefaultHelp = async (fwsArray: FlagWithStrategy[]): Promise<FlagWithStrategy[]> => {
-      const valueReferenceForHelp = fwsArrayToObject(flagsWithAllValues.filter(fws => !fws.metadata?.setFromDefault))
-      return Promise.all(fwsArray.map(async fws => {
-        try {
-          if (fws.helpFunction) {
-            return {
-              ...fws,
-              metadata: {
-                ...fws.metadata,
-                defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context),
-              },
+      const valueReferenceForHelp = fwsArrayToObject(flagsWithAllValues.filter((fws) => !fws.metadata?.setFromDefault))
+      return Promise.all(
+        fwsArray.map(async (fws) => {
+          try {
+            if (fws.helpFunction) {
+              return {
+                ...fws,
+                metadata: {
+                  ...fws.metadata,
+                  defaultHelp: await fws.helpFunction?.(fws, valueReferenceForHelp, this.context),
+                },
+              }
             }
+          } catch {
+            // no-op
           }
-        } catch {
-          // no-op
-        }
 
-        return fws
-      }))
+          return fws
+        }),
+      )
     }
 
-    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) => Object.fromEntries(
-      fwsArray.filter(fws => fws.value !== undefined)
-      .map(fws => [fws.inputFlag.name, fws.value]),
-    ) as TFlags & BFlags & { json: boolean | undefined }
+    const fwsArrayToObject = (fwsArray: FlagWithStrategy[]) =>
+      Object.fromEntries(
+        fwsArray.filter((fws) => fws.value !== undefined).map((fws) => [fws.inputFlag.name, fws.value]),
+      ) as TFlags & BFlags & {json: boolean | undefined}
 
     type FlagWithStrategy = {
       inputFlag: {
-        name: string,
+        name: string
         flag: Flag<any>
       }
-      tokens?: FlagToken[],
-      valueFunction?: ValueFunction;
-      helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>;
+      tokens?: FlagToken[]
+      valueFunction?: ValueFunction
+      helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>
       metadata?: MetadataFlag
-      value?: any;
+      value?: any
     }
 
     const flagTokenMap = this.mapAndValidateFlags()
-    const flagsWithValues = await Promise.all(Object.entries(this.input.flags)
-    // we check them if they have a token, or might have env, default, or defaultHelp.  Also include booleans so they get their default value
-    .filter(([name, flag]) => flag.type === 'boolean' || flag.env || flag.default !== undefined || 'defaultHelp' in flag || flagTokenMap.has(name))
-    // match each possible flag to its token, if there is one
-    .map(([name, flag]): FlagWithStrategy => ({inputFlag: {name, flag}, tokens: flagTokenMap.get(name)}))
-    .map(fws => addValueFunction(fws))
-    .filter(fws => fws.valueFunction !== undefined)
-    .map(fws => addHelpFunction(fws))
-    // we can't apply the default values until all the other flags are resolved because `flag.default` can reference other flags
-    .map(async fws => (fws.metadata?.setFromDefault ? fws : {...fws, value: await fws.valueFunction?.(fws)})))
+    const flagsWithValues = await Promise.all(
+      Object.entries(this.input.flags)
+        // we check them if they have a token, or might have env, default, or defaultHelp.  Also include booleans so they get their default value
+        .filter(
+          ([name, flag]) =>
+            flag.type === 'boolean' ||
+            flag.env ||
+            flag.default !== undefined ||
+            'defaultHelp' in flag ||
+            flagTokenMap.has(name),
+        )
+        // match each possible flag to its token, if there is one
+        .map(([name, flag]): FlagWithStrategy => ({inputFlag: {name, flag}, tokens: flagTokenMap.get(name)}))
+        .map((fws) => addValueFunction(fws))
+        .filter((fws) => fws.valueFunction !== undefined)
+        .map((fws) => addHelpFunction(fws))
+        // we can't apply the default values until all the other flags are resolved because `flag.default` can reference other flags
+        .map(async (fws) => (fws.metadata?.setFromDefault ? fws : {...fws, value: await fws.valueFunction?.(fws)})),
+    )
 
-    const valueReference = fwsArrayToObject(flagsWithValues.filter(fws => !fws.metadata?.setFromDefault))
+    const valueReference = fwsArrayToObject(flagsWithValues.filter((fws) => !fws.metadata?.setFromDefault))
 
-    const flagsWithAllValues = await Promise.all(flagsWithValues
-    .map(async fws => (fws.metadata?.setFromDefault ? {...fws, value: await fws.valueFunction?.(fws, valueReference)} : fws)))
+    const flagsWithAllValues = await Promise.all(
+      flagsWithValues.map(async (fws) =>
+        fws.metadata?.setFromDefault ? {...fws, value: await fws.valueFunction?.(fws, valueReference)} : fws,
+      ),
+    )
 
-    const finalFlags = (flagsWithAllValues.some(fws => typeof fws.helpFunction === 'function')) ? await addDefaultHelp(flagsWithAllValues) : flagsWithAllValues
+    const finalFlags = flagsWithAllValues.some((fws) => typeof fws.helpFunction === 'function')
+      ? await addDefaultHelp(flagsWithAllValues)
+      : flagsWithAllValues
 
     return {
       flags: fwsArrayToObject(finalFlags),
-      metadata: {flags: Object.fromEntries(finalFlags.filter(fws => fws.metadata).map(fws => [fws.inputFlag.name, fws.metadata as MetadataFlag]))},
+      metadata: {
+        flags: Object.fromEntries(
+          finalFlags.filter((fws) => fws.metadata).map((fws) => [fws.inputFlag.name, fws.metadata as MetadataFlag]),
+        ),
+      },
     }
   }
 
-  private async _args(): Promise<{ argv: unknown[]; args: Record<string, unknown> }> {
+  private async _args(): Promise<{argv: unknown[]; args: Record<string, unknown>}> {
     const argv: unknown[] = []
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
@@ -425,7 +493,7 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     const ctx = this.context as ArgParserContext
 
     for (const [name, arg] of Object.entries(this.input.args)) {
-      const token = tokens.find(t => t.arg === name)
+      const token = tokens.find((t) => t.arg === name)
       ctx.token = token!
 
       if (token) {
@@ -493,13 +561,13 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     debug(
       'available flags: %s',
       Object.keys(this.input.flags)
-      .map(f => `--${f}`)
-      .join(' '),
+        .map((f) => `--${f}`)
+        .join(' '),
     )
   }
 
   private get _argTokens(): ArgToken[] {
-    return this.raw.filter(o => o.type === 'arg') as ArgToken[]
+    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   private _setNames() {
@@ -512,9 +580,9 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
   }
 
-  private mapAndValidateFlags(): Map<string, FlagToken[]>  {
+  private mapAndValidateFlags(): Map<string, FlagToken[]> {
     const flagTokenMap = new Map<string, FlagToken[]>()
-    for (const token of (this.raw.filter(o => o.type === 'flag') as FlagToken[])) {
+    for (const token of this.raw.filter((o) => o.type === 'flag') as FlagToken[]) {
       // fail fast if there are any invalid flags
       if (!(token.flag in this.input.flags)) {
         throw new CLIError(`Unexpected flag ${token.flag}`)
@@ -543,18 +611,20 @@ export class Parser<T extends ParserInput, TFlags extends OutputFlags<T['flags']
     }
   }
 
-  private findShortFlag([_, char]: string):string | undefined {
+  private findShortFlag([_, char]: string): string | undefined {
     if (this.flagAliases[char]) {
       return this.flagAliases[char].name
     }
 
-    return Object.keys(this.input.flags).find(k => (this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined))
+    return Object.keys(this.input.flags).find(
+      (k) => this.input.flags[k].char === char && char !== undefined && this.input.flags[k].char !== undefined,
+    )
   }
 
-  private findFlag(arg: string): { name?: string, isLong: boolean } {
+  private findFlag(arg: string): {name?: string; isLong: boolean} {
     const isLong = arg.startsWith('--')
     const short = isLong ? false : arg.startsWith('-')
-    const name = isLong ? this.findLongFlag(arg) : (short ? this.findShortFlag(arg) : undefined)
+    const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined
     return {name, isLong}
   }
 }

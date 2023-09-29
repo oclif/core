@@ -20,7 +20,7 @@ abstract class BaseCommand extends Command {
 type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
 
 type MyType = {
-  foo: boolean;
+  foo: boolean
 }
 
 export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' | 'seconds'}>({
@@ -28,8 +28,8 @@ export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' 
     const value = opts.unit === 'minutes' ? new Date(input).getMinutes() : new Date(input).getSeconds()
     return value
   },
-  default: async _ctx => _ctx.options.unit === 'minutes' ? 1 : 2,
-  defaultHelp: async _ctx => _ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds',
+  default: async (_ctx) => (_ctx.options.unit === 'minutes' ? 1 : 2),
+  defaultHelp: async (_ctx) => (_ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds'),
   char: 'c',
 })
 
@@ -96,9 +96,7 @@ Flags.custom({multiple: false})({
 class MyCommand extends BaseCommand {
   static description = 'describe the command here'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   static flags = {
     string: Flags.string(),
@@ -110,7 +108,7 @@ class MyCommand extends BaseCommand {
     'string#opts:multiple,default': Flags.string({
       multiple: true,
       default: ['default'],
-      defaultHelp: async _ctx => 'defaultHelp',
+      defaultHelp: async (_ctx) => 'defaultHelp',
     }),
 
     boolean: Flags.boolean(),
@@ -145,7 +143,7 @@ class MyCommand extends BaseCommand {
     'url#opts:required': Flags.url({required: true}),
     'url#opts:default': Flags.url({
       default: new URL('http://example.com'),
-      defaultHelp: async _ctx => 'Example URL',
+      defaultHelp: async (_ctx) => 'Example URL',
     }),
 
     'url#opts:multiple': Flags.url({multiple: true}),
@@ -161,7 +159,7 @@ class MyCommand extends BaseCommand {
     'custom#opts:default': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({
-      default: async _ctx => ({foo: true}),
+      default: async (_ctx) => ({foo: true}),
     }),
 
     'custom#opts:multiple': Flags.custom<MyType>({
@@ -200,7 +198,7 @@ class MyCommand extends BaseCommand {
     })({required: true, multiple: true}),
     'option#opts:multiple,default': Flags.option({
       options,
-    })({default: async _ctx => ['foo'], multiple: true}),
+    })({default: async (_ctx) => ['foo'], multiple: true}),
 
     'custom#defs:required': Flags.custom({
       required: true,
@@ -226,7 +224,7 @@ class MyCommand extends BaseCommand {
     })(),
     'option#defs:default': Flags.option({
       options,
-      default: async _ctx => 'foo',
+      default: async (_ctx) => 'foo',
     })(),
     'option#defs:multiple': Flags.option({
       options,
@@ -240,7 +238,7 @@ class MyCommand extends BaseCommand {
     'option#defs,multiple,default': Flags.option({
       options,
       multiple: true,
-      default: async _ctx => ['foo'],
+      default: async (_ctx) => ['foo'],
     })(),
 
     'option#defs:multiple;opts:default': Flags.option({
@@ -254,14 +252,14 @@ class MyCommand extends BaseCommand {
       options,
       multiple: true,
     })({
-      default: async _ctx => ['foo'],
+      default: async (_ctx) => ['foo'],
     }),
 
     'custom#defs:multiple;opts:default-callback': Flags.custom({
       options,
       multiple: true,
     })({
-      default: async _ctx => ['foo'],
+      default: async (_ctx) => ['foo'],
     }),
 
     'custom#defs:multiple,parse': Flags.custom({
@@ -272,7 +270,7 @@ class MyCommand extends BaseCommand {
     'option#defs:multiple,prase': Flags.option({
       options,
       multiple: true,
-      parse: async (input, _ctx, _opts) => input as typeof options[number],
+      parse: async (input, _ctx, _opts) => input as (typeof options)[number],
     })(),
 
     'custom#defs:multiple=true;opts:multiple=false': Flags.custom({
@@ -447,17 +445,17 @@ class MyCommand extends BaseCommand {
     expectNotType<undefined>(this.flags['custom#defs:multiple,delimiter;opts:default'])
     expectType<string[] | undefined>(this.flags['custom#defs:multiple,delimiter'])
 
-    expectType<typeof options[number]>(this.flags['option#opts:required'])
+    expectType<(typeof options)[number]>(this.flags['option#opts:required'])
     expectNotType<undefined>(this.flags['option#opts:required'])
-    expectType<typeof options[number]>(this.flags['option#opts:default'])
+    expectType<(typeof options)[number]>(this.flags['option#opts:default'])
     expectNotType<undefined>(this.flags['option#opts:default'])
-    expectType<typeof options[number] | undefined>(this.flags.option)
+    expectType<(typeof options)[number] | undefined>(this.flags.option)
 
-    expectType<typeof options[number][]>(this.flags['option#opts:multiple,required'])
+    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,required'])
     expectNotType<undefined>(this.flags['option#opts:multiple,required'])
-    expectType<typeof options[number][]>(this.flags['option#opts:multiple,default'])
+    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,default'])
     expectNotType<undefined>(this.flags['option#opts:multiple,default'])
-    expectType<typeof options[number][] | undefined>(this.flags['option#opts:multiple'])
+    expectType<(typeof options)[number][] | undefined>(this.flags['option#opts:multiple'])
 
     expectType<string>(this.flags['custom#defs:required'])
     expectNotType<undefined>(this.flags['custom#defs:required'])
@@ -491,7 +489,7 @@ class MyCommand extends BaseCommand {
 
     expectType<string[] | undefined>(this.flags['custom#defs:multiple,parse'])
 
-    expectType<(typeof options[number])[] | undefined>(this.flags['option#defs:multiple,prase'])
+    expectType<(typeof options)[number][] | undefined>(this.flags['option#defs:multiple,prase'])
 
     expectType<string | undefined>(this.flags['custom#defs:multiple=true;opts:multiple=false'])
     expectType<string[] | undefined>(this.flags['custom#defs:multiple=false;opts:multiple=true'])
@@ -503,7 +501,9 @@ class MyCommand extends BaseCommand {
     expectType<string[] | undefined>(this.flags['custom#defs:required=true;opts:multiple=true,required=false'])
     expectType<string[]>(this.flags['custom#defs:required=false;opts:multiple=true,required=true'])
     expectNotType<undefined>(this.flags['custom#defs:required=false;opts:multiple=true,required=true'])
-    expectType<string | undefined>(this.flags['custom#defs:multiple=true,required=true;opts:multiple=false,required=false'])
+    expectType<string | undefined>(
+      this.flags['custom#defs:multiple=true,required=true;opts:multiple=false,required=false'],
+    )
     expectType<string[]>(this.flags['custom#defs:multiple=false,required=false;opts:multiple=true,required=true'])
     expectNotType<undefined>(this.flags['custom#defs:multiple=false,required=false;opts:multiple=true,required=true'])
 
@@ -513,4 +513,3 @@ class MyCommand extends BaseCommand {
     return result.flags
   }
 }
-

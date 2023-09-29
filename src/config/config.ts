@@ -93,7 +93,7 @@ export class Config implements IConfig {
   public version!: string
   public windows!: boolean
   public binAliases?: string[]
-  public nsisCustomization?:string
+  public nsisCustomization?: string
 
   protected warned = false
 
@@ -151,7 +151,8 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
-    settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    settings.performanceEnabled =
+      (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const marker = Performance.mark('config.load')
     this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
     Config._rootPlugin = await this.pluginLoader.loadRoot()
@@ -167,7 +168,7 @@ export class Config implements IConfig {
     this.channel = this.options.channel || channelFromVersion(this.version)
     this.valid = Config._rootPlugin.valid
 
-    this.arch = (arch() === 'ia32' ? 'x86' : arch() as any)
+    this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
     this.platform = WSL ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
@@ -176,7 +177,8 @@ export class Config implements IConfig {
     this.dirname = this.pjson.oclif.dirname || this.name
     this.flexibleTaxonomy = this.pjson.oclif.flexibleTaxonomy || false
     // currently, only colons or spaces are valid separators
-    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator)) this.topicSeparator = this.pjson.oclif.topicSeparator!
+    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator))
+      this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
@@ -201,17 +203,20 @@ export class Config implements IConfig {
       ...s3.templates,
       target: {
         baseDir: '<%- bin %>',
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        unversioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
         manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
-        ...s3.templates && s3.templates.target,
+        ...(s3.templates && s3.templates.target),
       },
       vanilla: {
         unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
         baseDir: '<%- bin %>',
         manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
-        ...s3.templates && s3.templates.vanilla,
+        ...(s3.templates && s3.templates.vanilla),
       },
     }
 
@@ -275,7 +280,7 @@ export class Config implements IConfig {
         }, ms).unref()
       })
 
-      return Promise.race([promise, timeout]).then(result => {
+      return Promise.race([promise, timeout]).then((result) => {
         clearTimeout(id)
         return result
       })
@@ -285,7 +290,7 @@ export class Config implements IConfig {
       successes: [],
       failures: [],
     } as Hook.Result<Hooks[T]['return']>
-    const promises = [...this.plugins.values()].map(async p => {
+    const promises = [...this.plugins.values()].map(async (p) => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -296,7 +301,7 @@ export class Config implements IConfig {
         log(message?: any, ...args: any[]) {
           stdout.write(format(message, ...args) + '\n')
         },
-        error(message, options: { code?: string; exit?: number } = {}) {
+        error(message, options: {code?: string; exit?: number} = {}) {
           error(message, options)
         },
         warn(message: string) {
@@ -314,8 +319,8 @@ export class Config implements IConfig {
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout
-            ? await withTimeout(timeout, search(module).call(context, {...opts as any, config: this}))
-            : await search(module).call(context, {...opts as any, config: this})
+            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this}))
+            : await search(module).call(context, {...(opts as any), config: this})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
@@ -346,15 +351,20 @@ export class Config implements IConfig {
     return final
   }
 
-  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
+  public async runCommand<T = unknown>(
+    id: string,
+    argv: string[] = [],
+    cachedCommand: Command.Loadable | null = null,
+  ): Promise<T> {
     const marker = Performance.mark(`config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
       const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
-      const hookResult = this.flexibleTaxonomy && matches.length > 0
-        ? await this.runHook('command_incomplete', {id, argv, matches})
-        : await this.runHook('command_not_found', {id, argv})
+      const hookResult =
+        this.flexibleTaxonomy && matches.length > 0
+          ? await this.runHook('command_incomplete', {id, argv, matches})
+          : await this.runHook('command_not_found', {id, argv})
 
       if (hookResult.successes[0]) return hookResult.successes[0].result as T
       if (hookResult.failures[0]) throw hookResult.failures[0].error
@@ -396,11 +406,11 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVar(k: string): string | undefined {
-    return process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
+    return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
   }
 
   public scopedEnvVarTrue(k: string): boolean {
-    const v = process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
+    const v = process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
     return v === '1' || v === 'true'
   }
 
@@ -411,9 +421,9 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
-    .map(p => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
-    .join('_')
-    .toUpperCase()
+      .map((p) => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
+      .join('_')
+      .toUpperCase()
   }
 
   /**
@@ -422,26 +432,27 @@ export class Config implements IConfig {
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
-    return [this.bin, ...this.binAliases ?? []].filter(Boolean).map(alias =>
-      [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
+    return [this.bin, ...(this.binAliases ?? [])]
+      .filter(Boolean)
+      .map((alias) => [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
-  public findCommand(id: string, opts: { must: true }): Command.Loadable
+  public findCommand(id: string, opts: {must: true}): Command.Loadable
 
-  public findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
+  public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
-  public findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
+  public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
     return command
   }
 
-  public findTopic(id: string, opts: { must: true }): Topic
+  public findTopic(id: string, opts: {must: true}): Topic
 
-  public findTopic(id: string, opts?: { must: boolean }): Topic | undefined
+  public findTopic(id: string, opts?: {must: boolean}): Topic | undefined
 
-  public findTopic(name: string, opts: { must?: boolean } = {}): Topic | undefined {
+  public findTopic(name: string, opts: {must?: boolean} = {}): Topic | undefined {
     const lookupId = this.getTopicLookupId(name)
     const topic = this._topics.get(lookupId)
     if (topic) return topic
@@ -462,14 +473,18 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
-    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replaceAll('-', ''))
-    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
+    const flags = argv
+      .filter((arg) => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-'))
+      .map((a) => a.replaceAll('-', ''))
+    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map((k) => this._commands.get(k)!)
 
-    const matches = possibleMatches.filter(command => {
-      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => def.char ? [def.char, flag] : [flag]) as string[]
+    const matches = possibleMatches.filter((command) => {
+      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) =>
+        def.char ? [def.char, flag] : [flag],
+      ) as string[]
 
       // A command is a match if the provided flags belong to the full command
-      return flags.every(f => cmdFlags.includes(f))
+      return flags.every((f) => cmdFlags.includes(f))
     })
 
     return matches
@@ -497,7 +512,7 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public getAllCommandIDs(): string[] {
-    return this.getAllCommands().map(c => c.id)
+    return this.getAllCommands().map((c) => c.id)
   }
 
   public get commands(): Command.Loadable[] {
@@ -506,7 +521,7 @@ export class Config implements IConfig {
 
   public get commandIDs(): string[] {
     if (this._commandIDs) return this._commandIDs
-    this._commandIDs = this.commands.map(c => c.id)
+    this._commandIDs = this.commands.map((c) => c.id)
     return this._commandIDs
   }
 
@@ -520,18 +535,24 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries([...this.plugins.values()].map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      pluginVersions: Object.fromEntries(
+        [...this.plugins.values()].map((p) => [p.name, {version: p.version, type: p.type, root: p.root}]),
+      ),
       osVersion: `${type()} ${release()}`,
       shell: this.shell,
       rootPath: this.root,
     }
   }
 
-  public s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}): string {
+  public s3Key(
+    type: keyof PJSON.S3.Templates,
+    ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options,
+    options: IConfig.s3Key.Options = {},
+  ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
     const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
-    return ejs.render(template, {...this as any, ...options})
+    return ejs.render(template, {...(this as any), ...options})
   }
 
   public s3Url(key: string): string {
@@ -547,9 +568,10 @@ export class Config implements IConfig {
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {
-    const base = process.env[`XDG_${category.toUpperCase()}_HOME`]
-      || (this.windows && process.env.LOCALAPPDATA)
-      || join(this.home, category === 'data' ? '.local/share' : '.' + category)
+    const base =
+      process.env[`XDG_${category.toUpperCase()}_HOME`] ||
+      (this.windows && process.env.LOCALAPPDATA) ||
+      join(this.home, category === 'data' ? '.local/share' : '.' + category)
     return join(base, this.dirname)
   }
 
@@ -558,7 +580,7 @@ export class Config implements IConfig {
   }
 
   protected windowsHomedriveHome(): string | undefined {
-    return (process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!))
+    return process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!)
   }
 
   protected windowsUserprofileHome(): string | undefined {
@@ -594,7 +616,7 @@ export class Config implements IConfig {
     return 0
   }
 
-  protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
+  protected warn(err: string | Error | {name: string; detail: string}, scope?: string): void {
     if (this.warned) return
 
     if (typeof err === 'string') {
@@ -638,7 +660,10 @@ export class Config implements IConfig {
 
   private isJitPluginCommand(c: Command.Loadable): boolean {
     // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
-    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
+    return (
+      Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') &&
+      Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
+    )
   }
 
   private getCmdLookupId(id: string): string {
@@ -666,9 +691,10 @@ export class Config implements IConfig {
 
       // v3 moved command id permutations to the manifest, but some plugins may not have
       // the new manifest yet. For those, we need to calculate the permutations here.
-      const permutations = this.flexibleTaxonomy && command.permutations === undefined
-        ? getCommandIdPermutations(command.id)
-        : command.permutations ?? [command.id]
+      const permutations =
+        this.flexibleTaxonomy && command.permutations === undefined
+          ? getCommandIdPermutations(command.id)
+          : command.permutations ?? [command.id]
       // set every permutation
       for (const permutation of permutations) {
         this.commandPermutations.add(permutation, command.id)
@@ -687,9 +713,10 @@ export class Config implements IConfig {
 
         // v3 moved command alias permutations to the manifest, but some plugins may not have
         // the new manifest yet. For those, we need to calculate the permutations here.
-        const aliasPermutations = this.flexibleTaxonomy && command.aliasPermutations === undefined
-          ? getCommandIdPermutations(alias)
-          : command.permutations ?? [alias]
+        const aliasPermutations =
+          this.flexibleTaxonomy && command.aliasPermutations === undefined
+            ? getCommandIdPermutations(alias)
+            : command.permutations ?? [alias]
         // set every permutation
         for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
@@ -719,7 +746,7 @@ export class Config implements IConfig {
     }
 
     // Add missing topics for displaying help when partial commands are entered.
-    for (const c of plugin.commands.filter(c => !c.hidden)) {
+    for (const c of plugin.commands.filter((c) => !c.hidden)) {
       const parts = c.id.split(':')
       while (parts.length > 0) {
         const name = parts.join(':')
@@ -793,14 +820,14 @@ export class Config implements IConfig {
   }
 
   /**
-    * Insert legacy plugins
-    *
-    * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
-    * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
-    *
-    * @param plugins array of oclif-compatible plugins
-    * @returns void
-    */
+   * Insert legacy plugins
+   *
+   * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
+   * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
+   *
+   * @param plugins array of oclif-compatible plugins
+   * @returns void
+   */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
       this.plugins.set(plugin.name, plugin)
@@ -808,4 +835,3 @@ export class Config implements IConfig {
     }
   }
 }
-

@@ -8,17 +8,17 @@ const errlog = join(__dirname, '../tmp/mytest/warn.log')
 
 describe('warn', () => {
   fancy
-  .stderr()
-  .do(() => {
-    config.errlog = errlog
-  })
-  .finally(() => {
-    config.errlog = undefined
-  })
-  .it('warns', async ctx => {
-    warn('foo!')
-    expect(ctx.stderr).to.contain('Warning: foo!')
-    await config.errorLogger!.flush()
-    expect(await readFile(errlog, 'utf8')).to.contain('Warning: foo!')
-  })
+    .stderr()
+    .do(() => {
+      config.errlog = errlog
+    })
+    .finally(() => {
+      config.errlog = undefined
+    })
+    .it('warns', async (ctx) => {
+      warn('foo!')
+      expect(ctx.stderr).to.contain('Warning: foo!')
+      await config.errorLogger!.flush()
+      expect(await readFile(errlog, 'utf8')).to.contain('Warning: foo!')
+    })
 })
