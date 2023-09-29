@@ -16,7 +16,7 @@ import {
 } from './interfaces/parser'
 import {format, inspect} from 'node:util'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
-import {requireJson, uniq} from './util'
+import {requireJson, uniq} from './util/index'
 import {stderr, stdout} from './cli-ux/stream'
 import {CommandError} from './interfaces/errors'
 import {Config} from './config'

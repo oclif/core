@@ -1,6 +1,6 @@
 import {Flag, FlagUsageOptions} from '../interfaces/parser'
 import chalk from 'chalk'
-import {sortBy} from '../util'
+import {sortBy} from '../util/index'
 
 export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [string, string | undefined] {
   const label = []

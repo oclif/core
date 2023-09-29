@@ -1,7 +1,7 @@
 import {CLIError, error} from '../errors'
 import {Debug, getCommandIdPermutations, resolvePackage} from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {compact, exists, isProd, mapValues, readJson, requireJson} from '../util'
+import {compact, exists, isProd, mapValues, readJson, requireJson} from '../util/index'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'

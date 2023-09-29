@@ -7,7 +7,7 @@ import {
   UnexpectedArgsError,
   Validation,
 } from './errors'
-import {uniq} from '../util'
+import {uniq} from '../util/index'
 
 export async function validate(parse: {input: ParserInput; output: ParserOutput}): Promise<void> {
   let cachedResolvedFlags: Record<string, unknown> | undefined

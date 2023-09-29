@@ -17,7 +17,7 @@ import {
   ParserOutput,
   ParsingToken,
 } from '../interfaces/parser'
-import {isTruthy, last, pickBy} from '../util'
+import {isTruthy, last, pickBy} from '../util/index'
 import {createInterface} from 'node:readline'
 
 let debug: any

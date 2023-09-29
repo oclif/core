@@ -1,6 +1,6 @@
 import * as Interfaces from '../interfaces'
 import {HelpFormatter} from './formatter'
-import {compact} from '../util'
+import {compact} from '../util/index'
 import stripAnsi from 'strip-ansi'
 
 export default class RootHelp extends HelpFormatter {

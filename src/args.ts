@@ -1,5 +1,5 @@
 import {Arg, ArgDefinition} from './interfaces/parser'
-import {dirExists, fileExists, isNotFalsy} from './util'
+import {dirExists, fileExists, isNotFalsy} from './util/index'
 import {Command} from './command'
 import {URL} from 'node:url'
 

@@ -1,6 +1,6 @@
 import * as Plugin from './plugin'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
-import {isProd, readJson} from '../util'
+import {isProd, readJson} from '../util/index'
 import {Debug} from './util'
 import {PJSON} from '../interfaces'
 import {Performance} from '../performance'
