@@ -161,9 +161,15 @@ export class Help extends HelpBase {
     if (state) {
       this.log(
         state === 'deprecated'
-          ? `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}`
+          ? `${formatCommandDeprecationWarning(toConfiguredId(name, this.config), command.deprecationOptions)}\n`
           : `This command is in ${state}.\n`,
       )
+    }
+
+    if (command.deprecateAliases && command.aliases.includes(name)) {
+      const actualCmd = this.config.commands.find((c) => c.aliases.includes(name))
+      const opts = {...command.deprecationOptions, ...(actualCmd ? {to: actualCmd.id} : {})}
+      this.log(`${formatCommandDeprecationWarning(toConfiguredId(name, this.config), opts)}\n`)
     }
 
     const summary = this.summary(command)

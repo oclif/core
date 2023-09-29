@@ -13,6 +13,7 @@ import {
   AppsTopic,
   DbCreate,
   DbTopic,
+  DeprecateAliases,
 } from './fixtures/fixtures'
 import {Config, Interfaces} from '../../src'
 import {monkeyPatchCommands} from './help-test-utils'
@@ -45,6 +46,25 @@ const test = base
 
       // use devPlugins: true to bring in plugins-plugin with topic commands for testing
       const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
+      ctx.help = new TestHelp(config)
+    },
+    finally(ctx) {
+      for (const stub of Object.values(ctx.stubs)) stub.restore()
+    },
+  }))
+  .register('setupDeprecatedAliasesHelp', () => ({
+    async run(ctx: {help: TestHelp; stubs: {[k: string]: SinonStub}}) {
+      ctx.stubs = {
+        showRootHelp: stub(TestHelp.prototype, 'showRootHelp').resolves(),
+        showTopicHelp: stub(TestHelp.prototype, 'showTopicHelp').resolves(),
+        showCommandHelp: stub(TestHelp.prototype, 'showCommandHelp').resolves(),
+      }
+
+      // use devPlugins: true to bring in plugins-plugin with topic commands for testing
+      const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
+      const pluginPlugins = config.plugins.get('@oclif/plugin-plugins')!
+      const pluginsInstall = pluginPlugins.commands.find((c) => c.id === 'plugins:install')!
+      pluginPlugins.commands = [...pluginPlugins.commands, {...pluginsInstall, deprecateAliases: true}]
       ctx.help = new TestHelp(config)
     },
     finally(ctx) {
@@ -256,6 +276,32 @@ TOPICS
 COMMANDS
   apps:create   Create an app
   apps:destroy  Destroy an app`)
+    })
+
+  test
+    .loadConfig()
+    .stdout()
+    .do(async (ctx) => {
+      const {config} = ctx
+      monkeyPatchCommands(config, [
+        {
+          name: 'plugin-1',
+          commands: [DeprecateAliases],
+          topics: [],
+        },
+      ])
+
+      const help = new TestHelp(config as any)
+      await help.showHelp(['foo:bar:alias'])
+    })
+    .it('show deprecation warning when using alias', ({stdout}) => {
+      expect(stdout.trim()).to.equal(`The "foo:bar:alias" command has been deprecated. Use "foo:bar" instead.
+
+USAGE
+  $ oclif foo:bar:alias
+
+ALIASES
+  $ oclif foo:bar:alias`)
     })
 })
 
