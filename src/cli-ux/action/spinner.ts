@@ -7,6 +7,8 @@ import {errtermwidth} from '../../screen'
 import spinners from './spinners'
 import stripAnsi from 'strip-ansi'
 
+const ansiEscapes = require('ansi-escapes')
+
 function color(s: string): string {
   if (!supportsColor) return s
   const has256 = supportsColor.stdout ? supportsColor.stdout.has256 : (process.env.TERM || '').includes('256')
@@ -82,7 +84,6 @@ export default class SpinnerAction extends ActionBase {
 
   private _reset() {
     if (!this.output) return
-    const ansiEscapes = require('ansi-escapes')
     const lines = this._lines(this.output)
     this._write(this.std, ansiEscapes.cursorLeft + ansiEscapes.cursorUp(lines) + ansiEscapes.eraseDown)
     this.output = undefined
