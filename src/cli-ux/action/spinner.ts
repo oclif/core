@@ -7,6 +7,8 @@ import {errtermwidth} from '../../screen'
 import spinners from './spinners'
 import stripAnsi from 'strip-ansi'
 
+const ansiEscapes = require('ansi-escapes')
+
 function color(s: string): string {
   if (!supportsColor) return s
   const has256 = supportsColor.stdout ? supportsColor.stdout.has256 : (process.env.TERM || '').includes('256')
@@ -34,10 +36,10 @@ export default class SpinnerAction extends ActionBase {
     this._reset()
     if (this.spinner) clearInterval(this.spinner)
     this._render()
-    this.spinner = setInterval(icon =>
-      this._render.bind(this)(icon),
-    process.platform === 'win32' ? 500 : 100,
-    'spinner',
+    this.spinner = setInterval(
+      (icon) => this._render.bind(this)(icon),
+      process.platform === 'win32' ? 500 : 100,
+      'spinner',
     )
     const interval = this.spinner
     interval.unref()
@@ -64,7 +66,7 @@ export default class SpinnerAction extends ActionBase {
   }
 
   private getFrames(opts?: Options) {
-    if (opts?.style) return spinners[process.platform === 'win32' ? 'line' : opts.style].frames
+    if (opts?.style) return spinners[opts.style].frames
 
     return spinners[process.platform === 'win32' ? 'line' : 'dots2'].frames
   }
@@ -82,15 +84,12 @@ export default class SpinnerAction extends ActionBase {
 
   private _reset() {
     if (!this.output) return
-    const ansiEscapes = require('ansi-escapes')
     const lines = this._lines(this.output)
     this._write(this.std, ansiEscapes.cursorLeft + ansiEscapes.cursorUp(lines) + ansiEscapes.eraseDown)
     this.output = undefined
   }
 
   private _lines(s: string): number {
-    return (stripAnsi(s).split('\n') as any[])
-    .map(l => Math.ceil(l.length / errtermwidth))
-    .reduce((c, i) => c + i, 0)
+    return (stripAnsi(s).split('\n') as any[]).map((l) => Math.ceil(l.length / errtermwidth)).reduce((c, i) => c + i, 0)
   }
 }

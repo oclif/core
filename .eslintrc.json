@@ -1,7 +1,8 @@
 {
   "extends": [
     "oclif",
-    "oclif-typescript"
+    "oclif-typescript",
+    "prettier"
   ],
   "rules": {
     "sort-imports": "error",

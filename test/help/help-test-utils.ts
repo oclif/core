@@ -1,14 +1,14 @@
-
 import {Command} from '../../src/command'
 import stripAnsi = require('strip-ansi')
 
-import {Interfaces, toCached} from '../../src'
+import {Interfaces} from '../../src'
 import {CommandHelp, Help} from '../../src/help'
+import {cacheCommand} from '../../src/util/cache-command'
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
     const sections = super.sections()
-    const flagSection = sections.find(section => section.header === 'FLAGS')
+    const flagSection = sections.find((section) => section.header === 'FLAGS')
     if (flagSection) flagSection.header = 'OPTIONS'
     return sections
   }
@@ -47,13 +47,16 @@ export class TestHelp extends Help {
 
 export const commandHelp = (command?: any) => ({
   async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await toCached(command!, {} as any, false)
+    const cached = await cacheCommand(command!, {} as any, false)
     const help = ctx.help.formatCommand(cached)
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
 
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(help)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has commandHelp'
   },
 })
@@ -66,7 +69,10 @@ export const topicsHelp = (topics: Interfaces.Topic[]) => ({
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicsHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicsHelp'
   },
 })
@@ -78,12 +84,18 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
       console.log(topicHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicHelp'
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{name: string, commands: Command.Class[], topics: Interfaces.Topic[]}>) {
+export function monkeyPatchCommands(
+  config: any,
+  plugins: Array<{name: string; commands: Command.Class[]; topics: Interfaces.Topic[]}>,
+) {
   const pluginsMap = new Map()
   for (const plugin of plugins) {
     pluginsMap.set(plugin.name, plugin)

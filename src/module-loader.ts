@@ -4,7 +4,7 @@ import {extname, join, sep} from 'node:path'
 import {Command} from './command'
 import {ModuleLoadError} from './errors'
 import {pathToFileURL} from 'node:url'
-import {tsPath} from './config'
+import {tsPath} from './config/ts-node'
 
 const getPackageType = require('get-package-type')
 
@@ -14,7 +14,7 @@ const getPackageType = require('get-package-type')
 // eslint-disable-next-line camelcase
 const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
 
-const isPlugin = (config: IConfig|IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
+const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
 
 /**
  * Loads and returns a module.
@@ -32,11 +32,11 @@ const isPlugin = (config: IConfig|IPlugin): config is IPlugin => (<IPlugin>confi
  *
  * @returns {Promise<*>} The entire ESM module from dynamic import or CJS module by require.
  */
-export async function load(config: IConfig|IPlugin, modulePath: string): Promise<any> {
+export async function load(config: IConfig | IPlugin, modulePath: string): Promise<any> {
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ({isESM, filePath} = resolvePath(config, modulePath))
+    ;({isESM, filePath} = resolvePath(config, modulePath))
     return isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -64,11 +64,14 @@ export async function load(config: IConfig|IPlugin, modulePath: string): Promise
  * @returns {Promise<{isESM: boolean, module: *, filePath: string}>} An object with the loaded module & data including
  *                                                                   file path and whether the module is ESM.
  */
-export async function loadWithData(config: IConfig|IPlugin, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
+export async function loadWithData(
+  config: IConfig | IPlugin,
+  modulePath: string,
+): Promise<{isESM: boolean; module: any; filePath: string}> {
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ({isESM, filePath} = resolvePath(config, modulePath))
+    ;({isESM, filePath} = resolvePath(config, modulePath))
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
     return {isESM, module, filePath}
   } catch (error: any) {
@@ -97,7 +100,10 @@ export async function loadWithData(config: IConfig|IPlugin, modulePath: string):
  * @returns {Promise<{isESM: boolean, module: *, filePath: string}>} An object with the loaded module & data including
  *                                                                   file path and whether the module is ESM.
  */
-export async function loadWithDataFromManifest(cached: Command.Cached, modulePath: string): Promise<{isESM: boolean; module: any; filePath: string}> {
+export async function loadWithDataFromManifest(
+  cached: Command.Cached,
+  modulePath: string,
+): Promise<{isESM: boolean; module: any; filePath: string}> {
   const {isESM, relativePath, id} = cached
   if (!relativePath) {
     throw new ModuleLoadError(`Cached command ${id} does not have a relative path`)
@@ -123,33 +129,33 @@ export async function loadWithDataFromManifest(cached: Command.Cached, modulePat
 }
 
 /**
-   * For `.js` files uses `getPackageType` to determine if `type` is set to `module` in associated `package.json`. If
-   * the `modulePath` provided ends in `.mjs` it is assumed to be ESM.
-   *
-   * @param {string} filePath - File path to test.
-   *
-   * @returns {boolean} The modulePath is an ES Module.
-   * @see https://www.npmjs.com/package/get-package-type
-   */
+ * For `.js` files uses `getPackageType` to determine if `type` is set to `module` in associated `package.json`. If
+ * the `modulePath` provided ends in `.mjs` it is assumed to be ESM.
+ *
+ * @param {string} filePath - File path to test.
+ *
+ * @returns {boolean} The modulePath is an ES Module.
+ * @see https://www.npmjs.com/package/get-package-type
+ */
 export function isPathModule(filePath: string): boolean {
   const extension = extname(filePath).toLowerCase()
 
   switch (extension) {
-  case '.js':
-  case '.jsx':
-  case '.ts':
-  case '.tsx': {
-    return getPackageType.sync(filePath) === 'module'
-  }
+    case '.js':
+    case '.jsx':
+    case '.ts':
+    case '.tsx': {
+      return getPackageType.sync(filePath) === 'module'
+    }
 
-  case '.mjs':
-  case '.mts': {
-    return true
-  }
+    case '.mjs':
+    case '.mts': {
+      return true
+    }
 
-  default: {
-    return false
-  }
+    default: {
+      return false
+    }
   }
 }
 
@@ -164,7 +170,7 @@ export function isPathModule(filePath: string): boolean {
  *
  * @returns {{isESM: boolean, filePath: string}} An object including file path and whether the module is ESM.
  */
-function resolvePath(config: IConfig|IPlugin, modulePath: string): {isESM: boolean; filePath: string} {
+function resolvePath(config: IConfig | IPlugin, modulePath: string): {isESM: boolean; filePath: string} {
   let isESM: boolean
   let filePath: string | undefined
 
@@ -172,7 +178,8 @@ function resolvePath(config: IConfig|IPlugin, modulePath: string): {isESM: boole
     filePath = require.resolve(modulePath)
     isESM = isPathModule(filePath)
   } catch {
-    filePath = (isPlugin(config) ? tsPath(config.root, modulePath, config) : tsPath(config.root, modulePath)) ?? modulePath
+    filePath =
+      (isPlugin(config) ? tsPath(config.root, modulePath, config) : tsPath(config.root, modulePath)) ?? modulePath
 
     let fileExists = false
     let isDirectory = false
@@ -212,7 +219,7 @@ function resolvePath(config: IConfig|IPlugin, modulePath: string): {isESM: boole
  *
  * @returns {string | null} Modified file path including extension or null if file is not found.
  */
-function findFile(filePath: string) : string | null {
+function findFile(filePath: string): string | null {
   // eslint-disable-next-line camelcase
   for (const extension of s_EXTENSIONS) {
     const testPath = `${filePath}${extension}`

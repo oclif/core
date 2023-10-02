@@ -1,21 +1,22 @@
 import * as ejs from 'ejs'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
-import {Arg, OptionFlag} from '../interfaces/parser'
 import {CLIError, error, exit, warn} from '../errors'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {URL, fileURLToPath} from 'node:url'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {compact, ensureArgObject, getHomeDir, getPlatform, isProd, requireJson} from '../util'
-import {join, sep} from 'node:path'
-// eslint-disable-next-line sort-imports
-import {OCLIF_MARKER_OWNER, Performance} from '../performance'
+import {compact, isProd} from '../util/util'
+import {getHomeDir, getPlatform} from '../util/os'
+import { join, sep } from 'node:path'
+import { OCLIF_MARKER_OWNER, Performance } from '../performance'
 import {Command} from '../command'
 import PluginLoader from './plugin-loader'
+import WSL from 'is-wsl'
 import {format} from 'node:util'
-import {getHelpFlagAdditions} from '../help'
+import {getHelpFlagAdditions} from '../help/util'
 import {loadWithData} from '../module-loader'
+import {requireJson} from '../util/fs'
 import {settings} from '../settings'
 import {stdout} from '../cli-ux/stream'
 
@@ -29,8 +30,6 @@ function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
   return (m && m[1]) || 'stable'
 }
-
-const WSL = require('is-wsl')
 
 function isConfig(o: any): o is Config {
   return o && Boolean(o._base)
@@ -96,7 +95,7 @@ export class Config implements IConfig {
   public version!: string
   public windows!: boolean
   public binAliases?: string[]
-  public nsisCustomization?:string
+  public nsisCustomization?: string
 
   protected warned = false
 
@@ -170,7 +169,7 @@ export class Config implements IConfig {
     this.channel = this.options.channel || channelFromVersion(this.version)
     this.valid = Config._rootPlugin.valid
 
-    this.arch = (arch() === 'ia32' ? 'x86' : arch() as any)
+    this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
     this.platform = WSL ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
@@ -179,7 +178,8 @@ export class Config implements IConfig {
     this.dirname = this.pjson.oclif.dirname || this.name
     this.flexibleTaxonomy = this.pjson.oclif.flexibleTaxonomy || false
     // currently, only colons or spaces are valid separators
-    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator)) this.topicSeparator = this.pjson.oclif.topicSeparator!
+    if (this.pjson.oclif.topicSeparator && [':', ' '].includes(this.pjson.oclif.topicSeparator))
+      this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
@@ -204,17 +204,20 @@ export class Config implements IConfig {
       ...s3.templates,
       target: {
         baseDir: '<%- bin %>',
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        unversioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
         manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
-        ...s3.templates && s3.templates.target,
+        ...(s3.templates && s3.templates.target),
       },
       vanilla: {
         unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
         baseDir: '<%- bin %>',
         manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
-        ...s3.templates && s3.templates.vanilla,
+        ...(s3.templates && s3.templates.vanilla),
       },
     }
 
@@ -278,7 +281,7 @@ export class Config implements IConfig {
         }, ms).unref()
       })
 
-      return Promise.race([promise, timeout]).then(result => {
+      return Promise.race([promise, timeout]).then((result) => {
         clearTimeout(id)
         return result
       })
@@ -288,7 +291,7 @@ export class Config implements IConfig {
       successes: [],
       failures: [],
     } as Hook.Result<Hooks[T]['return']>
-    const promises = [...this.plugins.values()].map(async p => {
+    const promises = [...this.plugins.values()].map(async (p) => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
@@ -299,7 +302,7 @@ export class Config implements IConfig {
         log(message?: any, ...args: any[]) {
           stdout.write(format(message, ...args) + '\n')
         },
-        error(message, options: { code?: string; exit?: number } = {}) {
+        error(message, options: {code?: string; exit?: number} = {}) {
           error(message, options)
         },
         warn(message: string) {
@@ -317,8 +320,8 @@ export class Config implements IConfig {
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout
-            ? await withTimeout(timeout, search(module).call(context, {...opts as any, config: this}))
-            : await search(module).call(context, {...opts as any, config: this})
+            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this}))
+            : await search(module).call(context, {...(opts as any), config: this})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
@@ -349,15 +352,20 @@ export class Config implements IConfig {
     return final
   }
 
-  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand: Command.Loadable | null = null): Promise<T> {
+  public async runCommand<T = unknown>(
+    id: string,
+    argv: string[] = [],
+    cachedCommand: Command.Loadable | null = null,
+  ): Promise<T> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
       const matches = this.flexibleTaxonomy ? this.findMatches(id, argv) : []
-      const hookResult = this.flexibleTaxonomy && matches.length > 0
-        ? await this.runHook('command_incomplete', {id, argv, matches})
-        : await this.runHook('command_not_found', {id, argv})
+      const hookResult =
+        this.flexibleTaxonomy && matches.length > 0
+          ? await this.runHook('command_incomplete', {id, argv, matches})
+          : await this.runHook('command_not_found', {id, argv})
 
       if (hookResult.successes[0]) return hookResult.successes[0].result as T
       if (hookResult.failures[0]) throw hookResult.failures[0].error
@@ -399,11 +407,11 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVar(k: string): string | undefined {
-    return process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
+    return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
   }
 
   public scopedEnvVarTrue(k: string): boolean {
-    const v = process.env[this.scopedEnvVarKeys(k).find(k => process.env[k]) as string]
+    const v = process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
     return v === '1' || v === 'true'
   }
 
@@ -414,9 +422,9 @@ export class Config implements IConfig {
    */
   public scopedEnvVarKey(k: string): string {
     return [this.bin, k]
-    .map(p => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
-    .join('_')
-    .toUpperCase()
+      .map((p) => p.replaceAll('@', '').replaceAll(/[/-]/g, '_'))
+      .join('_')
+      .toUpperCase()
   }
 
   /**
@@ -425,26 +433,27 @@ export class Config implements IConfig {
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
-    return [this.bin, ...this.binAliases ?? []].filter(Boolean).map(alias =>
-      [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
+    return [this.bin, ...(this.binAliases ?? [])]
+      .filter(Boolean)
+      .map((alias) => [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
-  public findCommand(id: string, opts: { must: true }): Command.Loadable
+  public findCommand(id: string, opts: {must: true}): Command.Loadable
 
-  public findCommand(id: string, opts?: { must: boolean }): Command.Loadable | undefined
+  public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
-  public findCommand(id: string, opts: { must?: boolean } = {}): Command.Loadable | undefined {
+  public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
     if (opts.must && !command) error(`command ${lookupId} not found`)
     return command
   }
 
-  public findTopic(id: string, opts: { must: true }): Topic
+  public findTopic(id: string, opts: {must: true}): Topic
 
-  public findTopic(id: string, opts?: { must: boolean }): Topic | undefined
+  public findTopic(id: string, opts?: {must: boolean}): Topic | undefined
 
-  public findTopic(name: string, opts: { must?: boolean } = {}): Topic | undefined {
+  public findTopic(name: string, opts: {must?: boolean} = {}): Topic | undefined {
     const lookupId = this.getTopicLookupId(name)
     const topic = this._topics.get(lookupId)
     if (topic) return topic
@@ -465,14 +474,18 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public findMatches(partialCmdId: string, argv: string[]): Command.Loadable[] {
-    const flags = argv.filter(arg => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-')).map(a => a.replaceAll('-', ''))
-    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map(k => this._commands.get(k)!)
+    const flags = argv
+      .filter((arg) => !getHelpFlagAdditions(this).includes(arg) && arg.startsWith('-'))
+      .map((a) => a.replaceAll('-', ''))
+    const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map((k) => this._commands.get(k)!)
 
-    const matches = possibleMatches.filter(command => {
-      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) => def.char ? [def.char, flag] : [flag]) as string[]
+    const matches = possibleMatches.filter((command) => {
+      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) =>
+        def.char ? [def.char, flag] : [flag],
+      ) as string[]
 
       // A command is a match if the provided flags belong to the full command
-      return flags.every(f => cmdFlags.includes(f))
+      return flags.every((f) => cmdFlags.includes(f))
     })
 
     return matches
@@ -500,7 +513,7 @@ export class Config implements IConfig {
    * @returns string[]
    */
   public getAllCommandIDs(): string[] {
-    return this.getAllCommands().map(c => c.id)
+    return this.getAllCommands().map((c) => c.id)
   }
 
   public get commands(): Command.Loadable[] {
@@ -509,7 +522,7 @@ export class Config implements IConfig {
 
   public get commandIDs(): string[] {
     if (this._commandIDs) return this._commandIDs
-    this._commandIDs = this.commands.map(c => c.id)
+    this._commandIDs = this.commands.map((c) => c.id)
     return this._commandIDs
   }
 
@@ -523,18 +536,24 @@ export class Config implements IConfig {
       cliVersion,
       architecture,
       nodeVersion,
-      pluginVersions: Object.fromEntries([...this.plugins.values()].map(p => [p.name, {version: p.version, type: p.type, root: p.root}])),
+      pluginVersions: Object.fromEntries(
+        [...this.plugins.values()].map((p) => [p.name, {version: p.version, type: p.type, root: p.root}]),
+      ),
       osVersion: `${type()} ${release()}`,
       shell: this.shell,
       rootPath: this.root,
     }
   }
 
-  public s3Key(type: keyof PJSON.S3.Templates, ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options, options: IConfig.s3Key.Options = {}): string {
+  public s3Key(
+    type: keyof PJSON.S3.Templates,
+    ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options,
+    options: IConfig.s3Key.Options = {},
+  ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
     const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
-    return ejs.render(template, {...this as any, ...options})
+    return ejs.render(template, {...(this as any), ...options})
   }
 
   public s3Url(key: string): string {
@@ -550,9 +569,10 @@ export class Config implements IConfig {
   }
 
   protected dir(category: 'cache' | 'data' | 'config'): string {
-    const base = process.env[`XDG_${category.toUpperCase()}_HOME`]
-      || (this.windows && process.env.LOCALAPPDATA)
-      || join(this.home, category === 'data' ? '.local/share' : '.' + category)
+    const base =
+      process.env[`XDG_${category.toUpperCase()}_HOME`] ||
+      (this.windows && process.env.LOCALAPPDATA) ||
+      join(this.home, category === 'data' ? '.local/share' : '.' + category)
     return join(base, this.dirname)
   }
 
@@ -561,7 +581,7 @@ export class Config implements IConfig {
   }
 
   protected windowsHomedriveHome(): string | undefined {
-    return (process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!))
+    return process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!)
   }
 
   protected windowsUserprofileHome(): string | undefined {
@@ -597,7 +617,7 @@ export class Config implements IConfig {
     return 0
   }
 
-  protected warn(err: string | Error | { name: string; detail: string }, scope?: string): void {
+  protected warn(err: string | Error | {name: string; detail: string}, scope?: string): void {
     if (this.warned) return
 
     if (typeof err === 'string') {
@@ -641,7 +661,10 @@ export class Config implements IConfig {
 
   private isJitPluginCommand(c: Command.Loadable): boolean {
     // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
-    return Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') && Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
+    return (
+      Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') &&
+      Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
+    )
   }
 
   private getCmdLookupId(id: string): string {
@@ -669,9 +692,10 @@ export class Config implements IConfig {
 
       // v3 moved command id permutations to the manifest, but some plugins may not have
       // the new manifest yet. For those, we need to calculate the permutations here.
-      const permutations = this.flexibleTaxonomy && command.permutations === undefined
-        ? getCommandIdPermutations(command.id)
-        : command.permutations ?? [command.id]
+      const permutations =
+        this.flexibleTaxonomy && command.permutations === undefined
+          ? getCommandIdPermutations(command.id)
+          : command.permutations ?? [command.id]
       // set every permutation
       for (const permutation of permutations) {
         this.commandPermutations.add(permutation, command.id)
@@ -690,9 +714,10 @@ export class Config implements IConfig {
 
         // v3 moved command alias permutations to the manifest, but some plugins may not have
         // the new manifest yet. For those, we need to calculate the permutations here.
-        const aliasPermutations = this.flexibleTaxonomy && command.aliasPermutations === undefined
-          ? getCommandIdPermutations(alias)
-          : command.permutations ?? [alias]
+        const aliasPermutations =
+          this.flexibleTaxonomy && command.aliasPermutations === undefined
+            ? getCommandIdPermutations(alias)
+            : command.permutations ?? [alias]
         // set every permutation
         for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
@@ -722,7 +747,7 @@ export class Config implements IConfig {
     }
 
     // Add missing topics for displaying help when partial commands are entered.
-    for (const c of plugin.commands.filter(c => !c.hidden)) {
+    for (const c of plugin.commands.filter((c) => !c.hidden)) {
       const parts = c.id.split(':')
       while (parts.length > 0) {
         const name = parts.join(':')
@@ -796,163 +821,18 @@ export class Config implements IConfig {
   }
 
   /**
-    * Insert legacy plugins
-    *
-    * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
-    * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
-    *
-    * @param plugins array of oclif-compatible plugins
-    * @returns void
-    */
+   * Insert legacy plugins
+   *
+   * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
+   * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
+   *
+   * @param plugins array of oclif-compatible plugins
+   * @returns void
+   */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
       this.plugins.set(plugin.name, plugin)
       this.loadCommands(plugin)
     }
   }
-}
-
-// when no manifest exists, the default is calculated.  This may throw, so we need to catch it
-const defaultFlagToCached = async (flag: OptionFlag<any>, respectNoCacheDefault: boolean) => {
-  if (respectNoCacheDefault && flag.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof flag.defaultHelp === 'function') {
-    try {
-      return await flag.defaultHelp({options: flag, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof flag.default === 'function') {
-    try {
-      return await flag.default({options: flag, flags: {}})
-    } catch {}
-  } else {
-    return flag.default
-  }
-}
-
-const defaultArgToCached = async (arg: Arg<any>, respectNoCacheDefault: boolean): Promise<any> => {
-  if (respectNoCacheDefault && arg.noCacheDefault) return
-  // Prefer the defaultHelp function (returns a friendly string for complex types)
-  if (typeof arg.defaultHelp === 'function') {
-    try {
-      return await arg.defaultHelp({options: arg, flags: {}})
-    } catch {
-      return
-    }
-  }
-
-  // if not specified, try the default function
-  if (typeof arg.default === 'function') {
-    try {
-      return await arg.default({options: arg, flags: {}})
-    } catch {}
-  } else {
-    return arg.default
-  }
-}
-
-export async function toCached(c: Command.Class, plugin?: IPlugin, respectNoCacheDefault = false): Promise<Command.Cached> {
-  const flags = {} as {[k: string]: Command.Flag.Cached}
-
-  for (const [name, flag] of Object.entries(c.flags || {})) {
-    if (flag.type === 'boolean') {
-      flags[name] = {
-        name,
-        type: flag.type,
-        char: flag.char,
-        summary: flag.summary,
-        description: flag.description,
-        hidden: flag.hidden,
-        required: flag.required,
-        helpLabel: flag.helpLabel,
-        helpGroup: flag.helpGroup,
-        allowNo: flag.allowNo,
-        dependsOn: flag.dependsOn,
-        relationships: flag.relationships,
-        exclusive: flag.exclusive,
-        deprecated: flag.deprecated,
-        deprecateAliases: c.deprecateAliases,
-        aliases: flag.aliases,
-        charAliases: flag.charAliases,
-        delimiter: flag.delimiter,
-        noCacheDefault: flag.noCacheDefault,
-      }
-    } else {
-      flags[name] = {
-        name,
-        type: flag.type,
-        char: flag.char,
-        summary: flag.summary,
-        description: flag.description,
-        hidden: flag.hidden,
-        required: flag.required,
-        helpLabel: flag.helpLabel,
-        helpValue: flag.helpValue,
-        helpGroup: flag.helpGroup,
-        multiple: flag.multiple,
-        options: flag.options,
-        dependsOn: flag.dependsOn,
-        relationships: flag.relationships,
-        exclusive: flag.exclusive,
-        default: await defaultFlagToCached(flag, respectNoCacheDefault),
-        deprecated: flag.deprecated,
-        deprecateAliases: c.deprecateAliases,
-        aliases: flag.aliases,
-        charAliases: flag.charAliases,
-        delimiter: flag.delimiter,
-        noCacheDefault: flag.noCacheDefault,
-      }
-      // a command-level placeholder in the manifest so that oclif knows it should regenerate the command during help-time
-      if (typeof flag.defaultHelp === 'function') {
-        c.hasDynamicHelp = true
-      }
-    }
-  }
-
-  const args = {} as {[k: string]: Command.Arg.Cached}
-  for (const [name, arg] of Object.entries(ensureArgObject(c.args))) {
-    args[name] = {
-      name,
-      description: arg.description,
-      required: arg.required,
-      options: arg.options,
-      default: await defaultArgToCached(arg, respectNoCacheDefault),
-      hidden: arg.hidden,
-      noCacheDefault: arg.noCacheDefault,
-    }
-  }
-
-  const stdProperties = {
-    id: c.id,
-    summary: c.summary,
-    description: c.description,
-    strict: c.strict,
-    usage: c.usage,
-    pluginName: plugin && plugin.name,
-    pluginAlias: plugin && plugin.alias,
-    pluginType: plugin && plugin.type,
-    hidden: c.hidden,
-    state: c.state,
-    aliases: c.aliases || [],
-    examples: c.examples || (c as any).example,
-    deprecationOptions: c.deprecationOptions,
-    deprecateAliases: c.deprecateAliases,
-    flags,
-    args,
-  }
-
-  // do not include these properties in manifest
-  const ignoreCommandProperties = ['plugin', '_flags', '_enableJsonFlag', '_globalFlags', '_baseFlags']
-  const stdKeys = Object.keys(stdProperties)
-  const keysToAdd = Object.keys(c).filter(property => ![...stdKeys, ...ignoreCommandProperties].includes(property))
-  const additionalProperties: Record<string, unknown> = {}
-  for (const key of keysToAdd) {
-    additionalProperties[key] = (c as any)[key]
-  }
-
-  return {...stdProperties, ...additionalProperties}
 }

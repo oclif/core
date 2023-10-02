@@ -66,7 +66,8 @@ describe('oclif plugins', () => {
         expect(help.stdout).to.include('EXAMPLES\n  $ oclif-hello-world plugins')
       })
       it('should show commands', () => {
-        const regex = /COMMANDS\n\s\splugins:inspect|\s\splugins:install|\s\splugins:link|\s\splugins:uninstall|\s\splugins:update/
+        const regex =
+          /COMMANDS\n\s\splugins:inspect|\s\splugins:install|\s\splugins:link|\s\splugins:uninstall|\s\splugins:update/
         expect(regex.test(help.stdout!)).to.be.true
       })
     })
@@ -173,8 +174,8 @@ describe('oclif plugins', () => {
 
     it('should show commands in json', async () => {
       commands = await executor.executeCommand('commands --json')
-      const json = JSON.parse(commands.stdout!) as Array<{ id: string }>
-      const commandIds = json.map(j => j.id)
+      const json = JSON.parse(commands.stdout!) as Array<{id: string}>
+      const commandIds = json.map((j) => j.id)
       expect(commandIds).to.include('commands')
       expect(commandIds).to.include('help')
       expect(commandIds).to.include('plugins')
@@ -211,7 +212,9 @@ describe('oclif plugins', () => {
       })
 
       it('should install the plugin', async () => {
-        const result = await executor.executeCommand('plugins:install https://github.com/oclif/plugin-warn-if-update-available')
+        const result = await executor.executeCommand(
+          'plugins:install https://github.com/oclif/plugin-warn-if-update-available',
+        )
         expect(result.code).to.equal(0)
 
         const pluginsResult = await executor.executeCommand('plugins --core')
@@ -222,7 +225,9 @@ describe('oclif plugins', () => {
 
     describe('forcefully installing a plugin', () => {
       it('should install the plugin', async () => {
-        const result = await executor.executeCommand('plugins:install @oclif/plugin-warn-if-update-available --force 2>&1')
+        const result = await executor.executeCommand(
+          'plugins:install @oclif/plugin-warn-if-update-available --force 2>&1',
+        )
         expect(result.code).to.equal(0)
         expect(result.stdout).to.include('@oclif/plugin-warn-if-update-available@latest... installed v')
 

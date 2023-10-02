@@ -1,8 +1,8 @@
-
 import {Arg, ArgDefinition} from './interfaces/parser'
-import {dirExists, fileExists, isNotFalsy} from './util'
+import {dirExists, fileExists} from './util/fs'
 import {Command} from './command'
 import {URL} from 'node:url'
+import {isNotFalsy} from './util/util'
 
 /**
  * Create a custom arg.
@@ -33,13 +33,12 @@ export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, 
 }
 
 export const boolean = custom<boolean>({
-  parse: async b => Boolean(b) && isNotFalsy(b),
+  parse: async (b) => Boolean(b) && isNotFalsy(b),
 })
 
-export const integer = custom<number, {min?: number; max?: number;}>({
+export const integer = custom<number, {min?: number; max?: number}>({
   async parse(input, _, opts) {
-    if (!/^-?\d+$/.test(input))
-      throw new Error(`Expected an integer but received: ${input}`)
+    if (!/^-?\d+$/.test(input)) throw new Error(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
     if (opts.min !== undefined && num < opts.min)
       throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)

@@ -15,14 +15,18 @@ const data = {
     {
       path: './test/module-loader/fixtures/esm/errors/bad_path.js',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] import() failed to load ${resolve('./test/module-loader/fixtures/esm/errors/bad_path.js')}`,
+      message: `[MODULE_NOT_FOUND] import() failed to load ${resolve(
+        './test/module-loader/fixtures/esm/errors/bad_path.js',
+      )}`,
       isESM: true,
     },
     // Non-existent path / no extension
     {
       path: './test/module-loader/fixtures/esm/errors/bad_path',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/esm/errors/bad_path')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve(
+        './test/module-loader/fixtures/esm/errors/bad_path',
+      )}`,
       isESM: true,
     },
 
@@ -30,14 +34,18 @@ const data = {
     {
       path: './test/module-loader/fixtures/cjs/errors/bad_path.cjs',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/cjs/errors/bad_path.cjs')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve(
+        './test/module-loader/fixtures/cjs/errors/bad_path.cjs',
+      )}`,
       isESM: false,
     },
     // Non-existent path / no extension
     {
       path: './test/module-loader/fixtures/cjs/errors/bad_path',
       type: ModuleLoadError,
-      message: `[MODULE_NOT_FOUND] require failed to load ${resolve('./test/module-loader/fixtures/cjs/errors/bad_path')}`,
+      message: `[MODULE_NOT_FOUND] require failed to load ${resolve(
+        './test/module-loader/fixtures/cjs/errors/bad_path',
+      )}`,
       isESM: false,
     },
 
@@ -78,7 +86,7 @@ const data = {
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
       filePath: `${resolve('./test/module-loader/fixtures/esm/success.js')}`,
       isESM: true,
-      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+      isESMOverride: false, // With no extension `ModuleLoader.isPathModule` will return CJS
     },
     // No extension / ESM source file loaded due to mjs file type.
     {
@@ -86,7 +94,7 @@ const data = {
       defaultModule: '{"default":"SUCCESS_MJS","namedExport":"SUCCESS_NAMED_MJS"}',
       filePath: `${resolve('./test/module-loader/fixtures/esm/empty-package/success-ext.mjs')}`,
       isESM: true,
-      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+      isESMOverride: false, // With no extension `ModuleLoader.isPathModule` will return CJS
     },
 
     // CJS source loaded from package.json in './test/module-loader/fixtures/cjs/' which doesn't have "type": "module".
@@ -124,7 +132,7 @@ const data = {
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
       filePath: `${resolve('./test/module-loader/fixtures/esm/index/js/index.js')}`,
       isESM: true,
-      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+      isESMOverride: false, // With no extension `ModuleLoader.isPathModule` will return CJS
     },
     // Directory / ESM source file with .mjs extension. Loads package.json in './test/module-loader/fixtures/esm/' for getPackageType check.
     {
@@ -132,7 +140,7 @@ const data = {
       defaultModule: '{"default":"SUCCESS","namedExport":"SUCCESS_NAMED"}',
       filePath: `${resolve('./test/module-loader/fixtures/esm/index/mjs/index.mjs')}`,
       isESM: true,
-      isESMOverride: false,  // With no extension `ModuleLoader.isPathModule` will return CJS
+      isESMOverride: false, // With no extension `ModuleLoader.isPathModule` will return CJS
     },
 
     // CJS NPM module; just check that it loads as CJS.
@@ -187,7 +195,7 @@ describe('ModuleLoader:', () => {
 
   describe('isPathModule:', () => {
     for (const module of data.modules) {
-      it(`${module.path}`,  () => {
+      it(`${module.path}`, () => {
         const result = isPathModule(module.path)
 
         // For extensionless ESM data `isPathModule` will return false
@@ -208,8 +216,9 @@ describe('ModuleLoader Failures:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        await expect(load(
-          config, error.path)).to.eventually.be.rejectedWith(error.message).and.be.an.instanceOf(error.type)
+        await expect(load(config, error.path))
+          .to.eventually.be.rejectedWith(error.message)
+          .and.be.an.instanceOf(error.type)
       })
     }
   })
@@ -220,8 +229,9 @@ describe('ModuleLoader Failures:', () => {
         const config = new Config({root: process.cwd()})
         await config.load()
 
-        await expect(loadWithData(
-          config, error.path)).to.eventually.be.rejectedWith(error.message).and.be.an.instanceOf(error.type)
+        await expect(loadWithData(config, error.path))
+          .to.eventually.be.rejectedWith(error.message)
+          .and.be.an.instanceOf(error.type)
       })
     }
   })

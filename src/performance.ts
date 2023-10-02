@@ -3,12 +3,12 @@ import {settings} from './settings'
 
 type Details = Record<string, string | boolean | number | string[]>
 type PerfResult = {
-  name: string;
+  name: string
   duration: number
   details: Details
-  module: string;
-  method: string | undefined;
-  scope: string | undefined;
+  module: string
+  method: string | undefined
+  scope: string | undefined
 }
 
 type PerfHighlights = {
@@ -122,12 +122,12 @@ export class Performance {
     const markers = [...Performance.markers.values()]
     if (markers.length === 0) return
 
-    for (const marker of markers.filter(m => !m.stopped)) {
+    for (const marker of markers.filter((m) => !m.stopped)) {
       marker.stop()
     }
 
-    return new Promise(resolve => {
-      const perfObserver = new PerformanceObserver(items => {
+    return new Promise((resolve) => {
+      const perfObserver = new PerformanceObserver((items) => {
         for (const entry of items.getEntries()) {
           const marker = Performance.markers.get(entry.name)
           if (marker) {
@@ -167,8 +167,10 @@ export class Performance {
             acc[event].total = perfResult.duration
           }
 
-          return acc
-        }, {} as Record<string, Record<string, number>>)
+              return acc
+            },
+            {} as Record<string, Record<string, number>>,
+          )
 
         const pluginLoadTimeByType = Object.fromEntries(oclifResults
         .filter(({name}) => name.startsWith('config.loadPlugins#'))

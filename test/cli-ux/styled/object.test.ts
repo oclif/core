@@ -3,9 +3,7 @@ import {expect, fancy} from 'fancy-test'
 import {ux} from '../../../src/cli-ux'
 
 describe('styled/object', () => {
-  fancy
-  .stdout()
-  .end('shows a table', output => {
+  fancy.stdout().end('shows a table', (output) => {
     ux.styledObject([
       {foo: 1, bar: 1},
       {foo: 2, bar: 2},

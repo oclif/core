@@ -4,10 +4,11 @@ import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
 let timer: any
-const wait = (ms: number) => new Promise(resolve => {
-  if (timer) timer.unref()
-  timer = setTimeout(() => resolve(null), ms)
-})
+const wait = (ms: number) =>
+  new Promise((resolve) => {
+    if (timer) timer.unref()
+    timer = setTimeout(() => resolve(null), ms)
+  })
 
 function chomp(s: string): string {
   if (s.endsWith('\n')) return s.replace(/\n$/, '')
@@ -23,7 +24,7 @@ export class Logger {
 
   log(msg: string): void {
     msg = stripAnsi(chomp(msg))
-    const lines = msg.split('\n').map(l => `${timestamp()} ${l}`.trimEnd())
+    const lines = msg.split('\n').map((l) => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
     this.flush(50).catch(console.error)
   }

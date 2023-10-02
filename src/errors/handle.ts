@@ -2,7 +2,7 @@
 /* eslint-disable unicorn/no-process-exit */
 import {OclifError, PrettyPrintableError} from '../interfaces'
 import {CLIError} from './errors/cli'
-import {ExitError} from '.'
+import {ExitError} from './errors/exit'
 import clean from 'clean-stack'
 import {config} from './config'
 import prettyPrint from './errors/pretty-print'
@@ -40,9 +40,10 @@ export async function handle(err: ErrorToHandle): Promise<void> {
         config.errorLogger.log(stack)
       }
 
-      await config.errorLogger.flush()
-      .then(() => Exit.exit(exitCode))
-      .catch(console.error)
+      await config.errorLogger
+        .flush()
+        .then(() => Exit.exit(exitCode))
+        .catch(console.error)
     } else Exit.exit(exitCode)
   } catch (error: any) {
     console.error(err.stack)

@@ -14,7 +14,7 @@ describe('flagUsage', () => {
       flags.string({name: 'foo', char: 'f', helpLabel: '-f'}),
       flags.boolean({char: 'g', description: 'goo'}),
     ]
-    expect(flagUsages(f).map(([name, desc]) => ([name, desc && stripAnsi(desc)]))).to.deep.equal([
+    expect(flagUsages(f).map(([name, desc]) => [name, desc && stripAnsi(desc)])).to.deep.equal([
       [' -b, --bar BAR', 'bar'],
       [' -f, --foo FOO', 'desc'],
       [' -f FOO', undefined],

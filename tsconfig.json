@@ -10,7 +10,7 @@
       "./src"
     ],
     "strict": true,
-    "target": "ES2021",
+    "target": "ES2022",
     "allowSyntheticDefaultImports": true,
     "noErrorTruncation": true,
     "moduleResolution": "Node16"

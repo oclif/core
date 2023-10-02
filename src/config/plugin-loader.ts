@@ -1,26 +1,26 @@
 import * as Plugin from './plugin'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
-import {isProd, readJson} from '../util'
-// eslint-disable-next-line sort-imports
-import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {Debug} from './util'
 import {PJSON} from '../interfaces'
+import {OCLIF_MARKER_OWNER, Performance} from '../performance'
+import {isProd} from '../util/util'
 import {join} from 'node:path'
+import {readJson} from '../util/fs'
 
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
 type PluginLoaderOptions = {
-  root: string;
-  plugins?: IPlugin[] | PluginsMap;
+  root: string
+  plugins?: IPlugin[] | PluginsMap
 }
 
 type LoadOpts = {
-  devPlugins?: boolean;
-  userPlugins?: boolean;
-  dataDir: string;
-  rootPlugin: IPlugin;
-  force?: boolean;
+  devPlugins?: boolean
+  userPlugins?: boolean
+  dataDir: string
+  rootPlugin: IPlugin
+  force?: boolean
 }
 
 type PluginsMap = Map<string, IPlugin>
@@ -33,7 +33,7 @@ export default class PluginLoader {
   constructor(public options: PluginLoaderOptions) {
     if (options.plugins) {
       this.pluginsProvided = true
-      this.plugins = Array.isArray(options.plugins) ? new Map(options.plugins.map(p => [p.name, p])) : options.plugins
+      this.plugins = Array.isArray(options.plugins) ? new Map(options.plugins.map((p) => [p.name, p])) : options.plugins
     }
   }
 
@@ -41,10 +41,10 @@ export default class PluginLoader {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {
       const plugins = [...this.plugins.values()]
-      rootPlugin = plugins.find(p => p.root === this.options.root) ?? plugins[0]
+      rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin.Plugin({root: this.options.root})
+      rootPlugin = new Plugin.Plugin({root: this.options.root, isRoot: true})
       await rootPlugin.load()
       marker?.addDetails({
         hasManifest: rootPlugin.hasManifest ?? false,
@@ -98,61 +98,76 @@ export default class PluginLoader {
         const pjson = await readJson<PJSON>(userPJSONPath)
         if (!pjson.oclif) pjson.oclif = {schema: 1}
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
-        await this.loadPlugins(userPJSONPath, 'user', pjson.oclif.plugins.filter((p: any) => p.type === 'user'))
-        await this.loadPlugins(userPJSONPath, 'link', pjson.oclif.plugins.filter((p: any) => p.type === 'link'))
+        await this.loadPlugins(
+          userPJSONPath,
+          'user',
+          pjson.oclif.plugins.filter((p: any) => p.type === 'user'),
+        )
+        await this.loadPlugins(
+          userPJSONPath,
+          'link',
+          pjson.oclif.plugins.filter((p: any) => p.type === 'link'),
+        )
       } catch (error: any) {
         if (error.code !== 'ENOENT') process.emitWarning(error)
       }
     }
   }
 
-  private async loadPlugins(root: string, type: string, plugins: (string | { root?: string; name?: string; tag?: string })[], parent?: Plugin.Plugin): Promise<void> {
+  private async loadPlugins(
+    root: string,
+    type: string,
+    plugins: (string | {root?: string; name?: string; tag?: string})[],
+    parent?: Plugin.Plugin,
+  ): Promise<void> {
     if (!plugins || plugins.length === 0) return
     const mark = Performance.mark(OCLIF_MARKER_OWNER, `config.loadPlugins#${type}`)
     debug('loading plugins', plugins)
-    await Promise.all((plugins || []).map(async plugin => {
-      try {
-        const name = typeof plugin === 'string' ? plugin : plugin.name!
-        const opts: Options = {
-          name,
-          type,
-          root,
-        }
-        if (typeof plugin !== 'string') {
-          opts.tag = plugin.tag || opts.tag
-          opts.root = plugin.root || opts.root
-        }
+    await Promise.all(
+      (plugins || []).map(async (plugin) => {
+        try {
+          const name = typeof plugin === 'string' ? plugin : plugin.name!
+          const opts: Options = {
+            name,
+            type,
+            root,
+          }
+          if (typeof plugin !== 'string') {
+            opts.tag = plugin.tag || opts.tag
+            opts.root = plugin.root || opts.root
+          }
 
-        if (parent) {
-          opts.parent = parent
-        }
+          if (parent) {
+            opts.parent = parent
+          }
 
-        if (this.plugins.has(name)) return
+          if (this.plugins.has(name)) return
         const pluginMarker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.load#${name}`)
-        const instance = new Plugin.Plugin(opts)
-        await instance.load()
-        pluginMarker?.addDetails({
-          hasManifest: instance.hasManifest,
-          commandCount: instance.commands.length,
-          topicCount: instance.topics.length,
-          type: instance.type,
-          usesMain: Boolean(instance.pjson.main),
-          name: instance.name,
-        })
-        pluginMarker?.stop()
+          const instance = new Plugin.Plugin(opts)
+          await instance.load()
+          pluginMarker?.addDetails({
+            hasManifest: instance.hasManifest,
+            commandCount: instance.commands.length,
+            topicCount: instance.topics.length,
+            type: instance.type,
+            usesMain: Boolean(instance.pjson.main),
+            name: instance.name,
+          })
+          pluginMarker?.stop()
 
-        this.plugins.set(instance.name, instance)
-        if (parent) {
-          instance.parent = parent
-          if (!parent.children) parent.children = []
-          parent.children.push(instance)
+          this.plugins.set(instance.name, instance)
+          if (parent) {
+            instance.parent = parent
+            if (!parent.children) parent.children = []
+            parent.children.push(instance)
+          }
+
+          await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
+        } catch (error: any) {
+          this.errors.push(error)
         }
-
-        await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
-      } catch (error: any) {
-        this.errors.push(error)
-      }
-    }))
+      }),
+    )
 
     mark?.addDetails({pluginCount: plugins.length})
     mark?.stop()

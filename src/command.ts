@@ -1,4 +1,3 @@
-
 import * as Errors from './errors'
 import * as Parser from './parser'
 import {
@@ -17,7 +16,6 @@ import {
 } from './interfaces/parser'
 import {format, inspect} from 'node:util'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
-import {requireJson, uniq} from './util'
 import {stderr, stdout} from './cli-ux/stream'
 import {CommandError} from './interfaces/errors'
 import {Config} from './config'
@@ -25,9 +23,11 @@ import {LoadOptions} from './interfaces/config'
 import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
 import {PrettyPrintableError} from './errors'
-import {boolean} from './flags'
+import {aggregateFlags} from './util/aggregate-flags'
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
+import {requireJson} from './util/fs'
+import {uniq} from './util/util'
 import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
@@ -37,17 +37,9 @@ const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
  * this occurs when stdout closes such as when piping to head
  */
 stdout.on('error', (err: any) => {
-  if (err && err.code === 'EPIPE')
-    return
+  if (err && err.code === 'EPIPE') return
   throw err
 })
-
-const jsonFlag = {
-  json: boolean({
-    description: 'Format output as json.',
-    helpGroup: 'GLOBAL',
-  }),
-}
 
 /**
  * An abstract class which acts as the base for each command
@@ -126,37 +118,7 @@ export abstract class Command {
 
   public static hasDynamicHelp = false
 
-  protected static '_--' = false
-
-  protected static _enableJsonFlag = false
-
-  public static get enableJsonFlag(): boolean {
-    return this._enableJsonFlag
-  }
-
-  public static set enableJsonFlag(value: boolean) {
-    this._enableJsonFlag = value
-    if (value === true) {
-      this.baseFlags = jsonFlag
-    } else {
-      delete this.baseFlags?.json
-      this.flags = {} // force the flags setter to run
-      delete this.flags?.json
-    }
-  }
-
-  public static get '--'(): boolean {
-    return Command['_--']
-  }
-
-  public static set '--'(value: boolean) {
-    Command['_--'] = value
-  }
-
-  public get passThroughEnabled(): boolean {
-    return Command['_--']
-  }
-
+  public static enableJsonFlag = false
   /**
    * instantiate and run the command
    *
@@ -165,7 +127,11 @@ export abstract class Command {
    * @param {LoadOptions} opts options
    * @returns {Promise<unknown>} result
    */
-  public static async run<T extends Command>(this: new(argv: string[], config: Config) => T, argv?: string[], opts?: LoadOptions): Promise<ReturnType<T['run']>> {
+  public static async run<T extends Command>(
+    this: new (argv: string[], config: Config) => T,
+    argv?: string[],
+    opts?: LoadOptions,
+  ): Promise<ReturnType<T['run']>> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -184,35 +150,19 @@ export abstract class Command {
     return cmd._run<ReturnType<T['run']>>()
   }
 
-  protected static _baseFlags: FlagInput
-
-  static get baseFlags(): FlagInput {
-    return this._baseFlags
-  }
-
-  static set baseFlags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._baseFlags = Object.assign({}, this.baseFlags, flags)
-    this.flags = {} // force the flags setter to run
-  }
+  public static baseFlags: FlagInput
 
   /** A hash of flags for the command */
-  protected static _flags: FlagInput
-
-  public static get flags(): FlagInput {
-    return this._flags
-  }
-
-  public static set flags(flags: FlagInput) {
-    // eslint-disable-next-line prefer-object-spread
-    this._flags = Object.assign({}, this._flags ?? {}, this.baseFlags, flags)
-  }
+  public static flags: FlagInput
 
   public id: string | undefined
 
   protected debug: (...args: any[]) => void
 
-  public constructor(public argv: string[], public config: Config) {
+  public constructor(
+    public argv: string[],
+    public config: Config,
+  ) {
     this.id = this.ctor.id
     try {
       this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
@@ -260,7 +210,10 @@ export abstract class Command {
 
   public error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
 
-  public error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
+  public error(
+    input: string | Error,
+    options: {code?: string; exit?: number | false} & PrettyPrintableError = {},
+  ): void {
     return Errors.error(input, options as any)
   }
 
@@ -284,16 +237,19 @@ export abstract class Command {
    * @returns {boolean} true if the command supports json and the --json flag is present
    */
   public jsonEnabled(): boolean {
-    // if the command doesn't support json, return false
+    // If the command doesn't support json, return false
     if (!this.ctor.enableJsonFlag) return false
-    // if the command parameter pass through is enabled, return true if the --json flag is before the '--' separator
-    if (this.passThroughEnabled) {
-      const ptIndex = this.argv.indexOf('--')
-      const jsonIndex = this.argv.indexOf('--json')
-      return jsonIndex > -1 && (ptIndex === -1 || jsonIndex < ptIndex)
-    }
 
-    return this.argv.includes('--json') || this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json'
+    // If the CONTENT_TYPE env var is set to json, return true
+    if (this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json') return true
+
+    const passThroughIndex = this.argv.indexOf('--')
+    const jsonIndex = this.argv.indexOf('--json')
+    return passThroughIndex === -1
+      ? // If '--' is not present, then check for `--json` in this.argv
+        jsonIndex > -1
+      : // If '--' is present, return true only the --json flag exists and is before the '--'
+        jsonIndex > -1 && jsonIndex < passThroughIndex
   }
 
   /**
@@ -312,8 +268,9 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
+    const allFlags = aggregateFlags(this.ctor.flags, this.ctor.baseFlags, this.ctor.enableJsonFlag)
     for (const flag of Object.keys(flags)) {
-      const flagDef = this.ctor.flags[flag]
+      const flagDef = allFlags[flag]
       const deprecated = flagDef?.deprecated
       if (deprecated) {
         this.warn(formatFlagDeprecationWarning(flag, deprecated))
@@ -321,10 +278,12 @@ export abstract class Command {
 
       const deprecateAliases = flagDef?.deprecateAliases
       if (deprecateAliases) {
-        const aliases = uniq([...flagDef?.aliases ?? [], ...flagDef?.charAliases ?? []]).map(a => a.length === 1 ? `-${a}` : `--${a}`)
+        const aliases = uniq([...(flagDef?.aliases ?? []), ...(flagDef?.charAliases ?? [])]).map((a) =>
+          a.length === 1 ? `-${a}` : `--${a}`,
+        )
         if (aliases.length === 0) return
 
-        const foundAliases = aliases.filter(alias => this.argv.some(a => a.startsWith(alias)))
+        const foundAliases = aliases.filter((alias) => this.argv.some((a) => a.startsWith(alias)))
         for (const alias of foundAliases) {
           let preferredUsage = `--${flagDef?.name}`
           if (flagDef?.char) {
@@ -352,12 +311,18 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(options?: Input<F, B, A>, argv = this.argv): Promise<ParserOutput<F, B, A>> {
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, B, A>,
+    argv = this.argv,
+  ): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
-    const opts = {context: this, ...options}
-    // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
-    opts.args = options?.args
+
+    const opts = {
+      context: this,
+      ...options,
+      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
+    }
+
     const results = await Parser.parse<F, B, A>(argv, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
@@ -407,14 +372,14 @@ export abstract class Command {
       keys.push(this.config.scopedEnvVarKey(envVar))
     }
 
-    keys.map(key => delete process.env[key])
+    keys.map((key) => delete process.env[key])
   }
 }
 
 export namespace Command {
   export type Class = typeof Command & {
-    id: string;
-    run(argv?: string[], config?: LoadOptions): Promise<any>;
+    id: string
+    run(argv?: string[], config?: LoadOptions): Promise<any>
   }
 
   export interface Loadable extends Cached {
@@ -422,34 +387,35 @@ export namespace Command {
   }
 
   export type Cached = {
-    [key: string]: unknown;
-    id: string;
-    hidden: boolean;
-    state?: 'beta' | 'deprecated' | string;
-    deprecationOptions?: Deprecation;
-    aliases: string[];
-    summary?: string;
-    description?: string;
-    usage?: string | string[];
-    examples?: Example[];
-    strict?: boolean;
-    type?: string;
-    pluginName?: string;
-    pluginType?: string;
-    pluginAlias?: string;
-    flags: {[name: string]: Flag.Cached};
-    args: {[name: string]: Arg.Cached};
-    hasDynamicHelp?: boolean;
+    [key: string]: unknown
+    id: string
+    hidden: boolean
+    state?: 'beta' | 'deprecated' | string
+    deprecationOptions?: Deprecation
+    aliases: string[]
+    summary?: string
+    description?: string
+    usage?: string | string[]
+    examples?: Example[]
+    strict?: boolean
+    type?: string
+    pluginName?: string
+    pluginType?: string
+    pluginAlias?: string
+    flags: {[name: string]: Flag.Cached}
+    args: {[name: string]: Arg.Cached}
+    hasDynamicHelp?: boolean
     permutations?: string[]
-    aliasPermutations?: string[];
-    isESM?: boolean;
-    relativePath?: string[];
+    aliasPermutations?: string[]
+    isESM?: boolean
+    relativePath?: string[]
   }
 
   export type Flag = IFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> & (BooleanFlagProps | OptionFlagProps)
+    export type Cached = Omit<Flag, 'parse' | 'input'> &
+      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
     export type Any = Flag | Cached
   }
 
@@ -460,8 +426,10 @@ export namespace Command {
     export type Any = Arg | Cached
   }
 
-  export type Example = string | {
-    description: string;
-    command: string;
-  }
+  export type Example =
+    | string
+    | {
+        description: string
+        command: string
+      }
 }

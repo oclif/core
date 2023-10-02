@@ -1,26 +1,26 @@
 import {ActionBase} from './action/base'
 import {PJSON} from '../interfaces/pjson'
-import {requireJson} from '../util'
+import {requireJson} from '../util/fs'
 import simple from './action/simple'
 import spinner from './action/spinner'
 
 export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
 
 export interface ConfigMessage {
-  type: 'config';
-  prop: string;
-  value: any;
+  type: 'config'
+  prop: string
+  value: any
 }
 
 const g: any = global
 const globals = g.ux || (g.ux = {})
 
-const actionType = (
-  Boolean(process.stderr.isTTY)
-  && !process.env.CI
-  && !['dumb', 'emacs-color'].includes(process.env.TERM!)
-  && 'spinner'
-) || 'simple'
+const actionType =
+  (Boolean(process.stderr.isTTY) &&
+    !process.env.CI &&
+    !['dumb', 'emacs-color'].includes(process.env.TERM!) &&
+    'spinner') ||
+  'simple'
 
 const Action = actionType === 'spinner' ? spinner : simple
 

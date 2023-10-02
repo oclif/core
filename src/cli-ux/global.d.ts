@@ -1,5 +1,5 @@
 declare namespace NodeJS {
   interface Global {
-    ux: any;
+    ux: any
   }
 }

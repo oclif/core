@@ -1,4 +1,3 @@
-
 import * as Errors from '../errors'
 import * as styled from './styled'
 import * as uxPrompt from './prompt'
@@ -42,8 +41,16 @@ export class ux {
     this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
-  public static get styledJSON(): typeof styled.styledJSON {
-    return styled.styledJSON
+  public static styledJSON(obj: unknown): void {
+    const json = JSON.stringify(obj, null, 2)
+    if (!chalk.level) {
+      info(json)
+      return
+    }
+
+    const cardinal = require('cardinal')
+    const theme = require('cardinal/themes/jq')
+    this.info(cardinal.highlight(json, {json: true, theme}))
   }
 
   public static get table(): typeof styled.Table.table {
@@ -169,7 +176,7 @@ const uxProcessExitHandler = async () => {
 
 // to avoid MaxListenersExceededWarning
 // only attach named listener once
-const uxListener = process.listeners('exit').find(fn => fn.name === uxProcessExitHandler.name)
+const uxListener = process.listeners('exit').find((fn) => fn.name === uxProcessExitHandler.name)
 if (!uxListener) {
   process.once('exit', uxProcessExitHandler)
 }

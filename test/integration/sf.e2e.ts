@@ -53,7 +53,8 @@ describe('Salesforce CLI (sf)', () => {
      * ENVIRONMENT VARIABLES
      *   <environment variables>
      */
-    const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?DESCRIPTION.*?EXAMPLES.*?FLAG DESCRIPTIONS.*?CONFIGURATION VARIABLES.*?ENVIRONMENT VARIABLES.*$/gs
+    const regex =
+      /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?DESCRIPTION.*?EXAMPLES.*?FLAG DESCRIPTIONS.*?CONFIGURATION VARIABLES.*?ENVIRONMENT VARIABLES.*$/gs
     expect(regex.test(help.stdout!)).to.be.true
   })
 
@@ -74,7 +75,8 @@ describe('Salesforce CLI (sf)', () => {
      * GLOBAL FLAGS
      *   <global flags>
      */
-    const regex = /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?(?!DESCRIPTION).*?(?!EXAMPLES).*?(?!FLAG DESCRIPTIONS).*?(?!CONFIGURATION VARIABLES).*?(?!ENVIRONMENT VARIABLES).*$/gs
+    const regex =
+      /^.*?USAGE.*?FLAGS.*?GLOBAL FLAGS.*?(?!DESCRIPTION).*?(?!EXAMPLES).*?(?!FLAG DESCRIPTIONS).*?(?!CONFIGURATION VARIABLES).*?(?!ENVIRONMENT VARIABLES).*$/gs
     expect(regex.test(help.stdout!)).to.be.true
   })
 
@@ -105,10 +107,12 @@ describe('Salesforce CLI (sf)', () => {
   })
 
   it('should handle varargs', async () => {
-    const config = await executor.executeCommand('config set disable-telemetry=true org-api-version=54.0 --global --json')
+    const config = await executor.executeCommand(
+      'config set disable-telemetry=true org-api-version=54.0 --global --json',
+    )
     const parsed = parseJson(config.stdout!)
     expect(parsed.status).to.equal(0)
-    const results = parsed.result as {successes: Array<{success: boolean}>, failures: Array<{failed: boolean}>}
+    const results = parsed.result as {successes: Array<{success: boolean}>; failures: Array<{failed: boolean}>}
     for (const result of results.successes) {
       expect(result.success).to.be.true
     }

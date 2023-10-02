@@ -1,4 +1,4 @@
-import {maxBy} from '../util'
+import {maxBy} from '../util/util'
 import {stdtermwidth} from '../screen'
 const wordwrap = require('wordwrap')
 
@@ -15,8 +15,8 @@ export function renderList(items: IListItem[]): string {
     return ''
   }
 
-  const maxLength = maxBy(items, item => item[0].length)?.[0].length ?? 0
-  const lines = items.map(i => {
+  const maxLength = maxBy(items, (item) => item[0].length)?.[0].length ?? 0
+  const lines = items.map((i) => {
     let left = i[0]
     let right = i[1]
     if (!right) {

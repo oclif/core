@@ -1,14 +1,9 @@
 import {CLIError, error} from '../errors'
-import {
-  Debug,
-  flatMap,
-  getCommandIdPermutations,
-  mapValues,
-  resolvePackage,
-} from './util'
+import {Debug, getCommandIdPermutations, resolvePackage} from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {compact, exists, isProd, readJson, requireJson} from '../util'
+import {compact, isProd, mapValues} from '../util/util'
 import {dirname, join, parse, relative, sep} from 'node:path'
+import {exists, readJson, requireJson} from '../util/fs'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 // eslint-disable-next-line sort-imports
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
@@ -16,9 +11,9 @@ import {Command} from '../command'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
 import {Topic} from '../interfaces/topic'
+import {cacheCommand} from '../util/cache-command'
 import {inspect} from 'node:util'
 import {sync} from 'globby'
-import {toCached} from './config'
 import {tsPath} from './ts-node'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -27,17 +22,17 @@ function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
   base = base ? `${base}:` : ''
   if (Array.isArray(input)) {
-    return [...input, ...flatMap(input, t => topicsToArray(t.subtopics, `${base}${t.name}`))]
+    return [...input, input.flatMap((t) => topicsToArray(t.subtopics, `${base}${t.name}`))]
   }
 
-  return flatMap(Object.keys(input), k => {
+  return Object.keys(input).flatMap((k) => {
     input[k].name = k
     return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })
 }
 
 // essentially just "cd .."
-function * up(from: string) {
+function* up(from: string) {
   while (dirname(from) !== from) {
     yield from
     from = dirname(from)
@@ -99,7 +94,7 @@ async function findRoot(name: string | undefined, root: string) {
 }
 
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
-  Boolean(manifest?.commands[id] && ('isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id]))
+  Boolean(manifest?.commands[id] && 'isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
 
 const search = (cmd: any) => {
   if (typeof cmd.run === 'function') return cmd
@@ -142,6 +137,8 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
+  isRoot = false
+
   private _commandsDir!: string | undefined
 
   private flexibleTaxonomy!: boolean
@@ -156,11 +153,13 @@ export class Plugin implements IPlugin {
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
     this.tag = this.options.tag
+    this.isRoot = this.options.isRoot ?? false
     if (this.options.parent) this.parent = this.options.parent as Plugin
     // Linked plugins already have a root so there's no need to search for it.
     // However there could be child plugins nested inside the linked plugin, in which
     // case we still need to search for the child plugin's root.
-    const root = this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
+    const root =
+      this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug('reading %s plugin %s', this.type, root)
@@ -181,18 +180,17 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.hooks = mapValues(this.pjson.oclif.hooks || {}, i => Array.isArray(i) ? i : [i])
+    this.hooks = mapValues(this.pjson.oclif.hooks || {}, (i) => (Array.isArray(i) ? i : [i]))
 
     this.manifest = await this._manifest()
-    this.commands = Object
-    .entries(this.manifest.commands)
-    .map(([id, c]) => ({
-      ...c,
-      pluginAlias: this.alias,
-      pluginType: c.pluginType === 'jit' ? 'jit' : this.type,
-      load: async () => this.findCommand(id, {must: true}),
-    }))
-    .sort((a, b) => a.id.localeCompare(b.id))
+    this.commands = Object.entries(this.manifest.commands)
+      .map(([id, c]) => ({
+        ...c,
+        pluginAlias: this.alias,
+        pluginType: c.pluginType === 'jit' ? 'jit' : this.type,
+        load: async () => this.findCommand(id, {must: true}),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id))
   }
 
   public get topics(): Topic[] {
@@ -211,12 +209,8 @@ export class Plugin implements IPlugin {
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.commandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${this.commandsDir}`)
-    const patterns = [
-      '**/*.+(js|cjs|mjs|ts|tsx)',
-      '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js)?(x)',
-    ]
-    const ids = sync(patterns, {cwd: this.commandsDir})
-    .map(file => {
+    const patterns = ['**/*.+(js|cjs|mjs|ts|tsx)', '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js)?(x)']
+    const ids = sync(patterns, {cwd: this.commandsDir}).map((file) => {
       const p = parse(file)
       const topics = p.dir.split('/')
       const command = p.name !== 'index' && p.name
@@ -242,7 +236,7 @@ export class Plugin implements IPlugin {
       let isESM: boolean | undefined
       let filePath: string | undefined
       try {
-        ({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id)
+        ;({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id)
           ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
           : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
@@ -276,7 +270,9 @@ export class Plugin implements IPlugin {
         const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
         const manifest = await readJson<Manifest>(p)
         if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
-          process.emitWarning(`Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`)
+          process.emitWarning(
+            `Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`,
+          )
         } else {
           this._debug('using manifest from', p)
           this.hasManifest = true
@@ -303,28 +299,35 @@ export class Plugin implements IPlugin {
 
     const manifest = {
       version: this.version,
-      commands: (await Promise.all(this.commandIDs.map(async id => {
-        try {
-          const cached = await toCached(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
-          if (this.flexibleTaxonomy) {
-            const permutations = getCommandIdPermutations(id)
-            const aliasPermutations = cached.aliases.flatMap(a => getCommandIdPermutations(a))
-            return [id, {...cached, permutations, aliasPermutations} as Command.Cached]
-          }
+      commands: (
+        await Promise.all(
+          this.commandIDs.map(async (id) => {
+            try {
+              const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+              if (this.flexibleTaxonomy) {
+                const permutations = getCommandIdPermutations(id)
+                const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
+                return [id, {...cached, permutations, aliasPermutations} as Command.Cached]
+              }
 
-          return [id, cached]
-        } catch (error: any) {
-          const scope = 'toCached'
-          if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
-          else throw this.addErrorScope(error, scope)
-        }
-      })))
-      // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
-      .filter((f): f is [string, Command.Cached] => Boolean(f))
-      .reduce((commands, [id, c]) => {
-        commands[id] = c
-        return commands
-      }, {} as {[k: string]: Command.Cached}),
+              return [id, cached]
+            } catch (error: any) {
+              const scope = 'cacheCommand'
+              if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
+              else throw this.addErrorScope(error, scope)
+            }
+          }),
+        )
+      )
+        // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
+        .filter((f): f is [string, Command.Cached] => Boolean(f))
+        .reduce(
+          (commands, [id, c]) => {
+            commands[id] = c
+            return commands
+          },
+          {} as {[k: string]: Command.Cached},
+        ),
     }
     marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
     marker?.stop()
@@ -339,8 +342,14 @@ export class Plugin implements IPlugin {
 
   private addErrorScope(err: any, scope?: string) {
     err.name = `${err.name} Plugin: ${this.name}`
-    err.detail = compact([err.detail, `module: ${this._base}`, scope && `task: ${scope}`, `plugin: ${this.name}`, `root: ${this.root}`, 'See more details with DEBUG=*']).join('\n')
+    err.detail = compact([
+      err.detail,
+      `module: ${this._base}`,
+      scope && `task: ${scope}`,
+      `plugin: ${this.name}`,
+      `root: ${this.root}`,
+      'See more details with DEBUG=*',
+    ]).join('\n')
     return err
   }
 }
-
