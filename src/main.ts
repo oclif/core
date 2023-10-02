@@ -1,9 +1,8 @@
 import * as Interfaces from './interfaces'
+import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {URL, fileURLToPath} from 'node:url'
 import {format, inspect} from 'node:util'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-// eslint-disable-next-line sort-imports
-import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {Config} from './config'
 import {stdout} from './cli-ux/stream'
 

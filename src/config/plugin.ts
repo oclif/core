@@ -1,12 +1,11 @@
 import {CLIError, error} from '../errors'
 import {Debug, getCommandIdPermutations, resolvePackage} from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
+import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {compact, isProd, mapValues} from '../util/util'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {exists, readJson, requireJson} from '../util/fs'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
-// eslint-disable-next-line sort-imports
-import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {Command} from '../command'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
