@@ -1,6 +1,7 @@
 import {CLIError, error} from '../errors'
 import {Debug, getCommandIdPermutations, resolvePackage} from './util'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
+import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {compact, isProd, mapValues} from '../util/util'
 import {dirname, join, parse, relative, sep} from 'node:path'
 import {exists, readJson, requireJson} from '../util/fs'
@@ -8,7 +9,6 @@ import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {Command} from '../command'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
-import {Performance} from '../performance'
 import {Topic} from '../interfaces/topic'
 import {cacheCommand} from '../util/cache-command'
 import {inspect} from 'node:util'
@@ -206,7 +206,7 @@ export class Plugin implements IPlugin {
   public get commandIDs(): string[] {
     if (!this.commandsDir) return []
 
-    const marker = Performance.mark(`plugin.commandIDs#${this.name}`, {plugin: this.name})
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.commandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${this.commandsDir}`)
     const patterns = ['**/*.+(js|cjs|mjs|ts|tsx)', '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js)?(x)']
     const ids = sync(patterns, {cwd: this.commandsDir}).map((file) => {
@@ -227,7 +227,7 @@ export class Plugin implements IPlugin {
   public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
 
   public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
-    const marker = Performance.mark(`plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
 
     const fetch = async () => {
       if (!this.commandsDir) return
@@ -286,7 +286,7 @@ export class Plugin implements IPlugin {
       }
     }
 
-    const marker = Performance.mark(`plugin.manifest#${this.name}`, {plugin: this.name})
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.manifest#${this.name}`, {plugin: this.name})
     if (!ignoreManifest) {
       const manifest = await readManifest()
       if (manifest) {

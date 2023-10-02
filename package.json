@@ -59,7 +59,7 @@
     "chai-as-promised": "^7.1.1",
     "commitlint": "^17.7.2",
     "cross-env": "^7.0.3",
-    "eslint": "^8.49.0",
+    "eslint": "^8.50.0",
     "eslint-config-oclif": "^5.0.0",
     "eslint-config-oclif-typescript": "^2.0.1",
     "eslint-config-prettier": "^9.0.0",

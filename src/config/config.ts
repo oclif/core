@@ -4,13 +4,13 @@ import {CLIError, error, exit, warn} from '../errors'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
+import { OCLIF_MARKER_OWNER, Performance } from '../performance'
 import {URL, fileURLToPath} from 'node:url'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {compact, isProd} from '../util/util'
 import {getHomeDir, getPlatform} from '../util/os'
-import {join, sep} from 'node:path'
+import { join, sep } from 'node:path'
 import {Command} from '../command'
-import {Performance} from '../performance'
 import PluginLoader from './plugin-loader'
 import WSL from 'is-wsl'
 import {format} from 'node:util'
@@ -153,9 +153,8 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
-    settings.performanceEnabled =
-      (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
-    const marker = Performance.mark('config.load')
+    settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
     Config._rootPlugin = await this.pluginLoader.loadRoot()
 
@@ -235,7 +234,7 @@ export class Config implements IConfig {
   }
 
   async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
-    const pluginsMarker = Performance.mark('config.loadAllPlugins')
+    const pluginsMarker = Performance.mark(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')
     const {plugins, errors} = await this.pluginLoader.loadChildren({
       devPlugins: this.options.devPlugins,
       userPlugins: this.options.userPlugins,
@@ -247,7 +246,7 @@ export class Config implements IConfig {
     this.plugins = plugins
     pluginsMarker?.stop()
 
-    const commandsMarker = Performance.mark('config.loadAllCommands')
+    const commandsMarker = Performance.mark(OCLIF_MARKER_OWNER, 'config.loadAllCommands')
     for (const plugin of this.plugins.values()) {
       this.loadCommands(plugin)
       this.loadTopics(plugin)
@@ -266,7 +265,7 @@ export class Config implements IConfig {
     timeout?: number,
     captureErrors?: boolean,
   ): Promise<Hook.Result<Hooks[T]['return']>> {
-    const marker = Performance.mark(`config.runHook#${event}`)
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${event}`)
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
       if (typeof m === 'function') return m
@@ -314,7 +313,7 @@ export class Config implements IConfig {
       const hooks = p.hooks[event] || []
 
       for (const hook of hooks) {
-        const marker = Performance.mark(`config.runHook#${p.name}(${hook})`)
+        const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
           const {isESM, module, filePath} = await loadWithData(p, join(p.root, hook))
@@ -358,7 +357,7 @@ export class Config implements IConfig {
     argv: string[] = [],
     cachedCommand: Command.Loadable | null = null,
   ): Promise<T> {
-    const marker = Performance.mark(`config.runCommand#${id}`)
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
     if (!c) {
@@ -681,7 +680,7 @@ export class Config implements IConfig {
   }
 
   private loadCommands(plugin: IPlugin) {
-    const marker = Performance.mark(`config.loadCommands#${plugin.name}`, {plugin: plugin.name})
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadCommands#${plugin.name}`, {plugin: plugin.name})
     for (const command of plugin.commands) {
       // set canonical command id
       if (this._commands.has(command.id)) {
@@ -731,7 +730,7 @@ export class Config implements IConfig {
   }
 
   private loadTopics(plugin: IPlugin) {
-    const marker = Performance.mark(`config.loadTopics#${plugin.name}`, {plugin: plugin.name})
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadTopics#${plugin.name}`, {plugin: plugin.name})
     for (const topic of compact(plugin.topics)) {
       const existing = this._topics.get(topic.name)
       if (existing) {
