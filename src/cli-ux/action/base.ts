@@ -1,6 +1,6 @@
 import {stderr, stdout} from '../stream'
 import {Options} from './types'
-import {castArray} from '../../util'
+import {castArray} from '../../util/util'
 import {inspect} from 'node:util'
 
 export interface ITask {

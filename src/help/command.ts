@@ -1,9 +1,10 @@
 import * as Interfaces from '../interfaces'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
-import {castArray, compact, ensureArgObject, sortBy} from '../util'
+import {castArray, compact, sortBy} from '../util/util'
 import {Command} from '../command'
 import {DocOpts} from './docopts'
 import chalk from 'chalk'
+import {ensureArgObject} from '../util/ensure-arg-object'
 import stripAnsi from 'strip-ansi'
 
 // Don't use os.EOL because we need to ensure that a string

@@ -1,6 +1,6 @@
 import * as F from '../../flags'
 import * as Interfaces from '../../interfaces'
-import {capitalize, sumBy} from '../../util'
+import {capitalize, sumBy} from '../../util/util'
 import chalk from 'chalk'
 import {inspect} from 'node:util'
 import {orderBy} from 'natural-orderby'

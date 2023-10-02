@@ -1,10 +1,11 @@
 import * as TSNode from 'ts-node'
 import {Plugin, TSConfig} from '../interfaces'
-import {isProd, readJsonSync} from '../util/index'
 import {join, relative as pathRelative} from 'node:path'
 import {Debug} from './util'
 import {existsSync} from 'node:fs'
+import {isProd} from '../util/util'
 import {memoizedWarn} from '../errors'
+import {readJsonSync} from '../util/fs'
 import {settings} from '../settings'
 
 // eslint-disable-next-line new-cap

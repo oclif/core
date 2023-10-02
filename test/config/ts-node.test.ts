@@ -5,7 +5,7 @@ import {SinonSandbox, createSandbox} from 'sinon'
 
 import {Interfaces, settings} from '../../src'
 import * as configTsNode from '../../src/config/ts-node'
-import * as util from '../../src/util'
+import * as util from '../../src/util/fs'
 import {expect} from 'chai'
 
 const root = resolve(__dirname, 'fixtures/typescript')

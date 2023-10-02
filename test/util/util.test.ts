@@ -1,17 +1,5 @@
 import {expect} from 'chai'
-import {homedir} from 'node:os'
-import {
-  capitalize,
-  castArray,
-  ensureArgObject,
-  getHomeDir,
-  isNotFalsy,
-  isTruthy,
-  last,
-  maxBy,
-  readJson,
-  sumBy,
-} from '../../src/util/index'
+import {capitalize, castArray, isNotFalsy, isTruthy, last, maxBy, sumBy} from '../../src/util/util'
 
 describe('capitalize', () => {
   it('capitalizes the string', () => {
@@ -62,25 +50,6 @@ describe('last', () => {
   })
 })
 
-describe('ensureArgObject', () => {
-  it('should convert array of arguments to an object', () => {
-    const args = [
-      {name: 'foo', description: 'foo desc', required: true},
-      {name: 'bar', description: 'bar desc'},
-    ]
-    const expected = {foo: args[0], bar: args[1]}
-    expect(ensureArgObject(args)).to.deep.equal(expected)
-  })
-
-  it('should do nothing to an arguments object', () => {
-    const args = {
-      foo: {name: 'foo', description: 'foo desc', required: true},
-      bar: {name: 'bar', description: 'bar desc'},
-    }
-    expect(ensureArgObject(args)).to.deep.equal(args)
-  })
-})
-
 describe('isNotFalsy', () => {
   it('should return true for truthy values', () => {
     expect(isNotFalsy('true')).to.be.true
@@ -110,29 +79,6 @@ describe('isTruthy', () => {
     expect(isTruthy('0')).to.be.false
     expect(isTruthy('no')).to.be.false
     expect(isTruthy('n')).to.be.false
-  })
-})
-
-describe('getHomeDir', () => {
-  it('should return the home directory', () => {
-    expect(getHomeDir()).to.equal(homedir())
-  })
-})
-
-describe('readJson', () => {
-  it('should return parsed JSON', async () => {
-    const json = await readJson<{name: string}>('package.json')
-    expect(json.name).to.equal('@oclif/core')
-  })
-
-  it('should throw an error if the file does not exist', async () => {
-    try {
-      await readJson('does-not-exist.json')
-      throw new Error('Expected an error to be thrown')
-    } catch (error) {
-      const err = error as Error
-      expect(err.message).to.include('ENOENT: no such file or directory')
-    }
   })
 })
 

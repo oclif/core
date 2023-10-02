@@ -1,6 +1,6 @@
 /* eslint-disable valid-jsdoc */
 import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfaces'
-import {dirExists, fileExists} from './util/index'
+import {dirExists, fileExists} from './util/fs'
 import {CLIError} from './errors'
 import {URL} from 'node:url'
 import {loadHelpClass} from './help'

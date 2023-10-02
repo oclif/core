@@ -1,4 +1,4 @@
-import {maxBy} from '../util/index'
+import {maxBy} from '../util/util'
 import {stdtermwidth} from '../screen'
 const wordwrap = require('wordwrap')
 

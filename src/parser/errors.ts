@@ -4,7 +4,7 @@ import {CLIError} from '../errors'
 import chalk from 'chalk'
 import {flagUsages} from './help'
 import {renderList} from '../cli-ux/list'
-import {uniq} from '../util/index'
+import {uniq} from '../util/util'
 
 export {CLIError} from '../errors'
 

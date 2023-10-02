@@ -1,7 +1,8 @@
 import {Arg, ArgDefinition} from './interfaces/parser'
-import {dirExists, fileExists, isNotFalsy} from './util/index'
+import {dirExists, fileExists} from './util/fs'
 import {Command} from './command'
 import {URL} from 'node:url'
+import {isNotFalsy} from './util/util'
 
 /**
  * Create a custom arg.

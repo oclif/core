@@ -1,9 +1,10 @@
 import {ArgInput, FlagInput} from '../interfaces/parser'
-import {ensureArgObject, pickBy} from './index'
 import {Command} from '../command'
 import {Plugin as IPlugin} from '../interfaces/plugin'
 import {aggregateFlags} from './aggregate-flags'
 import {cacheDefaultValue} from './cache-default-value'
+import {ensureArgObject} from './ensure-arg-object'
+import {pickBy} from './util'
 
 // In order to collect static properties up the inheritance chain, we need to recursively
 // access the prototypes until there's nothing left. This allows us to combine baseFlags

@@ -1,7 +1,8 @@
 import {join} from 'node:path'
 
 import {Plugin as IPlugin} from '../../src/interfaces'
-import * as util from '../../src/util'
+import * as os from '../../src/util/os'
+import * as fs from '../../src/util/fs'
 
 import {expect, fancy} from './test'
 import {Config, Interfaces} from '../../src'
@@ -49,9 +50,9 @@ describe('Config', () => {
     let test = fancy
       .resetConfig()
       .env(env, {clear: true})
-      .stub(util, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-      .stub(util, 'getPlatform', (stub) => stub.returns(platform))
-    if (pjson) test = test.stub(util, 'readJson', (stub) => stub.resolves(pjson))
+      .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
+      .stub(os, 'getPlatform', (stub) => stub.returns(platform))
+    if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
 
     test = test.add('config', () => Config.load())
 
@@ -317,10 +318,10 @@ describe('Config', () => {
       let test = fancy
         .resetConfig()
         .env(env, {clear: true})
-        .stub(util, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-        .stub(util, 'getPlatform', (stub) => stub.returns(platform))
+        .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
+        .stub(os, 'getPlatform', (stub) => stub.returns(platform))
 
-      if (pjson) test = test.stub(util, 'readJson', (stub) => stub.resolves(pjson))
+      if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
       test = test.add('config', async () => {
         const config = await Config.load()
         config.plugins = plugins
