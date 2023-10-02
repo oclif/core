@@ -1,5 +1,4 @@
-Migrating to @oclif/core@V3
-==============
+# Migrating to @oclif/core@V3
 
 - [Migrating to @oclif/core@V3](#migrating-to-oclifcorev3)
   - [BREAKING CHANGES ❗](#breaking-changes-)
@@ -12,18 +11,18 @@ Migrating to @oclif/core@V3
     - [`global['cli-ux']` -\> `global.ux`](#globalcli-ux---globalux)
     - [`handle`](#handle)
     - [`noCacheDefault` flag property replaces `isWritingManifest`](#nocachedefault-flag-property-replaces-iswritingmanifest)
-    - [Removed `toCached` export](#removed-tocached-export)
+    - [Removed Unnecessary Exports](#removed-unnecessary-exports)
   - [Features 🎉](#features-)
     - [Performance Improvements](#performance-improvements)
     - [charAliases Flag Property](#charaliases-flag-property)
     - [Flags.option](#flagsoption)
     - [Set spinner styles](#set-spinner-styles)
 
-
 ## BREAKING CHANGES ❗
 
 ### Dropping node 14 and node 16 support
- The end-of-life date for Node.js 14 was [April 30, 2023](https://nodejs.org/en/about/releases/).
+
+The end-of-life date for Node.js 14 was [April 30, 2023](https://nodejs.org/en/about/releases/).
 
 The end-of-life date for Node.js 16 was [September 11, 2023](https://nodejs.org/en/about/releases/). This date is earlier than previously published. Node.js’s [blog](https://nodejs.org/en/blog/announcements/nodejs16-eol/) explains why they chose this earlier end-of-life date.
 
@@ -44,43 +43,18 @@ If you'd like to migrate your plugin to ESM, please read our guide [here](https:
 We removed `ts-node` as a dependency to reduce the package size. By doing this, it means that linked plugin **must** have `ts-node` as a `devDependency` in order for auto-transpilation to work.
 
 ### `Config.plugins`
+
 `Config.plugins` is now a `Map` where the keys are the plugin names and the values are the loaded `Plugin` instances. Previously it was an array of loaded `Plugin` instances.
 
 By using a `Map` we can now do more efficient lookups during command execution. `Config.getPluginsList` was added in case you still would like a flat array of `Plugin` instances.
 
 ### Readonly properties on `Config`
-Various properties on `Config` are now `readonly`
-    - `name`
-    - `version`
-    - `channel`
-    - `pjson`
-    - `root`
-    - `arch`
-    - `bin`
-    - `cacheDir`
-    - `configDir`
-    - `dataDir`
-    - `dirname`
-    - `errLog`
-    - `home`
-    - `platform`
-    - `shell`
-    - `userAgent`
-    - `windows`
-    - `debug`
-    - `npmRegistry`
-    - `userPJSON`
-    - `plugins`
-    - `binPath`
-    - `binAliases`
-    - `nsisCustomization`
-    - `valid`
-    - `flexibleTaxonomy`
-    - `commands`
+
+Various properties on `Config` are now `readonly` - `name` - `version` - `channel` - `pjson` - `root` - `arch` - `bin` - `cacheDir` - `configDir` - `dataDir` - `dirname` - `errLog` - `home` - `platform` - `shell` - `userAgent` - `windows` - `debug` - `npmRegistry` - `userPJSON` - `plugins` - `binPath` - `binAliases` - `nsisCustomization` - `valid` - `flexibleTaxonomy` - `commands`
 
 ### Private methods on `Plugin`
-The `_manifest` and `warn` methods on `Plugin` are now `private`
 
+The `_manifest` and `warn` methods on `Plugin` are now `private`
 
 ### `global['cli-ux']` -> `global.ux`
 
@@ -98,12 +72,12 @@ Version 2 allowed you to optionally return non-sensitive input if the `default` 
 export const mySensitiveFlag = Flags.string({
   default: async (context, isWritingManifest) => {
     if (isWritingManifest) {
-      return undefined;
+      return undefined
     }
 
     return 'sensitive info'
   },
-});
+})
 ```
 
 Version 3 removes the `isWritingManifest` parameter in favor of a flag and arg property, `noCacheDefault`. Setting it to true will automatically keep it from being cached in the manifest.
@@ -114,12 +88,15 @@ export const mySensitiveFlag = Flags.string({
   default: async (context) => {
     return 'sensitive info'
   },
-});
+})
 ```
 
-### Removed `toCached` export
+### Removed Unnecessary Exports
 
-We removed the `toCached` export since there's no need for consumers of `@oclif/core` to use this function.
+The following exports have been removed:
+
+- `toCached`
+- `tsPath`
 
 ## Features 🎉
 
