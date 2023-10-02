@@ -41,8 +41,16 @@ export class ux {
     this.info(chalk.dim('=== ') + chalk.bold(header) + '\n')
   }
 
-  public static get styledJSON(): typeof styled.styledJSON {
-    return styled.styledJSON
+  public static styledJSON(obj: unknown): void {
+    const json = JSON.stringify(obj, null, 2)
+    if (!chalk.level) {
+      info(json)
+      return
+    }
+
+    const cardinal = require('cardinal')
+    const theme = require('cardinal/themes/jq')
+    this.info(cardinal.highlight(json, {json: true, theme}))
   }
 
   public static get table(): typeof styled.Table.table {
