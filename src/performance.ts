@@ -246,15 +246,15 @@ export class Performance {
     oclifDebug('Command Load Time: %sms', Performance.oclifPerf['oclif.commandLoadMs'].toFixed(4))
     oclifDebug('Command Run Time: %sms', Performance.oclifPerf['oclif.commandRunMs'].toFixed(4))
 
-    const nonOclifDebug = require('debug')('non-oclif-perf')
+    const nonCoreDebug = require('debug')('non-oclif-perf')
 
-    const nonOclifPerf = Performance.results
-    if (nonOclifPerf.size > 0) {
-      nonOclifDebug('Non-Oclif Performance Measurements:')
-      for (const [owner, results] of nonOclifPerf) {
-        nonOclifDebug(`  ${owner}:`)
+    const nonCorePerf = Performance.results
+    if (nonCorePerf.size > 0) {
+      nonCoreDebug('Non-Core Performance Measurements:')
+      for (const [owner, results] of nonCorePerf) {
+        nonCoreDebug(`  ${owner}:`)
         for (const result of results) {
-          nonOclifDebug(`    ${result.name}: ${result.duration.toFixed(4)}ms`)
+          nonCoreDebug(`    ${result.name}: ${result.duration.toFixed(4)}ms`)
         }
       }
     }
