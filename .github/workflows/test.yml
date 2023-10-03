@@ -96,7 +96,7 @@ jobs:
       - run: yarn test:esm-cjs --test=${{ matrix.test }}
   nuts:
     needs: linux-unit-tests
-    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@mdonnalley/add-ignore-scripts-options
+    uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
     strategy:
       fail-fast: false
       matrix:
@@ -115,7 +115,7 @@ jobs:
       useCache: false
       preSwapCommands: "npx yarn-deduplicate; yarn install"
       preExternalBuildCommands: "shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core"
-      ignoreScripts: false
+      ignoreScripts: true
     secrets:
       TESTKIT_AUTH_URL: ${{ secrets.TESTKIT_AUTH_URL }}
       TESTKIT_HUB_USERNAME: ${{ secrets.TESTKIT_HUB_USERNAME }}
