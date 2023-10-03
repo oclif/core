@@ -1,27 +1,28 @@
-import * as Errors from '../errors'
 import chalk from 'chalk'
+
+import * as Errors from '../errors'
 import {config} from './config'
 import {stderr} from './stream'
 
 export interface IPromptOptions {
+  default?: string
   prompt?: string
-  type?: 'normal' | 'mask' | 'hide' | 'single'
-  timeout?: number
   /**
    * Requires user input if true, otherwise allows empty input
    */
   required?: boolean
-  default?: string
+  timeout?: number
+  type?: 'hide' | 'mask' | 'normal' | 'single'
 }
 
 interface IPromptConfig {
+  default?: string
+  isTTY: boolean
   name: string
   prompt: string
-  type: 'normal' | 'mask' | 'hide' | 'single'
-  isTTY: boolean
   required: boolean
-  default?: string
   timeout?: number
+  type: 'hide' | 'mask' | 'normal' | 'single'
 }
 
 function normal(options: IPromptConfig, retries = 100): Promise<string> {
@@ -90,12 +91,12 @@ function replacePrompt(prompt: string) {
 async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {}): Promise<string> {
   const prompt = getPrompt(name, inputOptions.type, inputOptions.default)
   const options: IPromptConfig = {
+    default: '',
     isTTY: Boolean(process.env.TERM !== 'dumb' && process.stdin.isTTY),
     name,
     prompt,
-    type: 'normal',
     required: true,
-    default: '',
+    type: 'normal',
     ...inputOptions,
   }
   const passwordPrompt = require('password-prompt')
@@ -111,9 +112,9 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
 
     case 'mask': {
       return passwordPrompt(options.prompt, {
+        default: options.default,
         method: options.type,
         required: options.required,
-        default: options.default,
       }).then((value: string) => {
         replacePrompt(getPrompt(name, 'hide', inputOptions.default))
         return value
@@ -122,9 +123,9 @@ async function _prompt(name: string, inputOptions: Partial<IPromptOptions> = {})
 
     case 'hide': {
       return passwordPrompt(options.prompt, {
+        default: options.default,
         method: options.type,
         required: options.required,
-        default: options.default,
       })
     }
 
@@ -176,7 +177,7 @@ export async function anykey(message?: string): Promise<string> {
       : `Press enter to continue or ${chalk.yellow('q')} to exit`
   }
 
-  const char = await prompt(message, {type: 'single', required: false})
+  const char = await prompt(message, {required: false, type: 'single'})
   if (tty) stderr.write('\n')
   if (char === 'q') Errors.error('quit')
   if (char === '\u0003') Errors.error('ctrl-c')

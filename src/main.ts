@@ -1,10 +1,11 @@
-import * as Interfaces from './interfaces'
-import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {URL, fileURLToPath} from 'node:url'
 import {format, inspect} from 'node:util'
-import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-import {Config} from './config'
+
 import {stdout} from './cli-ux/stream'
+import {Config} from './config'
+import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
+import * as Interfaces from './interfaces'
+import {OCLIF_MARKER_OWNER, Performance} from './performance'
 
 const debug = require('debug')('oclif:main')
 
@@ -57,7 +58,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   let [id, ...argvSlice] = normalizeArgv(config, argv)
   // run init hook
-  await config.runHook('init', {id, argv: argvSlice})
+  await config.runHook('init', {argv: argvSlice, id})
 
   // display version if applicable
   if (versionAddition(argv, config)) {

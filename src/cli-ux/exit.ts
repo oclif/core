@@ -1,11 +1,11 @@
 export class ExitError extends Error {
-  public ux: {
-    exit: number
-  }
-
   public code: 'EEXIT'
 
   public error?: Error
+
+  public ux: {
+    exit: number
+  }
 
   constructor(status: number, error?: Error) {
     const code = 'EEXIT'

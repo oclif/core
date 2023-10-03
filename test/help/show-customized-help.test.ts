@@ -1,11 +1,11 @@
 import {test as base, expect} from '@oclif/test'
-import {SinonStub, stub} from 'sinon'
 import {resolve} from 'node:path'
+import {SinonStub, stub} from 'sinon'
 
-import {CommandHelp, Help} from '../../src/help'
-import {AppsAdminAdd, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndexWithDesc, AppsTopic} from './fixtures/fixtures'
 import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
+import {CommandHelp, Help} from '../../src/help'
+import {AppsAdminAdd, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndexWithDesc, AppsTopic} from './fixtures/fixtures'
 import {monkeyPatchCommands} from './help-test-utils'
 
 const g: any = global
@@ -39,17 +39,17 @@ class TestHelp extends Help {
     this.opts.usageHeader = 'SYNOPSIS'
   }
 
-  summary(c: Command.Class): string {
-    // This will essentially ignore the summary
-    return this.wrap(c.description || '')
-  }
-
   public async showRootHelp() {
     return super.showRootHelp()
   }
 
   public async showTopicHelp(topic: Interfaces.Topic) {
     return super.showTopicHelp(topic)
+  }
+
+  summary(c: Command.Class): string {
+    // This will essentially ignore the summary
+    return this.wrap(c.description || '')
   }
 }
 

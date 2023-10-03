@@ -1,6 +1,8 @@
-import {arch} from 'node:os'
 import {expect} from 'chai'
+import {arch} from 'node:os'
+
 import {Executor, setup} from './util'
+
 import StripAnsi = require('strip-ansi')
 const stripAnsi: typeof StripAnsi = require('strip-ansi')
 

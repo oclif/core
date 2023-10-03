@@ -1,5 +1,6 @@
-import {arch} from 'node:os'
 import {config as chaiConfig, expect} from 'chai'
+import {arch} from 'node:os'
+
 import {Executor, Result, setup} from './util'
 
 chaiConfig.truncateThreshold = 0

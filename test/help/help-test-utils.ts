@@ -1,9 +1,9 @@
-import {Command} from '../../src/command'
-import stripAnsi = require('strip-ansi')
-
 import {Interfaces} from '../../src'
+import {Command} from '../../src/command'
 import {CommandHelp, Help} from '../../src/help'
 import {cacheCommand} from '../../src/util/cache-command'
+
+import stripAnsi = require('strip-ansi')
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
@@ -36,12 +36,12 @@ export class TestHelp extends Help {
     return super.formatCommand(command)
   }
 
-  public formatTopics(topics: Interfaces.Topic[]) {
-    return super.formatTopics(topics)
-  }
-
   public formatTopic(topic: Interfaces.Topic) {
     return super.formatTopic(topic)
+  }
+
+  public formatTopics(topics: Interfaces.Topic[]) {
+    return super.formatTopics(topics)
   }
 }
 

@@ -1,19 +1,19 @@
-import {Config} from '../../src/config/config'
-import {Plugin as IPlugin} from '../../src/interfaces'
-
-import {expect, fancy} from './test'
-import {Flags, Interfaces} from '../../src'
-import {Command} from '../../src/command'
-import {getCommandIdPermutations} from '../../src/config/util'
-import * as os from '../../src/util/os'
 import {join} from 'node:path'
 
+import {Flags, Interfaces} from '../../src'
+import {Command} from '../../src/command'
+import {Config} from '../../src/config/config'
+import {getCommandIdPermutations} from '../../src/config/util'
+import {Plugin as IPlugin} from '../../src/interfaces'
+import * as os from '../../src/util/os'
+import {expect, fancy} from './test'
+
 interface Options {
-  pjson?: any
-  homedir?: string
-  platform?: string
-  env?: {[k: string]: string}
   commandIds?: string[]
+  env?: {[k: string]: string}
+  homedir?: string
+  pjson?: any
+  platform?: string
   types?: string[]
 }
 
@@ -22,11 +22,11 @@ class MyCommandClass extends Command {
 
   aliases: string[] = []
 
+  flags = {}
+
   hidden = false
 
   id = 'foo:bar'
-
-  flags = {}
 
   run(): Promise<any> {
     return Promise.resolve()

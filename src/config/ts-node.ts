@@ -1,12 +1,13 @@
-import * as TSNode from 'ts-node'
-import {Plugin, TSConfig} from '../interfaces'
-import {join, relative as pathRelative} from 'node:path'
-import {Debug} from './util'
 import {existsSync} from 'node:fs'
-import {isProd} from '../util/util'
+import {join, relative as pathRelative} from 'node:path'
+import * as TSNode from 'ts-node'
+
 import {memoizedWarn} from '../errors'
-import {readJsonSync} from '../util/fs'
+import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
+import {readJsonSync} from '../util/fs'
+import {isProd} from '../util/util'
+import {Debug} from './util'
 
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
@@ -86,22 +87,22 @@ function registerTSNode(root: string): TSConfig | undefined {
 
   const conf: TSNode.RegisterOptions = {
     compilerOptions: {
-      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-      target: tsconfig.compilerOptions.target ?? 'es2019',
-      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
       emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
+      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
+      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
       module: tsconfig.compilerOptions.module ?? 'commonjs',
-      sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
       rootDirs,
+      sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
+      target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
     },
-    skipProject: true,
-    transpileOnly: true,
+    cwd: root,
     esm: tsconfig['ts-node']?.esm ?? true,
+    experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
     scope: true,
     scopeDir: root,
-    cwd: root,
-    experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
+    skipProject: true,
+    transpileOnly: true,
   }
 
   if (tsconfig.compilerOptions.moduleResolution) {
@@ -173,7 +174,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   try {
     const tsconfig = registerTSNode(root)
     if (!tsconfig) return orig
-    const {rootDir, rootDirs, outDir} = tsconfig.compilerOptions
+    const {outDir, rootDir, rootDirs} = tsconfig.compilerOptions
     const rootDirPath = rootDir || (rootDirs || [])[0]
     if (!rootDirPath || !outDir) return orig
     // rewrite path from ./lib/foo to ./src/foo

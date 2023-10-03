@@ -8,14 +8,14 @@ export interface OclifError {
 
 export interface PrettyPrintableError {
   /**
-   * message to display related to the error
-   */
-  message?: string
-
-  /**
    * a unique error code for this error class
    */
   code?: string
+
+  /**
+   * message to display related to the error
+   */
+  message?: string
 
   /**
    * a url to find out more information related to this error

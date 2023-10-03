@@ -1,12 +1,12 @@
 import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
-
-import {parse} from '../../src/parser'
-import {Args, Flags} from '../../src'
-import {FlagDefault} from '../../src/interfaces/parser'
 import {URL} from 'node:url'
-import {createSandbox, SinonStub} from 'sinon'
+import {SinonStub, createSandbox} from 'sinon'
+
+import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
+import {FlagDefault} from '../../src/interfaces/parser'
+import {parse} from '../../src/parser'
 
 config.truncateThreshold = 0
 const stripAnsi = require('strip-ansi')

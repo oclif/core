@@ -1,4 +1,5 @@
 import {expect, test} from '@oclif/test'
+
 import {collectUsableIds, getCommandIdPermutations} from '../../src/config/util'
 
 describe('util', () => {

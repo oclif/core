@@ -1,5 +1,5 @@
-import {FlagInput, FlagOutput} from '../interfaces/parser'
 import {boolean} from '../flags'
+import {FlagInput, FlagOutput} from '../interfaces/parser'
 
 const json = boolean({
   description: 'Format output as json.',

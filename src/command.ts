@@ -1,5 +1,16 @@
+import chalk from 'chalk'
+import {fileURLToPath} from 'node:url'
+import {format, inspect} from 'node:util'
+
+import {ux} from './cli-ux'
+import {stderr, stdout} from './cli-ux/stream'
+import {Config} from './config'
 import * as Errors from './errors'
-import * as Parser from './parser'
+import {PrettyPrintableError} from './errors'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
+import {PJSON} from './interfaces'
+import {LoadOptions} from './interfaces/config'
+import {CommandError} from './interfaces/errors'
 import {
   ArgInput,
   ArgOutput,
@@ -14,21 +25,11 @@ import {
   OptionFlagProps,
   ParserOutput,
 } from './interfaces/parser'
-import {format, inspect} from 'node:util'
-import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
-import {stderr, stdout} from './cli-ux/stream'
-import {CommandError} from './interfaces/errors'
-import {Config} from './config'
-import {LoadOptions} from './interfaces/config'
-import {PJSON} from './interfaces'
 import {Plugin} from './interfaces/plugin'
-import {PrettyPrintableError} from './errors'
+import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
-import chalk from 'chalk'
-import {fileURLToPath} from 'node:url'
 import {requireJson} from './util/fs'
 import {uniq} from './util/util'
-import {ux} from './cli-ux'
 
 const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
@@ -47,16 +48,20 @@ stdout.on('error', (err: any) => {
  */
 
 export abstract class Command {
-  private static readonly _base = `${pjson.name}@${pjson.version}`
+  /** An array of aliases for this command. */
+  public static aliases: string[] = []
 
-  /** A command ID, used mostly in error or verbose reporting. */
-  public static id: string
+  /** An order-dependent object of arguments for the command */
+  public static args: ArgInput = {}
+
+  public static baseFlags: FlagInput
 
   /**
-   * The tweet-sized description for your class, used in a parent-commands
-   * sub-command listing and as the header for the command help.
+   * Emit deprecation warning when a command alias is used
    */
-  public static summary?: string
+  static deprecateAliases?: boolean
+
+  public static deprecationOptions?: Deprecation
 
   /**
    * A full description of how to use the command.
@@ -65,40 +70,7 @@ export abstract class Command {
    */
   public static description: string | undefined
 
-  /** Hide the command from help */
-  public static hidden: boolean
-
-  /** Mark the command as a given state (e.g. beta or deprecated) in help */
-  public static state?: 'beta' | 'deprecated' | string
-
-  public static deprecationOptions?: Deprecation
-
-  /**
-   * Emit deprecation warning when a command alias is used
-   */
-  static deprecateAliases?: boolean
-
-  /**
-   * An override string (or strings) for the default usage documentation.
-   */
-  public static usage: string | string[] | undefined
-
-  public static help: string | undefined
-
-  /** An array of aliases for this command. */
-  public static aliases: string[] = []
-
-  /** When set to false, allows a variable amount of arguments */
-  public static strict = true
-
-  /** An order-dependent object of arguments for the command */
-  public static args: ArgInput = {}
-
-  public static plugin: Plugin | undefined
-
-  public static readonly pluginName?: string
-  public static readonly pluginType?: string
-  public static readonly pluginAlias?: string
+  public static enableJsonFlag = false
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -116,9 +88,61 @@ export abstract class Command {
    */
   public static examples: Command.Example[]
 
+  /** A hash of flags for the command */
+  public static flags: FlagInput
+
   public static hasDynamicHelp = false
 
-  public static enableJsonFlag = false
+  public static help: string | undefined
+
+  /** Hide the command from help */
+  public static hidden: boolean
+
+  /** A command ID, used mostly in error or verbose reporting. */
+  public static id: string
+
+  public static plugin: Plugin | undefined
+
+  public static readonly pluginAlias?: string
+  public static readonly pluginName?: string
+  public static readonly pluginType?: string
+
+  /** Mark the command as a given state (e.g. beta or deprecated) in help */
+  public static state?: 'beta' | 'deprecated' | string
+
+  /** When set to false, allows a variable amount of arguments */
+  public static strict = true
+
+  /**
+   * The tweet-sized description for your class, used in a parent-commands
+   * sub-command listing and as the header for the command help.
+   */
+  public static summary?: string
+  /**
+   * An override string (or strings) for the default usage documentation.
+   */
+  public static usage: string | string[] | undefined
+
+  private static readonly _base = `${pjson.name}@${pjson.version}`
+
+  protected debug: (...args: any[]) => void
+
+  public id: string | undefined
+
+  public constructor(
+    public argv: string[],
+    public config: Config,
+  ) {
+    this.id = this.ctor.id
+    try {
+      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
+    } catch {
+      this.debug = () => {
+        // noop
+      }
+    }
+  }
+
   /**
    * instantiate and run the command
    *
@@ -150,33 +174,6 @@ export abstract class Command {
     return cmd._run<ReturnType<T['run']>>()
   }
 
-  public static baseFlags: FlagInput
-
-  /** A hash of flags for the command */
-  public static flags: FlagInput
-
-  public id: string | undefined
-
-  protected debug: (...args: any[]) => void
-
-  public constructor(
-    public argv: string[],
-    public config: Config,
-  ) {
-    this.id = this.ctor.id
-    try {
-      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
-    } catch {
-      this.debug = () => {
-        // noop
-      }
-    }
-  }
-
-  protected get ctor(): typeof Command {
-    return this.constructor as typeof Command
-  }
-
   protected async _run<T>(): Promise<T> {
     let err: Error | undefined
     let result: T | undefined
@@ -197,38 +194,63 @@ export abstract class Command {
     return result as T
   }
 
-  public exit(code = 0): never {
-    Errors.exit(code)
+  private removeEnvVar(envVar: string): void {
+    const keys: string[] = []
+    try {
+      keys.push(...this.config.scopedEnvVarKeys(envVar))
+    } catch {
+      keys.push(this.config.scopedEnvVarKey(envVar))
+    }
+
+    keys.map((key) => delete process.env[key])
   }
 
-  public warn(input: string | Error): string | Error {
-    if (!this.jsonEnabled()) Errors.warn(input)
-    return input
+  protected async catch(err: CommandError): Promise<any> {
+    process.exitCode = process.exitCode ?? err.exitCode ?? 1
+    if (this.jsonEnabled()) {
+      this.logJson(this.toErrorJson(err))
+    } else {
+      if (!err.message) throw err
+      try {
+        ux.action.stop(chalk.bold.red('!'))
+      } catch {}
+
+      throw err
+    }
   }
 
-  public error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
+  public error(input: Error | string, options: {code?: string; exit: false} & PrettyPrintableError): void
 
-  public error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
+  public error(input: Error | string, options?: {code?: string; exit?: number} & PrettyPrintableError): never
 
   public error(
-    input: string | Error,
-    options: {code?: string; exit?: number | false} & PrettyPrintableError = {},
+    input: Error | string,
+    options: {code?: string; exit?: false | number} & PrettyPrintableError = {},
   ): void {
     return Errors.error(input, options as any)
   }
 
-  public log(message = '', ...args: any[]): void {
-    if (!this.jsonEnabled()) {
-      message = typeof message === 'string' ? message : inspect(message)
-      stdout.write(format(message, ...args) + '\n')
+  public exit(code = 0): never {
+    Errors.exit(code)
+  }
+
+  protected async finally(_: Error | undefined): Promise<any> {
+    try {
+      const {config} = Errors
+      if (config.errorLogger) await config.errorLogger.flush()
+    } catch (error: any) {
+      console.error(error)
     }
   }
 
-  public logToStderr(message = '', ...args: any[]): void {
-    if (!this.jsonEnabled()) {
-      message = typeof message === 'string' ? message : inspect(message)
-      stderr.write(format(message, ...args) + '\n')
-    }
+  protected async init(): Promise<any> {
+    this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
+    if (this.config.debug) Errors.config.debug = true
+    if (this.config.errlog) Errors.config.errlog = this.config.errlog
+    const g: any = global
+    g['http-call'] = g['http-call'] || {}
+    g['http-call']!.userAgent = this.config.userAgent
+    this.warnIfCommandDeprecated()
   }
 
   /**
@@ -252,19 +274,68 @@ export abstract class Command {
         jsonIndex > -1 && jsonIndex < passThroughIndex
   }
 
-  /**
-   * actual command run code goes here
-   */
-  public abstract run(): Promise<any>
+  public log(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      stdout.write(format(message, ...args) + '\n')
+    }
+  }
 
-  protected async init(): Promise<any> {
-    this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    if (this.config.debug) Errors.config.debug = true
-    if (this.config.errlog) Errors.config.errlog = this.config.errlog
-    const g: any = global
-    g['http-call'] = g['http-call'] || {}
-    g['http-call']!.userAgent = this.config.userAgent
-    this.warnIfCommandDeprecated()
+  protected logJson(json: unknown): void {
+    ux.styledJSON(json)
+  }
+
+  public logToStderr(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      stderr.write(format(message, ...args) + '\n')
+    }
+  }
+
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, B, A>,
+    argv = this.argv,
+  ): Promise<ParserOutput<F, B, A>> {
+    if (!options) options = this.ctor as Input<F, B, A>
+
+    const opts = {
+      context: this,
+      ...options,
+      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
+    }
+
+    const results = await Parser.parse<F, B, A>(argv, opts)
+    this.warnIfFlagDeprecated(results.flags ?? {})
+
+    return results
+  }
+
+  protected toErrorJson(err: unknown): any {
+    return {error: err}
+  }
+
+  protected toSuccessJson(result: unknown): any {
+    return result
+  }
+
+  public warn(input: Error | string): Error | string {
+    if (!this.jsonEnabled()) Errors.warn(input)
+    return input
+  }
+
+  protected warnIfCommandDeprecated(): void {
+    const [id] = normalizeArgv(this.config)
+
+    if (this.ctor.deprecateAliases && this.ctor.aliases.includes(id)) {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      const aliasName = toConfiguredId(id, this.config)
+      this.warn(formatCommandDeprecationWarning(aliasName, {to: cmdName}))
+    }
+
+    if (this.ctor.state === 'deprecated') {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
+    }
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
@@ -296,84 +367,14 @@ export abstract class Command {
     }
   }
 
-  protected warnIfCommandDeprecated(): void {
-    const [id] = normalizeArgv(this.config)
-
-    if (this.ctor.deprecateAliases && this.ctor.aliases.includes(id)) {
-      const cmdName = toConfiguredId(this.ctor.id, this.config)
-      const aliasName = toConfiguredId(id, this.config)
-      this.warn(formatCommandDeprecationWarning(aliasName, {to: cmdName}))
-    }
-
-    if (this.ctor.state === 'deprecated') {
-      const cmdName = toConfiguredId(this.ctor.id, this.config)
-      this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
-    }
+  protected get ctor(): typeof Command {
+    return this.constructor as typeof Command
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
-    options?: Input<F, B, A>,
-    argv = this.argv,
-  ): Promise<ParserOutput<F, B, A>> {
-    if (!options) options = this.ctor as Input<F, B, A>
-
-    const opts = {
-      context: this,
-      ...options,
-      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
-    }
-
-    const results = await Parser.parse<F, B, A>(argv, opts)
-    this.warnIfFlagDeprecated(results.flags ?? {})
-
-    return results
-  }
-
-  protected async catch(err: CommandError): Promise<any> {
-    process.exitCode = process.exitCode ?? err.exitCode ?? 1
-    if (this.jsonEnabled()) {
-      this.logJson(this.toErrorJson(err))
-    } else {
-      if (!err.message) throw err
-      try {
-        ux.action.stop(chalk.bold.red('!'))
-      } catch {}
-
-      throw err
-    }
-  }
-
-  protected async finally(_: Error | undefined): Promise<any> {
-    try {
-      const {config} = Errors
-      if (config.errorLogger) await config.errorLogger.flush()
-    } catch (error: any) {
-      console.error(error)
-    }
-  }
-
-  protected toSuccessJson(result: unknown): any {
-    return result
-  }
-
-  protected toErrorJson(err: unknown): any {
-    return {error: err}
-  }
-
-  protected logJson(json: unknown): void {
-    ux.styledJSON(json)
-  }
-
-  private removeEnvVar(envVar: string): void {
-    const keys: string[] = []
-    try {
-      keys.push(...this.config.scopedEnvVarKeys(envVar))
-    } catch {
-      keys.push(this.config.scopedEnvVarKey(envVar))
-    }
-
-    keys.map((key) => delete process.env[key])
-  }
+  /**
+   * actual command run code goes here
+   */
+  public abstract run(): Promise<any>
 }
 
 export namespace Command {
@@ -388,48 +389,48 @@ export namespace Command {
 
   export type Cached = {
     [key: string]: unknown
-    id: string
-    hidden: boolean
-    state?: 'beta' | 'deprecated' | string
-    deprecationOptions?: Deprecation
+    aliasPermutations?: string[]
     aliases: string[]
-    summary?: string
+    args: {[name: string]: Arg.Cached}
+    deprecationOptions?: Deprecation
     description?: string
-    usage?: string | string[]
     examples?: Example[]
-    strict?: boolean
-    type?: string
+    flags: {[name: string]: Flag.Cached}
+    hasDynamicHelp?: boolean
+    hidden: boolean
+    id: string
+    isESM?: boolean
+    permutations?: string[]
+    pluginAlias?: string
     pluginName?: string
     pluginType?: string
-    pluginAlias?: string
-    flags: {[name: string]: Flag.Cached}
-    args: {[name: string]: Arg.Cached}
-    hasDynamicHelp?: boolean
-    permutations?: string[]
-    aliasPermutations?: string[]
-    isESM?: boolean
     relativePath?: string[]
+    state?: 'beta' | 'deprecated' | string
+    strict?: boolean
+    summary?: string
+    type?: string
+    usage?: string | string[]
   }
 
   export type Flag = IFlag<any>
 
   export namespace Flag {
-    export type Cached = Omit<Flag, 'parse' | 'input'> &
+    export type Cached = Omit<Flag, 'input' | 'parse'> &
       (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
-    export type Any = Flag | Cached
+    export type Any = Cached | Flag
   }
 
   export type Arg = IArg<any>
 
   export namespace Arg {
-    export type Cached = Omit<Arg, 'parse' | 'input'> & ArgProps
+    export type Cached = Omit<Arg, 'input' | 'parse'> & ArgProps
     export type Any = Arg | Cached
   }
 
   export type Example =
-    | string
     | {
-        description: string
         command: string
+        description: string
       }
+    | string
 }

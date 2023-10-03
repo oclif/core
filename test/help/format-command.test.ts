@@ -235,11 +235,11 @@ ALIASES
     test
       .commandHelp(
         class extends Command {
+          static description = 'description that is much longer than the summary'
+
           static id = 'test:summary'
 
           static summary = 'one line summary'
-
-          static description = 'description that is much longer than the summary'
         },
       )
       .it('outputs the summary at the top of the help and description', (ctx: any) =>
@@ -304,9 +304,9 @@ ALIASES
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static description = 'root part of the description\n\nThe <%= config.bin %> CLI has <%= command.id %>'
+
+          static id = 'apps:create'
         },
       )
       .it('renders template string from description', (ctx: any) =>
@@ -322,9 +322,9 @@ DESCRIPTION
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static description = 'root part of the description\r\n\nusing both carriage \n\nreturn and new line'
+
+          static id = 'apps:create'
         },
       )
       .it('splits on carriage return and new lines', (ctx: any) =>
@@ -369,14 +369,14 @@ FLAGS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static flags = {
             myenum: flags.string({
               options: myEnumValues,
               helpValue: myEnumValues.join('|'),
             }),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs flag enum with helpValue', (ctx: any) =>
@@ -390,8 +390,6 @@ FLAGS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static args = {
             arg1: Args.string({default: '.'}),
             arg2: Args.string({default: '.', description: 'arg2 desc'}),
@@ -403,6 +401,8 @@ FLAGS
             flag2: flags.string({default: '.', description: 'flag2 desc'}),
             flag3: flags.string({description: 'flag3 desc'}),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs with default flag options', (ctx: any) =>
@@ -424,11 +424,11 @@ FLAGS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static flags = {
             opt: flags.boolean({allowNo: true}),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs with with no options', (ctx: any) =>
@@ -442,14 +442,14 @@ FLAGS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static flags = {
             opt: flags.string({
               summary: 'one line summary',
               description: 'multiline\ndescription',
             }),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs flag summary and description', (ctx: any) =>
@@ -469,14 +469,14 @@ FLAG DESCRIPTIONS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static flags = {
             opt: flags.string({
               summary: 'one line summary',
               description: 'single line description',
             }),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs flag summary and single line description', (ctx: any) =>
@@ -495,14 +495,14 @@ FLAG DESCRIPTIONS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static flags = {
             opt: flags.string({
               summary: 'one line summary'.repeat(15),
               description: 'single line description',
             }),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs long flag summary and single line description', (ctx: any) =>
@@ -531,11 +531,11 @@ FLAG DESCRIPTIONS
     test
       .commandHelp(
         class extends Command {
-          static id = 'apps:create'
-
           static args = {
             arg1: Args.string({description: 'Show the options', options: ['option1', 'option2']}),
           }
+
+          static id = 'apps:create'
         },
       )
       .it('outputs with arg options', (ctx: any) =>
@@ -623,9 +623,9 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
+
+          static id = 'oclif:command'
         },
       )
       .it('outputs examples using templates', (ctx: any) =>
@@ -641,9 +641,9 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = ['<%= config.bin %> <%= command.id %> --help']
+
+          static id = 'oclif:command'
         },
       )
       .it('formats if command', (ctx: any) =>
@@ -657,9 +657,9 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help']
+
+          static id = 'oclif:command'
         },
       )
       .it('formats if command with description', (ctx: any) =>
@@ -675,11 +675,11 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = [
             'Prints out help.\n<%= config.bin %> <%= command.id %> --help\n<%= config.bin %> <%= command.id %> --help',
           ]
+
+          static id = 'oclif:command'
         },
       )
       .it('formats if multiple command with description', (ctx: any) =>
@@ -696,9 +696,9 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}]
+
+          static id = 'oclif:command'
         },
       )
       .it('formats example object', (ctx: any) =>
@@ -714,11 +714,11 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = [
             {description: 'force  it '.repeat(15), command: '<%= config.bin %> <%= command.id %> --help'},
           ]
+
+          static id = 'oclif:command'
         },
       )
       .it('formats example object with long description', (ctx: any) =>
@@ -735,14 +735,14 @@ EXAMPLES
     test
       .commandHelp(
         class extends Command {
-          static id = 'oclif:command'
-
           static examples = [
             {
               description: 'Prints out help.',
               command: '<%= config.bin %> <%= command.id %> ' + 'force  it '.repeat(15),
             },
           ]
+
+          static id = 'oclif:command'
         },
       )
       .it('formats example object with long command', (ctx: any) => {

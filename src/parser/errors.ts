@@ -1,18 +1,19 @@
-import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
-import {Flag, OptionFlag} from '../interfaces'
-import {CLIError} from '../errors'
 import chalk from 'chalk'
-import {flagUsages} from './help'
+
 import {renderList} from '../cli-ux/list'
+import {CLIError} from '../errors'
+import {Flag, OptionFlag} from '../interfaces'
+import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
 import {uniq} from '../util/util'
+import {flagUsages} from './help'
 
 export {CLIError} from '../errors'
 
 export type Validation = {
   name: string
-  status: 'success' | 'failed'
-  validationFn: string
   reason?: string
+  status: 'failed' | 'success'
+  validationFn: string
 }
 
 export class CLIParseError extends CLIError {
@@ -40,7 +41,7 @@ export class InvalidArgsSpecError extends CLIParseError {
       message += `:\n${list}`
     }
 
-    super({parse, message})
+    super({message, parse})
     this.args = args
   }
 }
@@ -50,8 +51,8 @@ export class RequiredArgsError extends CLIParseError {
 
   constructor({
     args,
-    parse,
     flagsWithMultiple,
+    parse,
   }: CLIParseErrorOptions & {args: Arg<any>[]; flagsWithMultiple?: string[]}) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter((a) => a.name)
@@ -70,7 +71,7 @@ export class RequiredArgsError extends CLIParseError {
       message += '\nAlternatively, you can use "--" to signify the end of the flags and the beginning of arguments.'
     }
 
-    super({parse, message})
+    super({message, parse})
     this.args = args
   }
 }
@@ -81,7 +82,7 @@ export class RequiredFlagError extends CLIParseError {
   constructor({flag, parse}: CLIParseErrorOptions & {flag: Flag<any>}) {
     const usage = renderList(flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
-    super({parse, message})
+    super({message, parse})
     this.flag = flag
   }
 }
@@ -89,9 +90,9 @@ export class RequiredFlagError extends CLIParseError {
 export class UnexpectedArgsError extends CLIParseError {
   public args: unknown[]
 
-  constructor({parse, args}: CLIParseErrorOptions & {args: unknown[]}) {
+  constructor({args, parse}: CLIParseErrorOptions & {args: unknown[]}) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
-    super({parse, message})
+    super({message, parse})
     this.args = args
   }
 }
@@ -99,9 +100,9 @@ export class UnexpectedArgsError extends CLIParseError {
 export class NonExistentFlagsError extends CLIParseError {
   public flags: string[]
 
-  constructor({parse, flags}: CLIParseErrorOptions & {flags: string[]}) {
+  constructor({flags, parse}: CLIParseErrorOptions & {flags: string[]}) {
     const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
-    super({parse, message})
+    super({message, parse})
     this.flags = flags
   }
 }
@@ -109,23 +110,23 @@ export class NonExistentFlagsError extends CLIParseError {
 export class FlagInvalidOptionError extends CLIParseError {
   constructor(flag: OptionFlag<any>, input: string) {
     const message = `Expected --${flag.name}=${input} to be one of: ${flag.options!.join(', ')}`
-    super({parse: {}, message})
+    super({message, parse: {}})
   }
 }
 
 export class ArgInvalidOptionError extends CLIParseError {
   constructor(arg: Arg<any>, input: string) {
     const message = `Expected ${input} to be one of: ${arg.options!.join(', ')}`
-    super({parse: {}, message})
+    super({message, parse: {}})
   }
 }
 
 export class FailedFlagValidationError extends CLIParseError {
-  constructor({parse, failed}: CLIParseErrorOptions & {failed: Validation[]}) {
+  constructor({failed, parse}: CLIParseErrorOptions & {failed: Validation[]}) {
     const reasons = failed.map((r) => r.reason)
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
     const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
-    super({parse, message})
+    super({message, parse})
   }
 }

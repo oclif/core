@@ -1,6 +1,7 @@
 import * as ejs from 'ejs'
-import {Deprecation, Config as IConfig} from '../interfaces'
+
 import {collectUsableIds} from '../config/util'
+import {Deprecation, Config as IConfig} from '../interfaces'
 
 export function template(context: any): (t: string) => string {
   function render(t: string): string {
@@ -73,7 +74,7 @@ export function getHelpFlagAdditions(config: IConfig): string[] {
   return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
 }
 
-export function formatFlagDeprecationWarning(flag: string, opts: true | Deprecation): string {
+export function formatFlagDeprecationWarning(flag: string, opts: Deprecation | true): string {
   let message = `The "${flag}" flag has been deprecated`
   if (opts === true) return `${message}.`
   if (opts.message) return opts.message

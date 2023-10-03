@@ -2,19 +2,19 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 
+import {URL} from 'node:url'
+import {expectNotType, expectType} from 'tsd'
+
 import {Command, Flags, Interfaces} from '../../src'
 
-import {expectNotType, expectType} from 'tsd'
-import {URL} from 'node:url'
-
 abstract class BaseCommand extends Command {
-  static enableJsonFlag = true
-
   static baseFlags = {
     optionalGlobalFlag: Flags.string(),
     requiredGlobalFlag: Flags.string({required: true}),
     defaultGlobalFlag: Flags.string({default: 'default'}),
   }
+
+  static enableJsonFlag = true
 }
 
 type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
@@ -94,6 +94,8 @@ Flags.custom({multiple: false})({
 })
 
 class MyCommand extends BaseCommand {
+  public static '--' = true
+
   static description = 'describe the command here'
 
   static examples = ['<%= config.bin %> <%= command.id %>']
@@ -336,8 +338,6 @@ class MyCommand extends BaseCommand {
       default: ['foo'],
     }),
   }
-
-  public static '--' = true
 
   public flags!: MyFlags
 

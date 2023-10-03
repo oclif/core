@@ -1,19 +1,20 @@
-import {CLIError, error} from '../errors'
-import {Debug, getCommandIdPermutations, resolvePackage} from './util'
-import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {OCLIF_MARKER_OWNER, Performance} from '../performance'
-import {compact, isProd, mapValues} from '../util/util'
+import {sync} from 'globby'
 import {dirname, join, parse, relative, sep} from 'node:path'
-import {exists, readJson, requireJson} from '../util/fs'
-import {loadWithData, loadWithDataFromManifest} from '../module-loader'
+import {inspect} from 'node:util'
+
 import {Command} from '../command'
+import {CLIError, error} from '../errors'
 import {Manifest} from '../interfaces/manifest'
 import {PJSON} from '../interfaces/pjson'
+import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
+import {loadWithData, loadWithDataFromManifest} from '../module-loader'
+import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
-import {inspect} from 'node:util'
-import {sync} from 'globby'
+import {exists, readJson, requireJson} from '../util/fs'
+import {compact, isProd, mapValues} from '../util/util'
 import {tsPath} from './ts-node'
+import {Debug, getCommandIdPermutations, resolvePackage} from './util'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
@@ -104,50 +105,183 @@ const search = (cmd: any) => {
 export class Plugin implements IPlugin {
   _base = `${_pjson.name}@${_pjson.version}`
 
-  name!: string
-
-  version!: string
-
-  pjson!: PJSON.Plugin
-
-  type!: string
-
-  moduleType!: 'module' | 'commonjs'
-
-  root!: string
-
-  alias!: string
-
-  tag?: string
-
-  manifest!: Manifest
-
-  commands!: Command.Loadable[]
-
-  hooks!: {[k: string]: string[]}
-
-  valid = false
-
-  alreadyLoaded = false
-
-  parent: Plugin | undefined
-
-  children: Plugin[] = []
-
-  hasManifest = false
-
-  isRoot = false
-
   private _commandsDir!: string | undefined
-
-  private flexibleTaxonomy!: boolean
 
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
+  private flexibleTaxonomy!: boolean
+
+  alias!: string
+
+  alreadyLoaded = false
+
+  children: Plugin[] = []
+
+  commands!: Command.Loadable[]
+
+  hasManifest = false
+
+  hooks!: {[k: string]: string[]}
+
+  isRoot = false
+
+  manifest!: Manifest
+
+  moduleType!: 'commonjs' | 'module'
+
+  name!: string
+
+  parent: Plugin | undefined
+
+  pjson!: PJSON.Plugin
+
+  root!: string
+
+  tag?: string
+
+  type!: string
+
+  valid = false
+
+  version!: string
+
   protected warned = false
 
   constructor(public options: PluginOptions) {}
+
+  private async _manifest(): Promise<Manifest> {
+    const ignoreManifest = Boolean(this.options.ignoreManifest)
+    const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
+    const respectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
+
+    const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
+      try {
+        const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
+        const manifest = await readJson<Manifest>(p)
+        if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
+          process.emitWarning(
+            `Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`,
+          )
+        } else {
+          this._debug('using manifest from', p)
+          this.hasManifest = true
+          return manifest
+        }
+      } catch (error: any) {
+        if (error.code === 'ENOENT') {
+          if (!dotfile) return readManifest(true)
+        } else {
+          this.warn(error, 'readManifest')
+        }
+      }
+    }
+
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.manifest#${this.name}`, {plugin: this.name})
+    if (!ignoreManifest) {
+      const manifest = await readManifest()
+      if (manifest) {
+        marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: true})
+        marker?.stop()
+        return manifest
+      }
+    }
+
+    const manifest = {
+      commands: (
+        await Promise.all(
+          this.commandIDs.map(async (id) => {
+            try {
+              const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+              if (this.flexibleTaxonomy) {
+                const permutations = getCommandIdPermutations(id)
+                const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
+                return [id, {...cached, aliasPermutations, permutations} as Command.Cached]
+              }
+
+              return [id, cached]
+            } catch (error: any) {
+              const scope = 'cacheCommand'
+              if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
+              else throw this.addErrorScope(error, scope)
+            }
+          }),
+        )
+      )
+        // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
+        .filter((f): f is [string, Command.Cached] => Boolean(f))
+        .reduce(
+          (commands, [id, c]) => {
+            commands[id] = c
+            return commands
+          },
+          {} as {[k: string]: Command.Cached},
+        ),
+      version: this.version,
+    }
+    marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: false})
+    marker?.stop()
+    return manifest
+  }
+
+  private addErrorScope(err: any, scope?: string) {
+    err.name = `${err.name} Plugin: ${this.name}`
+    err.detail = compact([
+      err.detail,
+      `module: ${this._base}`,
+      scope && `task: ${scope}`,
+      `plugin: ${this.name}`,
+      `root: ${this.root}`,
+      'See more details with DEBUG=*',
+    ]).join('\n')
+    return err
+  }
+
+  private warn(err: CLIError | Error | string, scope?: string): void {
+    if (this.warned) return
+    if (typeof err === 'string') err = new Error(err)
+    process.emitWarning(this.addErrorScope(err, scope))
+  }
+
+  public async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+
+  public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
+
+  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.findCommand#${this.name}.${id}`, {
+      id,
+      plugin: this.name,
+    })
+
+    const fetch = async () => {
+      if (!this.commandsDir) return
+      let module
+      let isESM: boolean | undefined
+      let filePath: string | undefined
+      try {
+        ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
+          ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
+          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+        this._debug(isESM ? '(import)' : '(require)', filePath)
+      } catch (error: any) {
+        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
+        throw error
+      }
+
+      const cmd = search(module)
+      if (!cmd) return
+      cmd.id = id
+      cmd.plugin = this
+      cmd.isESM = isESM
+      cmd.relativePath = relative(this.root, filePath || '').split(sep)
+      return cmd
+    }
+
+    const cmd = await fetch()
+    if (!cmd && opts.must) error(`command ${id} not found`)
+    marker?.stop()
+    return cmd
+  }
 
   public async load(): Promise<void> {
     this.type = this.options.type || 'core'
@@ -185,22 +319,11 @@ export class Plugin implements IPlugin {
     this.commands = Object.entries(this.manifest.commands)
       .map(([id, c]) => ({
         ...c,
+        load: async () => this.findCommand(id, {must: true}),
         pluginAlias: this.alias,
         pluginType: c.pluginType === 'jit' ? 'jit' : this.type,
-        load: async () => this.findCommand(id, {must: true}),
       }))
       .sort((a, b) => a.id.localeCompare(b.id))
-  }
-
-  public get topics(): Topic[] {
-    return topicsToArray(this.pjson.oclif.topics || {})
-  }
-
-  public get commandsDir(): string | undefined {
-    if (this._commandsDir) return this._commandsDir
-
-    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this)
-    return this._commandsDir
   }
 
   public get commandIDs(): string[] {
@@ -222,133 +345,14 @@ export class Plugin implements IPlugin {
     return ids
   }
 
-  public async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+  public get commandsDir(): string | undefined {
+    if (this._commandsDir) return this._commandsDir
 
-  public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
-
-  public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.findCommand#${this.name}.${id}`, {id, plugin: this.name})
-
-    const fetch = async () => {
-      if (!this.commandsDir) return
-      let module
-      let isESM: boolean | undefined
-      let filePath: string | undefined
-      try {
-        ;({isESM, module, filePath} = cachedCommandCanBeUsed(this.manifest, id)
-          ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
-        this._debug(isESM ? '(import)' : '(require)', filePath)
-      } catch (error: any) {
-        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
-        throw error
-      }
-
-      const cmd = search(module)
-      if (!cmd) return
-      cmd.id = id
-      cmd.plugin = this
-      cmd.isESM = isESM
-      cmd.relativePath = relative(this.root, filePath || '').split(sep)
-      return cmd
-    }
-
-    const cmd = await fetch()
-    if (!cmd && opts.must) error(`command ${id} not found`)
-    marker?.stop()
-    return cmd
+    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this)
+    return this._commandsDir
   }
 
-  private async _manifest(): Promise<Manifest> {
-    const ignoreManifest = Boolean(this.options.ignoreManifest)
-    const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
-    const respectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
-
-    const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
-      try {
-        const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
-        const manifest = await readJson<Manifest>(p)
-        if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
-          process.emitWarning(
-            `Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`,
-          )
-        } else {
-          this._debug('using manifest from', p)
-          this.hasManifest = true
-          return manifest
-        }
-      } catch (error: any) {
-        if (error.code === 'ENOENT') {
-          if (!dotfile) return readManifest(true)
-        } else {
-          this.warn(error, 'readManifest')
-        }
-      }
-    }
-
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.manifest#${this.name}`, {plugin: this.name})
-    if (!ignoreManifest) {
-      const manifest = await readManifest()
-      if (manifest) {
-        marker?.addDetails({fromCache: true, commandCount: Object.keys(manifest.commands).length})
-        marker?.stop()
-        return manifest
-      }
-    }
-
-    const manifest = {
-      version: this.version,
-      commands: (
-        await Promise.all(
-          this.commandIDs.map(async (id) => {
-            try {
-              const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
-              if (this.flexibleTaxonomy) {
-                const permutations = getCommandIdPermutations(id)
-                const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
-                return [id, {...cached, permutations, aliasPermutations} as Command.Cached]
-              }
-
-              return [id, cached]
-            } catch (error: any) {
-              const scope = 'cacheCommand'
-              if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
-              else throw this.addErrorScope(error, scope)
-            }
-          }),
-        )
-      )
-        // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
-        .filter((f): f is [string, Command.Cached] => Boolean(f))
-        .reduce(
-          (commands, [id, c]) => {
-            commands[id] = c
-            return commands
-          },
-          {} as {[k: string]: Command.Cached},
-        ),
-    }
-    marker?.addDetails({fromCache: false, commandCount: Object.keys(manifest.commands).length})
-    marker?.stop()
-    return manifest
-  }
-
-  private warn(err: string | Error | CLIError, scope?: string): void {
-    if (this.warned) return
-    if (typeof err === 'string') err = new Error(err)
-    process.emitWarning(this.addErrorScope(err, scope))
-  }
-
-  private addErrorScope(err: any, scope?: string) {
-    err.name = `${err.name} Plugin: ${this.name}`
-    err.detail = compact([
-      err.detail,
-      `module: ${this._base}`,
-      scope && `task: ${scope}`,
-      `plugin: ${this.name}`,
-      `root: ${this.root}`,
-      'See more details with DEBUG=*',
-    ]).join('\n')
-    return err
+  public get topics(): Topic[] {
+    return topicsToArray(this.pjson.oclif.topics || {})
   }
 }

@@ -1,10 +1,10 @@
 /**
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
-import {Args, Command, Interfaces} from '../../src'
-
-import {expectNotType, expectType} from 'tsd'
 import {URL} from 'node:url'
+import {expectNotType, expectType} from 'tsd'
+
+import {Args, Command, Interfaces} from '../../src'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 
@@ -13,10 +13,6 @@ type MyType = {
 }
 
 class MyCommand extends Command {
-  static description = 'describe the command here'
-
-  static examples = ['<%= config.bin %> <%= command.id %>']
-
   static args = {
     requiredString: Args.string({required: true}),
     optionalString: Args.string(),
@@ -52,6 +48,10 @@ class MyCommand extends Command {
       parse: async () => ({foo: true}),
     })({default: {foo: true}}),
   }
+
+  static description = 'describe the command here'
+
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   public args!: MyArgs
 

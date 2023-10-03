@@ -1,7 +1,8 @@
-import * as Interfaces from '../interfaces'
-import {HelpFormatter} from './formatter'
-import {compact} from '../util/util'
 import stripAnsi from 'strip-ansi'
+
+import * as Interfaces from '../interfaces'
+import {compact} from '../util/util'
+import {HelpFormatter} from './formatter'
 
 export default class RootHelp extends HelpFormatter {
   constructor(
@@ -9,6 +10,14 @@ export default class RootHelp extends HelpFormatter {
     public opts: Interfaces.HelpOptions,
   ) {
     super(config, opts)
+  }
+
+  protected description(): string | undefined {
+    let description = this.config.pjson.oclif.description || this.config.pjson.description || ''
+    description = this.render(description)
+    description = description.split('\n').slice(1).join('\n')
+    if (!description) return
+    return this.section('DESCRIPTION', this.wrap(description))
   }
 
   root(): string {
@@ -22,14 +31,6 @@ export default class RootHelp extends HelpFormatter {
 
   protected usage(): string {
     return this.section(this.opts.usageHeader || 'USAGE', this.wrap(`$ ${this.config.bin} [COMMAND]`))
-  }
-
-  protected description(): string | undefined {
-    let description = this.config.pjson.oclif.description || this.config.pjson.description || ''
-    description = this.render(description)
-    description = description.split('\n').slice(1).join('\n')
-    if (!description) return
-    return this.section('DESCRIPTION', this.wrap(description))
   }
 
   protected version(): string {

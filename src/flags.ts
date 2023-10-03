@@ -1,22 +1,23 @@
 /* eslint-disable valid-jsdoc */
+import {URL} from 'node:url'
+
+import {CLIError} from './errors'
+import {loadHelpClass} from './help'
 import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfaces'
 import {dirExists, fileExists} from './util/fs'
-import {CLIError} from './errors'
-import {URL} from 'node:url'
-import {loadHelpClass} from './help'
 
 type NotArray<T> = T extends Array<any> ? never : T
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
     multiple: true
-  } & ({required: true} | {default: OptionFlag<T[], P>['default']}),
+  } & ({default: OptionFlag<T[], P>['default']} | {required: true}),
 ): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<NotArray<T>, P>> & {
     multiple?: false | undefined
-  } & ({required: true} | {default: OptionFlag<NotArray<T>, P>['default']}),
+  } & ({default: OptionFlag<NotArray<T>, P>['default']} | {required: true}),
 ): FlagDefinition<T, P, {multiple: false; requiredOrDefaulted: true}>
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
@@ -29,8 +30,8 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(
 
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
-    multiple: true
     default?: OptionFlag<T[], P>['default'] | undefined
+    multiple: true
     required?: false | undefined
   },
 ): FlagDefinition<T, P, {multiple: true; requiredOrDefaulted: false}>
@@ -79,7 +80,7 @@ export function boolean<T = boolean>(options: Partial<BooleanFlag<T>> = {}): Boo
   } as BooleanFlag<T>
 }
 
-export const integer = custom<number, {min?: number; max?: number}>({
+export const integer = custom<number, {max?: number; min?: number}>({
   async parse(input, _, opts) {
     if (!/^-?\d+$/.test(input)) throw new CLIError(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
@@ -148,37 +149,37 @@ type ElementType<T extends ReadonlyArray<unknown>> = T[number]
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
-    options: T
     multiple: true
+    options: T
   } & (
-      | {required: true}
       | {
           default: OptionFlag<ElementType<T>[], P>['default'] | undefined
         }
+      | {required: true}
     ),
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {
-    options: T
     multiple?: false | undefined
-  } & ({required: true} | {default: OptionFlag<ElementType<T>, P>['default']}),
+    options: T
+  } & ({default: OptionFlag<ElementType<T>, P>['default']} | {required: true}),
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>, P>> & {
-    options: T
     default?: OptionFlag<ElementType<T>, P>['default'] | undefined
     multiple?: false | undefined
+    options: T
     required?: false | undefined
   },
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: false}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
-    options: T
-    multiple: true
     default?: OptionFlag<ElementType<T>[], P>['default'] | undefined
+    multiple: true
+    options: T
     required?: false | undefined
   },
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: false}>

@@ -16,7 +16,7 @@ export function compact<T>(a: (T | undefined)[]): T[] {
 export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
   return arr.filter((a, i) => {
     const aVal = fn(a)
-    return !arr.find((b, j) => j > i && fn(b) === aVal)
+    return !arr.some((b, j) => j > i && fn(b) === aVal)
   })
 }
 
@@ -25,7 +25,7 @@ export function last<T>(arr?: T[]): T | undefined {
   return arr.at(-1)
 }
 
-type SortTypes = string | number | undefined | boolean
+type SortTypes = boolean | number | string | undefined
 
 function compare(a: SortTypes | SortTypes[], b: SortTypes | SortTypes[]): number {
   a = a === undefined ? 0 : a
@@ -77,11 +77,11 @@ export function capitalize(s: string): string {
 }
 
 export function isTruthy(input: string): boolean {
-  return ['true', '1', 'yes', 'y'].includes(input.toLowerCase())
+  return ['1', 'true', 'y', 'yes'].includes(input.toLowerCase())
 }
 
 export function isNotFalsy(input: string): boolean {
-  return !['false', '0', 'no', 'n'].includes(input.toLowerCase())
+  return !['0', 'false', 'n', 'no'].includes(input.toLowerCase())
 }
 
 export function uniq<T>(arr: T[]): T[] {

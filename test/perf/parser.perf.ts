@@ -5,8 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import {Suite} from 'benchmark'
-import {parse} from '../../src/parser'
+
 import {Flags} from '../../src'
+import {parse} from '../../src/parser'
 
 const suite = new Suite()
 

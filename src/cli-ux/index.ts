@@ -1,12 +1,13 @@
-import * as Errors from '../errors'
-import * as styled from './styled'
-import * as uxPrompt from './prompt'
-import {Config, config} from './config'
-import {ActionBase} from './action/base'
-import {flush as _flush} from './flush'
 import chalk from 'chalk'
-import {stdout} from './stream'
 import {format as utilFormat} from 'node:util'
+
+import * as Errors from '../errors'
+import {ActionBase} from './action/base'
+import {Config, config} from './config'
+import {flush as _flush} from './flush'
+import * as uxPrompt from './prompt'
+import {stdout} from './stream'
+import * as styled from './styled'
 import uxWait from './wait'
 
 const hyperlinker = require('hyperlinker')
@@ -14,8 +15,18 @@ const hyperlinker = require('hyperlinker')
 export class ux {
   public static config: Config = config
 
-  public static get prompt(): typeof uxPrompt.prompt {
-    return uxPrompt.prompt
+  public static get action(): ActionBase {
+    return config.action
+  }
+
+  public static annotation(text: string, annotation: string): void {
+    const supports = require('supports-hyperlinks')
+    if (supports.stdout) {
+      // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
+      this.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
+    } else {
+      this.log(text)
+    }
   }
 
   /**
@@ -29,12 +40,34 @@ export class ux {
     return uxPrompt.confirm
   }
 
-  public static get action(): ActionBase {
-    return config.action
+  public static debug(format: string, ...args: string[]): void {
+    if (['debug', 'trace'].includes(this.config.outputLevel)) {
+      stdout.write(utilFormat(format, ...args) + '\n')
+    }
   }
 
-  public static styledObject(obj: any, keys?: string[]): void {
-    this.info(styled.styledObject(obj, keys))
+  public static async done(): Promise<void> {
+    config.action.stop()
+  }
+
+  public static async flush(ms = 10_000): Promise<void> {
+    await _flush(ms)
+  }
+
+  public static info(format: string, ...args: string[]): void {
+    stdout.write(utilFormat(format, ...args) + '\n')
+  }
+
+  public static log(format?: string, ...args: string[]): void {
+    this.info(format || '', ...args)
+  }
+
+  public static get progress(): typeof styled.progress {
+    return styled.progress
+  }
+
+  public static get prompt(): typeof uxPrompt.prompt {
+    return uxPrompt.prompt
   }
 
   public static styledHeader(header: string): void {
@@ -53,24 +86,12 @@ export class ux {
     this.info(cardinal.highlight(json, {json: true, theme}))
   }
 
+  public static styledObject(obj: any, keys?: string[]): void {
+    this.info(styled.styledObject(obj, keys))
+  }
+
   public static get table(): typeof styled.Table.table {
     return styled.Table.table
-  }
-
-  public static get tree(): typeof styled.tree {
-    return styled.tree
-  }
-
-  public static get wait(): typeof uxWait {
-    return uxWait
-  }
-
-  public static get progress(): typeof styled.progress {
-    return styled.progress
-  }
-
-  public static async done(): Promise<void> {
-    config.action.stop()
   }
 
   public static trace(format: string, ...args: string[]): void {
@@ -79,18 +100,8 @@ export class ux {
     }
   }
 
-  public static debug(format: string, ...args: string[]): void {
-    if (['trace', 'debug'].includes(this.config.outputLevel)) {
-      stdout.write(utilFormat(format, ...args) + '\n')
-    }
-  }
-
-  public static info(format: string, ...args: string[]): void {
-    stdout.write(utilFormat(format, ...args) + '\n')
-  }
-
-  public static log(format?: string, ...args: string[]): void {
-    this.info(format || '', ...args)
+  public static get tree(): typeof styled.tree {
+    return styled.tree
   }
 
   public static url(text: string, uri: string, params = {}): void {
@@ -102,18 +113,8 @@ export class ux {
     }
   }
 
-  public static annotation(text: string, annotation: string): void {
-    const supports = require('supports-hyperlinks')
-    if (supports.stdout) {
-      // \u001b]8;;https://google.com\u0007sometext\u001b]8;;\u0007
-      this.log(`\u001B]1337;AddAnnotation=${text.length}|${annotation}\u0007${text}`)
-    } else {
-      this.log(text)
-    }
-  }
-
-  public static async flush(ms = 10_000): Promise<void> {
-    await _flush(ms)
+  public static get wait(): typeof uxWait {
+    return uxWait
   }
 }
 
@@ -181,8 +182,8 @@ if (!uxListener) {
   process.once('exit', uxProcessExitHandler)
 }
 
+export {ActionBase} from './action/base'
+export {Config, config} from './config'
 export {ExitError} from './exit'
 export {IPromptOptions} from './prompt'
 export {Table} from './styled'
-export {ActionBase} from './action/base'
-export {config, Config} from './config'

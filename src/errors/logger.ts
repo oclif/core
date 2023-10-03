@@ -1,5 +1,6 @@
 import {appendFile, mkdir} from 'node:fs/promises'
 import {dirname} from 'node:path'
+
 import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
@@ -16,18 +17,11 @@ function chomp(s: string): string {
 }
 
 export class Logger {
-  protected flushing: Promise<void> = Promise.resolve()
-
   protected buffer: string[] = []
 
-  constructor(public file: string) {}
+  protected flushing: Promise<void> = Promise.resolve()
 
-  log(msg: string): void {
-    msg = stripAnsi(chomp(msg))
-    const lines = msg.split('\n').map((l) => `${timestamp()} ${l}`.trimEnd())
-    this.buffer.push(...lines)
-    this.flush(50).catch(console.error)
-  }
+  constructor(public file: string) {}
 
   async flush(waitForMs = 0): Promise<void> {
     await wait(waitForMs)
@@ -39,5 +33,12 @@ export class Logger {
       await appendFile(this.file, mylines.join('\n') + '\n')
     })
     await this.flushing
+  }
+
+  log(msg: string): void {
+    msg = stripAnsi(chomp(msg))
+    const lines = msg.split('\n').map((l) => `${timestamp()} ${l}`.trimEnd())
+    this.buffer.push(...lines)
+    this.flush(50).catch(console.error)
   }
 }

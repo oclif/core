@@ -1,11 +1,10 @@
-import {pathToFileURL} from 'node:url'
 import {resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
 
 import {Config} from '../../src/config'
-
-import {expect, fancy} from './test'
 import {getHelpFlagAdditions} from '../../src/help'
 import {helpAddition, versionAddition} from '../../src/main'
+import {expect, fancy} from './test'
 
 const root = resolve(__dirname, 'fixtures/help')
 // const p = (p: string) => path.join(root, p)

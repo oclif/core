@@ -6,11 +6,12 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
-import {Executor, setup} from './util'
 import {expect} from 'chai'
 import chalk from 'chalk'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
+
+import {Executor, setup} from './util'
 
 const FAILED: string[] = []
 const PASSED: string[] = []

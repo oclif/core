@@ -1,4 +1,5 @@
 import {expect, fancy} from 'fancy-test'
+
 import {error} from '../../src/errors'
 import {PrettyPrintableError} from '../../src/interfaces/errors'
 

@@ -1,4 +1,5 @@
 import {expect, fancy} from 'fancy-test'
+
 // import path = require('path')
 import {Command as Base, Flags} from '../../src'
 import {ensureArgObject} from '../../src/util/ensure-arg-object'
@@ -250,12 +251,13 @@ describe('command', () => {
       .stderr()
       .do(async () => {
         class CMD extends Command {
-          static id = 'my:command'
-          static state = 'deprecated'
           static deprecationOptions = {
             version: '2.0.0',
             to: 'my:other:command',
           }
+
+          static id = 'my:command'
+          static state = 'deprecated'
 
           async run() {
             this.log('running command')
@@ -438,8 +440,8 @@ describe('command', () => {
       .stdout()
       .do(async () => {
         class CMD extends Command {
-          static enableJsonFlag = false
           static '--' = true
+          static enableJsonFlag = false
 
           async run() {}
         }

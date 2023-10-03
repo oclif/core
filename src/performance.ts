@@ -1,43 +1,48 @@
 import {PerformanceObserver, performance} from 'node:perf_hooks'
+
 import {settings} from './settings'
 
-type Details = Record<string, string | boolean | number | string[]>
+type Details = Record<string, boolean | number | string | string[]>
 type PerfResult = {
-  name: string
-  duration: number
   details: Details
-  module: string
+  duration: number
   method: string | undefined
+  module: string
+  name: string
   scope: string | undefined
 }
 
 type PerfHighlights = {
-  'oclif.configLoadMs': number;
-  'oclif.runMs': number;
-  'oclif.initMs': number;
-  'oclif.commandLoadMs': number;
-  'oclif.initHookMs': number;
-  'oclif.prerunHookMs': number;
-  'oclif.postrunHookMs': number;
-  'oclif.commandRunMs': number;
-  'oclif.corePluginsLoadMs': number;
-  'oclif.userPluginsLoadMs': number;
-  'oclif.linkedPluginsLoadMs': number;
-  pluginLoadTimes: Record<string, {duration: number, details: Details}>;
-  hookRunTimes: Record<string, Record<string, number>>;
+  hookRunTimes: Record<string, Record<string, number>>
+  'oclif.commandLoadMs': number
+  'oclif.commandRunMs': number
+  'oclif.configLoadMs': number
+  'oclif.corePluginsLoadMs': number
+  'oclif.initHookMs': number
+  'oclif.initMs': number
+  'oclif.linkedPluginsLoadMs': number
+  'oclif.postrunHookMs': number
+  'oclif.prerunHookMs': number
+  'oclif.runMs': number
+  'oclif.userPluginsLoadMs': number
+  pluginLoadTimes: Record<string, {details: Details; duration: number}>
 }
 export const OCLIF_MARKER_OWNER = '@oclif/core'
 
 class Marker {
-  public module: string
+  private startMarker: string
+  private stopMarker: string
   public method: string
+  public module: string
+
   public scope: string
   public stopped = false
 
-  private startMarker: string
-  private stopMarker: string
-
-  constructor(public owner:string, public name: string, public details: Details = {}) {
+  constructor(
+    public owner: string,
+    public name: string,
+    public details: Details = {},
+  ) {
     this.startMarker = `${this.name}-start`
     this.stopMarker = `${this.name}-stop`
     const [caller, scope] = name.split('#')
@@ -53,61 +58,22 @@ class Marker {
     this.details = {...this.details, ...details}
   }
 
+  public measure() {
+    performance.measure(this.name, this.startMarker, this.stopMarker)
+  }
+
   public stop() {
     this.stopped = true
     performance.mark(this.stopMarker)
   }
-
-  public measure() {
-    performance.measure(this.name, this.startMarker, this.stopMarker)
-  }
 }
 
 export class Performance {
-  /* Key: marker.name */
-  private static markers = new Map<string, Marker>()
+  private static _oclifPerf: PerfHighlights
   /* Key: marker.owner */
   private static _results = new Map<string, PerfResult[]>()
-  private static _oclifPerf: PerfHighlights
-
-  public static get enabled(): boolean {
-    return settings.performanceEnabled ?? false
-  }
-
-  /** returns a map of owner, PerfResult[].  Excludes oclif PerfResult, which you can get from oclifPerf */
-  public static get results(): Map<string, PerfResult[]> {
-    if (!Performance.enabled) return new Map()
-    return new Map<string, PerfResult[]>([...Performance._results.entries()].filter(([owner]) => owner !== OCLIF_MARKER_OWNER))
-  }
-
-  public static getResult(owner: string, name: string): PerfResult | undefined {
-    return Performance._results.get(owner)?.find(r => r.name === name)
-  }
-
-  public static get oclifPerf(): PerfHighlights | Record<string, never> {
-    if (!Performance.enabled) return {}
-
-    if (Performance._oclifPerf) return Performance._oclifPerf
-
-    throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
-  }
-
-  /**
-   * Add a new performance marker
-   *
-   * @param owner An npm package like `@oclif/core` or `@salesforce/source-tracking`
-   * @param name Name of the marker. Use `module.method#scope` format
-   * @param details Arbitrary details to attach to the marker
-   * @returns Marker instance
-   */
-  public static mark(owner:string, name: string, details: Details = {}): Marker | undefined {
-    if (!Performance.enabled) return
-
-    const marker = new Marker(owner, name, details)
-    Performance.markers.set(marker.name, marker)
-
-    return marker
-  }
+  /* Key: marker.name */
+  private static markers = new Map<string, Marker>()
 
   /**
    * Collect performance results into static Performance.results
@@ -132,12 +98,12 @@ export class Performance {
           const marker = Performance.markers.get(entry.name)
           if (marker) {
             const result = {
-              name: entry.name,
-              module: marker.module,
-              method: marker.method,
-              scope: marker.scope,
-              duration: entry.duration,
               details: marker.details,
+              duration: entry.duration,
+              method: marker.method,
+              module: marker.module,
+              name: entry.name,
+              scope: marker.scope,
             }
 
             const existing = Performance._results.get(marker.owner) ?? []
@@ -146,57 +112,67 @@ export class Performance {
         }
 
         const oclifResults = Performance._results.get(OCLIF_MARKER_OWNER) ?? []
-        const command = oclifResults.find(r => r.name.startsWith('config.runCommand'))
-        const commandLoadTime = command ? Performance.getResult(OCLIF_MARKER_OWNER, `plugin.findCommand#${command.details.plugin}.${command.details.command}`)?.duration ?? 0 : 0
+        const command = oclifResults.find((r) => r.name.startsWith('config.runCommand'))
+        const commandLoadTime = command
+          ? Performance.getResult(
+              OCLIF_MARKER_OWNER,
+              `plugin.findCommand#${command.details.plugin}.${command.details.command}`,
+            )?.duration ?? 0
+          : 0
 
-        const pluginLoadTimes = Object.fromEntries(oclifResults
-        .filter(({name}) => name.startsWith('plugin.load#'))
-        .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration, details}) => [scope, {duration, details}]))
+        const pluginLoadTimes = Object.fromEntries(
+          oclifResults
+            .filter(({name}) => name.startsWith('plugin.load#'))
+            .sort((a, b) => b.duration - a.duration)
+            .map(({details, duration, scope}) => [scope, {details, duration}]),
+        )
 
         const hookRunTimes = oclifResults
-        .filter(({name}) => name.startsWith('config.runHook#'))
-        .reduce((acc, perfResult) => {
-          const event = perfResult.details.event as string
-          if (event) {
-            if (!acc[event]) acc[event] = {}
-            acc[event][perfResult.scope!] = perfResult.duration
-          } else {
-            const event = perfResult.scope!
-            if (!acc[event]) acc[event] = {}
-            acc[event].total = perfResult.duration
-          }
+          .filter(({name}) => name.startsWith('config.runHook#'))
+          .reduce(
+            (acc, perfResult) => {
+              const event = perfResult.details.event as string
+              if (event) {
+                if (!acc[event]) acc[event] = {}
+                acc[event][perfResult.scope!] = perfResult.duration
+              } else {
+                const event = perfResult.scope!
+                if (!acc[event]) acc[event] = {}
+                acc[event].total = perfResult.duration
+              }
 
               return acc
             },
             {} as Record<string, Record<string, number>>,
           )
 
-        const pluginLoadTimeByType = Object.fromEntries(oclifResults
-        .filter(({name}) => name.startsWith('config.loadPlugins#'))
-        .sort((a, b) => b.duration - a.duration)
-        .map(({scope, duration}) => [scope, duration]))
+        const pluginLoadTimeByType = Object.fromEntries(
+          oclifResults
+            .filter(({name}) => name.startsWith('config.loadPlugins#'))
+            .sort((a, b) => b.duration - a.duration)
+            .map(({duration, scope}) => [scope, duration]),
+        )
 
         Performance._oclifPerf = {
-          'oclif.configLoadMs': Performance.getResult(OCLIF_MARKER_OWNER, 'config.load')?.duration ?? 0,
-          'oclif.runMs': Performance.getResult(OCLIF_MARKER_OWNER, 'main.run')?.duration ?? 0,
-          'oclif.initMs': Performance.getResult(OCLIF_MARKER_OWNER, 'main.run#init')?.duration ?? 0,
-          'oclif.commandRunMs': oclifResults.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0,
+          hookRunTimes,
           'oclif.commandLoadMs': commandLoadTime,
+          'oclif.commandRunMs': oclifResults.find(({name}) => name.startsWith('config.runCommand#'))?.duration ?? 0,
+          'oclif.configLoadMs': Performance.getResult(OCLIF_MARKER_OWNER, 'config.load')?.duration ?? 0,
           'oclif.corePluginsLoadMs': pluginLoadTimeByType.core ?? 0,
-          'oclif.userPluginsLoadMs': pluginLoadTimeByType.user ?? 0,
+          'oclif.initHookMs': hookRunTimes.init?.total ?? 0,
+          'oclif.initMs': Performance.getResult(OCLIF_MARKER_OWNER, 'main.run#init')?.duration ?? 0,
           'oclif.linkedPluginsLoadMs': pluginLoadTimeByType.link ?? 0,
 
           'oclif.postrunHookMs': hookRunTimes.postrun?.total ?? 0,
           'oclif.prerunHookMs': hookRunTimes.prerun?.total ?? 0,
-          'oclif.initHookMs': hookRunTimes.init?.total ?? 0,
+          'oclif.runMs': Performance.getResult(OCLIF_MARKER_OWNER, 'main.run')?.duration ?? 0,
+          'oclif.userPluginsLoadMs': pluginLoadTimeByType.user ?? 0,
           pluginLoadTimes,
-          hookRunTimes,
         }
 
         resolve()
       })
-      perfObserver.observe({entryTypes: ['measure'], buffered: true})
+      perfObserver.observe({buffered: true, entryTypes: ['measure']})
 
       for (const marker of markers) {
         try {
@@ -221,8 +197,14 @@ export class Performance {
     oclifDebug('Total Time: %sms', Performance.oclifPerf['oclif.runMs'].toFixed(4))
     oclifDebug('Init Time: %sms', Performance.oclifPerf['oclif.initMs'].toFixed(4))
     oclifDebug('Config Load Time: %sms', Performance.oclifPerf['oclif.configLoadMs'].toFixed(4))
-    oclifDebug('  • Plugins Load Time: %sms', Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')?.duration.toFixed(4) ?? 0)
-    oclifDebug('  • Commands Load Time: %sms', Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllCommands')?.duration.toFixed(4) ?? 0)
+    oclifDebug(
+      '  • Plugins Load Time: %sms',
+      Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')?.duration.toFixed(4) ?? 0,
+    )
+    oclifDebug(
+      '  • Commands Load Time: %sms',
+      Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllCommands')?.duration.toFixed(4) ?? 0,
+    )
     oclifDebug('Core Plugin Load Time: %sms', Performance.oclifPerf['oclif.corePluginsLoadMs'].toFixed(4))
     oclifDebug('User Plugin Load Time: %sms', Performance.oclifPerf['oclif.userPluginsLoadMs'].toFixed(4))
     oclifDebug('Linked Plugin Load Time: %sms', Performance.oclifPerf['oclif.linkedPluginsLoadMs'].toFixed(4))
@@ -258,5 +240,46 @@ export class Performance {
         }
       }
     }
+  }
+
+  public static get enabled(): boolean {
+    return settings.performanceEnabled ?? false
+  }
+
+  public static getResult(owner: string, name: string): PerfResult | undefined {
+    return Performance._results.get(owner)?.find((r) => r.name === name)
+  }
+
+  /**
+   * Add a new performance marker
+   *
+   * @param owner An npm package like `@oclif/core` or `@salesforce/source-tracking`
+   * @param name Name of the marker. Use `module.method#scope` format
+   * @param details Arbitrary details to attach to the marker
+   * @returns Marker instance
+   */
+  public static mark(owner: string, name: string, details: Details = {}): Marker | undefined {
+    if (!Performance.enabled) return
+
+    const marker = new Marker(owner, name, details)
+    Performance.markers.set(marker.name, marker)
+
+    return marker
+  }
+
+  public static get oclifPerf(): PerfHighlights | Record<string, never> {
+    if (!Performance.enabled) return {}
+
+    if (Performance._oclifPerf) return Performance._oclifPerf
+
+    throw new Error('Perf results not available. Did you forget to call await Performance.collect()?')
+  }
+
+  /** returns a map of owner, PerfResult[].  Excludes oclif PerfResult, which you can get from oclifPerf */
+  public static get results(): Map<string, PerfResult[]> {
+    if (!Performance.enabled) return new Map()
+    return new Map<string, PerfResult[]>(
+      [...Performance._results.entries()].filter(([owner]) => owner !== OCLIF_MARKER_OWNER),
+    )
   }
 }

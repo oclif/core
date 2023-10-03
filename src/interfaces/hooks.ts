@@ -9,20 +9,38 @@ interface HookMeta {
 
 export interface Hooks {
   [event: string]: HookMeta
+  command_incomplete: {
+    options: {argv: string[]; id: string; matches: Command.Loadable[]}
+    return: unknown
+  }
+  command_not_found: {
+    options: {argv?: string[]; id: string}
+    return: unknown
+  }
   init: {
-    options: {id: string | undefined; argv: string[]}
+    options: {argv: string[]; id: string | undefined}
     return: void
   }
-  prerun: {
-    options: {Command: Command.Class; argv: string[]}
+  jit_plugin_not_installed: {
+    options: {argv: string[]; command: Command.Loadable; id: string; pluginName: string; pluginVersion: string}
+    return: unknown
+  }
+  'plugins:preinstall': {
+    options: {
+      plugin: {name: string; tag: string; type: 'npm'} | {type: 'repo'; url: string}
+    }
     return: void
   }
   postrun: {
     options: {
       Command: Command.Class
-      result?: any
       argv: string[]
+      result?: any
     }
+    return: void
+  }
+  prerun: {
+    options: {Command: Command.Class; argv: string[]}
     return: void
   }
   preupdate: {
@@ -31,24 +49,6 @@ export interface Hooks {
   }
   update: {
     options: {channel: string; version: string}
-    return: void
-  }
-  command_not_found: {
-    options: {id: string; argv?: string[]}
-    return: unknown
-  }
-  command_incomplete: {
-    options: {id: string; argv: string[]; matches: Command.Loadable[]}
-    return: unknown
-  }
-  jit_plugin_not_installed: {
-    options: {id: string; argv: string[]; command: Command.Loadable; pluginName: string; pluginVersion: string}
-    return: unknown
-  }
-  'plugins:preinstall': {
-    options: {
-      plugin: {name: string; tag: string; type: 'npm'} | {url: string; type: 'repo'}
-    }
     return: void
   }
 }
@@ -71,15 +71,15 @@ export namespace Hook {
 
   export interface Context {
     config: Config
-    exit(code?: number): void
-    error(message: string | Error, options?: {code?: string; exit?: number}): void
-    warn(message: string): void
-    log(message?: any, ...args: any[]): void
     debug(...args: any[]): void
+    error(message: Error | string, options?: {code?: string; exit?: number}): void
+    exit(code?: number): void
+    log(message?: any, ...args: any[]): void
+    warn(message: string): void
   }
 
   export interface Result<T> {
-    successes: Array<{result: T; plugin: Plugin}>
     failures: Array<{error: Error; plugin: Plugin}>
+    successes: Array<{plugin: Plugin; result: T}>
   }
 }

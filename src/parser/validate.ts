@@ -1,4 +1,5 @@
 import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
+import {uniq} from '../util/util'
 import {
   FailedFlagValidationError,
   InvalidArgsSpecError,
@@ -7,20 +8,19 @@ import {
   UnexpectedArgsError,
   Validation,
 } from './errors'
-import {uniq} from '../util/util'
 
 export async function validate(parse: {input: ParserInput; output: ParserOutput}): Promise<void> {
   let cachedResolvedFlags: Record<string, unknown> | undefined
 
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
-      throw new NonExistentFlagsError({parse, flags: parse.output.nonExistentFlags})
+      throw new NonExistentFlagsError({flags: parse.output.nonExistentFlags, parse})
     }
 
     const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
-      throw new UnexpectedArgsError({parse, args: extras})
+      throw new UnexpectedArgsError({args: extras, parse})
     }
 
     const missingRequiredArgs: Arg<any>[] = []
@@ -32,7 +32,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       } else if (hasOptional) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
-        throw new InvalidArgsSpecError({parse, args: parse.input.args})
+        throw new InvalidArgsSpecError({args: parse.input.args, parse})
       }
 
       if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
@@ -45,13 +45,13 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .filter(([_, flagDef]) => flagDef.type === 'option' && Boolean(flagDef.multiple))
         .map(([name]) => name)
 
-      throw new RequiredArgsError({parse, args: missingRequiredArgs, flagsWithMultiple})
+      throw new RequiredArgsError({args: missingRequiredArgs, flagsWithMultiple, parse})
     }
   }
 
   async function validateFlags() {
     const promises = Object.entries(parse.input.flags).flatMap(
-      ([name, flag]): Array<Validation | Promise<Validation>> => {
+      ([name, flag]): Array<Promise<Validation> | Validation> => {
         if (parse.output.flags[name] !== undefined) {
           return [
             ...(flag.relationships ? validateRelationships(name, flag) : []),
@@ -62,7 +62,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         }
 
         if (flag.required) {
-          return [{status: 'failed', name, validationFn: 'required', reason: `Missing required flag ${name}`}]
+          return [{name, reason: `Missing required flag ${name}`, status: 'failed', validationFn: 'required'}]
         }
 
         if (flag.exactlyOne && flag.exactlyOne.length > 0) {
@@ -76,7 +76,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const results = await Promise.all(promises)
 
     const failed = results.filter((r) => r.status === 'failed')
-    if (failed.length > 0) throw new FailedFlagValidationError({parse, failed})
+    if (failed.length > 0) throw new FailedFlagValidationError({failed, parse})
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
@@ -107,7 +107,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       // the command's exactlyOne may or may not include itself, so we'll use Set to add + de-dupe
       const deduped = uniq(flag.exactlyOne?.map((flag) => `--${flag}`) ?? []).join(', ')
       const reason = `Exactly one of the following must be provided: ${deduped}`
-      return {...base, status: 'failed', reason}
+      return {...base, reason, status: 'failed'}
     }
 
     return {...base, status: 'success'}
@@ -125,8 +125,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         const flagValue = parse.output.metadata.flags?.[flag]?.defaultHelp ?? parse.output.flags[flag]
         return {
           ...base,
-          status: 'failed',
           reason: `--${flag}=${flagValue} cannot also be provided when using --${name}`,
+          status: 'failed',
         }
       }
     }
@@ -141,7 +141,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const keys = getPresentFlags(resolved)
     for (const flag of keys) {
       if (flag !== name && parse.output.flags[flag] !== undefined) {
-        return {...base, status: 'failed', reason: `--${flag} cannot also be provided when using --${name}`}
+        return {...base, reason: `--${flag} cannot also be provided when using --${name}`, status: 'failed'}
       }
     }
 
@@ -159,8 +159,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .join(', ')
       return {
         ...base,
-        status: 'failed',
         reason: `All of the following must be provided when using --${name}: ${formattedFlags}`,
+        status: 'failed',
       }
     }
 
@@ -178,8 +178,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .join(', ')
       return {
         ...base,
-        status: 'failed',
         reason: `One of the following must be provided when using --${name}: ${formattedFlags}`,
+        status: 'failed',
       }
     }
 

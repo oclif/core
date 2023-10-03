@@ -1,5 +1,12 @@
 export type Settings = {
   /**
+   * Set the terminal width to a specified number of columns (characters)
+   *
+   * Environment Variable:
+   *   OCLIF_COLUMNS=80
+   */
+  columns?: number
+  /**
    * Show additional debug output without DEBUG. Mainly shows stackstraces.
    *
    * Useful to set in the ./bin/dev script.
@@ -13,12 +20,10 @@ export type Settings = {
    */
   errlog?: string
   /**
-   * Set the terminal width to a specified number of columns (characters)
-   *
-   * Environment Variable:
-   *   OCLIF_COLUMNS=80
+   * Enable performance tracking. Resulting data is available in the `perf` property of the `Config` class.
+   * This will be overridden by the `enablePerf` property passed into Config constructor.
    */
-  columns?: number
+  performanceEnabled?: boolean
   /**
    * Try to use ts-node to load typescript source files instead of
    * javascript files.
@@ -30,11 +35,6 @@ export type Settings = {
    *   NODE_ENV=development
    */
   tsnodeEnabled?: boolean
-  /**
-   * Enable performance tracking. Resulting data is available in the `perf` property of the `Config` class.
-   * This will be overridden by the `enablePerf` property passed into Config constructor.
-   */
-  performanceEnabled?: boolean
 }
 
 // Set global.oclif to the new object if it wasn't set before

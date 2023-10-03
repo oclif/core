@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+
 import {readJson} from '../../src/util/fs'
 
 describe('readJson', () => {

@@ -1,25 +1,30 @@
-import * as Interfaces from '../interfaces'
-import {Command} from '../command'
 import chalk from 'chalk'
 import indent from 'indent-string'
-import {stdtermwidth} from '../screen'
-import stripAnsi from 'strip-ansi'
-import {template} from './util'
-import widestLine from 'widest-line'
 import width from 'string-width'
+import stripAnsi from 'strip-ansi'
+import widestLine from 'widest-line'
 import wrap from 'wrap-ansi'
 
-export type HelpSectionKeyValueTable = {name: string; description: string}[]
+import {Command} from '../command'
+import * as Interfaces from '../interfaces'
+import {stdtermwidth} from '../screen'
+import {template} from './util'
+
+export type HelpSectionKeyValueTable = {description: string; name: string}[]
 export type HelpSection =
-  | {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined}
+  | {body: [string, string | undefined][] | HelpSectionKeyValueTable | string | undefined; header: string}
   | undefined
 export type HelpSectionRenderer = (
-  data: {cmd: Command.Class | Command.Loadable | Command.Cached; flags: Command.Flag.Any[]; args: Command.Arg.Any[]},
+  data: {args: Command.Arg.Any[]; cmd: Command.Cached | Command.Class | Command.Loadable; flags: Command.Flag.Any[]},
   header: string,
 ) => HelpSection | HelpSection[] | string | undefined
 
 export class HelpFormatter {
+  protected config: Interfaces.Config
+
   indentSpacing = 2
+
+  protected opts: Interfaces.HelpOptions
 
   /**
    * Takes a string and replaces `<%= prop =>` with the value of prop, where prop is anything on
@@ -35,42 +40,6 @@ export class HelpFormatter {
     this.config = config
     this.opts = {maxWidth: stdtermwidth, ...opts}
     this.render = template(this)
-  }
-
-  protected config: Interfaces.Config
-
-  protected opts: Interfaces.HelpOptions
-
-  /**
-   * Wrap text according to `opts.maxWidth` which is typically set to the terminal width. All text
-   * will be rendered before bring wrapped, otherwise it could mess up the lengths.
-   *
-   * A terminal will automatically wrap text, so this method is primarily used for indented
-   * text. For indented text, specify the indentation so it is taken into account during wrapping.
-   *
-   * Here is an example of wrapping with indentation.
-   * ```
-   * <------ terminal window width ------>
-   * <---------- no indentation --------->
-   * This is my text that will be wrapped
-   * once it passes maxWidth.
-   *
-   * <- indent -><------ text space ----->
-   *             This is my text that will
-   *             be wrapped once it passes
-   *             maxWidth.
-   *
-   * <-- indent not taken into account ->
-   *             This is my text that will
-   * be wrapped
-   *             once it passes maxWidth.
-   * ```
-   * @param body the text to wrap
-   * @param spacing the indentation size to subtract from the terminal width
-   * @returns the formatted wrapped text
-   */
-  public wrap(body: string, spacing = this.indentSpacing): string {
-    return wrap(this.render(body), this.opts.maxWidth - spacing, {hard: true})
   }
 
   /**
@@ -108,7 +77,7 @@ export class HelpFormatter {
 
   public renderList(
     input: (string | undefined)[][],
-    opts: {indentation: number; multiline?: boolean; stripAnsi?: boolean; spacer?: string},
+    opts: {indentation: number; multiline?: boolean; spacer?: string; stripAnsi?: boolean},
   ): string {
     if (input.length === 0) {
       return ''
@@ -182,16 +151,16 @@ export class HelpFormatter {
 
   public section(
     header: string,
-    body: string | HelpSection | HelpSectionKeyValueTable | [string, string | undefined][],
+    body: [string, string | undefined][] | HelpSection | HelpSectionKeyValueTable | string,
   ): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
     if (typeof body! === 'string') {
       newBody = this.render(body!)
     } else if (Array.isArray(body)) {
-      newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map((entry) => {
+      newBody = (body! as [string, HelpSectionKeyValueTable | string | undefined][]).map((entry) => {
         if ('name' in entry) {
-          const tableEntry = entry as unknown as {name: string; description: string}
+          const tableEntry = entry as unknown as {description: string; name: string}
           return [this.render(tableEntry.name), this.render(tableEntry.description)]
         }
 
@@ -202,16 +171,48 @@ export class HelpFormatter {
       return this.section(body!.header, body!.body)
     } else {
       newBody = (body! as unknown as HelpSectionKeyValueTable)
-        .map((entry: {name: string; description: string}) => [entry.name, entry.description])
+        .map((entry: {description: string; name: string}) => [entry.name, entry.description])
         .map(([left, right]) => [this.render(left), right && this.render(right)])
     }
 
     const output = [
       chalk.bold(header),
       this.indent(
-        Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody,
+        Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
       ),
     ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output
+  }
+
+  /**
+   * Wrap text according to `opts.maxWidth` which is typically set to the terminal width. All text
+   * will be rendered before bring wrapped, otherwise it could mess up the lengths.
+   *
+   * A terminal will automatically wrap text, so this method is primarily used for indented
+   * text. For indented text, specify the indentation so it is taken into account during wrapping.
+   *
+   * Here is an example of wrapping with indentation.
+   * ```
+   * <------ terminal window width ------>
+   * <---------- no indentation --------->
+   * This is my text that will be wrapped
+   * once it passes maxWidth.
+   *
+   * <- indent -><------ text space ----->
+   *             This is my text that will
+   *             be wrapped once it passes
+   *             maxWidth.
+   *
+   * <-- indent not taken into account ->
+   *             This is my text that will
+   * be wrapped
+   *             once it passes maxWidth.
+   * ```
+   * @param body the text to wrap
+   * @param spacing the indentation size to subtract from the terminal width
+   * @returns the formatted wrapped text
+   */
+  public wrap(body: string, spacing = this.indentSpacing): string {
+    return wrap(this.render(body), this.opts.maxWidth - spacing, {hard: true})
   }
 }

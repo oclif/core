@@ -1,20 +1,20 @@
 export interface TSConfig {
   compilerOptions: {
-    rootDir?: string
-    rootDirs?: string[]
-    outDir?: string
-    target?: string
+    emitDecoratorMetadata?: boolean
     esModuleInterop?: boolean
     experimentalDecorators?: boolean
-    emitDecoratorMetadata?: boolean
+    jsx?: boolean
     module?: string
     moduleResolution?: string
+    outDir?: string
+    rootDir?: string
+    rootDirs?: string[]
     sourceMap?: boolean
-    jsx?: boolean
+    target?: string
   }
   'ts-node'?: {
     esm?: boolean
-    experimentalSpecifierResolution?: 'node' | 'explicit'
+    experimentalSpecifierResolution?: 'explicit' | 'node'
     scope?: boolean
   }
 }

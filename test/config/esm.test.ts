@@ -1,8 +1,7 @@
-import * as url from 'node:url'
 import {join, resolve} from 'node:path'
+import * as url from 'node:url'
 
 import {Config} from '../../src/config'
-
 import {expect, fancy} from './test'
 
 const root = resolve(__dirname, 'fixtures/esm')

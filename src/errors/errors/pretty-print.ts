@@ -1,11 +1,12 @@
-import {PrettyPrintableError} from '../../interfaces/errors'
-import {config} from '../config'
-import {errtermwidth} from '../../screen'
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
 
+import {PrettyPrintableError} from '../../interfaces/errors'
+import {errtermwidth} from '../../screen'
+import {config} from '../config'
+
 // These exist for backwards compatibility with CLIError
-type CLIErrorDisplayOptions = {name?: string; bang?: string}
+type CLIErrorDisplayOptions = {bang?: string; name?: string}
 
 export function applyPrettyPrintOptions(error: Error, options: PrettyPrintableError): PrettyPrintableError {
   const prettyErrorKeys: (keyof PrettyPrintableError)[] = ['message', 'code', 'ref', 'suggestions']
@@ -34,7 +35,7 @@ export default function prettyPrint(error: Error & PrettyPrintableError & CLIErr
     return error.stack
   }
 
-  const {message, code, suggestions, ref, name: errorSuffix, bang} = error
+  const {bang, code, message, name: errorSuffix, ref, suggestions} = error
 
   // errorSuffix is pulled from the 'name' property on CLIError
   // and is like either Error or Warning
@@ -47,9 +48,9 @@ export default function prettyPrint(error: Error & PrettyPrintableError & CLIErr
     .filter(Boolean)
     .join('\n')
 
-  let output = wrap(formatted, errtermwidth - 6, {trim: false, hard: true} as any)
+  let output = wrap(formatted, errtermwidth - 6, {hard: true, trim: false} as any)
   output = indent(output, 3)
-  output = indent(output, 1, {indent: bang || '', includeEmptyLines: true} as any)
+  output = indent(output, 1, {includeEmptyLines: true, indent: bang || ''} as any)
   output = indent(output, 1)
 
   return output

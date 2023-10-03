@@ -1,5 +1,6 @@
-import {ActionBase, Config, ExitError, IPromptOptions, Table, ux} from '../../src/cli-ux'
 import {expect} from 'chai'
+
+import {ActionBase, Config, ExitError, IPromptOptions, Table, ux} from '../../src/cli-ux'
 
 type MyColumns = Record<string, unknown>
 const options: Table.table.Options = {}

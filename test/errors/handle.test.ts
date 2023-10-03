@@ -2,10 +2,10 @@ import {expect, fancy} from 'fancy-test'
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 import * as process from 'node:process'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 import {CLIError, ExitError, config, exit as exitErrorThrower} from '../../src/errors'
 import {Exit, handle} from '../../src/errors/handle'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 const errlog = join(__dirname, '../tmp/mytest/error.log')
 const x = process.platform === 'win32' ? '»' : '›'

@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
+import {createInterface} from 'node:readline'
+
 import {
   ArgParserContext,
   ArgToken,
@@ -18,7 +19,7 @@ import {
   ParsingToken,
 } from '../interfaces/parser'
 import {isTruthy, last, pickBy} from '../util/util'
-import {createInterface} from 'node:readline'
+import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 
 let debug: any
 try {
@@ -34,7 +35,7 @@ try {
   }
 }
 
-const readStdin = async (): Promise<string | null> => {
+const readStdin = async (): Promise<null | string> => {
   const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
@@ -97,14 +98,14 @@ export class Parser<
 > {
   private readonly argv: string[]
 
-  private readonly raw: ParsingToken[] = []
-
   private readonly booleanFlags: {[k: string]: BooleanFlag<any>}
-  private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
 
   private readonly context: ParserContext
-
   private currentFlag?: OptionFlag<any>
+
+  private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
+
+  private readonly raw: ParsingToken[] = []
 
   constructor(private readonly input: T) {
     this.context = input.context ?? ({} as ParserContext)
@@ -118,109 +119,88 @@ export class Parser<
     )
   }
 
-  public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
-    this._debugInput()
+  private get _argTokens(): ArgToken[] {
+    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
+  }
 
-    const parseFlag = (arg: string): boolean => {
-      const {name, isLong} = this.findFlag(arg)
-      if (!name) {
-        const i = arg.indexOf('=')
-        if (i !== -1) {
-          const sliced = arg.slice(i + 1)
-          this.argv.unshift(sliced)
+  private async _args(): Promise<{args: Record<string, unknown>; argv: unknown[]}> {
+    const argv: unknown[] = []
+    const args = {} as Record<string, unknown>
+    const tokens = this._argTokens
+    let stdinRead = false
+    const ctx = this.context as ArgParserContext
 
-          const equalsParsed = parseFlag(arg.slice(0, i))
-          if (!equalsParsed) {
-            this.argv.shift()
-          }
+    for (const [name, arg] of Object.entries(this.input.args)) {
+      const token = tokens.find((t) => t.arg === name)
+      ctx.token = token!
 
-          return equalsParsed
+      if (token) {
+        if (arg.options && !arg.options.includes(token.input)) {
+          throw new ArgInvalidOptionError(arg, token.input)
         }
 
-        return false
+        const parsed = await arg.parse(token.input, ctx, arg)
+        argv.push(parsed)
+        args[token.arg] = parsed
+      } else if (!arg.ignoreStdin && !stdinRead) {
+        let stdin = await readStdin()
+        if (stdin) {
+          stdin = stdin.trim()
+          const parsed = await arg.parse(stdin, ctx, arg)
+          argv.push(parsed)
+          args[name] = parsed
+        }
+
+        stdinRead = true
       }
 
-      const flag = this.input.flags[name]
-
-      if (flag.type === 'option') {
-        if (!flag.multiple && this.raw.some((o) => o.type === 'flag' && o.flag === name)) {
-          throw new CLIError(`Flag --${name} can only be specified once`)
-        }
-
-        this.currentFlag = flag
-        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        // if the value ends up being one of the command's flags, the user didn't provide an input
-        if (typeof input !== 'string' || this.findFlag(input).name) {
-          throw new CLIError(`Flag --${name} expects a value`)
-        }
-
-        this.raw.push({type: 'flag', flag: flag.name, input})
-      } else {
-        this.raw.push({type: 'flag', flag: flag.name, input: arg})
-        // push the rest of the short characters back on the stack
-        if (!isLong && arg.length > 2) {
-          this.argv.unshift(`-${arg.slice(2)}`)
+      if (!args[name] && (arg.default || arg.default === false)) {
+        if (typeof arg.default === 'function') {
+          const f = await arg.default()
+          argv.push(f)
+          args[name] = f
+        } else {
+          argv.push(arg.default)
+          args[name] = arg.default
         }
       }
-
-      return true
     }
 
-    let parsingFlags = true
-    const nonExistentFlags: string[] = []
-    let dashdash = false
-    const originalArgv = [...this.argv]
-
-    while (this.argv.length > 0) {
-      const input = this.argv.shift() as string
-      if (parsingFlags && input.startsWith('-') && input !== '-') {
-        // attempt to parse as arg
-        if (this.input['--'] !== false && input === '--') {
-          parsingFlags = false
-          continue
-        }
-
-        if (parseFlag(input)) {
-          continue
-        }
-
-        if (input === '--') {
-          dashdash = true
-          continue
-        }
-
-        if (this.input['--'] !== false && !isNegativeNumber(input)) {
-          // At this point we have a value that begins with '-' or '--'
-          // but doesn't match up to a flag definition. So we assume that
-          // this is a misspelled flag or a non-existent flag,
-          // e.g. --hekp instead of --help
-          nonExistentFlags.push(input)
-          continue
-        }
-      }
-
-      if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
-        this.raw.push({type: 'flag', flag: this.currentFlag.name, input})
-        continue
-      }
-
-      // not a flag, parse as arg
-      const arg = Object.keys(this.input.args)[this._argTokens.length]
-      this.raw.push({type: 'arg', arg, input})
+    for (const token of tokens) {
+      if (args[token.arg]) continue
+      argv.push(token.input)
     }
 
-    const [{argv, args}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
-    this._debugOutput(argv, args, flags)
+    return {args, argv}
+  }
 
-    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
+  private _debugInput() {
+    debug('input: %s', this.argv.join(' '))
+    const args = Object.keys(this.input.args)
+    if (args.length > 0) {
+      debug('available args: %s', args.join(' '))
+    }
 
-    return {
-      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
-      flags,
-      args: args as TArgs,
-      raw: this.raw,
-      metadata,
-      nonExistentFlags,
+    if (Object.keys(this.input.flags).length === 0) return
+    debug(
+      'available flags: %s',
+      Object.keys(this.input.flags)
+        .map((f) => `--${f}`)
+        .join(' '),
+    )
+  }
+
+  private _debugOutput(args: any, flags: any, argv: any) {
+    if (argv.length > 0) {
+      debug('argv: %o', argv)
+    }
+
+    if (Object.keys(args).length > 0) {
+      debug('args: %o', args)
+    }
+
+    if (Object.keys(flags).length > 0) {
+      debug('flags: %o', flags)
     }
   }
 
@@ -240,11 +220,11 @@ export class Parser<
 
       const ctx = {
         ...context,
-        token,
         error: context?.error,
         exit: context?.exit,
         log: context?.log,
         logToStderr: context?.logToStderr,
+        token,
         warn: context?.warn,
       } as FlagParserContext
 
@@ -376,7 +356,7 @@ export class Parser<
           valueFunction:
             typeof fws.inputFlag.flag.default === 'function'
               ? (i: FlagWithStrategy, allFlags = {}) =>
-                  fws.inputFlag.flag.default({options: i.inputFlag.flag, flags: allFlags})
+                  fws.inputFlag.flag.default({flags: allFlags, options: i.inputFlag.flag})
               : async () => fws.inputFlag.flag.default,
         }
       }
@@ -393,7 +373,7 @@ export class Parser<
             typeof fws.inputFlag.flag.defaultHelp === 'function'
               ? (i: FlagWithStrategy, flags: Record<string, string>, ...context) =>
                   // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
-                  i.inputFlag.flag.defaultHelp({options: i.inputFlag, flags}, ...context)
+                  i.inputFlag.flag.defaultHelp({flags, options: i.inputFlag}, ...context)
               : // @ts-expect-error flag type isn't specific enough to know defaultHelp will definitely be there
                 (i: FlagWithStrategy) => i.inputFlag.flag.defaultHelp,
         }
@@ -431,15 +411,15 @@ export class Parser<
       ) as TFlags & BFlags & {json: boolean | undefined}
 
     type FlagWithStrategy = {
-      inputFlag: {
-        name: string
-        flag: Flag<any>
-      }
-      tokens?: FlagToken[]
-      valueFunction?: ValueFunction
       helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>
+      inputFlag: {
+        flag: Flag<any>
+        name: string
+      }
       metadata?: MetadataFlag
+      tokens?: FlagToken[]
       value?: any
+      valueFunction?: ValueFunction
     }
 
     const flagTokenMap = this.mapAndValidateFlags()
@@ -455,7 +435,7 @@ export class Parser<
             flagTokenMap.has(name),
         )
         // match each possible flag to its token, if there is one
-        .map(([name, flag]): FlagWithStrategy => ({inputFlag: {name, flag}, tokens: flagTokenMap.get(name)}))
+        .map(([name, flag]): FlagWithStrategy => ({inputFlag: {flag, name}, tokens: flagTokenMap.get(name)}))
         .map((fws) => addValueFunction(fws))
         .filter((fws) => fws.valueFunction !== undefined)
         .map((fws) => addHelpFunction(fws))
@@ -485,91 +465,6 @@ export class Parser<
     }
   }
 
-  private async _args(): Promise<{argv: unknown[]; args: Record<string, unknown>}> {
-    const argv: unknown[] = []
-    const args = {} as Record<string, unknown>
-    const tokens = this._argTokens
-    let stdinRead = false
-    const ctx = this.context as ArgParserContext
-
-    for (const [name, arg] of Object.entries(this.input.args)) {
-      const token = tokens.find((t) => t.arg === name)
-      ctx.token = token!
-
-      if (token) {
-        if (arg.options && !arg.options.includes(token.input)) {
-          throw new ArgInvalidOptionError(arg, token.input)
-        }
-
-        const parsed = await arg.parse(token.input, ctx, arg)
-        argv.push(parsed)
-        args[token.arg] = parsed
-      } else if (!arg.ignoreStdin && !stdinRead) {
-        let stdin = await readStdin()
-        if (stdin) {
-          stdin = stdin.trim()
-          const parsed = await arg.parse(stdin, ctx, arg)
-          argv.push(parsed)
-          args[name] = parsed
-        }
-
-        stdinRead = true
-      }
-
-      if (!args[name] && (arg.default || arg.default === false)) {
-        if (typeof arg.default === 'function') {
-          const f = await arg.default()
-          argv.push(f)
-          args[name] = f
-        } else {
-          argv.push(arg.default)
-          args[name] = arg.default
-        }
-      }
-    }
-
-    for (const token of tokens) {
-      if (args[token.arg]) continue
-      argv.push(token.input)
-    }
-
-    return {argv, args}
-  }
-
-  private _debugOutput(args: any, flags: any, argv: any) {
-    if (argv.length > 0) {
-      debug('argv: %o', argv)
-    }
-
-    if (Object.keys(args).length > 0) {
-      debug('args: %o', args)
-    }
-
-    if (Object.keys(flags).length > 0) {
-      debug('flags: %o', flags)
-    }
-  }
-
-  private _debugInput() {
-    debug('input: %s', this.argv.join(' '))
-    const args = Object.keys(this.input.args)
-    if (args.length > 0) {
-      debug('available args: %s', args.join(' '))
-    }
-
-    if (Object.keys(this.input.flags).length === 0) return
-    debug(
-      'available flags: %s',
-      Object.keys(this.input.flags)
-        .map((f) => `--${f}`)
-        .join(' '),
-    )
-  }
-
-  private get _argTokens(): ArgToken[] {
-    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
-  }
-
   private _setNames() {
     for (const k of Object.keys(this.input.flags)) {
       this.input.flags[k].name = k
@@ -580,19 +475,11 @@ export class Parser<
     }
   }
 
-  private mapAndValidateFlags(): Map<string, FlagToken[]> {
-    const flagTokenMap = new Map<string, FlagToken[]>()
-    for (const token of this.raw.filter((o) => o.type === 'flag') as FlagToken[]) {
-      // fail fast if there are any invalid flags
-      if (!(token.flag in this.input.flags)) {
-        throw new CLIError(`Unexpected flag ${token.flag}`)
-      }
-
-      const existing = flagTokenMap.get(token.flag) ?? []
-      flagTokenMap.set(token.flag, [...existing, token])
-    }
-
-    return flagTokenMap
+  private findFlag(arg: string): {isLong: boolean; name?: string} {
+    const isLong = arg.startsWith('--')
+    const short = isLong ? false : arg.startsWith('-')
+    const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined
+    return {isLong, name}
   }
 
   private findLongFlag(arg: string): string | undefined {
@@ -621,10 +508,124 @@ export class Parser<
     )
   }
 
-  private findFlag(arg: string): {name?: string; isLong: boolean} {
-    const isLong = arg.startsWith('--')
-    const short = isLong ? false : arg.startsWith('-')
-    const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined
-    return {name, isLong}
+  private mapAndValidateFlags(): Map<string, FlagToken[]> {
+    const flagTokenMap = new Map<string, FlagToken[]>()
+    for (const token of this.raw.filter((o) => o.type === 'flag') as FlagToken[]) {
+      // fail fast if there are any invalid flags
+      if (!(token.flag in this.input.flags)) {
+        throw new CLIError(`Unexpected flag ${token.flag}`)
+      }
+
+      const existing = flagTokenMap.get(token.flag) ?? []
+      flagTokenMap.set(token.flag, [...existing, token])
+    }
+
+    return flagTokenMap
+  }
+
+  public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
+    this._debugInput()
+
+    const parseFlag = (arg: string): boolean => {
+      const {isLong, name} = this.findFlag(arg)
+      if (!name) {
+        const i = arg.indexOf('=')
+        if (i !== -1) {
+          const sliced = arg.slice(i + 1)
+          this.argv.unshift(sliced)
+
+          const equalsParsed = parseFlag(arg.slice(0, i))
+          if (!equalsParsed) {
+            this.argv.shift()
+          }
+
+          return equalsParsed
+        }
+
+        return false
+      }
+
+      const flag = this.input.flags[name]
+
+      if (flag.type === 'option') {
+        if (!flag.multiple && this.raw.some((o) => o.type === 'flag' && o.flag === name)) {
+          throw new CLIError(`Flag --${name} can only be specified once`)
+        }
+
+        this.currentFlag = flag
+        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if (typeof input !== 'string' || this.findFlag(input).name) {
+          throw new CLIError(`Flag --${name} expects a value`)
+        }
+
+        this.raw.push({flag: flag.name, input, type: 'flag'})
+      } else {
+        this.raw.push({flag: flag.name, input: arg, type: 'flag'})
+        // push the rest of the short characters back on the stack
+        if (!isLong && arg.length > 2) {
+          this.argv.unshift(`-${arg.slice(2)}`)
+        }
+      }
+
+      return true
+    }
+
+    let parsingFlags = true
+    const nonExistentFlags: string[] = []
+    let dashdash = false
+    const originalArgv = [...this.argv]
+
+    while (this.argv.length > 0) {
+      const input = this.argv.shift() as string
+      if (parsingFlags && input.startsWith('-') && input !== '-') {
+        // attempt to parse as arg
+        if (this.input['--'] !== false && input === '--') {
+          parsingFlags = false
+          continue
+        }
+
+        if (parseFlag(input)) {
+          continue
+        }
+
+        if (input === '--') {
+          dashdash = true
+          continue
+        }
+
+        if (this.input['--'] !== false && !isNegativeNumber(input)) {
+          // At this point we have a value that begins with '-' or '--'
+          // but doesn't match up to a flag definition. So we assume that
+          // this is a misspelled flag or a non-existent flag,
+          // e.g. --hekp instead of --help
+          nonExistentFlags.push(input)
+          continue
+        }
+      }
+
+      if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
+        this.raw.push({flag: this.currentFlag.name, input, type: 'flag'})
+        continue
+      }
+
+      // not a flag, parse as arg
+      const arg = Object.keys(this.input.args)[this._argTokens.length]
+      this.raw.push({arg, input, type: 'arg'})
+    }
+
+    const [{args, argv}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
+    this._debugOutput(argv, args, flags)
+
+    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
+
+    return {
+      args: args as TArgs,
+      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
+      flags,
+      metadata,
+      nonExistentFlags,
+      raw: this.raw,
+    }
   }
 }

@@ -1,5 +1,7 @@
-import {Command} from '../../src/command'
 import {test as base, expect} from '@oclif/test'
+
+import {Command} from '../../src/command'
+
 import stripAnsi = require('strip-ansi')
 
 const g: any = global
@@ -51,10 +53,10 @@ describe('formatCommand', () => {
     // @ts-ignore
     .formatCommands([
       class extends Command {
-        static id = 'hello:world'
-
         static description =
           'This is a very long command description that should wrap after too many characters have been entered'
+
+        static id = 'hello:world'
 
         async run() {
           'run'

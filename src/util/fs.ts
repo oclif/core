@@ -1,6 +1,6 @@
+import {readFileSync} from 'node:fs'
 import {access, readFile, stat} from 'node:fs/promises'
 import {join} from 'node:path'
-import {readFileSync} from 'node:fs'
 
 const debug = require('debug')
 

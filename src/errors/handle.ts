@@ -1,10 +1,11 @@
 /* eslint-disable no-process-exit */
+import clean from 'clean-stack'
+
 /* eslint-disable unicorn/no-process-exit */
 import {OclifError, PrettyPrintableError} from '../interfaces'
+import {config} from './config'
 import {CLIError} from './errors/cli'
 import {ExitError} from './errors/exit'
-import clean from 'clean-stack'
-import {config} from './config'
 import prettyPrint from './errors/pretty-print'
 
 /**
