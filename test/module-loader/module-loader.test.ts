@@ -1,10 +1,9 @@
+import {assert, expect} from 'chai'
 import {resolve} from 'node:path'
 
-import {assert, expect} from 'chai'
-
 import {Config} from '../../src'
-import {isPathModule, load, loadWithData} from '../../src/module-loader'
 import {ModuleLoadError} from '../../src/errors'
+import {isPathModule, load, loadWithData} from '../../src/module-loader'
 
 // The following data object contains an array of module loading data for errors and successful loading conditions and
 // the associated data to test for ModuleLoader.

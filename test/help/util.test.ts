@@ -1,10 +1,11 @@
-import {resolve} from 'node:path'
-import {Config, Interfaces} from '../../src'
 import {test} from '@oclif/test'
+import {expect} from 'chai'
+import {resolve} from 'node:path'
+
+import {Config, Interfaces} from '../../src'
+import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
-import {expect} from 'chai'
-import * as util from '../../src/config/util'
 
 describe('util', () => {
   let config: Interfaces.Config

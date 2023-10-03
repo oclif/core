@@ -1,9 +1,10 @@
-import {mkdir, rm} from 'node:fs/promises'
-import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
 import chalk from 'chalk'
+import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
+import {mkdir, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {basename, dirname, join, resolve} from 'node:path'
+
 import {Interfaces} from '../../src'
 
 const debug = require('debug')('e2e')
@@ -44,11 +45,13 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interface
 }
 
 export class Executor {
-  public usesJsScript = false
-  public pluginDir: string
-  public testFileName: string
+  public debug: (...args: any[]) => void
   public parentDir: string
+  public pluginDir: string
   public pluginName: string
+  public testFileName: string
+
+  public usesJsScript = false
 
   public constructor(options: ExecutorOptions) {
     this.pluginDir = options.pluginDir
@@ -66,18 +69,6 @@ export class Executor {
     const result = this.exec(cmd)
     this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
     return result
-  }
-
-  public executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
-    return this.exec(cmd, {...options, cwd: this.pluginDir} as ExecOptions)
-  }
-
-  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
-    const executable =
-      process.platform === 'win32'
-        ? join('bin', `${script}.cmd`)
-        : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
-    return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
   public exec(cmd: string, options?: ExecOptions): Promise<Result> {
@@ -109,7 +100,17 @@ export class Executor {
     })
   }
 
-  public debug: (...args: any[]) => void
+  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
+    const executable =
+      process.platform === 'win32'
+        ? join('bin', `${script}.cmd`)
+        : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+    return this.executeInTestDir(`${executable} ${cmd}`, options)
+  }
+
+  public executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
+    return this.exec(cmd, {...options, cwd: this.pluginDir} as ExecOptions)
+  }
 }
 
 // eslint-disable-next-line valid-jsdoc

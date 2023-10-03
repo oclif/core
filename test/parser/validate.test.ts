@@ -1,7 +1,7 @@
-import {fail} from 'node:assert'
 import {expect} from 'chai'
-import {CLIError} from '../../src/errors'
+import {fail} from 'node:assert'
 
+import {CLIError} from '../../src/errors'
 import {validate} from '../../src/parser/validate'
 
 describe('validate', () => {

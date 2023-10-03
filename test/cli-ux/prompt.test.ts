@@ -3,7 +3,6 @@ import * as chai from 'chai'
 const {expect} = chai
 
 import {ux} from '../../src/cli-ux'
-
 import {fancy} from './fancy'
 
 describe('prompt', () => {

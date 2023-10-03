@@ -1,5 +1,5 @@
-import {Logger} from './logger'
 import {settings} from '../settings'
+import {Logger} from './logger'
 
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
@@ -10,7 +10,6 @@ function displayWarnings() {
 }
 
 export const config = {
-  errorLogger: undefined as Logger | undefined,
   get debug(): boolean {
     return Boolean(settings.debug)
   },
@@ -30,4 +29,5 @@ export const config = {
       delete settings.errlog
     }
   },
+  errorLogger: undefined as Logger | undefined,
 }

@@ -1,7 +1,9 @@
 import {test as base} from '@oclif/test'
-import {SinonStub, stub} from 'sinon'
+import {expect} from 'chai'
 import {resolve} from 'node:path'
+import {SinonStub, stub} from 'sinon'
 
+import {Config, Interfaces} from '../../src'
 import {Help} from '../../src/help'
 import {
   AppsAdminAdd,
@@ -15,9 +17,7 @@ import {
   DbTopic,
   DeprecateAliases,
 } from './fixtures/fixtures'
-import {Config, Interfaces} from '../../src'
 import {monkeyPatchCommands} from './help-test-utils'
-import {expect} from 'chai'
 
 const g: any = global
 g.oclif.columns = 80

@@ -1,7 +1,8 @@
 import {expect} from 'chai'
-import {Config} from '../../src'
 import {userInfo as osUserInfo} from 'node:os'
 import {sep} from 'node:path'
+
+import {Config} from '../../src'
 
 const getShell = () => osUserInfo().shell?.split(sep)?.pop() || 'unknown'
 

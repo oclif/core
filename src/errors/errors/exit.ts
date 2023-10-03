@@ -1,5 +1,5 @@
-import {CLIError} from './cli'
 import {OclifError} from '../../interfaces'
+import {CLIError} from './cli'
 
 export class ExitError extends CLIError implements OclifError {
   code = 'EEXIT'

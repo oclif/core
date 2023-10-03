@@ -5,6 +5,6 @@
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "sort-imports": "off"
+    "perfectionist/sort-objects": "off"
   }
 }

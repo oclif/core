@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+
 import {cacheDefaultValue} from '../../src/util/cache-default-value'
 
 describe('cacheDefaultValue', () => {

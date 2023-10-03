@@ -3,27 +3,27 @@ import {PJSON} from './pjson'
 import {Topic} from './topic'
 
 export interface PluginOptions {
-  root: string
-  name?: string
-  type?: string
-  tag?: string
-  ignoreManifest?: boolean
-  errorOnManifestCreate?: boolean
-  respectNoCacheDefault?: boolean
-  parent?: Plugin
   children?: Plugin[]
+  errorOnManifestCreate?: boolean
   flexibleTaxonomy?: boolean
+  ignoreManifest?: boolean
   isRoot?: boolean
+  name?: string
+  parent?: Plugin
+  respectNoCacheDefault?: boolean
+  root: string
+  tag?: string
+  type?: string
 }
 
 export interface Options extends PluginOptions {
-  devPlugins?: boolean
-  jitPlugins?: boolean
-  userPlugins?: boolean
   channel?: string
-  version?: string
+  devPlugins?: boolean
   enablePerf?: boolean
+  jitPlugins?: boolean
   plugins?: Map<string, Plugin>
+  userPlugins?: boolean
+  version?: string
 }
 
 export interface Plugin {
@@ -32,34 +32,36 @@ export interface Plugin {
    */
   _base: string
   /**
-   * name from package.json
-   */
-  name: string
-  /**
    * aliases from package.json dependencies
    */
   alias: string
+  readonly commandIDs: string[]
+  commands: Command.Loadable[]
+  findCommand(id: string, opts: {must: true}): Promise<Command.Class>
+  findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class> | undefined
+  readonly hasManifest: boolean
+  hooks: {[k: string]: string[]}
   /**
-   * version from package.json
-   *
-   * example: 1.2.3
+   * True if the plugin is the root plugin.
    */
-  version: string
+  isRoot: boolean
+  load(): Promise<void>
+
+  /**
+   * Plugin is written in ESM or CommonJS
+   */
+  moduleType: 'commonjs' | 'module'
+
+  /**
+   * name from package.json
+   */
+  name: string
   /**
    * full package.json
    *
    * parsed with read-pkg
    */
-  pjson: PJSON.Plugin | PJSON.CLI
-  /**
-   * used to tell the user how the plugin was installed
-   * examples: core, link, user, dev
-   */
-  type: string
-  /**
-   * Plugin is written in ESM or CommonJS
-   */
-  moduleType: 'module' | 'commonjs'
+  pjson: PJSON.CLI | PJSON.Plugin
   /**
    * base path of plugin
    */
@@ -69,23 +71,21 @@ export interface Plugin {
    * only used for user plugins
    */
   tag?: string
+  readonly topics: Topic[]
+
+  /**
+   * used to tell the user how the plugin was installed
+   * examples: core, link, user, dev
+   */
+  type: string
   /**
    * if it appears to be an npm package but does not look like it's really a CLI plugin, this is set to false
    */
   valid: boolean
-
   /**
-   * True if the plugin is the root plugin.
+   * version from package.json
+   *
+   * example: 1.2.3
    */
-  isRoot: boolean
-
-  commands: Command.Loadable[]
-  hooks: {[k: string]: string[]}
-  readonly commandIDs: string[]
-  readonly topics: Topic[]
-  readonly hasManifest: boolean
-
-  findCommand(id: string, opts: {must: true}): Promise<Command.Class>
-  findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class> | undefined
-  load(): Promise<void>
+  version: string
 }

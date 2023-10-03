@@ -1,10 +1,11 @@
-import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {existsSync, lstatSync} from 'node:fs'
 import {extname, join, sep} from 'node:path'
-import {Command} from './command'
-import {ModuleLoadError} from './errors'
 import {pathToFileURL} from 'node:url'
+
+import {Command} from './command'
 import {tsPath} from './config/ts-node'
+import {ModuleLoadError} from './errors'
+import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 
 const getPackageType = require('get-package-type')
 
@@ -36,7 +37,7 @@ export async function load(config: IConfig | IPlugin, modulePath: string): Promi
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ;({isESM, filePath} = resolvePath(config, modulePath))
+    ;({filePath, isESM} = resolvePath(config, modulePath))
     return isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -67,13 +68,13 @@ export async function load(config: IConfig | IPlugin, modulePath: string): Promi
 export async function loadWithData(
   config: IConfig | IPlugin,
   modulePath: string,
-): Promise<{isESM: boolean; module: any; filePath: string}> {
+): Promise<{filePath: string; isESM: boolean; module: any}> {
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ;({isESM, filePath} = resolvePath(config, modulePath))
+    ;({filePath, isESM} = resolvePath(config, modulePath))
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
-    return {isESM, module, filePath}
+    return {filePath, isESM, module}
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
       throw new ModuleLoadError(
@@ -103,8 +104,8 @@ export async function loadWithData(
 export async function loadWithDataFromManifest(
   cached: Command.Cached,
   modulePath: string,
-): Promise<{isESM: boolean; module: any; filePath: string}> {
-  const {isESM, relativePath, id} = cached
+): Promise<{filePath: string; isESM: boolean; module: any}> {
+  const {id, isESM, relativePath} = cached
   if (!relativePath) {
     throw new ModuleLoadError(`Cached command ${id} does not have a relative path`)
   }
@@ -116,7 +117,7 @@ export async function loadWithDataFromManifest(
   const filePath = join(modulePath, relativePath.join(sep))
   try {
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
-    return {isESM, module, filePath}
+    return {filePath, isESM, module}
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
       throw new ModuleLoadError(
@@ -170,7 +171,7 @@ export function isPathModule(filePath: string): boolean {
  *
  * @returns {{isESM: boolean, filePath: string}} An object including file path and whether the module is ESM.
  */
-function resolvePath(config: IConfig | IPlugin, modulePath: string): {isESM: boolean; filePath: string} {
+function resolvePath(config: IConfig | IPlugin, modulePath: string): {filePath: string; isESM: boolean} {
   let isESM: boolean
   let filePath: string | undefined
 
@@ -209,7 +210,7 @@ function resolvePath(config: IConfig | IPlugin, modulePath: string): {isESM: boo
     isESM = isPathModule(filePath)
   }
 
-  return {isESM, filePath}
+  return {filePath, isESM}
 }
 
 /**
@@ -219,7 +220,7 @@ function resolvePath(config: IConfig | IPlugin, modulePath: string): {isESM: boo
  *
  * @returns {string | null} Modified file path including extension or null if file is not found.
  */
-function findFile(filePath: string): string | null {
+function findFile(filePath: string): null | string {
   // eslint-disable-next-line camelcase
   for (const extension of s_EXTENSIONS) {
     const testPath = `${filePath}${extension}`

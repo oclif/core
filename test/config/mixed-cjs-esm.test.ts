@@ -1,7 +1,6 @@
 import {join, resolve} from 'node:path'
 
 import {Config} from '../../src/config'
-
 import {expect, fancy} from './test'
 
 const root = resolve(__dirname, 'fixtures/mixed-cjs-esm')

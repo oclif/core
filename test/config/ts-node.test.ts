@@ -1,12 +1,12 @@
-import {join, resolve} from 'node:path'
+import {expect} from 'chai'
 import * as fs from 'node:fs'
-import * as tsNode from 'ts-node'
+import {join, resolve} from 'node:path'
 import {SinonSandbox, createSandbox} from 'sinon'
+import * as tsNode from 'ts-node'
 
 import {Interfaces, settings} from '../../src'
 import * as configTsNode from '../../src/config/ts-node'
 import * as util from '../../src/util/fs'
-import {expect} from 'chai'
 
 const root = resolve(__dirname, 'fixtures/typescript')
 const tsSource = 'src/hooks/init.ts'

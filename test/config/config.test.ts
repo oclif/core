@@ -1,19 +1,18 @@
 import {join} from 'node:path'
 
-import {Plugin as IPlugin} from '../../src/interfaces'
-import * as os from '../../src/util/os'
-import * as fs from '../../src/util/fs'
-
-import {expect, fancy} from './test'
 import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
+import {Plugin as IPlugin} from '../../src/interfaces'
+import * as fs from '../../src/util/fs'
+import * as os from '../../src/util/os'
+import {expect, fancy} from './test'
 
 interface Options {
-  pjson?: any
-  homedir?: string
-  platform?: string
-  env?: {[k: string]: string}
   commandIds?: string[]
+  env?: {[k: string]: string}
+  homedir?: string
+  pjson?: any
+  platform?: string
   types?: string[]
 }
 

@@ -1,5 +1,5 @@
-import {maxBy} from '../util/util'
 import {stdtermwidth} from '../screen'
+import {maxBy} from '../util/util'
 const wordwrap = require('wordwrap')
 
 function linewrap(length: number, s: string): string {

@@ -1,5 +1,5 @@
-import {CLIError} from './cli'
 import {OclifError} from '../../interfaces'
+import {CLIError} from './cli'
 
 export class ModuleLoadError extends CLIError implements OclifError {
   code = 'MODULE_NOT_FOUND'

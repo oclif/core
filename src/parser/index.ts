@@ -10,11 +10,11 @@ export async function parse<
   TArgs extends OutputArgs<any>,
 >(argv: string[], options: Input<TFlags, BFlags, TArgs>): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
   const input = {
+    '--': options['--'],
+    args: (options.args ?? {}) as ArgInput<any>,
     argv,
     context: options.context,
-    '--': options['--'],
     flags: (options.flags ?? {}) as FlagInput<any>,
-    args: (options.args ?? {}) as ArgInput<any>,
     strict: options.strict !== false,
   }
   const parser = new Parser(input)

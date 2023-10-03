@@ -1,15 +1,10 @@
 {
-  "extends": [
-    "oclif",
-    "oclif-typescript",
-    "prettier"
-  ],
+  "extends": ["oclif", "oclif-typescript", "prettier", "plugin:perfectionist/recommended-natural"],
   "rules": {
-    "sort-imports": "error",
     "unicorn/prefer-module": "off",
-    "unicorn/import-style": "error",
     "unicorn/no-array-reduce": "off",
-    "unicorn/prefer-array-some": "off",
-    "no-useless-constructor": "off"
+    "no-useless-constructor": "off",
+    "perfectionist/sort-object-types": "off",
+    "perfectionist/sort-union-types": "off"
   }
 }

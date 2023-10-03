@@ -6,15 +6,15 @@
 import {HelpBase} from '../../src'
 
 export default class extends HelpBase {
-  async showHelp(): Promise<void> {
-    console.log('help')
+  getCommandHelpForReadme(): string {
+    return 'help for readme'
   }
 
   async showCommandHelp(): Promise<void> {
     console.log('command help')
   }
 
-  getCommandHelpForReadme(): string {
-    return 'help for readme'
+  async showHelp(): Promise<void> {
+    console.log('help')
   }
 }

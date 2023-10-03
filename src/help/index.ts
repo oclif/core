@@ -1,19 +1,20 @@
-import * as Interfaces from '../interfaces'
-import {compact, sortBy, uniqBy} from '../util/util'
-import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
+import {format} from 'node:util'
+import stripAnsi from 'strip-ansi'
+
+import {stdout} from '../cli-ux/stream'
 import {Command} from '../command'
+import {error} from '../errors'
+import * as Interfaces from '../interfaces'
+import {load} from '../module-loader'
+import {cacheDefaultValue} from '../util/cache-default-value'
+import {compact, sortBy, uniqBy} from '../util/util'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {cacheDefaultValue} from '../util/cache-default-value'
-import {error} from '../errors'
-import {format} from 'node:util'
-import {load} from '../module-loader'
-import {stdout} from '../cli-ux/stream'
-import stripAnsi from 'strip-ansi'
+import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 
 export {CommandHelp} from './command'
-export {standardizeIDFromArgv, getHelpFlagAdditions, normalizeArgv} from './util'
+export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
   // for each help flag that starts with '--' create a new flag with same name sans '--'
@@ -33,21 +34,25 @@ export abstract class HelpBase extends HelpFormatter {
   }
 
   /**
-   * Show help, used in multi-command CLIs
-   * @param args passed into your command, useful for determining which type of help to display
-   */
-  public abstract showHelp(argv: string[]): Promise<void>
-
-  /**
    * Show help for an individual command
    * @param command
    * @param topics
    */
   public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>
+
+  /**
+   * Show help, used in multi-command CLIs
+   * @param args passed into your command, useful for determining which type of help to display
+   */
+  public abstract showHelp(argv: string[]): Promise<void>
 }
 
 export class Help extends HelpBase {
   protected CommandHelpClass: typeof CommandHelp = CommandHelp
+
+  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
+    super(config, opts)
+  }
 
   /*
    * _topics is to work around Interfaces.topics mistakenly including commands that do
@@ -63,88 +68,92 @@ export class Help extends HelpBase {
     })
   }
 
-  protected get sortedCommands(): Command.Loadable[] {
-    let {commands} = this.config
-
-    commands = commands.filter((c) => this.opts.all || !c.hidden)
-    commands = sortBy(commands, (c) => c.id)
-    commands = uniqBy(commands, (c) => c.id)
-
-    return commands
+  protected command(command: Command.Class): string {
+    return this.formatCommand(command)
   }
 
-  protected get sortedTopics(): Interfaces.Topic[] {
-    let topics = this._topics
-    topics = topics.filter((t) => this.opts.all || !t.hidden)
-    topics = sortBy(topics, (t) => t.name)
-    topics = uniqBy(topics, (t) => t.name)
+  protected description(c: Command.Cached | Command.Class | Command.Loadable): string {
+    const description = this.render(c.description || '')
+    if (c.summary) {
+      return description
+    }
 
-    return topics
+    return description.split('\n').slice(1).join('\n')
   }
 
-  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
-    super(config, opts)
+  protected formatCommand(command: Command.Cached | Command.Class | Command.Loadable): string {
+    if (this.config.topicSeparator !== ':') {
+      command.id = command.id.replaceAll(':', this.config.topicSeparator)
+      command.aliases = command.aliases && command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
+    }
+
+    const help = this.getCommandHelpClass(command)
+    return help.generate()
   }
 
-  public async showHelp(argv: string[]): Promise<void> {
-    const originalArgv = argv.slice(1)
-    argv = argv.filter((arg) => !getHelpFlagAdditions(this.config).includes(arg))
+  protected formatCommands(commands: Array<Command.Cached | Command.Class | Command.Loadable>): string {
+    if (commands.length === 0) return ''
 
-    if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
-    const subject = getHelpSubject(argv, this.config)
-    if (!subject) {
-      if (this.config.pjson.oclif.default) {
-        const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
-        if (rootCmd) {
-          await this.showCommandHelp(rootCmd)
-          return
-        }
-      }
+    const body = this.renderList(
+      commands.map((c) => {
+        if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
+        return [c.id, this.summary(c)]
+      }),
+      {
+        indentation: 2,
+        spacer: '\n',
+        stripAnsi: this.opts.stripAnsi,
+      },
+    )
 
-      await this.showRootHelp()
-      return
-    }
-
-    const command = this.config.findCommand(subject)
-    if (command) {
-      if (command.hasDynamicHelp && command.pluginType !== 'jit') {
-        const loaded = await command.load()
-        for (const [name, flag] of Object.entries(loaded.flags)) {
-          if (flag.type === 'boolean' || !command.flags[name].hasDynamicHelp) continue
-          // eslint-disable-next-line no-await-in-loop
-          command.flags[name].default = await cacheDefaultValue(flag, false)
-        }
-
-        await this.showCommandHelp(command)
-      } else {
-        await this.showCommandHelp(command)
-      }
-
-      return
-    }
-
-    const topic = this.config.findTopic(subject)
-    if (topic) {
-      await this.showTopicHelp(topic)
-      return
-    }
-
-    if (this.config.flexibleTaxonomy) {
-      const matches = this.config.findMatches(subject, originalArgv)
-      if (matches.length > 0) {
-        const result = await this.config.runHook('command_incomplete', {
-          id: subject,
-          argv: originalArgv.filter((o) => !subject.split(':').includes(o)),
-          matches,
-        })
-        if (result.successes.length > 0) return
-      }
-    }
-
-    error(`Command ${subject} not found.`)
+    return this.section('COMMANDS', body)
   }
 
-  public async showCommandHelp(command: Command.Class | Command.Loadable | Command.Cached): Promise<void> {
+  protected formatRoot(): string {
+    const help = new RootHelp(this.config, this.opts)
+    return help.root()
+  }
+
+  protected formatTopic(topic: Interfaces.Topic): string {
+    let description = this.render(topic.description || '')
+    const summary = description.split('\n')[0]
+    description = description.split('\n').slice(1).join('\n')
+    let topicID = `${topic.name}:COMMAND`
+    if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
+    let output = compact([
+      summary,
+      this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
+      description && this.section('DESCRIPTION', this.wrap(description)),
+    ]).join('\n\n')
+    if (this.opts.stripAnsi) output = stripAnsi(output)
+    return output + '\n'
+  }
+
+  protected formatTopics(topics: Interfaces.Topic[]): string {
+    if (topics.length === 0) return ''
+    const body = this.renderList(
+      topics.map((c) => {
+        if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
+        return [c.name, c.description && this.render(c.description.split('\n')[0])]
+      }),
+      {
+        indentation: 2,
+        spacer: '\n',
+        stripAnsi: this.opts.stripAnsi,
+      },
+    )
+    return this.section('TOPICS', body)
+  }
+
+  protected getCommandHelpClass(command: Command.Cached | Command.Class | Command.Loadable): CommandHelp {
+    return new this.CommandHelpClass(command, this.config, this.opts)
+  }
+
+  protected log(...args: string[]): void {
+    stdout.write(format.apply(this, args) + '\n')
+  }
+
+  public async showCommandHelp(command: Command.Cached | Command.Class | Command.Loadable): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
 
@@ -194,6 +203,64 @@ export class Help extends HelpBase {
       this.log(this.formatCommands(uniqueSubCommands))
       this.log('')
     }
+  }
+
+  public async showHelp(argv: string[]): Promise<void> {
+    const originalArgv = argv.slice(1)
+    argv = argv.filter((arg) => !getHelpFlagAdditions(this.config).includes(arg))
+
+    if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
+    const subject = getHelpSubject(argv, this.config)
+    if (!subject) {
+      if (this.config.pjson.oclif.default) {
+        const rootCmd = this.config.findCommand(this.config.pjson.oclif.default)
+        if (rootCmd) {
+          await this.showCommandHelp(rootCmd)
+          return
+        }
+      }
+
+      await this.showRootHelp()
+      return
+    }
+
+    const command = this.config.findCommand(subject)
+    if (command) {
+      if (command.hasDynamicHelp && command.pluginType !== 'jit') {
+        const loaded = await command.load()
+        for (const [name, flag] of Object.entries(loaded.flags)) {
+          if (flag.type === 'boolean' || !command.flags[name].hasDynamicHelp) continue
+          // eslint-disable-next-line no-await-in-loop
+          command.flags[name].default = await cacheDefaultValue(flag, false)
+        }
+
+        await this.showCommandHelp(command)
+      } else {
+        await this.showCommandHelp(command)
+      }
+
+      return
+    }
+
+    const topic = this.config.findTopic(subject)
+    if (topic) {
+      await this.showTopicHelp(topic)
+      return
+    }
+
+    if (this.config.flexibleTaxonomy) {
+      const matches = this.config.findMatches(subject, originalArgv)
+      if (matches.length > 0) {
+        const result = await this.config.runHook('command_incomplete', {
+          argv: originalArgv.filter((o) => !subject.split(':').includes(o)),
+          id: subject,
+          matches,
+        })
+        if (result.successes.length > 0) return
+      }
+    }
+
+    error(`Command ${subject} not found.`)
   }
 
   protected async showRootHelp(): Promise<void> {
@@ -252,95 +319,29 @@ export class Help extends HelpBase {
     }
   }
 
-  protected formatRoot(): string {
-    const help = new RootHelp(this.config, this.opts)
-    return help.root()
-  }
-
-  protected formatCommand(command: Command.Class | Command.Loadable | Command.Cached): string {
-    if (this.config.topicSeparator !== ':') {
-      command.id = command.id.replaceAll(':', this.config.topicSeparator)
-      command.aliases = command.aliases && command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
-    }
-
-    const help = this.getCommandHelpClass(command)
-    return help.generate()
-  }
-
-  protected getCommandHelpClass(command: Command.Class | Command.Loadable | Command.Cached): CommandHelp {
-    return new this.CommandHelpClass(command, this.config, this.opts)
-  }
-
-  protected formatCommands(commands: Array<Command.Class | Command.Loadable | Command.Cached>): string {
-    if (commands.length === 0) return ''
-
-    const body = this.renderList(
-      commands.map((c) => {
-        if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
-        return [c.id, this.summary(c)]
-      }),
-      {
-        spacer: '\n',
-        stripAnsi: this.opts.stripAnsi,
-        indentation: 2,
-      },
-    )
-
-    return this.section('COMMANDS', body)
-  }
-
-  protected summary(c: Command.Class | Command.Loadable | Command.Cached): string | undefined {
+  protected summary(c: Command.Cached | Command.Class | Command.Loadable): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
     return c.description && this.render(c.description).split('\n')[0]
   }
 
-  protected description(c: Command.Class | Command.Loadable | Command.Cached): string {
-    const description = this.render(c.description || '')
-    if (c.summary) {
-      return description
-    }
+  protected get sortedCommands(): Command.Loadable[] {
+    let {commands} = this.config
 
-    return description.split('\n').slice(1).join('\n')
+    commands = commands.filter((c) => this.opts.all || !c.hidden)
+    commands = sortBy(commands, (c) => c.id)
+    commands = uniqBy(commands, (c) => c.id)
+
+    return commands
   }
 
-  protected formatTopic(topic: Interfaces.Topic): string {
-    let description = this.render(topic.description || '')
-    const summary = description.split('\n')[0]
-    description = description.split('\n').slice(1).join('\n')
-    let topicID = `${topic.name}:COMMAND`
-    if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
-    let output = compact([
-      summary,
-      this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
-      description && this.section('DESCRIPTION', this.wrap(description)),
-    ]).join('\n\n')
-    if (this.opts.stripAnsi) output = stripAnsi(output)
-    return output + '\n'
-  }
+  protected get sortedTopics(): Interfaces.Topic[] {
+    let topics = this._topics
+    topics = topics.filter((t) => this.opts.all || !t.hidden)
+    topics = sortBy(topics, (t) => t.name)
+    topics = uniqBy(topics, (t) => t.name)
 
-  protected formatTopics(topics: Interfaces.Topic[]): string {
-    if (topics.length === 0) return ''
-    const body = this.renderList(
-      topics.map((c) => {
-        if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
-        return [c.name, c.description && this.render(c.description.split('\n')[0])]
-      }),
-      {
-        spacer: '\n',
-        stripAnsi: this.opts.stripAnsi,
-        indentation: 2,
-      },
-    )
-    return this.section('TOPICS', body)
-  }
-
-  protected command(command: Command.Class): string {
-    return this.formatCommand(command)
-  }
-
-  protected log(...args: string[]): void {
-    stdout.write(format.apply(this, args) + '\n')
+    return topics
   }
 }
 

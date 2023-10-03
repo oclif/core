@@ -1,7 +1,8 @@
+import {URL} from 'node:url'
+
+import {Command} from './command'
 import {Arg, ArgDefinition} from './interfaces/parser'
 import {dirExists, fileExists} from './util/fs'
-import {Command} from './command'
-import {URL} from 'node:url'
 import {isNotFalsy} from './util/util'
 
 /**
@@ -36,7 +37,7 @@ export const boolean = custom<boolean>({
   parse: async (b) => Boolean(b) && isNotFalsy(b),
 })
 
-export const integer = custom<number, {min?: number; max?: number}>({
+export const integer = custom<number, {max?: number; min?: number}>({
   async parse(input, _, opts) {
     if (!/^-?\d+$/.test(input)) throw new Error(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)

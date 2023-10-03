@@ -1,6 +1,6 @@
-import {LoadOptions} from './interfaces'
 import {flush} from './cli-ux/flush'
 import {handle} from './errors/handle'
+import {LoadOptions} from './interfaces'
 import {run} from './main'
 import {settings} from './settings'
 
@@ -47,10 +47,10 @@ import {settings} from './settings'
  * ```
  */
 export async function execute(options: {
-  dir: string
   args?: string[]
-  loadOptions?: LoadOptions
   development?: boolean
+  dir: string
+  loadOptions?: LoadOptions
 }): Promise<unknown> {
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins

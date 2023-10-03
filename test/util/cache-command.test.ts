@@ -1,17 +1,23 @@
 import {expect} from 'chai'
+
 import {Args, Command, Flags} from '../../src/index'
 import {cacheCommand} from '../../src/util/cache-command'
 
 describe('cacheCommand', () => {
   it('should return a cached command with every thing set', async () => {
     class C extends Command {
-      static id = 'foo:bar'
-      static title = 'cmd title'
-      static type = 'mytype'
-      static usage = ['$ usage']
-      static description = 'test command'
       static aliases = ['alias1', 'alias2']
-      static hidden = true
+      static args = {
+        arg1: Args.string({
+          description: 'arg1 desc',
+          required: true,
+          hidden: false,
+          options: ['af', 'b'],
+          default: async () => 'a',
+        }),
+      }
+
+      static description = 'test command'
       static flags = {
         flaga: Flags.boolean(),
         flagb: Flags.string({
@@ -33,15 +39,12 @@ describe('cacheCommand', () => {
         }),
       }
 
-      static args = {
-        arg1: Args.string({
-          description: 'arg1 desc',
-          required: true,
-          hidden: false,
-          options: ['af', 'b'],
-          default: async () => 'a',
-        }),
-      }
+      static hidden = true
+      static id = 'foo:bar'
+      static title = 'cmd title'
+      static type = 'mytype'
+
+      static usage = ['$ usage']
 
       public async run(): Promise<void> {}
     }
@@ -153,23 +156,25 @@ describe('cacheCommand', () => {
 
   it('should return a cached command with multiple Command classes in inheritance chain', async () => {
     class Base extends Command {
-      public static enableJsonFlag = true
       public static aliases = ['base']
-      public static state = 'beta'
-      public static summary = 'base summary'
       public static baseFlags = {
         parentFlag: Flags.boolean(),
       }
+
+      public static enableJsonFlag = true
+      public static state = 'beta'
+      public static summary = 'base summary'
 
       public async run(): Promise<void> {}
     }
 
     class Child extends Base {
-      static id = 'command'
-      public static summary = 'child summary'
       static flags = {
         childFlag: Flags.boolean(),
       }
+
+      static id = 'command'
+      public static summary = 'child summary'
 
       public async run(): Promise<void> {}
     }
@@ -261,13 +266,14 @@ describe('cacheCommand', () => {
 
   it('should set dynamicHelp to true if defaultHelp is a function', async () => {
     class C extends Command {
-      static id = 'foo:bar'
       static flags = {
         flaga: Flags.boolean(),
         flagb: Flags.string({
           defaultHelp: async () => 'foo',
         }),
       }
+
+      static id = 'foo:bar'
 
       public async run(): Promise<void> {}
     }
@@ -278,12 +284,12 @@ describe('cacheCommand', () => {
 
   it('should add additional command properties', async () => {
     class C extends Command {
-      static id = 'foo:bar'
+      static envVars = ['FOO_BAR']
       static flags = {
         flaga: Flags.boolean(),
       }
 
-      static envVars = ['FOO_BAR']
+      static id = 'foo:bar'
 
       public async run(): Promise<void> {}
     }

@@ -1,6 +1,7 @@
 import {expect} from 'chai'
-import {DocOpts} from '../../src/help/docopts'
+
 import {Flags} from '../../src'
+import {DocOpts} from '../../src/help/docopts'
 
 describe('doc opts', () => {
   it('shows required string field', async () => {

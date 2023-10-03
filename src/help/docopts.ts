@@ -57,11 +57,11 @@ import {ensureArgObject} from '../util/ensure-arg-object'
  *
  */
 export class DocOpts {
-  private flagMap: {[index: string]: Command.Flag.Any}
-
   private flagList: Command.Flag.Any[]
 
-  public constructor(private cmd: Command.Class | Command.Loadable | Command.Cached) {
+  private flagMap: {[index: string]: Command.Flag.Any}
+
+  public constructor(private cmd: Command.Cached | Command.Class | Command.Loadable) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -72,72 +72,8 @@ export class DocOpts {
       })
   }
 
-  public static generate(cmd: Command.Class | Command.Loadable | Command.Cached): string {
+  public static generate(cmd: Command.Cached | Command.Class | Command.Loadable): string {
     return new DocOpts(cmd).toString()
-  }
-
-  public toString(): string {
-    const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
-    if (this.cmd.args) {
-      const a =
-        Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
-          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
-        ) || []
-      opts.push(...a)
-    }
-
-    try {
-      opts.push(...Object.values(this.groupFlagElements()))
-    } catch {
-      // If there is an error, just return no usage so we don't fail command help.
-      opts.push(
-        ...this.flagList.map((flag) => {
-          const name = flag.char ? `-${flag.char}` : `--${flag.name}`
-          if (flag.type === 'boolean') return name
-          return `${name}=<value>`
-        }),
-      )
-    }
-
-    return opts.join(' ')
-  }
-
-  private groupFlagElements(): {[index: string]: string} {
-    const elementMap: {[index: string]: string} = {}
-
-    // Generate all doc opt elements for combining
-    // Show required flags first
-    this.generateElements(
-      elementMap,
-      this.flagList.filter((flag) => flag.required),
-    )
-    // Then show optional flags
-    this.generateElements(
-      elementMap,
-      this.flagList.filter((flag) => !flag.required),
-    )
-
-    for (const flag of this.flagList) {
-      if (Array.isArray(flag.dependsOn)) {
-        this.combineElementsToFlag(elementMap, flag.name, flag.dependsOn, ' ')
-      }
-
-      if (Array.isArray(flag.exclusive)) {
-        this.combineElementsToFlag(elementMap, flag.name, flag.exclusive, ' | ')
-      }
-    }
-
-    // Since combineElementsToFlag deletes the references in this.flags when it combines
-    // them, this will go through the remaining list of uncombined elements.
-    for (const remainingFlagName of Object.keys(this.flagMap)) {
-      const remainingFlag = this.flagMap[remainingFlagName] || {}
-
-      if (!remainingFlag.required) {
-        elementMap[remainingFlag.name] = `[${elementMap[remainingFlag.name] || ''}]`
-      }
-    }
-
-    return elementMap
   }
 
   private combineElementsToFlag(
@@ -187,5 +123,69 @@ export class DocOpts {
     }
 
     return elementStrs
+  }
+
+  private groupFlagElements(): {[index: string]: string} {
+    const elementMap: {[index: string]: string} = {}
+
+    // Generate all doc opt elements for combining
+    // Show required flags first
+    this.generateElements(
+      elementMap,
+      this.flagList.filter((flag) => flag.required),
+    )
+    // Then show optional flags
+    this.generateElements(
+      elementMap,
+      this.flagList.filter((flag) => !flag.required),
+    )
+
+    for (const flag of this.flagList) {
+      if (Array.isArray(flag.dependsOn)) {
+        this.combineElementsToFlag(elementMap, flag.name, flag.dependsOn, ' ')
+      }
+
+      if (Array.isArray(flag.exclusive)) {
+        this.combineElementsToFlag(elementMap, flag.name, flag.exclusive, ' | ')
+      }
+    }
+
+    // Since combineElementsToFlag deletes the references in this.flags when it combines
+    // them, this will go through the remaining list of uncombined elements.
+    for (const remainingFlagName of Object.keys(this.flagMap)) {
+      const remainingFlag = this.flagMap[remainingFlagName] || {}
+
+      if (!remainingFlag.required) {
+        elementMap[remainingFlag.name] = `[${elementMap[remainingFlag.name] || ''}]`
+      }
+    }
+
+    return elementMap
+  }
+
+  public toString(): string {
+    const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
+    if (this.cmd.args) {
+      const a =
+        Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
+          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
+        ) || []
+      opts.push(...a)
+    }
+
+    try {
+      opts.push(...Object.values(this.groupFlagElements()))
+    } catch {
+      // If there is an error, just return no usage so we don't fail command help.
+      opts.push(
+        ...this.flagList.map((flag) => {
+          const name = flag.char ? `-${flag.char}` : `--${flag.name}`
+          if (flag.type === 'boolean') return name
+          return `${name}=<value>`
+        }),
+      )
+    }
+
+    return opts.join(' ')
   }
 }

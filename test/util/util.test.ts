@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+
 import {capitalize, castArray, isNotFalsy, isTruthy, last, maxBy, sumBy} from '../../src/util/util'
 
 describe('capitalize', () => {
