@@ -4,12 +4,12 @@ import {CLIError, error, exit, warn} from '../errors'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
-import { OCLIF_MARKER_OWNER, Performance } from '../performance'
+import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {URL, fileURLToPath} from 'node:url'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {compact, isProd} from '../util/util'
 import {getHomeDir, getPlatform} from '../util/os'
-import { join, sep } from 'node:path'
+import {join, sep} from 'node:path'
 import {Command} from '../command'
 import PluginLoader from './plugin-loader'
 import WSL from 'is-wsl'
@@ -153,7 +153,8 @@ export class Config implements IConfig {
 
   // eslint-disable-next-line complexity
   public async load(): Promise<void> {
-    settings.performanceEnabled = (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    settings.performanceEnabled =
+      (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({root: this.options.root, plugins: this.options.plugins})
     Config._rootPlugin = await this.pluginLoader.loadRoot()
