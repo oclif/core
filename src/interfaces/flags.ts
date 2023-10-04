@@ -30,4 +30,4 @@ import {FlagInput} from './parser'
  *   }
  * }
  */
-export type InferredFlags<T> = T extends FlagInput<infer F> ? F & { json: boolean | undefined; } : unknown
+export type InferredFlags<T> = T extends FlagInput<infer F> ? F & {json: boolean | undefined} : unknown

@@ -2,33 +2,34 @@
  * This test file contains no unit tests but we use the tsd package to ensure that the types are valid when the tests are compiled
  */
 
+import {URL} from 'node:url'
+import {expectNotType, expectType} from 'tsd'
+
 import {Command, Flags, Interfaces} from '../../src'
-import {expectType, expectNotType} from 'tsd'
-import {URL} from 'url'
 
 abstract class BaseCommand extends Command {
-  static enableJsonFlag = true
-
   static baseFlags = {
     optionalGlobalFlag: Flags.string(),
     requiredGlobalFlag: Flags.string({required: true}),
     defaultGlobalFlag: Flags.string({default: 'default'}),
   }
+
+  static enableJsonFlag = true
 }
 
 type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
 
 type MyType = {
-  foo: boolean;
+  foo: boolean
 }
 
 export const customFlagWithRequiredProp = Flags.custom<number, {unit: 'minutes' | 'seconds'}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     const value = opts.unit === 'minutes' ? new Date(input).getMinutes() : new Date(input).getSeconds()
-    return Promise.resolve(value)
+    return value
   },
-  default: async _ctx => _ctx.options.unit === 'minutes' ? 1 : 2,
-  defaultHelp: async _ctx => _ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds',
+  default: async (_ctx) => (_ctx.options.unit === 'minutes' ? 1 : 2),
+  defaultHelp: async (_ctx) => (_ctx.options.unit === 'minutes' ? '1 minute' : '2 seconds'),
   char: 'c',
 })
 
@@ -37,96 +38,306 @@ export const arrayFlag = Flags.custom<string[]>({
   multiple: true,
 })
 
+const options = ['foo', 'bar'] as const
+
+Flags.option({
+  options,
+  multiple: true,
+  // @ts-expect-error because multiple is true, default must be an array
+  default: 'foo',
+})
+
+Flags.option({options})({
+  multiple: true,
+  // @ts-expect-error because multiple is true, default must be an array
+  default: 'foo',
+})
+
+// @ts-expect-error because multiple is false, default must be a single value
+Flags.option({
+  options,
+  default: ['foo'],
+})
+
+// @ts-expect-error because multiple is false, default must be a single value
+Flags.option({options, multiple: false})({
+  default: ['foo'],
+})
+
+Flags.custom({
+  options,
+  multiple: true,
+  // @ts-expect-error because multiple is true, default must be an array
+  default: 'foo',
+})
+
+Flags.custom()({
+  multiple: true,
+  // @ts-expect-error because multiple is true, default must be an array
+  default: 'foo',
+})
+
+Flags.custom({multiple: true})({
+  // @ts-expect-error because multiple is true, default must be an array
+  default: 'foo',
+})
+
+// @ts-expect-error because multiple is false, default must be a single value
+Flags.custom({
+  options,
+  default: ['foo'],
+})
+
+// @ts-expect-error because multiple is false, default must be a single value
+Flags.custom({multiple: false})({
+  default: ['foo'],
+})
+
 class MyCommand extends BaseCommand {
+  public static '--' = true
+
   static description = 'describe the command here'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   static flags = {
-    requiredString: Flags.string({required: true}),
-    optionalString: Flags.string(),
-    defaultString: Flags.string({default: 'default'}),
+    string: Flags.string(),
+    'string#opts:required': Flags.string({required: true}),
+    'string#opts:default': Flags.string({default: 'default'}),
 
-    requiredMultiString: Flags.string({required: true, multiple: true}),
-    optionalMultiString: Flags.string({multiple: true}),
-    defaultMultiString: Flags.string({
+    'string#opts:multiple,required': Flags.string({required: true, multiple: true}),
+    'string#opts:multiple': Flags.string({multiple: true}),
+    'string#opts:multiple,default': Flags.string({
       multiple: true,
       default: ['default'],
-      defaultHelp: async _ctx => 'defaultHelp',
+      defaultHelp: async (_ctx) => 'defaultHelp',
     }),
 
-    requiredBoolean: Flags.boolean({required: true}),
-    optionalBoolean: Flags.boolean(),
-    defaultBoolean: Flags.boolean({default: true}),
+    boolean: Flags.boolean(),
+    'boolean#opts:required': Flags.boolean({required: true}),
+    'boolean#opts:default': Flags.boolean({default: true}),
 
-    optionalInteger: Flags.integer(),
-    requiredInteger: Flags.integer({required: true}),
-    defaultInteger: Flags.integer({default: 1}),
+    integer: Flags.integer(),
+    'integer#opts:required': Flags.integer({required: true}),
+    'integer#opts:default': Flags.integer({default: 1}),
 
-    optionalMultiInteger: Flags.integer({multiple: true}),
-    requiredMultiInteger: Flags.integer({multiple: true, required: true}),
-    defaultMultiInteger: Flags.integer({multiple: true, default: [1]}),
+    'integer#opts:multiple': Flags.integer({multiple: true}),
+    'integer#opts:multiple,required': Flags.integer({multiple: true, required: true}),
+    'integer#opts:multiple,default': Flags.integer({multiple: true, default: [1]}),
 
-    optionalDirectory: Flags.directory(),
-    requiredDirectory: Flags.directory({required: true}),
-    defaultDirectory: Flags.directory({default: 'my-dir'}),
+    directory: Flags.directory(),
+    'directory#opts:required': Flags.directory({required: true}),
+    'directory#opts:default': Flags.directory({default: 'my-dir'}),
 
-    optionalMultiDirectory: Flags.directory({multiple: true}),
-    requiredMultiDirectory: Flags.directory({multiple: true, required: true}),
-    defaultMultiDirectory: Flags.directory({multiple: true, default: ['my-dir']}),
+    'directory#opts:multiple': Flags.directory({multiple: true}),
+    'directory#opts:multiple,required': Flags.directory({multiple: true, required: true}),
+    'directory#opts:multiple,default': Flags.directory({multiple: true, default: ['my-dir']}),
 
-    optionalFile: Flags.file(),
-    requiredFile: Flags.file({required: true}),
-    defaultFile: Flags.file({default: 'my-file.json'}),
+    file: Flags.file(),
+    'file#opts:required': Flags.file({required: true}),
+    'file#opts:default': Flags.file({default: 'my-file.json'}),
 
-    optionalMultiFile: Flags.file({multiple: true}),
-    requiredMultiFile: Flags.file({multiple: true, required: true}),
-    defaultMultiFile: Flags.file({multiple: true, default: ['my-file.json']}),
+    'file#opts:multiple': Flags.file({multiple: true}),
+    'file#opts:multiple,required': Flags.file({multiple: true, required: true}),
+    'file#opts:multiple,default': Flags.file({multiple: true, default: ['my-file.json']}),
 
-    optionalUrl: Flags.url(),
-    requiredUrl: Flags.url({required: true}),
-    defaultUrl: Flags.url({
+    url: Flags.url(),
+    'url#opts:required': Flags.url({required: true}),
+    'url#opts:default': Flags.url({
       default: new URL('http://example.com'),
-      defaultHelp: async _ctx => 'Example URL',
+      defaultHelp: async (_ctx) => 'Example URL',
     }),
 
-    optionalMultiUrl: Flags.url({multiple: true}),
-    requiredMultiUrl: Flags.url({multiple: true, required: true}),
-    defaultMultiUrl: Flags.url({multiple: true, default: [new URL('http://example.com')]}),
+    'url#opts:multiple': Flags.url({multiple: true}),
+    'url#opts:multiple,required': Flags.url({multiple: true, required: true}),
+    'url#opts:multiple,default': Flags.url({multiple: true, default: [new URL('http://example.com')]}),
 
-    optionalCustom: Flags.custom<MyType>({
+    custom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })(),
-    requiredCustom: Flags.custom<MyType>({
+    'custom#opts:required': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({required: true}),
-    defaultCustom: Flags.custom<MyType>({
+    'custom#opts:default': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
-      default: async _ctx => ({foo: true}),
-    })({default: {foo: true}}),
+    })({
+      default: async (_ctx) => ({foo: true}),
+    }),
 
-    optionalMultiCustom: Flags.custom<MyType>({
+    'custom#opts:multiple': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({multiple: true}),
-    requiredMultiCustom: Flags.custom<MyType>({
+    'custom#opts:multiple,required': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({required: true, multiple: true}),
-    defaultMultiCustom: Flags.custom<MyType>({
+    'custom#opts:multiple,default': Flags.custom<MyType>({
       parse: async () => ({foo: true}),
     })({default: [{foo: true}], multiple: true}),
 
-    optionalCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes'}),
-    requiredCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', required: true}),
-    defaultCustomFlagWithRequiredProp: customFlagWithRequiredProp({unit: 'minutes', default: 23}),
+    'custom#opts:custom-prop': customFlagWithRequiredProp({unit: 'minutes'}),
+    'custom#opts:custom-prop,required': customFlagWithRequiredProp({unit: 'minutes', required: true}),
+    'custom#opts:custom-prop,default': customFlagWithRequiredProp({unit: 'minutes', default: 23}),
 
-    optionalArrayFlag: arrayFlag(),
-    requiredArrayFlag: arrayFlag({required: true}),
-    defaultArrayFlag: arrayFlag({default: ['foo', 'bar']}),
+    'custom#defs:multiple,delimiter': arrayFlag(),
+    'custom#defs:multiple,delimiter;opts:required': arrayFlag({required: true}),
+    'custom#defs:multiple,delimiter;opts:default': arrayFlag({default: ['foo', 'bar']}),
+
+    option: Flags.option({
+      options,
+    })(),
+    'option#opts:required': Flags.option({
+      options,
+    })({required: true}),
+    'option#opts:default': Flags.option({
+      options,
+    })({default: 'foo'}),
+
+    'option#opts:multiple': Flags.option({
+      options,
+    })({multiple: true}),
+    'option#opts:multiple,required': Flags.option({
+      options,
+    })({required: true, multiple: true}),
+    'option#opts:multiple,default': Flags.option({
+      options,
+    })({default: async (_ctx) => ['foo'], multiple: true}),
+
+    'custom#defs:required': Flags.custom({
+      required: true,
+    })(),
+    'custom#defs:default': Flags.custom({
+      default: 'foo',
+    })(),
+    'custom#defs:multiple': Flags.custom({
+      multiple: true,
+    })(),
+    'custom#defs:multiple,required': Flags.custom({
+      multiple: true,
+      required: true,
+    })(),
+    'custom#defs:multiple,default': Flags.custom({
+      multiple: true,
+      default: ['foo'],
+    })(),
+
+    'option#defs:required': Flags.option({
+      options,
+      required: true,
+    })(),
+    'option#defs:default': Flags.option({
+      options,
+      default: async (_ctx) => 'foo',
+    })(),
+    'option#defs:multiple': Flags.option({
+      options,
+      multiple: true,
+    })(),
+    'option#defs:multiple,required': Flags.option({
+      options,
+      multiple: true,
+      required: true,
+    })(),
+    'option#defs,multiple,default': Flags.option({
+      options,
+      multiple: true,
+      default: async (_ctx) => ['foo'],
+    })(),
+
+    'option#defs:multiple;opts:default': Flags.option({
+      options,
+      multiple: true,
+    })({
+      default: ['foo'],
+    }),
+
+    'option#defs:multiple;opts:default-callback': Flags.option({
+      options,
+      multiple: true,
+    })({
+      default: async (_ctx) => ['foo'],
+    }),
+
+    'custom#defs:multiple;opts:default-callback': Flags.custom({
+      options,
+      multiple: true,
+    })({
+      default: async (_ctx) => ['foo'],
+    }),
+
+    'custom#defs:multiple,parse': Flags.custom({
+      multiple: true,
+      parse: async (input, _ctx, _opts) => input,
+    })(),
+
+    'option#defs:multiple,prase': Flags.option({
+      options,
+      multiple: true,
+      parse: async (input, _ctx, _opts) => input as (typeof options)[number],
+    })(),
+
+    'custom#defs:multiple=true;opts:multiple=false': Flags.custom({
+      multiple: true,
+    })({
+      multiple: false,
+    }),
+    'custom#defs:multiple=false;opts:multiple=true': Flags.custom({
+      multiple: false,
+    })({
+      multiple: true,
+    }),
+    'custom#defs:required=true;opts:required=false': Flags.custom({
+      required: true,
+    })({
+      required: false,
+    }),
+    'custom#defs:required=false;opts:required=true': Flags.custom({
+      required: false,
+    })({
+      required: true,
+    }),
+    'custom#defs:multiple=true;opts:multiple=false,required=true': Flags.custom({
+      multiple: true,
+    })({
+      multiple: false,
+      required: true,
+    }),
+    'custom#defs:required=true;opts:multiple=true,required=false': Flags.custom({
+      required: true,
+    })({
+      multiple: true,
+      required: false,
+    }),
+    'custom#defs:required=false;opts:multiple=true,required=true': Flags.custom({
+      required: false,
+    })({
+      multiple: true,
+      required: true,
+    }),
+
+    'custom#defs:multiple=true,required=true;opts:multiple=false,required=false': Flags.custom({
+      multiple: true,
+      required: true,
+    })({
+      multiple: false,
+      required: false,
+    }),
+
+    'custom#defs:multiple=false,required=false;opts:multiple=true,required=true': Flags.custom({
+      multiple: false,
+      required: false,
+    })({
+      multiple: true,
+      required: true,
+    }),
+
+    'custom#defs:multiple=true;opts:multiple=false,default': Flags.custom({
+      multiple: true,
+    })({
+      multiple: false,
+      // TODO: THIS IS A BUG. It should enforce a single value instead of allowing a single value or an array
+      default: ['foo'],
+    }),
   }
-
-  public static '--' = true
 
   public flags!: MyFlags
 
@@ -141,94 +352,164 @@ class MyCommand extends BaseCommand {
     expectNotType<undefined>(this.flags.defaultGlobalFlag)
     expectType<string | undefined>(this.flags.optionalGlobalFlag)
 
-    expectType<string>(this.flags.requiredString)
-    expectNotType<undefined>(this.flags.requiredString)
+    expectType<string>(this.flags['string#opts:required'])
+    expectNotType<undefined>(this.flags['string#opts:required'])
 
-    expectType<string>(this.flags.defaultString)
-    expectNotType<undefined>(this.flags.defaultString)
+    expectType<string>(this.flags['string#opts:default'])
+    expectNotType<undefined>(this.flags['string#opts:default'])
 
-    expectType<string | undefined>(this.flags.optionalString)
+    expectType<string | undefined>(this.flags.string)
 
-    expectType<string[]>(this.flags.requiredMultiString)
-    expectNotType<undefined>(this.flags.requiredMultiString)
+    expectType<string[]>(this.flags['string#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['string#opts:multiple,required'])
 
-    expectType<string[] | undefined>(this.flags.optionalMultiString)
-    expectType<string[]>(this.flags.defaultMultiString)
-    expectNotType<undefined>(this.flags.defaultMultiString)
+    expectType<string[] | undefined>(this.flags['string#opts:multiple'])
+    expectType<string[]>(this.flags['string#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['string#opts:multiple,default'])
 
-    expectType<boolean>(this.flags.requiredBoolean)
-    expectNotType<undefined>(this.flags.requiredBoolean)
-    expectType<boolean>(this.flags.defaultBoolean)
-    expectNotType<undefined>(this.flags.defaultBoolean)
-    expectType<boolean | undefined>(this.flags.optionalBoolean)
+    expectType<boolean>(this.flags['boolean#opts:required'])
+    expectNotType<undefined>(this.flags['boolean#opts:required'])
+    expectType<boolean>(this.flags['boolean#opts:default'])
+    expectNotType<undefined>(this.flags['boolean#opts:default'])
+    expectType<boolean | undefined>(this.flags.boolean)
 
-    expectType<number>(this.flags.requiredInteger)
-    expectNotType<undefined>(this.flags.requiredInteger)
-    expectType<number>(this.flags.defaultInteger)
-    expectNotType<undefined>(this.flags.defaultInteger)
-    expectType<number | undefined>(this.flags.optionalInteger)
+    expectType<number>(this.flags['integer#opts:required'])
+    expectNotType<undefined>(this.flags['integer#opts:required'])
+    expectType<number>(this.flags['integer#opts:default'])
+    expectNotType<undefined>(this.flags['integer#opts:default'])
+    expectType<number | undefined>(this.flags.integer)
 
-    expectType<number[]>(this.flags.requiredMultiInteger)
-    expectNotType<undefined>(this.flags.requiredMultiInteger)
-    expectType<number[]>(this.flags.defaultMultiInteger)
-    expectNotType<undefined>(this.flags.defaultMultiInteger)
-    expectType<number[] | undefined>(this.flags.optionalMultiInteger)
+    expectType<number[]>(this.flags['integer#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['integer#opts:multiple,required'])
+    expectType<number[]>(this.flags['integer#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['integer#opts:multiple,default'])
+    expectType<number[] | undefined>(this.flags['integer#opts:multiple'])
 
-    expectType<string>(this.flags.requiredDirectory)
-    expectNotType<undefined>(this.flags.requiredDirectory)
-    expectType<string>(this.flags.defaultDirectory)
-    expectNotType<undefined>(this.flags.defaultDirectory)
-    expectType<string | undefined>(this.flags.optionalDirectory)
+    expectType<string>(this.flags['directory#opts:required'])
+    expectNotType<undefined>(this.flags['directory#opts:required'])
+    expectType<string>(this.flags['directory#opts:default'])
+    expectNotType<undefined>(this.flags['directory#opts:default'])
+    expectType<string | undefined>(this.flags.directory)
 
-    expectType<string[]>(this.flags.requiredMultiDirectory)
-    expectNotType<undefined>(this.flags.requiredMultiDirectory)
-    expectType<string[]>(this.flags.defaultMultiDirectory)
-    expectNotType<undefined>(this.flags.defaultMultiDirectory)
-    expectType<string[] | undefined>(this.flags.optionalMultiDirectory)
+    expectType<string[]>(this.flags['directory#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['directory#opts:multiple,required'])
+    expectType<string[]>(this.flags['directory#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['directory#opts:multiple,default'])
+    expectType<string[] | undefined>(this.flags['directory#opts:multiple'])
 
-    expectType<string>(this.flags.requiredFile)
-    expectNotType<undefined>(this.flags.requiredFile)
-    expectType<string>(this.flags.defaultFile)
-    expectNotType<undefined>(this.flags.defaultFile)
-    expectType<string | undefined>(this.flags.optionalFile)
+    expectType<string>(this.flags['file#opts:required'])
+    expectNotType<undefined>(this.flags['file#opts:required'])
+    expectType<string>(this.flags['file#opts:default'])
+    expectNotType<undefined>(this.flags['file#opts:default'])
+    expectType<string | undefined>(this.flags.file)
 
-    expectType<string[]>(this.flags.requiredMultiFile)
-    expectNotType<undefined>(this.flags.requiredMultiFile)
-    expectType<string[]>(this.flags.defaultMultiFile)
-    expectNotType<undefined>(this.flags.defaultMultiFile)
-    expectType<string[] | undefined>(this.flags.optionalMultiFile)
+    expectType<string[]>(this.flags['file#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['file#opts:multiple,required'])
+    expectType<string[]>(this.flags['file#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['file#opts:multiple,default'])
+    expectType<string[] | undefined>(this.flags['file#opts:multiple'])
 
-    expectType<URL>(this.flags.requiredUrl)
-    expectNotType<undefined>(this.flags.requiredUrl)
-    expectType<URL>(this.flags.defaultUrl)
-    expectNotType<undefined>(this.flags.defaultUrl)
-    expectType<URL | undefined>(this.flags.optionalUrl)
+    expectType<URL>(this.flags['url#opts:required'])
+    expectNotType<undefined>(this.flags['url#opts:required'])
+    expectType<URL>(this.flags['url#opts:default'])
+    expectNotType<undefined>(this.flags['url#opts:default'])
+    expectType<URL | undefined>(this.flags.url)
 
-    expectType<URL[]>(this.flags.requiredMultiUrl)
-    expectNotType<undefined>(this.flags.requiredMultiUrl)
-    expectType<URL[]>(this.flags.defaultMultiUrl)
-    expectNotType<undefined>(this.flags.defaultMultiUrl)
-    expectType<URL[] | undefined>(this.flags.optionalMultiUrl)
+    expectType<URL[]>(this.flags['url#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['url#opts:multiple,required'])
+    expectType<URL[]>(this.flags['url#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['url#opts:multiple,default'])
+    expectType<URL[] | undefined>(this.flags['url#opts:multiple'])
 
-    expectType<MyType>(this.flags.requiredCustom)
-    expectNotType<undefined>(this.flags.requiredCustom)
-    expectType<MyType>(this.flags.defaultCustom)
-    expectNotType<undefined>(this.flags.defaultCustom)
-    expectType<MyType | undefined>(this.flags.optionalCustom)
+    expectType<MyType>(this.flags['custom#opts:required'])
+    expectNotType<undefined>(this.flags['custom#opts:required'])
+    expectType<MyType>(this.flags['custom#opts:default'])
+    expectNotType<undefined>(this.flags['custom#opts:default'])
+    expectType<MyType | undefined>(this.flags.custom)
 
-    expectType<MyType[]>(this.flags.requiredMultiCustom)
-    expectNotType<undefined>(this.flags.requiredMultiCustom)
-    expectType<MyType[]>(this.flags.defaultMultiCustom)
-    expectNotType<undefined>(this.flags.defaultMultiCustom)
-    expectType<MyType[] | undefined>(this.flags.optionalMultiCustom)
+    expectType<MyType[]>(this.flags['custom#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['custom#opts:multiple,required'])
+    expectType<MyType[]>(this.flags['custom#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['custom#opts:multiple,default'])
+    expectType<MyType[] | undefined>(this.flags['custom#opts:multiple'])
 
-    expectType<number | undefined>(this.flags.optionalCustomFlagWithRequiredProp)
-    expectType<number>(this.flags.requiredCustomFlagWithRequiredProp)
-    expectNotType<undefined>(this.flags.requiredCustomFlagWithRequiredProp)
-    expectType<number>(this.flags.defaultCustomFlagWithRequiredProp)
-    expectNotType<undefined>(this.flags.defaultCustomFlagWithRequiredProp)
+    expectType<number | undefined>(this.flags['custom#opts:custom-prop'])
+    expectType<number>(this.flags['custom#opts:custom-prop,required'])
+    expectNotType<undefined>(this.flags['custom#opts:custom-prop,required'])
+    expectType<number>(this.flags['custom#opts:custom-prop,default'])
+    expectNotType<undefined>(this.flags['custom#opts:custom-prop,default'])
+
+    expectType<string[]>(this.flags['custom#defs:multiple,delimiter;opts:required'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple,delimiter;opts:required'])
+    expectType<string[]>(this.flags['custom#defs:multiple,delimiter;opts:default'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple,delimiter;opts:default'])
+    expectType<string[] | undefined>(this.flags['custom#defs:multiple,delimiter'])
+
+    expectType<(typeof options)[number]>(this.flags['option#opts:required'])
+    expectNotType<undefined>(this.flags['option#opts:required'])
+    expectType<(typeof options)[number]>(this.flags['option#opts:default'])
+    expectNotType<undefined>(this.flags['option#opts:default'])
+    expectType<(typeof options)[number] | undefined>(this.flags.option)
+
+    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,required'])
+    expectNotType<undefined>(this.flags['option#opts:multiple,required'])
+    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,default'])
+    expectNotType<undefined>(this.flags['option#opts:multiple,default'])
+    expectType<(typeof options)[number][] | undefined>(this.flags['option#opts:multiple'])
+
+    expectType<string>(this.flags['custom#defs:required'])
+    expectNotType<undefined>(this.flags['custom#defs:required'])
+    expectType<string>(this.flags['custom#defs:default'])
+    expectNotType<undefined>(this.flags['custom#defs:default'])
+    expectType<string[] | undefined>(this.flags['custom#defs:multiple'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple'])
+    expectType<string[]>(this.flags['custom#defs:multiple,required'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple,required'])
+    expectType<string[]>(this.flags['custom#defs:multiple,default'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple,default'])
+
+    expectType<string>(this.flags['option#defs:required'])
+    expectNotType<undefined>(this.flags['option#defs:required'])
+    expectType<string>(this.flags['option#defs:default'])
+    expectNotType<undefined>(this.flags['option#defs:default'])
+    expectType<string[] | undefined>(this.flags['option#defs:multiple'])
+    expectNotType<undefined>(this.flags['option#defs:multiple'])
+    expectType<string[]>(this.flags['option#defs:multiple,required'])
+    expectNotType<undefined>(this.flags['option#defs:multiple,required'])
+    expectType<string[]>(this.flags['option#defs,multiple,default'])
+    expectNotType<undefined>(this.flags['option#defs,multiple,default'])
+
+    expectType<string[]>(this.flags['option#defs:multiple;opts:default'])
+    expectNotType<undefined>(this.flags['option#defs:multiple;opts:default'])
+
+    expectType<string[]>(this.flags['option#defs:multiple;opts:default-callback'])
+    expectNotType<undefined>(this.flags['option#defs:multiple;opts:default-callback'])
+
+    expectType<string[]>(this.flags['custom#defs:multiple;opts:default-callback'])
+
+    expectType<string[] | undefined>(this.flags['custom#defs:multiple,parse'])
+
+    expectType<(typeof options)[number][] | undefined>(this.flags['option#defs:multiple,prase'])
+
+    expectType<string | undefined>(this.flags['custom#defs:multiple=true;opts:multiple=false'])
+    expectType<string[] | undefined>(this.flags['custom#defs:multiple=false;opts:multiple=true'])
+    expectType<string | undefined>(this.flags['custom#defs:required=true;opts:required=false'])
+    expectType<string>(this.flags['custom#defs:required=false;opts:required=true'])
+    expectNotType<undefined>(this.flags['custom#defs:required=false;opts:required=true'])
+    expectType<string>(this.flags['custom#defs:multiple=true;opts:multiple=false,required=true'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple=true;opts:multiple=false,required=true'])
+    expectType<string[] | undefined>(this.flags['custom#defs:required=true;opts:multiple=true,required=false'])
+    expectType<string[]>(this.flags['custom#defs:required=false;opts:multiple=true,required=true'])
+    expectNotType<undefined>(this.flags['custom#defs:required=false;opts:multiple=true,required=true'])
+    expectType<string | undefined>(
+      this.flags['custom#defs:multiple=true,required=true;opts:multiple=false,required=false'],
+    )
+    expectType<string[]>(this.flags['custom#defs:multiple=false,required=false;opts:multiple=true,required=true'])
+    expectNotType<undefined>(this.flags['custom#defs:multiple=false,required=false;opts:multiple=true,required=true'])
+
+    // TODO: Known issue with `default` not enforcing the correct type whenever multiple is defaulted to true but then overridden to false
+    // expectType<string>(this.flags['custom#defs:multiple=true;opts:multiple=false,default'])
 
     return result.flags
   }
 }
-

@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import {Interfaces} from '../../src'
 import {Command} from '../../src/command'
-import stripAnsi = require('strip-ansi')
+import {CommandHelp, Help} from '../../src/help'
+import {cacheCommand} from '../../src/util/cache-command'
 
-import {Interfaces, toCached} from '../../src'
-import {Help, CommandHelp} from '../../src/help'
+import stripAnsi = require('strip-ansi')
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
     const sections = super.sections()
-    const flagSection = sections.find(section => section.header === 'FLAGS')
+    const flagSection = sections.find((section) => section.header === 'FLAGS')
     if (flagSection) flagSection.header = 'OPTIONS'
     return sections
   }
@@ -36,24 +36,27 @@ export class TestHelp extends Help {
     return super.formatCommand(command)
   }
 
-  public formatTopics(topics: Interfaces.Topic[]) {
-    return super.formatTopics(topics)
-  }
-
   public formatTopic(topic: Interfaces.Topic) {
     return super.formatTopic(topic)
+  }
+
+  public formatTopics(topics: Interfaces.Topic[]) {
+    return super.formatTopics(topics)
   }
 }
 
 export const commandHelp = (command?: any) => ({
   async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await toCached(command!, {} as any, false)
+    const cached = await cacheCommand(command!, {} as any, false)
     const help = ctx.help.formatCommand(cached)
     if (process.env.TEST_OUTPUT === '1') {
       console.log(help)
     }
 
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(help)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has commandHelp'
   },
 })
@@ -66,7 +69,10 @@ export const topicsHelp = (topics: Interfaces.Topic[]) => ({
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicsHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicsHelp'
   },
 })
@@ -78,16 +84,27 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
       console.log(topicHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicHelpOutput).split('\n').map(s => s.trimEnd()).join('\n')
+    ctx.commandHelp = stripAnsi(topicHelpOutput)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
     ctx.expectation = 'has topicHelp'
   },
 })
 
-export function monkeyPatchCommands(config: any, plugins: Array<{commands: Command.Class[], topics: Interfaces.Topic[]}>) {
-  config.plugins = plugins
+export function monkeyPatchCommands(
+  config: any,
+  plugins: Array<{name: string; commands: Command.Class[]; topics: Interfaces.Topic[]}>,
+) {
+  const pluginsMap = new Map()
+  for (const plugin of plugins) {
+    pluginsMap.set(plugin.name, plugin)
+  }
+
+  config.plugins = pluginsMap
   config._commands = new Map()
   config._topics = new Map()
-  for (const plugin of config.plugins) {
+  for (const plugin of config.plugins.values()) {
     config.loadCommands(plugin)
     config.loadTopics(plugin)
   }

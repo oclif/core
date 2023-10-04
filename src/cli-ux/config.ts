@@ -1,49 +1,37 @@
 import {PJSON} from '../interfaces/pjson'
-import {requireJson} from '../util'
-import spinner from './action/spinner'
-import simple from './action/spinner'
-import pride from './action/pride-spinner'
+import {requireJson} from '../util/fs'
 import {ActionBase} from './action/base'
+import simple from './action/simple'
+import spinner from './action/spinner'
 
-export type Levels = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace'
+export type Levels = 'debug' | 'error' | 'fatal' | 'info' | 'trace' | 'warn'
 
 export interface ConfigMessage {
-  type: 'config';
-  prop: string;
-  value: any;
+  prop: string
+  type: 'config'
+  value: any
 }
 
 const g: any = global
-const globals = g['cli-ux'] || (g['cli-ux'] = {})
+const globals = g.ux || (g.ux = {})
 
-const actionType = (
-  Boolean(process.stderr.isTTY) &&
-  !process.env.CI &&
-  !['dumb', 'emacs-color'].includes(process.env.TERM!) &&
-  'spinner'
-) || 'simple'
+const actionType =
+  (Boolean(process.stderr.isTTY) &&
+    !process.env.CI &&
+    !['dumb', 'emacs-color'].includes(process.env.TERM!) &&
+    'spinner') ||
+  'simple'
 
 const Action = actionType === 'spinner' ? spinner : simple
-const PrideAction = actionType === 'spinner' ? pride : simple
 
 export class Config {
-  outputLevel: Levels = 'info'
-
   action: ActionBase = new Action()
-
-  prideAction: ActionBase = new PrideAction()
 
   errorsHandled = false
 
+  outputLevel: Levels = 'info'
+
   showStackTrace = true
-
-  get debug(): boolean {
-    return globals.debug || process.env.DEBUG === '*'
-  }
-
-  set debug(v: boolean) {
-    globals.debug = v
-  }
 
   get context(): any {
     return globals.context || {}
@@ -51,6 +39,14 @@ export class Config {
 
   set context(v: unknown) {
     globals.context = v
+  }
+
+  get debug(): boolean {
+    return globals.debug || process.env.DEBUG === '*'
+  }
+
+  set debug(v: boolean) {
+    globals.debug = v
   }
 }
 

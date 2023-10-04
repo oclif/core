@@ -1,1 +1,1 @@
-module.exports = error => require('./lib/errors/handle').handle(error)
+module.exports = async error => require('./lib/errors/handle').handle(error)

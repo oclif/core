@@ -1,0 +1,10 @@
+{
+  "extends": ["oclif", "oclif-typescript", "prettier", "plugin:perfectionist/recommended-natural"],
+  "rules": {
+    "unicorn/prefer-module": "off",
+    "unicorn/no-array-reduce": "off",
+    "no-useless-constructor": "off",
+    "perfectionist/sort-object-types": "off",
+    "perfectionist/sort-union-types": "off"
+  }
+}

@@ -1,7 +1,9 @@
-import {URL} from 'url'
-import {Arg, ArgDefinition} from './interfaces/parser'
+import {URL} from 'node:url'
+
 import {Command} from './command'
-import {dirExists, fileExists, isNotFalsy} from './util'
+import {Arg, ArgDefinition} from './interfaces/parser'
+import {dirExists, fileExists} from './util/fs'
+import {isNotFalsy} from './util/util'
 
 /**
  * Create a custom arg.
@@ -22,25 +24,22 @@ import {dirExists, fileExists, isNotFalsy} from './util'
  */
 export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P> {
-  return (options: any = {}) => {
-    return {
-      parse: async (i: string, _context: Command, _opts: P) => i,
-      ...defaults,
-      ...options,
-      input: [] as string[],
-      type: 'option',
-    }
-  }
+  return (options: any = {}) => ({
+    parse: async (i: string, _context: Command, _opts: P) => i,
+    ...defaults,
+    ...options,
+    input: [] as string[],
+    type: 'option',
+  })
 }
 
 export const boolean = custom<boolean>({
-  parse: async b => Boolean(b) && isNotFalsy(b),
+  parse: async (b) => Boolean(b) && isNotFalsy(b),
 })
 
-export const integer = custom<number, {min?: number; max?: number;}>({
-  parse: async (input, _, opts) => {
-    if (!/^-?\d+$/.test(input))
-      throw new Error(`Expected an integer but received: ${input}`)
+export const integer = custom<number, {max?: number; min?: number}>({
+  async parse(input, _, opts) {
+    if (!/^-?\d+$/.test(input)) throw new Error(`Expected an integer but received: ${input}`)
     const num = Number.parseInt(input, 10)
     if (opts.min !== undefined && num < opts.min)
       throw new Error(`Expected an integer greater than or equal to ${opts.min} but received: ${input}`)
@@ -51,7 +50,7 @@ export const integer = custom<number, {min?: number; max?: number;}>({
 })
 
 export const directory = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return dirExists(input)
 
     return input
@@ -59,7 +58,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 export const file = custom<string, {exists?: boolean}>({
-  parse: async (input, _, opts) => {
+  async parse(input, _, opts) {
     if (opts.exists) return fileExists(input)
 
     return input
@@ -71,7 +70,7 @@ export const file = custom<string, {exists?: boolean}>({
  * if the string is not a valid URL.
  */
 export const url = custom<URL>({
-  parse: async input => {
+  async parse(input) {
     try {
       return new URL(input)
     } catch {

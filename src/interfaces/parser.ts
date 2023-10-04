@@ -1,49 +1,48 @@
 import {Command} from '../command'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
-import {Config} from './config'
 
-export type FlagOutput = { [name: string]: any }
-export type ArgOutput = { [name: string]: any }
+export type FlagOutput = {[name: string]: any}
+export type ArgOutput = {[name: string]: any}
 
 export type CLIParseErrorOptions = {
   parse: {
-    input?: ParserInput;
-    output?: ParserOutput;
-  };
+    input?: ParserInput
+    output?: ParserOutput
+  }
 }
 
-export type OutputArgs<T extends ParserInput['args']> = { [P in keyof T]: any }
-export type OutputFlags<T extends ParserInput['flags']> = { [P in keyof T]: any }
+export type OutputArgs<T extends ParserInput['args']> = {[P in keyof T]: any}
+export type OutputFlags<T extends ParserInput['flags']> = {[P in keyof T]: any}
 
 export type ParserOutput<
   TFlags extends OutputFlags<any> = any,
   BFlags extends OutputFlags<any> = any,
-  TArgs extends OutputFlags<any> = any
+  TArgs extends OutputFlags<any> = any,
 > = {
   // Add in the --json flag so that it shows up in the types.
   // This is necessary because there's no way to optionally add the json flag based
   // on wether enableJsonFlag is set in the command.
-  flags: TFlags & BFlags & { json: boolean | undefined };
-  args: TArgs;
-  argv: unknown[];
-  raw: ParsingToken[];
-  metadata: Metadata;
-  nonExistentFlags: string[];
+  flags: TFlags & BFlags & {json: boolean | undefined}
+  args: TArgs
+  argv: unknown[]
+  raw: ParsingToken[]
+  metadata: Metadata
+  nonExistentFlags: string[]
 }
 
-export type ArgToken = { type: 'arg'; arg: string; input: string }
-export type FlagToken = { type: 'flag'; flag: string; input: string }
+export type ArgToken = {type: 'arg'; arg: string; input: string}
+export type FlagToken = {type: 'flag'; flag: string; input: string}
 export type ParsingToken = ArgToken | FlagToken
 
-export type FlagUsageOptions = { displayRequired?: boolean }
+export type FlagUsageOptions = {displayRequired?: boolean}
 
 export type Metadata = {
-  flags: { [key: string]: MetadataFlag };
+  flags: {[key: string]: MetadataFlag}
 }
 
 export type MetadataFlag = {
-  setFromDefault?: boolean;
-  defaultHelp?: unknown;
+  setFromDefault?: boolean
+  defaultHelp?: unknown
 }
 
 export type ListItem = [string, string | undefined]
@@ -52,31 +51,15 @@ export type List = ListItem[]
 export type CustomOptions = Record<string, unknown>
 
 export type DefaultContext<T> = {
-  options: T;
-  flags: Record<string, string>;
+  options: T
+  flags: Record<string, string>
 }
 
 /**
  * Type to define a default value for a flag.
  * @param context The context of the flag.
- * @param isWritingManifest Informs the function that a manifest file is being written.
- * The manifest file is used to store the flag definitions, with a default value if present, for a command and is published to npm.
- * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
- * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
- * in the function's implementation.
- * @example
- * static flags = {
- *   foo: flags.string({
- *     defaultHelp: async (context, isWritingManifest) => {
- *       if (isWritingManifest) {
- *         return undefined
- *       }
- *       return 'value that is used outside a manifest'
- *     },
- *    }),
- *  }
  */
-export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, isWritingManifest?: boolean) => Promise<T>)
+export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<T>)
 
 /**
  * Type to define a defaultHelp value for a flag.
@@ -84,284 +67,363 @@ export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P 
  * It is also can be used to provide a value for the flag when issuing certain error messages.
  *
  * @param context The context of the flag.
- * @param isWritingManifest Informs the function that a manifest file is being written.
- * The manifest file is used to store the flag definitions, with a default value if present via defaultHelp, for a command and is published to npm.
- * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
- * The plugin developer can use isWritingManifest to determine if the defaultHelp value should be omitted from the manifest.
- * in the function's implementation.
- * @example
- * static flags = {
- *   foo: flags.string({
- *     defaultHelp: async (context, isWritingManifest) => {
- *       if (isWritingManifest) {
- *         return undefined
- *       }
- *       return 'value that is used outside a manifest'
- *     },
- *    }),
- *  }
  */
-export type FlagDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<P & OptionFlag<T, P>>, isWritingManifest?: boolean) => Promise<string | undefined>)
+export type FlagDefaultHelp<T, P = CustomOptions> =
+  | T
+  | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<string | undefined>)
 
 /**
  * Type to define a default value for an arg.
  * @param context The context of the arg.
- * @param isWritingManifest Informs the function that a manifest file is being written.
- * The manifest file is used to store the arg definitions, with a default value if present, for a command and is published to npm.
- * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
- * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
- * in the function's implementation.
- * @example
- *   public static readonly args = {
- *     one: Args.string({
- *       default: async (context, isWritingManifest) => {
- *          if (isWritingManifest) {
- *             return undefined
- *          }
- *          return 'value that is used outside a manifest'
- *       }),
- *   };
  */
-export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, isWritingManifest?: boolean) => Promise<T>)
+export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>) => Promise<T>)
 
 /**
  * Type to define a defaultHelp value for an arg.
  * @param context The context of the arg.
- * @param isWritingManifest Informs the function that a manifest file is being written.
- * The manifest file is used to store the arg definitions, with a default value if present via defaultHelp, for a command and is published to npm.
- * When a manifest file is being written, the default value may contain data that should not be included in the manifest.
- * The plugin developer can use isWritingManifest to determine if the default value should be omitted from the manifest.
- * in the function's implementation.
- * @example
- *   public static readonly args = {
- *     one: Args.string({
- *       defaultHelp: async (context, isWritingManifest) => {
- *          if (isWritingManifest) {
- *             return undefined
- *          }
- *          return 'value that is used outside a manifest'
- *       }),
- *   };
  */
-export type ArgDefaultHelp<T, P = CustomOptions> = T | ((context: DefaultContext<Arg<T, P>>, isWritingManifest?: boolean) => Promise<string | undefined>)
+export type ArgDefaultHelp<T, P = CustomOptions> =
+  | T
+  | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
 
-export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>};
+export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>}
 export type Relationship = {
-  type: 'all' | 'some' | 'none';
-  flags: FlagRelationship[];
+  type: 'all' | 'some' | 'none'
+  flags: FlagRelationship[]
 }
 
 export type Deprecation = {
-  to?: string;
-  message?: string;
-  version?: string | number;
+  to?: string
+  message?: string
+  version?: string | number
 }
 
 export type FlagProps = {
-  name: string;
-  char?: AlphabetLowercase | AlphabetUppercase;
+  name: string
+  char?: AlphabetLowercase | AlphabetUppercase
   /**
    * A short summary of flag usage to show in the flag list.
    * If not provided, description will be used.
    */
-  summary?: string;
+  summary?: string
   /**
    * A description of flag usage. If summary is provided, the description
    * is assumed to be a longer description and will be shown in a separate
    * section within help.
    */
-  description?: string;
+  description?: string
   /**
    * The flag label to show in help. Defaults to "[-<char>] --<name>" where -<char> is
    * only displayed if the char is defined.
    */
-  helpLabel?: string;
+  helpLabel?: string
   /**
    * Shows this flag in a separate list in the help.
    */
-  helpGroup?: string;
+  helpGroup?: string
   /**
    * Accept an environment variable as input
    */
-  env?: string;
+  env?: string
   /**
    * If true, the flag will not be shown in the help.
    */
-  hidden?: boolean;
+  hidden?: boolean
   /**
    * If true, the flag will be required.
    */
-  required?: boolean;
+  required?: boolean
   /**
    * List of flags that this flag depends on.
    */
-  dependsOn?: string[];
+  dependsOn?: string[]
   /**
    * List of flags that cannot be used with this flag.
    */
-  exclusive?: string[];
+  exclusive?: string[]
   /**
    * Exactly one of these flags must be provided.
    */
-  exactlyOne?: string[];
+  exactlyOne?: string[]
   /**
    * Define complex relationships between flags.
    */
-  relationships?: Relationship[];
+  relationships?: Relationship[]
   /**
    * Make the flag as deprecated.
    */
-  deprecated?: true | Deprecation;
+  deprecated?: true | Deprecation
   /**
    * Alternate names that can be used for this flag.
    */
-  aliases?: string[];
+  aliases?: string[]
+  /**
+   * Alternate short chars that can be used for this flag.
+   */
+  charAliases?: (AlphabetLowercase | AlphabetUppercase)[]
   /**
    * Emit deprecation warning when a flag alias is provided
    */
   deprecateAliases?: boolean
   /**
-   * Delimiter to separate the values for a multiple value flag.
-   * Only respected if multiple is set to true. Default behavior is to
-   * separate on spaces.
+   * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
+   * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
-  delimiter?: ',',
+  noCacheDefault?: boolean
 }
 
 export type ArgProps = {
-  name: string;
+  name: string
   /**
    * A description of flag usage. If summary is provided, the description
    * is assumed to be a longer description and will be shown in a separate
    * section within help.
    */
-  description?: string;
+  description?: string
   /**
    * If true, the flag will not be shown in the help.
    */
-  hidden?: boolean;
+  hidden?: boolean
   /**
    * If true, the flag will be required.
    */
-  required?: boolean;
+  required?: boolean
 
-  options?: string[];
-  ignoreStdin?: boolean;
+  options?: string[]
+  ignoreStdin?: boolean
+  /**
+   * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
+   * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
+   */
+  noCacheDefault?: boolean
 }
 
 export type BooleanFlagProps = FlagProps & {
-  type: 'boolean';
-  allowNo: boolean;
+  type: 'boolean'
+  allowNo: boolean
 }
 
 export type OptionFlagProps = FlagProps & {
-  type: 'option';
-  helpValue?: string;
-  options?: string[];
-  multiple?: boolean;
+  type: 'option'
+  helpValue?: string
+  options?: readonly string[]
+  multiple?: boolean
+  /**
+   * Delimiter to separate the values for a multiple value flag.
+   * Only respected if multiple is set to true. Default behavior is to
+   * separate on spaces.
+   */
+  delimiter?: ','
 }
 
 export type FlagParserContext = Command & {token: FlagToken}
 
-export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (input: I, context: FlagParserContext, opts: P & OptionFlag<T, P>) => Promise<T>
+export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (
+  input: I,
+  context: FlagParserContext,
+  opts: P & OptionFlag<T, P>,
+) => T extends Array<infer U> ? Promise<U | undefined> : Promise<T | undefined>
 
 export type ArgParserContext = Command & {token: ArgToken}
 
-export type ArgParser<T, P = CustomOptions> = (input: string, context: ArgParserContext, opts: P & Arg<T, P>) => Promise<T>
+export type ArgParser<T, P = CustomOptions> = (
+  input: string,
+  context: ArgParserContext,
+  opts: P & Arg<T, P>,
+) => Promise<T>
 
 export type Arg<T, P = CustomOptions> = ArgProps & {
-  options?: T[];
-  defaultHelp?: ArgDefaultHelp<T>;
-  input: string[];
-  default?: ArgDefault<T | undefined>;
-  parse: ArgParser<T, P>;
+  options?: T[]
+  defaultHelp?: ArgDefaultHelp<T>
+  input: string[]
+  default?: ArgDefault<T | undefined>
+  parse: ArgParser<T, P>
 }
 
 export type ArgDefinition<T, P = CustomOptions> = {
-  (options: P & ({ required: true } | { default: ArgDefault<T> }) & Partial<Arg<T, P>>): Arg<T, P>;
-  (options?: P & Partial<Arg<T, P>>): Arg<T | undefined, P>;
+  (options: P & ({required: true} | {default: ArgDefault<T>}) & Partial<Arg<T, P>>): Arg<T, P>
+  (options?: P & Partial<Arg<T, P>>): Arg<T | undefined, P>
 }
 
-export type BooleanFlag<T> = FlagProps & BooleanFlagProps & {
-  /**
-   * specifying a default of false is the same as not specifying a default
-   */
-  default?: FlagDefault<boolean>;
-  parse: (input: boolean, context: FlagParserContext, opts: FlagProps & BooleanFlagProps) => Promise<T>
-}
+export type BooleanFlag<T> = FlagProps &
+  BooleanFlagProps & {
+    /**
+     * specifying a default of false is the same as not specifying a default
+     */
+    default?: FlagDefault<boolean>
+    parse: (input: boolean, context: FlagParserContext, opts: FlagProps & BooleanFlagProps) => Promise<T>
+  }
 
-export type OptionFlagDefaults<T, P = CustomOptions, M = false> = FlagProps & OptionFlagProps & {
-  parse: FlagParser<T, string, P>
-  defaultHelp?: FlagDefaultHelp<T>;
-  input: string[];
-  default?: M extends true ? FlagDefault<T[] | undefined, P> : FlagDefault<T | undefined, P>;
-}
+export type OptionFlag<T, P = CustomOptions> = FlagProps &
+  OptionFlagProps & {
+    parse: FlagParser<T | undefined, string, P>
+    defaultHelp?: FlagDefaultHelp<T, P>
+    input: string[]
+    default?: FlagDefault<T | undefined, P>
+  }
 
-export type OptionFlag<T, P = CustomOptions> = FlagProps & OptionFlagProps & {
-  parse: FlagParser<T, string, P>
-  defaultHelp?: FlagDefaultHelp<T, P>;
-  input: string[];
-} & ({
-  default?: FlagDefault<T | undefined, P>;
-  multiple: false;
-} | {
-  default?: FlagDefault<T[] | undefined, P>;
-  multiple: true;
-})
+type ReturnTypeSwitches = {multiple: boolean; requiredOrDefaulted: boolean}
 
-export type FlagDefinition<T, P = CustomOptions> = {
+/**
+ * The logic here is as follows:
+ * - If requiredOrDefaulted is true && multiple is true, then the return type is T[]
+ *    - It's possible that T extends an Array, if so we want to return T so that the return isn't T[][]
+ * - If requiredOrDefaulted is true && multiple is false, then the return type is T
+ * - If requiredOrDefaulted is false && multiple is true, then the return type is T[] | undefined
+ *    - It's possible that T extends an Array, if so we want to return T so that the return isn't T[][]
+ * - If requiredOrDefaulted is false && multiple is false, then the return type is T | undefined
+ */
+type FlagReturnType<T, R extends ReturnTypeSwitches> = R['requiredOrDefaulted'] extends true
+  ? R['multiple'] extends true
+    ? [T] extends [Array<unknown>]
+      ? T
+      : T[]
+    : T
+  : R['multiple'] extends true
+  ? [T] extends [Array<unknown>]
+    ? T | undefined
+    : T[] | undefined
+  : T | undefined
+
+/**
+ * FlagDefinition types a function that takes `options` and returns an OptionFlag<T>.
+ *
+ * This is returned by `Flags.custom()` and `Flags.option()`, which each take a `defaults` object
+ * that mirrors the OptionFlag interface.
+ *
+ * The `T` in the `OptionFlag<T>` return type is determined by a combination of the provided defaults for
+ * `multiple`, `required`, and `default` and the provided options for those same properties. If these properties
+ * are provided in the options, they override the defaults.
+ *
+ * no options or defaults -> T | undefined
+ * `required` -> T
+ * `default` -> T
+ * `multiple` -> T[] | undefined
+ * `required` + `multiple` -> T[]
+ * `default` + `multiple` -> T[]
+ */
+export type FlagDefinition<
+  T,
+  P = CustomOptions,
+  R extends ReturnTypeSwitches = {multiple: false; requiredOrDefaulted: false},
+> = {
   (
-    options: P & { multiple: true } & ({ required: true } | { default: FlagDefault<T[]> }) & Partial<OptionFlag<T, P>>
-  ): OptionFlag<T[]>;
-  (options: P & { multiple: true } & Partial<OptionFlag<T>>): OptionFlag<T[] | undefined>;
-  (options: P & ({ required: true } | { default: FlagDefault<T> }) & Partial<OptionFlag<T>>): OptionFlag<T>;
-  (options?: P & Partial<OptionFlag<T>>): OptionFlag<T | undefined>;
+    // `multiple` is set to false and `required` is set to true in options, potentially overriding the default
+    options: P & {multiple: false; required: true} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: true}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: true}>>
+  (
+    // `multiple` is set to true and `required` is set to false in options, potentially overriding the default
+    options: P & {multiple: true; required: false} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: false}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: false}>>
+  (
+    // `multiple` is set to true and `required` is set to false in options, potentially overriding the default
+    options: P & {multiple: false; required: false} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: false}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: false}>>
+  (
+    options: R['multiple'] extends true
+      ? // `multiple` is defaulted to true and either `required=true` or `default` are provided in options
+        P &
+          (
+            | {required: true}
+            | {
+                default: OptionFlag<
+                  FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>,
+                  P
+                >['default']
+              }
+          ) &
+          Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>>
+      : // `multiple` is NOT defaulted to true and either `required=true` or `default` are provided in options
+        P & {multiple?: false | undefined} & (
+            | {required: true}
+            | {
+                default: OptionFlag<
+                  FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>,
+                  P
+                >['default']
+              }
+          ) &
+          Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>>,
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>>
+  (
+    options: R['multiple'] extends true
+      ? // `multiple` is defaulted to true and either `required=true` or `default` are provided in options
+        P &
+          (
+            | {required: true}
+            | {default: OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>['default']}
+          ) &
+          Partial<OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>>
+      : // `multiple` is NOT defaulted to true but `multiple=true` and either `required=true` or `default` are provided in options
+        P & {multiple: true} & (
+            | {required: true}
+            | {default: OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>['default']}
+          ) &
+          Partial<OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>, P>>,
+  ): OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: true}>>
+  (
+    // `multiple` is not provided in options but either `required=true` or `default` are provided
+    options: P & {multiple?: false | undefined} & (
+        | {required: true}
+        | {default: OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>['default']}
+      ) &
+      Partial<OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>, P>>,
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: true}>>
+  (
+    // `required` is set to false in options, potentially overriding the default
+    options: P & {required: false} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: false}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: R['multiple']; requiredOrDefaulted: false}>>
+  (
+    // `multiple` is set to false in options, potentially overriding the default
+    options: P & {multiple: false} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: R['requiredOrDefaulted']}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: false; requiredOrDefaulted: R['requiredOrDefaulted']}>>
+  (
+    // Catch all for when `multiple` is not set in the options
+    options?: P & {multiple?: false | undefined} & Partial<OptionFlag<FlagReturnType<T, R>, P>>,
+  ): OptionFlag<FlagReturnType<T, R>>
+  (
+    // `multiple` is set to true in options, potentially overriding the default
+    options: P & {multiple: true} & Partial<
+        OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: R['requiredOrDefaulted']}>, P>
+      >,
+  ): OptionFlag<FlagReturnType<T, {multiple: true; requiredOrDefaulted: R['requiredOrDefaulted']}>>
 }
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 
 export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
-  flags?: FlagInput<TFlags>;
-  baseFlags?: FlagInput<BFlags>;
-  args?: ArgInput<AFlags>;
-  strict?: boolean;
-  context?: ParserContext;
-  '--'?: boolean;
+  flags?: FlagInput<TFlags>
+  baseFlags?: FlagInput<BFlags>
+  enableJsonFlag?: true | false
+  args?: ArgInput<AFlags>
+  strict?: boolean
+  context?: ParserContext
+  '--'?: boolean
 }
 
 export type ParserInput = {
-  argv: string[];
-  flags: FlagInput<any>;
-  args: ArgInput<any>;
-  strict: boolean;
-  context: ParserContext | undefined;
-  '--'?: boolean;
+  argv: string[]
+  flags: FlagInput<any>
+  args: ArgInput<any>
+  strict: boolean
+  context: ParserContext | undefined
+  '--'?: boolean
 }
 
 export type ParserContext = Command & {
-  token?: FlagToken | ArgToken;
+  token?: FlagToken | ArgToken
 }
 
-export type CompletionContext = {
-  args?: { [name: string]: string };
-  flags?: { [name: string]: string };
-  argv?: string[];
-  config: Config;
-}
+export type FlagInput<T extends FlagOutput = {[flag: string]: any}> = {[P in keyof T]: Flag<T[P]>}
 
-export type Completion = {
-  skipCache?: boolean;
-  cacheDuration?: number;
-  cacheKey?(ctx: CompletionContext): Promise<string>;
-  options(ctx: CompletionContext): Promise<string[]>;
-}
-
-export type CompletableOptionFlag<T> = OptionFlag<T> & {
-  completion?: Completion;
-}
-
-export type CompletableFlag<T> = BooleanFlag<T> | CompletableOptionFlag<T>
-
-export type FlagInput<T extends FlagOutput = { [flag: string]: any }> = { [P in keyof T]: CompletableFlag<T[P]> }
-
-export type ArgInput<T extends ArgOutput = { [arg: string]: any }> = { [P in keyof T]: Arg<T[P]> }
+export type ArgInput<T extends ArgOutput = {[arg: string]: any}> = {[P in keyof T]: Arg<T[P]>}

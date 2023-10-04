@@ -1,34 +1,8 @@
 import * as ejs from 'ejs'
-import {Config as IConfig, HelpOptions, Deprecation} from '../interfaces'
-import {Help, HelpBase} from '.'
-import ModuleLoader from '../module-loader'
+
 import {collectUsableIds} from '../config/util'
+import {Deprecation, Config as IConfig} from '../interfaces'
 
-interface HelpBaseDerived {
-  new(config: IConfig, opts?: Partial<HelpOptions>): HelpBase;
-}
-
-function extractClass(exported: any): HelpBaseDerived {
-  return exported && exported.default ? exported.default : exported
-}
-
-export async function loadHelpClass(config: IConfig): Promise<HelpBaseDerived> {
-  const pjson = config.pjson
-  const configuredClass = pjson && pjson.oclif && pjson.oclif.helpClass
-
-  if (configuredClass) {
-    try {
-      const exported = await ModuleLoader.load(config, configuredClass) as HelpBaseDerived
-      return extractClass(exported) as HelpBaseDerived
-    } catch (error: any) {
-      throw new Error(`Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`)
-    }
-  }
-
-  return Help
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function template(context: any): (t: string) => string {
   function render(t: string): string {
     return ejs.render(t, context)
@@ -36,6 +10,9 @@ export function template(context: any): (t: string) => string {
 
   return render
 }
+
+const isFlag = (s: string) => s.startsWith('-')
+const isArgWithValue = (s: string) => s.includes('=')
 
 function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   if (argv.length === 1) return argv
@@ -45,9 +22,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
     const final: string[] = []
     const idPresent = (id: string) => ids.has(id)
-    const isFlag = (s: string) => s.startsWith('-')
-    const isArgWithValue = (s: string) => s.includes('=')
-    const finalizeId = (s?: string) => s ? [...final, s].join(':') : final.join(':')
+    const finalizeId = (s?: string) => (s ? [...final, s].join(':') : final.join(':'))
 
     const hasArgs = () => {
       const id = finalizeId()
@@ -78,12 +53,12 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 }
 
 export function toStandardizedId(commandID: string, config: IConfig): string {
-  return commandID.replace(new RegExp(config.topicSeparator, 'g'), ':')
+  return commandID.replaceAll(new RegExp(config.topicSeparator, 'g'), ':')
 }
 
 export function toConfiguredId(commandID: string, config: IConfig): string {
   const defaultTopicSeparator = ':'
-  return commandID.replace(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
+  return commandID.replaceAll(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {
@@ -99,7 +74,7 @@ export function getHelpFlagAdditions(config: IConfig): string[] {
   return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
 }
 
-export function formatFlagDeprecationWarning(flag: string, opts: true | Deprecation): string {
+export function formatFlagDeprecationWarning(flag: string, opts: Deprecation | true): string {
   let message = `The "${flag}" flag has been deprecated`
   if (opts === true) return `${message}.`
   if (opts.message) return opts.message

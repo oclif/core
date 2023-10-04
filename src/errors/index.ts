@@ -1,25 +1,23 @@
-export {handle} from './handle'
-export {ExitError} from './errors/exit'
-export {ModuleLoadError} from './errors/module-load'
-export {CLIError} from './errors/cli'
-export {Logger} from './logger'
-export {config} from './config'
-
+import {OclifError, PrettyPrintableError} from '../interfaces'
 import {config} from './config'
 import {CLIError, addOclifExitCode} from './errors/cli'
 import {ExitError} from './errors/exit'
 import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
-import {OclifError, PrettyPrintableError} from '../interfaces'
 
-export {PrettyPrintableError}
+export {PrettyPrintableError} from '../interfaces'
+export {config} from './config'
+export {CLIError} from './errors/cli'
+export {ExitError} from './errors/exit'
+export {ModuleLoadError} from './errors/module-load'
+export {handle} from './handle'
 
 export function exit(code = 0): never {
   throw new ExitError(code)
 }
 
-export function error(input: string | Error, options: {exit: false} & PrettyPrintableError): void
-export function error(input: string | Error, options?: {exit?: number} & PrettyPrintableError): never
-export function error(input: string | Error, options: {exit?: number | false} & PrettyPrintableError = {}): void {
+export function error(input: Error | string, options: {exit: false} & PrettyPrintableError): void
+export function error(input: Error | string, options?: {exit?: number} & PrettyPrintableError): never
+export function error(input: Error | string, options: {exit?: false | number} & PrettyPrintableError = {}): void {
   let err: Error & OclifError
 
   if (typeof input === 'string') {
@@ -39,7 +37,7 @@ export function error(input: string | Error, options: {exit?: number | false} & 
   } else throw err
 }
 
-export function warn(input: string | Error): void {
+export function warn(input: Error | string): void {
   let err: Error & OclifError
 
   if (typeof input === 'string') {
@@ -54,3 +52,12 @@ export function warn(input: string | Error): void {
   console.error(message)
   if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
 }
+
+const WARNINGS = new Set<Error | string>()
+export function memoizedWarn(input: Error | string): void {
+  if (!WARNINGS.has(input)) warn(input)
+
+  WARNINGS.add(input)
+}
+
+export {Logger} from './logger'

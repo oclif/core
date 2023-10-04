@@ -1,16 +1,13 @@
-import {fileURLToPath} from 'url'
+import {URL, fileURLToPath} from 'node:url'
+import {format, inspect} from 'node:util'
 
-import {format, inspect} from 'util'
-
-import * as Interfaces from './interfaces'
-import {URL} from 'url'
+import {stdout} from './cli-ux/stream'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-import {settings} from './settings'
-import {Errors, flush} from '.'
-import {join, dirname} from 'path'
-import {stdout} from './cli-ux/stream'
-import {Performance} from './performance'
+import * as Interfaces from './interfaces'
+import {OCLIF_MARKER_OWNER, Performance} from './performance'
+
+const debug = require('debug')('oclif:main')
 
 const log = (message = '', ...args: any[]) => {
   message = typeof message === 'string' ? message : inspect(message)
@@ -36,16 +33,20 @@ export const versionAddition = (argv: string[], config?: Interfaces.Config): boo
 }
 
 export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
-  const marker = Performance.mark('main.run')
+  const marker = Performance.mark(OCLIF_MARKER_OWNER, 'main.run')
 
-  const initMarker = Performance.mark('main.run#init')
+  const initMarker = Performance.mark(OCLIF_MARKER_OWNER, 'main.run#init')
 
   const collectPerf = async () => {
     marker?.stop()
-    initMarker?.stop()
+    if (!initMarker?.stopped) initMarker?.stop()
     await Performance.collect()
     Performance.debug()
   }
+
+  debug(`process.execPath: ${process.execPath}`)
+  debug(`process.execArgv: ${process.execArgv}`)
+  debug('process.argv: %O', process.argv)
 
   argv = argv ?? process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
@@ -57,7 +58,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   let [id, ...argvSlice] = normalizeArgv(config, argv)
   // run init hook
-  await config.runHook('init', {id, argv: argvSlice})
+  await config.runHook('init', {argv: argvSlice, id})
 
   // display version if applicable
   if (versionAddition(argv, config)) {
@@ -98,77 +99,4 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   } finally {
     await collectPerf()
   }
-}
-
-function getTsConfigPath(dir: string, type: 'esm' | 'cjs'): string {
-  return type === 'cjs' ? join(dir, '..', 'tsconfig.json') : join(dirname(fileURLToPath(dir)), '..', 'tsconfig.json')
-}
-
-/**
- * Load and run oclif CLI
- *
- * @param options - options to load the CLI
- * @returns Promise<void>
- *
- * @example For ESM dev.js
- * ```
- * #!/usr/bin/env ts-node
- * // eslint-disable-next-line node/shebang
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', development: true, dir: import.meta.url})
- * })()
- * ```
- *
- * @example For ESM run.js
- * ```
- * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'esm', dir: import.meta.url})
- * })()
- * ```
- *
- * @example For CJS dev.js
- * ```
- * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', development: true, dir: __dirname})
- * })()
- * ```
- *
- * @example For CJS run.js
- * ```
- * #!/usr/bin/env node
- * // eslint-disable-next-line node/shebang
- * (async () => {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({type: 'cjs', dir: import.meta.url})
- * })()
- * ```
- */
-export async function execute(
-  options: {
-    type: 'cjs' | 'esm';
-    dir: string;
-    args?: string[];
-    loadOptions?: Interfaces.LoadOptions;
-    development?: boolean;
-  },
-): Promise<void> {
-  if (options.development) {
-    // In dev mode -> use ts-node and dev plugins
-    process.env.NODE_ENV = 'development'
-    require('ts-node').register({
-      project: getTsConfigPath(options.dir, options.type),
-    })
-    settings.debug = true
-  }
-
-  await run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
-  .then(async () => flush())
-  .catch(Errors.handle)
 }

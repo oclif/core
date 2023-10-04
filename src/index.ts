@@ -1,53 +1,4 @@
-import {Command} from './command'
-import {run, execute} from './main'
-import {Config, Plugin, tsPath, toCached} from './config'
-import * as Interfaces from './interfaces'
-import * as Errors from './errors'
-import * as Flags from './flags'
-import * as Args from './args'
-import {CommandHelp, HelpBase, Help, loadHelpClass} from './help'
-import {toStandardizedId, toConfiguredId} from './help/util'
-import * as Parser from './parser'
-import {Hook} from './interfaces/hooks'
-import {settings, Settings} from './settings'
-import {HelpSection, HelpSectionRenderer, HelpSectionKeyValueTable} from './help/formatter'
-import * as ux from './cli-ux'
-import {stderr, stdout} from './cli-ux/stream'
-import {Performance} from './performance'
-
-const flush = ux.flush
-
-export {
-  Args,
-  Command,
-  CommandHelp,
-  Config,
-  Errors,
-  Flags,
-  loadHelpClass,
-  Help,
-  HelpBase,
-  HelpSection,
-  HelpSectionRenderer,
-  HelpSectionKeyValueTable,
-  Hook,
-  Interfaces,
-  Parser,
-  Plugin,
-  Performance,
-  run,
-  toCached,
-  tsPath,
-  toStandardizedId,
-  toConfiguredId,
-  settings,
-  Settings,
-  flush,
-  ux,
-  execute,
-  stderr,
-  stdout,
-}
+import {stderr} from './cli-ux/stream'
 
 function checkCWD() {
   try {
@@ -60,3 +11,23 @@ function checkCWD() {
 }
 
 checkCWD()
+
+export * as Args from './args'
+export * as ux from './cli-ux'
+export {flush} from './cli-ux/flush'
+export {stderr, stdout} from './cli-ux/stream'
+export {Command} from './command'
+export {Config, Plugin} from './config'
+export * as Errors from './errors'
+export {handle} from './errors/handle'
+export {execute} from './execute'
+export * as Flags from './flags'
+export {CommandHelp, Help, HelpBase, loadHelpClass} from './help'
+export {HelpSection, HelpSectionKeyValueTable, HelpSectionRenderer} from './help/formatter'
+export {toConfiguredId, toStandardizedId} from './help/util'
+export * as Interfaces from './interfaces'
+export {Hook} from './interfaces/hooks'
+export {run} from './main'
+export * as Parser from './parser'
+export {Performance} from './performance'
+export {Settings, settings} from './settings'

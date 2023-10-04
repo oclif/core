@@ -1,19 +1,19 @@
-import * as os from 'os'
-import * as path from 'path'
+import {join} from 'node:path'
 
+import {Config, Interfaces} from '../../src'
+import {Command} from '../../src/command'
 import {Plugin as IPlugin} from '../../src/interfaces'
-import * as util from '../../src/config/util'
-
+import * as fs from '../../src/util/fs'
+import * as os from '../../src/util/os'
 import {expect, fancy} from './test'
-import {Command, Config, Interfaces} from '../../src'
 
 interface Options {
-  pjson?: any;
-  homedir?: string;
-  platform?: string;
-  env?: {[k: string]: string};
-  commandIds?: string[];
-  types?: string[];
+  commandIds?: string[]
+  env?: {[k: string]: string}
+  homedir?: string
+  pjson?: any
+  platform?: string
+  types?: string[]
 }
 
 const pjson = {
@@ -47,26 +47,25 @@ const pjson = {
 describe('Config', () => {
   const testConfig = ({pjson, homedir = '/my/home', platform = 'darwin', env = {}}: Options = {}) => {
     let test = fancy
-    .resetConfig()
-    .env(env, {clear: true})
-    .stub(os, 'homedir', () => path.join(homedir))
-    .stub(os, 'platform', () => platform)
-
-    if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+      .resetConfig()
+      .env(env, {clear: true})
+      .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
+      .stub(os, 'getPlatform', (stub) => stub.returns(platform))
+    if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
 
     test = test.add('config', () => Config.load())
 
     return {
       hasS3Key(k: keyof Interfaces.PJSON.S3.Templates, expected: string, extra: any = {}) {
-        return this
-        .it(`renders ${k} template as ${expected}`, config => {
+        return this.it(`renders ${k} template as ${expected}`, (config) => {
           // Config.load reads the package.json to determine the version and channel
           // In order to allow prerelease branches to pass, we need to strip the prerelease
           // tag from the version and switch the channel to stable.
-          config.version = config.version.replace(/-beta\.\d/g, '')
+          // @ts-expect-error because readonly property
+          config.version = config.version.replaceAll(/-beta\.\d/g, '')
+          // @ts-expect-error because readonly property
           config.channel = 'stable'
 
-          // eslint-disable-next-line prefer-const
           let {ext, ...options} = extra
           options = {
             bin: 'oclif-cli',
@@ -79,13 +78,10 @@ describe('Config', () => {
         })
       },
       hasProperty<K extends keyof Interfaces.Config>(k: K | undefined, v: Interfaces.Config[K] | undefined) {
-        return this
-        .it(`has ${k}=${v}`, config => expect(config).to.have.property(k!, v))
+        return this.it(`has ${k}=${v}`, (config) => expect(config).to.have.property(k!, v))
       },
       it(expectation: string, fn: (config: Interfaces.Config) => any) {
-        test
-        .do(({config}) => fn(config))
-        .it(expectation)
+        test.do(({config}) => fn(config)).it(expectation)
         return this
       },
     }
@@ -93,62 +89,61 @@ describe('Config', () => {
 
   describe('darwin', () => {
     testConfig()
-    .hasProperty('cacheDir', path.join('/my/home/Library/Caches/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/Library/Caches/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+      .hasProperty('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
+      .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+      .hasProperty('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
+      .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+      .hasProperty('home', join('/my/home'))
   })
 
   describe('binAliases', () => {
-    testConfig({pjson})
-    .it('will have binAliases set', config => {
+    testConfig({pjson}).it('will have binAliases set', (config) => {
       expect(config.binAliases).to.deep.equal(['bar', 'baz'])
     })
 
-    testConfig({pjson}).it('will get scoped env vars with bin aliases', config => {
+    testConfig({pjson}).it('will get scoped env vars with bin aliases', (config) => {
       expect(config.scopedEnvVarKeys('abc')).to.deep.equal(['FOO_ABC', 'BAR_ABC', 'BAZ_ABC'])
     })
 
-    testConfig({pjson}).it('will get scoped env vars', config => {
+    testConfig({pjson}).it('will get scoped env vars', (config) => {
       expect(config.scopedEnvVarKey('abc')).to.equal('FOO_ABC')
     })
 
-    testConfig({pjson}).it('will get scopedEnvVar', config => {
+    testConfig({pjson}).it('will get scopedEnvVar', (config) => {
       process.env.FOO_ABC = 'find me'
       expect(config.scopedEnvVar('abc')).to.deep.equal('find me')
       delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVar via alias', config => {
+    testConfig({pjson}).it('will get scopedEnvVar via alias', (config) => {
       process.env.BAZ_ABC = 'find me'
       expect(config.scopedEnvVar('abc')).to.deep.equal('find me')
       delete process.env.BAZ_ABC
     })
 
-    testConfig({pjson}).it('will get scoped env vars', config => {
+    testConfig({pjson}).it('will get scoped env vars', (config) => {
       expect(config.scopedEnvVarKey('abc')).to.equal('FOO_ABC')
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue', config => {
+    testConfig({pjson}).it('will get scopedEnvVarTrue', (config) => {
       process.env.FOO_ABC = 'true'
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
       delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue via alias', config => {
+    testConfig({pjson}).it('will get scopedEnvVarTrue via alias', (config) => {
       process.env.BAR_ABC = 'true'
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
       delete process.env.BAR_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1', config => {
+    testConfig({pjson}).it('will get scopedEnvVarTrue=1', (config) => {
       process.env.FOO_ABC = '1'
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
       delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1 via alias', config => {
+    testConfig({pjson}).it('will get scopedEnvVarTrue=1 via alias', (config) => {
       process.env.BAR_ABC = '1'
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
       delete process.env.BAR_ABC
@@ -157,11 +152,11 @@ describe('Config', () => {
 
   describe('linux', () => {
     testConfig({platform: 'linux'})
-    .hasProperty('cacheDir', path.join('/my/home/.cache/@oclif/core'))
-    .hasProperty('configDir', path.join('/my/home/.config/@oclif/core'))
-    .hasProperty('errlog', path.join('/my/home/.cache/@oclif/core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/.local/share/@oclif/core'))
-    .hasProperty('home', path.join('/my/home'))
+      .hasProperty('cacheDir', join('/my/home/.cache/@oclif/core'))
+      .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
+      .hasProperty('errlog', join('/my/home/.cache/@oclif/core/error.log'))
+      .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
+      .hasProperty('home', join('/my/home'))
   })
 
   describe('win32', () => {
@@ -169,34 +164,37 @@ describe('Config', () => {
       platform: 'win32',
       env: {LOCALAPPDATA: '/my/home/localappdata'},
     })
-    .hasProperty('cacheDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('configDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('errlog', path.join('/my/home/localappdata/@oclif\\core/error.log'))
-    .hasProperty('dataDir', path.join('/my/home/localappdata/@oclif\\core'))
-    .hasProperty('home', path.join('/my/home'))
+      .hasProperty('cacheDir', join('/my/home/localappdata/@oclif\\core'))
+      .hasProperty('configDir', join('/my/home/localappdata/@oclif\\core'))
+      .hasProperty('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
+      .hasProperty('dataDir', join('/my/home/localappdata/@oclif\\core'))
+      .hasProperty('home', join('/my/home'))
   })
 
   describe('s3Key', () => {
     const target = {platform: 'darwin', arch: 'x64'}
     const beta = {version: '2.0.0-beta', channel: 'beta'}
     testConfig()
-    .hasS3Key('baseDir', 'oclif-cli')
-    .hasS3Key('manifest', 'version')
-    .hasS3Key('manifest', 'channels/beta/version', beta)
-    .hasS3Key('manifest', 'darwin-x64', target)
-    .hasS3Key('manifest', 'channels/beta/darwin-x64', {...beta, ...target})
-    .hasS3Key('unversioned', 'oclif-cli.tar.gz')
-    .hasS3Key('unversioned', 'oclif-cli.tar.gz')
-    .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
-    .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
-    .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
-    .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
-    .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
-    .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
-    .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0.tar.gz')
-    .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0-darwin-x64.tar.gz', target)
-    .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta.tar.gz', beta)
-    .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta-darwin-x64.tar.gz', {...beta, ...target})
+      .hasS3Key('baseDir', 'oclif-cli')
+      .hasS3Key('manifest', 'version')
+      .hasS3Key('manifest', 'channels/beta/version', beta)
+      .hasS3Key('manifest', 'darwin-x64', target)
+      .hasS3Key('manifest', 'channels/beta/darwin-x64', {...beta, ...target})
+      .hasS3Key('unversioned', 'oclif-cli.tar.gz')
+      .hasS3Key('unversioned', 'oclif-cli.tar.gz')
+      .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
+      .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
+      .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
+      .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
+      .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
+      .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
+      .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0.tar.gz')
+      .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0-darwin-x64.tar.gz', target)
+      .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta.tar.gz', beta)
+      .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta-darwin-x64.tar.gz', {
+        ...beta,
+        ...target,
+      })
   })
 
   describe('options', () => {
@@ -208,8 +206,7 @@ describe('Config', () => {
     })
   })
 
-  testConfig()
-  .it('has s3Url', config => {
+  testConfig().it('has s3Url', (config) => {
     const orig = config.pjson.oclif.update.s3.host
     config.pjson.oclif.update.s3.host = 'https://bar.com/a/'
     expect(config.s3Url('/b/c')).to.equal('https://bar.com/a/b/c')
@@ -218,13 +215,13 @@ describe('Config', () => {
 
   testConfig({
     pjson,
-  })
-  .it('has subtopics', config => {
-    expect(config.topics.map(t => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
+  }).it('has subtopics', (config) => {
+    expect(config.topics.map((t) => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
   })
 
   describe('findCommand', () => {
-    const findCommandTestConfig = ({pjson,
+    const findCommandTestConfig = ({
+      pjson,
       homedir = '/my/home',
       platform = 'darwin',
       env = {},
@@ -232,27 +229,30 @@ describe('Config', () => {
       types = [],
     }: Options = {}) => {
       class MyCommandClass extends Command {
-      _base = ''
+        _base = ''
 
-      aliases: string[] = []
+        aliases: string[] = []
 
-      hidden = false
+        hidden = false
 
-      id = 'foo:bar'
+        id = 'foo:bar'
 
-      run(): Promise<any> {
-        return Promise.resolve()
-      }
+        run(): Promise<any> {
+          return Promise.resolve()
+        }
       }
 
       const load = async (): Promise<void> => {}
-      const findCommand = async (): Promise<Command.Class> => {
-        return MyCommandClass
-      }
+      const findCommand = async (): Promise<Command.Class> => MyCommandClass
 
       const commandPluginA: Command.Loadable = {
         strict: false,
-        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
+        aliases: [],
+        args: {},
+        flags: {},
+        hidden: false,
+        id: commandIds[0],
+        async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[0] ?? 'core',
@@ -260,14 +260,20 @@ describe('Config', () => {
       }
       const commandPluginB: Command.Loadable = {
         strict: false,
-        aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
+        aliases: [],
+        args: {},
+        flags: {},
+        hidden: false,
+        id: commandIds[1],
+        async load(): Promise<Command.Class> {
           return MyCommandClass
         },
         pluginType: types[1] ?? 'core',
         pluginAlias: '@My/pluginb',
       }
       const hooks = {}
-      const pluginA: IPlugin = {load,
+      const pluginA: IPlugin = {
+        load,
         findCommand,
         name: '@My/plugina',
         alias: '@My/plugina',
@@ -282,6 +288,9 @@ describe('Config', () => {
         topics: [],
         valid: true,
         tag: 'tag',
+        moduleType: 'commonjs',
+        hasManifest: false,
+        isRoot: false,
       }
 
       const pluginB: IPlugin = {
@@ -300,21 +309,24 @@ describe('Config', () => {
         topics: [],
         valid: true,
         tag: 'tag',
+        moduleType: 'commonjs',
+        hasManifest: false,
+        isRoot: false,
       }
-      const plugins: IPlugin[] = [pluginA, pluginB]
+      const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
       let test = fancy
-      .resetConfig()
-      .env(env, {clear: true})
-      .stub(os, 'homedir', () => path.join(homedir))
-      .stub(os, 'platform', () => platform)
+        .resetConfig()
+        .env(env, {clear: true})
+        .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
+        .stub(os, 'getPlatform', (stub) => stub.returns(platform))
 
-      if (pjson) test = test.stub(util, 'loadJSON', () => Promise.resolve(pjson))
+      if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
       test = test.add('config', async () => {
         const config = await Config.load()
         config.plugins = plugins
         config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
         config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
-        for (const plugin of config.plugins) {
+        for (const plugin of config.plugins.values()) {
           // @ts-expect-error private method
           config.loadCommands(plugin)
           // @ts-expect-error private method
@@ -326,58 +338,61 @@ describe('Config', () => {
       // @ts-ignore
       return {
         it(expectation: string, fn: (config: Interfaces.Config) => any) {
-          test
-          .do(({config}) => fn(config))
-          .it(expectation)
+          test.do(({config}) => fn(config)).it(expectation)
           return this
         },
       }
     }
 
-    findCommandTestConfig()
-    .it('find command with no duplicates', config => {
+    findCommandTestConfig().it('find command with no duplicates', (config) => {
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']})
-    .it('find command with duplicates and choose the one that appears first in oclif.plugins', config => {
-      const command = config.findCommand('foo:bar', {must: true})
-      expect(command).to.have.property('pluginAlias', '@My/pluginb')
-    })
-    findCommandTestConfig({types: ['core', 'user']})
-    .it('find command with no duplicates core/user', config => {
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']}).it(
+      'find command with duplicates and choose the one that appears first in oclif.plugins',
+      (config) => {
+        const command = config.findCommand('foo:bar', {must: true})
+        expect(command).to.have.property('pluginAlias', '@My/pluginb')
+      },
+    )
+    findCommandTestConfig({types: ['core', 'user']}).it('find command with no duplicates core/user', (config) => {
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'core')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({types: ['user', 'core']})
-    .it('find command with no duplicates user/core', config => {
+    findCommandTestConfig({types: ['user', 'core']}).it('find command with no duplicates user/core', (config) => {
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'user')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
-    .it('find command with duplicates core/user', config => {
-      const command = config.findCommand('foo:bar', {must: true})
-      expect(command).to.have.property('id', 'foo:bar')
-      expect(command).to.have.property('pluginType', 'core')
-      expect(command).to.have.property('pluginAlias', '@My/plugina')
-    })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
-    .it('find command with duplicates user/core', config => {
-      const command = config.findCommand('foo:bar', {must: true})
-      expect(command).to.have.property('id', 'foo:bar')
-      expect(command).to.have.property('pluginType', 'core')
-      expect(command).to.have.property('pluginAlias', '@My/pluginb')
-    })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
-    .it('find command with duplicates user/user', config => {
-      const command = config.findCommand('foo:bar', {must: true})
-      expect(command).to.have.property('id', 'foo:bar')
-      expect(command).to.have.property('pluginType', 'user')
-      expect(command).to.have.property('pluginAlias', '@My/plugina')
-    })
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']}).it(
+      'find command with duplicates core/user',
+      (config) => {
+        const command = config.findCommand('foo:bar', {must: true})
+        expect(command).to.have.property('id', 'foo:bar')
+        expect(command).to.have.property('pluginType', 'core')
+        expect(command).to.have.property('pluginAlias', '@My/plugina')
+      },
+    )
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']}).it(
+      'find command with duplicates user/core',
+      (config) => {
+        const command = config.findCommand('foo:bar', {must: true})
+        expect(command).to.have.property('id', 'foo:bar')
+        expect(command).to.have.property('pluginType', 'core')
+        expect(command).to.have.property('pluginAlias', '@My/pluginb')
+      },
+    )
+    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']}).it(
+      'find command with duplicates user/user',
+      (config) => {
+        const command = config.findCommand('foo:bar', {must: true})
+        expect(command).to.have.property('id', 'foo:bar')
+        expect(command).to.have.property('pluginType', 'user')
+        expect(command).to.have.property('pluginAlias', '@My/plugina')
+      },
+    )
   })
 })
