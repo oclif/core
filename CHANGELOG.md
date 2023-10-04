@@ -1,3 +1,7 @@
+# [3.0.0](https://github.com/oclif/core/compare/2.15.0...3.0.0) (2023-10-04)
+
+
+
 # [2.15.0](https://github.com/oclif/core/compare/2.14.0...2.15.0) (2023-09-01)
 
 
