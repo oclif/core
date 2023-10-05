@@ -604,6 +604,13 @@ export class Config implements IConfig {
     await this.runHook('prerun', {Command: command, argv})
 
     const result = (await command.run(argv, this)) as T
+    // If plugins:uninstall was run, we need to remove all the uninstalled plugins
+    // from this.plugins so that the postrun hook doesn't attempt to run any
+    // hooks that might have existed in the uninstalled plugins.
+    if (c.id === 'plugins:uninstall') {
+      for (const arg of argv) this.plugins.delete(arg)
+    }
+
     await this.runHook('postrun', {Command: command, argv, result})
 
     marker?.addDetails({command: id, plugin: c.pluginName!})
