@@ -30,6 +30,10 @@ export namespace PJSON {
       helpOptions?: HelpOptions
       hooks?: {[name: string]: string | string[]}
       jitPlugins?: Record<string, string>
+      macos?: {
+        identifier?: string
+        sign?: string
+      }
       plugins?: string[]
       repositoryPrefix?: string
       schema?: number
