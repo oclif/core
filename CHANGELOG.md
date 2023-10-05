@@ -1,3 +1,12 @@
+## [3.0.2](https://github.com/oclif/core/compare/3.0.1...3.0.2) (2023-10-05)
+
+
+### Bug Fixes
+
+* dont run postrun hook for uinstalled plugins ([#805](https://github.com/oclif/core/issues/805)) ([0c47a5c](https://github.com/oclif/core/commit/0c47a5c17ac9b9fbc94d67fa46effbd96d877db0))
+
+
+
 ## [3.0.1](https://github.com/oclif/core/compare/3.0.0...3.0.1) (2023-10-05)
 
 
