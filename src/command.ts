@@ -383,7 +383,7 @@ export namespace Command {
     run(argv?: string[], config?: LoadOptions): Promise<any>
   }
 
-  export interface Loadable extends Cached {
+  export type Loadable = Cached & {
     load(): Promise<Command.Class>
   }
 
@@ -392,6 +392,7 @@ export namespace Command {
     aliasPermutations?: string[]
     aliases: string[]
     args: {[name: string]: Arg.Cached}
+    deprecateAliases?: boolean
     deprecationOptions?: Deprecation
     description?: string
     examples?: Example[]

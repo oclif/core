@@ -38,7 +38,7 @@ export abstract class HelpBase extends HelpFormatter {
    * @param command
    * @param topics
    */
-  public abstract showCommandHelp(command: Command.Class, topics: Interfaces.Topic[]): Promise<void>
+  public abstract showCommandHelp(command: Command.Loadable, topics: Interfaces.Topic[]): Promise<void>
 
   /**
    * Show help, used in multi-command CLIs
@@ -68,11 +68,11 @@ export class Help extends HelpBase {
     })
   }
 
-  protected command(command: Command.Class): string {
+  protected command(command: Command.Loadable): string {
     return this.formatCommand(command)
   }
 
-  protected description(c: Command.Cached | Command.Class | Command.Loadable): string {
+  protected description(c: Command.Loadable): string {
     const description = this.render(c.description || '')
     if (c.summary) {
       return description
@@ -81,7 +81,7 @@ export class Help extends HelpBase {
     return description.split('\n').slice(1).join('\n')
   }
 
-  protected formatCommand(command: Command.Cached | Command.Class | Command.Loadable): string {
+  protected formatCommand(command: Command.Loadable): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replaceAll(':', this.config.topicSeparator)
       command.aliases = command.aliases && command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
@@ -91,7 +91,7 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected formatCommands(commands: Array<Command.Cached | Command.Class | Command.Loadable>): string {
+  protected formatCommands(commands: Array<Command.Loadable>): string {
     if (commands.length === 0) return ''
 
     const body = this.renderList(
@@ -145,7 +145,7 @@ export class Help extends HelpBase {
     return this.section('TOPICS', body)
   }
 
-  protected getCommandHelpClass(command: Command.Cached | Command.Class | Command.Loadable): CommandHelp {
+  protected getCommandHelpClass(command: Command.Loadable): CommandHelp {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
@@ -153,7 +153,7 @@ export class Help extends HelpBase {
     stdout.write(format.apply(this, args) + '\n')
   }
 
-  public async showCommandHelp(command: Command.Cached | Command.Class | Command.Loadable): Promise<void> {
+  public async showCommandHelp(command: Command.Loadable): Promise<void> {
     const name = command.id
     const depth = name.split(':').length
 
@@ -319,7 +319,7 @@ export class Help extends HelpBase {
     }
   }
 
-  protected summary(c: Command.Cached | Command.Class | Command.Loadable): string | undefined {
+  protected summary(c: Command.Loadable): string | undefined {
     if (c.summary) return this.render(c.summary.split('\n')[0])
 
     return c.description && this.render(c.description).split('\n')[0]

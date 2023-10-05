@@ -1,9 +1,9 @@
+import stripAnsi from 'strip-ansi'
+
 import {Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {CommandHelp, Help} from '../../src/help'
 import {cacheCommand} from '../../src/util/cache-command'
-
-import stripAnsi = require('strip-ansi')
 
 export class TestCommandHelp extends CommandHelp {
   protected sections() {
@@ -25,15 +25,15 @@ export class TestHelpWithOptions extends Help {
     this.opts.hideCommandSummaryInDescription = true
   }
 
-  public formatCommand(command: Command.Class) {
-    return super.formatCommand(command)
+  public formatCommand(command: Command.Loadable) {
+    return cleanOutput(super.formatCommand(command))
   }
 }
 
 // extensions to expose method as public for testing
 export class TestHelp extends Help {
-  public formatCommand(command: Command.Class | Command.Loadable | Command.Cached) {
-    return super.formatCommand(command)
+  public formatCommand(command: Command.Loadable) {
+    return cleanOutput(super.formatCommand(command))
   }
 
   public formatTopic(topic: Interfaces.Topic) {
@@ -45,21 +45,31 @@ export class TestHelp extends Help {
   }
 }
 
-export const commandHelp = (command?: any) => ({
-  async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await cacheCommand(command!, {} as any, false)
-    const help = ctx.help.formatCommand(cached)
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(help)
+function cleanOutput(output: string) {
+  return stripAnsi(output)
+    .split('\n')
+    .map((s) => s.trimEnd())
+    .join('\n')
+}
+
+export async function makeLoadable(command: Command.Class): Promise<Command.Loadable> {
+  return {
+    ...(await cacheCommand(command)),
+    load: async () => command,
+  }
+}
+
+export function makeCommandClass(cmdProps: Partial<Command.Class>): Command.Class {
+  return class extends Command {
+    async run(): Promise<void> {
+      // do nothing
     }
 
-    ctx.commandHelp = stripAnsi(help)
-      .split('\n')
-      .map((s) => s.trimEnd())
-      .join('\n')
-    ctx.expectation = 'has commandHelp'
-  },
-})
+    static {
+      Object.assign(this, cmdProps)
+    }
+  }
+}
 
 export const topicsHelp = (topics: Interfaces.Topic[]) => ({
   run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {

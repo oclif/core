@@ -143,3 +143,14 @@ export class DeprecateAliases extends Command {
     'run'
   }
 }
+
+export class LongDescription extends Command {
+  static description =
+    'This is a very long command description that should wrap after too many characters have been entered'
+
+  static id = 'hello:world'
+
+  async run(): Promise<void> {
+    'run'
+  }
+}

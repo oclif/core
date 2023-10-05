@@ -22,7 +22,7 @@ if (process.env.ConEmuANSI === 'ON') {
 
 export class CommandHelp extends HelpFormatter {
   constructor(
-    public command: Command.Cached | Command.Class | Command.Loadable,
+    public command: Command.Loadable,
     public config: Interfaces.Config,
     public opts: Interfaces.HelpOptions,
   ) {

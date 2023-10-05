@@ -47,7 +47,7 @@ class TestHelp extends Help {
     return super.showTopicHelp(topic)
   }
 
-  summary(c: Command.Class): string {
+  summary(c: Command.Loadable): string {
     // This will essentially ignore the summary
     return this.wrap(c.description || '')
   }
