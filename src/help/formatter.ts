@@ -15,7 +15,7 @@ export type HelpSection =
   | {body: [string, string | undefined][] | HelpSectionKeyValueTable | string | undefined; header: string}
   | undefined
 export type HelpSectionRenderer = (
-  data: {args: Command.Arg.Any[]; cmd: Command.Cached | Command.Class | Command.Loadable; flags: Command.Flag.Any[]},
+  data: {args: Command.Arg.Any[]; cmd: Command.Loadable; flags: Command.Flag.Any[]},
   header: string,
 ) => HelpSection | HelpSection[] | string | undefined
 
