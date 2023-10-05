@@ -1,3 +1,12 @@
+## [3.0.1](https://github.com/oclif/core/compare/3.0.0...3.0.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* add macos to plugin PJSON interface ([2919835](https://github.com/oclif/core/commit/2919835703778800f993efb83a4ac63e1edd59e7))
+
+
+
 # [3.0.0](https://github.com/oclif/core/compare/2.15.0...3.0.0) (2023-10-04)
 
 
