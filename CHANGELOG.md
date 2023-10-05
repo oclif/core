@@ -1,3 +1,12 @@
+## [3.0.3](https://github.com/oclif/core/compare/3.0.2...3.0.3) (2023-10-05)
+
+
+### Bug Fixes
+
+* only Command.Loadable in Help ([#811](https://github.com/oclif/core/issues/811)) ([bf9110e](https://github.com/oclif/core/commit/bf9110ed9e98cce1a6c1757e568a35b027b0d275))
+
+
+
 ## [3.0.2](https://github.com/oclif/core/compare/3.0.1...3.0.2) (2023-10-05)
 
 
