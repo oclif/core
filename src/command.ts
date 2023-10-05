@@ -378,15 +378,30 @@ export abstract class Command {
 }
 
 export namespace Command {
+  /**
+   * The Command class exported by a command file.
+   */
   export type Class = typeof Command & {
     id: string
     run(argv?: string[], config?: LoadOptions): Promise<any>
   }
 
+  /**
+   * A cached command that's had a `load` method attached to it.
+   *
+   * The `Plugin` class loads the commands from the manifest (if it exists) or requires and caches
+   * the commands directly from the commands directory inside the plugin. At this point the plugin
+   * is working with `Command.Cached`. It then appends a `load` method to each one. If the a command
+   * is executed then the `load` method is used to require the command class.
+   */
   export type Loadable = Cached & {
     load(): Promise<Command.Class>
   }
 
+  /**
+   * A cached version of the command. This is created by the cachedCommand utility and
+   * stored in the oclif.manifest.json.
+   */
   export type Cached = {
     [key: string]: unknown
     aliasPermutations?: string[]
