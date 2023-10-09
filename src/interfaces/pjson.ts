@@ -64,6 +64,7 @@ export namespace PJSON {
   export interface S3 {
     acl?: string
     bucket?: string
+    folder?: string
     gz?: boolean
     host?: string
     templates: {
