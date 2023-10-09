@@ -55,7 +55,7 @@ jobs:
       - run: New-Item -Path D:\a -Name "e2e" -ItemType "directory"
       - run: New-Item -Path D:\a\e2e -Name "sf.e2e.ts" -ItemType "directory"
       - run: |
-          git clone https://github.com/salesforcecli/cli.git --branch mdonnalley/esm
+          git clone https://github.com/salesforcecli/cli.git
           cd cli
 
           $Json = Get-Content package.json | ConvertFrom-Json
