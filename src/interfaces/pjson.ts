@@ -34,6 +34,11 @@ export namespace PJSON {
         identifier?: string
         sign?: string
       }
+      windows?: {
+        homepage?: string
+        keypath?: string
+        name?: string
+      }
       plugins?: string[]
       repositoryPrefix?: string
       schema?: number
