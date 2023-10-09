@@ -218,11 +218,13 @@ export type OptionFlagProps = FlagProps & {
 
 export type FlagParserContext = Command & {token: FlagToken}
 
+type NonNullableElementOf<T> = [NonNullable<T>] extends [Array<infer U>] ? U : T
+
 export type FlagParser<T, I extends string | boolean, P = CustomOptions> = (
   input: I,
   context: FlagParserContext,
   opts: P & OptionFlag<T, P>,
-) => T extends Array<infer U> ? Promise<U | undefined> : Promise<T | undefined>
+) => Promise<NonNullableElementOf<T> | undefined>
 
 export type ArgParserContext = Command & {token: ArgToken}
 

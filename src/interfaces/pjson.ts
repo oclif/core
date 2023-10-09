@@ -34,6 +34,11 @@ export namespace PJSON {
         identifier?: string
         sign?: string
       }
+      windows?: {
+        homepage?: string
+        keypath?: string
+        name?: string
+      }
       plugins?: string[]
       repositoryPrefix?: string
       schema?: number
@@ -64,6 +69,7 @@ export namespace PJSON {
   export interface S3 {
     acl?: string
     bucket?: string
+    folder?: string
     gz?: boolean
     host?: string
     templates: {

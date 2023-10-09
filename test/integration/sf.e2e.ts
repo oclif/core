@@ -19,7 +19,6 @@ describe('Salesforce CLI (sf)', () => {
     process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
     executor = await setup(__filename, {
       repo: 'https://github.com/salesforcecli/cli',
-      branch: 'mdonnalley/esm',
     })
   })
 

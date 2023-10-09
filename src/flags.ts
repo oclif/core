@@ -145,30 +145,30 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
     },
   })
 
-type ElementType<T extends ReadonlyArray<unknown>> = T[number]
+type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
 
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
+  defaults: Partial<OptionFlag<ReadonlyElementOf<T>[], P>> & {
     multiple: true
     options: T
   } & (
       | {
-          default: OptionFlag<ElementType<T>[], P>['default'] | undefined
+          default: OptionFlag<ReadonlyElementOf<T>[], P>['default'] | undefined
         }
       | {required: true}
     ),
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ElementType<T>, P>> & {
+  defaults: Partial<OptionFlag<ReadonlyElementOf<T>, P>> & {
     multiple?: false | undefined
     options: T
-  } & ({default: OptionFlag<ElementType<T>, P>['default']} | {required: true}),
+  } & ({default: OptionFlag<ReadonlyElementOf<T>, P>['default']} | {required: true}),
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: true}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ElementType<T>, P>> & {
-    default?: OptionFlag<ElementType<T>, P>['default'] | undefined
+  defaults: Partial<OptionFlag<ReadonlyElementOf<T>, P>> & {
+    default?: OptionFlag<ReadonlyElementOf<T>, P>['default'] | undefined
     multiple?: false | undefined
     options: T
     required?: false | undefined
@@ -176,8 +176,8 @@ export function option<T extends readonly string[], P extends CustomOptions>(
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: false}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ElementType<T>[], P>> & {
-    default?: OptionFlag<ElementType<T>[], P>['default'] | undefined
+  defaults: Partial<OptionFlag<ReadonlyElementOf<T>[], P>> & {
+    default?: OptionFlag<ReadonlyElementOf<T>[], P>['default'] | undefined
     multiple: true
     options: T
     required?: false | undefined
@@ -197,7 +197,7 @@ export function option<T extends readonly string[], P extends CustomOptions>(
  * }
  */
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ElementType<T>, P>> & {options: T},
+  defaults: Partial<OptionFlag<ReadonlyElementOf<T>, P>> & {options: T},
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
   return (options: any = {}) => ({
     parse: async (input, _ctx, _opts) => input,
