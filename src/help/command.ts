@@ -29,17 +29,6 @@ export class CommandHelp extends HelpFormatter {
     super(config, opts)
   }
 
-  private formatIfCommand(example: string): string {
-    example = this.render(example)
-    if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
-    if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
-    return example
-  }
-
-  private isCommand(example: string): boolean {
-    return stripAnsi(this.formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
-  }
-
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
     const body = aliases.map((a) => ['$', this.config.bin, a].join(' ')).join('\n')
@@ -330,6 +319,17 @@ export class CommandHelp extends HelpFormatter {
       })
       .join('\n')
     return body
+  }
+
+  private formatIfCommand(example: string): string {
+    example = this.render(example)
+    if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
+    if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
+    return example
+  }
+
+  private isCommand(example: string): boolean {
+    return stripAnsi(this.formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
   }
 }
 export default CommandHelp

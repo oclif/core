@@ -123,11 +123,11 @@ export abstract class Command {
    */
   public static usage: string | string[] | undefined
 
-  private static readonly _base = `${pjson.name}@${pjson.version}`
-
   protected debug: (...args: any[]) => void
 
   public id: string | undefined
+
+  private static readonly _base = `${pjson.name}@${pjson.version}`
 
   public constructor(
     public argv: string[],
@@ -142,6 +142,11 @@ export abstract class Command {
       }
     }
   }
+
+  /**
+   * actual command run code goes here
+   */
+  public abstract run(): Promise<any>
 
   /**
    * instantiate and run the command
@@ -174,35 +179,8 @@ export abstract class Command {
     return cmd._run<ReturnType<T['run']>>()
   }
 
-  protected async _run<T>(): Promise<T> {
-    let err: Error | undefined
-    let result: T | undefined
-    try {
-      // remove redirected env var to allow subsessions to run autoupdated client
-      this.removeEnvVar('REDIRECTED')
-      await this.init()
-      result = await this.run()
-    } catch (error: any) {
-      err = error
-      await this.catch(error)
-    } finally {
-      await this.finally(err)
-    }
-
-    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
-
-    return result as T
-  }
-
-  private removeEnvVar(envVar: string): void {
-    const keys: string[] = []
-    try {
-      keys.push(...this.config.scopedEnvVarKeys(envVar))
-    } catch {
-      keys.push(this.config.scopedEnvVarKey(envVar))
-    }
-
-    keys.map((key) => delete process.env[key])
+  protected get ctor(): typeof Command {
+    return this.constructor as typeof Command
   }
 
   protected async catch(err: CommandError): Promise<any> {
@@ -367,14 +345,36 @@ export abstract class Command {
     }
   }
 
-  protected get ctor(): typeof Command {
-    return this.constructor as typeof Command
+  protected async _run<T>(): Promise<T> {
+    let err: Error | undefined
+    let result: T | undefined
+    try {
+      // remove redirected env var to allow subsessions to run autoupdated client
+      this.removeEnvVar('REDIRECTED')
+      await this.init()
+      result = await this.run()
+    } catch (error: any) {
+      err = error
+      await this.catch(error)
+    } finally {
+      await this.finally(err)
+    }
+
+    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
+
+    return result as T
   }
 
-  /**
-   * actual command run code goes here
-   */
-  public abstract run(): Promise<any>
+  private removeEnvVar(envVar: string): void {
+    const keys: string[] = []
+    try {
+      keys.push(...this.config.scopedEnvVarKeys(envVar))
+    } catch {
+      keys.push(this.config.scopedEnvVarKey(envVar))
+    }
+
+    keys.map((key) => delete process.env[key])
+  }
 }
 
 export namespace Command {

@@ -68,16 +68,8 @@ class Permutations extends Map<string, Set<string>> {
 }
 
 export class Config implements IConfig {
-  private _base = BASE
-
-  private _commandIDs!: string[]
-  private _commands = new Map<string, Command.Loadable>()
-  private static _rootPlugin: IPlugin
-  private _topics = new Map<string, Topic>()
-  private commandPermutations = new Permutations()
-  private pluginLoader!: PluginLoader
-  private topicPermutations = new Permutations()
   public arch!: ArchTypes
+
   public bin!: string
   public binAliases?: string[]
   public binPath?: string
@@ -97,21 +89,29 @@ export class Config implements IConfig {
   public platform!: PlatformTypes
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
-
   public shell!: string
-
   public topicSeparator: ' ' | ':' = ':'
-
   public userAgent!: string
-
   public userPJSON?: PJSON.User
-
   public valid!: boolean
-
   public version!: string
   protected warned = false
-
   public windows!: boolean
+
+  private _base = BASE
+
+  private _commandIDs!: string[]
+
+  private _commands = new Map<string, Command.Loadable>()
+
+  private static _rootPlugin: IPlugin
+
+  private _topics = new Map<string, Topic>()
+
+  private commandPermutations = new Permutations()
+  private pluginLoader!: PluginLoader
+
+  private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
 
@@ -152,206 +152,37 @@ export class Config implements IConfig {
     return Config._rootPlugin
   }
 
-  protected _debug(): number {
-    if (this.scopedEnvVarTrue('DEBUG')) return 1
-    try {
-      const {enabled} = require('debug')(this.bin)
-      if (enabled) return 1
-    } catch {}
-
-    return 0
+  public get commandIDs(): string[] {
+    if (this._commandIDs) return this._commandIDs
+    this._commandIDs = this.commands.map((c) => c.id)
+    return this._commandIDs
   }
 
-  protected _shell(): string {
-    let shellPath
-    const {COMSPEC} = process.env
-    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
-    if (SHELL) {
-      shellPath = SHELL.split('/')
-    } else if (this.windows && COMSPEC) {
-      shellPath = COMSPEC.split(/\\|\//)
-    } else {
-      shellPath = ['unknown']
+  public get commands(): Command.Loadable[] {
+    return [...this._commands.values()]
+  }
+
+  protected get isProd(): boolean {
+    return isProd()
+  }
+
+  public get topics(): Topic[] {
+    return [...this._topics.values()]
+  }
+
+  public get versionDetails(): VersionDetails {
+    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ')
+    return {
+      architecture,
+      cliVersion,
+      nodeVersion,
+      osVersion: `${type()} ${release()}`,
+      pluginVersions: Object.fromEntries(
+        [...this.plugins.values()].map((p) => [p.name, {root: p.root, type: p.type, version: p.version}]),
+      ),
+      rootPath: this.root,
+      shell: this.shell,
     }
-
-    return shellPath.at(-1) ?? 'unknown'
-  }
-
-  /**
-   * This method is responsible for locating the correct plugin to use for a named command id
-   * It searches the {Config} registered commands to match either the raw command id or the command alias
-   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
-   * create the same command or command alias.
-   *
-   * In the case of more than one found command, the function will select the command based on the order in which
-   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
-   * is selected as the command to run.
-   *
-   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
-   * is present, this function defers to the core plugin.
-   *
-   * If there is not a core plugin command present, this function will return the first
-   * plugin as discovered (will not change the order)
-   *
-   * @param commands commands to determine the priority of
-   * @returns command instance {Command.Loadable} or undefined
-   */
-  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
-    const oclifPlugins = this.pjson.oclif?.plugins ?? []
-    const commandPlugins = commands.sort((a, b) => {
-      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
-      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
-      const aIndex = oclifPlugins.indexOf(pluginAliasA)
-      const bIndex = oclifPlugins.indexOf(pluginAliasB)
-      // When both plugin types are 'core' plugins sort based on index
-      if (a.pluginType === 'core' && b.pluginType === 'core') {
-        // If b appears first in the pjson.plugins sort it first
-        return aIndex - bIndex
-      }
-
-      // if b is a core plugin and a is not sort b first
-      if (b.pluginType === 'core' && a.pluginType !== 'core') {
-        return 1
-      }
-
-      // if a is a core plugin and b is not sort a first
-      if (a.pluginType === 'core' && b.pluginType !== 'core') {
-        return -1
-      }
-
-      // if a is a jit plugin and b is not sort b first
-      if (a.pluginType === 'jit' && b.pluginType !== 'jit') {
-        return 1
-      }
-
-      // if b is a jit plugin and a is not sort a first
-      if (b.pluginType === 'jit' && a.pluginType !== 'jit') {
-        return -1
-      }
-
-      // neither plugin is core, so do not change the order
-      return 0
-    })
-    return commandPlugins[0]
-  }
-
-  private getCmdLookupId(id: string): string {
-    if (this._commands.has(id)) return id
-    if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
-    return id
-  }
-
-  private getTopicLookupId(id: string): string {
-    if (this._topics.has(id)) return id
-    if (this.topicPermutations.hasValid(id)) return this.topicPermutations.getValid(id)!
-    return id
-  }
-
-  /**
-   * Insert legacy plugins
-   *
-   * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
-   * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
-   *
-   * @param plugins array of oclif-compatible plugins
-   * @returns void
-   */
-  private insertLegacyPlugins(plugins: IPlugin[]) {
-    for (const plugin of plugins) {
-      this.plugins.set(plugin.name, plugin)
-      this.loadCommands(plugin)
-    }
-  }
-
-  private isJitPluginCommand(c: Command.Loadable): boolean {
-    // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
-    return (
-      Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') &&
-      Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
-    )
-  }
-
-  private loadCommands(plugin: IPlugin) {
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadCommands#${plugin.name}`, {plugin: plugin.name})
-    for (const command of plugin.commands) {
-      // set canonical command id
-      if (this._commands.has(command.id)) {
-        const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
-        this._commands.set(prioritizedCommand.id, prioritizedCommand)
-      } else {
-        this._commands.set(command.id, command)
-      }
-
-      // v3 moved command id permutations to the manifest, but some plugins may not have
-      // the new manifest yet. For those, we need to calculate the permutations here.
-      const permutations =
-        this.flexibleTaxonomy && command.permutations === undefined
-          ? getCommandIdPermutations(command.id)
-          : command.permutations ?? [command.id]
-      // set every permutation
-      for (const permutation of permutations) {
-        this.commandPermutations.add(permutation, command.id)
-      }
-
-      // set command aliases
-      for (const alias of command.aliases ?? []) {
-        if (this._commands.has(alias)) {
-          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
-          this._commands.set(alias, {...prioritizedCommand, id: alias})
-        } else {
-          this._commands.set(alias, {...command, id: alias})
-        }
-
-        // set every permutation of the aliases
-
-        // v3 moved command alias permutations to the manifest, but some plugins may not have
-        // the new manifest yet. For those, we need to calculate the permutations here.
-        const aliasPermutations =
-          this.flexibleTaxonomy && command.aliasPermutations === undefined
-            ? getCommandIdPermutations(alias)
-            : command.permutations ?? [alias]
-        // set every permutation
-        for (const permutation of aliasPermutations) {
-          this.commandPermutations.add(permutation, command.id)
-        }
-      }
-    }
-
-    marker?.addDetails({commandCount: plugin.commands.length})
-    marker?.stop()
-  }
-
-  private loadTopics(plugin: IPlugin) {
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadTopics#${plugin.name}`, {plugin: plugin.name})
-    for (const topic of compact(plugin.topics)) {
-      const existing = this._topics.get(topic.name)
-      if (existing) {
-        existing.description = topic.description || existing.description
-        existing.hidden = existing.hidden || topic.hidden
-      } else {
-        this._topics.set(topic.name, topic)
-      }
-
-      const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(topic.name) : [topic.name]
-      for (const permutation of permutations) {
-        this.topicPermutations.add(permutation, topic.name)
-      }
-    }
-
-    // Add missing topics for displaying help when partial commands are entered.
-    for (const c of plugin.commands.filter((c) => !c.hidden)) {
-      const parts = c.id.split(':')
-      while (parts.length > 0) {
-        const name = parts.join(':')
-        if (name && !this._topics.has(name)) {
-          this._topics.set(name, {description: c.summary || c.description, name})
-        }
-
-        parts.pop()
-      }
-    }
-
-    marker?.stop()
   }
 
   protected dir(category: 'cache' | 'config' | 'data'): string {
@@ -812,36 +643,205 @@ export class Config implements IConfig {
     return process.env.USERPROFILE
   }
 
-  public get commandIDs(): string[] {
-    if (this._commandIDs) return this._commandIDs
-    this._commandIDs = this.commands.map((c) => c.id)
-    return this._commandIDs
+  protected _debug(): number {
+    if (this.scopedEnvVarTrue('DEBUG')) return 1
+    try {
+      const {enabled} = require('debug')(this.bin)
+      if (enabled) return 1
+    } catch {}
+
+    return 0
   }
 
-  public get commands(): Command.Loadable[] {
-    return [...this._commands.values()]
-  }
-
-  protected get isProd(): boolean {
-    return isProd()
-  }
-
-  public get topics(): Topic[] {
-    return [...this._topics.values()]
-  }
-
-  public get versionDetails(): VersionDetails {
-    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ')
-    return {
-      architecture,
-      cliVersion,
-      nodeVersion,
-      osVersion: `${type()} ${release()}`,
-      pluginVersions: Object.fromEntries(
-        [...this.plugins.values()].map((p) => [p.name, {root: p.root, type: p.type, version: p.version}]),
-      ),
-      rootPath: this.root,
-      shell: this.shell,
+  protected _shell(): string {
+    let shellPath
+    const {COMSPEC} = process.env
+    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
+    if (SHELL) {
+      shellPath = SHELL.split('/')
+    } else if (this.windows && COMSPEC) {
+      shellPath = COMSPEC.split(/\\|\//)
+    } else {
+      shellPath = ['unknown']
     }
+
+    return shellPath.at(-1) ?? 'unknown'
+  }
+
+  /**
+   * This method is responsible for locating the correct plugin to use for a named command id
+   * It searches the {Config} registered commands to match either the raw command id or the command alias
+   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
+   * create the same command or command alias.
+   *
+   * In the case of more than one found command, the function will select the command based on the order in which
+   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
+   * is selected as the command to run.
+   *
+   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
+   * is present, this function defers to the core plugin.
+   *
+   * If there is not a core plugin command present, this function will return the first
+   * plugin as discovered (will not change the order)
+   *
+   * @param commands commands to determine the priority of
+   * @returns command instance {Command.Loadable} or undefined
+   */
+  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
+    const oclifPlugins = this.pjson.oclif?.plugins ?? []
+    const commandPlugins = commands.sort((a, b) => {
+      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
+      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
+      const aIndex = oclifPlugins.indexOf(pluginAliasA)
+      const bIndex = oclifPlugins.indexOf(pluginAliasB)
+      // When both plugin types are 'core' plugins sort based on index
+      if (a.pluginType === 'core' && b.pluginType === 'core') {
+        // If b appears first in the pjson.plugins sort it first
+        return aIndex - bIndex
+      }
+
+      // if b is a core plugin and a is not sort b first
+      if (b.pluginType === 'core' && a.pluginType !== 'core') {
+        return 1
+      }
+
+      // if a is a core plugin and b is not sort a first
+      if (a.pluginType === 'core' && b.pluginType !== 'core') {
+        return -1
+      }
+
+      // if a is a jit plugin and b is not sort b first
+      if (a.pluginType === 'jit' && b.pluginType !== 'jit') {
+        return 1
+      }
+
+      // if b is a jit plugin and a is not sort a first
+      if (b.pluginType === 'jit' && a.pluginType !== 'jit') {
+        return -1
+      }
+
+      // neither plugin is core, so do not change the order
+      return 0
+    })
+    return commandPlugins[0]
+  }
+
+  private getCmdLookupId(id: string): string {
+    if (this._commands.has(id)) return id
+    if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
+    return id
+  }
+
+  private getTopicLookupId(id: string): string {
+    if (this._topics.has(id)) return id
+    if (this.topicPermutations.hasValid(id)) return this.topicPermutations.getValid(id)!
+    return id
+  }
+
+  /**
+   * Insert legacy plugins
+   *
+   * Replace invalid CLI plugins (cli-engine plugins, mostly Heroku) loaded via `this.loadPlugins`
+   * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
+   *
+   * @param plugins array of oclif-compatible plugins
+   * @returns void
+   */
+  private insertLegacyPlugins(plugins: IPlugin[]) {
+    for (const plugin of plugins) {
+      this.plugins.set(plugin.name, plugin)
+      this.loadCommands(plugin)
+    }
+  }
+
+  private isJitPluginCommand(c: Command.Loadable): boolean {
+    // Return true if the command's plugin is listed under oclif.jitPlugins AND if the plugin hasn't been loaded to this.plugins
+    return (
+      Object.keys(this.pjson.oclif.jitPlugins ?? {}).includes(c.pluginName ?? '') &&
+      Boolean(c?.pluginName && !this.plugins.has(c.pluginName))
+    )
+  }
+
+  private loadCommands(plugin: IPlugin) {
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadCommands#${plugin.name}`, {plugin: plugin.name})
+    for (const command of plugin.commands) {
+      // set canonical command id
+      if (this._commands.has(command.id)) {
+        const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
+        this._commands.set(prioritizedCommand.id, prioritizedCommand)
+      } else {
+        this._commands.set(command.id, command)
+      }
+
+      // v3 moved command id permutations to the manifest, but some plugins may not have
+      // the new manifest yet. For those, we need to calculate the permutations here.
+      const permutations =
+        this.flexibleTaxonomy && command.permutations === undefined
+          ? getCommandIdPermutations(command.id)
+          : command.permutations ?? [command.id]
+      // set every permutation
+      for (const permutation of permutations) {
+        this.commandPermutations.add(permutation, command.id)
+      }
+
+      // set command aliases
+      for (const alias of command.aliases ?? []) {
+        if (this._commands.has(alias)) {
+          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
+          this._commands.set(alias, {...prioritizedCommand, id: alias})
+        } else {
+          this._commands.set(alias, {...command, id: alias})
+        }
+
+        // set every permutation of the aliases
+
+        // v3 moved command alias permutations to the manifest, but some plugins may not have
+        // the new manifest yet. For those, we need to calculate the permutations here.
+        const aliasPermutations =
+          this.flexibleTaxonomy && command.aliasPermutations === undefined
+            ? getCommandIdPermutations(alias)
+            : command.permutations ?? [alias]
+        // set every permutation
+        for (const permutation of aliasPermutations) {
+          this.commandPermutations.add(permutation, command.id)
+        }
+      }
+    }
+
+    marker?.addDetails({commandCount: plugin.commands.length})
+    marker?.stop()
+  }
+
+  private loadTopics(plugin: IPlugin) {
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.loadTopics#${plugin.name}`, {plugin: plugin.name})
+    for (const topic of compact(plugin.topics)) {
+      const existing = this._topics.get(topic.name)
+      if (existing) {
+        existing.description = topic.description || existing.description
+        existing.hidden = existing.hidden || topic.hidden
+      } else {
+        this._topics.set(topic.name, topic)
+      }
+
+      const permutations = this.flexibleTaxonomy ? getCommandIdPermutations(topic.name) : [topic.name]
+      for (const permutation of permutations) {
+        this.topicPermutations.add(permutation, topic.name)
+      }
+    }
+
+    // Add missing topics for displaying help when partial commands are entered.
+    for (const c of plugin.commands.filter((c) => !c.hidden)) {
+      const parts = c.id.split(':')
+      while (parts.length > 0) {
+        const name = parts.join(':')
+        if (name && !this._topics.has(name)) {
+          this._topics.set(name, {description: c.summary || c.description, name})
+        }
+
+        parts.pop()
+      }
+    }
+
+    marker?.stop()
   }
 }

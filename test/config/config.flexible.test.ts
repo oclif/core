@@ -18,8 +18,6 @@ interface Options {
 }
 
 class MyCommandClass extends Command {
-  _base = ''
-
   aliases: string[] = []
 
   flags = {}
@@ -27,6 +25,8 @@ class MyCommandClass extends Command {
   hidden = false
 
   id = 'foo:bar'
+
+  _base = ''
 
   run(): Promise<any> {
     return Promise.resolve()

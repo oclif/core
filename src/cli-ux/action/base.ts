@@ -13,16 +13,110 @@ export interface ITask {
 export type ActionType = 'debug' | 'simple' | 'spinner'
 
 export class ActionBase {
-  private stdmockOrigs = {
-    stderr: stderr.write,
-    stdout: stdout.write,
-  }
-
   std: 'stderr' | 'stdout' = 'stderr'
 
   protected stdmocks?: ['stderr' | 'stdout', string[]][]
 
   type!: ActionType
+
+  private stdmockOrigs = {
+    stderr: stderr.write,
+    stdout: stdout.write,
+  }
+
+  protected get output(): string | undefined {
+    return this.globals.output
+  }
+
+  protected set output(output: string | undefined) {
+    this.globals.output = output
+  }
+
+  get running(): boolean {
+    return Boolean(this.task)
+  }
+
+  get status(): string | undefined {
+    return this.task ? this.task.status : undefined
+  }
+
+  set status(status: string | undefined) {
+    const {task} = this
+    if (!task) {
+      return
+    }
+
+    if (task.status === status) {
+      return
+    }
+
+    this._updateStatus(status, task.status)
+    task.status = status
+  }
+
+  public get task(): ITask | undefined {
+    return this.globals.action.task
+  }
+
+  public set task(task: ITask | undefined) {
+    this.globals.action.task = task
+  }
+
+  public pause(fn: () => any, icon?: string): Promise<any> {
+    const {task} = this
+    const active = task && task.active
+    if (task && active) {
+      this._pause(icon)
+      this._stdout(false)
+      task.active = false
+    }
+
+    const ret = fn()
+    if (task && active) {
+      this._resume()
+    }
+
+    return ret
+  }
+
+  public async pauseAsync<T>(fn: () => Promise<T>, icon?: string): Promise<T> {
+    const {task} = this
+    const active = task && task.active
+    if (task && active) {
+      this._pause(icon)
+      this._stdout(false)
+      task.active = false
+    }
+
+    const ret = await fn()
+    if (task && active) {
+      this._resume()
+    }
+
+    return ret
+  }
+
+  public start(action: string, status?: string, opts: Options = {}): void {
+    this.std = opts.stdout ? 'stdout' : 'stderr'
+    const task = {action, active: Boolean(this.task && this.task.active), status}
+    this.task = task
+
+    this._start(opts)
+    task.active = true
+    this._stdout(true)
+  }
+
+  public stop(msg = 'done'): void {
+    const {task} = this
+    if (!task) {
+      return
+    }
+
+    this._stop(msg)
+    task.active = false
+    this.task = undefined
+    this._stdout(false)
+  }
 
   // flush mocked stdout/stderr
   protected _flushStdout(): void {
@@ -122,99 +216,5 @@ export class ActionBase {
     const globals = (global as any).ux
     globals.action = globals.action || {}
     return globals
-  }
-
-  public pause(fn: () => any, icon?: string): Promise<any> {
-    const {task} = this
-    const active = task && task.active
-    if (task && active) {
-      this._pause(icon)
-      this._stdout(false)
-      task.active = false
-    }
-
-    const ret = fn()
-    if (task && active) {
-      this._resume()
-    }
-
-    return ret
-  }
-
-  public async pauseAsync<T>(fn: () => Promise<T>, icon?: string): Promise<T> {
-    const {task} = this
-    const active = task && task.active
-    if (task && active) {
-      this._pause(icon)
-      this._stdout(false)
-      task.active = false
-    }
-
-    const ret = await fn()
-    if (task && active) {
-      this._resume()
-    }
-
-    return ret
-  }
-
-  public start(action: string, status?: string, opts: Options = {}): void {
-    this.std = opts.stdout ? 'stdout' : 'stderr'
-    const task = {action, active: Boolean(this.task && this.task.active), status}
-    this.task = task
-
-    this._start(opts)
-    task.active = true
-    this._stdout(true)
-  }
-
-  public stop(msg = 'done'): void {
-    const {task} = this
-    if (!task) {
-      return
-    }
-
-    this._stop(msg)
-    task.active = false
-    this.task = undefined
-    this._stdout(false)
-  }
-
-  protected get output(): string | undefined {
-    return this.globals.output
-  }
-
-  protected set output(output: string | undefined) {
-    this.globals.output = output
-  }
-
-  get running(): boolean {
-    return Boolean(this.task)
-  }
-
-  get status(): string | undefined {
-    return this.task ? this.task.status : undefined
-  }
-
-  set status(status: string | undefined) {
-    const {task} = this
-    if (!task) {
-      return
-    }
-
-    if (task.status === status) {
-      return
-    }
-
-    this._updateStatus(status, task.status)
-    task.status = status
-  }
-
-  public get task(): ITask | undefined {
-    return this.globals.action.task
-  }
-
-  public set task(task: ITask | undefined) {
-    this.globals.action.task = task
   }
 }

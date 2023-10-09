@@ -4,6 +4,10 @@
 class Stream {
   public constructor(public channel: 'stderr' | 'stdout') {}
 
+  public get isTTY(): boolean {
+    return process[this.channel].isTTY
+  }
+
   public emit(event: string, ...args: any[]): boolean {
     return process[this.channel].emit(event, ...args)
   }
@@ -28,10 +32,6 @@ class Stream {
 
   public write(data: string): boolean {
     return process[this.channel].write(data)
-  }
-
-  public get isTTY(): boolean {
-    return process[this.channel].isTTY
   }
 }
 
