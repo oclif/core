@@ -1,3 +1,12 @@
+## [3.0.4](https://github.com/oclif/core/compare/3.0.3...3.0.4) (2023-10-09)
+
+
+### Bug Fixes
+
+* custom flags with union type ([#813](https://github.com/oclif/core/issues/813)) ([a4afa23](https://github.com/oclif/core/commit/a4afa23983b7c164f4bf16f340e0dc4f584e8289))
+
+
+
 ## [3.0.3](https://github.com/oclif/core/compare/3.0.2...3.0.3) (2023-10-05)
 
 

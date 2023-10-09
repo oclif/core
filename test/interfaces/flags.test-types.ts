@@ -337,6 +337,19 @@ class MyCommand extends BaseCommand {
       // TODO: THIS IS A BUG. It should enforce a single value instead of allowing a single value or an array
       default: ['foo'],
     }),
+
+    'custom-union#defs:parse': Flags.custom<'a' | 'b' | 'c'>({
+      async parse(input, _ctx, _opts) {
+        return input as 'a' | 'b' | 'c'
+      },
+    })(),
+
+    'custom-union#defs:parse,multiple': Flags.custom<'a' | 'b' | 'c'>({
+      async parse(input, _ctx, _opts) {
+        return input as 'a' | 'b' | 'c'
+      },
+      multiple: true,
+    })(),
   }
 
   public flags!: MyFlags
@@ -509,6 +522,9 @@ class MyCommand extends BaseCommand {
 
     // TODO: Known issue with `default` not enforcing the correct type whenever multiple is defaulted to true but then overridden to false
     // expectType<string>(this.flags['custom#defs:multiple=true;opts:multiple=false,default'])
+
+    expectType<'a' | 'b' | 'c' | undefined>(this.flags['custom-union#defs:parse'])
+    expectType<Array<'a' | 'b' | 'c'> | undefined>(this.flags['custom-union#defs:parse,multiple'])
 
     return result.flags
   }
