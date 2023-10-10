@@ -1,5 +1,6 @@
+/* eslint-disable complexity */
 import {existsSync} from 'node:fs'
-import {join, relative as pathRelative} from 'node:path'
+import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import {memoizedWarn} from '../errors'
@@ -95,6 +96,10 @@ function registerTSNode(root: string): TSConfig | undefined {
       sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
       target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
+      ...(tsconfig.compilerOptions.moduleResolution
+        ? {moduleResolution: tsconfig.compilerOptions.moduleResolution}
+        : {}),
+      ...(tsconfig.compilerOptions.jsx ? {jsx: tsconfig.compilerOptions.jsx} : {}),
     },
     cwd: root,
     esm: tsconfig['ts-node']?.esm ?? true,
@@ -103,16 +108,6 @@ function registerTSNode(root: string): TSConfig | undefined {
     scopeDir: root,
     skipProject: true,
     transpileOnly: true,
-  }
-
-  if (tsconfig.compilerOptions.moduleResolution) {
-    // @ts-expect-error TSNode.RegisterOptions.compilerOptions is typed as a plain object
-    conf.compilerOptions.moduleResolution = tsconfig.compilerOptions.moduleResolution
-  }
-
-  if (tsconfig.compilerOptions.jsx) {
-    // @ts-expect-error TSNode.RegisterOptions.compilerOptions is typed as a plain object
-    conf.compilerOptions.jsx = tsconfig.compilerOptions.jsx
   }
 
   tsNode.register(conf)
@@ -168,6 +163,16 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
 
   if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
     debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
+    return orig
+  }
+
+  const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
+  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes(`ts-node`)
+  if (plugin?.moduleType === 'module' && !isProduction && tsNodeExecIsUsed && nodeMajor >= 20 && process.execArgv) {
+    debug(`Skipping ts-node registration for ${root} because ts-node is run in node version ${process.version}"`)
+    memoizedWarn(
+      `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
+    )
     return orig
   }
 
