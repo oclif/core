@@ -229,13 +229,13 @@ describe('Config', () => {
       types = [],
     }: Options = {}) => {
       class MyCommandClass extends Command {
-        _base = ''
-
         aliases: string[] = []
 
         hidden = false
 
         id = 'foo:bar'
+
+        _base = ''
 
         run(): Promise<any> {
           return Promise.resolve()

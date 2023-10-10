@@ -30,13 +30,13 @@ type PerfHighlights = {
 export const OCLIF_MARKER_OWNER = '@oclif/core'
 
 class Marker {
-  private startMarker: string
-  private stopMarker: string
   public method: string
   public module: string
-
   public scope: string
   public stopped = false
+
+  private startMarker: string
+  private stopMarker: string
 
   constructor(
     public owner: string,

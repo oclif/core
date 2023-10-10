@@ -27,15 +27,49 @@ type LoadOpts = {
 type PluginsMap = Map<string, IPlugin>
 
 export default class PluginLoader {
-  private pluginsProvided = false
   public errors: (Error | string)[] = []
   public plugins: PluginsMap = new Map()
+  private pluginsProvided = false
 
   constructor(public options: PluginLoaderOptions) {
     if (options.plugins) {
       this.pluginsProvided = true
       this.plugins = Array.isArray(options.plugins) ? new Map(options.plugins.map((p) => [p.name, p])) : options.plugins
     }
+  }
+
+  public async loadChildren(opts: LoadOpts): Promise<{errors: (Error | string)[]; plugins: PluginsMap}> {
+    if (!this.pluginsProvided || opts.force) {
+      await this.loadUserPlugins(opts)
+      await this.loadDevPlugins(opts)
+      await this.loadCorePlugins(opts)
+    }
+
+    return {errors: this.errors, plugins: this.plugins}
+  }
+
+  public async loadRoot(): Promise<IPlugin> {
+    let rootPlugin: IPlugin
+    if (this.pluginsProvided) {
+      const plugins = [...this.plugins.values()]
+      rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
+    } else {
+      const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
+      rootPlugin = new Plugin.Plugin({isRoot: true, root: this.options.root})
+      await rootPlugin.load()
+      marker?.addDetails({
+        commandCount: rootPlugin.commands.length,
+        hasManifest: rootPlugin.hasManifest ?? false,
+        name: rootPlugin.name,
+        topicCount: rootPlugin.topics.length,
+        type: rootPlugin.type,
+        usesMain: Boolean(rootPlugin.pjson.main),
+      })
+      marker?.stop()
+    }
+
+    this.plugins.set(rootPlugin.name, rootPlugin)
+    return rootPlugin
   }
 
   private async loadCorePlugins(opts: LoadOpts): Promise<void> {
@@ -138,39 +172,5 @@ export default class PluginLoader {
         if (error.code !== 'ENOENT') process.emitWarning(error)
       }
     }
-  }
-
-  public async loadChildren(opts: LoadOpts): Promise<{errors: (Error | string)[]; plugins: PluginsMap}> {
-    if (!this.pluginsProvided || opts.force) {
-      await this.loadUserPlugins(opts)
-      await this.loadDevPlugins(opts)
-      await this.loadCorePlugins(opts)
-    }
-
-    return {errors: this.errors, plugins: this.plugins}
-  }
-
-  public async loadRoot(): Promise<IPlugin> {
-    let rootPlugin: IPlugin
-    if (this.pluginsProvided) {
-      const plugins = [...this.plugins.values()]
-      rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
-    } else {
-      const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin.Plugin({isRoot: true, root: this.options.root})
-      await rootPlugin.load()
-      marker?.addDetails({
-        commandCount: rootPlugin.commands.length,
-        hasManifest: rootPlugin.hasManifest ?? false,
-        name: rootPlugin.name,
-        topicCount: rootPlugin.topics.length,
-        type: rootPlugin.type,
-        usesMain: Boolean(rootPlugin.pjson.main),
-      })
-      marker?.stop()
-    }
-
-    this.plugins.set(rootPlugin.name, rootPlugin)
-    return rootPlugin
   }
 }

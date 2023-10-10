@@ -55,6 +55,76 @@ class Table<T extends Record<string, unknown>> {
     }
   }
 
+  display() {
+    // build table rows from input array data
+    let rows = this.data.map((d) => {
+      const row: any = {}
+      for (const col of this.columns) {
+        let val = col.get(d)
+        if (typeof val !== 'string') val = inspect(val, {breakLength: Number.POSITIVE_INFINITY})
+        row[col.key] = val
+      }
+
+      return row
+    })
+
+    // filter rows
+    if (this.options.filter) {
+      let [header, regex] = this.options.filter!.split('=')
+      const isNot = header[0] === '-'
+      if (isNot) header = header.slice(1)
+      const col = this.findColumnFromHeader(header)
+      if (!col || !regex) throw new Error('Filter flag has an invalid value')
+      rows = rows.filter((d: any) => {
+        const re = new RegExp(regex)
+        const val = d[col!.key]
+        const match = val.match(re)
+        return isNot ? !match : match
+      })
+    }
+
+    // sort rows
+    if (this.options.sort) {
+      const sorters = this.options.sort!.split(',')
+      const sortHeaders = sorters.map((k) => (k[0] === '-' ? k.slice(1) : k))
+      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map((c) => (v: any) => v[c.key])
+      const sortKeysOrder = sorters.map((k) => (k[0] === '-' ? 'desc' : 'asc'))
+      rows = orderBy(rows, sortKeys, sortKeysOrder)
+    }
+
+    // and filter columns
+    if (this.options.columns) {
+      const filters = this.options.columns!.split(',')
+      this.columns = this.filterColumnsFromHeaders(filters)
+    } else if (!this.options.extended) {
+      // show extented columns/properties
+      this.columns = this.columns.filter((c) => !c.extended)
+    }
+
+    this.data = rows
+
+    switch (this.options.output) {
+      case 'csv': {
+        this.outputCSV()
+        break
+      }
+
+      case 'json': {
+        this.outputJSON()
+        break
+      }
+
+      case 'yaml': {
+        this.outputYAML()
+        break
+      }
+
+      default: {
+        this.outputTable()
+      }
+    }
+  }
+
   private filterColumnsFromHeaders(
     filters: string[],
   ): (table.Column<T> & {key: string; maxWidth?: number; width?: number})[] {
@@ -242,76 +312,6 @@ class Table<T extends Record<string, unknown>> {
   private resolveColumnsToObjectArray() {
     const {columns, data} = this
     return data.map((d: any) => Object.fromEntries(columns.map((col) => [col.key, d[col.key] ?? ''])))
-  }
-
-  display() {
-    // build table rows from input array data
-    let rows = this.data.map((d) => {
-      const row: any = {}
-      for (const col of this.columns) {
-        let val = col.get(d)
-        if (typeof val !== 'string') val = inspect(val, {breakLength: Number.POSITIVE_INFINITY})
-        row[col.key] = val
-      }
-
-      return row
-    })
-
-    // filter rows
-    if (this.options.filter) {
-      let [header, regex] = this.options.filter!.split('=')
-      const isNot = header[0] === '-'
-      if (isNot) header = header.slice(1)
-      const col = this.findColumnFromHeader(header)
-      if (!col || !regex) throw new Error('Filter flag has an invalid value')
-      rows = rows.filter((d: any) => {
-        const re = new RegExp(regex)
-        const val = d[col!.key]
-        const match = val.match(re)
-        return isNot ? !match : match
-      })
-    }
-
-    // sort rows
-    if (this.options.sort) {
-      const sorters = this.options.sort!.split(',')
-      const sortHeaders = sorters.map((k) => (k[0] === '-' ? k.slice(1) : k))
-      const sortKeys = this.filterColumnsFromHeaders(sortHeaders).map((c) => (v: any) => v[c.key])
-      const sortKeysOrder = sorters.map((k) => (k[0] === '-' ? 'desc' : 'asc'))
-      rows = orderBy(rows, sortKeys, sortKeysOrder)
-    }
-
-    // and filter columns
-    if (this.options.columns) {
-      const filters = this.options.columns!.split(',')
-      this.columns = this.filterColumnsFromHeaders(filters)
-    } else if (!this.options.extended) {
-      // show extented columns/properties
-      this.columns = this.columns.filter((c) => !c.extended)
-    }
-
-    this.data = rows
-
-    switch (this.options.output) {
-      case 'csv': {
-        this.outputCSV()
-        break
-      }
-
-      case 'json': {
-        this.outputJSON()
-        break
-      }
-
-      case 'yaml': {
-        this.outputYAML()
-        break
-      }
-
-      default: {
-        this.outputTable()
-      }
-    }
   }
 }
 

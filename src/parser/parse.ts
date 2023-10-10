@@ -119,8 +119,110 @@ export class Parser<
     )
   }
 
-  private get _argTokens(): ArgToken[] {
-    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
+  public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
+    this._debugInput()
+
+    const parseFlag = (arg: string): boolean => {
+      const {isLong, name} = this.findFlag(arg)
+      if (!name) {
+        const i = arg.indexOf('=')
+        if (i !== -1) {
+          const sliced = arg.slice(i + 1)
+          this.argv.unshift(sliced)
+
+          const equalsParsed = parseFlag(arg.slice(0, i))
+          if (!equalsParsed) {
+            this.argv.shift()
+          }
+
+          return equalsParsed
+        }
+
+        return false
+      }
+
+      const flag = this.input.flags[name]
+
+      if (flag.type === 'option') {
+        if (!flag.multiple && this.raw.some((o) => o.type === 'flag' && o.flag === name)) {
+          throw new CLIError(`Flag --${name} can only be specified once`)
+        }
+
+        this.currentFlag = flag
+        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if (typeof input !== 'string' || this.findFlag(input).name) {
+          throw new CLIError(`Flag --${name} expects a value`)
+        }
+
+        this.raw.push({flag: flag.name, input, type: 'flag'})
+      } else {
+        this.raw.push({flag: flag.name, input: arg, type: 'flag'})
+        // push the rest of the short characters back on the stack
+        if (!isLong && arg.length > 2) {
+          this.argv.unshift(`-${arg.slice(2)}`)
+        }
+      }
+
+      return true
+    }
+
+    let parsingFlags = true
+    const nonExistentFlags: string[] = []
+    let dashdash = false
+    const originalArgv = [...this.argv]
+
+    while (this.argv.length > 0) {
+      const input = this.argv.shift() as string
+      if (parsingFlags && input.startsWith('-') && input !== '-') {
+        // attempt to parse as arg
+        if (this.input['--'] !== false && input === '--') {
+          parsingFlags = false
+          continue
+        }
+
+        if (parseFlag(input)) {
+          continue
+        }
+
+        if (input === '--') {
+          dashdash = true
+          continue
+        }
+
+        if (this.input['--'] !== false && !isNegativeNumber(input)) {
+          // At this point we have a value that begins with '-' or '--'
+          // but doesn't match up to a flag definition. So we assume that
+          // this is a misspelled flag or a non-existent flag,
+          // e.g. --hekp instead of --help
+          nonExistentFlags.push(input)
+          continue
+        }
+      }
+
+      if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
+        this.raw.push({flag: this.currentFlag.name, input, type: 'flag'})
+        continue
+      }
+
+      // not a flag, parse as arg
+      const arg = Object.keys(this.input.args)[this._argTokens.length]
+      this.raw.push({arg, input, type: 'arg'})
+    }
+
+    const [{args, argv}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
+    this._debugOutput(argv, args, flags)
+
+    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
+
+    return {
+      args: args as TArgs,
+      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
+      flags,
+      metadata,
+      nonExistentFlags,
+      raw: this.raw,
+    }
   }
 
   private async _args(): Promise<{args: Record<string, unknown>; argv: unknown[]}> {
@@ -172,6 +274,10 @@ export class Parser<
     }
 
     return {args, argv}
+  }
+
+  private get _argTokens(): ArgToken[] {
+    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   private _debugInput() {
@@ -521,111 +627,5 @@ export class Parser<
     }
 
     return flagTokenMap
-  }
-
-  public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
-    this._debugInput()
-
-    const parseFlag = (arg: string): boolean => {
-      const {isLong, name} = this.findFlag(arg)
-      if (!name) {
-        const i = arg.indexOf('=')
-        if (i !== -1) {
-          const sliced = arg.slice(i + 1)
-          this.argv.unshift(sliced)
-
-          const equalsParsed = parseFlag(arg.slice(0, i))
-          if (!equalsParsed) {
-            this.argv.shift()
-          }
-
-          return equalsParsed
-        }
-
-        return false
-      }
-
-      const flag = this.input.flags[name]
-
-      if (flag.type === 'option') {
-        if (!flag.multiple && this.raw.some((o) => o.type === 'flag' && o.flag === name)) {
-          throw new CLIError(`Flag --${name} can only be specified once`)
-        }
-
-        this.currentFlag = flag
-        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        // if the value ends up being one of the command's flags, the user didn't provide an input
-        if (typeof input !== 'string' || this.findFlag(input).name) {
-          throw new CLIError(`Flag --${name} expects a value`)
-        }
-
-        this.raw.push({flag: flag.name, input, type: 'flag'})
-      } else {
-        this.raw.push({flag: flag.name, input: arg, type: 'flag'})
-        // push the rest of the short characters back on the stack
-        if (!isLong && arg.length > 2) {
-          this.argv.unshift(`-${arg.slice(2)}`)
-        }
-      }
-
-      return true
-    }
-
-    let parsingFlags = true
-    const nonExistentFlags: string[] = []
-    let dashdash = false
-    const originalArgv = [...this.argv]
-
-    while (this.argv.length > 0) {
-      const input = this.argv.shift() as string
-      if (parsingFlags && input.startsWith('-') && input !== '-') {
-        // attempt to parse as arg
-        if (this.input['--'] !== false && input === '--') {
-          parsingFlags = false
-          continue
-        }
-
-        if (parseFlag(input)) {
-          continue
-        }
-
-        if (input === '--') {
-          dashdash = true
-          continue
-        }
-
-        if (this.input['--'] !== false && !isNegativeNumber(input)) {
-          // At this point we have a value that begins with '-' or '--'
-          // but doesn't match up to a flag definition. So we assume that
-          // this is a misspelled flag or a non-existent flag,
-          // e.g. --hekp instead of --help
-          nonExistentFlags.push(input)
-          continue
-        }
-      }
-
-      if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
-        this.raw.push({flag: this.currentFlag.name, input, type: 'flag'})
-        continue
-      }
-
-      // not a flag, parse as arg
-      const arg = Object.keys(this.input.args)[this._argTokens.length]
-      this.raw.push({arg, input, type: 'arg'})
-    }
-
-    const [{args, argv}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
-    this._debugOutput(argv, args, flags)
-
-    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
-
-    return {
-      args: args as TArgs,
-      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
-      flags,
-      metadata,
-      nonExistentFlags,
-      raw: this.raw,
-    }
   }
 }

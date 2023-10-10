@@ -33,6 +33,16 @@ export class CLIError extends Error implements OclifError {
     this.suggestions = options.suggestions
   }
 
+  get bang(): string | undefined {
+    try {
+      return chalk.red(process.platform === 'win32' ? '»' : '›')
+    } catch {}
+  }
+
+  get stack(): string {
+    return cs(super.stack!, {pretty: true})
+  }
+
   /**
    * @deprecated `render` Errors display should be handled by display function, like pretty-print
    * @return {string} returns a string representing the dispay of the error
@@ -48,16 +58,6 @@ export class CLIError extends Error implements OclifError {
     output = indent(output, 1, {includeEmptyLines: true, indent: this.bang} as any)
     output = indent(output, 1)
     return output
-  }
-
-  get bang(): string | undefined {
-    try {
-      return chalk.red(process.platform === 'win32' ? '»' : '›')
-    } catch {}
-  }
-
-  get stack(): string {
-    return cs(super.stack!, {pretty: true})
   }
 }
 

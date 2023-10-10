@@ -76,6 +76,32 @@ export class DocOpts {
     return new DocOpts(cmd).toString()
   }
 
+  public toString(): string {
+    const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
+    if (this.cmd.args) {
+      const a =
+        Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
+          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
+        ) || []
+      opts.push(...a)
+    }
+
+    try {
+      opts.push(...Object.values(this.groupFlagElements()))
+    } catch {
+      // If there is an error, just return no usage so we don't fail command help.
+      opts.push(
+        ...this.flagList.map((flag) => {
+          const name = flag.char ? `-${flag.char}` : `--${flag.name}`
+          if (flag.type === 'boolean') return name
+          return `${name}=<value>`
+        }),
+      )
+    }
+
+    return opts.join(' ')
+  }
+
   private combineElementsToFlag(
     elementMap: {[index: string]: string},
     flagName: string,
@@ -161,31 +187,5 @@ export class DocOpts {
     }
 
     return elementMap
-  }
-
-  public toString(): string {
-    const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
-    if (this.cmd.args) {
-      const a =
-        Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
-          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
-        ) || []
-      opts.push(...a)
-    }
-
-    try {
-      opts.push(...Object.values(this.groupFlagElements()))
-    } catch {
-      // If there is an error, just return no usage so we don't fail command help.
-      opts.push(
-        ...this.flagList.map((flag) => {
-          const name = flag.char ? `-${flag.char}` : `--${flag.name}`
-          if (flag.type === 'boolean') return name
-          return `${name}=<value>`
-        }),
-      )
-    }
-
-    return opts.join(' ')
   }
 }
