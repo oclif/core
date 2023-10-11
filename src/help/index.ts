@@ -98,12 +98,13 @@ export class Help extends HelpBase {
 
   protected formatCommands(commands: Array<Command.Loadable>): string {
     if (commands.length === 0) return ''
-
     const body = this.renderList(
-      commands.map((c) => {
-        if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
-        return [c.id, this.summary(c)]
-      }),
+      commands
+        .filter((c) => (this.opts.hideAliasesFromRoot ? !c.aliases?.includes(c.id) : true))
+        .map((c) => {
+          if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
+          return [c.id, this.summary(c)]
+        }),
       {
         indentation: 2,
         spacer: '\n',
