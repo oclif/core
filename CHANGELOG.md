@@ -1,3 +1,16 @@
+## [3.0.5](https://github.com/oclif/core/compare/3.0.5-dev.0...3.0.5) (2023-10-11)
+
+
+
+## [3.0.5-dev.0](https://github.com/oclif/core/compare/3.0.4...3.0.5-dev.0) (2023-10-10)
+
+
+### Bug Fixes
+
+* avoid fs.access for checking for file existence ([c4277a9](https://github.com/oclif/core/commit/c4277a984223eae89dabef36e9bee2ed565f3616))
+
+
+
 ## [3.0.4](https://github.com/oclif/core/compare/3.0.3...3.0.4) (2023-10-09)
 
 
