@@ -70,7 +70,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // display help version if applicable
   if (helpAddition(argv, config)) {
     const Help = await loadHelpClass(config)
-    const help = new Help(config, config.pjson.helpOptions ?? config.pjson.oclif.helpOptions)
+    const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
     await help.showHelp(argv)
     await collectPerf()
     return

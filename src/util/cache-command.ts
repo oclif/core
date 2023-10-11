@@ -96,6 +96,7 @@ export async function cacheCommand(
     flags,
     hasDynamicHelp: Object.values(flags).some((f) => f.hasDynamicHelp),
     hidden: cmd.hidden,
+    hiddenAliases: cmd.hiddenAliases || [],
     id: cmd.id,
     pluginAlias: plugin && plugin.alias,
     pluginName: plugin && plugin.name,
