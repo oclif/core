@@ -1,3 +1,12 @@
+## [3.0.6](https://github.com/oclif/core/compare/3.0.5...3.0.6) (2023-10-11)
+
+
+### Bug Fixes
+
+* warn about ts-node and node 20 ([#818](https://github.com/oclif/core/issues/818)) ([00ed4fe](https://github.com/oclif/core/commit/00ed4fe7a8e232ff23b3d6dc33e6f02335d69ffa))
+
+
+
 ## [3.0.5](https://github.com/oclif/core/compare/3.0.5-dev.0...3.0.5) (2023-10-11)
 
 
