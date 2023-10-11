@@ -87,16 +87,17 @@ export async function cacheCommand(
   const args = await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault)
 
   const stdProperties = {
-    aliases: cmd.aliases || [],
+    aliases: cmd.aliases ?? [],
     args,
     deprecateAliases: cmd.deprecateAliases,
     deprecationOptions: cmd.deprecationOptions,
     description: cmd.description,
-    examples: cmd.examples || (cmd as any).example,
+    // Support both `examples` and `example` for backwards compatibility.
+    examples: cmd.examples ?? (cmd as unknown as {example: string}).example,
     flags,
     hasDynamicHelp: Object.values(flags).some((f) => f.hasDynamicHelp),
     hidden: cmd.hidden,
-    hiddenAliases: cmd.hiddenAliases || [],
+    hiddenAliases: cmd.hiddenAliases ?? [],
     id: cmd.id,
     pluginAlias: plugin && plugin.alias,
     pluginName: plugin && plugin.name,

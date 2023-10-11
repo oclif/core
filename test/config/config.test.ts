@@ -251,6 +251,7 @@ describe('Config', () => {
         args: {},
         flags: {},
         hidden: false,
+        hiddenAliases: [],
         id: commandIds[0],
         async load(): Promise<Command.Class> {
           return MyCommandClass
@@ -264,6 +265,7 @@ describe('Config', () => {
         args: {},
         flags: {},
         hidden: false,
+        hiddenAliases: [],
         id: commandIds[1],
         async load(): Promise<Command.Class> {
           return MyCommandClass
