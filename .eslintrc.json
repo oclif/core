@@ -7,6 +7,7 @@
     "perfectionist/sort-object-types": "off",
     "perfectionist/sort-union-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-namespace": "off"
+    "@typescript-eslint/no-namespace": "off",
+    "valid-jsdoc": "off"
   }
 }

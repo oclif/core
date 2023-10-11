@@ -12,7 +12,7 @@ import {settings} from './settings'
  *
  * @example For ESM dev.js
  * ```
- * #!/usr/bin/env ts-node
+ * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
  * async function main() {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: import.meta.url})
