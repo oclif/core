@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import {existsSync} from 'node:fs'
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
@@ -117,6 +116,63 @@ function registerTSNode(root: string): TSConfig | undefined {
 }
 
 /**
+ * Skip ts-node registration for ESM plugins in production.
+ * The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
+ * See the following:
+ * - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
+ * - https://github.com/nodejs/node/issues/49432
+ * - https://github.com/nodejs/node/pull/49407
+ * - https://github.com/nodejs/node/issues/34049
+ *
+ * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM
+ * since that allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
+ */
+function cannotTranspileEsm(root: string, plugin: Plugin | undefined, isProduction: boolean): boolean {
+  return (isProduction || ROOT_PLUGIN?.moduleType === 'commonjs') && plugin?.moduleType === 'module'
+}
+
+/**
+ * If the dev script is run with ts-node for an ESM plugin, skip ts-node registration
+ * and fall back on compiled source since ts-node executable cannot transpile ESM in Node 20+
+ *
+ * See the following:
+ * https://nodejs.org/en/blog/announcements/v20-release-announce#custom-esm-loader-hooks-nearing-stable
+ * https://github.com/oclif/core/issues/817
+ * https://github.com/TypeStrong/ts-node/issues/1997
+ */
+function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction: boolean): boolean {
+  if (plugin?.moduleType !== 'module' || isProduction) return false
+
+  const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
+  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes(`ts-node`)
+  return tsNodeExecIsUsed && nodeMajor >= 20
+}
+
+/**
+ * Determine the path to the source file from the compiled ./lib files
+ */
+function determinePath(root: string, orig: string): string {
+  const tsconfig = registerTSNode(root)
+  if (!tsconfig) return orig
+  const {outDir, rootDir, rootDirs} = tsconfig.compilerOptions
+  const rootDirPath = rootDir || (rootDirs || [])[0]
+  if (!rootDirPath || !outDir) return orig
+  // rewrite path from ./lib/foo to ./src/foo
+  const lib = join(root, outDir) // ./lib
+  const src = join(root, rootDirPath) // ./src
+  const relative = pathRelative(lib, orig) // ./commands
+  // For hooks, it might point to a js file, not a module. Something like "./hooks/myhook.js" which doesn't need the js.
+  const out = join(src, relative).replace(/\.js$/, '') // ./src/commands
+  // this can be a directory of commands or point to a hook file
+  // if it's a directory, we check if the path exists. If so, return the path to the directory.
+  // For hooks, it might point to a module, not a file. Something like "./hooks/myhook"
+  // That file doesn't exist, and the real file is "./hooks/myhook.ts"
+  // In that case we attempt to resolve to the filename. If it fails it will revert back to the lib path
+  if (existsSync(out) || existsSync(out + '.ts')) return out
+  return orig
+}
+
+/**
  * Convert a path from the compiled ./lib files to the ./src typescript source
  * this is for developing typescript plugins/CLIs
  * if there is a tsconfig and the original sources exist, it attempts to require ts-node
@@ -137,27 +193,15 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   }
 
   const isProduction = isProd()
-  /**
-   * Skip ts-node registration for ESM plugins.
-   * The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
-   * See the following:
-   * - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
-   * - https://github.com/nodejs/node/issues/49432
-   * - https://github.com/nodejs/node/pull/49407
-   * - https://github.com/nodejs/node/issues/34049
-   *
-   * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM.
-   * In other words, this allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
-   */
-  if ((isProduction || ROOT_PLUGIN?.moduleType === 'commonjs') && plugin?.moduleType === 'module') {
+
+  if (cannotTranspileEsm(root, plugin, isProduction)) {
     debug(
       `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${ROOT_PLUGIN?.moduleType})))`,
     )
-    if (plugin.type === 'link')
+    if (plugin?.type === 'link')
       memoizedWarn(
-        `${plugin.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
+        `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
-
     return orig
   }
 
@@ -166,9 +210,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
     return orig
   }
 
-  const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
-  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes(`ts-node`)
-  if (plugin?.moduleType === 'module' && !isProduction && tsNodeExecIsUsed && nodeMajor >= 20 && process.execArgv) {
+  if (cannotUseTsNode(root, plugin, isProduction)) {
     debug(`Skipping ts-node registration for ${root} because ts-node is run in node version ${process.version}"`)
     memoizedWarn(
       `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
@@ -177,24 +219,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   }
 
   try {
-    const tsconfig = registerTSNode(root)
-    if (!tsconfig) return orig
-    const {outDir, rootDir, rootDirs} = tsconfig.compilerOptions
-    const rootDirPath = rootDir || (rootDirs || [])[0]
-    if (!rootDirPath || !outDir) return orig
-    // rewrite path from ./lib/foo to ./src/foo
-    const lib = join(root, outDir) // ./lib
-    const src = join(root, rootDirPath) // ./src
-    const relative = pathRelative(lib, orig) // ./commands
-    // For hooks, it might point to a js file, not a module. Something like "./hooks/myhook.js" which doesn't need the js.
-    const out = join(src, relative).replace(/\.js$/, '') // ./src/commands
-    // this can be a directory of commands or point to a hook file
-    // if it's a directory, we check if the path exists. If so, return the path to the directory.
-    // For hooks, it might point to a module, not a file. Something like "./hooks/myhook"
-    // That file doesn't exist, and the real file is "./hooks/myhook.ts"
-    // In that case we attempt to resolve to the filename. If it fails it will revert back to the lib path
-    if (existsSync(out) || existsSync(out + '.ts')) return out
-    return orig
+    return determinePath(root, orig)
   } catch (error: any) {
     debug(error)
     return orig

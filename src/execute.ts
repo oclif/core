@@ -34,7 +34,7 @@ import {settings} from './settings'
  *
  * @example For CJS dev.js
  * ```
- * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
+ * #!/usr/bin/env ts-node
  * void (async () => {
  *   const oclif = await import('@oclif/core')
  *   await oclif.execute({development: true, dir: __dirname})
