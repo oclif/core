@@ -1,5 +1,4 @@
-@oclif/core
-===========
+# @oclif/core
 
 base library for oclif CLIs
 
@@ -7,9 +6,7 @@ base library for oclif CLIs
 [![Downloads/week](https://img.shields.io/npm/dw/@oclif/core.svg)](https://npmjs.org/package/@oclif/core)
 [![License](https://img.shields.io/npm/l/@oclif/core.svg)](https://github.com/oclif/core/blob/main/package.json)
 
-
-Migrating
-=====
+# Migrating
 
 See the [v3 migration guide](./guides/V3_MIGRATION.md) for an overview of breaking changes that occurred between v2 and v3.
 
@@ -17,19 +14,18 @@ See the [v2 migration guide](./guides/V2_MIGRATION.md) for an overview of breaki
 
 Migrating from `@oclif/config` and `@oclif/command`? See the [v1 migration guide](./guides/PRE_CORE_MIGRATION.md).
 
-CLI UX
-=====
+# CLI UX
 
 The [ux README](./src/cli-ux/README.md) contains detailed usage examples of using the `ux` export.
 
-Usage
-=====
+# Usage
 
 We strongly encourage you generate an oclif CLI using the [oclif cli](https://github.com/oclif/oclif). The generator will generate an npm package with `@oclif/core` as a dependency.
 
 You can, however, use `@oclif/core` in a standalone script like this:
+
 ```typescript
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
 
 import * as fs from 'fs'
 import {Command, Flags, flush, handle} from '@oclif/core'
@@ -54,11 +50,14 @@ class LS extends Command {
   }
 }
 
-LS.run().then(async () => {
-  await flush()
-}, async (err) => {
-  await handle(err)
-})
+LS.run().then(
+  async () => {
+    await flush()
+  },
+  async (err) => {
+    await handle(err)
+  },
+)
 ```
 
 Then run it like this:
