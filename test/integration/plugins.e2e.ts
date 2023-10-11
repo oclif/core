@@ -9,7 +9,7 @@ describe('oclif plugins', () => {
   let executor: Executor
   before(async () => {
     executor = await setup(__filename, {
-      repo: 'https://github.com/oclif/hello-world',
+      repo: 'https://github.com/oclif/hello-world-esm',
       plugins: [
         '@oclif/plugin-autocomplete',
         '@oclif/plugin-commands',
@@ -31,13 +31,13 @@ describe('oclif plugins', () => {
       })
 
       it('should show description', () => {
-        expect(help.stdout).to.include('oclif example Hello World CLI')
+        expect(help.stdout).to.include('oclif example Hello World CLI (ESM)')
       })
       it('should show version', () => {
-        expect(help.stdout).to.include('VERSION\n  oclif-hello-world/0.0.0')
+        expect(help.stdout).to.include('VERSION\n  oclif-hello-world-esm')
       })
       it('should show usage', () => {
-        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world [COMMAND]')
+        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world-esm [COMMAND]')
       })
       it('should show topics', () => {
         expect(help.stdout).to.include('TOPICS\n  plugins')
@@ -58,13 +58,13 @@ describe('oclif plugins', () => {
         expect(help.stdout).to.include('List installed plugins.')
       })
       it('should show usage', () => {
-        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world plugins [--json] [--core]')
+        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world-esm plugins [--json] [--core]')
       })
       it('should show description', () => {
         expect(help.stdout).to.include('DESCRIPTION\n  List installed plugins.')
       })
       it('should show examples', () => {
-        expect(help.stdout).to.include('EXAMPLES\n  $ oclif-hello-world plugins')
+        expect(help.stdout).to.include('EXAMPLES\n  $ oclif-hello-world-esm plugins')
       })
       it('should show commands', () => {
         const regex =
@@ -83,7 +83,7 @@ describe('oclif plugins', () => {
         expect(help.stdout).to.include('Installs a plugin into the CLI.')
       })
       it('should show usage', () => {
-        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world plugins:install PLUGIN...')
+        expect(help.stdout).to.include('USAGE\n  $ oclif-hello-world-esm plugins:install PLUGIN...')
       })
       it('should show arguments', () => {
         expect(help.stdout).to.include('ARGUMENTS\n  PLUGIN  Plugin to install.')
@@ -98,13 +98,13 @@ describe('oclif plugins', () => {
         expect(help.stdout).to.include('DESCRIPTION\n  Installs a plugin into the CLI.')
       })
       it('should show aliases', () => {
-        expect(help.stdout).to.include('ALIASES\n  $ oclif-hello-world plugins:add')
+        expect(help.stdout).to.include('ALIASES\n  $ oclif-hello-world-esm plugins:add')
       })
       it('should show examples', () => {
         expect(help.stdout).to.include('EXAMPLES\n')
-        expect(help.stdout).to.include('$ oclif-hello-world plugins:install myplugin')
-        expect(help.stdout).to.include('$ oclif-hello-world plugins:install https://github.com/someuser/someplugin')
-        expect(help.stdout).to.include('$ oclif-hello-world plugins:install someuser/someplugin')
+        expect(help.stdout).to.include('$ oclif-hello-world-esm plugins:install myplugin')
+        expect(help.stdout).to.include('$ oclif-hello-world-esm plugins:install https://github.com/someuser/someplugin')
+        expect(help.stdout).to.include('$ oclif-hello-world-esm plugins:install someuser/someplugin')
       })
     })
   })
@@ -261,7 +261,7 @@ describe('oclif plugins', () => {
       version = await executor.executeCommand('version')
     })
 
-    it('should show version', () => expect(version.stdout).to.include('oclif-hello-world/0.0.0'))
+    it('should show version', () => expect(version.stdout).to.include('oclif-hello-world-esm'))
     it('should show platform', () => expect(version.stdout).to.include(process.platform))
     it('should show arch', () => expect(version.stdout).to.include(arch()))
     it('should show node version', () => expect(version.stdout).to.include(process.version))
