@@ -111,7 +111,7 @@ function registerTSNode(root: string): TSConfig | undefined {
 
   tsNode.register(conf)
   REGISTERED.add(root)
-
+  debug('%O', tsconfig)
   return tsconfig
 }
 
@@ -154,9 +154,19 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
 function determinePath(root: string, orig: string): string {
   const tsconfig = registerTSNode(root)
   if (!tsconfig) return orig
-  const {outDir, rootDir, rootDirs} = tsconfig.compilerOptions
-  const rootDirPath = rootDir || (rootDirs || [])[0]
-  if (!rootDirPath || !outDir) return orig
+  debug(`determining path for ${orig}`)
+  const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
+  const rootDirPath = rootDir || (rootDirs || [])[0] || baseUrl
+  if (!rootDirPath) {
+    debug(`no rootDir, rootDirs, or baseUrl specified in tsconfig.json. Returning default path ${orig}`)
+    return orig
+  }
+
+  if (!outDir) {
+    debug(`no outDir specified in tsconfig.json. Returning default path ${orig}`)
+    return orig
+  }
+
   // rewrite path from ./lib/foo to ./src/foo
   const lib = join(root, outDir) // ./lib
   const src = join(root, rootDirPath) // ./src
@@ -168,7 +178,18 @@ function determinePath(root: string, orig: string): string {
   // For hooks, it might point to a module, not a file. Something like "./hooks/myhook"
   // That file doesn't exist, and the real file is "./hooks/myhook.ts"
   // In that case we attempt to resolve to the filename. If it fails it will revert back to the lib path
-  if (existsSync(out) || existsSync(out + '.ts')) return out
+
+  debug(`lib dir: ${lib}`)
+  debug(`src dir: ${src}`)
+  debug(`src commands dir: ${out}`)
+  if (existsSync(out) || existsSync(out + '.ts')) {
+    debug(`Found source file for ${orig} at ${out}`)
+    return out
+  }
+
+  debug(`No source file found. Returning default path ${orig}`)
+  if (!isProd()) memoizedWarn(`Could not find source for ${orig} based on tsconfig. Defaulting to compiled source.`)
+
   return orig
 }
 

@@ -1,5 +1,6 @@
 export interface TSConfig {
   compilerOptions: {
+    baseUrl?: string
     emitDecoratorMetadata?: boolean
     esModuleInterop?: boolean
     experimentalDecorators?: boolean
