@@ -1,63 +1,115 @@
+import chalk from 'chalk'
+import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
+import {existsSync, readFileSync, writeFileSync} from 'node:fs'
+import {mkdir, rm} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {basename, dirname, join, resolve} from 'node:path'
 
-import {rm} from 'shelljs'
-import {mkdirp} from 'fs-extra'
-import * as cp from 'child_process'
-import * as chalk from 'chalk'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import {Interfaces} from '../../src'
 
-export type ExecError = cp.ExecException & { stderr: string; stdout: string };
+const debug = require('debug')('e2e')
 
-export interface Result {
-  code: number;
-  output?: string;
+export type ExecError = ExecException & {stderr: string; stdout: string}
+
+export type Result = {
+  code: number
+  stdout?: string
+  stderr?: string
   error?: ExecError
 }
 
-export interface Options {
-  repo: string;
-  plugins?: string[];
+export type SetupOptions = {
+  repo: string
+  branch?: string
+  plugins?: string[]
+  subDir?: string
+  noLinkCore?: boolean
 }
 
-function updatePkgJson(testDir: string, obj: Record<string, unknown>): void {
-  const pkgJsonFile = path.join(testDir, 'package.json')
-  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonFile, 'utf-8'))
+export type ExecutorOptions = {
+  pluginDir: string
+  testFileName: string
+}
+
+export type ExecOptions = ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
+
+function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
+  const pkgJsonFile = join(testDir, 'package.json')
+  const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf8'))
   obj.dependencies = Object.assign(pkgJson.dependencies || {}, obj.dependencies || {})
   obj.resolutions = Object.assign(pkgJson.resolutions || {}, obj.resolutions || {})
   const updated = Object.assign(pkgJson, obj)
-  fs.writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
+  writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
+
+  return updated
 }
 
 export class Executor {
-  // eslint-disable-next-line no-useless-constructor
-  public constructor(private testDir: string) {}
+  public debug: (...args: any[]) => void
+  public parentDir: string
+  public pluginDir: string
+  public pluginName: string
+  public testFileName: string
 
-  public executeInTestDir(cmd: string, silent = true): Promise<Result> {
-    return this.exec(cmd, this.testDir, silent)
+  public usesJsScript = false
+
+  public constructor(options: ExecutorOptions) {
+    this.pluginDir = options.pluginDir
+    this.testFileName = options.testFileName
+    this.parentDir = basename(dirname(this.pluginDir))
+    this.pluginName = basename(this.pluginDir)
+    this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
+    this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
 
-  public executeCommand(cmd: string): Promise<Result> {
-    const executable = process.platform === 'win32' ? path.join('bin', 'run.cmd') : path.join('bin', 'run')
-    return this.executeInTestDir(`${executable} ${cmd} 2>&1`)
+  public clone(repo: string, branch?: string): Promise<Result> {
+    const cmd = branch
+      ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1`
+      : `git clone ${repo} ${this.pluginDir} --depth 1`
+    const result = this.exec(cmd)
+    this.usesJsScript = existsSync(join(this.pluginDir, 'bin', 'run.js'))
+    return result
   }
 
-  public exec(cmd: string, cwd = process.cwd(), silent = true): Promise<Result> {
-    return new Promise(resolve => {
+  public exec(cmd: string, options?: ExecOptions): Promise<Result> {
+    const cwd = options?.cwd ?? process.cwd()
+    const silent = options?.silent ?? true
+    return new Promise((resolve) => {
+      this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
-          const r = cp.execSync(cmd, {stdio: 'pipe', cwd})
-          resolve({code: 0, output: r.toString()})
+          const r = execSync(cmd, {...options, stdio: 'pipe', cwd})
+          const stdout = r.toString()
+          this.debug(stdout)
+          resolve({code: 0, stdout})
         } catch (error) {
           const err = error as ExecError
-          resolve({code: 1, error: err, output: err.stdout.toString()})
+          this.debug('stdout', err.stdout.toString())
+          this.debug('stderr', err.stderr.toString())
+          resolve({
+            code: 1,
+            error: err,
+            stdout: err.stdout.toString(),
+            stderr: err.stderr.toString(),
+          })
         }
       } else {
-        console.log(chalk.cyan(cmd))
-        cp.execSync(cmd, {stdio: 'inherit', cwd})
+        execSync(cmd, {...options, stdio: 'inherit', cwd})
         resolve({code: 0})
       }
     })
+  }
+
+  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
+    const executable =
+      process.platform === 'win32'
+        ? join('bin', `${script}.cmd`)
+        : join('bin', `${script}${this.usesJsScript ? '.js' : ''}`)
+    return this.executeInTestDir(`${executable} ${cmd}`, options)
+  }
+
+  public executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
+    return this.exec(cmd, {...options, cwd: this.pluginDir} as ExecOptions)
   }
 }
 
@@ -65,7 +117,7 @@ export class Executor {
 /**
  * Setup for integration tests.
  *
- * Clones the hello-world repo from github
+ * Clones the requested repo from github
  * Adds the local version of @oclif/core to the package.json
  * Adds relevant oclif plugins
  * Builds the package
@@ -74,52 +126,81 @@ export class Executor {
  * - OCLIF_CORE_E2E_TEST_DIR: the directory that you want the setup to happen in
  * - OCLIF_CORE_E2E_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
  */
-export async function setup(testFile: string, options: Options): Promise<Executor> {
-  const testFileName = path.basename(testFile)
-  const location = path.join(process.env.OCLIF_CORE_E2E_TEST_DIR || os.tmpdir(), testFileName)
-  const [name] = options.repo.match(/(?<=\/).+?(?=\.)/) ?? ['hello-world']
-  const testDir = path.join(location, name)
-  const executor = new Executor(testDir)
+export async function setup(testFile: string, options: SetupOptions): Promise<Executor> {
+  const testFileName = basename(testFile)
+  const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || tmpdir()
+  const testDir = options.subDir ? join(dir, testFileName, options.subDir) : join(dir, testFileName)
 
-  console.log(chalk.cyan(`${testFileName}:`), testDir)
+  const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
+  const pluginDir = join(testDir, name)
+  const executor = new Executor({pluginDir, testFileName})
+
+  executor.debug('plugin directory:', pluginDir)
 
   if (process.env.OCLIF_CORE_E2E_SKIP_SETUP === 'true') {
     console.log(chalk.yellow.bold('OCLIF_CORE_E2E_SKIP_SETUP is true. Skipping test setup...'))
     return executor
   }
 
-  await mkdirp(location)
-  rm('-rf', testDir)
+  await mkdir(testDir, {recursive: true})
+  await rm(pluginDir, {recursive: true, force: true})
 
-  const clone = `git clone ${options.repo} ${testDir}`
-  console.log(chalk.cyan(`${testFileName}:`), clone)
-  await executor.exec(clone)
+  await executor.clone(options.repo, options.branch)
 
-  console.log(chalk.cyan(`${testFileName}:`), 'Updating package.json')
-  const dependencies = {'@oclif/core': `file:${path.resolve('.')}`}
+  executor.debug('Updating package.json')
+  const dependencies = options.noLinkCore ? {} : {'@oclif/core': `file:${resolve('.')}`}
 
+  let pjson: Interfaces.PJSON
   if (options.plugins) {
     // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
-    updatePkgJson(testDir, {
-      resolutions: {'@oclif/core': path.resolve('.')},
-      dependencies: Object.assign(dependencies, pluginDeps),
+    pjson = updatePkgJson(pluginDir, {
+      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
+      dependencies: {...dependencies, ...pluginDeps},
       oclif: {plugins: options.plugins},
     })
   } else {
-    updatePkgJson(testDir, {
-      resolutions: {'@oclif/core': path.resolve('.')},
+    pjson = updatePkgJson(pluginDir, {
+      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
       dependencies,
     })
   }
 
-  const install = 'yarn install --force'
-  console.log(chalk.cyan(`${testFileName}:`), install)
-  await executor.executeInTestDir(install)
+  executor.debug('updated dependencies:', JSON.stringify(pjson.dependencies, null, 2))
+  executor.debug('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
+  executor.debug('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
 
-  const build = 'yarn build'
-  console.log(chalk.cyan(`${testFileName}:`), build)
-  await executor.executeInTestDir(build)
+  const bin = (pjson.oclif.bin ?? pjson.name.replaceAll('-', '_')).toUpperCase()
+  const dataDir = join(testDir, 'data', pjson.oclif.bin ?? pjson.name)
+  const cacheDir = join(testDir, 'cache', pjson.oclif.bin ?? pjson.name)
+  const configDir = join(testDir, 'config', pjson.oclif.bin ?? pjson.name)
 
+  await mkdir(dataDir, {recursive: true})
+  await mkdir(configDir, {recursive: true})
+  await mkdir(cacheDir, {recursive: true})
+
+  process.env[`${bin}_DATA_DIR`] = dataDir
+  process.env[`${bin}_CONFIG_DIR`] = configDir
+  process.env[`${bin}_CACHE_DIR`] = cacheDir
+
+  executor.debug(`${bin}_DATA_DIR:`, process.env[`${bin}_DATA_DIR`])
+  executor.debug(`${bin}_CONFIG_DIR:`, process.env[`${bin}_CONFIG_DIR`])
+  executor.debug(`${bin}_CACHE_DIR:`, process.env[`${bin}_CACHE_DIR`])
+
+  const yarnInstallRes = await executor.executeInTestDir('yarn install --force --network-timeout 600000', {
+    silent: false,
+  })
+  if (yarnInstallRes.code !== 0) {
+    console.error(yarnInstallRes?.error)
+    throw new Error('Failed to run `yarn install --force`')
+  }
+
+  const compileRes = await executor.executeInTestDir('yarn build')
+  if (compileRes.code !== 0) {
+    console.error(compileRes?.error)
+    throw new Error('Failed to run `yarn build`')
+  }
+
+  executor.debug('Setup complete')
   return executor
 }

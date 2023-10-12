@@ -10,7 +10,6 @@ function displayWarnings() {
 }
 
 export const config = {
-  errorLogger: undefined as Logger | undefined,
   get debug(): boolean {
     return Boolean(settings.debug)
   },
@@ -30,4 +29,5 @@ export const config = {
       delete settings.errlog
     }
   },
+  errorLogger: undefined as Logger | undefined,
 }

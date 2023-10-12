@@ -1,26 +1,23 @@
-// tslint:disable
-
-import * as chalk from 'chalk'
-import * as util from 'util'
+import chalk from 'chalk'
+import {inspect} from 'node:util'
 
 export default function styledObject(obj: any, keys?: string[]): string {
   const output: string[] = []
-  const keyLengths = Object.keys(obj).map(key => key.toString().length)
+  const keyLengths = Object.keys(obj).map((key) => key.toString().length)
   const maxKeyLength = Math.max(...keyLengths) + 2
   function pp(obj: any) {
     if (typeof obj === 'string' || typeof obj === 'number') return obj
     if (typeof obj === 'object') {
       return Object.keys(obj)
-      .map(k => k + ': ' + util.inspect(obj[k]))
-      .join(', ')
+        .map((k) => k + ': ' + inspect(obj[k]))
+        .join(', ')
     }
 
-    return util.inspect(obj)
+    return inspect(obj)
   }
 
-  const logKeyValue = (key: string, value: any): string => {
-    return `${chalk.blue(key)}:` + ' '.repeat(maxKeyLength - key.length - 1) + pp(value)
-  }
+  const logKeyValue = (key: string, value: any): string =>
+    `${chalk.blue(key)}:` + ' '.repeat(maxKeyLength - key.length - 1) + pp(value)
 
   for (const key of keys || Object.keys(obj).sort()) {
     const value = obj[key]

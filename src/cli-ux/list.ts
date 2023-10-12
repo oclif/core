@@ -1,12 +1,9 @@
-// tslint:disable
-
-import maxBy from 'lodash/maxBy'
-
-import deps from './deps'
+import {stdtermwidth} from '../screen'
+import {maxBy} from '../util/util'
+const wordwrap = require('wordwrap')
 
 function linewrap(length: number, s: string): string {
-  const lw = require('@oclif/linewrap')
-  return lw(length, deps.screen.stdtermwidth, {
+  return wordwrap(length, stdtermwidth, {
     skipScheme: 'ansi-color',
   })(s).trim()
 }
@@ -18,8 +15,8 @@ export function renderList(items: IListItem[]): string {
     return ''
   }
 
-  const maxLength = (maxBy(items, '[0].length') as any)[0].length
-  const lines = items.map(i => {
+  const maxLength = maxBy(items, (item) => item[0].length)?.[0].length ?? 0
+  const lines = items.map((i) => {
     let left = i[0]
     let right = i[1]
     if (!right) {

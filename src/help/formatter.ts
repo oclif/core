@@ -1,25 +1,30 @@
-import * as Chalk from 'chalk'
-import indent = require('indent-string')
-import stripAnsi = require('strip-ansi')
+import chalk from 'chalk'
+import indent from 'indent-string'
+import width from 'string-width'
+import stripAnsi from 'strip-ansi'
+import widestLine from 'widest-line'
+import wrap from 'wrap-ansi'
 
+import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
 import {template} from './util'
 
-const width = require('string-width')
-const widestLine = require('widest-line')
-
-const wrap = require('wrap-ansi')
-const {
-  bold,
-} = Chalk
-
-export type HelpSectionKeyValueTable = {name: string; description: string}[]
-export type HelpSection = {header: string; body: string | HelpSectionKeyValueTable | [string, string | undefined][] | undefined} | undefined;
-export type HelpSectionRenderer = (data: {cmd: Interfaces.Command; flags: Interfaces.Command.Flag[]; args: Interfaces.Command.Arg[]}, header: string) => HelpSection | HelpSection[] | string | undefined;
+export type HelpSectionKeyValueTable = {description: string; name: string}[]
+export type HelpSection =
+  | {body: [string, string | undefined][] | HelpSectionKeyValueTable | string | undefined; header: string}
+  | undefined
+export type HelpSectionRenderer = (
+  data: {args: Command.Arg.Any[]; cmd: Command.Loadable; flags: Command.Flag.Any[]},
+  header: string,
+) => HelpSection | HelpSection[] | string | undefined
 
 export class HelpFormatter {
+  protected config: Interfaces.Config
+
   indentSpacing = 2
+
+  protected opts: Interfaces.HelpOptions
 
   /**
    * Takes a string and replaces `<%= prop =>` with the value of prop, where prop is anything on
@@ -35,42 +40,6 @@ export class HelpFormatter {
     this.config = config
     this.opts = {maxWidth: stdtermwidth, ...opts}
     this.render = template(this)
-  }
-
-  protected config: Interfaces.Config
-
-  protected opts: Interfaces.HelpOptions
-
-  /**
-   * Wrap text according to `opts.maxWidth` which is typically set to the terminal width. All text
-   * will be rendered before bring wrapped, otherwise it could mess up the lengths.
-   *
-   * A terminal will automatically wrap text, so this method is primarily used for indented
-   * text. For indented text, specify the indentation so it is taken into account during wrapping.
-   *
-   * Here is an example of wrapping with indentation.
-   * ```
-   * <------ terminal window width ------>
-   * <---------- no indentation --------->
-   * This is my text that will be wrapped
-   * once it passes maxWidth.
-   *
-   * <- indent -><------ text space ----->
-   *             This is my text that will
-   *             be wrapped once it passes
-   *             maxWidth.
-   *
-   * <-- indent not taken into account ->
-   *             This is my text that will
-   * be wrapped
-   *             once it passes maxWidth.
-   * ```
-   * @param body the text to wrap
-   * @param spacing the indentation size to subtract from the terminal width
-   * @returns the formatted wrapped text
-   */
-  public wrap(body: string, spacing = this.indentSpacing): string {
-    return wrap(this.render(body), this.opts.maxWidth - spacing, {hard: true})
   }
 
   /**
@@ -106,7 +75,10 @@ export class HelpFormatter {
     return indent(body, spacing)
   }
 
-  public renderList(input: (string | undefined)[][], opts: {indentation: number; multiline?: boolean; stripAnsi?: boolean; spacer?: string}): string {
+  public renderList(
+    input: (string | undefined)[][],
+    opts: {indentation: number; multiline?: boolean; spacer?: string; stripAnsi?: boolean},
+  ): string {
     if (input.length === 0) {
       return ''
     }
@@ -133,7 +105,7 @@ export class HelpFormatter {
     }
 
     if (opts.multiline) return renderMultiline()
-    const maxLength = widestLine(input.map(i => i[0]).join('\n'))
+    const maxLength = widestLine(input.map((i) => i[0]).join('\n'))
     let output = ''
     let spacer = opts.spacer || '\n'
     let cur = ''
@@ -154,7 +126,7 @@ export class HelpFormatter {
       if (opts.stripAnsi) right = stripAnsi(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
-      const [first, ...lines] = right!.split('\n').map(s => s.trim())
+      const [first, ...lines] = right!.split('\n').map((s) => s.trim())
       cur += ' '.repeat(maxLength - width(cur) + 2)
       cur += first
       if (lines.length === 0) {
@@ -177,33 +149,70 @@ export class HelpFormatter {
     return output.trim()
   }
 
-  public section(header: string, body: string | HelpSection | HelpSectionKeyValueTable | [string, string | undefined][]): string {
+  public section(
+    header: string,
+    body: [string, string | undefined][] | HelpSection | HelpSectionKeyValueTable | string,
+  ): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
     if (typeof body! === 'string') {
       newBody = this.render(body!)
     } else if (Array.isArray(body)) {
-      newBody = (body! as [string, string | undefined | HelpSectionKeyValueTable][]).map(entry => {
+      newBody = (body! as [string, HelpSectionKeyValueTable | string | undefined][]).map((entry) => {
         if ('name' in entry) {
-          const tableEntry = entry as unknown as {name: string; description: string}
-          return ([this.render(tableEntry.name), this.render(tableEntry.description)])
+          const tableEntry = entry as unknown as {description: string; name: string}
+          return [this.render(tableEntry.name), this.render(tableEntry.description)]
         }
 
         const [left, right] = entry
-        return ([this.render(left), right && this.render(right as string)])
+        return [this.render(left), right && this.render(right as string)]
       })
     } else if ('header' in body!) {
       return this.section(body!.header, body!.body)
     } else {
       newBody = (body! as unknown as HelpSectionKeyValueTable)
-      .map((entry: { name: string; description: string }) => ([entry.name, entry.description]))
-      .map(([left, right]) => ([this.render(left), right && this.render(right)]))
+        .map((entry: {description: string; name: string}) => [entry.name, entry.description])
+        .map(([left, right]) => [this.render(left), right && this.render(right)])
     }
 
     const output = [
-      bold(header),
-      this.indent(Array.isArray(newBody) ? this.renderList(newBody, {stripAnsi: this.opts.stripAnsi, indentation: 2}) : newBody),
+      chalk.bold(header),
+      this.indent(
+        Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
+      ),
     ].join('\n')
     return this.opts.stripAnsi ? stripAnsi(output) : output
+  }
+
+  /**
+   * Wrap text according to `opts.maxWidth` which is typically set to the terminal width. All text
+   * will be rendered before bring wrapped, otherwise it could mess up the lengths.
+   *
+   * A terminal will automatically wrap text, so this method is primarily used for indented
+   * text. For indented text, specify the indentation so it is taken into account during wrapping.
+   *
+   * Here is an example of wrapping with indentation.
+   * ```
+   * <------ terminal window width ------>
+   * <---------- no indentation --------->
+   * This is my text that will be wrapped
+   * once it passes maxWidth.
+   *
+   * <- indent -><------ text space ----->
+   *             This is my text that will
+   *             be wrapped once it passes
+   *             maxWidth.
+   *
+   * <-- indent not taken into account ->
+   *             This is my text that will
+   * be wrapped
+   *             once it passes maxWidth.
+   * ```
+   * @param body the text to wrap
+   * @param spacing the indentation size to subtract from the terminal width
+   * @returns the formatted wrapped text
+   */
+  public wrap(body: string, spacing = this.indentSpacing): string {
+    return wrap(this.render(body), this.opts.maxWidth - spacing, {hard: true})
   }
 }

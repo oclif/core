@@ -1,39 +1,54 @@
 /* eslint-disable no-process-exit */
-/* eslint-disable unicorn/no-process-exit */
-import {config} from './config'
-import prettyPrint from './errors/pretty-print'
-import {ExitError} from '.'
-import clean = require('clean-stack')
-import {CLIError} from './errors/cli'
-import {OclifError, PrettyPrintableError} from '../interfaces'
+import clean from 'clean-stack'
 
-export const handle = (err: Error & Partial<PrettyPrintableError> & Partial<OclifError>) => {
+/* eslint-disable unicorn/no-process-exit */
+import {OclifError, PrettyPrintableError} from '../interfaces'
+import {config} from './config'
+import {CLIError} from './errors/cli'
+import {ExitError} from './errors/exit'
+import prettyPrint from './errors/pretty-print'
+
+/**
+ * This is an odd abstraction for process.exit, but it allows us to stub it in tests.
+ *
+ * https://github.com/sinonjs/sinon/issues/562
+ */
+export const Exit = {
+  exit(code = 0) {
+    process.exit(code)
+  },
+}
+
+type ErrorToHandle = Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}
+
+export async function handle(err: ErrorToHandle): Promise<void> {
   try {
     if (!err) err = new CLIError('no error?')
-    if (err.message === 'SIGINT') process.exit(1)
+    if (err.message === 'SIGINT') Exit.exit(1)
 
-    const shouldPrint = !(err instanceof ExitError)
+    const shouldPrint = !(err instanceof ExitError) && !err.skipOclifErrorHandling
     const pretty = prettyPrint(err)
     const stack = clean(err.stack || '', {pretty: true})
 
     if (shouldPrint) {
-      console.error(pretty ? pretty : stack)
+      console.error(pretty ?? stack)
     }
 
-    const exitCode = err.oclif?.exit !== undefined && err.oclif?.exit !== false ? err.oclif?.exit : 1
+    const exitCode = err.oclif?.exit ?? 1
 
     if (config.errorLogger && err.code !== 'EEXIT') {
       if (stack) {
         config.errorLogger.log(stack)
       }
 
-      config.errorLogger.flush()
-      .then(() => process.exit(exitCode))
-      .catch(console.error)
-    } else process.exit(exitCode)
+      await config.errorLogger
+        .flush()
+        .then(() => Exit.exit(exitCode))
+        .catch(console.error)
+    } else Exit.exit(exitCode)
   } catch (error: any) {
     console.error(err.stack)
     console.error(error.stack)
-    process.exit(1)
+    Exit.exit(1)
   }
 }

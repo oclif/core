@@ -3,15 +3,17 @@
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "module": "commonjs",
+    "module": "Node16",
     "outDir": "./lib",
+    "pretty": true,
     "rootDirs": [
       "./src"
     ],
     "strict": true,
-    "target": "es2019",
-    "lib": ["es2019"],
-    "allowSyntheticDefaultImports": true
+    "target": "ES2022",
+    "allowSyntheticDefaultImports": true,
+    "noErrorTruncation": true,
+    "moduleResolution": "Node16"
   },
   "include": [
     "./src/**/*"

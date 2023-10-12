@@ -1,84 +1,47 @@
-import {expect, test as base} from '@oclif/test'
-import stripAnsi = require('strip-ansi')
+import {expect} from 'chai'
 
-import {Command as Base, Flags as flags, Interfaces, toCached} from '../../src'
-import {Help, CommandHelp} from '../../src/help'
+import {Args, Config, Flags as flags} from '../../src'
+import {TestHelpWithOptions as TestHelp, makeCommandClass, makeLoadable} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
 
-class Command extends Base {
-  static disableJsonFlag = true
-
-  async run() {
-    return null
-  }
-}
-
-// Allow overriding section headers
-class TestCommandHelp extends CommandHelp {
-  protected sections() {
-    const sections = super.sections()
-    const flagSection = sections.find(section => section.header === 'FLAGS')
-    if (flagSection) flagSection.header = 'OPTIONS'
-    return sections
-  }
-}
-
-// extensions to expose method as public for testing
-class TestHelp extends Help {
-  CommandHelpClass = TestCommandHelp
-
-  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
-    super(config, opts)
-    this.opts.showFlagNameInTitle = true
-    this.opts.showFlagOptionsInTitle = true
-    this.opts.hideCommandSummaryInDescription = true
-  }
-
-  public formatCommand(command: Interfaces.Command) {
-    return super.formatCommand(command)
-  }
-}
-
-const test = base
-.loadConfig()
-.add('help', ctx => new TestHelp(ctx.config as any))
-.register('commandHelp', (command?: any) => ({
-  async run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const cached = await toCached(command!, {} as any)
-    const help = ctx.help.formatCommand(cached)
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(help)
-    }
-
-    ctx.commandHelp = stripAnsi(help).split('\n').map(s => s.trimEnd()).join('\n')
-    ctx.expectation = 'has commandHelp'
-  },
-}))
-
 describe('formatCommand', () => {
-  test
-  .commandHelp(class extends Command {
-      static id = 'apps:create'
+  let config: Config
+  let help: TestHelp
 
-      static aliases = ['app:init', 'create']
-
-      static description = `first line
-multiline help`
-
-      static args = [{name: 'app_name', description: 'app to use'}]
-
-      static flags = {
-        app: flags.string({char: 'a', hidden: true}),
-        foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
-        force: flags.boolean({description: 'force  it '.repeat(15)}),
-        ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
-        remote: flags.string({char: 'r'}),
-        label: flags.string({char: 'l', helpLabel: '-l'}),
-      }
+  before(async () => {
+    config = await Config.load(process.cwd())
   })
-  .it('handles multi-line help output', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+  beforeEach(() => {
+    help = new TestHelp(config)
+  })
+
+  it('should handle multi-line help output', async () => {
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        aliases: ['app:init', 'create'],
+        args: {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use'}),
+        },
+        deprecateAliases: true,
+        description: `first line
+multiline help`,
+        flags: {
+          app: flags.string({char: 'a', hidden: true}),
+          foo: flags.string({char: 'f', description: 'foobar'.repeat(18)}),
+          force: flags.boolean({description: 'force  it '.repeat(15)}),
+          ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+          remote: flags.string({char: 'r'}),
+          label: flags.string({char: 'l', helpLabel: '-l'}),
+        },
+        id: 'apps:create',
+      }),
+    )
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [-f <value>] [--force] [--ss] [-r
     <value>] [-l <value>]
 
@@ -103,28 +66,31 @@ DESCRIPTION
 
 ALIASES
   $ oclif app:init
-  $ oclif create`))
+  $ oclif create`)
+  })
 
   describe('arg and flag multiline handling', () => {
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static description = 'description of apps:create'
-
-        static aliases = ['app:init', 'create']
-
-        static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
-
-        static flags = {
-          app: flags.string({char: 'a', hidden: true}),
-          foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
-          force: flags.boolean({description: 'force  it '.repeat(15)}),
-          ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
-          remote: flags.string({char: 'r'}),
-        }
-    })
-    .it('show args and flags side by side when their output do not exceed 4 lines ', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should show args and flags side by side when their output do not exceed 4 lines ', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          aliases: ['app:init', 'create'],
+          args: {
+            // eslint-disable-next-line camelcase
+            app_name: Args.string({description: 'app to use'.repeat(35)}),
+          },
+          description: 'description of apps:create',
+          flags: {
+            app: flags.string({char: 'a', hidden: true}),
+            foo: flags.string({char: 'f', description: 'foobar'.repeat(15)}),
+            force: flags.boolean({description: 'force  it '.repeat(15)}),
+            ss: flags.boolean({description: 'newliney\n'.repeat(4)}),
+            remote: flags.string({char: 'r'}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [-f <value>] [--force] [--ss] [-r
     <value>]
 
@@ -150,27 +116,30 @@ OPTIONS
 
 ALIASES
   $ oclif app:init
-  $ oclif create`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static description = 'description of apps:create'
-
-        static aliases = ['app:init', 'create']
-
-        static args = [{name: 'app_name', description: 'app to use'.repeat(35)}]
-
-        static flags = {
-          app: flags.string({char: 'a', hidden: true}),
-          foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
-          force: flags.boolean({description: 'force  it '.repeat(29)}),
-          ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
-          remote: flags.string({char: 'r'}),
-        }
+  $ oclif create`)
     })
-    .it('shows stacked args and flags when the lines exceed 4', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should show stacked args and flags when the lines exceed 4', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          aliases: ['app:init', 'create'],
+          args: {
+            // eslint-disable-next-line camelcase
+            app_name: Args.string({description: 'app to use'.repeat(35)}),
+          },
+          description: 'description of apps:create',
+          flags: {
+            app: flags.string({char: 'a', hidden: true}),
+            foo: flags.string({char: 'f', description: 'foobar'.repeat(20)}),
+            force: flags.boolean({description: 'force  it '.repeat(29)}),
+            ss: flags.boolean({description: 'newliney\n'.repeat(5)}),
+            remote: flags.string({char: 'r'}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [-f <value>] [--force] [--ss] [-r
     <value>]
 
@@ -204,25 +173,28 @@ OPTIONS
 
 ALIASES
   $ oclif app:init
-  $ oclif create`))
+  $ oclif create`)
+    })
   })
 
   describe('description', () => {
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static description = 'description of apps:create\nthese values are after and will show up in the command description'
-
-        static aliases = ['app:init', 'create']
-
-        static args = [{name: 'app_name', description: 'app to use'}]
-
-        static flags = {
-          force: flags.boolean({description: 'forces'}),
-        }
-    })
-    .it('outputs command description with values after a \\n newline character', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should output command description with values after a \\n newline character', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          aliases: ['app:init', 'create'],
+          args: {
+            // eslint-disable-next-line camelcase
+            app_name: Args.string({description: 'app to use'}),
+          },
+          description: 'description of apps:create\nthese values are after and will show up in the command description',
+          flags: {
+            force: flags.boolean({description: 'forces'}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [APP_NAME] [--force]
 
 ARGUMENTS
@@ -236,54 +208,63 @@ DESCRIPTION
 
 ALIASES
   $ oclif app:init
-  $ oclif create`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static description = 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>'
+  $ oclif create`)
     })
-    .it('renders template string from description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should render template string from description', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          description: 'root part of the description\nThe <%= config.bin %> CLI has <%= command.id %>',
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create
 
 DESCRIPTION
-  The oclif CLI has apps:create`))
+  The oclif CLI has apps:create`)
+    })
   })
 
-  describe(('flags'), () => {
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static flags = {
-          myenum: flags.string({
-            options: ['a', 'b', 'c'],
-          }),
-        }
-    })
-    .it('outputs flag enum', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  describe('flags', () => {
+    it('should output flag options', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            myenum: flags.string({
+              options: ['a', 'b', 'c'],
+            }),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [--myenum a|b|c]
 
 OPTIONS
-  --myenum=a|b|c`))
+  --myenum=a|b|c`)
+    })
 
-    test
-    .commandHelp(class extends Command {
-      static id = 'apps:create'
-
-      static args = [
-        {name: 'arg1', default: '.'},
-        {name: 'arg2', default: '.', description: 'arg2 desc'},
-        {name: 'arg3', description: 'arg3 desc'},
-      ]
-
-      static flags = {
-        flag1: flags.string({default: '.'}),
-        flag2: flags.string({default: '.', description: 'flag2 desc'}),
-        flag3: flags.string({description: 'flag3 desc'}),
-      }
-    }).it('outputs with default flag options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should output default flag options', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          args: {
+            arg1: Args.string({default: '.'}),
+            arg2: Args.string({default: '.', description: 'arg2 desc'}),
+            arg3: Args.string({description: 'arg3 desc'}),
+          },
+          flags: {
+            flag1: flags.string({default: '.'}),
+            flag2: flags.string({default: '.', description: 'flag2 desc'}),
+            flag3: flags.string({description: 'flag3 desc'}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [ARG1] [ARG2] [ARG3] [--flag1 <value>] [--flag2
     <value>] [--flag3 <value>]
 
@@ -295,144 +276,180 @@ ARGUMENTS
 OPTIONS
   --flag1=flag1  [default: .]
   --flag2=flag2  [default: .] flag2 desc
-  --flag3=flag3  flag3 desc`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static flags = {
-          opt: flags.boolean({allowNo: true}),
-        }
+  --flag3=flag3  flag3 desc`)
     })
-    .it('outputs with with no options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should output with no options', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            opt: flags.boolean({allowNo: true}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [--opt]
 
 OPTIONS
-  --[no-]opt`))
+  --[no-]opt`)
+    })
   })
 
-  describe('args', () =>  {
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static args = [
-          {name: 'arg1', description: 'Show the options', options: ['option1', 'option2']},
-        ]
-    })
-    .it('outputs with arg options', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+  describe('args', () => {
+    it('should output arg options', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          args: {
+            arg1: Args.string({description: 'Show the options', options: ['option1', 'option2']}),
+          },
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif apps:create [ARG1]
 
 ARGUMENTS
-  ARG1  (option1|option2) Show the options`))
+  ARG1  (option1|option2) Show the options`)
+    })
   })
 
   describe('usage', () => {
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static usage = '<%= config.bin %> <%= command.id %> usage'
+    it('should output usage with templates', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          usage: '<%= config.bin %> <%= command.id %> usage',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif oclif apps:create usage`)
     })
-    .it('outputs usage with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif oclif apps:create usage`))
 
-    test
-    .commandHelp(class extends Command {
-        static id = 'apps:create'
-
-        static usage = ['<%= config.bin %>', '<%= command.id %> usage']
-    })
-    .it('outputs usage arrays with templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should output usage arrays with templates', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          usage: ['<%= config.bin %>', '<%= command.id %> usage'],
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif oclif
-  $ oclif apps:create usage`))
-
-    test
-    .commandHelp(class extends Command {
-      static id = 'apps:create'
-
-      static usage = undefined
+  $ oclif apps:create usage`)
     })
-    .it('defaults usage when not specified', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif apps:create`))
+
+    it('should output default usage when not specified', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create`)
+    })
   })
 
   describe('examples', () => {
-    test
-    .commandHelp(class extends Command {
-        static examples = ['it handles a list of examples', 'more example text']
-    })
-    .it('outputs multiple examples', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should output multiple examples', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: ['it handles a list of examples', 'more example text'],
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif
 
 EXAMPLES
   it handles a list of examples
 
-  more example text`))
-
-    test
-    .commandHelp(class extends Command {
-        static examples = ['it handles a single example']
+  more example text`)
     })
-    .it('outputs a single example', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should output a single example', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: ['it handles a single example'],
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif
 
 EXAMPLES
-  it handles a single example`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>']
+  it handles a single example`)
     })
-    .it('outputs examples using templates', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should output example using templates', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: ['the bin is <%= config.bin %>', 'the command id is <%= command.id %>'],
+          id: 'oclif:command',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif oclif:command
 
 EXAMPLES
   the bin is oclif
 
-  the command id is oclif:command`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = ['<%= config.bin %> <%= command.id %> --help']
+  the command id is oclif:command`)
     })
-    .it('formats if command', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+
+    it('should format if command', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: ['<%= config.bin %> <%= command.id %> --help'],
+          id: 'oclif:command',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif oclif:command
 
 EXAMPLES
-  $ oclif oclif:command --help`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = ['Prints out help.\n<%= config.bin %> <%= command.id %> --help']
+  $ oclif oclif:command --help`)
     })
-    .it('formats if command with description', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
-  $ oclif oclif:command
 
-EXAMPLES
-  Prints out help.
-
-    $ oclif oclif:command --help`))
-
-    test
-    .commandHelp(class extends Command {
-        static id = 'oclif:command'
-
-        static examples = [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}]
-    })
-    .it('formats example object', (ctx: any) => expect(ctx.commandHelp).to.equal(`USAGE
+    it('should format if command with description', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: ['Prints out help.\n<%= config.bin %> <%= command.id %> --help'],
+          id: 'oclif:command',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
   $ oclif oclif:command
 
 EXAMPLES
   Prints out help.
 
-    $ oclif oclif:command --help`))
+    $ oclif oclif:command --help`)
+    })
+
+    it('should format example object', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          examples: [{description: 'Prints out help.', command: '<%= config.bin %> <%= command.id %> --help'}],
+          id: 'oclif:command',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif oclif:command
+
+EXAMPLES
+  Prints out help.
+
+    $ oclif oclif:command --help`)
+    })
   })
 })

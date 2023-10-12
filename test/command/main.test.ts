@@ -1,29 +1,42 @@
-import {expect, fancy} from 'fancy-test'
-import path = require('path')
+import {expect} from 'chai'
+import {resolve} from 'node:path'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
+import {Interfaces, stdout} from '../../src/index'
 import {run} from '../../src/main'
+import {requireJson} from '../../src/util/fs'
 
-const root = path.resolve(__dirname, '../../package.json')
-const pjson = require(root)
+import stripAnsi = require('strip-ansi')
+
+const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', '..', 'package.json')
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
 
 describe('main', () => {
-  fancy
-  .stdout()
-  .do(() => run(['plugins'], root))
-  .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
-  .it('runs plugins')
+  let sandbox: SinonSandbox
+  let stdoutStub: SinonStub
 
-  fancy
-  .stdout()
-  .do(() => run(['--version'], root))
-  .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
-  .it('runs --version')
+  beforeEach(() => {
+    sandbox = createSandbox()
+    stdoutStub = sandbox.stub(stdout, 'write').callsFake(() => true)
+  })
 
-  fancy
-  .stdout()
-  .do(() => run(['--help'], root))
-  .do((output: any) => expect(output.stdout).to.equal(`base library for oclif CLIs
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  it('should run plugins', async () => {
+    const result = await run(['plugins'], resolve(__dirname, '../../package.json'))
+    expect(result).to.deep.equal([])
+  })
+
+  it('should run version', async () => {
+    await run(['--version'], resolve(__dirname, '../../package.json'))
+    expect(stdoutStub.firstCall.firstArg).to.equal(`${version}\n`)
+  })
+
+  it('should run help', async () => {
+    await run(['--help'], resolve(__dirname, '../../package.json'))
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -38,13 +51,12 @@ COMMANDS
   help     Display help for oclif.
   plugins  List installed plugins.
 
-`))
-  .it('runs --help')
+`)
+  })
 
-  fancy
-  .stdout()
-  .do(() => run(['--help', 'foo'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal(`foo topic description
+  it('should show help for topics with spaces', async () => {
+    await run(['--help', 'foo'], resolve(__dirname, 'fixtures/typescript/package.json'))
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -55,13 +67,12 @@ TOPICS
 COMMANDS
   foo baz  foo baz description
 
-`))
-  .it('runs spaced topic help')
+`)
+  })
 
-  fancy
-  .stdout()
-  .do(() => run(['foo', 'bar', '--help'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal(`foo bar topic description
+  it('should run spaced topic help v2', async () => {
+    await run(['foo', 'bar', '--help'], resolve(__dirname, 'fixtures/typescript/package.json'))
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
 
 USAGE
   $ oclif foo bar COMMAND
@@ -70,18 +81,18 @@ COMMANDS
   foo bar fail     fail description
   foo bar succeed  succeed description
 
-`))
-  .it('runs spaced topic help v2')
+`)
+  })
 
-  fancy
-  .stdout()
-  .do(() => run(['foo', 'baz'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
-  .it('runs foo:baz with space separator')
+  it('should run foo:baz with space separator', async () => {
+    const consoleLogStub = sandbox.stub(console, 'log').returns()
+    await run(['foo', 'baz'], resolve(__dirname, 'fixtures/typescript/package.json'))
+    expect(consoleLogStub.firstCall.firstArg).to.equal('running Baz')
+  })
 
-  fancy
-  .stdout()
-  .do(() => run(['foo', 'bar', 'succeed'], path.resolve(__dirname, 'fixtures/typescript/package.json')))
-  .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
-  .it('runs foo:bar:succeed with space separator')
+  it('should run foo:bar:succeed with space separator', async () => {
+    const consoleLogStub = sandbox.stub(console, 'log').returns()
+    await run(['foo', 'bar', 'succeed'], resolve(__dirname, 'fixtures/typescript/package.json'))
+    expect(consoleLogStub.firstCall.firstArg).to.equal('it works!')
+  })
 })

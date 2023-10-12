@@ -1,0 +1,13 @@
+{
+  "extends": ["oclif", "oclif-typescript", "prettier"],
+  "rules": {
+    "unicorn/prefer-module": "off",
+    "unicorn/no-array-reduce": "off",
+    "no-useless-constructor": "off",
+    "perfectionist/sort-object-types": "off",
+    "perfectionist/sort-union-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "valid-jsdoc": "off"
+  }
+}

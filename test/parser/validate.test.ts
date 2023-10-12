@@ -1,5 +1,7 @@
 import {expect} from 'chai'
+import {fail} from 'node:assert'
 
+import {CLIError} from '../../src/errors'
 import {validate} from '../../src/parser/validate'
 
 describe('validate', () => {
@@ -20,13 +22,13 @@ describe('validate', () => {
         exclusive: [],
       },
     },
-    args: [],
+    args: {},
     strict: true,
     context: {},
     '--': true,
   }
 
-  it('enforces exclusivity for flags', () => {
+  it('enforces exclusivity for flags', async () => {
     const output = {
       args: {},
       argv: [],
@@ -34,11 +36,13 @@ describe('validate', () => {
         dinner: 'pizza',
         dessert: 'cheesecake',
       },
-      raw: [{
-        type: 'flag',
-        flag: 'dinner',
-        input: 'pizza',
-      }],
+      raw: [
+        {
+          type: 'flag',
+          flag: 'dinner',
+          input: 'pizza',
+        },
+      ],
       metadata: {
         flags: {
           dessert: {
@@ -48,11 +52,17 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    expect(validate.bind({input, output})).to.throw()
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
+    }
   })
 
-  it('ignores exclusivity for defaulted flags', () => {
+  it('ignores exclusivity for defaulted flags', async () => {
     const output = {
       args: {},
       argv: [],
@@ -60,11 +70,13 @@ describe('validate', () => {
         dinner: 'pizza',
         dessert: 'cheesecake',
       },
-      raw: [{
-        type: 'flag',
-        flag: 'dinner',
-        input: 'pizza',
-      }],
+      raw: [
+        {
+          type: 'flag',
+          flag: 'dinner',
+          input: 'pizza',
+        },
+      ],
       metadata: {
         flags: {
           dessert: {
@@ -74,11 +86,11 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    validate({input, output})
+    // @ts-expect-error
+    await validate({input, output})
   })
 
-  it('allows zero for integer', () => {
+  it('allows zero for integer', async () => {
     const input = {
       argv: [],
       flags: {
@@ -87,12 +99,9 @@ describe('validate', () => {
           required: true,
         },
       },
-      args: [
-        {
-          name: 'zero',
-          required: true,
-        },
-      ],
+      args: {
+        zero: {required: true},
+      },
       strict: true,
       context: {},
       '--': true,
@@ -108,11 +117,11 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    validate({input, output})
+    // @ts-expect-error
+    await validate({input, output})
   })
 
-  it('throws when required flag is undefined', () => {
+  it('throws when required flag is undefined', async () => {
     const input = {
       argv: [],
       flags: {
@@ -121,7 +130,7 @@ describe('validate', () => {
           required: true,
         },
       },
-      args: [],
+      args: {},
       strict: true,
       context: {},
       '--': true,
@@ -137,7 +146,794 @@ describe('validate', () => {
       },
     }
 
-    // @ts-ignore
-    expect(validate.bind({input, output})).to.throw()
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('Missing required flag')
+    }
+  })
+
+  describe('relationships', () => {
+    describe('type: all', () => {
+      it('should pass if all required flags are provided', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', sprinkles: true, cookies: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+            {type: 'flag', flag: 'cookies', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should exclude any flags whose when property resolves to false', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: ['cookies', {name: 'sprinkles', when: async () => false}],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', cookies: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'cookies', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should require all specified flags', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream'},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include(
+            'All of the following must be provided when using --dessert: --cookies, --sprinkles',
+          )
+        }
+      })
+
+      it('should require all specified flags with when property that resolves to true', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: [
+                    'cookies',
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: true},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include(
+            'All of the following must be provided when using --dessert: --cookies, --sprinkles',
+          )
+        }
+      })
+
+      it('should require all specified flags with when property that resolves to false', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'all',
+                  flags: [
+                    'cookies',
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: false},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
+        }
+      })
+    })
+
+    describe('type: some', () => {
+      it('should pass if some of the specified flags are provided', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'some',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', sprinkles: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should require some of the specified flags', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'some',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream'},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include(
+            'One of the following must be provided when using --dessert: --cookies, --sprinkles',
+          )
+        }
+      })
+
+      it('should require some of the specified flags with when property that resolves to true', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'some',
+                  flags: [
+                    'cookies',
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: true},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include(
+            'One of the following must be provided when using --dessert: --cookies, --sprinkles',
+          )
+        }
+      })
+
+      it('should require some of the specified flags with when property that resolves to false', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'some',
+                  flags: [
+                    'cookies',
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: false},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
+        }
+      })
+    })
+
+    describe('type: none', () => {
+      it('should pass if none of the specified flags are provided', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'none',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream'},
+          raw: [{type: 'flag', flag: 'dessert', input: 'ice-cream'}],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should fail if the specified flags are provided', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'none',
+                  flags: ['cookies', 'sprinkles'],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', sprinkles: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+          ],
+          metadata: {
+            flags: {
+              dessert: {setFromDefault: false},
+              sprinkles: {setFromDefault: false},
+            },
+          },
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
+        }
+      })
+
+      it('should fail if the specified flags are provided with when property that resolves to true', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'none',
+                  flags: [
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: true, sprinkles: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+            {type: 'flag', flag: 'birthday', input: true},
+          ],
+          metadata: {
+            flags: {
+              dessert: {setFromDefault: false},
+              sprinkles: {setFromDefault: false},
+              birthday: {setFromDefault: false},
+            },
+          },
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
+        }
+      })
+
+      it('should pass if the specified flags are provided with when property that resolves to false', async () => {
+        const input = {
+          argv: [],
+          flags: {
+            cookies: {input: [], name: 'cookies'},
+            sprinkles: {input: [], name: 'sprinkles'},
+            birthday: {input: [], name: 'birthday'},
+            dessert: {
+              input: [],
+              name: 'dessert',
+              relationships: [
+                {
+                  type: 'none',
+                  flags: [
+                    {
+                      name: 'sprinkles',
+                      when: async (flags: {birthday: boolean}) => flags.birthday,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          args: {},
+          strict: true,
+          context: {},
+          '--': true,
+        }
+
+        const output = {
+          args: {},
+          argv: [],
+          flags: {dessert: 'ice-cream', birthday: false, sprinkles: true},
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+            {type: 'flag', flag: 'birthday', input: false},
+          ],
+          metadata: {
+            flags: {
+              dessert: {setFromDefault: false},
+              sprinkles: {setFromDefault: false},
+              birthday: {setFromDefault: false},
+            },
+          },
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+    })
+
+    it('should pass if the specified flags whose when property resolves to true, flag has a false value', async () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            relationships: [
+              {
+                type: 'all',
+                flags: ['sprinkles', {name: 'cookies', when: async () => true}],
+              },
+            ],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      const output = {
+        args: {},
+        argv: [],
+        flags: {sprinkles: true, dessert: 'ice-cream', cookies: false},
+        raw: [
+          {type: 'flag', flag: 'sprinkles', input: true},
+          {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+          {type: 'flag', flag: 'cookies', input: false},
+        ],
+        metadata: {},
+      }
+
+      // @ts-expect-error
+      await validate({input, output})
+    })
+
+    it('should fail if the specified flags whose when property resolves to true in exclusive, flag has a false value', async () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            exclusive: [{name: 'cookies', when: async () => true}],
+          },
+        },
+        args: [],
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      const output = {
+        args: {},
+        argv: [],
+        flags: {sprinkles: true, dessert: 'ice-cream', cookies: false},
+        raw: [
+          {type: 'flag', flag: 'sprinkles', input: true},
+          {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+          {type: 'flag', flag: 'cookies', input: false},
+        ],
+        metadata: {},
+      }
+
+      try {
+        // @ts-expect-error
+        await validate({input, output})
+        fail('should have thrown')
+      } catch (error) {
+        const err = error as CLIError
+        expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
+      }
+    })
+
+    describe('mixed', () => {
+      const input = {
+        argv: [],
+        flags: {
+          cookies: {input: [], name: 'cookies'},
+          sprinkles: {input: [], name: 'sprinkles'},
+          cake: {input: [], name: 'cake'},
+          brownies: {input: [], name: 'brownies'},
+          pie: {input: [], name: 'pie'},
+          fudge: {input: [], name: 'fudge'},
+          cupcake: {input: [], name: 'cupcake'},
+          muffin: {input: [], name: 'muffin'},
+          scone: {input: [], name: 'scone'},
+          dessert: {
+            input: [],
+            name: 'dessert',
+            relationships: [
+              {
+                type: 'all',
+                flags: [
+                  'cookies',
+                  {name: 'sprinkles', when: async () => false},
+                  {name: 'cake', when: async () => true},
+                ],
+              },
+              {
+                type: 'some',
+                flags: ['brownies', {name: 'pie', when: async () => false}, {name: 'fudge', when: async () => true}],
+              },
+              {
+                type: 'none',
+                flags: ['cupcake', {name: 'muffin', when: async () => false}, {name: 'scone', when: async () => true}],
+              },
+            ],
+          },
+        },
+        args: {},
+        strict: true,
+        context: {},
+        '--': true,
+      }
+
+      it('should succeed', async () => {
+        const output = {
+          args: {},
+          argv: [],
+          flags: {
+            dessert: 'ice-cream',
+            cookies: true,
+            brownies: true,
+            cake: true,
+            muffin: true,
+          },
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'cookies', input: true},
+            {type: 'flag', flag: 'brownies', input: true},
+            {type: 'flag', flag: 'cake', input: true},
+            {type: 'flag', flag: 'muffin', input: true},
+          ],
+          metadata: {},
+        }
+
+        // @ts-expect-error
+        await validate({input, output})
+      })
+
+      it('should fail', async () => {
+        const output = {
+          args: {},
+          argv: [],
+          flags: {
+            dessert: 'ice-cream',
+            sprinkles: true,
+            cake: true,
+            scone: true,
+            pie: true,
+          },
+          raw: [
+            {type: 'flag', flag: 'dessert', input: 'ice-cream'},
+            {type: 'flag', flag: 'sprinkles', input: true},
+            {type: 'flag', flag: 'cake', input: true},
+            {type: 'flag', flag: 'scone', input: true},
+            {type: 'flag', flag: 'pie', input: true},
+          ],
+          metadata: {},
+        }
+
+        try {
+          // @ts-expect-error
+          await validate({input, output})
+          fail('should have thrown')
+        } catch (error) {
+          const err = error as CLIError
+          expect(err.message).to.include(
+            'All of the following must be provided when using --dessert: --cookies, --cake',
+          )
+          expect(err.message).to.include('--scone=true cannot also be provided when using --dessert')
+          expect(err.message).to.include(
+            'One of the following must be provided when using --dessert: --brownies, --fudge',
+          )
+        }
+      })
+    })
   })
 })

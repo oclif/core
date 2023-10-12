@@ -6,7 +6,14 @@
   "files": [],
   "oclif": {
     "commands": "./src/commands",
-    "additionalHelpFlags": ["-h", "--mycommandhelp"],
-    "additionalVersionFlags": ["-v", "myversion", "version"]
+    "additionalHelpFlags": [
+      "-h",
+      "--mycommandhelp"
+    ],
+    "additionalVersionFlags": [
+      "-v",
+      "myversion",
+      "version"
+    ]
   }
 }

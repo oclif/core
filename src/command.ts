@@ -1,23 +1,44 @@
-import {fileURLToPath} from 'url'
+import chalk from 'chalk'
+import {fileURLToPath} from 'node:url'
+import {format, inspect} from 'node:util'
 
-import {format, inspect} from 'util'
-import {CliUx} from './index'
+import {ux} from './cli-ux'
+import {stderr, stdout} from './cli-ux/stream'
 import {Config} from './config'
-import * as Interfaces from './interfaces'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
+import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv, toConfiguredId} from './help/util'
+import {PJSON} from './interfaces'
+import {LoadOptions} from './interfaces/config'
+import {CommandError} from './interfaces/errors'
+import {
+  ArgInput,
+  ArgOutput,
+  ArgProps,
+  BooleanFlagProps,
+  Deprecation,
+  FlagInput,
+  FlagOutput,
+  Arg as IArg,
+  Flag as IFlag,
+  Input,
+  OptionFlagProps,
+  ParserOutput,
+} from './interfaces/parser'
+import {Plugin} from './interfaces/plugin'
 import * as Parser from './parser'
-import * as Flags from './flags'
+import {aggregateFlags} from './util/aggregate-flags'
+import {requireJson} from './util/fs'
+import {uniq} from './util/util'
 
-const pjson = require('../package.json')
+const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
 
 /**
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-process.stdout.on('error', (err: any) => {
-  if (err && err.code === 'EPIPE')
-    return
+stdout.on('error', (err: any) => {
+  if (err && err.code === 'EPIPE') return
   throw err
 })
 
@@ -26,50 +47,30 @@ process.stdout.on('error', (err: any) => {
  * in your project.
  */
 
-export default abstract class Command {
-  static _base = `${pjson.name}@${pjson.version}`
+export abstract class Command {
+  /** An array of aliases for this command. */
+  public static aliases: string[] = []
 
-  /** A command ID, used mostly in error or verbose reporting. */
-  static id: string
+  /** An order-dependent object of arguments for the command */
+  public static args: ArgInput = {}
+
+  public static baseFlags: FlagInput
 
   /**
-   * The tweet-sized description for your class, used in a parent-commands
-   * sub-command listing and as the header for the command help.
+   * Emit deprecation warning when a command alias is used
    */
-  static summary?: string;
+  static deprecateAliases?: boolean
+
+  public static deprecationOptions?: Deprecation
 
   /**
    * A full description of how to use the command.
    *
    * If no summary, the first line of the description will be used as the summary.
    */
-  static description: string | undefined
+  public static description: string | undefined
 
-  /** Hide the command from help? */
-  static hidden: boolean
-
-  /** Mark the command as a given state (e.g. beta) in help? */
-  static state?: string;
-
-  /**
-   * An override string (or strings) for the default usage documentation.
-   */
-  static usage: string | string[] | undefined
-
-  static help: string | undefined
-
-  /** An array of aliases for this command. */
-  static aliases: string[] = []
-
-  /** When set to false, allows a variable amount of arguments */
-  static strict = true
-
-  static parse = true
-
-  /** An order-dependent array of arguments for the command */
-  static args?: Interfaces.ArgInput
-
-  static plugin: Interfaces.Plugin | undefined
+  public static enableJsonFlag = false
 
   /**
    * An array of examples to show at the end of the command's help.
@@ -85,20 +86,81 @@ export default abstract class Command {
    *     $ <%= config.bin => command flags
    * ```
    */
-  static examples: Interfaces.Example[]
+  public static examples: Command.Example[]
 
-  static parserOptions = {}
+  /** A hash of flags for the command */
+  public static flags: FlagInput
 
-  static enableJsonFlag = false
+  public static hasDynamicHelp = false
 
-  // eslint-disable-next-line valid-jsdoc
+  public static help: string | undefined
+
+  /** Hide the command from help */
+  public static hidden: boolean
+
+  /** A command ID, used mostly in error or verbose reporting. */
+  public static id: string
+
+  public static plugin: Plugin | undefined
+
+  public static readonly pluginAlias?: string
+  public static readonly pluginName?: string
+  public static readonly pluginType?: string
+
+  /** Mark the command as a given state (e.g. beta or deprecated) in help */
+  public static state?: 'beta' | 'deprecated' | string
+
+  /** When set to false, allows a variable amount of arguments */
+  public static strict = true
+
+  /**
+   * The tweet-sized description for your class, used in a parent-commands
+   * sub-command listing and as the header for the command help.
+   */
+  public static summary?: string
+  /**
+   * An override string (or strings) for the default usage documentation.
+   */
+  public static usage: string | string[] | undefined
+
+  protected debug: (...args: any[]) => void
+
+  public id: string | undefined
+
+  private static readonly _base = `${pjson.name}@${pjson.version}`
+
+  public constructor(
+    public argv: string[],
+    public config: Config,
+  ) {
+    this.id = this.ctor.id
+    try {
+      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
+    } catch {
+      this.debug = () => {
+        // noop
+      }
+    }
+  }
+
+  /**
+   * actual command run code goes here
+   */
+  public abstract run(): Promise<any>
+
   /**
    * instantiate and run the command
-   * @param {Interfaces.Command.Class} this Class
+   *
+   * @param {Command.Class} this - the command class
    * @param {string[]} argv argv
-   * @param {Interfaces.LoadOptions} opts options
+   * @param {LoadOptions} opts options
+   * @returns {Promise<unknown>} result
    */
-  static run: Interfaces.Command.Class['run'] = async function (this: Interfaces.Command.Class, argv?: string[], opts?) {
+  public static async run<T extends Command>(
+    this: new (argv: string[], config: Config) => T,
+    argv?: string[],
+    opts?: LoadOptions,
+  ): Promise<ReturnType<T['run']>> {
     if (!argv) argv = process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -106,53 +168,189 @@ export default abstract class Command {
       opts = fileURLToPath(opts)
     }
 
-    // to-do: update in node-14 to module.main
-    const config = await Config.load(opts || (module.parent && module.parent.parent && module.parent.parent.filename) || __dirname)
+    const config = await Config.load(opts || require.main?.filename || __dirname)
     const cmd = new this(argv, config)
-    return cmd._run(argv)
-  }
-
-  private static globalFlags = {
-    json: Flags.boolean({
-      description: 'Format output as json.',
-      helpGroup: 'GLOBAL',
-    }),
-  }
-
-  /** A hash of flags for the command */
-  private static _flags: Interfaces.FlagInput<any>
-
-  static get flags(): Interfaces.FlagInput<any> {
-    return this._flags
-  }
-
-  static set flags(flags: Interfaces.FlagInput<any>) {
-    this._flags = this.enableJsonFlag ? Object.assign({}, Command.globalFlags, flags) : flags
-  }
-
-  id: string | undefined
-
-  protected debug: (...args: any[]) => void
-
-  constructor(public argv: string[], public config: Config) {
-    this.id = this.ctor.id
-    try {
-      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
-    } catch {
-      this.debug = () => {}
+    if (!cmd.id) {
+      const id = cmd.constructor.name.toLowerCase()
+      cmd.id = id
+      cmd.ctor.id = id
     }
+
+    return cmd._run<ReturnType<T['run']>>()
   }
 
-  get ctor(): typeof Command {
+  protected get ctor(): typeof Command {
     return this.constructor as typeof Command
   }
 
-  async _run<T>(): Promise<T | undefined> {
+  protected async catch(err: CommandError): Promise<any> {
+    process.exitCode = process.exitCode ?? err.exitCode ?? 1
+    if (this.jsonEnabled()) {
+      this.logJson(this.toErrorJson(err))
+    } else {
+      if (!err.message) throw err
+      try {
+        ux.action.stop(chalk.bold.red('!'))
+      } catch {}
+
+      throw err
+    }
+  }
+
+  public error(input: Error | string, options: {code?: string; exit: false} & PrettyPrintableError): void
+
+  public error(input: Error | string, options?: {code?: string; exit?: number} & PrettyPrintableError): never
+
+  public error(
+    input: Error | string,
+    options: {code?: string; exit?: false | number} & PrettyPrintableError = {},
+  ): void {
+    return Errors.error(input, options as any)
+  }
+
+  public exit(code = 0): never {
+    Errors.exit(code)
+  }
+
+  protected async finally(_: Error | undefined): Promise<any> {
+    try {
+      const {config} = Errors
+      if (config.errorLogger) await config.errorLogger.flush()
+    } catch (error: any) {
+      console.error(error)
+    }
+  }
+
+  protected async init(): Promise<any> {
+    this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
+    if (this.config.debug) Errors.config.debug = true
+    if (this.config.errlog) Errors.config.errlog = this.config.errlog
+    const g: any = global
+    g['http-call'] = g['http-call'] || {}
+    g['http-call']!.userAgent = this.config.userAgent
+    this.warnIfCommandDeprecated()
+  }
+
+  /**
+   * Determine if the command is being run with the --json flag in a command that supports it.
+   *
+   * @returns {boolean} true if the command supports json and the --json flag is present
+   */
+  public jsonEnabled(): boolean {
+    // If the command doesn't support json, return false
+    if (!this.ctor.enableJsonFlag) return false
+
+    // If the CONTENT_TYPE env var is set to json, return true
+    if (this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json') return true
+
+    const passThroughIndex = this.argv.indexOf('--')
+    const jsonIndex = this.argv.indexOf('--json')
+    return passThroughIndex === -1
+      ? // If '--' is not present, then check for `--json` in this.argv
+        jsonIndex > -1
+      : // If '--' is present, return true only the --json flag exists and is before the '--'
+        jsonIndex > -1 && jsonIndex < passThroughIndex
+  }
+
+  public log(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      stdout.write(format(message, ...args) + '\n')
+    }
+  }
+
+  protected logJson(json: unknown): void {
+    ux.styledJSON(json)
+  }
+
+  public logToStderr(message = '', ...args: any[]): void {
+    if (!this.jsonEnabled()) {
+      message = typeof message === 'string' ? message : inspect(message)
+      stderr.write(format(message, ...args) + '\n')
+    }
+  }
+
+  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, B, A>,
+    argv = this.argv,
+  ): Promise<ParserOutput<F, B, A>> {
+    if (!options) options = this.ctor as Input<F, B, A>
+
+    const opts = {
+      context: this,
+      ...options,
+      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
+    }
+
+    const results = await Parser.parse<F, B, A>(argv, opts)
+    this.warnIfFlagDeprecated(results.flags ?? {})
+
+    return results
+  }
+
+  protected toErrorJson(err: unknown): any {
+    return {error: err}
+  }
+
+  protected toSuccessJson(result: unknown): any {
+    return result
+  }
+
+  public warn(input: Error | string): Error | string {
+    if (!this.jsonEnabled()) Errors.warn(input)
+    return input
+  }
+
+  protected warnIfCommandDeprecated(): void {
+    const [id] = normalizeArgv(this.config)
+
+    if (this.ctor.deprecateAliases && this.ctor.aliases.includes(id)) {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      const aliasName = toConfiguredId(id, this.config)
+      this.warn(formatCommandDeprecationWarning(aliasName, {to: cmdName}))
+    }
+
+    if (this.ctor.state === 'deprecated') {
+      const cmdName = toConfiguredId(this.ctor.id, this.config)
+      this.warn(formatCommandDeprecationWarning(cmdName, this.ctor.deprecationOptions))
+    }
+  }
+
+  protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
+    const allFlags = aggregateFlags(this.ctor.flags, this.ctor.baseFlags, this.ctor.enableJsonFlag)
+    for (const flag of Object.keys(flags)) {
+      const flagDef = allFlags[flag]
+      const deprecated = flagDef?.deprecated
+      if (deprecated) {
+        this.warn(formatFlagDeprecationWarning(flag, deprecated))
+      }
+
+      const deprecateAliases = flagDef?.deprecateAliases
+      if (deprecateAliases) {
+        const aliases = uniq([...(flagDef?.aliases ?? []), ...(flagDef?.charAliases ?? [])]).map((a) =>
+          a.length === 1 ? `-${a}` : `--${a}`,
+        )
+        if (aliases.length === 0) return
+
+        const foundAliases = aliases.filter((alias) => this.argv.some((a) => a.startsWith(alias)))
+        for (const alias of foundAliases) {
+          let preferredUsage = `--${flagDef?.name}`
+          if (flagDef?.char) {
+            preferredUsage += ` | -${flagDef?.char}`
+          }
+
+          this.warn(formatFlagDeprecationWarning(alias, {to: preferredUsage}))
+        }
+      }
+    }
+  }
+
+  protected async _run<T>(): Promise<T> {
     let err: Error | undefined
-    let result
+    let result: T | undefined
     try {
       // remove redirected env var to allow subsessions to run autoupdated client
-      delete process.env[this.config.scopedEnvVarKey('REDIRECTED')]
+      this.removeEnvVar('REDIRECTED')
       await this.init()
       result = await this.run()
     } catch (error: any) {
@@ -162,98 +360,93 @@ export default abstract class Command {
       await this.finally(err)
     }
 
-    if (result && this.jsonEnabled()) {
-      CliUx.ux.styledJSON(this.toSuccessJson(result))
+    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
+
+    return result as T
+  }
+
+  private removeEnvVar(envVar: string): void {
+    const keys: string[] = []
+    try {
+      keys.push(...this.config.scopedEnvVarKeys(envVar))
+    } catch {
+      keys.push(this.config.scopedEnvVarKey(envVar))
     }
 
-    return result
+    keys.map((key) => delete process.env[key])
   }
+}
 
-  exit(code = 0): void {
-    return Errors.exit(code)
-  }
-
-  warn(input: string | Error): string | Error {
-    if (!this.jsonEnabled()) Errors.warn(input)
-    return input
-  }
-
-  error(input: string | Error, options: {code?: string; exit: false} & PrettyPrintableError): void
-
-  error(input: string | Error, options?: {code?: string; exit?: number} & PrettyPrintableError): never
-
-  error(input: string | Error, options: {code?: string; exit?: number | false} & PrettyPrintableError = {}): void {
-    return Errors.error(input, options as any)
-  }
-
-  log(message = '', ...args: any[]): void {
-    if (!this.jsonEnabled()) {
-      // tslint:disable-next-line strict-type-predicates
-      message = typeof message === 'string' ? message : inspect(message)
-      process.stdout.write(format(message, ...args) + '\n')
-    }
-  }
-
-  public jsonEnabled(): boolean {
-    return this.ctor.enableJsonFlag && this.argv.includes('--json')
+export namespace Command {
+  /**
+   * The Command class exported by a command file.
+   */
+  export type Class = typeof Command & {
+    id: string
+    run(argv?: string[], config?: LoadOptions): Promise<any>
   }
 
   /**
-   * actual command run code goes here
+   * A cached command that's had a `load` method attached to it.
+   *
+   * The `Plugin` class loads the commands from the manifest (if it exists) or requires and caches
+   * the commands directly from the commands directory inside the plugin. At this point the plugin
+   * is working with `Command.Cached`. It then appends a `load` method to each one. If the a command
+   * is executed then the `load` method is used to require the command class.
    */
-  abstract run(): PromiseLike<any>
-
-  protected async init(): Promise<any> {
-    this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    if (this.config.debug) Errors.config.debug = true
-    if (this.config.errlog) Errors.config.errlog = this.config.errlog
-    // global['cli-ux'].context = global['cli-ux'].context || {
-    //   command: compact([this.id, ...this.argv]).join(' '),
-    //   version: this.config.userAgent,
-    // }
-    const g: any = global
-    g['http-call'] = g['http-call'] || {}
-    g['http-call']!.userAgent = this.config.userAgent
+  export type Loadable = Cached & {
+    load(): Promise<Command.Class>
   }
 
-  protected async parse<F, A extends { [name: string]: any }>(options?: Interfaces.Input<F>, argv = this.argv): Promise<Interfaces.ParserOutput<F, A>> {
-    if (!options) options = this.constructor as any
-    const opts = {context: this, ...options}
-    // the spread operator doesn't work with getters so we have to manually add it here
-    opts.flags = options?.flags
-    return Parser.parse(argv, opts)
+  /**
+   * A cached version of the command. This is created by the cachedCommand utility and
+   * stored in the oclif.manifest.json.
+   */
+  export type Cached = {
+    [key: string]: unknown
+    aliasPermutations?: string[]
+    aliases: string[]
+    args: {[name: string]: Arg.Cached}
+    deprecateAliases?: boolean
+    deprecationOptions?: Deprecation
+    description?: string
+    examples?: Example[]
+    flags: {[name: string]: Flag.Cached}
+    hasDynamicHelp?: boolean
+    hidden: boolean
+    id: string
+    isESM?: boolean
+    permutations?: string[]
+    pluginAlias?: string
+    pluginName?: string
+    pluginType?: string
+    relativePath?: string[]
+    state?: 'beta' | 'deprecated' | string
+    strict?: boolean
+    summary?: string
+    type?: string
+    usage?: string | string[]
   }
 
-  protected async catch(err: Record<string, any>): Promise<any> {
-    process.exitCode = process.exitCode ?? err.exitCode ?? 1
-    if (this.jsonEnabled()) {
-      CliUx.ux.styledJSON(this.toErrorJson(err))
-    } else {
-      if (!err.message) throw err
-      try {
-        const chalk = require('chalk')
-        CliUx.ux.action.stop(chalk.bold.red('!'))
-      } catch {}
+  export type Flag = IFlag<any>
 
-      throw err
-    }
+  export namespace Flag {
+    export type Cached = Omit<Flag, 'input' | 'parse'> &
+      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
+    export type Any = Cached | Flag
   }
 
-  protected async finally(_: Error | undefined): Promise<any> {
-    try {
-      const config = Errors.config
-      if (config.errorLogger) await config.errorLogger.flush()
-      // tslint:disable-next-line no-console
-    } catch (error: any) {
-      console.error(error)
-    }
+  export type Arg = IArg<any>
+
+  export namespace Arg {
+    export type Cached = Omit<Arg, 'input' | 'parse'> & ArgProps
+    export type Any = Arg | Cached
   }
 
-  protected toSuccessJson(result: unknown): any {
-    return result
-  }
-
-  protected toErrorJson(err: unknown): any {
-    return {error: err}
-  }
+  export type Example =
+    | {
+        command: string
+        description: string
+      }
+    | string
 }

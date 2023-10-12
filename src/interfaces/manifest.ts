@@ -1,6 +1,6 @@
-import {Command} from './command'
+import {Command} from '../command'
 
-export interface Manifest {
-  version: string;
-  commands: {[id: string]: Command};
+export type Manifest = {
+  commands: {[id: string]: Command.Cached}
+  version: string
 }

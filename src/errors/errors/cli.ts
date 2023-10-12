@@ -1,19 +1,19 @@
-import * as chalk from 'chalk'
-import * as indent from 'indent-string'
-import * as cs from 'clean-stack'
-import * as wrap from 'wrap-ansi'
+import chalk from 'chalk'
+import cs from 'clean-stack'
+import indent from 'indent-string'
+import wrap from 'wrap-ansi'
 
-import * as screen from '../../screen'
+import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
+import {errtermwidth} from '../../screen'
 import {config} from '../config'
-import {PrettyPrintableError, OclifError} from '../../interfaces/errors'
 
 /**
  * properties specific to internal oclif error handling
  */
 
-export function addOclifExitCode(error: Record<string, any>, options?: { exit?: number | false }): OclifError {
+export function addOclifExitCode(error: Record<string, any>, options?: {exit?: false | number}): OclifError {
   if (!('oclif' in error)) {
-    (error as unknown as OclifError).oclif = {}
+    ;(error as unknown as OclifError).oclif = {}
   }
 
   error.oclif.exit = options?.exit === undefined ? 2 : options.exit
@@ -21,14 +21,22 @@ export function addOclifExitCode(error: Record<string, any>, options?: { exit?: 
 }
 
 export class CLIError extends Error implements OclifError {
-  oclif: OclifError['oclif'] = {}
-
   code?: string
 
-  constructor(error: string | Error, options: { exit?: number | false } & PrettyPrintableError = {}) {
+  oclif: OclifError['oclif'] = {}
+  suggestions?: string[]
+
+  constructor(error: Error | string, options: {exit?: false | number} & PrettyPrintableError = {}) {
     super(error instanceof Error ? error.message : error)
     addOclifExitCode(this, options)
     this.code = options.code
+    this.suggestions = options.suggestions
+  }
+
+  get bang(): string | undefined {
+    try {
+      return chalk.red(process.platform === 'win32' ? '»' : '›')
+    } catch {}
   }
 
   get stack(): string {
@@ -45,28 +53,22 @@ export class CLIError extends Error implements OclifError {
     }
 
     let output = `${this.name}: ${this.message}`
-    output = wrap(output, screen.errtermwidth - 6, {trim: false, hard: true} as any)
+    output = wrap(output, errtermwidth - 6, {hard: true, trim: false} as any)
     output = indent(output, 3)
-    output = indent(output, 1, {indent: this.bang, includeEmptyLines: true} as any)
+    output = indent(output, 1, {includeEmptyLines: true, indent: this.bang} as any)
     output = indent(output, 1)
     return output
-  }
-
-  get bang() {
-    try {
-      return chalk.red(process.platform === 'win32' ? '»' : '›')
-    } catch {}
   }
 }
 
 export namespace CLIError {
   export class Warn extends CLIError {
-    constructor(err: string | Error) {
+    constructor(err: Error | string) {
       super(err instanceof Error ? err.message : err)
       this.name = 'Warning'
     }
 
-    get bang() {
+    get bang(): string | undefined {
       try {
         return chalk.yellow(process.platform === 'win32' ? '»' : '›')
       } catch {}

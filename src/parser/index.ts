@@ -1,38 +1,24 @@
-// tslint:disable interface-over-type-literal
-
-import * as args from './args'
-import Deps from './deps'
-import * as flags from './flags'
+import {ArgInput, FlagInput, Input, OutputArgs, OutputFlags, ParserOutput} from '../interfaces/parser'
 import {Parser} from './parse'
-import {Input, ParserOutput} from '../interfaces'
-import * as Validate from './validate'
-export {args}
-export {flags}
+import {validate} from './validate'
+
 export {flagUsages} from './help'
 
-// eslint-disable-next-line new-cap
-const m = Deps()
-// eslint-disable-next-line node/no-missing-require
-.add('validate', () => require('./validate').validate as typeof Validate.validate)
-
-export async function parse<TFlags, TArgs extends { [name: string]: string }>(argv: string[], options: Input<TFlags>): Promise<ParserOutput<TFlags, TArgs>> {
+export async function parse<
+  TFlags extends OutputFlags<any>,
+  BFlags extends OutputFlags<any>,
+  TArgs extends OutputArgs<any>,
+>(argv: string[], options: Input<TFlags, BFlags, TArgs>): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
   const input = {
+    '--': options['--'],
+    args: (options.args ?? {}) as ArgInput<any>,
     argv,
     context: options.context,
-    args: (options.args || []).map((a: any) => args.newArg(a as any)),
-    '--': options['--'],
-    flags: {
-      color: flags.defaultFlags.color,
-      ...((options.flags || {})) as any,
-    },
+    flags: (options.flags ?? {}) as FlagInput<any>,
     strict: options.strict !== false,
   }
   const parser = new Parser(input)
   const output = await parser.parse()
-  m.validate({input, output})
-  return output as ParserOutput<TFlags, TArgs>
+  await validate({input, output})
+  return output as ParserOutput<TFlags, BFlags, TArgs>
 }
-
-const {boolean, integer, url} = flags
-
-export {boolean, integer, url}

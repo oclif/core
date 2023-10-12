@@ -1,103 +1,126 @@
 import {HelpOptions} from './help'
 
 export interface PJSON {
-  [k: string]: any;
-  dependencies?: {[name: string]: string};
+  [k: string]: any
+  dependencies?: {[name: string]: string}
+  devDependencies?: {[name: string]: string}
   oclif: {
-    schema?: number;
-  };
+    bin?: string
+    dirname?: string
+    hooks?: Record<string, string | string[]>
+    plugins?: string[]
+    schema?: number
+  }
+  version: string
 }
 
 export namespace PJSON {
   export interface Plugin extends PJSON {
-    name: string;
-    version: string;
+    name: string
     oclif: PJSON['oclif'] & {
-      schema?: number;
-      description?: string;
-      topicSeparator?: ':' | ' ';
-      hooks?: { [name: string]: (string | string[]) };
-      commands?: string;
-      default?: string;
-      plugins?: string[];
-      devPlugins?: string[];
-      helpClass?: string;
-      helpOptions?: HelpOptions;
-      aliases?: { [name: string]: string | null };
-      repositoryPrefix?: string;
-      update: {
-        s3: S3;
-        autoupdate?: {
-          rollout?: number;
-          debounce?: number;
-        };
-        node: {
-          version?: string;
-          targets?: string[];
-        };
-      };
+      additionalHelpFlags?: string[]
+      additionalVersionFlags?: string[]
+      aliases?: {[name: string]: null | string}
+      commands?: string
+      default?: string
+      description?: string
+      devPlugins?: string[]
+      flexibleTaxonomy?: boolean
+      helpClass?: string
+      helpOptions?: HelpOptions
+      hooks?: {[name: string]: string | string[]}
+      jitPlugins?: Record<string, string>
+      macos?: {
+        identifier?: string
+        sign?: string
+      }
+      windows?: {
+        homepage?: string
+        keypath?: string
+        name?: string
+      }
+      plugins?: string[]
+      repositoryPrefix?: string
+      schema?: number
+      state?: 'beta' | 'deprecated' | string
+      topicSeparator?: ' ' | ':'
       topics?: {
         [k: string]: {
-          description?: string;
-          subtopics?: Plugin['oclif']['topics'];
-          hidden?: boolean;
-        };
-      };
-      additionalHelpFlags?: string[];
-      additionalVersionFlags?: string[];
-      state?: string;
-    };
+          description?: string
+          hidden?: boolean
+          subtopics?: Plugin['oclif']['topics']
+        }
+      }
+      update: {
+        autoupdate?: {
+          debounce?: number
+          rollout?: number
+        }
+        node: {
+          targets?: string[]
+          version?: string
+        }
+        s3: S3
+      }
+    }
+    version: string
   }
 
   export interface S3 {
-    acl?: string;
-    bucket?: string;
-    host?: string;
-    xz?: boolean;
-    gz?: boolean;
+    acl?: string
+    bucket?: string
+    folder?: string
+    gz?: boolean
+    host?: string
     templates: {
-      target: S3.Templates;
-      vanilla: S3.Templates;
-    };
+      target: S3.Templates
+      vanilla: S3.Templates
+    }
+    xz?: boolean
   }
 
   export namespace S3 {
     export interface Templates {
-      baseDir?: string;
-      versioned?: string;
-      unversioned?: string;
-      manifest?: string;
+      baseDir?: string
+      manifest?: string
+      unversioned?: string
+      versioned?: string
     }
   }
 
   export interface CLI extends Plugin {
     oclif: Plugin['oclif'] & {
-      schema?: number;
-      bin?: string;
-      npmRegistry?: string;
-      scope?: string;
-      dirname?: string;
-    };
+      bin?: string
+      binAliases?: string[]
+      dirname?: string
+      flexibleTaxonomy?: boolean
+      jitPlugins?: Record<string, string>
+      npmRegistry?: string
+      nsisCustomization?: string
+      schema?: number
+      scope?: string
+    }
   }
 
   export interface User extends PJSON {
-    private?: boolean;
     oclif: PJSON['oclif'] & {
-      plugins?: (string | PluginTypes.User | PluginTypes.Link)[]; };
+      plugins?: (PluginTypes.Link | PluginTypes.User | string)[]
+    }
+    private?: boolean
   }
 
-  export type PluginTypes = PluginTypes.User | PluginTypes.Link | {root: string}
+  export type PluginTypes = {root: string} | PluginTypes.Link | PluginTypes.User
   export namespace PluginTypes {
     export interface User {
-      type: 'user';
-      name: string;
-      url?: string;
-      tag?: string;
+      name: string
+      tag?: string
+      type: 'user'
+      url?: string
     }
     export interface Link {
-      type: 'link';
-      name: string;
-      root: string;
+      name: string
+      root: string
+      type: 'link'
     }
   }
 }

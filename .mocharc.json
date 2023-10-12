@@ -3,11 +3,14 @@
   "reporter": "spec",
   "require": [
     "test/helpers/init.js",
-    "ts-node/register",
-    "source-map-support/register"
+    "ts-node/register"
   ],
   "timeout": 60000,
   "watch-extensions": [
     "ts"
+  ],
+  "watch-files": [
+    "src",
+    "test"
   ]
 }
