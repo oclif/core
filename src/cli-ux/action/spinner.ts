@@ -38,7 +38,10 @@ export default class SpinnerAction extends ActionBase {
   }
 
   private _lines(s: string): number {
-    return (stripAnsi(s).split('\n') as any[]).map((l) => Math.ceil(l.length / errtermwidth)).reduce((c, i) => c + i, 0)
+    return stripAnsi(s)
+      .split('\n')
+      .map((l) => Math.ceil(l.length / errtermwidth))
+      .reduce((c, i) => c + i, 0)
   }
 
   protected _pause(icon?: string): void {
