@@ -88,11 +88,10 @@ export async function cacheCommand(
   // @ts-expect-error because v2 commands have base flags stored in _baseFlags
   const uncachedBaseFlags = cmd.baseFlags ?? cmd._baseFlags
 
-  const flags = await cacheFlags(
-    aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag),
-    respectNoCacheDefault,
-  )
-  const args = await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault)
+  const [flags, args] = await Promise.all([
+    await cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
+    await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
+  ])
 
   const stdProperties = {
     aliases: cmd.aliases || [],
