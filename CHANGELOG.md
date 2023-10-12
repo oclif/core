@@ -1,3 +1,12 @@
+## [3.0.8](https://github.com/oclif/core/compare/3.0.7...3.0.8) (2023-10-12)
+
+
+### Bug Fixes
+
+* **deps:** bump semver from 5.7.1 to 5.7.2 ([#808](https://github.com/oclif/core/issues/808)) ([cffa115](https://github.com/oclif/core/commit/cffa115b4e76b87911c33ac0ef9928ffe1cb4d6c))
+
+
+
 ## [3.0.7](https://github.com/oclif/core/compare/3.0.6...3.0.7) (2023-10-12)
 
 
