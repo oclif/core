@@ -1,3 +1,12 @@
+## [3.0.7](https://github.com/oclif/core/compare/3.0.6...3.0.7) (2023-10-12)
+
+
+### Bug Fixes
+
+* use _flags for linked v2 plugins ([#820](https://github.com/oclif/core/issues/820)) ([cc63720](https://github.com/oclif/core/commit/cc63720aa90163d28dda9b5fb258ccc0556b6931))
+
+
+
 ## [3.0.6](https://github.com/oclif/core/compare/3.0.5...3.0.6) (2023-10-11)
 
 

@@ -29,6 +29,7 @@ async function cacheFlags(
       deprecateAliases: flag.deprecateAliases,
       deprecated: flag.deprecated,
       description: flag.description,
+      env: flag.env,
       exclusive: flag.exclusive,
       helpGroup: flag.helpGroup,
       helpLabel: flag.helpLabel,
