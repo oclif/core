@@ -13,7 +13,7 @@ const getPackageType = require('get-package-type')
  * Defines file extension resolution when source files do not have an extension.
  */
 // eslint-disable-next-line camelcase
-const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs']
+const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs', '.mts', '.cts']
 
 const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
 
