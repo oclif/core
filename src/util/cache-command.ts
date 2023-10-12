@@ -83,7 +83,15 @@ export async function cacheCommand(
 ): Promise<Command.Cached> {
   const cmd = mergePrototype(uncachedCmd, uncachedCmd)
 
-  const flags = await cacheFlags(aggregateFlags(cmd.flags, cmd.baseFlags, cmd.enableJsonFlag), respectNoCacheDefault)
+  // @ts-expect-error because v2 commands have flags stored in _flags
+  const uncachedFlags = cmd.flags ?? cmd._flags
+  // @ts-expect-error because v2 commands have base flags stored in _baseFlags
+  const uncachedBaseFlags = cmd.baseFlags ?? cmd._baseFlags
+
+  const flags = await cacheFlags(
+    aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag),
+    respectNoCacheDefault,
+  )
   const args = await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault)
 
   const stdProperties = {
