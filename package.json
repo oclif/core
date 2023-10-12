@@ -75,7 +75,6 @@
     "sinon": "^11.1.2",
     "ts-node": "^10.9.1",
     "tsd": "^0.29.0",
-    "tslib": "^2.5.0",
     "typescript": "^5"
   },
   "engines": {
