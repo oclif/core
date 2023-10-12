@@ -1,3 +1,12 @@
+## [3.0.9](https://github.com/oclif/core/compare/3.0.8...3.0.9) (2023-10-12)
+
+
+### Bug Fixes
+
+* remove tslib ([#825](https://github.com/oclif/core/issues/825)) ([5964ca6](https://github.com/oclif/core/commit/5964ca69afeb382a4fc4306737115d73f543b5a6))
+
+
+
 ## [3.0.8](https://github.com/oclif/core/compare/3.0.7...3.0.8) (2023-10-12)
 
 
