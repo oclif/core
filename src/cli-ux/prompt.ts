@@ -28,7 +28,7 @@ interface IPromptConfig {
 function normal(options: IPromptConfig, retries = 100): Promise<string> {
   if (retries < 0) throw new Error('no input')
   return new Promise((resolve, reject) => {
-    let timer: NodeJS.Timer
+    let timer: NodeJS.Timeout
     if (options.timeout) {
       timer = setTimeout(() => {
         process.stdin.pause()
