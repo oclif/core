@@ -104,6 +104,8 @@ export namespace PJSON {
         message: string
         registry: string
         timeoutInDays: number
+        frequency: number
+        frequencyUnit: 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
       }
     }
   }
