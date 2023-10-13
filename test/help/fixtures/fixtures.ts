@@ -154,3 +154,12 @@ export class LongDescription extends Command {
     'run'
   }
 }
+
+export class CommandWithAliases extends Command {
+  static aliases = ['bar', 'baz', 'qux']
+  static description = 'This is a command with aliases'
+  static id = 'foo'
+  async run(): Promise<void> {
+    'run'
+  }
+}

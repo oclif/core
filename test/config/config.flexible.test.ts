@@ -58,6 +58,7 @@ describe('Config with flexible taxonomy', () => {
         flagA: Flags.boolean({char: 'a'}),
       },
       hidden: false,
+      hiddenAliases: [],
       id: commandIds[0],
       async load(): Promise<Command.Class> {
         return MyCommandClass
@@ -74,6 +75,7 @@ describe('Config with flexible taxonomy', () => {
         flagB: Flags.boolean({}),
       },
       hidden: false,
+      hiddenAliases: [],
       id: commandIds[1],
       async load(): Promise<Command.Class> {
         return MyCommandClass

@@ -98,6 +98,9 @@ export abstract class Command {
   /** Hide the command from help */
   public static hidden: boolean
 
+  /** An array of aliases for this command that are hidden from help. */
+  public static hiddenAliases: string[] = []
+
   /** A command ID, used mostly in error or verbose reporting. */
   public static id: string
 
@@ -414,6 +417,7 @@ export namespace Command {
     flags: {[name: string]: Flag.Cached}
     hasDynamicHelp?: boolean
     hidden: boolean
+    hiddenAliases: string[]
     id: string
     isESM?: boolean
     permutations?: string[]

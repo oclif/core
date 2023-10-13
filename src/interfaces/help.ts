@@ -5,6 +5,10 @@ export interface HelpOptions {
    */
   docopts?: boolean
   /**
+   * If true, hide command aliases from the root help output. Defaults to false.
+   */
+  hideAliasesFromRoot?: boolean
+  /**
    * By default, the command summary is show at the top of the help and as the first line in
    * the command description. Repeating the summary in the command description improves readability
    * especially for long command help output. If there is no `command.summary`, the first line of

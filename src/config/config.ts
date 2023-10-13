@@ -784,17 +784,15 @@ export class Config implements IConfig {
         this.commandPermutations.add(permutation, command.id)
       }
 
-      // set command aliases
-      for (const alias of command.aliases ?? []) {
+      const handleAlias = (alias: string, hidden = false) => {
         if (this._commands.has(alias)) {
           const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
           this._commands.set(alias, {...prioritizedCommand, id: alias})
         } else {
-          this._commands.set(alias, {...command, id: alias})
+          this._commands.set(alias, {...command, hidden, id: alias})
         }
 
         // set every permutation of the aliases
-
         // v3 moved command alias permutations to the manifest, but some plugins may not have
         // the new manifest yet. For those, we need to calculate the permutations here.
         const aliasPermutations =
@@ -805,6 +803,16 @@ export class Config implements IConfig {
         for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
         }
+      }
+
+      // set command aliases
+      for (const alias of command.aliases ?? []) {
+        handleAlias(alias)
+      }
+
+      // set hidden command aliases
+      for (const alias of command.hiddenAliases ?? []) {
+        handleAlias(alias, true)
       }
     }
 

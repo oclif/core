@@ -13,6 +13,7 @@ import {
   AppsDestroy,
   AppsIndex,
   AppsTopic,
+  CommandWithAliases,
   DbCreate,
   DbTopic,
   DeprecateAliases,
@@ -134,6 +135,69 @@ USAGE
 
 COMMANDS
   apps  List all apps (app index command)`)
+    })
+
+  test
+    .loadConfig()
+    .stdout()
+    .do(async (ctx) => {
+      const {config} = ctx
+
+      monkeyPatchCommands(config, [
+        {
+          name: 'plugin-1',
+          commands: [CommandWithAliases],
+          topics: [],
+        },
+      ])
+
+      const help = new TestHelp(config as any, {hideAliasesFromRoot: true})
+      await help.showHelp([])
+    })
+    .it('shows root help without aliases if hideAliasesFromRoot=true', ({stdout, config}) => {
+      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+
+VERSION
+  ${config.userAgent}
+
+USAGE
+  $ oclif [COMMAND]
+
+COMMANDS
+  foo  This is a command with aliases`)
+    })
+
+  test
+    .loadConfig()
+    .stdout()
+    .do(async (ctx) => {
+      const {config} = ctx
+
+      monkeyPatchCommands(config, [
+        {
+          name: 'plugin-1',
+          commands: [CommandWithAliases],
+          topics: [],
+        },
+      ])
+
+      const help = new TestHelp(config as any)
+      await help.showHelp([])
+    })
+    .it('shows root help with aliases commands by default', ({stdout, config}) => {
+      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+
+VERSION
+  ${config.userAgent}
+
+USAGE
+  $ oclif [COMMAND]
+
+COMMANDS
+  bar  This is a command with aliases
+  baz  This is a command with aliases
+  foo  This is a command with aliases
+  qux  This is a command with aliases`)
     })
 })
 

@@ -113,7 +113,6 @@ export class Executor {
   }
 }
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Setup for integration tests.
  *

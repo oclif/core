@@ -1,4 +1,3 @@
-/* eslint-disable valid-jsdoc */
 import {URL} from 'node:url'
 
 import {CLIError} from './errors'
@@ -140,7 +139,9 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
     ...opts,
     async parse(_, cmd) {
       const Help = await loadHelpClass(cmd.config)
-      await new Help(cmd.config, cmd.config.pjson.helpOptions).showHelp(cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv)
+      await new Help(cmd.config, cmd.config.pjson.oclif.helpOptions ?? cmd.config.pjson.helpOptions).showHelp(
+        cmd.id ? [cmd.id, ...cmd.argv] : cmd.argv,
+      )
       cmd.exit(0)
     },
   })
