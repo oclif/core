@@ -1,7 +1,6 @@
 import {inspect} from 'node:util'
 
 import {castArray} from '../../util/util'
-import {stderr, stdout} from '../stream'
 import {Options} from './types'
 
 export interface ITask {
@@ -13,15 +12,15 @@ export interface ITask {
 export type ActionType = 'debug' | 'simple' | 'spinner'
 
 export class ActionBase {
-  std: 'stderr' | 'stdout' = 'stderr'
+  std: 'process.stderr' | 'process.stdout' = 'process.stderr'
 
-  protected stdmocks?: ['stderr' | 'stdout', string[]][]
+  protected stdmocks?: ['process.stderr' | 'process.stdout', string[]][]
 
   type!: ActionType
 
   private stdmockOrigs = {
-    stderr: stderr.write,
-    stdout: stdout.write,
+    stderr: process.stderr.write,
+    stdout: process.stdout.write,
   }
 
   protected get output(): string | undefined {
@@ -97,7 +96,7 @@ export class ActionBase {
   }
 
   public start(action: string, status?: string, opts: Options = {}): void {
-    this.std = opts.stdout ? 'stdout' : 'stderr'
+    this.std = opts.stdout ? 'process.stdout' : 'process.stderr'
     const task = {action, active: Boolean(this.task && this.task.active), status}
     this.task = task
 
@@ -122,9 +121,9 @@ export class ActionBase {
   protected _flushStdout(): void {
     try {
       let output = ''
-      let std: 'stderr' | 'stdout' | undefined
+      let std: 'process.stderr' | 'process.stdout' | undefined
       while (this.stdmocks && this.stdmocks.length > 0) {
-        const cur = this.stdmocks.shift() as ['stderr' | 'stdout', string[]]
+        const cur = this.stdmocks.shift() as ['process.stderr' | 'process.stdout', string[]]
         std = cur[0]
         this._write(std, cur[1])
         output += (cur[1][0] as any).toString('utf8')
@@ -136,7 +135,7 @@ export class ActionBase {
         this._write(std, '\n')
       }
     } catch (error) {
-      this._write('stderr', inspect(error))
+      this._write('process.stderr', inspect(error))
     }
   }
 
@@ -158,29 +157,29 @@ export class ActionBase {
       if (toggle) {
         if (this.stdmocks) return
         this.stdmockOrigs = {
-          stderr: stderr.write,
-          stdout: stdout.write,
+          stderr: process.stderr.write,
+          stdout: process.stdout.write,
         }
 
         this.stdmocks = []
-        stdout.write = (...args: any[]) => {
-          this.stdmocks!.push(['stdout', args] as ['stdout', string[]])
+        process.stdout.write = (...args: any[]) => {
+          this.stdmocks!.push(['process.stdout', args] as ['process.stdout', string[]])
           return true
         }
 
-        stderr.write = (...args: any[]) => {
-          this.stdmocks!.push(['stderr', args] as ['stderr', string[]])
+        process.stderr.write = (...args: any[]) => {
+          this.stdmocks!.push(['process.stderr', args] as ['process.stderr', string[]])
           return true
         }
       } else {
         if (!this.stdmocks) return
-        // this._write('stderr', '\nresetstdmock\n\n\n')
+        // this._write('process.stderr', '\nresetstdmock\n\n\n')
         delete this.stdmocks
-        stdout.write = this.stdmockOrigs.stdout
-        stderr.write = this.stdmockOrigs.stderr
+        process.stdout.write = this.stdmockOrigs.stdout
+        process.stderr.write = this.stdmockOrigs.stderr
       }
     } catch (error) {
-      this._write('stderr', inspect(error))
+      this._write('process.stderr', inspect(error))
     }
   }
 
@@ -192,16 +191,16 @@ export class ActionBase {
     // Not implemented
   }
 
-  // write to the real stdout/stderr
-  protected _write(std: 'stderr' | 'stdout', s: string | string[]): void {
+  // write to the real process.stdout/process.stderr
+  protected _write(std: 'process.stderr' | 'process.stdout', s: string | string[]): void {
     switch (std) {
-      case 'stdout': {
-        this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
+      case 'process.stdout': {
+        this.stdmockOrigs.stdout.apply(process.stdout, castArray(s) as [string])
         break
       }
 
-      case 'stderr': {
-        this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
+      case 'process.stderr': {
+        this.stdmockOrigs.stderr.apply(process.stderr, castArray(s) as [string])
         break
       }
 
