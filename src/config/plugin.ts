@@ -171,7 +171,10 @@ export class Plugin implements IPlugin {
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.commandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${this.commandsDir}`)
-    const patterns = ['**/*.+(js|cjs|mjs|ts|tsx)', '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js)?(x)']
+    const patterns = [
+      '**/*.+(js|cjs|mjs|ts|tsx|mts|cts)',
+      '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js|d.mts|d.cts)?(x)',
+    ]
     const ids = sync(patterns, {cwd: this.commandsDir}).map((file) => {
       const p = parse(file)
       const topics = p.dir.split('/')
