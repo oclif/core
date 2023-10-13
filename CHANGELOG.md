@@ -1,3 +1,12 @@
+## [3.2.1](https://github.com/oclif/core/compare/3.2.0...3.2.1) (2023-10-13)
+
+
+### Bug Fixes
+
+* add types for warn-if-update-available ([#826](https://github.com/oclif/core/issues/826)) ([5464dcf](https://github.com/oclif/core/commit/5464dcf0933bd8afec26704662dfc5276ef07f47))
+
+
+
 # [3.2.0](https://github.com/oclif/core/compare/3.1.0...3.2.0) (2023-10-13)
 
 
