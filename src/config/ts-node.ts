@@ -7,6 +7,7 @@ import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {readJsonSync} from '../util/fs'
 import {isProd} from '../util/util'
+import Cache from './cache'
 import {Debug} from './util'
 
 // eslint-disable-next-line new-cap
@@ -14,11 +15,6 @@ const debug = Debug('ts-node')
 
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
-/**
- * Cache the root plugin so that we can reference it later when determining if
- * we should skip ts-node registration for an ESM plugin.
- */
-let ROOT_PLUGIN: Plugin | undefined
 
 function loadTSConfig(root: string): TSConfig | undefined {
   if (TS_CONFIGS[root]) return TS_CONFIGS[root]
@@ -127,8 +123,12 @@ function registerTSNode(root: string): TSConfig | undefined {
  * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM
  * since that allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
  */
-function cannotTranspileEsm(root: string, plugin: Plugin | undefined, isProduction: boolean): boolean {
-  return (isProduction || ROOT_PLUGIN?.moduleType === 'commonjs') && plugin?.moduleType === 'module'
+function cannotTranspileEsm(
+  rootPlugin: Plugin | undefined,
+  plugin: Plugin | undefined,
+  isProduction: boolean,
+): boolean {
+  return (isProduction || rootPlugin?.moduleType === 'commonjs') && plugin?.moduleType === 'module'
 }
 
 /**
@@ -201,7 +201,7 @@ function determinePath(root: string, orig: string): string {
 export function tsPath(root: string, orig: string, plugin: Plugin): string
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
-  if (plugin?.isRoot) ROOT_PLUGIN = plugin
+  const rootPlugin = Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig
   orig = orig.startsWith(root) ? orig : join(root, orig)
@@ -215,9 +215,9 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
 
   const isProduction = isProd()
 
-  if (cannotTranspileEsm(root, plugin, isProduction)) {
+  if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
     debug(
-      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${ROOT_PLUGIN?.moduleType})))`,
+      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})))`,
     )
     if (plugin?.type === 'link')
       memoizedWarn(

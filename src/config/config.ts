@@ -18,6 +18,7 @@ import {settings} from '../settings'
 import {requireJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
+import Cache from './cache'
 import PluginLoader from './plugin-loader'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 
@@ -104,12 +105,13 @@ export class Config implements IConfig {
 
   private _commands = new Map<string, Command.Loadable>()
 
-  private static _rootPlugin: IPlugin
-
   private _topics = new Map<string, Topic>()
 
   private commandPermutations = new Permutations()
+
   private pluginLoader!: PluginLoader
+
+  private rootPlugin!: IPlugin
 
   private topicPermutations = new Permutations()
 
@@ -149,7 +151,7 @@ export class Config implements IConfig {
   }
 
   static get rootPlugin(): IPlugin | undefined {
-    return Config._rootPlugin
+    return this.rootPlugin
   }
 
   public get commandIDs(): string[] {
@@ -281,18 +283,22 @@ export class Config implements IConfig {
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
-    Config._rootPlugin = await this.pluginLoader.loadRoot()
+    this.rootPlugin = await this.pluginLoader.loadRoot()
 
-    this.root = Config._rootPlugin.root
-    this.pjson = Config._rootPlugin.pjson
+    // Cache the root plugin so that we can reference it later when determining if
+    // we should skip ts-node registration for an ESM plugin.
+    Cache.getInstance().set('rootPlugin', this.rootPlugin)
 
-    this.plugins.set(Config._rootPlugin.name, Config._rootPlugin)
-    this.root = Config._rootPlugin.root
-    this.pjson = Config._rootPlugin.pjson
+    this.root = this.rootPlugin.root
+    this.pjson = this.rootPlugin.pjson
+
+    this.plugins.set(this.rootPlugin.name, this.rootPlugin)
+    this.root = this.rootPlugin.root
+    this.pjson = this.rootPlugin.pjson
     this.name = this.pjson.name
     this.version = this.options.version || this.pjson.version || '0.0.0'
     this.channel = this.options.channel || channelFromVersion(this.version)
-    this.valid = Config._rootPlugin.valid
+    this.valid = this.rootPlugin.valid
 
     this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
     this.platform = WSL ? 'wsl' : getPlatform()
@@ -364,7 +370,7 @@ export class Config implements IConfig {
       dataDir: this.dataDir,
       devPlugins: this.options.devPlugins,
       force: opts?.force ?? false,
-      rootPlugin: Config._rootPlugin,
+      rootPlugin: this.rootPlugin,
       userPlugins: this.options.userPlugins,
     })
 
