@@ -1,3 +1,25 @@
+# [3.2.0](https://github.com/oclif/core/compare/3.1.0...3.2.0) (2023-10-13)
+
+
+### Bug Fixes
+
+* add Cache class for caching root plugin ([9452b19](https://github.com/oclif/core/commit/9452b191dafe64bd50bda116baa62c0b14552af3))
+* bump ejs and other deps ([14a0e48](https://github.com/oclif/core/commit/14a0e48c5e9868bff9c28a640073966aa138528c))
+* ignore .d.mts and .d.cts ([4ba853f](https://github.com/oclif/core/commit/4ba853fe51b0d0f623921ed025f61cf6665f66f3))
+* support baseUrl for ts source ([03b824b](https://github.com/oclif/core/commit/03b824bdfc61810bc4e4ff89b21cccd3dfe0ebe4))
+
+
+### Features
+
+* support .mts and .cts file extensions ([5f16e0b](https://github.com/oclif/core/commit/5f16e0bd57f25b4f2d5f1fce70971c4538c54b1b))
+
+
+### Performance Improvements
+
+* promise.all flag and arg caching ([c592ce0](https://github.com/oclif/core/commit/c592ce0d1de21fc8624cac0240e22dc54a3f1f20))
+
+
+
 # [3.1.0](https://github.com/oclif/core/compare/3.0.9...3.1.0) (2023-10-13)
 
 
