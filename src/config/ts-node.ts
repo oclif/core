@@ -156,7 +156,7 @@ function determinePath(root: string, orig: string): string {
   if (!tsconfig) return orig
   debug(`determining path for ${orig}`)
   const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
-  const rootDirPath = rootDir || (rootDirs || [])[0] || baseUrl
+  const rootDirPath = rootDir ?? (rootDirs ?? [])[0] ?? baseUrl
   if (!rootDirPath) {
     debug(`no rootDir, rootDirs, or baseUrl specified in tsconfig.json. Returning default path ${orig}`)
     return orig
