@@ -1,3 +1,13 @@
+# [3.1.0](https://github.com/oclif/core/compare/3.0.9...3.1.0) (2023-10-13)
+
+
+### Features
+
+* add hiddenAliases property to Command ([5bf0a2e](https://github.com/oclif/core/commit/5bf0a2e5ac08bee500543a379ba68251dc850574))
+* add hideAliases help option ([f1925a7](https://github.com/oclif/core/commit/f1925a7136408a328dbfcf3146f8eb1fbd8d04a9))
+
+
+
 ## [3.0.9](https://github.com/oclif/core/compare/3.0.8...3.0.9) (2023-10-12)
 
 
