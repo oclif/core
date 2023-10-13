@@ -99,6 +99,12 @@ export namespace PJSON {
       nsisCustomization?: string
       schema?: number
       scope?: string
+      'warn-if-update-available'?: {
+        authorization: string
+        message: string
+        registry: string
+        timeoutInDays: number
+      }
     }
   }
 
