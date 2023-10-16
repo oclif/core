@@ -1,3 +1,12 @@
+## [3.3.1](https://github.com/oclif/core/compare/3.3.0...3.3.1) (2023-10-16)
+
+
+### Bug Fixes
+
+* add frequency and frequencyUnit to warn-if-update ([#827](https://github.com/oclif/core/issues/827)) ([3567c74](https://github.com/oclif/core/commit/3567c748a8a04ab94cca493aa1dfcb4f10370f6e))
+
+
+
 # [3.3.0](https://github.com/oclif/core/compare/3.2.1...3.3.0) (2023-10-16)
 
 
