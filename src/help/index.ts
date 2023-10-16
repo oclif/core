@@ -1,7 +1,7 @@
 import {format} from 'node:util'
 import stripAnsi from 'strip-ansi'
 
-import {stdout} from '../cli-ux/stream'
+import write from '../cli-ux/write'
 import {Command} from '../command'
 import {error} from '../errors'
 import * as Interfaces from '../interfaces'
@@ -155,8 +155,8 @@ export class Help extends HelpBase {
     return new this.CommandHelpClass(command, this.config, this.opts)
   }
 
-  protected log(...args: string[]): void {
-    stdout.write(format.apply(this, args) + '\n')
+  protected log(...args: string[]) {
+    write.stdout(format.apply(this, args) + '\n')
   }
 
   public async showCommandHelp(command: Command.Loadable): Promise<void> {

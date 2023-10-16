@@ -1,7 +1,6 @@
 import {inspect} from 'node:util'
 
 import {castArray} from '../../util/util'
-import {stderr, stdout} from '../stream'
 import {Options} from './types'
 
 export interface ITask {
@@ -20,8 +19,8 @@ export class ActionBase {
   type!: ActionType
 
   private stdmockOrigs = {
-    stderr: stderr.write,
-    stdout: stdout.write,
+    stderr: process.stderr.write,
+    stdout: process.stdout.write,
   }
 
   protected get output(): string | undefined {
@@ -158,17 +157,17 @@ export class ActionBase {
       if (toggle) {
         if (this.stdmocks) return
         this.stdmockOrigs = {
-          stderr: stderr.write,
-          stdout: stdout.write,
+          stderr: process.stderr.write,
+          stdout: process.stdout.write,
         }
 
         this.stdmocks = []
-        stdout.write = (...args: any[]) => {
+        process.stdout.write = (...args: any[]) => {
           this.stdmocks!.push(['stdout', args] as ['stdout', string[]])
           return true
         }
 
-        stderr.write = (...args: any[]) => {
+        process.stderr.write = (...args: any[]) => {
           this.stdmocks!.push(['stderr', args] as ['stderr', string[]])
           return true
         }
@@ -176,8 +175,8 @@ export class ActionBase {
         if (!this.stdmocks) return
         // this._write('stderr', '\nresetstdmock\n\n\n')
         delete this.stdmocks
-        stdout.write = this.stdmockOrigs.stdout
-        stderr.write = this.stdmockOrigs.stderr
+        process.stdout.write = this.stdmockOrigs.stdout
+        process.stderr.write = this.stdmockOrigs.stderr
       }
     } catch (error) {
       this._write('stderr', inspect(error))
@@ -196,12 +195,12 @@ export class ActionBase {
   protected _write(std: 'stderr' | 'stdout', s: string | string[]): void {
     switch (std) {
       case 'stdout': {
-        this.stdmockOrigs.stdout.apply(stdout, castArray(s) as [string])
+        this.stdmockOrigs.stdout.apply(process.stdout, castArray(s) as [string])
         break
       }
 
       case 'stderr': {
-        this.stdmockOrigs.stderr.apply(stderr, castArray(s) as [string])
+        this.stdmockOrigs.stderr.apply(process.stderr, castArray(s) as [string])
         break
       }
 

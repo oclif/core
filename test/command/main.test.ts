@@ -3,7 +3,8 @@ import {resolve} from 'node:path'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi from 'strip-ansi'
 
-import {Interfaces, stdout} from '../../src/index'
+import write from '../../src/cli-ux/write'
+import {Interfaces} from '../../src/index'
 import {run} from '../../src/main'
 import {requireJson} from '../../src/util/fs'
 
@@ -16,7 +17,7 @@ describe('main', () => {
 
   beforeEach(() => {
     sandbox = createSandbox()
-    stdoutStub = sandbox.stub(stdout, 'write').callsFake(() => true)
+    stdoutStub = sandbox.stub(write, 'stdout').callsFake(() => true)
   })
 
   afterEach(() => {
