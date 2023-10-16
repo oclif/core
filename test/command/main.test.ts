@@ -1,10 +1,9 @@
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
+import {SinonSandbox, createSandbox} from 'sinon'
 import stripAnsi from 'strip-ansi'
 
-import write from '../../src/cli-ux/write'
-import {Interfaces} from '../../src/index'
+import {Interfaces, ux} from '../../src/index'
 import {run} from '../../src/main'
 import {requireJson} from '../../src/util/fs'
 
@@ -13,11 +12,11 @@ const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch
 
 describe('main', () => {
   let sandbox: SinonSandbox
-  let stdoutStub: SinonStub
+  let stubs: ReturnType<typeof ux.makeStubs>
 
   beforeEach(() => {
     sandbox = createSandbox()
-    stdoutStub = sandbox.stub(write, 'stdout').callsFake(() => true)
+    stubs = ux.makeStubs(sandbox)
   })
 
   afterEach(() => {
@@ -31,12 +30,12 @@ describe('main', () => {
 
   it('should run version', async () => {
     await run(['--version'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.firstCall.firstArg).to.equal(`${version}\n`)
+    expect(stubs.stdout.firstCall.firstArg).to.equal(`${version}\n`)
   })
 
   it('should run help', async () => {
     await run(['--help'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
+    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -56,7 +55,7 @@ COMMANDS
 
   it('should show help for topics with spaces', async () => {
     await run(['--help', 'foo'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
+    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -72,7 +71,7 @@ COMMANDS
 
   it('should run spaced topic help v2', async () => {
     await run(['foo', 'bar', '--help'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
+    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
 
 USAGE
   $ oclif foo bar COMMAND

@@ -192,4 +192,6 @@ export {ActionBase} from './action/base'
 export {Config, config} from './config'
 export {ExitError} from './exit'
 export {IPromptOptions} from './prompt'
+export {makeStubs} from './stub'
+
 export {Table} from './styled'
