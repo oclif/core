@@ -1,3 +1,12 @@
+## [3.3.2](https://github.com/oclif/core/compare/3.3.1...3.3.2) (2023-10-17)
+
+
+### Bug Fixes
+
+* **deps:** bump @babel/traverse from 7.23.0 to 7.23.2 ([d53498a](https://github.com/oclif/core/commit/d53498af1da6bdcb3fb70f7c0b6e0da8da0831a1))
+
+
+
 ## [3.3.1](https://github.com/oclif/core/compare/3.3.0...3.3.1) (2023-10-16)
 
 
