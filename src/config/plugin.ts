@@ -1,5 +1,8 @@
 /* eslint-disable no-await-in-loop */
+import type {PackageInformation, PackageLocator, getPackageInformation} from 'pnpapi'
+
 import {sync} from 'globby'
+import {createRequire} from 'node:module'
 import {basename, dirname, join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
@@ -96,7 +99,76 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
   }
 }
 
+let pnp: {
+  getPackageInformation: typeof getPackageInformation
+  getLocator: (name: string, reference: string | [string, string]) => PackageLocator
+  getDependencyTreeRoots: () => PackageLocator[]
+}
+
+function maybeRequirePnpApi(root: string): unknown {
+  if (pnp) return pnp
+  const otherModuleRequire = createRequire(root)
+  pnp = otherModuleRequire('pnpapi')
+  return pnp
+}
+
+const getKey = (locator: PackageLocator | string | [string, string] | undefined) => JSON.stringify(locator)
+const isPeerDependency = (
+  pkg: PackageInformation | undefined,
+  parentPkg: PackageInformation | undefined,
+  name: string,
+) => getKey(pkg?.packageDependencies.get(name)) === getKey(parentPkg?.packageDependencies.get(name))
+
+/**
+ * Traverse PnP dependency tree to find package root
+ *
+ * Implementation taken from https://yarnpkg.com/advanced/pnpapi#traversing-the-dependency-tree
+ */
+function findPackageWithYarn(name: string, root: string): string | undefined {
+  maybeRequirePnpApi(root)
+  const seen = new Set()
+
+  const traverseDependencyTree = (locator: PackageLocator, parentPkg?: PackageInformation): string | undefined => {
+    // Prevent infinite recursion when A depends on B which depends on A
+    const key = getKey(locator)
+    if (seen.has(key)) return
+
+    const pkg = pnp.getPackageInformation(locator)
+
+    if (locator.name === name) {
+      return pkg.packageLocation
+    }
+
+    seen.add(key)
+
+    for (const [name, referencish] of pkg.packageDependencies) {
+      // Unmet peer dependencies
+      if (referencish === null) continue
+
+      // Avoid iterating on peer dependencies - very expensive
+      if (parentPkg !== null && isPeerDependency(pkg, parentPkg, name)) continue
+
+      const childLocator = pnp.getLocator(name, referencish)
+      const foundSomething = traverseDependencyTree(childLocator, pkg)
+      if (foundSomething) return foundSomething
+    }
+
+    // Important: This `delete` here causes the traversal to go over nodes even
+    // if they have already been traversed in another branch. If you don't need
+    // that, remove this line for a hefty speed increase.
+    seen.delete(key)
+  }
+
+  // Iterate on each workspace
+  for (const locator of pnp.getDependencyTreeRoots()) {
+    const foundSomething = traverseDependencyTree(locator)
+    if (foundSomething) return foundSomething
+  }
+}
+
 async function findRoot(name: string | undefined, root: string) {
+  if (process.versions.pnp && name) return findPackageWithYarn(name, root)
+
   if (name) {
     let pkgPath
     try {
