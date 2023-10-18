@@ -94,7 +94,7 @@ export default class PluginLoader {
   private async loadPlugins(
     root: string,
     type: string,
-    plugins: ({name?: string; root?: string; tag?: string} | string)[],
+    plugins: ({name?: string; root?: string; tag?: string; url?: string} | string)[],
     parent?: Plugin.Plugin,
   ): Promise<void> {
     if (!plugins || plugins.length === 0) return
@@ -112,6 +112,7 @@ export default class PluginLoader {
           if (typeof plugin !== 'string') {
             opts.tag = plugin.tag || opts.tag
             opts.root = plugin.root || opts.root
+            opts.url = plugin.url
           }
 
           if (parent) {
