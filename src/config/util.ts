@@ -1,9 +1,5 @@
 const debug = require('debug')
 
-export function resolvePackage(id: string, paths: {paths: string[]}): string {
-  return require.resolve(id, paths)
-}
-
 function displayWarnings() {
   if (process.listenerCount('warning') > 1) return
   process.on('warning', (warning: any) => {
