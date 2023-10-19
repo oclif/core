@@ -1,4 +1,4 @@
-import {existsSync, lstatSync} from 'node:fs'
+import {lstatSync} from 'node:fs'
 import {extname, join, sep} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
@@ -6,6 +6,7 @@ import {Command} from './command'
 import {tsPath} from './config/ts-node'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
+import {existsSync} from './util/fs'
 
 const getPackageType = require('get-package-type')
 

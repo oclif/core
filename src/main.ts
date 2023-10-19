@@ -1,18 +1,12 @@
 import {URL, fileURLToPath} from 'node:url'
-import {format, inspect} from 'node:util'
 
-import {stdout} from './cli-ux/stream'
+import {ux} from './cli-ux'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 
 const debug = require('debug')('oclif:main')
-
-const log = (message = '', ...args: any[]) => {
-  message = typeof message === 'string' ? message : inspect(message)
-  stdout.write(format(message, ...args) + '\n')
-}
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.pjson.oclif.default) return true
@@ -62,7 +56,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // display version if applicable
   if (versionAddition(argv, config)) {
-    log(config.userAgent)
+    ux.log(config.userAgent)
     await collectPerf()
     return
   }

@@ -1,9 +1,8 @@
 import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
-import {format, inspect} from 'node:util'
+import {inspect} from 'node:util'
 
 import {ux} from './cli-ux'
-import {stderr, stdout} from './cli-ux/stream'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -37,7 +36,7 @@ const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
  * swallows stdout epipe errors
  * this occurs when stdout closes such as when piping to head
  */
-stdout.on('error', (err: any) => {
+process.stdout.on('error', (err: any) => {
   if (err && err.code === 'EPIPE') return
   throw err
 })
@@ -258,7 +257,7 @@ export abstract class Command {
   public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      stdout.write(format(message, ...args) + '\n')
+      ux.info(message, ...args)
     }
   }
 
@@ -269,7 +268,7 @@ export abstract class Command {
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      stderr.write(format(message, ...args) + '\n')
+      ux.logToStderr(message, ...args)
     }
   }
 

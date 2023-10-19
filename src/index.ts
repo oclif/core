@@ -1,11 +1,11 @@
-import {stderr} from './cli-ux/stream'
+import write from './cli-ux/write'
 
 function checkCWD() {
   try {
     process.cwd()
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      stderr.write('WARNING: current directory does not exist\n')
+      write.stderr('WARNING: current directory does not exist\n')
     }
   }
 }
@@ -15,6 +15,7 @@ checkCWD()
 export * as Args from './args'
 export * as ux from './cli-ux'
 export {flush} from './cli-ux/flush'
+// Remove these in the next major version
 export {stderr, stdout} from './cli-ux/stream'
 export {Command} from './command'
 export {Config, Plugin} from './config'

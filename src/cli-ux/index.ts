@@ -3,17 +3,17 @@ import {format as utilFormat} from 'node:util'
 
 import * as Errors from '../errors'
 import {ActionBase} from './action/base'
-import {Config, config} from './config'
+import {config} from './config'
 import {flush as _flush} from './flush'
 import * as uxPrompt from './prompt'
-import {stdout} from './stream'
 import * as styled from './styled'
 import uxWait from './wait'
+import write from './write'
 
 const hyperlinker = require('hyperlinker')
 
 export class ux {
-  public static config: Config = config
+  public static config = config
 
   public static get action(): ActionBase {
     return config.action
@@ -42,7 +42,7 @@ export class ux {
 
   public static debug(format: string, ...args: string[]): void {
     if (['debug', 'trace'].includes(this.config.outputLevel)) {
-      stdout.write(utilFormat(format, ...args) + '\n')
+      this.info(utilFormat(format, ...args) + '\n')
     }
   }
 
@@ -55,11 +55,15 @@ export class ux {
   }
 
   public static info(format: string, ...args: string[]): void {
-    stdout.write(utilFormat(format, ...args) + '\n')
+    write.stdout(utilFormat(format, ...args) + '\n')
   }
 
   public static log(format?: string, ...args: string[]): void {
     this.info(format || '', ...args)
+  }
+
+  public static logToStderr(format?: string, ...args: string[]): void {
+    write.stderr(utilFormat(format, ...args) + '\n')
   }
 
   public static get progress(): typeof styled.progress {
@@ -77,7 +81,7 @@ export class ux {
   public static styledJSON(obj: unknown): void {
     const json = JSON.stringify(obj, null, 2)
     if (!chalk.level) {
-      info(json)
+      this.info(json)
       return
     }
 
@@ -96,7 +100,7 @@ export class ux {
 
   public static trace(format: string, ...args: string[]): void {
     if (this.config.outputLevel === 'trace') {
-      stdout.write(utilFormat(format, ...args) + '\n')
+      this.info(utilFormat(format, ...args) + '\n')
     }
   }
 
@@ -128,6 +132,7 @@ const {
   flush,
   info,
   log,
+  logToStderr,
   progress,
   prompt,
   styledHeader,
@@ -153,6 +158,7 @@ export {
   flush,
   info,
   log,
+  logToStderr,
   progress,
   prompt,
   styledHeader,
@@ -186,4 +192,6 @@ export {ActionBase} from './action/base'
 export {Config, config} from './config'
 export {ExitError} from './exit'
 export {IPromptOptions} from './prompt'
+export {makeStubs} from './stub'
+
 export {Table} from './styled'
