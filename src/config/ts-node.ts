@@ -201,7 +201,7 @@ function determinePath(root: string, orig: string): string {
 export function tsPath(root: string, orig: string, plugin: Plugin): string
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
 export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
-  const rootPlugin = Cache.getInstance().get('rootPlugin')
+  const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig
   orig = orig.startsWith(root) ? orig : join(root, orig)
@@ -223,10 +223,16 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
       memoizedWarn(
         `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
+
+    if (plugin?.options.url)
+      memoizedWarn(
+        `${plugin?.name} is an ESM module installed from github and cannot be auto-transpiled. Existing compiled source will be used instead.`,
+      )
     return orig
   }
 
-  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
+  // Do not skip ts-node registration if the plugin is linked or installed from github
+  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link' && !plugin?.options.url) {
     debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }
