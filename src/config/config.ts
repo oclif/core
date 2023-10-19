@@ -528,7 +528,17 @@ export class Config implements IConfig {
         } catch (error: any) {
           final.failures.push({error: error as Error, plugin: p})
           debug(error)
-          if (!captureErrors && error.oclif?.exit !== undefined) throw error
+          // Do not throw the error if
+          // captureErrors is set to true
+          // error.oclif.exit is undefined or 0
+          // error.code is MODULE_NOT_FOUND
+          if (
+            !captureErrors &&
+            error.oclif?.exit !== undefined &&
+            error.oclif?.exit !== 0 &&
+            error.code !== 'MODULE_NOT_FOUND'
+          )
+            throw error
         }
 
         marker?.addDetails({
