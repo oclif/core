@@ -1,3 +1,13 @@
+## [3.3.3](https://github.com/oclif/core/compare/3.3.2...3.3.3) (2023-10-19)
+
+
+### Bug Fixes
+
+* allow github-installed plugins to be auto-transpiled ([6f2c5e2](https://github.com/oclif/core/commit/6f2c5e2ec9b9bafa7dea4ae2e7350ada64ff0e88))
+* handle ModuleLoadError from hooks ([0321093](https://github.com/oclif/core/commit/0321093e4f8a0f659346a9e2e808ad44c6d3771f))
+
+
+
 ## [3.3.2](https://github.com/oclif/core/compare/3.3.1...3.3.2) (2023-10-17)
 
 
