@@ -1,3 +1,18 @@
+# [3.4.0](https://github.com/oclif/core/compare/3.3.3...3.4.0) (2023-10-19)
+
+
+### Bug Fixes
+
+* add pluginPrefix type ([f14181e](https://github.com/oclif/core/commit/f14181e071f8c5d7f93646eef2e8d35b39dde0a7))
+
+
+### Features
+
+* export ux stubs ([4b7cdda](https://github.com/oclif/core/commit/4b7cddafef4e0f4a494b8be273f09575081a93c8))
+* no longer use wrapped process.stdout and process.stderr ([3ff5f63](https://github.com/oclif/core/commit/3ff5f6357a1157aa402ca580babb05eb13e7a249))
+
+
+
 ## [3.3.3](https://github.com/oclif/core/compare/3.3.2...3.3.3) (2023-10-19)
 
 
