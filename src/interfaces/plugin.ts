@@ -14,6 +14,7 @@ export interface PluginOptions {
   root: string
   tag?: string
   type?: string
+  url?: string
 }
 
 export interface Options extends PluginOptions {
@@ -56,6 +57,7 @@ export interface Plugin {
    * name from package.json
    */
   name: string
+  readonly options: Options
   parent?: Plugin
   /**
    * full package.json

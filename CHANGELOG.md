@@ -1,3 +1,31 @@
+## [3.3.3](https://github.com/oclif/core/compare/3.3.2...3.3.3) (2023-10-19)
+
+
+### Bug Fixes
+
+* allow github-installed plugins to be auto-transpiled ([6f2c5e2](https://github.com/oclif/core/commit/6f2c5e2ec9b9bafa7dea4ae2e7350ada64ff0e88))
+* handle ModuleLoadError from hooks ([0321093](https://github.com/oclif/core/commit/0321093e4f8a0f659346a9e2e808ad44c6d3771f))
+
+
+
+## [3.3.2](https://github.com/oclif/core/compare/3.3.1...3.3.2) (2023-10-17)
+
+
+### Bug Fixes
+
+* **deps:** bump @babel/traverse from 7.23.0 to 7.23.2 ([d53498a](https://github.com/oclif/core/commit/d53498af1da6bdcb3fb70f7c0b6e0da8da0831a1))
+
+
+
+## [3.3.1](https://github.com/oclif/core/compare/3.3.0...3.3.1) (2023-10-16)
+
+
+### Bug Fixes
+
+* add frequency and frequencyUnit to warn-if-update ([#827](https://github.com/oclif/core/issues/827)) ([3567c74](https://github.com/oclif/core/commit/3567c748a8a04ab94cca493aa1dfcb4f10370f6e))
+
+
+
 # [3.3.0](https://github.com/oclif/core/compare/3.2.1...3.3.0) (2023-10-16)
 
 
