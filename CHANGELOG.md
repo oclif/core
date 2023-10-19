@@ -1,3 +1,17 @@
+# [3.5.0](https://github.com/oclif/core/compare/3.4.0...3.5.0) (2023-10-19)
+
+
+### Bug Fixes
+
+* compile error ([15d6556](https://github.com/oclif/core/commit/15d65561583e5f419ce0037435978f2a58745f0c))
+
+
+### Features
+
+* don't error on exit code 0 ([c62fb01](https://github.com/oclif/core/commit/c62fb012a8e579c46f76d66397abe40a3894a9b1))
+
+
+
 # [3.4.0](https://github.com/oclif/core/compare/3.3.3...3.4.0) (2023-10-19)
 
 
