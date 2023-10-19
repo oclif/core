@@ -210,7 +210,9 @@ export abstract class Command {
     return Errors.error(input, options as any)
   }
 
-  public exit(code = 0): never {
+  public exit(code: number): never
+  public exit(code: 0): void
+  public exit(code = 0): void | never {
     Errors.exit(code)
   }
 
