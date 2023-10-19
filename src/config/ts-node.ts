@@ -24,7 +24,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
     typescript = require('typescript')
   } catch {
     try {
-      typescript = require(join(root, 'node_modules', 'typescript'))
+      typescript = require(require.resolve('typescript', {paths: [root, __dirname]}))
     } catch {
       debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
       memoizedWarn(

@@ -2,7 +2,6 @@
 import type {PackageInformation, PackageLocator, getPackageInformation} from 'pnpapi'
 
 import {sync} from 'globby'
-import {createRequire} from 'node:module'
 import {basename, dirname, join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
@@ -45,7 +44,7 @@ function* up(from: string) {
   yield from
 }
 
-async function findSourcesRoot(root: string, name?: string) {
+async function findPluginRoot(root: string, name?: string) {
   // If we know the plugin name then we just need to traverse the file
   // system until we find the directory that matches the plugin name.
   if (name) {
@@ -107,8 +106,13 @@ let pnp: {
 
 function maybeRequirePnpApi(root: string): unknown {
   if (pnp) return pnp
-  const otherModuleRequire = createRequire(root)
-  pnp = otherModuleRequire('pnpapi')
+  // Require pnpapi directly from the plugin.
+  // The pnpapi module is only available if running in a pnp environment.
+  // Because of that we have to require it from the root.
+  // Solution taken from here: https://github.com/yarnpkg/berry/issues/1467#issuecomment-642869600
+  // eslint-disable-next-line node/no-missing-require
+  pnp = require(require.resolve('pnpapi', {paths: [root]}))
+
   return pnp
 }
 
@@ -124,7 +128,7 @@ const isPeerDependency = (
  *
  * Implementation taken from https://yarnpkg.com/advanced/pnpapi#traversing-the-dependency-tree
  */
-function findPackageWithYarn(name: string, root: string): string | undefined {
+function findPnpRoot(name: string, root: string): string | undefined {
   maybeRequirePnpApi(root)
   const seen = new Set()
 
@@ -167,18 +171,18 @@ function findPackageWithYarn(name: string, root: string): string | undefined {
 }
 
 async function findRoot(name: string | undefined, root: string) {
-  if (process.versions.pnp && name) return findPackageWithYarn(name, root)
-
   if (name) {
     let pkgPath
     try {
       pkgPath = resolvePackage(name, {paths: [root]})
     } catch {}
 
-    return pkgPath ? findSourcesRoot(dirname(pkgPath), name) : findRootLegacy(name, root)
+    if (pkgPath) return findPluginRoot(dirname(pkgPath), name)
+
+    return process.versions.pnp ? findPnpRoot(name, root) : findRootLegacy(name, root)
   }
 
-  return findSourcesRoot(root)
+  return findPluginRoot(root)
 }
 
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
