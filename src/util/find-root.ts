@@ -85,9 +85,11 @@ let pnp: {
  */
 function maybeRequirePnpApi(root: string): unknown {
   if (pnp) return pnp
-  // eslint-disable-next-line node/no-missing-require
-  pnp = require(require.resolve('pnpapi', {paths: [root]}))
-  return pnp
+  try {
+    // eslint-disable-next-line node/no-missing-require
+    pnp = require(require.resolve('pnpapi', {paths: [root]}))
+    return pnp
+  } catch {}
 }
 
 const getKey = (locator: PackageLocator | string | [string, string] | undefined) => JSON.stringify(locator)
@@ -104,6 +106,9 @@ const isPeerDependency = (
  */
 function findPnpRoot(name: string, root: string): string | undefined {
   maybeRequirePnpApi(root)
+
+  if (!pnp) return
+
   const seen = new Set()
 
   const traverseDependencyTree = (locator: PackageLocator, parentPkg?: PackageInformation): string | undefined => {
