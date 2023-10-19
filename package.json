@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "3.3.2",
+  "version": "3.4.0",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -73,7 +73,7 @@
     "nyc": "^15.1.0",
     "prettier": "^3.0.3",
     "shx": "^0.3.4",
-    "sinon": "^11.1.2",
+    "sinon": "^16.1.0",
     "ts-node": "^10.9.1",
     "tsd": "^0.29.0",
     "typescript": "^5"

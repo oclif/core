@@ -35,5 +35,11 @@ class Stream {
   }
 }
 
+/**
+ * @deprecated Use process.stdout directly. This will be removed in the next major version
+ */
 export const stdout = new Stream('stdout')
+/**
+ * @deprecated Use process.stderr directly. This will be removed in the next major version
+ */
 export const stderr = new Stream('stderr')

@@ -1,5 +1,4 @@
 import {error} from '../errors'
-import {stdout} from './stream'
 
 function timeout(p: Promise<any>, ms: number) {
   function wait(ms: number, unref = false) {
@@ -14,9 +13,9 @@ function timeout(p: Promise<any>, ms: number) {
 
 async function _flush() {
   const p = new Promise((resolve) => {
-    stdout.once('drain', () => resolve(null))
+    process.stdout.once('drain', () => resolve(null))
   })
-  const flushed = stdout.write('')
+  const flushed = process.stdout.write('')
 
   if (flushed) return
 

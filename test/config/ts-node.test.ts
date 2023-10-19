@@ -1,5 +1,4 @@
 import {expect} from 'chai'
-import * as fs from 'node:fs'
 import {join, resolve} from 'node:path'
 import {SinonSandbox, createSandbox} from 'sinon'
 import * as tsNode from 'ts-node'
@@ -28,7 +27,7 @@ describe('tsPath', () => {
 
   beforeEach(() => {
     sandbox = createSandbox()
-    sandbox.stub(fs, 'existsSync').returns(true)
+    sandbox.stub(util, 'existsSync').returns(true)
     sandbox.stub(tsNode, 'register')
   })
 

@@ -1,22 +1,23 @@
 import {expect} from 'chai'
-import {SinonStub, stub} from 'sinon'
+import {SinonSandbox, createSandbox} from 'sinon'
 
-import {stdout} from '../../../src'
-import {ux} from '../../../src/cli-ux'
+import {ux} from '../../../src'
 
 describe('styled/header', () => {
-  let writeStub: SinonStub
+  let sandbox: SinonSandbox
+  let stubs: ReturnType<typeof ux.makeStubs>
 
   beforeEach(() => {
-    writeStub = stub(stdout, 'write')
+    sandbox = createSandbox()
+    stubs = ux.makeStubs(sandbox)
   })
 
   afterEach(() => {
-    writeStub.restore()
+    sandbox.restore()
   })
 
   it('shows a styled header', () => {
     ux.styledHeader('A styled header')
-    expect(writeStub.firstCall.firstArg).to.equal('=== A styled header\n\n')
+    expect(stubs.stdout.firstCall.firstArg).to.include('=== A styled header\n')
   })
 })

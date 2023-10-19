@@ -99,6 +99,7 @@ export namespace PJSON {
       nsisCustomization?: string
       schema?: number
       scope?: string
+      pluginPrefix?: string
       'warn-if-update-available'?: {
         authorization: string
         message: string

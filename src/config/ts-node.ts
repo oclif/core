@@ -1,11 +1,10 @@
-import {existsSync} from 'node:fs'
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {readJsonSync} from '../util/fs'
+import {existsSync, readJsonSync} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
