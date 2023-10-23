@@ -49,6 +49,7 @@
     "@types/mocha": "^10.0.2",
     "@types/node": "^18",
     "@types/node-notifier": "^8.0.2",
+    "@types/pnpapi": "^0.0.4",
     "@types/slice-ansi": "^4.0.0",
     "@types/strip-ansi": "^5.2.1",
     "@types/supports-color": "^8.1.1",

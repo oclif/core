@@ -1,6 +1,5 @@
-/* eslint-disable no-await-in-loop */
 import {sync} from 'globby'
-import {basename, dirname, join, parse, relative, sep} from 'node:path'
+import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
 import {Command} from '../command'
@@ -12,10 +11,11 @@ import {Topic} from '../interfaces/topic'
 import {loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
-import {readJson, requireJson, safeReadJson} from '../util/fs'
+import {findRoot} from '../util/find-root'
+import {readJson, requireJson} from '../util/fs'
 import {compact, isProd, mapValues} from '../util/util'
 import {tsPath} from './ts-node'
-import {Debug, getCommandIdPermutations, resolvePackage} from './util'
+import {Debug, getCommandIdPermutations} from './util'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 
@@ -30,83 +30,6 @@ function topicsToArray(input: any, base?: string): Topic[] {
     input[k].name = k
     return [{...input[k], name: `${base}${k}`}, ...topicsToArray(input[k].subtopics, `${base}${input[k].name}`)]
   })
-}
-
-// essentially just "cd .."
-function* up(from: string) {
-  while (dirname(from) !== from) {
-    yield from
-    from = dirname(from)
-  }
-
-  yield from
-}
-
-async function findSourcesRoot(root: string, name?: string) {
-  // If we know the plugin name then we just need to traverse the file
-  // system until we find the directory that matches the plugin name.
-  if (name) {
-    for (const next of up(root)) {
-      if (next.endsWith(basename(name))) return next
-    }
-  }
-
-  // If there's no plugin name (typically just the root plugin), then we need
-  // to traverse the file system until we find a directory with a package.json
-  for (const next of up(root)) {
-    // Skip the bin directory
-    if (
-      basename(dirname(next)) === 'bin' &&
-      ['dev', 'dev.cmd', 'dev.js', 'run', 'run.cmd', 'run.js'].includes(basename(next))
-    ) {
-      continue
-    }
-
-    try {
-      const cur = join(next, 'package.json')
-      if (await safeReadJson<PJSON>(cur)) return dirname(cur)
-    } catch {}
-  }
-}
-
-/**
- * Find package root for packages installed into node_modules. This will go up directories
- * until it finds a node_modules directory with the plugin installed into it
- *
- * This is needed because some oclif plugins do not declare the `main` field in their package.json
- * https://github.com/oclif/config/pull/289#issuecomment-983904051
- *
- * @returns string
- * @param name string
- * @param root string
- */
-async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
-  for (const next of up(root)) {
-    let cur
-    if (name) {
-      cur = join(next, 'node_modules', name, 'package.json')
-      if (await safeReadJson<PJSON>(cur)) return dirname(cur)
-
-      const pkg = await safeReadJson<PJSON>(join(next, 'package.json'))
-      if (pkg?.name === name) return next
-    } else {
-      cur = join(next, 'package.json')
-      if (await safeReadJson<PJSON>(cur)) return dirname(cur)
-    }
-  }
-}
-
-async function findRoot(name: string | undefined, root: string) {
-  if (name) {
-    let pkgPath
-    try {
-      pkgPath = resolvePackage(name, {paths: [root]})
-    } catch {}
-
-    return pkgPath ? findSourcesRoot(dirname(pkgPath), name) : findRootLegacy(name, root)
-  }
-
-  return findSourcesRoot(root)
 }
 
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
