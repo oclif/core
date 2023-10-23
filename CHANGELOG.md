@@ -1,3 +1,26 @@
+# [3.6.0](https://github.com/oclif/core/compare/3.4.1-dev.0...3.6.0) (2023-10-23)
+
+
+### Bug Fixes
+
+* safely fail if pnpapi cannot be found ([c2fc8d2](https://github.com/oclif/core/commit/c2fc8d2cfe4360602ad8be9ae5c4fe1947c9ef27))
+
+
+
+# [3.5.0](https://github.com/oclif/core/compare/3.4.0...3.5.0) (2023-10-19)
+
+
+
+## [3.4.1-dev.0](https://github.com/oclif/core/compare/3.5.0...3.4.1-dev.0) (2023-10-19)
+
+
+### Features
+
+* better support yarn PnP ([c5d87fc](https://github.com/oclif/core/commit/c5d87fc9bb30973fb055143c92df7bc27de16554))
+* support pnp plugins ([8e217a6](https://github.com/oclif/core/commit/8e217a6b9a0d5824113f0c68c9be009440331f23))
+
+
+
 # [3.5.0](https://github.com/oclif/core/compare/3.4.0...3.5.0) (2023-10-19)
 
 
