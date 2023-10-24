@@ -765,6 +765,17 @@ export class Config implements IConfig {
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {
       this.plugins.set(plugin.name, plugin)
+
+      // Delete all commands from the legacy plugin so that we can re-add them.
+      // This is necessary because this.determinePriority will pick the initial
+      // command that was added, which won't have been converted by PluginLegacy yet.
+      for (const cmd of plugin.commands ?? []) {
+        this._commands.delete(cmd.id)
+        for (const alias of [...(cmd.aliases ?? []), ...(cmd.hiddenAliases ?? [])]) {
+          this._commands.delete(alias)
+        }
+      }
+
       this.loadCommands(plugin)
     }
   }
