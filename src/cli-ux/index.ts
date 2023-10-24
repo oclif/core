@@ -144,6 +144,7 @@ const {
   url,
   wait,
 } = ux
+
 const {error, exit, warn} = Errors
 
 export {
@@ -192,6 +193,6 @@ export {ActionBase} from './action/base'
 export {Config, config} from './config'
 export {ExitError} from './exit'
 export {IPromptOptions} from './prompt'
-export {makeStubs} from './stub'
-
 export {Table} from './styled'
+
+export {default as write} from './write'

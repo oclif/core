@@ -786,12 +786,11 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^3.0.0-beta.17":
-  version "3.0.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.0.0-beta.17.tgz#a6f0d22703647743aba6c9e53f0560724aba3ccb"
-  integrity sha512-knoDpfAVYgbVeuoUpX/es8os1GeVp//gNczB3mgNPotENXMALOZKgIv7rBbKpHa1xmpGdEf0n31WrBq3HigKwQ==
+"@oclif/core@^3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.6.0.tgz#b9582f3bf1ad933a6ac0335d0437be9ac10ce3b6"
+  integrity sha512-qjLXQEHUajQPeHQYRU9kRv5tBCW8O4L/OvILF/8lt08RLlp24E8yK6J7ROCZMwPxYsD3YC1/AQ76br2R+O1Cqw==
   dependencies:
-    "@types/cli-progress" "^3.11.0"
     ansi-escapes "^4.3.2"
     ansi-styles "^4.3.0"
     cardinal "^2.1.1"
@@ -799,7 +798,7 @@
     clean-stack "^3.0.1"
     cli-progress "^3.12.0"
     debug "^4.3.4"
-    ejs "^3.1.8"
+    ejs "^3.1.9"
     get-package-type "^0.1.0"
     globby "^11.1.0"
     hyperlinker "^1.0.0"
@@ -849,12 +848,12 @@
   resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.1.tgz#1def9f38134f9bfb229257f48a35f7d0d183dc78"
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
-"@oclif/test@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.0.1.tgz#81d7645222211640afae7512d8243d5a9c52e2c1"
-  integrity sha512-1oJNdnwpp1x4WhUcstgwNgbijNOdz7l5LdWiTU0ZMwkyvxcQhZKCF5puFXndV+EkYds/s/0+dZOx0rhhDILA/w==
+"@oclif/test@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.0.3.tgz#fe32dd96171933a323468b27951104a22673e981"
+  integrity sha512-hhQa732q85z71wur0Tzf9n9Z32Yiq8Hb4suNGeweYHtNQ5DmWgGqHJ57S+zs6ri0GF+xJmzRyr5qFq8KNs3Xqg==
   dependencies:
-    "@oclif/core" "^3.0.0-beta.17"
+    "@oclif/core" "^3.6.0"
     chai "^4.3.10"
     fancy-test "^3.0.1"
 

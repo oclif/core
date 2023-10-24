@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-import {SinonSandbox, createSandbox} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi from 'strip-ansi'
 
 import {Interfaces, ux} from '../../src/index'
@@ -12,11 +12,11 @@ const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch
 
 describe('main', () => {
   let sandbox: SinonSandbox
-  let stubs: ReturnType<typeof ux.makeStubs>
+  let stdoutStub: SinonStub
 
   beforeEach(() => {
     sandbox = createSandbox()
-    stubs = ux.makeStubs(sandbox)
+    stdoutStub = sandbox.stub(ux.write, 'stdout')
   })
 
   afterEach(() => {
@@ -30,12 +30,12 @@ describe('main', () => {
 
   it('should run version', async () => {
     await run(['--version'], resolve(__dirname, '../../package.json'))
-    expect(stubs.stdout.firstCall.firstArg).to.equal(`${version}\n`)
+    expect(stdoutStub.firstCall.firstArg).to.equal(`${version}\n`)
   })
 
   it('should run help', async () => {
     await run(['--help'], resolve(__dirname, '../../package.json'))
-    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -55,7 +55,7 @@ COMMANDS
 
   it('should show help for topics with spaces', async () => {
     await run(['--help', 'foo'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -71,7 +71,7 @@ COMMANDS
 
   it('should run spaced topic help v2', async () => {
     await run(['foo', 'bar', '--help'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stubs.stdout.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
+    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
 
 USAGE
   $ oclif foo bar COMMAND

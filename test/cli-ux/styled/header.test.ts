@@ -1,15 +1,16 @@
 import {expect} from 'chai'
-import {SinonSandbox, createSandbox} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
+import stripAnsi from 'strip-ansi'
 
 import {ux} from '../../../src'
 
 describe('styled/header', () => {
   let sandbox: SinonSandbox
-  let stubs: ReturnType<typeof ux.makeStubs>
+  let stdoutStub: SinonStub
 
   beforeEach(() => {
     sandbox = createSandbox()
-    stubs = ux.makeStubs(sandbox)
+    stdoutStub = sandbox.stub(ux.write, 'stdout')
   })
 
   afterEach(() => {
@@ -18,6 +19,6 @@ describe('styled/header', () => {
 
   it('shows a styled header', () => {
     ux.styledHeader('A styled header')
-    expect(stubs.stdout.firstCall.firstArg).to.include('=== A styled header\n')
+    expect(stripAnsi(stdoutStub.firstCall.firstArg)).to.include('=== A styled header\n')
   })
 })

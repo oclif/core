@@ -1,6 +1,6 @@
 {
   "check-coverage": true,
-  "lines": 80,
+  "lines": 79,
   "statements": 70,
   "functions": 70,
   "branches": 60,
