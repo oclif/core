@@ -1,4 +1,4 @@
-import {Stats, readFileSync} from 'node:fs'
+import {Stats, existsSync as fsExistsSync, readFileSync} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 import {join} from 'node:path'
 
@@ -67,4 +67,8 @@ export async function safeReadJson<T>(path: string): Promise<T | undefined> {
   try {
     return await readJson<T>(path)
   } catch {}
+}
+
+export function existsSync(path: string): boolean {
+  return fsExistsSync(path)
 }

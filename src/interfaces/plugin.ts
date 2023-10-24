@@ -14,6 +14,7 @@ export interface PluginOptions {
   root: string
   tag?: string
   type?: string
+  url?: string
 }
 
 export interface Options extends PluginOptions {
@@ -56,6 +57,8 @@ export interface Plugin {
    * name from package.json
    */
   name: string
+  readonly options: Options
+  parent?: Plugin
   /**
    * full package.json
    *
@@ -71,8 +74,8 @@ export interface Plugin {
    * only used for user plugins
    */
   tag?: string
-  readonly topics: Topic[]
 
+  readonly topics: Topic[]
   /**
    * used to tell the user how the plugin was installed
    * examples: core, link, user, dev
@@ -82,6 +85,7 @@ export interface Plugin {
    * if it appears to be an npm package but does not look like it's really a CLI plugin, this is set to false
    */
   valid: boolean
+
   /**
    * version from package.json
    *

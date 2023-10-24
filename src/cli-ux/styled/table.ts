@@ -9,7 +9,7 @@ import * as F from '../../flags'
 import * as Interfaces from '../../interfaces'
 import {stdtermwidth} from '../../screen'
 import {capitalize, sumBy} from '../../util/util'
-import {stdout} from '../stream'
+import write from '../write'
 
 class Table<T extends Record<string, unknown>> {
   columns: (table.Column<T> & {key: string; maxWidth?: number; width?: number})[]
@@ -48,7 +48,7 @@ class Table<T extends Record<string, unknown>> {
       'no-header': options['no-header'] ?? false,
       'no-truncate': options['no-truncate'] ?? false,
       output: csv ? 'csv' : output,
-      printLine: printLine ?? ((s: any) => stdout.write(s + '\n')),
+      printLine: printLine ?? ((s: any) => write.stdout(s + '\n')),
       rowStart: ' ',
       sort,
       title,
@@ -97,7 +97,7 @@ class Table<T extends Record<string, unknown>> {
       const filters = this.options.columns!.split(',')
       this.columns = this.filterColumnsFromHeaders(filters)
     } else if (!this.options.extended) {
-      // show extented columns/properties
+      // show extended columns/properties
       this.columns = this.columns.filter((c) => !c.extended)
     }
 
@@ -189,7 +189,7 @@ class Table<T extends Record<string, unknown>> {
     // truncation logic
     const shouldShorten = () => {
       // don't shorten if full mode
-      if (options['no-truncate'] || (!stdout.isTTY && !process.env.CLI_UX_SKIP_TTY_CHECK)) return
+      if (options['no-truncate'] || (!process.stdout.isTTY && !process.env.CLI_UX_SKIP_TTY_CHECK)) return
 
       // don't shorten if there is enough screen width
       const dataMaxWidth = sumBy(columns, (c) => c.width!)

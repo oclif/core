@@ -1,3 +1,65 @@
+# [3.6.0](https://github.com/oclif/core/compare/3.4.1-dev.0...3.6.0) (2023-10-23)
+
+
+### Bug Fixes
+
+* safely fail if pnpapi cannot be found ([c2fc8d2](https://github.com/oclif/core/commit/c2fc8d2cfe4360602ad8be9ae5c4fe1947c9ef27))
+
+
+
+# [3.5.0](https://github.com/oclif/core/compare/3.4.0...3.5.0) (2023-10-19)
+
+
+
+## [3.4.1-dev.0](https://github.com/oclif/core/compare/3.5.0...3.4.1-dev.0) (2023-10-19)
+
+
+### Features
+
+* better support yarn PnP ([c5d87fc](https://github.com/oclif/core/commit/c5d87fc9bb30973fb055143c92df7bc27de16554))
+* support pnp plugins ([8e217a6](https://github.com/oclif/core/commit/8e217a6b9a0d5824113f0c68c9be009440331f23))
+
+
+
+# [3.5.0](https://github.com/oclif/core/compare/3.4.0...3.5.0) (2023-10-19)
+
+
+### Bug Fixes
+
+* compile error ([15d6556](https://github.com/oclif/core/commit/15d65561583e5f419ce0037435978f2a58745f0c))
+
+
+### Features
+
+* don't error on exit code 0 ([c62fb01](https://github.com/oclif/core/commit/c62fb012a8e579c46f76d66397abe40a3894a9b1))
+
+
+
+# [3.4.0](https://github.com/oclif/core/compare/3.3.3...3.4.0) (2023-10-19)
+
+
+### Bug Fixes
+
+* add pluginPrefix type ([f14181e](https://github.com/oclif/core/commit/f14181e071f8c5d7f93646eef2e8d35b39dde0a7))
+
+
+### Features
+
+* export ux stubs ([4b7cdda](https://github.com/oclif/core/commit/4b7cddafef4e0f4a494b8be273f09575081a93c8))
+* no longer use wrapped process.stdout and process.stderr ([3ff5f63](https://github.com/oclif/core/commit/3ff5f6357a1157aa402ca580babb05eb13e7a249))
+
+
+
+## [3.3.3](https://github.com/oclif/core/compare/3.3.2...3.3.3) (2023-10-19)
+
+
+### Bug Fixes
+
+* allow github-installed plugins to be auto-transpiled ([6f2c5e2](https://github.com/oclif/core/commit/6f2c5e2ec9b9bafa7dea4ae2e7350ada64ff0e88))
+* handle ModuleLoadError from hooks ([0321093](https://github.com/oclif/core/commit/0321093e4f8a0f659346a9e2e808ad44c6d3771f))
+
+
+
 ## [3.3.2](https://github.com/oclif/core/compare/3.3.1...3.3.2) (2023-10-17)
 
 
