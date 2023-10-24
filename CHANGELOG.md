@@ -1,3 +1,16 @@
+## [3.7.1](https://github.com/oclif/core/compare/3.7.0...3.7.1) (2023-10-24)
+
+
+
+## [3.3.3-dev.0](https://github.com/oclif/core/compare/3.3.2...3.3.3-dev.0) (2023-10-18)
+
+
+### Bug Fixes
+
+* clear commands belogning to legacy plugins before reloading ([6a53997](https://github.com/oclif/core/commit/6a5399704a9644d26c54269ae88cbbb420af5490))
+
+
+
 # [3.7.0](https://github.com/oclif/core/compare/3.6.0...3.7.0) (2023-10-24)
 
 
@@ -59,13 +72,22 @@
 
 
 
-## [3.3.3](https://github.com/oclif/core/compare/3.3.2...3.3.3) (2023-10-19)
+## [3.3.3](https://github.com/oclif/core/compare/3.3.3-dev.0...3.3.3) (2023-10-19)
 
 
 ### Bug Fixes
 
 * allow github-installed plugins to be auto-transpiled ([6f2c5e2](https://github.com/oclif/core/commit/6f2c5e2ec9b9bafa7dea4ae2e7350ada64ff0e88))
 * handle ModuleLoadError from hooks ([0321093](https://github.com/oclif/core/commit/0321093e4f8a0f659346a9e2e808ad44c6d3771f))
+
+
+
+## [3.3.3-dev.0](https://github.com/oclif/core/compare/3.3.2...3.3.3-dev.0) (2023-10-18)
+
+
+### Bug Fixes
+
+* clear commands belogning to legacy plugins before reloading ([6a53997](https://github.com/oclif/core/commit/6a5399704a9644d26c54269ae88cbbb420af5490))
 
 
 
