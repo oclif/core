@@ -36,7 +36,7 @@
     "@oclif/plugin-help": "^5.2.8",
     "@oclif/plugin-plugins": "^3.3.0",
     "@oclif/prettier-config": "^0.2.1",
-    "@oclif/test": "^3.0.1",
+    "@oclif/test": "^3.0.3",
     "@types/ansi-styles": "^3.2.1",
     "@types/benchmark": "^2.1.2",
     "@types/chai": "^4.3.8",
