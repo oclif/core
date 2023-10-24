@@ -1,3 +1,12 @@
+# [3.7.0](https://github.com/oclif/core/compare/3.6.0...3.7.0) (2023-10-24)
+
+
+### Features
+
+* remove ux.makeStubs ([8a81413](https://github.com/oclif/core/commit/8a81413267f30f60aa91b7c6875f74385850044d))
+
+
+
 # [3.6.0](https://github.com/oclif/core/compare/3.4.1-dev.0...3.6.0) (2023-10-23)
 
 
