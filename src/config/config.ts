@@ -511,7 +511,7 @@ export class Config implements IConfig {
         const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {filePath, isESM, module} = await loadWithData(p, join(p.root, hook))
+          const {filePath, isESM, module} = await loadWithData(p, hook)
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout

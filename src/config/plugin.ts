@@ -13,7 +13,7 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson, requireJson} from '../util/fs'
-import {compact, isProd, mapValues} from '../util/util'
+import {castArray, compact, isProd, mapValues} from '../util/util'
 import {tsPath} from './ts-node'
 import {Debug, getCommandIdPermutations} from './util'
 
@@ -192,7 +192,7 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.hooks = mapValues(this.pjson.oclif.hooks || {}, (i) => (Array.isArray(i) ? i : [i]))
+    this.hooks = mapValues(this.pjson.oclif.hooks ?? {}, (i) => castArray(i).map((i) => tsPath(this.root, i, this)))
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
