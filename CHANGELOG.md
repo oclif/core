@@ -1,3 +1,12 @@
+# [3.8.0](https://github.com/oclif/core/compare/3.7.1...3.8.0) (2023-10-25)
+
+
+### Features
+
+* run tsPath on hooks ([8275a2e](https://github.com/oclif/core/commit/8275a2ea5ab93c9a387ce90170afcf6a3205ca04))
+
+
+
 ## [3.7.1](https://github.com/oclif/core/compare/3.7.0...3.7.1) (2023-10-24)
 
 
