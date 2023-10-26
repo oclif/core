@@ -515,8 +515,8 @@ export class Config implements IConfig {
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout
-            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this}))
-            : await search(module).call(context, {...(opts as any), config: this})
+            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this, context}))
+            : await search(module).call(context, {...(opts as any), config: this, context})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {

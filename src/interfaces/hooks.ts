@@ -7,6 +7,14 @@ interface HookMeta {
   return: any
 }
 
+type Context = {
+  debug(...args: any[]): void
+  error(message: Error | string, options?: {code?: string; exit?: number}): void
+  exit(code?: number): void
+  log(message?: any, ...args: any[]): void
+  warn(message: string): void
+}
+
 export interface Hooks {
   [event: string]: HookMeta
   command_incomplete: {
@@ -55,7 +63,7 @@ export interface Hooks {
 
 export type Hook<T extends keyof P, P extends Hooks = Hooks> = (
   this: Hook.Context,
-  options: P[T]['options'] & {config: Config},
+  options: P[T]['options'] & {config: Config; context: Context},
 ) => Promise<P[T]['return']>
 
 export namespace Hook {

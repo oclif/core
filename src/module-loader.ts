@@ -34,12 +34,12 @@ const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>con
  *
  * @returns {Promise<*>} The entire ESM module from dynamic import or CJS module by require.
  */
-export async function load(config: IConfig | IPlugin, modulePath: string): Promise<any> {
+export async function load<T = any>(config: IConfig | IPlugin, modulePath: string): Promise<T> {
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
     ;({filePath, isESM} = resolvePath(config, modulePath))
-    return isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
+    return (isESM ? await import(pathToFileURL(filePath).href) : require(filePath)) as T
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
       throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
@@ -66,10 +66,10 @@ export async function load(config: IConfig | IPlugin, modulePath: string): Promi
  * @returns {Promise<{isESM: boolean, module: *, filePath: string}>} An object with the loaded module & data including
  *                                                                   file path and whether the module is ESM.
  */
-export async function loadWithData(
+export async function loadWithData<T = any>(
   config: IConfig | IPlugin,
   modulePath: string,
-): Promise<{filePath: string; isESM: boolean; module: any}> {
+): Promise<{filePath: string; isESM: boolean; module: T}> {
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
@@ -102,10 +102,10 @@ export async function loadWithData(
  * @returns {Promise<{isESM: boolean, module: *, filePath: string}>} An object with the loaded module & data including
  *                                                                   file path and whether the module is ESM.
  */
-export async function loadWithDataFromManifest(
+export async function loadWithDataFromManifest<T = any>(
   cached: Command.Cached,
   modulePath: string,
-): Promise<{filePath: string; isESM: boolean; module: any}> {
+): Promise<{filePath: string; isESM: boolean; module: T}> {
   const {id, isESM, relativePath} = cached
   if (!relativePath) {
     throw new ModuleLoadError(`Cached command ${id} does not have a relative path`)
