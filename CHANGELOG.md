@@ -1,3 +1,12 @@
+# [3.9.0](https://github.com/oclif/core/compare/3.8.0...3.9.0) (2023-10-26)
+
+
+### Features
+
+* export ModuleLoader ([5e40c0b](https://github.com/oclif/core/commit/5e40c0bd1100db022a721a5258a9c75057cc39ef))
+
+
+
 # [3.8.0](https://github.com/oclif/core/compare/3.7.1...3.8.0) (2023-10-25)
 
 
