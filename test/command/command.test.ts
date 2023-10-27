@@ -68,7 +68,8 @@ describe('command', () => {
 
       return Command.run([])
     })
-    .it('exits with 0 does not throw error')
+    .catch(/EEXIT: 0/)
+    .it('exits with 0')
 
   describe('parse', () => {
     fancy.stdout().it('has a flag', async (ctx) => {
