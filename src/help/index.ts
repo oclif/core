@@ -235,7 +235,15 @@ export class Help extends HelpBase {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
         const loaded = await command.load()
         for (const [name, flag] of Object.entries(loaded.flags)) {
-          if (flag.type === 'boolean' || !command.flags[name].hasDynamicHelp) continue
+          // As of v3 each flag that needs to be re-evaluated has the `hasDynamicHelp` property.
+          // However, we cannot assume that the absence of this property means that the flag
+          // doesn't need to be re-evaluated since any command from a v2 or older plugin will
+          // not have the `hasDynamicHelp` property on it.
+
+          // In the future we could improve performance by skipping any flag that doesn't
+          // have `hasDynamicHelp === true`
+
+          if (flag.type === 'boolean') continue
           // eslint-disable-next-line no-await-in-loop
           command.flags[name].default = await cacheDefaultValue(flag, false)
         }
