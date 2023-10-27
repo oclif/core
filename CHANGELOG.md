@@ -1,3 +1,12 @@
+## [3.9.1](https://github.com/oclif/core/compare/3.9.0...3.9.1) (2023-10-27)
+
+
+### Bug Fixes
+
+* restore exit(0) behavior ([0c3fdd7](https://github.com/oclif/core/commit/0c3fdd7a7e3bfe605274d69894e9a2fba8c2e3d7))
+
+
+
 # [3.9.0](https://github.com/oclif/core/compare/3.8.0...3.9.0) (2023-10-26)
 
 
