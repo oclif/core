@@ -113,7 +113,7 @@ function registerTSNode(root: string, plugin?: Plugin): TSConfig | undefined {
   tsNode.register(conf)
   REGISTERED.add(root)
   debug('tsconfig: %O', tsconfig)
-  debug('tsconfig registration options: %O', conf)
+  debug('ts-node options: %O', conf)
   return tsconfig
 }
 
