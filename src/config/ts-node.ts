@@ -47,7 +47,7 @@ function loadTSConfig(root: string): TSConfig | undefined {
   }
 }
 
-function registerTSNode(root: string): TSConfig | undefined {
+function registerTSNode(root: string, plugin?: Plugin): TSConfig | undefined {
   const tsconfig = loadTSConfig(root)
   if (!tsconfig) return
   if (REGISTERED.has(root)) return tsconfig
@@ -80,6 +80,11 @@ function registerTSNode(root: string): TSConfig | undefined {
     rootDirs.push(join(root, 'src'))
   }
 
+  const swc = plugin
+    ? Boolean(plugin.pjson.devDependencies?.['@swc/core'])
+    : existsSync(join(root, 'node_modules', '@swc'))
+  if (swc) debug(`@swc/core dependency found for ${root}. Using swc for transpilation.`)
+
   const conf: TSNode.RegisterOptions = {
     compilerOptions: {
       emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
@@ -101,12 +106,14 @@ function registerTSNode(root: string): TSConfig | undefined {
     scope: true,
     scopeDir: root,
     skipProject: true,
+    swc,
     transpileOnly: true,
   }
 
   tsNode.register(conf)
   REGISTERED.add(root)
-  debug('%O', tsconfig)
+  debug('tsconfig: %O', tsconfig)
+  debug('tsconfig registration options: %O', conf)
   return tsconfig
 }
 
@@ -150,8 +157,8 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
 /**
  * Determine the path to the source file from the compiled ./lib files
  */
-function determinePath(root: string, orig: string): string {
-  const tsconfig = registerTSNode(root)
+function determinePath(root: string, orig: string, plugin?: Plugin): string {
+  const tsconfig = registerTSNode(root, plugin)
   if (!tsconfig) return orig
   debug(`determining path for ${orig}`)
   const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
@@ -245,7 +252,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   }
 
   try {
-    return determinePath(root, orig)
+    return determinePath(root, orig, plugin)
   } catch (error: any) {
     debug(error)
     return orig
