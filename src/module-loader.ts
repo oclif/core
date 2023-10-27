@@ -38,7 +38,7 @@ export async function load<T = any>(config: IConfig | IPlugin, modulePath: strin
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ;({filePath, isESM} = resolvePath(config, modulePath))
+    ;({filePath, isESM} = await resolvePath(config, modulePath))
     return (isESM ? await import(pathToFileURL(filePath).href) : require(filePath)) as T
   } catch (error: any) {
     if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -73,7 +73,7 @@ export async function loadWithData<T = any>(
   let filePath: string | undefined
   let isESM: boolean | undefined
   try {
-    ;({filePath, isESM} = resolvePath(config, modulePath))
+    ;({filePath, isESM} = await resolvePath(config, modulePath))
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
     return {filePath, isESM, module}
   } catch (error: any) {
@@ -172,7 +172,7 @@ export function isPathModule(filePath: string): boolean {
  *
  * @returns {{isESM: boolean, filePath: string}} An object including file path and whether the module is ESM.
  */
-function resolvePath(config: IConfig | IPlugin, modulePath: string): {filePath: string; isESM: boolean} {
+async function resolvePath(config: IConfig | IPlugin, modulePath: string): Promise<{filePath: string; isESM: boolean}> {
   let isESM: boolean
   let filePath: string | undefined
 
@@ -181,7 +181,8 @@ function resolvePath(config: IConfig | IPlugin, modulePath: string): {filePath: 
     isESM = isPathModule(filePath)
   } catch {
     filePath =
-      (isPlugin(config) ? tsPath(config.root, modulePath, config) : tsPath(config.root, modulePath)) ?? modulePath
+      (isPlugin(config) ? await tsPath(config.root, modulePath, config) : await tsPath(config.root, modulePath)) ??
+      modulePath
 
     let fileExists = false
     let isDirectory = false

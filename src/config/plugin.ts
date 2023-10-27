@@ -1,4 +1,4 @@
-import {sync} from 'globby'
+import globby, {sync} from 'globby'
 import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
@@ -13,8 +13,8 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson, requireJson} from '../util/fs'
-import {castArray, compact, isProd, mapValues} from '../util/util'
-import {tsPath} from './ts-node'
+import {castArray, compact, isProd} from '../util/util'
+import {tsPath, tsPathSync} from './ts-node'
 import {Debug, getCommandIdPermutations} from './util'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -39,6 +39,21 @@ const search = (cmd: any) => {
   if (typeof cmd.run === 'function') return cmd
   if (cmd.default && cmd.default.run) return cmd.default
   return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
+}
+
+const GLOB_PATTERNS = [
+  '**/*.+(js|cjs|mjs|ts|tsx|mts|cts)',
+  '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js|d.mts|d.cts)?(x)',
+]
+
+function processCommandIds(files: string[]): string[] {
+  return files.map((file) => {
+    const p = parse(file)
+    const topics = p.dir.split('/')
+    const command = p.name !== 'index' && p.name
+    const id = [...topics, command].filter(Boolean).join(':')
+    return id === '' ? '.' : id
+  })
 }
 
 export class Plugin implements IPlugin {
@@ -89,32 +104,28 @@ export class Plugin implements IPlugin {
 
   constructor(public options: PluginOptions) {}
 
+  /**
+   * @deprecated use getCommandIDs instead. Underlying implementation cannot read extended tsconfig.json files.
+   */
   public get commandIDs(): string[] {
     if (!this.commandsDir) return []
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.commandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${this.commandsDir}`)
-    const patterns = [
-      '**/*.+(js|cjs|mjs|ts|tsx|mts|cts)',
-      '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js|d.mts|d.cts)?(x)',
-    ]
-    const ids = sync(patterns, {cwd: this.commandsDir}).map((file) => {
-      const p = parse(file)
-      const topics = p.dir.split('/')
-      const command = p.name !== 'index' && p.name
-      const id = [...topics, command].filter(Boolean).join(':')
-      return id === '' ? '.' : id
-    })
+    const ids = processCommandIds(sync(GLOB_PATTERNS, {cwd: this.commandsDir}))
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
     marker?.stop()
     return ids
   }
 
+  /**
+   * @deprecated use getCommandsDir instead. Underlying implementation cannot read extended tsconfig.json files.
+   */
   public get commandsDir(): string | undefined {
     if (this._commandsDir) return this._commandsDir
 
-    this._commandsDir = tsPath(this.root, this.pjson.oclif.commands, this)
+    this._commandsDir = tsPathSync(this.root, this.pjson.oclif.commands, this)
     return this._commandsDir
   }
 
@@ -133,14 +144,15 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      if (!this.commandsDir) return
+      const commandsDir = await this.getCommandsDir()
+      if (!commandsDir) return
       let module
       let isESM: boolean | undefined
       let filePath: string | undefined
       try {
         ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
           ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
@@ -162,8 +174,29 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
+  public async getCommandIDs(): Promise<string[]> {
+    const commandsDir = await this.getCommandsDir()
+    if (!commandsDir) return []
+
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
+    this._debug(`loading IDs from ${commandsDir}`)
+    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
+    const ids = processCommandIds(files)
+    this._debug('found commands', ids)
+    marker?.addDetails({count: ids.length})
+    marker?.stop()
+    return ids
+  }
+
+  public async getCommandsDir(): Promise<string | undefined> {
+    if (this._commandsDir) return this._commandsDir
+
+    this._commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
+    return this._commandsDir
+  }
+
   public async load(): Promise<void> {
-    this.type = this.options.type || 'core'
+    this.type = this.options.type ?? 'core'
     this.tag = this.options.tag
     this.isRoot = this.options.isRoot ?? false
     if (this.options.parent) this.parent = this.options.parent as Plugin
@@ -192,7 +225,11 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.hooks = mapValues(this.pjson.oclif.hooks ?? {}, (i) => castArray(i).map((i) => tsPath(this.root, i, this)))
+    this.hooks = {}
+    for (const [k, v] of Object.entries(this.pjson.oclif.hooks ?? {})) {
+      // eslint-disable-next-line no-await-in-loop
+      this.hooks[k] = await Promise.all(castArray(v).map(async (i) => tsPath(this.root, i, this)))
+    }
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
@@ -242,10 +279,11 @@ export class Plugin implements IPlugin {
       }
     }
 
+    const commandIDs = await this.getCommandIDs()
     const manifest = {
       commands: (
         await Promise.all(
-          this.commandIDs.map(async (id) => {
+          commandIDs.map(async (id) => {
             try {
               const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
               if (this.flexibleTaxonomy) {

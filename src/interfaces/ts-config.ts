@@ -17,5 +17,6 @@ export interface TSConfig {
     esm?: boolean
     experimentalSpecifierResolution?: 'explicit' | 'node'
     scope?: boolean
+    swc?: boolean
   }
 }
