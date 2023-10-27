@@ -20,6 +20,7 @@ describe('oclif plugins', () => {
         '@oclif/plugin-version',
         '@oclif/plugin-which',
       ],
+      yarnInstallArgs: ['--no-lockfile'],
     })
   })
 
