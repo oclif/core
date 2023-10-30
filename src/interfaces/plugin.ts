@@ -38,6 +38,7 @@ export interface Plugin {
   alias: string
   readonly commandIDs: string[]
   commands: Command.Loadable[]
+  readonly commandsDir: string | undefined
   findCommand(id: string, opts: {must: true}): Promise<Command.Class>
   findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class> | undefined
   readonly hasManifest: boolean

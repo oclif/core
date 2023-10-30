@@ -1,4 +1,4 @@
-import globby, {sync} from 'globby'
+import globby from 'globby'
 import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
@@ -14,7 +14,7 @@ import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson, requireJson} from '../util/fs'
 import {castArray, compact, isProd} from '../util/util'
-import {tsPath, tsPathSync} from './ts-node'
+import {tsPath} from './ts-node'
 import {Debug, getCommandIdPermutations} from './util'
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
@@ -63,7 +63,11 @@ export class Plugin implements IPlugin {
 
   children: Plugin[] = []
 
+  commandIDs!: string[]
+
   commands!: Command.Loadable[]
+
+  commandsDir!: string | undefined
 
   hasManifest = false
 
@@ -95,39 +99,12 @@ export class Plugin implements IPlugin {
 
   _base = `${_pjson.name}@${_pjson.version}`
 
-  private _commandsDir!: string | undefined
-
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
   private flexibleTaxonomy!: boolean
 
   constructor(public options: PluginOptions) {}
-
-  /**
-   * @deprecated use getCommandIDs instead. Underlying implementation cannot read extended tsconfig.json files.
-   */
-  public get commandIDs(): string[] {
-    if (!this.commandsDir) return []
-
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.commandIDs#${this.name}`, {plugin: this.name})
-    this._debug(`loading IDs from ${this.commandsDir}`)
-    const ids = processCommandIds(sync(GLOB_PATTERNS, {cwd: this.commandsDir}))
-    this._debug('found commands', ids)
-    marker?.addDetails({count: ids.length})
-    marker?.stop()
-    return ids
-  }
-
-  /**
-   * @deprecated use getCommandsDir instead. Underlying implementation cannot read extended tsconfig.json files.
-   */
-  public get commandsDir(): string | undefined {
-    if (this._commandsDir) return this._commandsDir
-
-    this._commandsDir = tsPathSync(this.root, this.pjson.oclif.commands, this)
-    return this._commandsDir
-  }
 
   public get topics(): Topic[] {
     return topicsToArray(this.pjson.oclif.topics || {})
@@ -189,10 +166,7 @@ export class Plugin implements IPlugin {
   }
 
   public async getCommandsDir(): Promise<string | undefined> {
-    if (this._commandsDir) return this._commandsDir
-
-    this._commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
-    return this._commandsDir
+    return tsPath(this.root, this.pjson.oclif.commands, this)
   }
 
   public async load(): Promise<void> {
@@ -224,6 +198,9 @@ export class Plugin implements IPlugin {
     } else {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
+
+    this.commandsDir = await this.getCommandsDir()
+    this.commandIDs = await this.getCommandIDs()
 
     this.hooks = {}
     for (const [k, v] of Object.entries(this.pjson.oclif.hooks ?? {})) {

@@ -4,7 +4,7 @@ import * as TSNode from 'ts-node'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, readJsonSync, safeReadJson} from '../util/fs'
+import {existsSync, safeReadJson} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
@@ -15,62 +15,32 @@ const debug = Debug('ts-node')
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
-/**
- * @deprecated use loadTSConfig instead since it's able to merge extended tsconfig.json files
- */
-function loadTSConfigSync(root: string): TSConfig | undefined {
-  if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-  const tsconfigPath = join(root, 'tsconfig.json')
-  let typescript: typeof import('typescript') | undefined
+async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
-    typescript = require('typescript')
-  } catch {
-    try {
-      typescript = require(require.resolve('typescript', {paths: [root, __dirname]}))
-    } catch {
-      debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(
-        'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
-      )
-      return
-    }
-  }
-
-  if (existsSync(tsconfigPath) && typescript) {
-    const tsconfig = typescript.parseConfigFileTextToJson(tsconfigPath, readJsonSync(tsconfigPath, false)).config
-    if (!tsconfig || !tsconfig.compilerOptions) {
-      throw new Error(
-        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it did not contain a "compilerOptions" section.`,
-      )
-    }
+    if (TS_CONFIGS[root]) return TS_CONFIGS[root]
+    const tsconfigPath = join(root, 'tsconfig.json')
+    const tsconfig = await safeReadJson<TSConfig>(tsconfigPath)
+    if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
 
     TS_CONFIGS[root] = tsconfig
-    return tsconfig
-  }
-}
 
-async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
-  if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-  const tsconfigPath = join(root, 'tsconfig.json')
-  const tsconfig = await safeReadJson<TSConfig>(tsconfigPath)
-  if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
-
-  try {
-    const {parse} = await import('tsconfck')
-    const result = await parse(tsconfigPath, {})
-    let tsNodeOpts = {}
-    for (const extended of (result.extended ?? []).reverse()) {
-      if (extended.tsconfig['ts-node']) {
-        tsNodeOpts = {...tsNodeOpts, ...extended.tsconfig['ts-node']}
+    if (tsconfig.extends) {
+      const {parse} = await import('tsconfck')
+      const result = await parse(tsconfigPath, {})
+      let tsNodeOpts = {}
+      for (const extended of (result.extended ?? []).reverse()) {
+        if (extended.tsconfig['ts-node']) {
+          tsNodeOpts = {...tsNodeOpts, ...extended.tsconfig['ts-node']}
+        }
       }
+
+      const final = {...result.tsconfig, 'ts-node': tsNodeOpts}
+
+      TS_CONFIGS[root] = final
     }
 
-    const final = {...result.tsconfig, 'ts-node': tsNodeOpts}
-
-    TS_CONFIGS[root] = final
-    return final
-  } catch (error) {
-    console.log(error)
+    return TS_CONFIGS[root]
+  } catch {
     debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
     memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
@@ -218,8 +188,18 @@ function determinePath(root: string, orig: string, tsconfig: TSConfig): string {
   return orig
 }
 
-function shouldUseOriginal(root: string, orig: string, plugin?: Plugin): string | false {
+/**
+ * Convert a path from the compiled ./lib files to the ./src typescript source
+ * this is for developing typescript plugins/CLIs
+ * if there is a tsconfig and the original sources exist, it attempts to require ts-node
+ */
+export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
   const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
+
+  if (!orig) return orig
+  orig = orig.startsWith(root) ? orig : join(root, orig)
 
   // NOTE: The order of these checks matter!
 
@@ -259,57 +239,6 @@ function shouldUseOriginal(root: string, orig: string, plugin?: Plugin): string 
     )
     return orig
   }
-
-  return false
-}
-
-/**
- * @deprecated use tsPath instead since it's able to merge extended tsconfig.json files
- */
-export function tsPathSync(root: string, orig: string, plugin: Plugin): string
-/**
- * @deprecated use tsPath instead since it's able to merge extended tsconfig.json files
- */
-export function tsPathSync(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
-/**
- * Convert a path from the compiled ./lib files to the ./src typescript source
- * this is for developing typescript plugins/CLIs
- * if there is a tsconfig and the original sources exist, it attempts to require ts-node
- *
- * @deprecated use tsPath instead since it's able to merge extended tsconfig.json files
- */
-export function tsPathSync(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
-  if (!orig) return orig
-  orig = orig.startsWith(root) ? orig : join(root, orig)
-
-  const originalPath = shouldUseOriginal(root, orig, plugin)
-  if (originalPath) return originalPath
-
-  try {
-    const tsconfig = loadTSConfigSync(root)
-    if (!tsconfig) return orig
-
-    registerTSNode(root, tsconfig)
-    return determinePath(root, orig, tsconfig)
-  } catch (error: any) {
-    debug(error)
-    return orig
-  }
-}
-
-/**
- * Convert a path from the compiled ./lib files to the ./src typescript source
- * this is for developing typescript plugins/CLIs
- * if there is a tsconfig and the original sources exist, it attempts to require ts-node
- */
-export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
-  if (!orig) return orig
-  orig = orig.startsWith(root) ? orig : join(root, orig)
-
-  const originalPath = shouldUseOriginal(root, orig, plugin)
-  if (originalPath) return originalPath
 
   try {
     const tsconfig = await loadTSConfig(root)
