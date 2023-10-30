@@ -4,7 +4,7 @@ import * as TSNode from 'ts-node'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, safeReadJson} from '../util/fs'
+import {existsSync, readJson} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
@@ -19,7 +19,8 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
     const tsconfigPath = join(root, 'tsconfig.json')
-    const tsconfig = await safeReadJson<TSConfig>(tsconfigPath)
+    const tsconfig = await readJson<TSConfig>(tsconfigPath)
+
     if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
 
     TS_CONFIGS[root] = tsconfig
@@ -40,9 +41,11 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
     }
 
     return TS_CONFIGS[root]
-  } catch {
-    debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
-    memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
+      memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
+    }
   }
 }
 
@@ -84,11 +87,11 @@ function registerTSNode(root: string, tsconfig: TSConfig): void {
   // don't conflict.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
-
   const conf: TSNode.RegisterOptions = {
     compilerOptions: {
       ...rest,
       rootDirs,
+      // target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
     },
     ...tsconfig['ts-node'],
