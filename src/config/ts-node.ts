@@ -52,8 +52,8 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
 async function registerTSNode(root: string): Promise<TSConfig | undefined> {
   const tsconfig = await loadTSConfig(root)
   if (!tsconfig) return
+  if (REGISTERED.has(root)) return tsconfig
 
-  if (REGISTERED.has(root)) return
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   debug('ts-node path:', tsNodePath)
