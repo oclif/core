@@ -1,6 +1,7 @@
 import {expect} from 'chai'
 import {join, resolve} from 'node:path'
 import {SinonSandbox, createSandbox} from 'sinon'
+import stripAnsi from 'strip-ansi'
 import * as tsNode from 'ts-node'
 
 import write from '../../src/cli-ux/write'
@@ -110,6 +111,6 @@ describe('tsPath', () => {
     const stderrStub = sandbox.stub(write, 'stderr')
     const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
-    expect(stderrStub.firstCall.firstArg).to.include('Falling back to compiled source')
+    expect(stripAnsi(stderrStub.firstCall.firstArg).split('\n').at(-1)).to.include('Falling back to compiled source')
   })
 })
