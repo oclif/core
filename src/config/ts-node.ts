@@ -73,32 +73,31 @@ function registerTSNode(root: string, tsconfig: TSConfig): void {
     }
   } else if (tsconfig.compilerOptions.rootDir) {
     rootDirs.push(join(root, tsconfig.compilerOptions.rootDir))
+  } else if (tsconfig.compilerOptions.baseUrl) {
+    rootDirs.push(join(root, tsconfig.compilerOptions.baseUrl))
   } else {
     rootDirs.push(join(root, 'src'))
   }
 
+  // Because we need to provide a modified `rootDirs` to ts-node, we need to
+  // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
+  // don't conflict.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
+
   const conf: TSNode.RegisterOptions = {
     compilerOptions: {
-      emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
-      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
-      module: tsconfig.compilerOptions.module ?? 'commonjs',
+      ...rest,
       rootDirs,
-      sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
-      target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
-      ...(tsconfig.compilerOptions.moduleResolution
-        ? {moduleResolution: tsconfig.compilerOptions.moduleResolution}
-        : {}),
-      ...(tsconfig.compilerOptions.jsx ? {jsx: tsconfig.compilerOptions.jsx} : {}),
     },
+    ...tsconfig['ts-node'],
     cwd: root,
     esm: tsconfig['ts-node']?.esm ?? true,
     experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
     scope: true,
     scopeDir: root,
     skipProject: true,
-    swc: tsconfig['ts-node']?.swc ?? false,
     transpileOnly: true,
   }
 

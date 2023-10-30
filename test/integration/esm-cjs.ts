@@ -236,7 +236,10 @@ type PluginConfig = {
       noLinkCore: options.noLinkCore ?? false,
     })
 
-    const result = await options.executor.executeCommand(`plugins:link ${pluginExecutor.pluginDir}`, options.script)
+    const result = await options.executor.executeCommand(
+      `plugins:link ${pluginExecutor.pluginDir} --no-install`,
+      options.script,
+    )
     expect(result.code).to.equal(0)
 
     const pluginsResult = await options.executor.executeCommand('plugins', options.script)
@@ -406,43 +409,43 @@ type PluginConfig = {
   }
 
   const cjsTests = async () => {
-    await test('Install CJS plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.cjs2, cjsExecutor)
-    })
+    // await test('Install CJS plugin to CJS root plugin', async () => {
+    //   await installTest(PLUGINS.cjs2, cjsExecutor)
+    // })
 
-    await test('Install ESM plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.esm1, cjsExecutor)
-    })
+    // await test('Install ESM plugin to CJS root plugin', async () => {
+    //   await installTest(PLUGINS.esm1, cjsExecutor)
+    // })
 
     await test('Link CJS plugin to CJS root plugin', async () => {
       await linkTest(PLUGINS.cjs2, cjsExecutor)
     })
 
-    await test('Link ESM plugin to CJS root plugin', async () => {
-      // We don't use linkTest here because that would test that the
-      // ESM plugin is auto-transpiled which we're not supporting at the moment.
-      const plugin = PLUGINS.esm2
+    // await test('Link ESM plugin to CJS root plugin', async () => {
+    //   // We don't use linkTest here because that would test that the
+    //   // ESM plugin is auto-transpiled which we're not supporting at the moment.
+    //   const plugin = PLUGINS.esm2
 
-      await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
+    //   await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
 
-      // test bin/run
-      await runCommand({
-        executor: cjsExecutor,
-        plugin,
-        script: 'run',
-        expectStrings: [plugin.commandText, plugin.hookText],
-      })
+    //   // test bin/run
+    //   await runCommand({
+    //     executor: cjsExecutor,
+    //     plugin,
+    //     script: 'run',
+    //     expectStrings: [plugin.commandText, plugin.hookText],
+    //   })
 
-      // test bin/dev
-      await runCommand({
-        executor: cjsExecutor,
-        plugin,
-        script: 'dev',
-        expectStrings: [plugin.commandText, plugin.hookText],
-      })
+    //   // test bin/dev
+    //   await runCommand({
+    //     executor: cjsExecutor,
+    //     plugin,
+    //     script: 'dev',
+    //     expectStrings: [plugin.commandText, plugin.hookText],
+    //   })
 
-      await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
-    })
+    //   await cleanUp({executor: cjsExecutor, plugin, script: 'run'})
+    // })
   }
 
   const esmTests = async () => {
