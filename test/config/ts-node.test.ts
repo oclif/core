@@ -111,6 +111,6 @@ describe('tsPath', () => {
     const stderrStub = sandbox.stub(write, 'stderr')
     const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
-    expect(stripAnsi(stderrStub.firstCall.firstArg).split('\n').at(-1)).to.include('Falling back to compiled source')
+    expect(stripAnsi(stderrStub.firstCall.firstArg).split('\n').join(' ')).to.include('Falling back to compiled source')
   })
 })

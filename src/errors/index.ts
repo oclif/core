@@ -35,7 +35,7 @@ export function error(input: Error | string, options: {exit?: false | number} & 
 
   if (options.exit === false) {
     const message = prettyPrint(err)
-    if (message) write.stderr(message)
+    if (message) write.stderr(message + '\n')
     if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
   } else throw err
 }
@@ -52,7 +52,7 @@ export function warn(input: Error | string): void {
   }
 
   const message = prettyPrint(err)
-  if (message) write.stderr(message)
+  if (message) write.stderr(message + '\n')
   if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
 }
 
