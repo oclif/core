@@ -1,3 +1,12 @@
+## [3.9.2](https://github.com/oclif/core/compare/3.9.1...3.9.2) (2023-10-30)
+
+
+### Bug Fixes
+
+* support `hasDynamicHelp` for v2 commands ([#844](https://github.com/oclif/core/issues/844)) ([1b1e053](https://github.com/oclif/core/commit/1b1e053e47e3e5dcd529db3d0fe8a9dd282c56bf))
+
+
+
 ## [3.9.1](https://github.com/oclif/core/compare/3.9.0...3.9.1) (2023-10-27)
 
 
