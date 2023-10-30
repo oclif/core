@@ -121,15 +121,14 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      const commandsDir = await this.getCommandsDir()
-      if (!commandsDir) return
+      if (!this.commandsDir) return
       let module
       let isESM: boolean | undefined
       let filePath: string | undefined
       try {
         ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
           ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
@@ -152,12 +151,11 @@ export class Plugin implements IPlugin {
   }
 
   public async getCommandIDs(): Promise<string[]> {
-    const commandsDir = await this.getCommandsDir()
-    if (!commandsDir) return []
+    if (!this.commandsDir) return []
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
-    this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
+    this._debug(`loading IDs from ${this.commandsDir}`)
+    const files = await globby(GLOB_PATTERNS, {cwd: this.commandsDir})
     const ids = processCommandIds(files)
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
@@ -256,11 +254,10 @@ export class Plugin implements IPlugin {
       }
     }
 
-    const commandIDs = await this.getCommandIDs()
     const manifest = {
       commands: (
         await Promise.all(
-          commandIDs.map(async (id) => {
+          this.commandIDs.map(async (id) => {
             try {
               const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
               if (this.flexibleTaxonomy) {

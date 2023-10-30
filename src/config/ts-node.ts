@@ -49,7 +49,10 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   }
 }
 
-function registerTSNode(root: string, tsconfig: TSConfig): void {
+async function registerTSNode(root: string): Promise<TSConfig | undefined> {
+  const tsconfig = await loadTSConfig(root)
+  if (!tsconfig) return
+
   if (REGISTERED.has(root)) return
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
@@ -91,7 +94,6 @@ function registerTSNode(root: string, tsconfig: TSConfig): void {
     compilerOptions: {
       ...rest,
       rootDirs,
-      // target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
     },
     ...tsconfig['ts-node'],
@@ -108,6 +110,8 @@ function registerTSNode(root: string, tsconfig: TSConfig): void {
   REGISTERED.add(root)
   debug('tsconfig: %O', tsconfig)
   debug('ts-node options: %O', conf)
+
+  return tsconfig
 }
 
 /**
@@ -150,7 +154,10 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
 /**
  * Determine the path to the source file from the compiled ./lib files
  */
-function determinePath(root: string, orig: string, tsconfig: TSConfig): string {
+async function determinePath(root: string, orig: string): Promise<string> {
+  const tsconfig = await registerTSNode(root)
+  if (!tsconfig) return orig
+
   debug(`determining path for ${orig}`)
   const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
   const rootDirPath = rootDir ?? (rootDirs ?? [])[0] ?? baseUrl
@@ -243,11 +250,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
   }
 
   try {
-    const tsconfig = await loadTSConfig(root)
-    if (!tsconfig) return orig
-
-    registerTSNode(root, tsconfig)
-    return determinePath(root, orig, tsconfig)
+    return await determinePath(root, orig)
   } catch (error: any) {
     debug(error)
     return orig
