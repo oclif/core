@@ -36,8 +36,7 @@ describe('typescript', () => {
   })
 
   withConfig.stdout().it('runs init hook', async (ctx) => {
-    // to-do: fix union types
-    await (ctx.config.runHook as any)('init', {id: 'myid', argv: ['foo']})
+    await ctx.config.runHook('init', {id: 'myid', argv: ['foo']})
     expect(ctx.stdout).to.equal('running ts init hook\n')
   })
 })
