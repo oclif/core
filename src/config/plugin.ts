@@ -63,7 +63,7 @@ export class Plugin implements IPlugin {
 
   children: Plugin[] = []
 
-  commandIDs!: string[]
+  commandIDs: string[] = []
 
   commands!: Command.Loadable[]
 
@@ -148,23 +148,6 @@ export class Plugin implements IPlugin {
     if (!cmd && opts.must) error(`command ${id} not found`)
     marker?.stop()
     return cmd
-  }
-
-  public async getCommandIDs(): Promise<string[]> {
-    if (!this.commandsDir) return []
-
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
-    this._debug(`loading IDs from ${this.commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: this.commandsDir})
-    const ids = processCommandIds(files)
-    this._debug('found commands', ids)
-    marker?.addDetails({count: ids.length})
-    marker?.stop()
-    return ids
-  }
-
-  public async getCommandsDir(): Promise<string | undefined> {
-    return tsPath(this.root, this.pjson.oclif.commands, this)
   }
 
   public async load(): Promise<void> {
@@ -302,6 +285,23 @@ export class Plugin implements IPlugin {
       'See more details with DEBUG=*',
     ]).join('\n')
     return err
+  }
+
+  private async getCommandIDs(): Promise<string[]> {
+    if (!this.commandsDir) return []
+
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
+    this._debug(`loading IDs from ${this.commandsDir}`)
+    const files = await globby(GLOB_PATTERNS, {cwd: this.commandsDir})
+    const ids = processCommandIds(files)
+    this._debug('found commands', ids)
+    marker?.addDetails({count: ids.length})
+    marker?.stop()
+    return ids
+  }
+
+  private async getCommandsDir(): Promise<string | undefined> {
+    return tsPath(this.root, this.pjson.oclif.commands, this)
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
