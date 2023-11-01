@@ -67,7 +67,7 @@ export class Plugin implements IPlugin {
 
   commands!: Command.Loadable[]
 
-  commandsDir!: string | undefined
+  commandsDir: string | undefined
 
   hasManifest = false
 
@@ -183,11 +183,14 @@ export class Plugin implements IPlugin {
     this.commandsDir = await this.getCommandsDir()
     this.commandIDs = await this.getCommandIDs()
 
-    this.hooks = {}
-    for (const [k, v] of Object.entries(this.pjson.oclif.hooks ?? {})) {
-      // eslint-disable-next-line no-await-in-loop
-      this.hooks[k] = await Promise.all(castArray(v).map(async (i) => tsPath(this.root, i, this)))
-    }
+    this.hooks = Object.fromEntries(
+      await Promise.all(
+        Object.entries(this.pjson.oclif.hooks ?? {}).map(async ([k, v]) => [
+          k,
+          await Promise.all(castArray(v).map(async (i) => tsPath(this.root, i, this))),
+        ]),
+      ),
+    )
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
