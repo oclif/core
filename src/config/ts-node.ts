@@ -27,9 +27,9 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
 
     if (tsconfig.extends) {
       const {parse} = await import('tsconfck')
-      const result = await parse(tsconfigPath, {})
+      const result = await parse(tsconfigPath)
       const tsNodeOpts = Object.fromEntries(
-        (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})),
+        (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
       )
 
       TS_CONFIGS[root] = {...result.tsconfig, 'ts-node': tsNodeOpts}
