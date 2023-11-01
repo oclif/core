@@ -162,7 +162,7 @@ export class Plugin implements IPlugin {
       this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
-    this._debug('reading %s plugin %s', this.type, root)
+    this._debug(`loading ${this.type} plugin from ${root}`)
     this.pjson = await readJson(join(root, 'package.json'))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'

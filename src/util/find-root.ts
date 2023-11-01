@@ -1,10 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import type {PackageInformation, PackageLocator, getPackageInformation} from 'pnpapi'
 
+import makeDebug from 'debug'
 import {basename, dirname, join} from 'node:path'
 
 import {PJSON} from '../interfaces'
 import {safeReadJson} from './fs'
+
+const debug = makeDebug('find-root')
 
 // essentially just "cd .."
 function* up(from: string) {
@@ -26,7 +29,9 @@ async function findPluginRoot(root: string, name?: string) {
   // If we know the plugin name then we just need to traverse the file
   // system until we find the directory that matches the plugin name.
   if (name) {
+    debug.extend(name)(`Finding root starting at ${root}`)
     for (const next of up(root)) {
+      debug.extend(name)(`Checking ${next}`)
       if (next.endsWith(basename(name))) return next
     }
   }
@@ -44,6 +49,7 @@ async function findPluginRoot(root: string, name?: string) {
 
     try {
       const cur = join(next, 'package.json')
+      debug.extend('root-plugin')(`Checking ${cur}`)
       if (await safeReadJson<PJSON>(cur)) return dirname(cur)
     } catch {}
   }
@@ -56,6 +62,7 @@ async function findPluginRoot(root: string, name?: string) {
  * See https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
 async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
+  debug.extend(name ?? 'root-plugin')('Finding root using legacy method')
   for (const next of up(root)) {
     let cur
     if (name) {
@@ -106,9 +113,9 @@ const isPeerDependency = (
  */
 function findPnpRoot(name: string, root: string): string | undefined {
   maybeRequirePnpApi(root)
-
   if (!pnp) return
 
+  debug.extend(name)('Finding root for using pnp method')
   const seen = new Set()
 
   const traverseDependencyTree = (locator: PackageLocator, parentPkg?: PackageInformation): string | undefined => {
@@ -165,15 +172,30 @@ function findPnpRoot(name: string, root: string): string | undefined {
  */
 export async function findRoot(name: string | undefined, root: string) {
   if (name) {
+    debug.extend(name)(`Finding root using ${root}`)
     let pkgPath
     try {
       pkgPath = require.resolve(name, {paths: [root]})
-    } catch {}
+      debug.extend(name)(`Found starting point with require.resolve`)
+    } catch {
+      debug.extend(name)(`require.resolve could not find plugin starting point`)
+    }
 
-    if (pkgPath) return findPluginRoot(dirname(pkgPath), name)
+    if (pkgPath) {
+      const found = await findPluginRoot(dirname(pkgPath), name)
+      if (found) {
+        debug.extend(name)(`Found root at ${found}`)
+        return found
+      }
+    }
 
-    return process.versions.pnp ? findPnpRoot(name, root) : findRootLegacy(name, root)
+    const found = process.versions.pnp ? findPnpRoot(name, root) : await findRootLegacy(name, root)
+    debug.extend(name)(found ? `Found root at ${found}` : 'No root found!')
+    return found
   }
 
-  return findPluginRoot(root)
+  debug.extend('root-plugin')(`Finding root plugin using ${root}`)
+  const found = await findPluginRoot(root)
+  debug.extend('root-plugin')(found ? `Found root at ${found}` : 'No root found!')
+  return found
 }
