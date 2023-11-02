@@ -2,8 +2,6 @@ import {Stats, existsSync as fsExistsSync, readFileSync} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 import {join} from 'node:path'
 
-const debug = require('debug')
-
 export function requireJson<T>(...pathParts: string[]): T {
   return JSON.parse(readFileSync(join(...pathParts), 'utf8'))
 }
@@ -51,7 +49,6 @@ export const fileExists = async (input: string): Promise<string> => {
 }
 
 export async function readJson<T = unknown>(path: string): Promise<T> {
-  debug('config')('readJson %s', path)
   const contents = await readFile(path, 'utf8')
   return JSON.parse(contents) as T
 }

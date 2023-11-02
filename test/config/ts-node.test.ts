@@ -1,10 +1,12 @@
 import {expect} from 'chai'
 import {join, resolve} from 'node:path'
 import {SinonSandbox, createSandbox} from 'sinon'
+import stripAnsi from 'strip-ansi'
 import * as tsNode from 'ts-node'
 
-import {Interfaces, settings} from '../../src'
+import write from '../../src/cli-ux/write'
 import * as configTsNode from '../../src/config/ts-node'
+import {Interfaces, settings} from '../../src/index'
 import * as util from '../../src/util/fs'
 
 const root = resolve(__dirname, 'fixtures/typescript')
@@ -27,7 +29,6 @@ describe('tsPath', () => {
 
   beforeEach(() => {
     sandbox = createSandbox()
-    sandbox.stub(util, 'existsSync').returns(true)
     sandbox.stub(tsNode, 'register')
   })
 
@@ -42,49 +43,76 @@ describe('tsPath', () => {
     configTsNode.REGISTERED = new Set()
   })
 
-  it('should resolve a .js file to ts src', () => {
-    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
-    const result = configTsNode.tsPath(root, jsCompiled)
+  it('should resolve a .js file to ts src', async () => {
+    sandbox.stub(util, 'readJson').resolves(DEFAULT_TS_CONFIG)
+    const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, tsModule))
   })
 
-  it('should resolve a module file to ts src', () => {
-    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
-    const result = configTsNode.tsPath(root, jsCompiledModule)
+  it('should resolve a module file to ts src', async () => {
+    sandbox.stub(util, 'readJson').resolves(DEFAULT_TS_CONFIG)
+    const result = await configTsNode.tsPath(root, jsCompiledModule)
     expect(result).to.equal(join(root, tsModule))
   })
 
-  it('should resolve a .ts file', () => {
-    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
-    const result = configTsNode.tsPath(root, tsSource)
+  it('should resolve a .ts file', async () => {
+    sandbox.stub(util, 'readJson').resolves(DEFAULT_TS_CONFIG)
+    const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
   })
 
-  it('should resolve .js with no rootDir or outDir', () => {
-    sandbox.stub(util, 'readJsonSync').returns({compilerOptions: {}})
-    const result = configTsNode.tsPath(root, jsCompiled)
+  it('should resolve a .ts file using baseUrl', async () => {
+    sandbox.stub(util, 'readJson').resolves({
+      compilerOptions: {
+        baseUrl: '.src/',
+        outDir: 'lib',
+      },
+    })
+    const result = await configTsNode.tsPath(root, tsSource)
+    expect(result).to.equal(join(root, tsSource))
+  })
+
+  it('should resolve .ts with no outDir', async () => {
+    sandbox.stub(util, 'readJson').resolves({compilerOptions: {rootDir: 'src'}})
+    const result = await configTsNode.tsPath(root, tsSource)
+    expect(result).to.equal(join(root, tsSource))
+  })
+
+  it('should resolve .js with no rootDir and outDir', async () => {
+    sandbox.stub(util, 'readJson').resolves({compilerOptions: {strict: true}})
+    const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
   })
 
-  it('should resolve to .ts file if enabled and prod', () => {
-    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+  it('should resolve to .ts file if enabled and prod', async () => {
+    sandbox.stub(util, 'readJson').resolves(DEFAULT_TS_CONFIG)
     settings.tsnodeEnabled = true
     const originalNodeEnv = process.env.NODE_ENV
     delete process.env.NODE_ENV
 
-    const result = configTsNode.tsPath(root, jsCompiled)
+    const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, tsModule))
 
     process.env.NODE_ENV = originalNodeEnv
     delete settings.tsnodeEnabled
   })
 
-  it('should resolve to js if disabled', () => {
-    sandbox.stub(util, 'readJsonSync').returns(JSON.stringify(DEFAULT_TS_CONFIG))
+  it('should resolve to js if disabled', async () => {
+    sandbox.stub(util, 'readJson').resolves(DEFAULT_TS_CONFIG)
     settings.tsnodeEnabled = false
-    const result = configTsNode.tsPath(root, jsCompiled)
+    const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
 
     delete settings.tsnodeEnabled
+  })
+
+  it('should handle SyntaxError', async () => {
+    sandbox.stub(util, 'readJson').throws(new SyntaxError('Unexpected token } in JSON at position 0'))
+    const stderrStub = sandbox.stub(write, 'stderr')
+    const result = await configTsNode.tsPath(root, tsSource)
+    expect(result).to.equal(join(root, tsSource))
+    expect(stripAnsi(stderrStub.firstCall.firstArg).split('\n').join(' ')).to.include(
+      'Warning: Could not parse tsconfig.json',
+    )
   })
 })

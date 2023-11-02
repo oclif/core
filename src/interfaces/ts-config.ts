@@ -13,9 +13,11 @@ export interface TSConfig {
     sourceMap?: boolean
     target?: string
   }
+  extends?: string
   'ts-node'?: {
     esm?: boolean
     experimentalSpecifierResolution?: 'explicit' | 'node'
     scope?: boolean
+    swc?: boolean
   }
 }

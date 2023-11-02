@@ -294,6 +294,7 @@ describe('Config', () => {
         hasManifest: false,
         isRoot: false,
         options: {root: ''},
+        commandsDir: './lib/commands',
       }
 
       const pluginB: IPlugin = {
@@ -316,6 +317,7 @@ describe('Config', () => {
         hasManifest: false,
         isRoot: false,
         options: {root: ''},
+        commandsDir: './lib/commands',
       }
       const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
       let test = fancy

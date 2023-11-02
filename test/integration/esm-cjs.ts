@@ -236,7 +236,10 @@ type PluginConfig = {
       noLinkCore: options.noLinkCore ?? false,
     })
 
-    const result = await options.executor.executeCommand(`plugins:link ${pluginExecutor.pluginDir}`, options.script)
+    const result = await options.executor.executeCommand(
+      `plugins:link ${pluginExecutor.pluginDir} --no-install`,
+      options.script,
+    )
     expect(result.code).to.equal(0)
 
     const pluginsResult = await options.executor.executeCommand('plugins', options.script)

@@ -1,3 +1,4 @@
+import write from '../cli-ux/write'
 import {OclifError, PrettyPrintableError} from '../interfaces'
 import {config} from './config'
 import {CLIError, addOclifExitCode} from './errors/cli'
@@ -32,7 +33,7 @@ export function error(input: Error | string, options: {exit?: false | number} & 
 
   if (options.exit === false) {
     const message = prettyPrint(err)
-    console.error(message)
+    if (message) write.stderr(message + '\n')
     if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
   } else throw err
 }
@@ -49,7 +50,7 @@ export function warn(input: Error | string): void {
   }
 
   const message = prettyPrint(err)
-  console.error(message)
+  if (message) write.stderr(message + '\n')
   if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
 }
 

@@ -4,7 +4,7 @@ import * as TSNode from 'ts-node'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, readJsonSync} from '../util/fs'
+import {existsSync, readJson} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
@@ -15,42 +15,40 @@ const debug = Debug('ts-node')
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
-function loadTSConfig(root: string): TSConfig | undefined {
-  if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-  const tsconfigPath = join(root, 'tsconfig.json')
-  let typescript: typeof import('typescript') | undefined
+async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
-    typescript = require('typescript')
-  } catch {
-    try {
-      typescript = require(require.resolve('typescript', {paths: [root, __dirname]}))
-    } catch {
-      debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(
-        'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
-      )
-      return
-    }
-  }
+    if (TS_CONFIGS[root]) return TS_CONFIGS[root]
+    const tsconfigPath = join(root, 'tsconfig.json')
+    const tsconfig = await readJson<TSConfig>(tsconfigPath)
 
-  if (existsSync(tsconfigPath) && typescript) {
-    const tsconfig = typescript.parseConfigFileTextToJson(tsconfigPath, readJsonSync(tsconfigPath, false)).config
-    if (!tsconfig || !tsconfig.compilerOptions) {
-      throw new Error(
-        `Could not read and parse tsconfig.json at ${tsconfigPath}, or it ` +
-          'did not contain a "compilerOptions" section.',
-      )
-    }
+    if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
 
     TS_CONFIGS[root] = tsconfig
-    return tsconfig
+
+    if (tsconfig.extends) {
+      const {parse} = await import('tsconfck')
+      const result = await parse(tsconfigPath)
+      const tsNodeOpts = Object.fromEntries(
+        (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
+      )
+
+      TS_CONFIGS[root] = {...result.tsconfig, 'ts-node': tsNodeOpts}
+    }
+
+    return TS_CONFIGS[root]
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
+      memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
+    }
   }
 }
 
-function registerTSNode(root: string): TSConfig | undefined {
-  const tsconfig = loadTSConfig(root)
+async function registerTSNode(root: string): Promise<TSConfig | undefined> {
+  const tsconfig = await loadTSConfig(root)
   if (!tsconfig) return
   if (REGISTERED.has(root)) return tsconfig
+
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   debug('ts-node path:', tsNodePath)
@@ -76,25 +74,24 @@ function registerTSNode(root: string): TSConfig | undefined {
     }
   } else if (tsconfig.compilerOptions.rootDir) {
     rootDirs.push(join(root, tsconfig.compilerOptions.rootDir))
+  } else if (tsconfig.compilerOptions.baseUrl) {
+    rootDirs.push(join(root, tsconfig.compilerOptions.baseUrl))
   } else {
     rootDirs.push(join(root, 'src'))
   }
 
+  // Because we need to provide a modified `rootDirs` to ts-node, we need to
+  // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
+  // don't conflict.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
   const conf: TSNode.RegisterOptions = {
     compilerOptions: {
-      emitDecoratorMetadata: tsconfig.compilerOptions.emitDecoratorMetadata ?? false,
-      esModuleInterop: tsconfig.compilerOptions.esModuleInterop,
-      experimentalDecorators: tsconfig.compilerOptions.experimentalDecorators ?? false,
-      module: tsconfig.compilerOptions.module ?? 'commonjs',
+      ...rest,
       rootDirs,
-      sourceMap: tsconfig.compilerOptions.sourceMap ?? true,
-      target: tsconfig.compilerOptions.target ?? 'es2019',
       typeRoots,
-      ...(tsconfig.compilerOptions.moduleResolution
-        ? {moduleResolution: tsconfig.compilerOptions.moduleResolution}
-        : {}),
-      ...(tsconfig.compilerOptions.jsx ? {jsx: tsconfig.compilerOptions.jsx} : {}),
     },
+    ...tsconfig['ts-node'],
     cwd: root,
     esm: tsconfig['ts-node']?.esm ?? true,
     experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
@@ -106,7 +103,9 @@ function registerTSNode(root: string): TSConfig | undefined {
 
   tsNode.register(conf)
   REGISTERED.add(root)
-  debug('%O', tsconfig)
+  debug('tsconfig: %O', tsconfig)
+  debug('ts-node options: %O', conf)
+
   return tsconfig
 }
 
@@ -150,9 +149,10 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
 /**
  * Determine the path to the source file from the compiled ./lib files
  */
-function determinePath(root: string, orig: string): string {
-  const tsconfig = registerTSNode(root)
+async function determinePath(root: string, orig: string): Promise<string> {
+  const tsconfig = await registerTSNode(root)
   if (!tsconfig) return orig
+
   debug(`determining path for ${orig}`)
   const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
   const rootDirPath = rootDir ?? (rootDirs ?? [])[0] ?? baseUrl
@@ -197,9 +197,9 @@ function determinePath(root: string, orig: string): string {
  * this is for developing typescript plugins/CLIs
  * if there is a tsconfig and the original sources exist, it attempts to require ts-node
  */
-export function tsPath(root: string, orig: string, plugin: Plugin): string
-export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined
-export function tsPath(root: string, orig: string | undefined, plugin?: Plugin): string | undefined {
+export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
   const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig
@@ -245,7 +245,7 @@ export function tsPath(root: string, orig: string | undefined, plugin?: Plugin):
   }
 
   try {
-    return determinePath(root, orig)
+    return await determinePath(root, orig)
   } catch (error: any) {
     debug(error)
     return orig
