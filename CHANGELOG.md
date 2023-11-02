@@ -1,3 +1,12 @@
+# [3.10.0](https://github.com/oclif/core/compare/3.9.2...3.10.0) (2023-11-02)
+
+
+### Features
+
+* read extended tsconfigs ([#845](https://github.com/oclif/core/issues/845)) ([59145ee](https://github.com/oclif/core/commit/59145ee40ec33f70aec3fb79c1431de19e7fb041))
+
+
+
 ## [3.9.2](https://github.com/oclif/core/compare/3.9.1...3.9.2) (2023-10-30)
 
 
