@@ -15,7 +15,7 @@ export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
 function isErrno(error: any): error is NodeJS.ErrnoException {
-  return 'code' in error
+  return 'code' in error && error.code === 'ENOENT'
 }
 
 async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
