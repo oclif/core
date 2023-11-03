@@ -60,9 +60,21 @@ export function readJsonSync<T = unknown>(path: string, parse = true): T | strin
   return parse ? (JSON.parse(contents) as T) : contents
 }
 
+/**
+ * Read a JSON file, returning undefined if the file does not exist.
+ */
 export async function safeReadJson<T>(path: string): Promise<T | undefined> {
   try {
     return await readJson<T>(path)
+  } catch {}
+}
+
+/**
+ * Read a file, returning undefined if the file does not exist.
+ */
+export async function safeReadFile(path: string): Promise<string | undefined> {
+  try {
+    return await readFile(path, 'utf8')
   } catch {}
 }
 

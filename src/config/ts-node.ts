@@ -1,11 +1,10 @@
-import {readFile} from 'node:fs/promises'
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync} from '../util/fs'
+import {existsSync, safeReadFile} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
@@ -38,11 +37,15 @@ function importTypescript(root: string) {
 async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-    const tsconfigPath = join(root, 'tsconfig.json')
+
     const typescript = importTypescript(root)
     if (!typescript) return
 
-    const {config} = typescript.parseConfigFileTextToJson(tsconfigPath, await readFile(tsconfigPath, 'utf8'))
+    const tsconfigPath = join(root, 'tsconfig.json')
+    const raw = await safeReadFile(tsconfigPath)
+    if (!raw) return
+
+    const {config} = typescript.parseConfigFileTextToJson(tsconfigPath, raw)
 
     if (!config || Object.keys(config.compilerOptions).length === 0) return
 
