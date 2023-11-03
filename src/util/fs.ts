@@ -69,3 +69,12 @@ export async function safeReadJson<T>(path: string): Promise<T | undefined> {
 export function existsSync(path: string): boolean {
   return fsExistsSync(path)
 }
+
+export async function readTSConfig(path: string) {
+  const {parse} = await import('tsconfck')
+  const result = await parse(path)
+  const tsNodeOpts = Object.fromEntries(
+    (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
+  )
+  return {...result.tsconfig, 'ts-node': tsNodeOpts}
+}

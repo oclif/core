@@ -4,43 +4,32 @@ import * as TSNode from 'ts-node'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, readJson} from '../util/fs'
+import {existsSync, readTSConfig} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
-
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
+function isErrno(error: any): error is NodeJS.ErrnoException {
+  return 'code' in error && error.code === 'ENOENT'
+}
+
 async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
-    const tsconfigPath = join(root, 'tsconfig.json')
-    const tsconfig = await readJson<TSConfig>(tsconfigPath)
 
-    if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
-
-    TS_CONFIGS[root] = tsconfig
-
-    if (tsconfig.extends) {
-      const {parse} = await import('tsconfck')
-      const result = await parse(tsconfigPath)
-      const tsNodeOpts = Object.fromEntries(
-        (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
-      )
-
-      TS_CONFIGS[root] = {...result.tsconfig, 'ts-node': tsNodeOpts}
-    }
+    TS_CONFIGS[root] = await readTSConfig(join(root, 'tsconfig.json'))
 
     return TS_CONFIGS[root]
   } catch (error) {
-    if (error instanceof SyntaxError) {
-      debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
-    }
+    if (isErrno(error)) return
+
+    debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
+    memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
 }
 
