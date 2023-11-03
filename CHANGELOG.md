@@ -1,3 +1,15 @@
+## [3.10.1](https://github.com/oclif/core/compare/3.10.0...3.10.1) (2023-11-03)
+
+
+### Bug Fixes
+
+* check for ENOENT code ([44fb9dc](https://github.com/oclif/core/commit/44fb9dc40a307ea1656e726806b62c9d165ae32f))
+* handle non-existent tsconfig ([0b15536](https://github.com/oclif/core/commit/0b15536b1b021eec182b18e99d5ab2b6c9deacd3))
+* support jsonc tsconfig ([026f835](https://github.com/oclif/core/commit/026f8358006eea5651961070d77105111e1a37a2))
+* use tsconfck to handle json-c ([7f0c9f0](https://github.com/oclif/core/commit/7f0c9f0a78c9d4f78bbdcc8b174aef01a007a918))
+
+
+
 # [3.10.0](https://github.com/oclif/core/compare/3.9.2...3.10.0) (2023-11-02)
 
 
