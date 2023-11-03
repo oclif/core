@@ -1,10 +1,11 @@
+import {readFile} from 'node:fs/promises'
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, readJson} from '../util/fs'
+import {existsSync} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
@@ -15,17 +16,39 @@ const debug = Debug('ts-node')
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
+function importTypescript(root: string) {
+  let typescript: typeof import('typescript') | undefined
+  try {
+    typescript = require('typescript')
+  } catch {
+    try {
+      typescript = require(require.resolve('typescript', {paths: [root, __dirname]}))
+    } catch {
+      debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
+      memoizedWarn(
+        'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
+      )
+      return
+    }
+  }
+
+  return typescript
+}
+
 async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
     const tsconfigPath = join(root, 'tsconfig.json')
-    const tsconfig = await readJson<TSConfig>(tsconfigPath)
+    const typescript = importTypescript(root)
+    if (!typescript) return
 
-    if (!tsconfig || Object.keys(tsconfig.compilerOptions).length === 0) return
+    const {config} = typescript.parseConfigFileTextToJson(tsconfigPath, await readFile(tsconfigPath, 'utf8'))
 
-    TS_CONFIGS[root] = tsconfig
+    if (!config || Object.keys(config.compilerOptions).length === 0) return
 
-    if (tsconfig.extends) {
+    TS_CONFIGS[root] = config
+
+    if (config.extends) {
       const {parse} = await import('tsconfck')
       const result = await parse(tsconfigPath)
       const tsNodeOpts = Object.fromEntries(
@@ -36,11 +59,9 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
     }
 
     return TS_CONFIGS[root]
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
-    }
+  } catch {
+    debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
+    memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
 }
 
