@@ -60,24 +60,21 @@ export function readJsonSync<T = unknown>(path: string, parse = true): T | strin
   return parse ? (JSON.parse(contents) as T) : contents
 }
 
-/**
- * Read a JSON file, returning undefined if the file does not exist.
- */
 export async function safeReadJson<T>(path: string): Promise<T | undefined> {
   try {
     return await readJson<T>(path)
   } catch {}
 }
 
-/**
- * Read a file, returning undefined if the file does not exist.
- */
-export async function safeReadFile(path: string): Promise<string | undefined> {
-  try {
-    return await readFile(path, 'utf8')
-  } catch {}
-}
-
 export function existsSync(path: string): boolean {
   return fsExistsSync(path)
+}
+
+export async function readTSConfig(path: string) {
+  const {parse} = await import('tsconfck')
+  const result = await parse(path)
+  const tsNodeOpts = Object.fromEntries(
+    (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
+  )
+  return {...result.tsconfig, 'ts-node': tsNodeOpts}
 }

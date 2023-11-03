@@ -42,50 +42,48 @@ describe('tsPath', () => {
   })
 
   it('should resolve a .js file to ts src', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
     const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, tsModule))
   })
 
   it('should resolve a module file to ts src', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
     const result = await configTsNode.tsPath(root, jsCompiledModule)
     expect(result).to.equal(join(root, tsModule))
   })
 
   it('should resolve a .ts file', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
     const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
   })
 
   it('should resolve a .ts file using baseUrl', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(
-      JSON.stringify({
-        compilerOptions: {
-          baseUrl: '.src/',
-          outDir: 'lib',
-        },
-      }),
-    )
+    sandbox.stub(util, 'readTSConfig').resolves({
+      compilerOptions: {
+        baseUrl: '.src/',
+        outDir: 'lib',
+      },
+    })
     const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
   })
 
   it('should resolve .ts with no outDir', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify({compilerOptions: {rootDir: 'src'}}))
+    sandbox.stub(util, 'readTSConfig').resolves({compilerOptions: {rootDir: 'src'}})
     const result = await configTsNode.tsPath(root, tsSource)
     expect(result).to.equal(join(root, tsSource))
   })
 
   it('should resolve .js with no rootDir and outDir', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify({compilerOptions: {strict: true}}))
+    sandbox.stub(util, 'readTSConfig').resolves({compilerOptions: {strict: true}})
     const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
   })
 
   it('should resolve to .ts file if enabled and prod', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
     settings.tsnodeEnabled = true
     const originalNodeEnv = process.env.NODE_ENV
     delete process.env.NODE_ENV
@@ -98,7 +96,7 @@ describe('tsPath', () => {
   })
 
   it('should resolve to js if disabled', async () => {
-    sandbox.stub(util, 'safeReadFile').resolves(JSON.stringify(DEFAULT_TS_CONFIG))
+    sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
     settings.tsnodeEnabled = false
     const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))

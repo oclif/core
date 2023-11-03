@@ -4,65 +4,30 @@ import * as TSNode from 'ts-node'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, safeReadFile} from '../util/fs'
+import {existsSync, readTSConfig} from '../util/fs'
 import {isProd} from '../util/util'
 import Cache from './cache'
 import {Debug} from './util'
-
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
 export const TS_CONFIGS: Record<string, TSConfig> = {}
 const REGISTERED = new Set<string>()
 
-function importTypescript(root: string) {
-  let typescript: typeof import('typescript') | undefined
-  try {
-    typescript = require('typescript')
-  } catch {
-    try {
-      typescript = require(require.resolve('typescript', {paths: [root, __dirname]}))
-    } catch {
-      debug(`Could not find typescript dependency. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(
-        'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
-      )
-      return
-    }
-  }
-
-  return typescript
+function isErrno(error: any): error is NodeJS.ErrnoException {
+  return 'code' in error
 }
 
 async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
 
-    const typescript = importTypescript(root)
-    if (!typescript) return
-
-    const tsconfigPath = join(root, 'tsconfig.json')
-    const raw = await safeReadFile(tsconfigPath)
-    if (!raw) return
-
-    const {config} = typescript.parseConfigFileTextToJson(tsconfigPath, raw)
-
-    if (!config || Object.keys(config.compilerOptions).length === 0) return
-
-    TS_CONFIGS[root] = config
-
-    if (config.extends) {
-      const {parse} = await import('tsconfck')
-      const result = await parse(tsconfigPath)
-      const tsNodeOpts = Object.fromEntries(
-        (result.extended ?? []).flatMap((e) => Object.entries(e.tsconfig['ts-node'] ?? {})).reverse(),
-      )
-
-      TS_CONFIGS[root] = {...result.tsconfig, 'ts-node': tsNodeOpts}
-    }
+    TS_CONFIGS[root] = await readTSConfig(join(root, 'tsconfig.json'))
 
     return TS_CONFIGS[root]
-  } catch {
+  } catch (error) {
+    if (isErrno(error)) return
+
     debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
     memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
