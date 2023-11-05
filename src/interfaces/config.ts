@@ -24,6 +24,21 @@ export type VersionDetails = {
   shell?: string
 }
 
+export type Theme = {
+  header: string
+  flagSeparator: string
+  flagType: string
+  flagDefaultValue: string
+  flagRequired: string
+  flagDescription: string
+  command: string
+  topic: string
+  commandDescription: string
+  topicDescription: string
+  usageDescription: string
+  versionDescription: string
+}
+
 export interface Config {
   /**
    * process.arch
@@ -122,6 +137,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
+  theme: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   /**

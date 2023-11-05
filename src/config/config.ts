@@ -9,7 +9,7 @@ import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, Theme, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
@@ -91,6 +91,7 @@ export class Config implements IConfig {
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
+  public theme: Theme
   public topicSeparator: ' ' | ':' = ':'
   public userAgent!: string
   public userPJSON?: PJSON.User
