@@ -1,3 +1,12 @@
+## [3.10.6](https://github.com/oclif/core/compare/3.10.5...3.10.6) (2023-11-06)
+
+
+### Bug Fixes
+
+* improve plugin loading performance ([#856](https://github.com/oclif/core/issues/856)) ([3c17c24](https://github.com/oclif/core/commit/3c17c24b3955c9d74e462790c3cf0a46908a2b85)), closes [#857](https://github.com/oclif/core/issues/857)
+
+
+
 ## [3.10.5](https://github.com/oclif/core/compare/3.10.4...3.10.5) (2023-11-06)
 
 
