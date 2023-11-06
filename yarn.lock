@@ -5032,13 +5032,12 @@ nise@^5.1.4:
     path-to-regexp "^1.7.0"
 
 nock@^13.3.3:
-  version "13.3.4"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-13.3.4.tgz#4ed3ed1465a75c87833044a881dbdd6546337e8d"
-  integrity sha512-DDpmn5oLEdCTclEqweOT4U7bEpuoifBMFUXem9sA4turDAZ5tlbrEoWqCorwXey8CaAw44mst5JOQeVNiwtkhw==
+  version "13.3.8"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.3.8.tgz#7adf3c66f678b02ef0a78d5697ae8bc2ebde0142"
+  integrity sha512-96yVFal0c/W1lG7mmfRe7eO+hovrhJYd2obzzOZ90f6fjpeU/XNvd9cYHZKZAQJumDfhXgoTpkpJ9pvMj+hqHw==
   dependencies:
     debug "^4.1.0"
     json-stringify-safe "^5.0.1"
-    lodash "^4.17.21"
     propagate "^2.0.0"
 
 node-gyp@^9.0.0, node-gyp@^9.4.0:
