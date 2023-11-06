@@ -1,3 +1,12 @@
+## [3.10.4](https://github.com/oclif/core/compare/3.10.3...3.10.4) (2023-11-06)
+
+
+### Bug Fixes
+
+* **deps:** bump get-func-name from 2.0.0 to 2.0.2 ([#796](https://github.com/oclif/core/issues/796)) ([a6c5f3c](https://github.com/oclif/core/commit/a6c5f3c18721b0f2893ea17eb4eb9cc4c2774869))
+
+
+
 ## [3.10.3](https://github.com/oclif/core/compare/3.10.2...3.10.3) (2023-11-06)
 
 
