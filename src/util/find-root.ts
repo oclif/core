@@ -28,11 +28,13 @@ function* up(from: string) {
 async function findPluginRoot(root: string, name?: string) {
   // If we know the plugin name then we just need to traverse the file
   // system until we find the directory that matches the plugin name.
+  debug.extend(name ?? 'root-plugin')(`Finding root starting at ${root}`)
   if (name) {
-    debug.extend(name)(`Finding root starting at ${root}`)
     for (const next of up(root)) {
-      debug.extend(name)(`Checking ${next}`)
-      if (next.endsWith(basename(name))) return next
+      if (next.endsWith(basename(name))) {
+        debug.extend(name)('Found root based on plugin name!')
+        return next
+      }
     }
   }
 
@@ -49,8 +51,11 @@ async function findPluginRoot(root: string, name?: string) {
 
     try {
       const cur = join(next, 'package.json')
-      debug.extend('root-plugin')(`Checking ${cur}`)
-      if (await safeReadJson<PJSON>(cur)) return dirname(cur)
+      debug.extend(name ?? 'root-plugin')(`Checking ${cur}`)
+      if (await safeReadJson<PJSON>(cur)) {
+        debug.extend(name ?? 'root-plugin')('Found root by traversing up from starting point!')
+        return dirname(cur)
+      }
     } catch {}
   }
 }

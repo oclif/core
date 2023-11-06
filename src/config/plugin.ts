@@ -65,6 +65,7 @@ export class Plugin implements IPlugin {
 
   commandIDs: string[] = []
 
+  // This will be initialized in the _manifest() method, which gets called in the load() method.
   commands!: Command.Loadable[]
 
   commandsDir: string | undefined
@@ -121,14 +122,15 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      if (!this.commandsDir) return
+      const commandsDir = await this.getCommandsDir()
+      if (!commandsDir) return
       let module
       let isESM: boolean | undefined
       let filePath: string | undefined
       try {
         ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
           ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(this.commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
         this._debug(isESM ? '(import)' : '(require)', filePath)
       } catch (error: any) {
         if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
@@ -180,17 +182,7 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.commandsDir = await this.getCommandsDir()
-    this.commandIDs = await this.getCommandIDs()
-
-    this.hooks = Object.fromEntries(
-      await Promise.all(
-        Object.entries(this.pjson.oclif.hooks ?? {}).map(async ([k, v]) => [
-          k,
-          await Promise.all(castArray(v).map(async (i) => tsPath(this.root, i, this))),
-        ]),
-      ),
-    )
+    this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
@@ -236,10 +228,12 @@ export class Plugin implements IPlugin {
       if (manifest) {
         marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: true})
         marker?.stop()
+        this.commandIDs = Object.keys(manifest.commands)
         return manifest
       }
     }
 
+    this.commandIDs = await this.getCommandIDs()
     const manifest = {
       commands: (
         await Promise.all(
@@ -291,11 +285,12 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandIDs(): Promise<string[]> {
-    if (!this.commandsDir) return []
+    const commandsDir = await this.getCommandsDir()
+    if (!commandsDir) return []
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
-    this._debug(`loading IDs from ${this.commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: this.commandsDir})
+    this._debug(`loading IDs from ${commandsDir}`)
+    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
     const ids = processCommandIds(files)
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
@@ -304,7 +299,8 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandsDir(): Promise<string | undefined> {
-    return tsPath(this.root, this.pjson.oclif.commands, this)
+    this.commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
+    return this.commandsDir
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
