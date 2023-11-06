@@ -1,3 +1,12 @@
+## [3.10.5](https://github.com/oclif/core/compare/3.10.4...3.10.5) (2023-11-06)
+
+
+### Bug Fixes
+
+* extra parens in debug logs ([81c9efc](https://github.com/oclif/core/commit/81c9efcb1a042344761bbea01f12e54e39190c59))
+
+
+
 ## [3.10.4](https://github.com/oclif/core/compare/3.10.3...3.10.4) (2023-11-06)
 
 
