@@ -1,3 +1,12 @@
+## [3.10.3](https://github.com/oclif/core/compare/3.10.2...3.10.3) (2023-11-06)
+
+
+### Bug Fixes
+
+* **deps:** bump postcss from 8.4.30 to 8.4.31 ([#809](https://github.com/oclif/core/issues/809)) ([fd938d3](https://github.com/oclif/core/commit/fd938d3a91f58cad5c59286815567a0cff14b69d))
+
+
+
 ## [3.10.2](https://github.com/oclif/core/compare/3.10.1...3.10.2) (2023-11-06)
 
 
