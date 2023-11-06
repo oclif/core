@@ -1,3 +1,5 @@
+import Color from 'color'
+
 import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
 import {PJSON} from './pjson'
@@ -24,19 +26,15 @@ export type VersionDetails = {
   shell?: string
 }
 
-export type Theme = {
-  header: string
-  flagSeparator: string
-  flagType: string
-  flagDefaultValue: string
-  flagRequired: string
-  flagDescription: string
-  command: string
-  topic: string
-  commandDescription: string
-  topicDescription: string
-  usageDescription: string
-  versionDescription: string
+export interface Theme {
+  command: Color
+  flagDefaultValue: Color
+  flagRequired: Color
+  flagSeparator: Color
+  flagType: Color
+  sectionDescription: Color
+  sectionHeader: Color
+  topic: Color
 }
 
 export interface Config {
@@ -137,7 +135,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
-  theme: Theme
+  readonly theme: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   /**

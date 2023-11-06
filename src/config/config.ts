@@ -91,7 +91,7 @@ export class Config implements IConfig {
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
-  public theme: Theme
+  public theme!: Theme
   public topicSeparator: ' ' | ':' = ':'
   public userAgent!: string
   public userPJSON?: PJSON.User
