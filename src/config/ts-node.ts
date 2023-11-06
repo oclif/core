@@ -211,16 +211,11 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
       memoizedWarn(
         `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
-
-    if (plugin?.options.url)
-      memoizedWarn(
-        `${plugin?.name} is an ESM module installed from github and cannot be auto-transpiled. Existing compiled source will be used instead.`,
-      )
     return orig
   }
 
-  // Do not skip ts-node registration if the plugin is linked or installed from github
-  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link' && !plugin?.options.url) {
+  // Do not skip ts-node registration if the plugin is linked
+  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
     debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }
