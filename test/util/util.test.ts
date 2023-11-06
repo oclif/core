@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 
-import {capitalize, castArray, isNotFalsy, isTruthy, last, maxBy, sumBy} from '../../src/util/util'
+import {capitalize, castArray, isNotFalsy, isTruthy, last, maxBy, mergeNestedObjects, sumBy} from '../../src/util/util'
 
 describe('capitalize', () => {
   it('capitalizes the string', () => {
@@ -94,5 +94,37 @@ describe('castArray', () => {
 
   it('should return an empty array if the value is undefined', () => {
     expect(castArray()).to.deep.equal([])
+  })
+})
+
+describe('mergeNestedObjects', () => {
+  it('should merge nested objects', () => {
+    const a = {
+      tsconfig: {
+        compilerOptions: {
+          outDir: 'dist',
+          rootDir: 'src',
+        },
+        'ts-node': {
+          transpileOnly: true,
+        },
+      },
+    }
+
+    const b = {
+      tsconfig: {
+        compilerOptions: {
+          outDir: 'dist',
+          rootDir: 'src',
+        },
+        'ts-node': {
+          transpileOnly: false,
+        },
+      },
+    }
+
+    expect(mergeNestedObjects([a, b], 'tsconfig.ts-node')).to.deep.equal({
+      transpileOnly: true,
+    })
   })
 })

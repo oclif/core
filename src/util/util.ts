@@ -97,3 +97,11 @@ export function mapValues<T extends Record<string, any>, TResult>(
     return o
   }, {} as any)
 }
+
+function get(obj: Record<string, any>, path: string): unknown {
+  return path.split('.').reduce((o, p) => o?.[p], obj)
+}
+
+export function mergeNestedObjects(objs: Record<string, any>[], path: string): Record<string, any> {
+  return Object.fromEntries(objs.flatMap((o) => Object.entries(get(o, path) ?? {})).reverse())
+}
