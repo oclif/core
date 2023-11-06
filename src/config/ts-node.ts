@@ -205,7 +205,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
 
   if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
     debug(
-      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})))`,
+      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
     )
     if (plugin?.type === 'link')
       memoizedWarn(
