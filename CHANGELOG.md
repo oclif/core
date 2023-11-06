@@ -1,3 +1,12 @@
+## [3.10.2](https://github.com/oclif/core/compare/3.10.1...3.10.2) (2023-11-06)
+
+
+### Bug Fixes
+
+* dont drop ts-node options if there are no extends ([#853](https://github.com/oclif/core/issues/853)) ([039b42a](https://github.com/oclif/core/commit/039b42a9dcfb8e1bd953820bf65d7c9ddbbf9740))
+
+
+
 ## [3.10.1](https://github.com/oclif/core/compare/3.10.0...3.10.1) (2023-11-03)
 
 
