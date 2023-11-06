@@ -1,3 +1,4 @@
+import Color from 'color'
 import * as ejs from 'ejs'
 import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
@@ -313,6 +314,16 @@ export class Config implements IConfig {
     if (this.pjson.oclif.topicSeparator && [' ', ':'].includes(this.pjson.oclif.topicSeparator))
       this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
+    this.theme = this.pjson.oclif.theme ?? {
+      command: new Color('white'),
+      flagDefaultValue: new Color('white'),
+      flagRequired: new Color('white'),
+      flagSeparator: new Color('white'),
+      flagType: new Color('white'),
+      sectionDescription: new Color('white'),
+      sectionHeader: new Color('white'),
+      topic: new Color('white'),
+    }
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
     this.debug = this._debug()
