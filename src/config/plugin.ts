@@ -13,7 +13,7 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson, requireJson} from '../util/fs'
-import {castArray, compact, isProd} from '../util/util'
+import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-node'
 import {Debug, getCommandIdPermutations} from './util'
 
@@ -172,7 +172,6 @@ export class Plugin implements IPlugin {
     this.alias = this.options.name ?? this.pjson.name
     const pjsonPath = join(root, 'package.json')
     if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
-    if (!isProd() && !this.pjson.files) this.warn(`files attribute must be specified in ${pjsonPath}`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
     this.version = this.pjson.version
