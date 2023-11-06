@@ -19,6 +19,7 @@ import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import Cache from './cache'
 import PluginLoader from './plugin-loader'
+import {tsPath} from './ts-node'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 
 // eslint-disable-next-line new-cap
@@ -511,7 +512,7 @@ export class Config implements IConfig {
         const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {filePath, isESM, module} = await loadWithData(p, hook)
+          const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook, p))
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
           const result = timeout
