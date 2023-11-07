@@ -27,7 +27,9 @@ export type VersionDetails = {
 }
 
 export interface Theme {
+  bin: Color
   command: Color
+  commandSummary: Color
   dollarSign: Color
   flag: Color
   flagDefaultValue: Color
@@ -38,6 +40,7 @@ export interface Theme {
   sectionDescription: Color
   sectionHeader: Color
   topic: Color
+  version: Color
 }
 
 export interface Config {
