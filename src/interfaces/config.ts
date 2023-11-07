@@ -27,20 +27,20 @@ export type VersionDetails = {
 }
 
 export interface Theme {
-  bin: Color
-  command: Color
-  commandSummary: Color
-  dollarSign: Color
-  flag: Color
-  flagDefaultValue: Color
-  flagOptions: Color
-  flagRequired: Color
-  flagSeparator: Color
-  flagType: Color
-  sectionDescription: Color
-  sectionHeader: Color
-  topic: Color
-  version: Color
+  bin?: Color
+  command?: Color
+  commandSummary?: Color
+  dollarSign?: Color
+  flag?: Color
+  flagDefaultValue?: Color
+  flagOptions?: Color
+  flagRequired?: Color
+  flagSeparator?: Color
+  flagType?: Color
+  sectionDescription?: Color
+  sectionHeader?: Color
+  topic?: Color
+  version?: Color
 }
 
 export interface Config {
