@@ -26,7 +26,7 @@ export default class RootHelp extends HelpFormatter {
     description = this.render(description)
     description = description.split('\n')[0]
     let output = compact([
-      colorize(this.config?.theme?.sectionDescription, description),
+      colorize(this.config?.theme?.commandSummary, description),
       this.version(),
       this.usage(),
       this.description(),
