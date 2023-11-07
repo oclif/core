@@ -110,6 +110,6 @@ export function normalizeArgv(config: IConfig, argv = process.argv.slice(2)): st
   return argv
 }
 
-export function colorize(color: Color, text: string) {
+export function colorize(color: Color | undefined, text: string) {
   return color ? chalk.hex(color.hex())(text) : text
 }
