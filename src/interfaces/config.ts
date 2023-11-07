@@ -28,7 +28,10 @@ export type VersionDetails = {
 
 export interface Theme {
   command: Color
+  dollarSign: Color
+  flag: Color
   flagDefaultValue: Color
+  flagOptions: Color
   flagRequired: Color
   flagSeparator: Color
   flagType: Color
