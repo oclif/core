@@ -10,7 +10,15 @@ import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, Theme, VersionDetails} from '../interfaces/config'
+import {
+  ArchTypes,
+  Config as IConfig,
+  LoadOptions,
+  PlatformTypes,
+  Theme,
+  VersionDetails,
+  parseTheme,
+} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
@@ -336,7 +344,7 @@ export class Config implements IConfig {
     const OCLIF_ENABLE_THEME = process.env.OCLIF_ENABLE_THEME === 'true'
     this.enableTheme = OCLIF_ENABLE_THEME ?? this.pjson.oclif.enableTheme ?? false
     if (this.enableTheme) {
-      this.theme = this.pjson.oclif.theme ?? DEFAULT_THEME
+      this.theme = this.pjson.oclif?.theme ? parseTheme(this.pjson.oclif?.theme) : DEFAULT_THEME
     }
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`

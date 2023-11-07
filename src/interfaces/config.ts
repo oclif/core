@@ -43,6 +43,18 @@ export interface Theme {
   version?: Color
 }
 
+export function parseTheme(json: any): Theme {
+  const theme: Theme = {}
+
+  for (const prop in json) {
+    if (Object.prototype.hasOwnProperty.call(json, prop)) {
+      theme[prop as keyof Theme] = new Color(json[prop])
+    }
+  }
+
+  return theme
+}
+
 export interface Config {
   /**
    * process.arch
