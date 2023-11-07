@@ -176,7 +176,7 @@ export class HelpFormatter {
     }
 
     const output = [
-      chalk.bold(header),
+      chalk.hex(this.config.theme.sectionHeader.hex()).bold(header),
       this.indent(
         Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
       ),
