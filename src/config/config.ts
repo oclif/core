@@ -98,6 +98,7 @@ export class Config implements IConfig {
   public dataDir!: string
   public debug = 0
   public dirname!: string
+  public enableTheme: boolean = false
   public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
@@ -332,7 +333,10 @@ export class Config implements IConfig {
       this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
-    this.theme = this.pjson.oclif.theme ?? DEFAULT_THEME
+    this.enableTheme = this.pjson.oclif.enableTheme ?? process.env.OCLIF_ENABLE_THEME ?? false
+    if (this.enableTheme) {
+      this.theme = this.pjson.oclif.theme ?? DEFAULT_THEME
+    }
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
