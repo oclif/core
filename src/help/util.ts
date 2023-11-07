@@ -1,3 +1,5 @@
+import chalk from 'chalk'
+import Color from 'color'
 import * as ejs from 'ejs'
 
 import {collectUsableIds} from '../config/util'
@@ -106,4 +108,8 @@ export function formatCommandDeprecationWarning(command: string, opts?: Deprecat
 export function normalizeArgv(config: IConfig, argv = process.argv.slice(2)): string[] {
   if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
   return argv
+}
+
+export function colorize(color: Color, text: string) {
+  return color ? chalk.hex(color.hex())(text) : text
 }
