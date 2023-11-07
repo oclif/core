@@ -333,7 +333,7 @@ export class Config implements IConfig {
       this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
-    this.enableTheme = this.pjson.oclif.enableTheme ?? process.env.OCLIF_ENABLE_THEME ?? false
+    this.enableTheme = process.env.OCLIF_ENABLE_THEME ?? this.pjson.oclif.enableTheme ?? false
     if (this.enableTheme) {
       this.theme = this.pjson.oclif.theme ?? DEFAULT_THEME
     }
