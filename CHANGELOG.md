@@ -1,3 +1,12 @@
+## [3.10.7](https://github.com/oclif/core/compare/3.10.6...3.10.7) (2023-11-07)
+
+
+### Bug Fixes
+
+* handle undefined flags in help ([bd5a38f](https://github.com/oclif/core/commit/bd5a38f3abb05586b71b2bbe8c202987f38ba5da))
+
+
+
 ## [3.10.6](https://github.com/oclif/core/compare/3.10.5...3.10.6) (2023-11-06)
 
 
