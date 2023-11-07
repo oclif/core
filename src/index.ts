@@ -1,9 +1,5 @@
 import write from './cli-ux/write'
 
-// learn about the no-color manifest in this link: https://no-color.org/
-// learn about how to disable chalks colors in this link: https://github.com/chalk/chalk#supportscolor
-process.env.FORCE_COLOR = (Number(!process.env.NO_COLOR) * 3).toString()
-
 function checkCWD() {
   try {
     process.cwd()
