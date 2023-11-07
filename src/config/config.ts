@@ -30,20 +30,20 @@ const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 const BASE = `${_pjson.name}@${_pjson.version}`
 
 const DEFAULT_THEME: Theme = {
-  bin: new Color('#1798C1'),
-  command: new Color('green'),
-  commandSummary: new Color('white'),
-  dollarSign: new Color('yellow'),
-  flag: new Color('green'),
-  flagDefaultValue: new Color('blue'),
-  flagOptions: new Color('green'),
-  flagRequired: new Color('red'),
-  flagSeparator: new Color('white'),
+  bin: new Color('#1AB9FF'),
+  command: new Color('#45C65A'),
+  commandSummary: new Color('#FFFFFF'),
+  dollarSign: new Color('#FFFF00'),
+  flag: new Color('#45C65A'),
+  flagDefaultValue: new Color('#1AB9FF'),
+  flagOptions: new Color('#45C65A'),
+  flagRequired: new Color('#FE5C4C'),
+  flagSeparator: new Color('#FFFFFF'),
   flagType: new Color('#0EAEE8'),
-  sectionDescription: new Color('white'),
-  sectionHeader: new Color('white'),
-  topic: new Color('green'),
-  version: new Color('green'),
+  sectionDescription: new Color('#FFFFFF'),
+  sectionHeader: new Color('#FFFF00'),
+  topic: new Color('#45C65A'),
+  version: new Color('#45C65A'),
 }
 
 function channelFromVersion(version: string) {
