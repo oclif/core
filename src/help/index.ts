@@ -234,7 +234,7 @@ export class Help extends HelpBase {
     if (command) {
       if (command.hasDynamicHelp && command.pluginType !== 'jit') {
         const loaded = await command.load()
-        for (const [name, flag] of Object.entries(loaded.flags)) {
+        for (const [name, flag] of Object.entries(loaded.flags ?? {})) {
           // As of v3 each flag that needs to be re-evaluated has the `hasDynamicHelp` property.
           // However, we cannot assume that the absence of this property means that the flag
           // doesn't need to be re-evaluated since any command from a v2 or older plugin will
