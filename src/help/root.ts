@@ -1,9 +1,9 @@
-import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
 
 import * as Interfaces from '../interfaces'
 import {compact} from '../util/util'
 import {HelpFormatter} from './formatter'
+import {colorize} from './util'
 
 export default class RootHelp extends HelpFormatter {
   constructor(
@@ -18,7 +18,7 @@ export default class RootHelp extends HelpFormatter {
     description = this.render(description)
     description = description.split('\n').slice(1).join('\n')
     if (!description) return
-    return this.section('DESCRIPTION', this.wrap(chalk.hex(this.config.theme.sectionDescription.hex())(description)))
+    return this.section('DESCRIPTION', this.wrap(colorize(this.config?.theme?.sectionDescription, description)))
   }
 
   root(): string {
@@ -26,7 +26,7 @@ export default class RootHelp extends HelpFormatter {
     description = this.render(description)
     description = description.split('\n')[0]
     let output = compact([
-      chalk.hex(this.config.theme.sectionDescription.hex())(description),
+      colorize(this.config?.theme?.sectionDescription, description),
       this.version(),
       this.usage(),
       this.description(),
@@ -39,14 +39,15 @@ export default class RootHelp extends HelpFormatter {
     return this.section(
       this.opts.usageHeader || 'USAGE',
       this.wrap(
-        `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${chalk.hex(this.config.theme.bin.hex())(
+        `${colorize(this.config?.theme?.dollarSign, '$')} ${colorize(
+          this.config?.theme?.bin,
           this.config.bin,
-        )} ${chalk.hex(this.config.theme.sectionDescription.hex())('[COMMAND]')}`,
+        )} ${colorize(this.config?.theme?.sectionDescription, '[COMMAND]')}`,
       ),
     )
   }
 
   protected version(): string {
-    return this.section('VERSION', this.wrap(chalk.hex(this.config.theme.version.hex())(this.config.userAgent)))
+    return this.section('VERSION', this.wrap(colorize(this.config?.theme?.version, this.config.userAgent)))
   }
 }

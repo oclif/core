@@ -7,6 +7,7 @@ import {ensureArgObject} from '../util/ensure-arg-object'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
+import {colorize} from './util'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be
@@ -26,11 +27,9 @@ export class CommandHelp extends HelpFormatter {
     if (!aliases || aliases.length === 0) return
     const body = aliases
       .map((a) =>
-        [
-          chalk.hex(this.config.theme.dollarSign.hex())('$'),
-          chalk.hex(this.config.theme.bin.hex())(this.config.bin),
-          a,
-        ].join(' '),
+        [colorize(this.config?.theme?.dollarSign, '$'), colorize(this.config?.theme?.bin, this.config.bin), a].join(
+          ' ',
+        ),
       )
       .join('\n')
     return body
@@ -49,10 +48,10 @@ export class CommandHelp extends HelpFormatter {
       const name = a.name.toUpperCase()
       let description = a.description || ''
       if (a.default)
-        description = `${chalk.hex(this.config.theme.flagDefaultValue.hex())(`[default: ${a.default}]`)} ${description}`
+        description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
       if (a.options)
-        description = `${chalk.hex(this.config.theme.flagOptions.hex())(`(${a.options.join('|')}`)} ${description}`
-      return [name, description ? chalk.hex(this.config.theme.sectionDescription.hex())(description) : undefined]
+        description = `${colorize(this.config?.theme?.flagOptions, `(${a.options.join('|')}`)} ${description}`
+      return [name, description ? colorize(this.config?.theme?.sectionDescription, description) : undefined]
     })
   }
 
@@ -126,7 +125,7 @@ export class CommandHelp extends HelpFormatter {
           .join('\n')
 
         return `${this.wrap(
-          chalk.hex(this.config.theme.sectionDescription.hex())(description),
+          colorize(this.config?.theme?.sectionDescription, description),
           finalIndentedSpacing,
         )}\n\n${multilineCommands}`
       })
@@ -148,7 +147,7 @@ export class CommandHelp extends HelpFormatter {
         }
       }
 
-      label = labels.join(chalk.hex(this.config.theme.flagSeparator.hex())(', '))
+      label = labels.join(colorize(this.config?.theme?.flagSeparator, ', '))
     }
 
     if (flag.type === 'option') {
@@ -169,20 +168,20 @@ export class CommandHelp extends HelpFormatter {
     if (flags.length === 0) return
 
     return flags.map((flag) => {
-      const left = chalk.hex(this.config.theme.flag.hex())(this.flagHelpLabel(flag))
+      const left = colorize(this.config?.theme?.flag, this.flagHelpLabel(flag))
 
       let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
-        right = `${chalk.hex(this.config.theme.flagDefaultValue.hex())(`[default: '${flag.default}']`)} ${right}`
+        right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: '${flag.default}']`)} ${right}`
       }
 
-      if (flag.required) right = `${chalk.hex(this.config.theme.flagRequired.hex())('(required)')} ${right}`
+      if (flag.required) right = `${colorize(this.config?.theme?.flagRequired, '(required)')} ${right}`
 
       if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
-        right += chalk.hex(this.config.theme.flagOptions.hex())(`\n<options: ${flag.options.join('|')}>`)
+        right += colorize(this.config?.theme?.flagOptions, `\n<options: ${flag.options.join('|')}>`)
       }
 
-      return [left, chalk.hex(this.config.theme.sectionDescription.hex())(right.trim())]
+      return [left, colorize(this.config?.theme?.sectionDescription, right.trim())]
     })
   }
 
@@ -311,11 +310,13 @@ export class CommandHelp extends HelpFormatter {
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
-        const line = `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${chalk.hex(this.config.theme.bin.hex())(
+        const line = `${colorize(this.config?.theme?.dollarSign, '$')} ${colorize(
+          this.config?.theme?.bin,
           this.config.bin,
-        )} ${chalk.hex(this.config.theme.command.hex())('<%= command.id %>')}${chalk.hex(
-          this.config.theme.sectionDescription.hex(),
-        )(u.replace('<%= command.id %>', ''))}`.trim()
+        )} ${colorize(this.config?.theme?.command, '<%= command.id %>')}${colorize(
+          this.config?.theme?.sectionDescription,
+          u.replace('<%= command.id %>', ''),
+        )}`.trim()
         if (line.length > allowedSpacing) {
           const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
           return (
@@ -333,7 +334,7 @@ export class CommandHelp extends HelpFormatter {
 
   private formatIfCommand(example: string): string {
     example = this.render(example)
-    const dollarSign = chalk.hex(this.config.theme.dollarSign.hex())('$')
+    const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
     if (example.startsWith(this.config.bin)) return `${dollarSign} ${example}`
     if (example.startsWith(`${dollarSign} ${this.config.bin}`)) return example
     return example
@@ -341,7 +342,7 @@ export class CommandHelp extends HelpFormatter {
 
   private isCommand(example: string): boolean {
     return stripAnsi(this.formatIfCommand(example)).startsWith(
-      `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${this.config.bin}`,
+      `${colorize(this.config?.theme?.dollarSign, '$')} ${this.config.bin}`,
     )
   }
 }

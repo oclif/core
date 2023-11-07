@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import {format} from 'node:util'
 import stripAnsi from 'strip-ansi'
 
@@ -12,7 +11,13 @@ import {compact, sortBy, uniqBy} from '../util/util'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
+import {
+  colorize,
+  formatCommandDeprecationWarning,
+  getHelpFlagAdditions,
+  standardizeIDFromArgv,
+  toConfiguredId,
+} from './util'
 
 export {CommandHelp} from './command'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
@@ -106,8 +111,8 @@ export class Help extends HelpBase {
           if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
           const summary = this.summary(c)
           return [
-            chalk.hex(this.config.theme.command.hex())(c.id),
-            summary && chalk.hex(this.config.theme.sectionDescription.hex())(summary),
+            colorize(this.config?.theme?.command, c.id),
+            summary && colorize(this.config?.theme?.sectionDescription, summary),
           ]
         }),
       {
@@ -132,15 +137,16 @@ export class Help extends HelpBase {
     let topicID = `${topic.name}:COMMAND`
     if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
     let output = compact([
-      chalk.hex(this.config.theme.commandSummary.hex())(summary),
+      colorize(this.config?.theme?.commandSummary, summary),
       this.section(
         this.opts.usageHeader || 'USAGE',
-        `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${chalk.hex(this.config.theme.bin.hex())(
+        `${colorize(this.config?.theme?.dollarSign, '$')} ${colorize(
+          this.config?.theme?.bin,
           this.config.bin,
         )} ${topicID}`,
       ),
       description &&
-        this.section('DESCRIPTION', this.wrap(chalk.hex(this.config.theme.sectionDescription.hex())(description))),
+        this.section('DESCRIPTION', this.wrap(colorize(this.config?.theme?.sectionDescription, description))),
     ]).join('\n\n')
     if (this.opts.stripAnsi) output = stripAnsi(output)
     return output + '\n'
@@ -152,9 +158,8 @@ export class Help extends HelpBase {
       topics.map((c) => {
         if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
         return [
-          chalk.hex(this.config.theme.topic.hex())(c.name),
-          c.description &&
-            this.render(chalk.hex(this.config.theme.sectionDescription.hex())(c.description.split('\n')[0])),
+          colorize(this.config?.theme?.topic, c.name),
+          c.description && this.render(colorize(this.config?.theme?.sectionDescription, c.description.split('\n')[0])),
         ]
       }),
       {
@@ -349,9 +354,9 @@ export class Help extends HelpBase {
   }
 
   protected summary(c: Command.Loadable): string | undefined {
-    if (c.summary) return chalk.hex(this.config.theme.commandSummary.hex())(this.render(c.summary.split('\n')[0]))
+    if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
 
-    return c.description && chalk.hex(this.config.theme.commandSummary.hex())(this.render(c.description).split('\n')[0])
+    return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
   }
 
   /*
