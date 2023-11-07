@@ -342,7 +342,7 @@ export class Config implements IConfig {
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
     const OCLIF_ENABLE_THEME = process.env.OCLIF_ENABLE_THEME === 'true'
-    this.enableTheme = OCLIF_ENABLE_THEME ?? this.pjson.oclif.enableTheme ?? false
+    this.enableTheme = OCLIF_ENABLE_THEME || this.pjson.oclif.enableTheme
     if (this.enableTheme) {
       this.theme = this.pjson.oclif?.theme ? parseTheme(this.pjson.oclif?.theme) : DEFAULT_THEME
     }
