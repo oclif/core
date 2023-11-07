@@ -13,13 +13,6 @@ import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
 
-let {dim} = chalk
-
-if (process.env.ConEmuANSI === 'ON') {
-  // eslint-disable-next-line unicorn/consistent-destructuring
-  dim = chalk.gray
-}
-
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Command.Loadable,
@@ -31,7 +24,15 @@ export class CommandHelp extends HelpFormatter {
 
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
-    const body = aliases.map((a) => ['$', this.config.bin, a].join(' ')).join('\n')
+    const body = aliases
+      .map((a) =>
+        [
+          chalk.hex(this.config.theme.dollarSign.hex())('$'),
+          chalk.hex(this.config.theme.bin.hex())(this.config.bin),
+          a,
+        ].join(' '),
+      )
+      .join('\n')
     return body
   }
 
@@ -47,9 +48,11 @@ export class CommandHelp extends HelpFormatter {
     return args.map((a) => {
       const name = a.name.toUpperCase()
       let description = a.description || ''
-      if (a.default) description = `[default: ${a.default}] ${description}`
-      if (a.options) description = `(${a.options.join('|')}) ${description}`
-      return [name, description ? dim(description) : undefined]
+      if (a.default)
+        description = `${chalk.hex(this.config.theme.flagDefaultValue.hex())(`[default: ${a.default}]`)} ${description}`
+      if (a.options)
+        description = `${chalk.hex(this.config.theme.flagOptions.hex())(`(${a.options.join('|')}`)} ${description}`
+      return [name, description ? chalk.hex(this.config.theme.sectionDescription.hex())(description) : undefined]
     })
   }
 
@@ -122,7 +125,10 @@ export class CommandHelp extends HelpFormatter {
           )
           .join('\n')
 
-        return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
+        return `${this.wrap(
+          chalk.hex(this.config.theme.sectionDescription.hex())(description),
+          finalIndentedSpacing,
+        )}\n\n${multilineCommands}`
       })
       .join('\n\n')
     return body
@@ -142,7 +148,7 @@ export class CommandHelp extends HelpFormatter {
         }
       }
 
-      label = labels.join(', ')
+      label = labels.join(chalk.hex(this.config.theme.flagSeparator.hex())(', '))
     }
 
     if (flag.type === 'option') {
@@ -163,20 +169,20 @@ export class CommandHelp extends HelpFormatter {
     if (flags.length === 0) return
 
     return flags.map((flag) => {
-      const left = this.flagHelpLabel(flag)
+      const left = chalk.hex(this.config.theme.flag.hex())(this.flagHelpLabel(flag))
 
       let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
-        right = `[default: ${flag.default}] ${right}`
+        right = `${chalk.hex(this.config.theme.flagDefaultValue.hex())(`[default: '${flag.default}']`)} ${right}`
       }
 
-      if (flag.required) right = `(required) ${right}`
+      if (flag.required) right = `${chalk.hex(this.config.theme.flagRequired.hex())('(required)')} ${right}`
 
       if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
-        right += `\n<options: ${flag.options.join('|')}>`
+        right += chalk.hex(this.config.theme.flagOptions.hex())(`\n<options: ${flag.options.join('|')}>`)
       }
 
-      return [left, dim(right.trim())]
+      return [left, chalk.hex(this.config.theme.sectionDescription.hex())(right.trim())]
     })
   }
 
@@ -305,7 +311,11 @@ export class CommandHelp extends HelpFormatter {
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
-        const line = `$ ${this.config.bin} ${u}`.trim()
+        const line = `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${chalk.hex(this.config.theme.bin.hex())(
+          this.config.bin,
+        )} ${chalk.hex(this.config.theme.command.hex())('<%= command.id %>')}${chalk.hex(
+          this.config.theme.sectionDescription.hex(),
+        )(u.replace('<%= command.id %>', ''))}`.trim()
         if (line.length > allowedSpacing) {
           const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
           return (
@@ -323,13 +333,16 @@ export class CommandHelp extends HelpFormatter {
 
   private formatIfCommand(example: string): string {
     example = this.render(example)
-    if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
-    if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
+    const dollarSign = chalk.hex(this.config.theme.dollarSign.hex())('$')
+    if (example.startsWith(this.config.bin)) return `${dollarSign} ${example}`
+    if (example.startsWith(`${dollarSign} ${this.config.bin}`)) return example
     return example
   }
 
   private isCommand(example: string): boolean {
-    return stripAnsi(this.formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
+    return stripAnsi(this.formatIfCommand(example)).startsWith(
+      `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${this.config.bin}`,
+    )
   }
 }
 export default CommandHelp

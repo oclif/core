@@ -1,3 +1,4 @@
+import chalk from 'chalk'
 import {format} from 'node:util'
 import stripAnsi from 'strip-ansi'
 
@@ -103,7 +104,11 @@ export class Help extends HelpBase {
         .filter((c) => (this.opts.hideAliasesFromRoot ? !c.aliases?.includes(c.id) : true))
         .map((c) => {
           if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
-          return [c.id, this.summary(c)]
+          const summary = this.summary(c)
+          return [
+            chalk.hex(this.config.theme.command.hex())(c.id),
+            summary && chalk.hex(this.config.theme.sectionDescription.hex())(summary),
+          ]
         }),
       {
         indentation: 2,
@@ -127,9 +132,15 @@ export class Help extends HelpBase {
     let topicID = `${topic.name}:COMMAND`
     if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
     let output = compact([
-      summary,
-      this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
-      description && this.section('DESCRIPTION', this.wrap(description)),
+      chalk.hex(this.config.theme.commandSummary.hex())(summary),
+      this.section(
+        this.opts.usageHeader || 'USAGE',
+        `${chalk.hex(this.config.theme.dollarSign.hex())('$')} ${chalk.hex(this.config.theme.bin.hex())(
+          this.config.bin,
+        )} ${topicID}`,
+      ),
+      description &&
+        this.section('DESCRIPTION', this.wrap(chalk.hex(this.config.theme.sectionDescription.hex())(description))),
     ]).join('\n\n')
     if (this.opts.stripAnsi) output = stripAnsi(output)
     return output + '\n'
@@ -140,7 +151,11 @@ export class Help extends HelpBase {
     const body = this.renderList(
       topics.map((c) => {
         if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
-        return [c.name, c.description && this.render(c.description.split('\n')[0])]
+        return [
+          chalk.hex(this.config.theme.topic.hex())(c.name),
+          c.description &&
+            this.render(chalk.hex(this.config.theme.sectionDescription.hex())(c.description.split('\n')[0])),
+        ]
       }),
       {
         indentation: 2,
@@ -334,9 +349,9 @@ export class Help extends HelpBase {
   }
 
   protected summary(c: Command.Loadable): string | undefined {
-    if (c.summary) return this.render(c.summary.split('\n')[0])
+    if (c.summary) return chalk.hex(this.config.theme.commandSummary.hex())(this.render(c.summary.split('\n')[0]))
 
-    return c.description && this.render(c.description).split('\n')[0]
+    return c.description && chalk.hex(this.config.theme.commandSummary.hex())(this.render(c.description).split('\n')[0])
   }
 
   /*
