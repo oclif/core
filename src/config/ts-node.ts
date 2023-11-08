@@ -203,6 +203,12 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
 
   const isProduction = isProd()
 
+  // Do not skip ts-node registration if the plugin is linked
+  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
+    debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
+    return orig
+  }
+
   if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
     debug(
       `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
@@ -211,12 +217,6 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
       memoizedWarn(
         `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
-    return orig
-  }
-
-  // Do not skip ts-node registration if the plugin is linked
-  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
-    debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }
 
