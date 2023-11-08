@@ -200,6 +200,10 @@ export class Performance {
     oclifDebug('Init Time: %sms', Performance.oclifPerf['oclif.initMs'].toFixed(4))
     oclifDebug('Config Load Time: %sms', Performance.oclifPerf['oclif.configLoadMs'].toFixed(4))
     oclifDebug(
+      '  • Root Plugin Load Time: %sms',
+      Performance.getResult(OCLIF_MARKER_OWNER, 'plugin.load#root')?.duration.toFixed(4) ?? 0,
+    )
+    oclifDebug(
       '  • Plugins Load Time: %sms',
       Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')?.duration.toFixed(4) ?? 0,
     )
