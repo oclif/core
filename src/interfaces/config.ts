@@ -44,12 +44,30 @@ export interface Theme {
   version?: Color
 }
 
-export function parseTheme(json: any): Theme {
-  const theme: Theme = {}
+// TODO: find a way to create this array at build time based on the interface keys
+export const THEME_KEYS = [
+  'alias',
+  'bin',
+  'command',
+  'commandSummary',
+  'dollarSign',
+  'flag',
+  'flagDefaultValue',
+  'flagOptions',
+  'flagRequired',
+  'flagSeparator',
+  'flagType',
+  'sectionDescription',
+  'sectionHeader',
+  'topic',
+  'version',
+]
 
-  for (const prop in json) {
-    if (Object.prototype.hasOwnProperty.call(json, prop)) {
-      theme[prop as keyof Theme] = new Color(json[prop])
+export function parseTheme(untypedTheme: any): Theme {
+  const theme: Theme = {}
+  for (const prop in untypedTheme) {
+    if (Object.prototype.hasOwnProperty.call(untypedTheme, prop) && THEME_KEYS.includes(prop)) {
+      theme[prop as keyof Theme] = new Color(untypedTheme[prop])
     }
   }
 
