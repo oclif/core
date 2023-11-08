@@ -312,13 +312,16 @@ export class CommandHelp extends HelpFormatter {
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
-        const line = `${colorize(this.config?.theme?.dollarSign, '$')} ${colorize(
-          this.config?.theme?.bin,
-          this.config.bin,
-        )} ${colorize(this.config?.theme?.command, '<%= command.id %>')}${colorize(
+
+        const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
+        const bin = colorize(this.config?.theme?.bin, this.config.bin)
+        const command = colorize(this.config?.theme?.command, '<%= command.id %>')
+        const commandDescription = colorize(
           this.config?.theme?.sectionDescription,
-          u.replace('<%= command.id %>', ''),
-        )}`.trim()
+          u.replace('<%= command.id %>', '').trim(),
+        )
+
+        const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()
         if (line.length > allowedSpacing) {
           const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
           return (
