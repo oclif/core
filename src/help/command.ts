@@ -52,7 +52,7 @@ export class CommandHelp extends HelpFormatter {
       if (a.default)
         description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
       if (a.options)
-        description = `${colorize(this.config?.theme?.flagOptions, `(${a.options.join('|')}`)} ${description}`
+        description = `${colorize(this.config?.theme?.flagOptions, `(${a.options.join('|')})`)} ${description}`
       return [
         colorize(this.config?.theme?.flag, name),
         description ? colorize(this.config?.theme?.sectionDescription, description) : undefined,
