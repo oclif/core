@@ -28,7 +28,7 @@ suite
   .add('multiple async flags that take time', {
     defer: true,
     fn(deferred: {resolve: () => any}) {
-      parse(['--flagA', 'foo', '--flagA', 'bar'], {
+      parse(['--flagA', 'foo', '--flagB', 'bar'], {
         flags: {
           flagA: Flags.string({
             async parse(input) {
