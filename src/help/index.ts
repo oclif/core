@@ -86,10 +86,10 @@ export class Help extends HelpBase {
   protected description(c: Command.Loadable): string {
     const description = this.render(c.description || '')
     if (c.summary) {
-      return description
+      return colorize(this.config?.theme?.sectionDescription, description)
     }
 
-    return description.split('\n').slice(1).join('\n')
+    return colorize(this.config?.theme?.sectionDescription, description.split('\n').slice(1).join('\n'))
   }
 
   protected formatCommand(command: Command.Loadable): string {

@@ -27,9 +27,11 @@ export class CommandHelp extends HelpFormatter {
     if (!aliases || aliases.length === 0) return
     const body = aliases
       .map((a) =>
-        [colorize(this.config?.theme?.dollarSign, '$'), colorize(this.config?.theme?.bin, this.config.bin), a].join(
-          ' ',
-        ),
+        [
+          colorize(this.config?.theme?.dollarSign, '$'),
+          colorize(this.config?.theme?.bin, this.config.bin),
+          colorize(this.config?.theme?.sectionDescription, a),
+        ].join(' '),
       )
       .join('\n')
     return body
@@ -51,7 +53,10 @@ export class CommandHelp extends HelpFormatter {
         description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
       if (a.options)
         description = `${colorize(this.config?.theme?.flagOptions, `(${a.options.join('|')}`)} ${description}`
-      return [name, description ? colorize(this.config?.theme?.sectionDescription, description) : undefined]
+      return [
+        colorize(this.config?.theme?.flag, name),
+        description ? colorize(this.config?.theme?.sectionDescription, description) : undefined,
+      ]
     })
   }
 
@@ -84,7 +89,7 @@ export class CommandHelp extends HelpFormatter {
     }
 
     if (description) {
-      return this.wrap(description.join('\n'))
+      return this.wrap(colorize(this.config?.theme?.commandSummary, description.join('\n')))
     }
   }
 
@@ -124,13 +129,10 @@ export class CommandHelp extends HelpFormatter {
           )
           .join('\n')
 
-        return `${this.wrap(
-          colorize(this.config?.theme?.sectionDescription, description),
-          finalIndentedSpacing,
-        )}\n\n${multilineCommands}`
+        return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
       })
       .join('\n\n')
-    return body
+    return colorize(this.config?.theme?.sectionDescription, body)
   }
 
   protected flagHelpLabel(flag: Command.Flag.Any, showOptions = false): string {
@@ -202,7 +204,7 @@ export class CommandHelp extends HelpFormatter {
       })
       .join('\n\n')
 
-    return body
+    return colorize(this.config?.theme?.sectionDescription, body)
   }
 
   generate(): string {
@@ -336,7 +338,7 @@ export class CommandHelp extends HelpFormatter {
     example = this.render(example)
     const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
     if (example.startsWith(this.config.bin)) return `${dollarSign} ${example}`
-    if (example.startsWith(`${dollarSign} ${this.config.bin}`)) return example
+    if (example.startsWith(`$ ${this.config.bin}`)) return `${dollarSign}${example.replace(`$`, '')}`
     return example
   }
 
