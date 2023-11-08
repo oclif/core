@@ -1,3 +1,12 @@
+## [3.10.8](https://github.com/oclif/core/compare/3.10.7...3.10.8) (2023-11-08)
+
+
+### Bug Fixes
+
+* move up prod check in tsPath ([#858](https://github.com/oclif/core/issues/858)) ([204de58](https://github.com/oclif/core/commit/204de58ddd158e10943007d50c658e0e1ef81d4f))
+
+
+
 ## [3.10.7](https://github.com/oclif/core/compare/3.10.6...3.10.7) (2023-11-07)
 
 
