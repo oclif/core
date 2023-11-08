@@ -1,8 +1,7 @@
-import Color from 'color'
 import * as ejs from 'ejs'
 import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {join, sep} from 'node:path'
+import path, {join, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import {ux} from '../cli-ux'
@@ -23,7 +22,7 @@ import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
-import {requireJson} from '../util/fs'
+import {existsSync, readJsonSync, requireJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import Cache from './cache'
@@ -36,23 +35,6 @@ const debug = Debug()
 
 const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
 const BASE = `${_pjson.name}@${_pjson.version}`
-
-const DEFAULT_THEME: Theme = {
-  bin: new Color('#1AB9FF'),
-  command: new Color('#45C65A'),
-  commandSummary: new Color('#FFFFFF'),
-  dollarSign: new Color('#FFFF00'),
-  flag: new Color('#45C65A'),
-  flagDefaultValue: new Color('#1AB9FF'),
-  flagOptions: new Color('#45C65A'),
-  flagRequired: new Color('#FE5C4C'),
-  flagSeparator: new Color('#FFFFFF'),
-  flagType: new Color('#0EAEE8'),
-  sectionDescription: new Color('#FFFFFF'),
-  sectionHeader: new Color('#FFFF00'),
-  topic: new Color('#45C65A'),
-  version: new Color('#45C65A'),
-}
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
@@ -341,11 +323,6 @@ export class Config implements IConfig {
       this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
-    this.enableTheme = process.env.OCLIF_ENABLE_THEME === 'true' || this.pjson.oclif.enableTheme
-    if (this.enableTheme) {
-      this.theme = this.pjson.oclif?.theme ? parseTheme(this.pjson.oclif?.theme) : DEFAULT_THEME
-    }
-
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
     this.debug = this._debug()
@@ -358,6 +335,14 @@ export class Config implements IConfig {
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
+
+    this.enableTheme = this.scopedEnvVarTrue('ENABLE_THEME') ?? this.pjson.oclif.enableTheme
+    if (this.enableTheme) {
+      const jsonTheme = path.resolve(this.configDir, 'theme.json')
+      if (existsSync(jsonTheme)) {
+        this.theme = parseTheme(readJsonSync(jsonTheme))
+      }
+    }
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
