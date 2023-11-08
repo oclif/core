@@ -401,4 +401,71 @@ describe('Config', () => {
       },
     )
   })
+
+  describe('theme', () => {
+    describe('enableTheme', () => {
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: true}}, env: {FOO_ENABLE_THEME: 'true'}}).it(
+        'should be true when ENABLE_THEME is true and this.config.pjson.oclif.enableTheme is true',
+        (config) => {
+          expect(config).to.have.property('enableTheme', true)
+        },
+      )
+
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: true}}, env: {FOO_ENABLE_THEME: 'false'}}).it(
+        'should be false when ENABLE_THEME is false and this.config.pjson.oclif.enableTheme is true',
+        (config) => {
+          expect(config).to.have.property('enableTheme', false)
+        },
+      )
+
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: true}}, env: {}}).it(
+        'should be true when ENABLE_THEME is unset and this.config.pjson.oclif.enableTheme is true',
+        (config) => {
+          expect(config).to.have.property('enableTheme', true)
+        },
+      )
+
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: false}}, env: {FOO_ENABLE_THEME: 'true'}}).it(
+        'should be true when ENABLE_THEME is true and this.config.pjson.oclif.enableTheme is false',
+        (config) => {
+          expect(config).to.have.property('enableTheme', true)
+        },
+      )
+
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: false}}, env: {FOO_ENABLE_THEME: 'false'}}).it(
+        'should be false when ENABLE_THEME is false and this.config.pjson.oclif.enableTheme is false',
+        (config) => {
+          expect(config).to.have.property('enableTheme', false)
+        },
+      )
+
+      testConfig({pjson: {...pjson, oclif: {...pjson.oclif, enableTheme: false}}, env: {}}).it(
+        'should be false when ENABLE_THEME is unset and this.config.pjson.oclif.enableTheme is false',
+        (config) => {
+          expect(config).to.have.property('enableTheme', false)
+        },
+      )
+
+      testConfig({pjson, env: {FOO_ENABLE_THEME: 'true'}}).it(
+        'should be true when ENABLE_THEME is true and this.config.pjson.oclif.enableTheme is unset',
+        (config) => {
+          expect(config).to.have.property('enableTheme', true)
+        },
+      )
+
+      testConfig({pjson, env: {FOO_ENABLE_THEME: 'false'}}).it(
+        'should be false when ENABLE_THEME is false and this.config.pjson.oclif.enableTheme is unset',
+        (config) => {
+          expect(config).to.have.property('enableTheme', false)
+        },
+      )
+
+      testConfig({pjson, env: {}}).it(
+        'should be false when ENABLE_THEME is unset and this.config.pjson.oclif.enableTheme is unset',
+        (config) => {
+          expect(config).to.have.property('enableTheme', false)
+        },
+      )
+    })
+  })
 })
