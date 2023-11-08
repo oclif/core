@@ -174,7 +174,7 @@ export class CommandHelp extends HelpFormatter {
 
       let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
-        right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: '${flag.default}']`)} ${right}`
+        right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${flag.default}]`)} ${right}`
       }
 
       if (flag.required) right = `${colorize(this.config?.theme?.flagRequired, '(required)')} ${right}`
