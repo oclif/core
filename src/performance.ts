@@ -231,7 +231,7 @@ export class Performance {
     oclifDebug('Command Run Time: %sms', Performance.oclifPerf['oclif.commandRunMs'].toFixed(4))
     if (Performance.oclifPerf['oclif.configLoadMs'] > Performance.oclifPerf['oclif.runMs']) {
       oclifDebug(
-        '! Config load time is greater than total time. This might mean that Config was instantiated before oclif was run.',
+        '! Config load time is greater than total oclif time. This might mean that Config was instantiated before oclif was run.',
       )
     }
 
