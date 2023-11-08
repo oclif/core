@@ -27,6 +27,7 @@ export type VersionDetails = {
 }
 
 export interface Theme {
+  alias?: Color
   bin?: Color
   command?: Color
   commandSummary?: Color

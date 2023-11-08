@@ -30,7 +30,7 @@ export class CommandHelp extends HelpFormatter {
         [
           colorize(this.config?.theme?.dollarSign, '$'),
           colorize(this.config?.theme?.bin, this.config.bin),
-          colorize(this.config?.theme?.sectionDescription, a),
+          colorize(this.config?.theme?.alias, a),
         ].join(' '),
       )
       .join('\n')
