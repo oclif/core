@@ -1,7 +1,7 @@
 import * as ejs from 'ejs'
 import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import path, {join, sep} from 'node:path'
+import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import {ux} from '../cli-ux'
@@ -22,7 +22,7 @@ import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
-import {existsSync, readJsonSync, requireJson} from '../util/fs'
+import {requireJson, safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import Cache from './cache'
@@ -336,13 +336,10 @@ export class Config implements IConfig {
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    this.enableTheme = this.scopedEnvVarBoolean('ENABLE_THEME') ?? this.pjson.oclif?.enableTheme ?? false
-    if (this.enableTheme) {
-      const jsonTheme = path.resolve(this.configDir, 'theme.json')
-      if (existsSync(jsonTheme)) {
-        this.theme = parseTheme(readJsonSync(jsonTheme))
-      }
-    }
+    const themeFilePath = resolve(this.configDir, 'theme.json')
+    const theme = this.scopedEnvVarBoolean('DISABLE_THEME') ? undefined : await safeReadJson(themeFilePath)
+    this.enableTheme = Boolean(theme)
+    if (this.enableTheme) this.theme = parseTheme(theme)
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
@@ -602,6 +599,7 @@ export class Config implements IConfig {
 
   public scopedEnvVarBoolean(k: string): boolean | undefined {
     const v = this.scopedEnvVar(k)
+    // we might want to do something when env variable is unset but not false
     if (v === undefined) return undefined
     return v === '1' || v === 'true'
   }
