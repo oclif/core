@@ -629,11 +629,6 @@ export class Config implements IConfig {
       .map((alias) => [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
-  public scopedEnvVarTrue(k: string): boolean {
-    const v = process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
-    return v === '1' || v === 'true'
-  }
-
   protected warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
     if (this.warned) return
 
@@ -685,7 +680,7 @@ export class Config implements IConfig {
   }
 
   protected _debug(): number {
-    if (this.scopedEnvVarTrue('DEBUG')) return 1
+    if (this.scopedEnvVarBoolean('DEBUG')) return 1
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1

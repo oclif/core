@@ -125,27 +125,27 @@ describe('Config', () => {
       expect(config.scopedEnvVarKey('abc')).to.equal('FOO_ABC')
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue', (config) => {
+    testConfig({pjson}).it('will get scopedEnvVarBoolean', (config) => {
       process.env.FOO_ABC = 'true'
-      expect(config.scopedEnvVarTrue('abc')).to.equal(true)
+      expect(config.scopedEnvVarBoolean('abc')).to.equal(true)
       delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue via alias', (config) => {
+    testConfig({pjson}).it('will get scopedEnvVarBoolean via alias', (config) => {
       process.env.BAR_ABC = 'true'
-      expect(config.scopedEnvVarTrue('abc')).to.equal(true)
+      expect(config.scopedEnvVarBoolean('abc')).to.equal(true)
       delete process.env.BAR_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1', (config) => {
+    testConfig({pjson}).it('will get scopedEnvVarBoolean=1', (config) => {
       process.env.FOO_ABC = '1'
-      expect(config.scopedEnvVarTrue('abc')).to.equal(true)
+      expect(config.scopedEnvVarBoolean('abc')).to.equal(true)
       delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1 via alias', (config) => {
+    testConfig({pjson}).it('will get scopedEnvVarBoolean=1 via alias', (config) => {
       process.env.BAR_ABC = '1'
-      expect(config.scopedEnvVarTrue('abc')).to.equal(true)
+      expect(config.scopedEnvVarBoolean('abc')).to.equal(true)
       delete process.env.BAR_ABC
     })
   })
