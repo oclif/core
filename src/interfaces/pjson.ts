@@ -1,4 +1,3 @@
-import {Theme} from './config'
 import {HelpOptions} from './help'
 
 export interface PJSON {
@@ -45,7 +44,6 @@ export namespace PJSON {
       repositoryPrefix?: string
       schema?: number
       state?: 'beta' | 'deprecated' | string
-      theme?: Theme
       topicSeparator?: ' ' | ':'
       topics?: {
         [k: string]: {
