@@ -166,6 +166,7 @@ export interface Config {
   s3Key(type: keyof PJSON.S3.Templates, options?: Config.s3Key.Options): string
   s3Url(key: string): string
   scopedEnvVar(key: string): string | undefined
+  scopedEnvVarBoolean(key: string): boolean | undefined
   scopedEnvVarKey(key: string): string
   scopedEnvVarKeys(key: string): string[]
   scopedEnvVarTrue(key: string): boolean

@@ -336,7 +336,7 @@ export class Config implements IConfig {
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    this.enableTheme = this.scopedEnvVarTrue('ENABLE_THEME') ?? this.pjson.oclif.enableTheme
+    this.enableTheme = this.scopedEnvVarBoolean('ENABLE_THEME') ?? this.pjson.oclif?.enableTheme ?? false
     if (this.enableTheme) {
       const jsonTheme = path.resolve(this.configDir, 'theme.json')
       if (existsSync(jsonTheme)) {
@@ -598,6 +598,12 @@ export class Config implements IConfig {
 
   public scopedEnvVar(k: string): string | undefined {
     return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
+  }
+
+  public scopedEnvVarBoolean(k: string): boolean | undefined {
+    const v = this.scopedEnvVar(k)
+    if (v === undefined) return undefined
+    return v === '1' || v === 'true'
   }
 
   /**
