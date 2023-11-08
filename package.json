@@ -109,6 +109,7 @@
     "access": "public"
   },
   "scripts": {
+    "build:dev": "shx rm -rf lib && tsc --sourceMap",
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "compile": "tsc",
@@ -123,6 +124,7 @@
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
     "test:esm-cjs": "cross-env DEBUG=e2e:* ts-node test/integration/esm-cjs.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
+    "test:dev": "nyc mocha \"test/**/*.test.ts\"",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"
