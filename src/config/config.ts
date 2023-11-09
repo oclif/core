@@ -337,7 +337,7 @@ export class Config implements IConfig {
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
     const themeFilePath = resolve(this.configDir, 'theme.json')
-    const theme = this.scopedEnvVarBoolean('DISABLE_THEME') ? undefined : await safeReadJson(themeFilePath)
+    const theme = this.scopedEnvVarTrue('DISABLE_THEME') ? undefined : await safeReadJson(themeFilePath)
     this.enableTheme = Boolean(theme)
     if (this.enableTheme) this.theme = parseTheme(theme as Record<string, string>)
 
@@ -597,13 +597,6 @@ export class Config implements IConfig {
     return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
   }
 
-  public scopedEnvVarBoolean(k: string): boolean | undefined {
-    const v = this.scopedEnvVar(k)
-    // we might want to do something when env variable is unset but not false
-    if (v === undefined) return undefined
-    return v === '1' || v === 'true'
-  }
-
   /**
    * this DOES NOT account for bin aliases, use scopedEnvVarKeys instead which will account for bin aliases
    * @param {string} k, the unscoped key you want to get the value for
@@ -625,6 +618,11 @@ export class Config implements IConfig {
     return [this.bin, ...(this.binAliases ?? [])]
       .filter(Boolean)
       .map((alias) => [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
+  }
+
+  public scopedEnvVarTrue(k: string): boolean | undefined {
+    const v = this.scopedEnvVar(k)
+    return v === '1' || v === 'true'
   }
 
   protected warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
@@ -678,7 +676,7 @@ export class Config implements IConfig {
   }
 
   protected _debug(): number {
-    if (this.scopedEnvVarBoolean('DEBUG')) return 1
+    if (this.scopedEnvVarTrue('DEBUG')) return 1
     try {
       const {enabled} = require('debug')(this.bin)
       if (enabled) return 1
