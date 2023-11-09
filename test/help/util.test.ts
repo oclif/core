@@ -1,10 +1,13 @@
 import {test} from '@oclif/test'
 import {expect} from 'chai'
+import chalk from 'chalk'
+import Color from 'color'
 import {resolve} from 'node:path'
 
 import {Config, Interfaces} from '../../src'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
+import {colorize} from '../../src/help/util'
 import configuredHelpClass from './_test-help-class'
 
 describe('util', () => {
@@ -182,5 +185,29 @@ describe('util', () => {
           expect(actual).to.deep.equal(['foo:bar', 'my-arg', 'hello=world', '--baz'])
         },
       )
+  })
+
+  describe('colorize', () => {
+    const color = new Color('red')
+
+    it('should return text with ansi characters when given color', () => {
+      const text = colorize(color, 'brazil')
+      expect(text).to.equal(chalk.hex(color.hex())('brazil'))
+    })
+
+    it('should return text without ansi characters when given undefined', () => {
+      const text = colorize(undefined, 'brazil')
+      expect(text).to.equal('brazil')
+    })
+
+    it('should return empty text without ansi characters when given color', () => {
+      const text = colorize(color, '')
+      expect(text).to.equal('')
+    })
+
+    it('should return empty text without ansi characters when given undefined', () => {
+      const text = colorize(undefined, '')
+      expect(text).to.equal('')
+    })
   })
 })
