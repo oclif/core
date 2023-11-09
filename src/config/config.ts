@@ -9,22 +9,14 @@ import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {
-  ArchTypes,
-  Config as IConfig,
-  LoadOptions,
-  PlatformTypes,
-  Theme,
-  VersionDetails,
-  parseTheme,
-} from '../interfaces/config'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, Theme, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
 import {requireJson, safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
-import {compact, isProd} from '../util/util'
+import {compact, isProd, parseTheme} from '../util/util'
 import Cache from './cache'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-node'

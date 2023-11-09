@@ -63,14 +63,6 @@ export const THEME_KEYS = [
   'version',
 ]
 
-export function parseTheme(untypedTheme: Record<string, string>): Theme {
-  return Object.fromEntries(
-    Object.entries(untypedTheme)
-      .filter(([key]) => THEME_KEYS.includes(key))
-      .map(([key, value]) => [key, new Color(value)]),
-  )
-}
-
 export interface Config {
   /**
    * process.arch

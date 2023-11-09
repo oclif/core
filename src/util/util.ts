@@ -1,3 +1,7 @@
+import Color from 'color'
+
+import {THEME_KEYS, Theme} from '../interfaces/config'
+
 export function pickBy<T extends {[s: string]: T[keyof T]} | ArrayLike<T[keyof T]>>(
   obj: T,
   fn: (i: T[keyof T]) => boolean,
@@ -104,4 +108,12 @@ function get(obj: Record<string, any>, path: string): unknown {
 
 export function mergeNestedObjects(objs: Record<string, any>[], path: string): Record<string, any> {
   return Object.fromEntries(objs.flatMap((o) => Object.entries(get(o, path) ?? {})).reverse())
+}
+
+export function parseTheme(untypedTheme: Record<string, string>): Theme {
+  return Object.fromEntries(
+    Object.entries(untypedTheme)
+      .filter(([key]) => THEME_KEYS.includes(key))
+      .map(([key, value]) => [key, new Color(value)]),
+  )
 }
