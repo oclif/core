@@ -26,25 +26,6 @@ export type VersionDetails = {
   shell?: string
 }
 
-export interface Theme {
-  alias?: Color
-  bin?: Color
-  command?: Color
-  commandSummary?: Color
-  dollarSign?: Color
-  flag?: Color
-  flagDefaultValue?: Color
-  flagOptions?: Color
-  flagRequired?: Color
-  flagSeparator?: Color
-  flagType?: Color
-  sectionDescription?: Color
-  sectionHeader?: Color
-  topic?: Color
-  version?: Color
-}
-
-// TODO: find a way to create this array at build time based on the interface keys
 export const THEME_KEYS = [
   'alias',
   'bin',
@@ -62,6 +43,8 @@ export const THEME_KEYS = [
   'topic',
   'version',
 ]
+
+export type Theme = Record<string, Color>
 
 export interface Config {
   /**
