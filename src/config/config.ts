@@ -1,7 +1,7 @@
 import * as ejs from 'ejs'
 import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {join, sep} from 'node:path'
+import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import {ux} from '../cli-ux'
@@ -9,14 +9,14 @@ import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
-import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
+import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, Theme, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
-import {requireJson} from '../util/fs'
+import {requireJson, safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
-import {compact, isProd} from '../util/util'
+import {compact, isProd, parseTheme} from '../util/util'
 import Cache from './cache'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-node'
@@ -91,6 +91,7 @@ export class Config implements IConfig {
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
+  public theme?: Theme
   public topicSeparator: ' ' | ':' = ':'
   public userAgent!: string
   public userPJSON?: PJSON.User
@@ -312,6 +313,7 @@ export class Config implements IConfig {
     if (this.pjson.oclif.topicSeparator && [' ', ':'].includes(this.pjson.oclif.topicSeparator))
       this.topicSeparator = this.pjson.oclif.topicSeparator!
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
+
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
     this.debug = this._debug()
@@ -324,6 +326,12 @@ export class Config implements IConfig {
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
+
+    if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
+      const themeFilePath = resolve(this.configDir, 'theme.json')
+      const theme = await safeReadJson<Record<string, string>>(themeFilePath)
+      this.theme = theme ? parseTheme(theme) : undefined
+    }
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
@@ -605,7 +613,7 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVarTrue(k: string): boolean {
-    const v = process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
+    const v = this.scopedEnvVar(k)
     return v === '1' || v === 'true'
   }
 

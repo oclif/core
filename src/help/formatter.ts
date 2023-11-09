@@ -8,7 +8,7 @@ import wrap from 'wrap-ansi'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
-import {template} from './util'
+import {colorize, template} from './util'
 
 export type HelpSectionKeyValueTable = {description: string; name: string}[]
 export type HelpSection =
@@ -176,7 +176,7 @@ export class HelpFormatter {
     }
 
     const output = [
-      chalk.bold(header),
+      colorize(this.config?.theme?.sectionHeader, chalk.bold(header)),
       this.indent(
         Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
       ),

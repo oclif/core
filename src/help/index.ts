@@ -11,7 +11,13 @@ import {compact, sortBy, uniqBy} from '../util/util'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
+import {
+  colorize,
+  formatCommandDeprecationWarning,
+  getHelpFlagAdditions,
+  standardizeIDFromArgv,
+  toConfiguredId,
+} from './util'
 
 export {CommandHelp} from './command'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
@@ -80,10 +86,10 @@ export class Help extends HelpBase {
   protected description(c: Command.Loadable): string {
     const description = this.render(c.description || '')
     if (c.summary) {
-      return description
+      return colorize(this.config?.theme?.sectionDescription, description)
     }
 
-    return description.split('\n').slice(1).join('\n')
+    return colorize(this.config?.theme?.sectionDescription, description.split('\n').slice(1).join('\n'))
   }
 
   protected formatCommand(command: Command.Loadable): string {
@@ -103,7 +109,11 @@ export class Help extends HelpBase {
         .filter((c) => (this.opts.hideAliasesFromRoot ? !c.aliases?.includes(c.id) : true))
         .map((c) => {
           if (this.config.topicSeparator !== ':') c.id = c.id.replaceAll(':', this.config.topicSeparator)
-          return [c.id, this.summary(c)]
+          const summary = this.summary(c)
+          return [
+            colorize(this.config?.theme?.command, c.id),
+            summary && colorize(this.config?.theme?.sectionDescription, summary),
+          ]
         }),
       {
         indentation: 2,
@@ -127,9 +137,16 @@ export class Help extends HelpBase {
     let topicID = `${topic.name}:COMMAND`
     if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
     let output = compact([
-      summary,
-      this.section(this.opts.usageHeader || 'USAGE', `$ ${this.config.bin} ${topicID}`),
-      description && this.section('DESCRIPTION', this.wrap(description)),
+      colorize(this.config?.theme?.commandSummary, summary),
+      this.section(
+        this.opts.usageHeader || 'USAGE',
+        `${colorize(this.config?.theme?.dollarSign, '$')} ${colorize(
+          this.config?.theme?.bin,
+          this.config.bin,
+        )} ${topicID}`,
+      ),
+      description &&
+        this.section('DESCRIPTION', this.wrap(colorize(this.config?.theme?.sectionDescription, description))),
     ]).join('\n\n')
     if (this.opts.stripAnsi) output = stripAnsi(output)
     return output + '\n'
@@ -140,7 +157,10 @@ export class Help extends HelpBase {
     const body = this.renderList(
       topics.map((c) => {
         if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
-        return [c.name, c.description && this.render(c.description.split('\n')[0])]
+        return [
+          colorize(this.config?.theme?.topic, c.name),
+          c.description && this.render(colorize(this.config?.theme?.sectionDescription, c.description.split('\n')[0])),
+        ]
       }),
       {
         indentation: 2,
@@ -334,9 +354,9 @@ export class Help extends HelpBase {
   }
 
   protected summary(c: Command.Loadable): string | undefined {
-    if (c.summary) return this.render(c.summary.split('\n')[0])
+    if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
 
-    return c.description && this.render(c.description).split('\n')[0]
+    return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
   }
 
   /*
