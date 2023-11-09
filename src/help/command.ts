@@ -4,10 +4,10 @@ import stripAnsi from 'strip-ansi'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
+import {colorize} from '../util/theme'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
-import {colorize} from './util'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be

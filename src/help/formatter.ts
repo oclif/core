@@ -8,7 +8,8 @@ import wrap from 'wrap-ansi'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
-import {colorize, template} from './util'
+import {colorize} from '../util/theme'
+import {template} from './util'
 
 export type HelpSectionKeyValueTable = {description: string; name: string}[]
 export type HelpSection =

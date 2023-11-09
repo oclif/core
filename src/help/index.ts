@@ -7,17 +7,12 @@ import {error} from '../errors'
 import * as Interfaces from '../interfaces'
 import {load} from '../module-loader'
 import {cacheDefaultValue} from '../util/cache-default-value'
+import {colorize} from '../util/theme'
 import {compact, sortBy, uniqBy} from '../util/util'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
-import {
-  colorize,
-  formatCommandDeprecationWarning,
-  getHelpFlagAdditions,
-  standardizeIDFromArgv,
-  toConfiguredId,
-} from './util'
+import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv, toConfiguredId} from './util'
 
 export {CommandHelp} from './command'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'

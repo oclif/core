@@ -1,9 +1,8 @@
-import * as Color from 'color'
-
 import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
 import {PJSON} from './pjson'
 import {Options, Plugin} from './plugin'
+import {Theme} from './theme'
 import {Topic} from './topic'
 
 export type LoadOptions = Config | Options | string | undefined
@@ -25,26 +24,6 @@ export type VersionDetails = {
   rootPath?: string
   shell?: string
 }
-
-export const THEME_KEYS = [
-  'alias',
-  'bin',
-  'command',
-  'commandSummary',
-  'dollarSign',
-  'flag',
-  'flagDefaultValue',
-  'flagOptions',
-  'flagRequired',
-  'flagSeparator',
-  'flagType',
-  'sectionDescription',
-  'sectionHeader',
-  'topic',
-  'version',
-]
-
-export type Theme = Record<string, Color>
 
 export interface Config {
   /**

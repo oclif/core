@@ -1,9 +1,9 @@
 import stripAnsi from 'strip-ansi'
 
 import * as Interfaces from '../interfaces'
+import {colorize} from '../util/theme'
 import {compact} from '../util/util'
 import {HelpFormatter} from './formatter'
-import {colorize} from './util'
 
 export default class RootHelp extends HelpFormatter {
   constructor(
