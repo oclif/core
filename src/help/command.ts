@@ -133,7 +133,7 @@ export class CommandHelp extends HelpFormatter {
 
     if (!label) {
       const labels = []
-      if (flag.char) labels.push(`-${flag.char[0]}`)
+      labels.push(flag.char ? `-${flag.char[0]}` : '  ')
       if (flag.name) {
         if (flag.type === 'boolean' && flag.allowNo) {
           labels.push(`--[no-]${flag.name.trim()}`)
@@ -142,7 +142,7 @@ export class CommandHelp extends HelpFormatter {
         }
       }
 
-      label = labels.join(', ')
+      label = labels.join(flag.char ? ', ' : '  ')
     }
 
     if (flag.type === 'option') {
@@ -162,8 +162,12 @@ export class CommandHelp extends HelpFormatter {
   protected flags(flags: Array<Command.Flag.Any>): [string, string | undefined][] | undefined {
     if (flags.length === 0) return
 
+    const noChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
+
     return flags.map((flag) => {
-      const left = this.flagHelpLabel(flag)
+      let left = this.flagHelpLabel(flag)
+
+      if (noChar) left = left.replace('    ', '')
 
       let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
@@ -189,10 +193,14 @@ export class CommandHelp extends HelpFormatter {
         // Guaranteed to be set because of the filter above, but make ts happy
         const summary = flag.summary || ''
         let flagHelp = this.flagHelpLabel(flag, true)
+
+        if (!flag.char) flagHelp = flagHelp.replace('    ', '')
+
         flagHelp +=
           flagHelp.length + summary.length + 2 < this.opts.maxWidth
             ? '  ' + summary
             : '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
+
         return `${flagHelp}\n\n${this.indent(this.wrap(flag.description || '', this.indentSpacing * 2))}`
       })
       .join('\n\n')
