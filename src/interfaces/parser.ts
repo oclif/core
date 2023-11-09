@@ -170,6 +170,20 @@ export type FlagProps = {
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
   noCacheDefault?: boolean
+  /**
+   * The label for the type of the flag. When set, its value is appended after the flag's char and name.
+   * This is useful when developers want to quickly grasp the format of the value they must fill the flag with without
+   * the need of reading the flag's description.
+   *
+   * For example: for a string flag
+   *
+   * FLAGS
+   *   -r, --remote url
+   *   -t, --team string
+   *   -b, --buildpack url
+   *   -m, --metadatapath filePath
+   */
+  typeLabel?: string
 }
 
 export type ArgProps = {
@@ -196,6 +210,19 @@ export type ArgProps = {
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
   noCacheDefault?: boolean
+  /**
+   * The label for the type of the arg. When set, its value is appended after the arg's char and name.
+   * This is useful when developers want to quickly grasp the format of the value they must fill the arg
+   * without reading its description.
+   *
+   * For example: for a string arg
+   *
+   * ARGUMENTS
+   *   APP string
+   *   CERTIFICATE filePath
+   *   BISCOITO naoEBolacha
+   */
+  typeLabel?: string
 }
 
 export type BooleanFlagProps = FlagProps & {
