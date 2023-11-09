@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import Color from 'color'
+import * as Color from 'color'
 import * as ejs from 'ejs'
 
 import {collectUsableIds} from '../config/util'

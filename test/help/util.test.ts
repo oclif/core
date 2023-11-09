@@ -1,13 +1,13 @@
 import {test} from '@oclif/test'
 import {expect} from 'chai'
 import chalk from 'chalk'
-import Color from 'color'
 import {resolve} from 'node:path'
 
 import {Config, Interfaces} from '../../src'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import {colorize} from '../../src/help/util'
+import {getColor} from '../../src/util/util'
 import configuredHelpClass from './_test-help-class'
 
 describe('util', () => {
@@ -188,7 +188,7 @@ describe('util', () => {
   })
 
   describe('colorize', () => {
-    const color = new Color('red')
+    const color = getColor('red')
 
     it('should return text with ansi characters when given color', () => {
       const text = colorize(color, 'brazil')

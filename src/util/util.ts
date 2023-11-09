@@ -1,4 +1,4 @@
-import Color from 'color'
+import * as Color from 'color'
 
 import {THEME_KEYS, Theme} from '../interfaces/config'
 
@@ -114,6 +114,11 @@ export function parseTheme(untypedTheme: Record<string, string>): Theme {
   return Object.fromEntries(
     Object.entries(untypedTheme)
       .filter(([key]) => THEME_KEYS.includes(key))
-      .map(([key, value]) => [key, new Color(value)]),
+      .map(([key, value]) => [key, getColor(value)]),
   )
+}
+
+export function getColor(color: string) {
+  // eslint-disable-next-line new-cap
+  return new Color.default(color)
 }
