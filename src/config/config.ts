@@ -620,7 +620,7 @@ export class Config implements IConfig {
       .map((alias) => [alias.replaceAll('@', '').replaceAll(/[/-]/g, '_'), k].join('_').toUpperCase())
   }
 
-  public scopedEnvVarTrue(k: string): boolean | undefined {
+  public scopedEnvVarTrue(k: string): boolean {
     const v = this.scopedEnvVar(k)
     return v === '1' || v === 'true'
   }
