@@ -140,7 +140,7 @@ export interface Config {
   scopedEnvVar(key: string): string | undefined
   scopedEnvVarKey(key: string): string
   scopedEnvVarKeys(key: string): string[]
-  scopedEnvVarTrue(key: string): boolean | undefined
+  scopedEnvVarTrue(key: string): boolean
   /**
    * active shell
    */
