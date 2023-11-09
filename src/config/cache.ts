@@ -1,7 +1,8 @@
-import {Plugin} from '../interfaces'
+import {PJSON, Plugin} from '../interfaces'
 
 type CacheContents = {
   rootPlugin: Plugin
+  rootCli: PJSON.CLI
 }
 
 type ValueOf<T> = T[keyof T]
@@ -20,6 +21,7 @@ export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContent
   }
 
   public get(key: 'rootPlugin'): Plugin | undefined
+  public get(key: 'rootCli'): PJSON.CLI | undefined
   public get(key: keyof CacheContents): ValueOf<CacheContents> | undefined {
     return super.get(key)
   }

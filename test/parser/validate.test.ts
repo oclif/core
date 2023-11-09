@@ -1,8 +1,41 @@
 import {expect} from 'chai'
 import {fail} from 'node:assert'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
+import Cache from '../../src/config/cache'
 import {CLIError} from '../../src/errors'
 import {validate} from '../../src/parser/validate'
+
+let sandbox: SinonSandbox
+let cacheStub: SinonStub
+
+const cache = Cache.getInstance()
+before(() => {
+  sandbox = createSandbox()
+})
+
+beforeEach(() => {
+  // don't stub the entire rootCli object
+  // @ts-ignore
+  cacheStub = sandbox
+    .stub(cache, 'get')
+    .withArgs('rootCli')
+    .returns({
+      pjson: {
+        oclif: {
+          exitCodes: {
+            requiredArgs: 3,
+            failedFlagValidation: 7,
+            nonExistentFlag: 5,
+            unexpectedArgs: 6,
+            invalidArgsSpec: 4,
+          },
+        },
+      },
+    })
+})
+
+afterEach(() => sandbox.restore())
 
 describe('validate', () => {
   const input = {
@@ -41,7 +74,7 @@ describe('validate', () => {
       fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
-      expect(err.oclif.exit).to.equal(3)
+      expect(err.oclif.exit).to.equal(5)
       expect(err.message).to.include('Nonexistent flag: foobar')
     }
   })
@@ -59,7 +92,7 @@ describe('validate', () => {
       fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
-      expect(err.oclif.exit).to.equal(4)
+      expect(err.oclif.exit).to.equal(6)
       expect(err.message).to.include('Unexpected arguments: found, me')
     }
   })
@@ -103,7 +136,7 @@ describe('validate', () => {
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Invalid argument spec')
-      expect(err.oclif.exit).to.equal(5)
+      expect(err.oclif.exit).to.equal(4)
     }
   })
 
@@ -276,7 +309,7 @@ describe('validate', () => {
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Missing 1 required arg')
-      expect(err.oclif.exit).to.equal(6)
+      expect(err.oclif.exit).to.equal(3)
     }
   })
 
@@ -932,6 +965,9 @@ describe('validate', () => {
     })
 
     it('should fail if the specified flags whose when property resolves to true in exclusive, flag has a false value', async () => {
+      // no values set for error overrides, will default to 2
+      cacheStub.reset()
+
       const input = {
         argv: [],
         flags: {
@@ -967,8 +1003,7 @@ describe('validate', () => {
         fail('should have thrown')
       } catch (error) {
         const err = error as CLIError
-        expect(err.oclif.exit).to.equal(7)
-
+        expect(err.oclif.exit).to.equal(2)
         expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
       }
     })

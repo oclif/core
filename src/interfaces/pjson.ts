@@ -97,6 +97,13 @@ export namespace PJSON {
       jitPlugins?: Record<string, string>
       npmRegistry?: string
       nsisCustomization?: string
+      exitCodes?: {
+        requiredArgs?: number
+        failedFlagValidation?: number
+        nonExistentFlag?: number
+        unexpectedArgs?: number
+        invalidArgsSpec?: number
+      }
       schema?: number
       scope?: string
       pluginPrefix?: string

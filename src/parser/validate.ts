@@ -1,3 +1,4 @@
+import Cache from '../config/cache'
 import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../util/util'
 import {
@@ -14,14 +15,21 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
-      // this is the first error that could be thrown, exit codes 1 and 2 have been used, so we'll start with 3
-      throw new NonExistentFlagsError({exit: 3, flags: parse.output.nonExistentFlags, parse})
+      throw new NonExistentFlagsError({
+        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.nonExistentFlag,
+        flags: parse.output.nonExistentFlags,
+        parse,
+      })
     }
 
     const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
-      throw new UnexpectedArgsError({args: extras, exit: 4, parse})
+      throw new UnexpectedArgsError({
+        args: extras,
+        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.unexpectedArgs,
+        parse,
+      })
     }
 
     const missingRequiredArgs: Arg<any>[] = []
@@ -33,7 +41,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       } else if (hasOptional) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
-        throw new InvalidArgsSpecError({args: parse.input.args, exit: 5, parse})
+        throw new InvalidArgsSpecError({
+          args: parse.input.args,
+          exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.invalidArgsSpec,
+          parse,
+        })
       }
 
       if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
@@ -46,8 +58,12 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .filter(([_, flagDef]) => flagDef.type === 'option' && Boolean(flagDef.multiple))
         .map(([name]) => name)
 
-      // if a command is missing args -> exit 6
-      throw new RequiredArgsError({args: missingRequiredArgs, exit: 6, flagsWithMultiple, parse})
+      throw new RequiredArgsError({
+        args: missingRequiredArgs,
+        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.requiredArgs,
+        flagsWithMultiple,
+        parse,
+      })
     }
   }
 
@@ -78,8 +94,12 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const results = await Promise.all(promises)
 
     const failed = results.filter((r) => r.status === 'failed')
-    // if a command is missing flags -> exit 7
-    if (failed.length > 0) throw new FailedFlagValidationError({exit: 7, failed, parse})
+    if (failed.length > 0)
+      throw new FailedFlagValidationError({
+        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.failedFlagValidation,
+        failed,
+        parse,
+      })
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
