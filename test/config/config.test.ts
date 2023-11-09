@@ -447,4 +447,20 @@ describe('Config', () => {
       },
     )
   })
+
+  describe('theme', () => {
+    testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}, {bin: 'red'}).it(
+      'should be set if this.enableTheme is true',
+      (config) => {
+        expect(config.theme).to.be.not.undefined
+      },
+    )
+
+    testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}, {bin: 'red'}).it(
+      'should not be set if this.enableTheme is false',
+      (config) => {
+        expect(config.theme).to.be.undefined
+      },
+    )
+  })
 })
