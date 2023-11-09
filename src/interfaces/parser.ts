@@ -9,6 +9,7 @@ export type CLIParseErrorOptions = {
     input?: ParserInput
     output?: ParserOutput
   }
+  exit?: number
 }
 
 export type OutputArgs<T extends ParserInput['args']> = {[P in keyof T]: any}

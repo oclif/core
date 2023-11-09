@@ -28,6 +28,85 @@ describe('validate', () => {
     '--': true,
   }
 
+  it('will exit 3 when a nonExistentFlags flag is passed', async () => {
+    const output = {
+      args: {},
+      argv: [],
+      nonExistentFlags: ['foobar'],
+    }
+
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.oclif.exit).to.equal(3)
+      expect(err.message).to.include('Nonexistent flag: foobar')
+    }
+  })
+
+  it('will exit 4 when an unexpected argument is found', async () => {
+    const output = {
+      args: {},
+      argv: ['found', 'me'],
+      nonExistentFlags: [],
+    }
+
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.oclif.exit).to.equal(4)
+      expect(err.message).to.include('Unexpected arguments: found, me')
+    }
+  })
+
+  it('throws when required flag is mixed with args -> exit 5', async () => {
+    const input = {
+      argv: [],
+      flags: {
+        foo: {
+          description: 'foo flag',
+          required: true,
+        },
+      },
+      raw: [
+        {
+          type: 'flag',
+          flag: 'foo',
+          input: 'value',
+        },
+      ],
+      args: {foo: {required: false}, bar: {required: true}},
+      strict: true,
+      context: {},
+      '--': true,
+    }
+
+    const output = {
+      args: {},
+      argv: [],
+      flags: {foobar: 'value'},
+      raw: [],
+      metadata: {
+        flags: {},
+      },
+    }
+
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('Invalid argument spec')
+      expect(err.oclif.exit).to.equal(5)
+    }
+  })
+
   it('enforces exclusivity for flags', async () => {
     const output = {
       args: {},
@@ -58,6 +137,7 @@ describe('validate', () => {
       fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
+      expect(err.oclif.exit).to.equal(7)
       expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
     }
   })
@@ -153,6 +233,50 @@ describe('validate', () => {
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Missing required flag')
+      expect(err.oclif.exit).to.equal(7)
+    }
+  })
+
+  it('throws when required flag is missing value', async () => {
+    const input = {
+      argv: [],
+      flags: {
+        foobar: {
+          description: 'foobar flag',
+          required: true,
+        },
+      },
+      raw: [
+        {
+          type: 'flag',
+          flag: 'foobar',
+          input: 'value',
+        },
+      ],
+      args: {foobar: {required: true}},
+      strict: true,
+      context: {},
+      '--': true,
+    }
+
+    const output = {
+      args: {},
+      argv: [],
+      flags: {foobar: 'value'},
+      raw: [],
+      metadata: {
+        flags: {},
+      },
+    }
+
+    try {
+      // @ts-expect-error
+      await validate({input, output})
+      fail('should have thrown')
+    } catch (error) {
+      const err = error as CLIError
+      expect(err.message).to.include('Missing 1 required arg')
+      expect(err.oclif.exit).to.equal(6)
     }
   })
 
@@ -272,6 +396,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -322,6 +448,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -372,6 +500,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
         }
       })
@@ -453,6 +583,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include(
             'One of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -503,6 +635,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include(
             'One of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -553,6 +687,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
         }
       })
@@ -639,6 +775,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
@@ -696,6 +834,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
@@ -827,6 +967,8 @@ describe('validate', () => {
         fail('should have thrown')
       } catch (error) {
         const err = error as CLIError
+        expect(err.oclif.exit).to.equal(7)
+
         expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
       }
     })
@@ -925,6 +1067,8 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
+          expect(err.oclif.exit).to.equal(7)
+
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --cake',
           )

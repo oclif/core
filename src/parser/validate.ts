@@ -14,13 +14,14 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
-      throw new NonExistentFlagsError({flags: parse.output.nonExistentFlags, parse})
+      // this is the first error that could be thrown, exit codes 1 and 2 have been used, so we'll start with 3
+      throw new NonExistentFlagsError({exit: 3, flags: parse.output.nonExistentFlags, parse})
     }
 
     const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
-      throw new UnexpectedArgsError({args: extras, parse})
+      throw new UnexpectedArgsError({args: extras, exit: 4, parse})
     }
 
     const missingRequiredArgs: Arg<any>[] = []
@@ -32,7 +33,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       } else if (hasOptional) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
-        throw new InvalidArgsSpecError({args: parse.input.args, parse})
+        throw new InvalidArgsSpecError({args: parse.input.args, exit: 5, parse})
       }
 
       if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
@@ -45,7 +46,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .filter(([_, flagDef]) => flagDef.type === 'option' && Boolean(flagDef.multiple))
         .map(([name]) => name)
 
-      throw new RequiredArgsError({args: missingRequiredArgs, flagsWithMultiple, parse})
+      // if a command is missing args -> exit 6
+      throw new RequiredArgsError({args: missingRequiredArgs, exit: 6, flagsWithMultiple, parse})
     }
   }
 
@@ -76,7 +78,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const results = await Promise.all(promises)
 
     const failed = results.filter((r) => r.status === 'failed')
-    if (failed.length > 0) throw new FailedFlagValidationError({failed, parse})
+    // if a command is missing flags -> exit 7
+    if (failed.length > 0) throw new FailedFlagValidationError({exit: 7, failed, parse})
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {

@@ -19,9 +19,9 @@ export type Validation = {
 export class CLIParseError extends CLIError {
   public parse: CLIParseErrorOptions['parse']
 
-  constructor(options: CLIParseErrorOptions & {message: string}) {
+  constructor(options: CLIParseErrorOptions & {exit?: number; message: string}) {
     options.message += '\nSee more help with --help'
-    super(options.message)
+    super(options.message, {exit: options.exit})
     this.parse = options.parse
   }
 }
@@ -29,7 +29,7 @@ export class CLIParseError extends CLIError {
 export class InvalidArgsSpecError extends CLIParseError {
   public args: ArgInput
 
-  constructor({args, parse}: CLIParseErrorOptions & {args: ArgInput}) {
+  constructor({args, exit, parse}: CLIParseErrorOptions & {args: ArgInput}) {
     let message = 'Invalid argument spec'
     const namedArgs = Object.values(args).filter((a) => a.name)
     if (namedArgs.length > 0) {
@@ -41,7 +41,7 @@ export class InvalidArgsSpecError extends CLIParseError {
       message += `:\n${list}`
     }
 
-    super({message, parse})
+    super({exit, message, parse})
     this.args = args
   }
 }
@@ -51,6 +51,7 @@ export class RequiredArgsError extends CLIParseError {
 
   constructor({
     args,
+    exit,
     flagsWithMultiple,
     parse,
   }: CLIParseErrorOptions & {args: Arg<any>[]; flagsWithMultiple?: string[]}) {
@@ -71,7 +72,7 @@ export class RequiredArgsError extends CLIParseError {
       message += '\nAlternatively, you can use "--" to signify the end of the flags and the beginning of arguments.'
     }
 
-    super({message, parse})
+    super({exit, message, parse})
     this.args = args
   }
 }
@@ -79,10 +80,10 @@ export class RequiredArgsError extends CLIParseError {
 export class RequiredFlagError extends CLIParseError {
   public flag: Flag<any>
 
-  constructor({flag, parse}: CLIParseErrorOptions & {flag: Flag<any>}) {
+  constructor({exit, flag, parse}: CLIParseErrorOptions & {flag: Flag<any>}) {
     const usage = renderList(flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
-    super({message, parse})
+    super({exit, message, parse})
     this.flag = flag
   }
 }
@@ -90,9 +91,9 @@ export class RequiredFlagError extends CLIParseError {
 export class UnexpectedArgsError extends CLIParseError {
   public args: unknown[]
 
-  constructor({args, parse}: CLIParseErrorOptions & {args: unknown[]}) {
+  constructor({args, exit, parse}: CLIParseErrorOptions & {args: unknown[]}) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
-    super({message, parse})
+    super({exit, message, parse})
     this.args = args
   }
 }
@@ -100,9 +101,9 @@ export class UnexpectedArgsError extends CLIParseError {
 export class NonExistentFlagsError extends CLIParseError {
   public flags: string[]
 
-  constructor({flags, parse}: CLIParseErrorOptions & {flags: string[]}) {
+  constructor({exit, flags, parse}: CLIParseErrorOptions & {flags: string[]}) {
     const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
-    super({message, parse})
+    super({exit, message, parse})
     this.flags = flags
   }
 }
@@ -122,11 +123,11 @@ export class ArgInvalidOptionError extends CLIParseError {
 }
 
 export class FailedFlagValidationError extends CLIParseError {
-  constructor({failed, parse}: CLIParseErrorOptions & {failed: Validation[]}) {
+  constructor({exit, failed, parse}: CLIParseErrorOptions & {failed: Validation[]}) {
     const reasons = failed.map((r) => r.reason)
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
     const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
-    super({message, parse})
+    super({exit, message, parse})
   }
 }
