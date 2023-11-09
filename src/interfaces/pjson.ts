@@ -25,7 +25,6 @@ export namespace PJSON {
       default?: string
       description?: string
       devPlugins?: string[]
-      enableTheme: boolean
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions
