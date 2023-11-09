@@ -91,7 +91,6 @@ export interface Config {
    * base dirname to use in cacheDir/configDir/dataDir
    */
   readonly dirname: string
-  enableTheme: boolean
   /**
    * points to a file that should be appended to for error logs
    *
@@ -145,7 +144,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
-  readonly theme: Theme
+  readonly theme?: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   /**

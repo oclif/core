@@ -404,62 +404,46 @@ describe('Config', () => {
     )
   })
 
-  describe('enableTheme', () => {
+  describe('theme', () => {
     testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}, {bin: 'red'}).it(
-      'should be false when DISABLE_THEME is true and theme.json exists',
+      'should not be set when DISABLE_THEME is true and theme.json exists',
       (config) => {
-        expect(config).to.have.property('enableTheme', false)
+        expect(config).to.have.property('theme', undefined)
       },
     )
 
     testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}, {bin: 'red'}).it(
-      'should be true when DISABLE_THEME is false and theme.json exists',
+      'should be set when DISABLE_THEME is false and theme.json exists',
       (config) => {
-        expect(config).to.have.property('enableTheme', true)
+        expect(config).to.nested.include({'theme.bin.color[0]': 255})
       },
     )
 
     testConfig({pjson, env: {}}, {bin: 'red'}).it(
-      'should be true when DISABLE_THEME is unset and theme.json exists',
+      'should be set when DISABLE_THEME is unset and theme.json exists',
       (config) => {
-        expect(config).to.have.property('enableTheme', true)
+        expect(config).to.nested.include({'theme.bin.color[0]': 255})
       },
     )
 
     testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}).it(
-      'should be false when DISABLE_THEME is true and theme.json does not exist',
+      'should not be set when DISABLE_THEME is true and theme.json does not exist',
       (config) => {
-        expect(config).to.have.property('enableTheme', false)
+        expect(config).to.have.property('theme', undefined)
       },
     )
 
     testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}).it(
-      'should be false when DISABLE_THEME is false and theme.json does not exist',
+      'should not be set when DISABLE_THEME is false and theme.json does not exist',
       (config) => {
-        expect(config).to.have.property('enableTheme', false)
+        expect(config).to.have.property('theme', undefined)
       },
     )
 
     testConfig({pjson, env: {}}).it(
-      'should be false when DISABLE_THEME is unset and theme.json does not exist',
+      'should not be set when DISABLE_THEME is unset and theme.json does not exist',
       (config) => {
-        expect(config).to.have.property('enableTheme', false)
-      },
-    )
-  })
-
-  describe('theme', () => {
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}, {bin: 'red'}).it(
-      'should be set if this.enableTheme is true',
-      (config) => {
-        expect(config.theme).to.be.not.undefined
-      },
-    )
-
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}, {bin: 'red'}).it(
-      'should not be set if this.enableTheme is false',
-      (config) => {
-        expect(config.theme).to.be.undefined
+        expect(config).to.have.property('theme', undefined)
       },
     )
   })

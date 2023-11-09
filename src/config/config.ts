@@ -80,7 +80,6 @@ export class Config implements IConfig {
   public dataDir!: string
   public debug = 0
   public dirname!: string
-  public enableTheme: boolean = false
   public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
@@ -92,7 +91,7 @@ export class Config implements IConfig {
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
-  public theme!: Theme
+  public theme?: Theme
   public topicSeparator: ' ' | ':' = ':'
   public userAgent!: string
   public userPJSON?: PJSON.User
@@ -328,10 +327,11 @@ export class Config implements IConfig {
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    const themeFilePath = resolve(this.configDir, 'theme.json')
-    const theme = this.scopedEnvVarTrue('DISABLE_THEME') ? undefined : await safeReadJson(themeFilePath)
-    this.enableTheme = Boolean(theme)
-    if (this.enableTheme) this.theme = parseTheme(theme as Record<string, string>)
+    if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
+      const themeFilePath = resolve(this.configDir, 'theme.json')
+      const theme = await safeReadJson<Record<string, string>>(themeFilePath)
+      this.theme = theme ? parseTheme(theme) : undefined
+    }
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
