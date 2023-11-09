@@ -63,15 +63,12 @@ export const THEME_KEYS = [
   'version',
 ]
 
-export function parseTheme(untypedTheme: any): Theme {
-  const theme: Theme = {}
-  for (const prop in untypedTheme) {
-    if (Object.prototype.hasOwnProperty.call(untypedTheme, prop) && THEME_KEYS.includes(prop)) {
-      theme[prop as keyof Theme] = new Color(untypedTheme[prop])
-    }
-  }
-
-  return theme
+export function parseTheme(untypedTheme: Record<string, string>): Theme {
+  return Object.fromEntries(
+    Object.entries(untypedTheme)
+      .filter(([key]) => THEME_KEYS.includes(key))
+      .map(([key, value]) => [key, new Color(value)]),
+  )
 }
 
 export interface Config {

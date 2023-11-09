@@ -339,7 +339,7 @@ export class Config implements IConfig {
     const themeFilePath = resolve(this.configDir, 'theme.json')
     const theme = this.scopedEnvVarBoolean('DISABLE_THEME') ? undefined : await safeReadJson(themeFilePath)
     this.enableTheme = Boolean(theme)
-    if (this.enableTheme) this.theme = parseTheme(theme)
+    if (this.enableTheme) this.theme = parseTheme(theme as Record<string, string>)
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
