@@ -147,8 +147,8 @@ export class CommandHelp extends HelpFormatter {
 
     if (flag.type === 'option') {
       let value
-      if (this.config.showFlagTypeLabel && flag.typeLabel) {
-        value = ` ${flag.typeLabel}`
+      if (this.config.showFlagTypeLabel) {
+        value = ` ${flag.typeLabel ?? 'string'}`
       } else {
         value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
         if (!flag.helpValue && flag.options) {
