@@ -178,6 +178,7 @@ export type FlagProps = {
    * For example: for a string flag
    *
    * FLAGS
+   *
    *   -r, --remote url
    *   -t, --team string
    *   -b, --buildpack url
@@ -218,8 +219,11 @@ export type ArgProps = {
    * For example: for a string arg
    *
    * ARGUMENTS
+   *
    *   APP string
+   *
    *   CERTIFICATE filePath
+   *
    *   BISCOITO naoEBolacha
    */
   typeLabel?: string
@@ -241,6 +245,7 @@ export type OptionFlagProps = FlagProps & {
    * separate on spaces.
    */
   delimiter?: ','
+  typeLabel?: string
 }
 
 export type FlagParserContext = Command & {token: FlagToken}
