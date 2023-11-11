@@ -91,6 +91,7 @@ export class Config implements IConfig {
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
+  public showFlagTypeLabel!: boolean
   public topicSeparator: ' ' | ':' = ':'
   public userAgent!: string
   public userPJSON?: PJSON.User
@@ -324,6 +325,8 @@ export class Config implements IConfig {
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
+
+    this.showFlagTypeLabel = this.pjson.oclif.showFlagTypeLabel || false
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}

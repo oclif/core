@@ -122,6 +122,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
+  readonly showFlagTypeLabel?: boolean
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   /**

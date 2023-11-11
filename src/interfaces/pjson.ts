@@ -42,6 +42,7 @@ export namespace PJSON {
       plugins?: string[]
       repositoryPrefix?: string
       schema?: number
+      showFlagTypeLabel?: boolean
       state?: 'beta' | 'deprecated' | string
       topicSeparator?: ' ' | ':'
       topics?: {
