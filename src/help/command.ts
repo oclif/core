@@ -145,23 +145,23 @@ export class CommandHelp extends HelpFormatter {
       label = labels.join(', ')
     }
 
-    if (this.config.showFlagTypeLabel) {
-      label += ` ${
-        flag.typeLabel && flag.type === 'option'
-          ? flag.multiple
-            ? chalk.underline(flag.typeLabel)
-            : flag.typeLabel
-          : 'boolean'
-      }`
-    } else if (flag.type === 'option') {
-      let value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
-      if (!flag.helpValue && flag.options) {
-        value = showOptions || this.opts.showFlagOptionsInTitle ? `${flag.options.join('|')}` : '<option>'
+    if (flag.type === 'option') {
+      let value
+      if (this.config.showFlagTypeLabel && flag.typeLabel) {
+        value = ` ${flag.typeLabel}`
+      } else {
+        value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
+        if (!flag.helpValue && flag.options) {
+          value = showOptions || this.opts.showFlagOptionsInTitle ? `${flag.options.join('|')}` : '<option>'
+        }
+
+        if (!value.includes('|')) value = chalk.underline(value)
+        value = `=${value}`
       }
 
       if (flag.multiple) value += '...'
-      if (!value.includes('|')) value = chalk.underline(value)
-      label += `=${value}`
+
+      label += value
     }
 
     return label
