@@ -280,7 +280,7 @@ describe('parse', () => {
         expect(message).to.include(`Missing 2 required args:
 arg2  arg2 desc
 arg3  arg3 desc
-See more help with --help`)
+See how the command can be used below:`)
       })
 
       it('warns about having one flag with multiple values when missing an arg', async () => {
@@ -303,7 +303,7 @@ arg1  arg1 desc
 
 Note: --flag1 allows multiple values. Because of this you need to provide all arguments before providing that flag.
 Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
-See more help with --help`)
+See how the command can be used below:`)
       })
 
       it('warns about having many flags with multiple values when missing an arg', async () => {
@@ -327,7 +327,7 @@ arg1  arg1 desc
 
 Note: --flag1, --flag2 allow multiple values. Because of this you need to provide all arguments before providing those flags.
 Alternatively, you can use "--" to signify the end of the flags and the beginning of arguments.
-See more help with --help`)
+See how the command can be used below:`)
       })
 
       it('too many args', async () => {
@@ -410,7 +410,7 @@ See more help with --help`)
 
         expect(message).to.include(`Missing 1 required arg:
 arg1
-See more help with --help`)
+See how the command can be used below:`)
       })
 
       it('two args: only first is required, only first has a default', async () => {
@@ -453,7 +453,7 @@ See more help with --help`)
         expect(message).to.include(`Invalid argument spec:
 arg1 (optional)
 arg2 (required)
-See more help with --help`)
+See how the command can be used below:`)
       })
 
       it('required arg after multiple optional args', async () => {
@@ -476,7 +476,7 @@ arg1 (optional)
 arg2 (optional)
 arg3 (optional)
 arg4 (required)
-See more help with --help`)
+See how the command can be used below:`)
       })
     })
 
