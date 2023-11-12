@@ -92,12 +92,8 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   } catch (error) {
     // WARNING: error instanceof NonExistentFlag does not work
     // WARNING: typeof error === 'NonExistentFlag' does not work
-    if (error instanceof Error) {
-      // eslint-disable-next-line unicorn/no-lonely-if
-      if (error.message.includes('Nonexistent flag')) {
-        console.log(error)
-        await showHelp(argv, config)
-      }
+    if ((error as Error).message.includes('Nonexistent flag')) {
+      await showHelp(argv, config)
     }
   } finally {
     await collectPerf()
