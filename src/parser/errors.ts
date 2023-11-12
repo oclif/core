@@ -20,7 +20,7 @@ export class CLIParseError extends CLIError {
   public parse: CLIParseErrorOptions['parse']
 
   constructor(options: CLIParseErrorOptions & {message: string}) {
-    options.message += '\nSee more help with --help'
+    options.message += '\nSee how the command can be used below:'
     super(options.message)
     this.parse = options.parse
   }

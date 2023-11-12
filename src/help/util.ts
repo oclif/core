@@ -1,5 +1,6 @@
 import * as ejs from 'ejs'
 
+import {loadHelpClass} from '.'
 import {collectUsableIds} from '../config/util'
 import {Deprecation, Config as IConfig} from '../interfaces'
 
@@ -106,4 +107,10 @@ export function formatCommandDeprecationWarning(command: string, opts?: Deprecat
 export function normalizeArgv(config: IConfig, argv = process.argv.slice(2)): string[] {
   if (config.topicSeparator !== ':' && !argv[0]?.includes(':')) argv = standardizeIDFromArgv(argv, config)
   return argv
+}
+
+export async function showHelp(argv: string[], config: IConfig) {
+  const Help = await loadHelpClass(config)
+  const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
+  return help.showHelp(argv)
 }

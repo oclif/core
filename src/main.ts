@@ -2,7 +2,8 @@ import {URL, fileURLToPath} from 'node:url'
 
 import {ux} from './cli-ux'
 import {Config} from './config'
-import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
+import {getHelpFlagAdditions, normalizeArgv} from './help'
+import {showHelp} from './help/util'
 import * as Interfaces from './interfaces'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 
@@ -63,9 +64,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // display help version if applicable
   if (helpAddition(argv, config)) {
-    const Help = await loadHelpClass(config)
-    const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
-    await help.showHelp(argv)
+    await showHelp(argv, config)
     await collectPerf()
     return
   }
@@ -90,6 +89,16 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   try {
     return await config.runCommand(id, argvSlice, cmd)
+  } catch (error) {
+    // WARNING: error instanceof NonExistentFlag does not work
+    // WARNING: typeof error === 'NonExistentFlag' does not work
+    if (error instanceof Error) {
+      // eslint-disable-next-line unicorn/no-lonely-if
+      if (error.message.includes('Nonexistent flag')) {
+        console.log(error)
+        await showHelp(argv, config)
+      }
+    }
   } finally {
     await collectPerf()
   }
