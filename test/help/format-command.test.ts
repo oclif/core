@@ -565,12 +565,13 @@ ARGUMENTS
       const cmd = await makeLoadable(
         makeCommandClass({
           examples: ['it handles a list of examples', 'more example text'],
+          id: 'command',
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif
+  $ oclif command
 
 EXAMPLES
   it handles a list of examples
@@ -582,12 +583,13 @@ EXAMPLES
       const cmd = await makeLoadable(
         makeCommandClass({
           examples: ['it handles a single example'],
+          id: 'command',
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif
+  $ oclif command
 
 EXAMPLES
   it handles a single example`)
