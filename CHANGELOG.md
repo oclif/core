@@ -1,3 +1,12 @@
+# [3.11.0](https://github.com/oclif/core/compare/3.10.8...3.11.0) (2023-11-13)
+
+
+### Features
+
+* indent all flags with no char below each other ([#863](https://github.com/oclif/core/issues/863)) ([#872](https://github.com/oclif/core/issues/872)) ([0fcd6ed](https://github.com/oclif/core/commit/0fcd6edc12e839a2b6ef9cf33550862840547fbf))
+
+
+
 ## [3.10.8](https://github.com/oclif/core/compare/3.10.7...3.10.8) (2023-11-08)
 
 
