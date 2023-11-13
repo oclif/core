@@ -4,6 +4,7 @@ import stripAnsi from 'strip-ansi'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
+import {toStandardizedId} from '../util/ids'
 import {colorize} from '../util/theme'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
@@ -308,17 +309,20 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected usage(): string {
-    const {usage} = this.command
+    const {id, usage} = this.command
+    const standardId = toStandardizedId(id, this.config)
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
 
         const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
         const bin = colorize(this.config?.theme?.bin, this.config.bin)
+
         const command = colorize(this.config?.theme?.command, '<%= command.id %>')
+
         const commandDescription = colorize(
           this.config?.theme?.sectionDescription,
-          u.replace('<%= command.id %>', '').trim(),
+          u.replace('<%= command.id %>', '').replace(standardId, '').trim(),
         )
 
         const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()

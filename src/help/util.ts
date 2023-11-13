@@ -2,6 +2,7 @@ import * as ejs from 'ejs'
 
 import {collectUsableIds} from '../config/util'
 import {Deprecation, Config as IConfig} from '../interfaces'
+import {toStandardizedId} from '../util/ids'
 
 export function template(context: any): (t: string) => string {
   function render(t: string): string {
@@ -50,15 +51,6 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
   }
 
   return argv // ID is argv[0]
-}
-
-export function toStandardizedId(commandID: string, config: IConfig): string {
-  return commandID.replaceAll(new RegExp(config.topicSeparator, 'g'), ':')
-}
-
-export function toConfiguredId(commandID: string, config: IConfig): string {
-  const defaultTopicSeparator = ':'
-  return commandID.replaceAll(new RegExp(defaultTopicSeparator, 'g'), config.topicSeparator || defaultTopicSeparator)
 }
 
 export function standardizeIDFromArgv(argv: string[], config: IConfig): string[] {
