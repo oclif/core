@@ -81,10 +81,10 @@ export class Help extends HelpBase {
   protected description(c: Command.Loadable): string {
     const description = this.render(c.description || '')
     if (c.summary) {
-      return colorize(this.config?.theme?.sectionDescription, description)
+      return description
     }
 
-    return colorize(this.config?.theme?.sectionDescription, description.split('\n').slice(1).join('\n'))
+    return description.split('\n').slice(1).join('\n')
   }
 
   protected formatCommand(command: Command.Loadable): string {
@@ -107,7 +107,7 @@ export class Help extends HelpBase {
           const summary = this.summary(c)
           return [
             colorize(this.config?.theme?.command, c.id),
-            summary && colorize(this.config?.theme?.sectionDescription, summary),
+            summary && colorize(this.config?.theme?.sectionDescription, stripAnsi(summary)),
           ]
         }),
       {
@@ -350,7 +350,6 @@ export class Help extends HelpBase {
 
   protected summary(c: Command.Loadable): string | undefined {
     if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
-
     return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
   }
 

@@ -89,7 +89,7 @@ export class CommandHelp extends HelpFormatter {
     }
 
     if (description) {
-      return this.wrap(colorize(this.config?.theme?.commandSummary, description.join('\n')))
+      return this.wrap(description.join('\n'))
     }
   }
 
@@ -132,7 +132,7 @@ export class CommandHelp extends HelpFormatter {
         return `${this.wrap(description, finalIndentedSpacing)}\n\n${multilineCommands}`
       })
       .join('\n\n')
-    return colorize(this.config?.theme?.sectionDescription, body)
+    return body
   }
 
   protected flagHelpLabel(flag: Command.Flag.Any, showOptions = false): string {
@@ -204,7 +204,7 @@ export class CommandHelp extends HelpFormatter {
       })
       .join('\n\n')
 
-    return colorize(this.config?.theme?.sectionDescription, body)
+    return body
   }
 
   generate(): string {

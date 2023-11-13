@@ -178,10 +178,14 @@ export class HelpFormatter {
 
     const output = [
       colorize(this.config?.theme?.sectionHeader, chalk.bold(header)),
-      this.indent(
-        Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
+      colorize(
+        this.config?.theme?.sectionDescription,
+        this.indent(
+          Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
+        ),
       ),
     ].join('\n')
+
     return this.opts.stripAnsi ? stripAnsi(output) : output
   }
 
