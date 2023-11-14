@@ -36,6 +36,11 @@ export const STANDARD_CHALK = [
   'bgMagentaBright',
   'bgCyanBright',
   'bgWhiteBright',
+  'bold',
+  'underline',
+  'dim',
+  'italic',
+  'strikethrough',
 ] as const
 
 export type StandardChalk = (typeof STANDARD_CHALK)[number]
