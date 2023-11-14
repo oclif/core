@@ -9,7 +9,6 @@ import * as uxPrompt from './prompt'
 import * as styled from './styled'
 import uxWait from './wait'
 import write from './write'
-
 const hyperlinker = require('hyperlinker')
 
 export class ux {
@@ -195,4 +194,5 @@ export {ExitError} from './exit'
 export {IPromptOptions} from './prompt'
 export {Table} from './styled'
 
+export {colorize} from './theme'
 export {default as write} from './write'

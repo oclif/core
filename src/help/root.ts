@@ -1,7 +1,7 @@
 import stripAnsi from 'strip-ansi'
 
+import {colorize} from '../cli-ux/theme'
 import * as Interfaces from '../interfaces'
-import {colorize} from '../util/theme'
 import {compact} from '../util/util'
 import {HelpFormatter} from './formatter'
 

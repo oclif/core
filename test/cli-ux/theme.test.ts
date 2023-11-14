@@ -3,7 +3,8 @@ import chalk from 'chalk'
 
 config.truncateThreshold = 0
 
-import {colorize, getColor, parseTheme} from '../../src/util/theme'
+import {colorize, getColor, parseTheme} from '../../src/cli-ux/theme'
+import {THEME_KEYS} from '../../src/interfaces/theme'
 describe('colorize', () => {
   it('should return text with ansi characters when given hex code', () => {
     const color = getColor('#FF0000')
@@ -54,11 +55,26 @@ describe('theme parsing', () => {
 
     const theme = parseTheme(untypedTheme)
 
-    for (const key of Object.keys(theme)) {
-      expect(typeof theme[key]).to.equal('object')
-      expect(theme[key]).to.have.property('model')
-      expect(theme[key]).to.have.property('color')
-      expect(theme[key]).to.have.property('valpha')
+    for (const value of Object.values(theme)) {
+      expect(typeof value).to.equal('object')
+      expect(value).to.have.property('model')
+      expect(value).to.have.property('color')
+      expect(value).to.have.property('valpha')
+    }
+  })
+
+  it('should parse untyped theme json to theme using rgb', () => {
+    const untypedTheme = {
+      alias: 'rgb(255, 255, 255)',
+    }
+
+    const theme = parseTheme(untypedTheme)
+
+    for (const value of Object.values(theme)) {
+      expect(typeof value).to.equal('object')
+      expect(value).to.have.property('model')
+      expect(value).to.have.property('color')
+      expect(value).to.have.property('valpha')
     }
   })
 
@@ -81,9 +97,39 @@ describe('theme parsing', () => {
     }
 
     const theme = parseTheme(untypedTheme)
-
-    for (const key of Object.keys(theme)) {
-      expect(theme[key]).to.equal('cyan')
+    for (const value of Object.values(theme)) {
+      expect(value).to.equal('cyan')
     }
+  })
+
+  it('should ignore unsupported values', () => {
+    const untypedTheme = {
+      alias: 'FOO',
+    }
+
+    const theme = parseTheme(untypedTheme)
+    expect(theme).to.deep.equal({})
+  })
+})
+
+describe('THEME_KEYS', () => {
+  it('should always have native theme keys', () => {
+    expect(THEME_KEYS).deep.equal([
+      'alias',
+      'bin',
+      'command',
+      'commandSummary',
+      'dollarSign',
+      'flag',
+      'flagDefaultValue',
+      'flagOptions',
+      'flagRequired',
+      'flagSeparator',
+      'flagType',
+      'sectionDescription',
+      'sectionHeader',
+      'topic',
+      'version',
+    ])
   })
 })

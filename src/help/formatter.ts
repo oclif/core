@@ -5,10 +5,10 @@ import stripAnsi from 'strip-ansi'
 import widestLine from 'widest-line'
 import wrap from 'wrap-ansi'
 
+import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
-import {colorize} from '../util/theme'
 import {template} from './util'
 
 export type HelpSectionKeyValueTable = {description: string; name: string}[]

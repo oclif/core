@@ -1,11 +1,11 @@
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
 
+import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
 import {toStandardizedId} from '../util/ids'
-import {colorize} from '../util/theme'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'

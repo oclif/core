@@ -40,4 +40,41 @@ export const STANDARD_CHALK = [
 
 export type StandardChalk = (typeof STANDARD_CHALK)[number]
 
-export type Theme = Record<string, Color | StandardChalk>
+export const THEME_KEYS = [
+  'alias',
+  'bin',
+  'command',
+  'commandSummary',
+  'dollarSign',
+  'flag',
+  'flagDefaultValue',
+  'flagOptions',
+  'flagRequired',
+  'flagSeparator',
+  'flagType',
+  'sectionDescription',
+  'sectionHeader',
+  'topic',
+  'version',
+] as const
+
+export type ThemeKey = (typeof THEME_KEYS)[number]
+
+export type Theme = {
+  [key: string | ThemeKey]: Color | StandardChalk | undefined
+  alias?: Color | StandardChalk
+  bin?: Color | StandardChalk
+  command?: Color | StandardChalk
+  commandSummary?: Color | StandardChalk
+  dollarSign?: Color | StandardChalk
+  flag?: Color | StandardChalk
+  flagDefaultValue?: Color | StandardChalk
+  flagOptions?: Color | StandardChalk
+  flagRequired?: Color | StandardChalk
+  flagSeparator?: Color | StandardChalk
+  flagType?: Color | StandardChalk
+  sectionDescription?: Color | StandardChalk
+  sectionHeader?: Color | StandardChalk
+  topic?: Color | StandardChalk
+  version?: Color | StandardChalk
+}
