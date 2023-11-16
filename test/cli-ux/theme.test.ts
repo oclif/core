@@ -9,7 +9,7 @@ describe('colorize', () => {
   it('should return text with ansi characters when given hex code', () => {
     const color = getColor('#FF0000')
     const text = colorize(color, 'brazil')
-    expect(text).to.equal(chalk.hex(color.hex())('brazil'))
+    expect(text).to.equal(chalk.hex(color)('brazil'))
   })
 
   it('should return text with ansi characters when standard chalk color', () => {
@@ -58,12 +58,7 @@ describe('theme parsing', () => {
       themes: {test: untypedTheme},
     })
 
-    for (const value of Object.values(theme)) {
-      expect(typeof value).to.equal('object')
-      expect(value).to.have.property('model')
-      expect(value).to.have.property('color')
-      expect(value).to.have.property('valpha')
-    }
+    expect(theme).to.deep.equal(untypedTheme)
   })
 
   it('should parse untyped theme json to theme using rgb', () => {
@@ -76,12 +71,7 @@ describe('theme parsing', () => {
       themes: {test: untypedTheme},
     })
 
-    for (const value of Object.values(theme)) {
-      expect(typeof value).to.equal('object')
-      expect(value).to.have.property('model')
-      expect(value).to.have.property('color')
-      expect(value).to.have.property('valpha')
-    }
+    expect(theme).to.deep.equal({alias: '#FFFFFF'})
   })
 
   it('should parse untyped theme json to theme using chalk standard colors', () => {

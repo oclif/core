@@ -1,5 +1,3 @@
-import * as Color from 'color'
-
 // chalk doesn't export a list of standard colors, so we have to supply our own
 export const STANDARD_CHALK = [
   'white',
@@ -66,22 +64,22 @@ export const THEME_KEYS = [
 export type ThemeKey = (typeof THEME_KEYS)[number]
 
 export type Theme = {
-  [key: string | ThemeKey]: Color | StandardChalk | undefined
-  alias?: Color | StandardChalk
-  bin?: Color | StandardChalk
-  command?: Color | StandardChalk
-  commandSummary?: Color | StandardChalk
-  dollarSign?: Color | StandardChalk
-  flag?: Color | StandardChalk
-  flagDefaultValue?: Color | StandardChalk
-  flagOptions?: Color | StandardChalk
-  flagRequired?: Color | StandardChalk
-  flagSeparator?: Color | StandardChalk
-  flagType?: Color | StandardChalk
-  sectionDescription?: Color | StandardChalk
-  sectionHeader?: Color | StandardChalk
-  topic?: Color | StandardChalk
-  version?: Color | StandardChalk
+  [key: string | ThemeKey]: string | StandardChalk | undefined
+  alias?: string | StandardChalk
+  bin?: string | StandardChalk
+  command?: string | StandardChalk
+  commandSummary?: string | StandardChalk
+  dollarSign?: string | StandardChalk
+  flag?: string | StandardChalk
+  flagDefaultValue?: string | StandardChalk
+  flagOptions?: string | StandardChalk
+  flagRequired?: string | StandardChalk
+  flagSeparator?: string | StandardChalk
+  flagType?: string | StandardChalk
+  sectionDescription?: string | StandardChalk
+  sectionHeader?: string | StandardChalk
+  topic?: string | StandardChalk
+  version?: string | StandardChalk
 }
 
 export type Themes = {

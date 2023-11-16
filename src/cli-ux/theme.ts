@@ -13,10 +13,10 @@ function isStandardChalk(color: any): color is StandardChalk {
  * @param text string to colorize
  * @returns colorized string
  */
-export function colorize(color: Color | StandardChalk | undefined, text: string): string {
+export function colorize(color: string | StandardChalk | undefined, text: string): string {
   if (isStandardChalk(color)) return chalk[color](text)
 
-  return color ? chalk.hex(color.hex())(text) : text
+  return color ? chalk.hex(color)(text) : text
 }
 
 export function parseTheme(theme: Themes): Theme {
@@ -29,11 +29,11 @@ export function parseTheme(theme: Themes): Theme {
   )
 }
 
-export function getColor(color: string): Color
+export function getColor(color: string): string
 export function getColor(color: StandardChalk): StandardChalk
-export function getColor(color: string | StandardChalk): Color | StandardChalk | undefined {
+export function getColor(color: string | StandardChalk): string | StandardChalk | undefined {
   try {
     // eslint-disable-next-line new-cap
-    return isStandardChalk(color) ? color : new Color.default(color)
+    return isStandardChalk(color) ? color : new Color.default(color).hex()
   } catch {}
 }

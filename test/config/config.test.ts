@@ -415,14 +415,14 @@ describe('Config', () => {
     testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}, {bin: '#FF0000'}).it(
       'should be set when DISABLE_THEME is false and theme.json exists',
       (config) => {
-        expect(config).to.nested.include({'theme.bin.color[0]': 255})
+        expect(config.theme).to.have.property('bin', '#FF0000')
       },
     )
 
     testConfig({pjson, env: {}}, {bin: '#FF0000'}).it(
       'should be set when DISABLE_THEME is unset and theme.json exists',
       (config) => {
-        expect(config).to.nested.include({'theme.bin.color[0]': 255})
+        expect(config.theme).to.have.property('bin', '#FF0000')
       },
     )
 
