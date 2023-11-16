@@ -127,7 +127,6 @@ describe('THEME_KEYS', () => {
       'flagOptions',
       'flagRequired',
       'flagSeparator',
-      'flagType',
       'sectionDescription',
       'sectionHeader',
       'topic',

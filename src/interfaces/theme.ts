@@ -54,7 +54,6 @@ export const THEME_KEYS = [
   'flagOptions',
   'flagRequired',
   'flagSeparator',
-  'flagType',
   'sectionDescription',
   'sectionHeader',
   'topic',
@@ -75,7 +74,6 @@ export type Theme = {
   flagOptions?: string | StandardChalk
   flagRequired?: string | StandardChalk
   flagSeparator?: string | StandardChalk
-  flagType?: string | StandardChalk
   sectionDescription?: string | StandardChalk
   sectionHeader?: string | StandardChalk
   topic?: string | StandardChalk
