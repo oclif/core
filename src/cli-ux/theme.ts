@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import * as Color from 'color'
 
-import {STANDARD_CHALK, StandardChalk, Theme} from '../interfaces/theme'
+import {STANDARD_CHALK, StandardChalk, Theme, Themes} from '../interfaces/theme'
 
 function isStandardChalk(color: any): color is StandardChalk {
   return STANDARD_CHALK.includes(color)
@@ -13,9 +13,11 @@ export function colorize(color: Color | StandardChalk | undefined, text: string)
   return color ? chalk.hex(color.hex())(text) : text
 }
 
-export function parseTheme(untypedTheme: Record<string, string>): Theme {
+export function parseTheme(theme: Themes): Theme {
+  const themes = theme.themes ?? {}
+  const selected = theme.selected ? themes[theme.selected] ?? {} : {}
   return Object.fromEntries(
-    Object.entries(untypedTheme)
+    Object.entries(selected)
       .map(([key, value]) => [key, getColor(value)])
       .filter(([_, value]) => value),
   )

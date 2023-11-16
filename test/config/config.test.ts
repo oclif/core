@@ -52,7 +52,7 @@ describe('Config', () => {
       .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
       .stub(os, 'getPlatform', (stub) => stub.returns(platform))
 
-    if (theme) test = test.stub(fs, 'safeReadJson', (stub) => stub.resolves(theme))
+    if (theme) test = test.stub(fs, 'safeReadJson', (stub) => stub.resolves({selected: 'test', themes: {test: theme}}))
     if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
 
     test = test.add('config', () => Config.load())

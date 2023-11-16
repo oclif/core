@@ -83,3 +83,8 @@ export type Theme = {
   topic?: Color | StandardChalk
   version?: Color | StandardChalk
 }
+
+export type Themes = {
+  selected?: string
+  themes?: Record<string, Record<string, string>>
+}
