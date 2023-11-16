@@ -7,6 +7,12 @@ function isStandardChalk(color: any): color is StandardChalk {
   return STANDARD_CHALK.includes(color)
 }
 
+/**
+ * Add color to text.
+ * @param color color to use. Can be hex code (e.g. `#ff0000`), rgb (e.g. `rgb(255, 255, 255)`) or a chalk color (e.g. `red`)
+ * @param text string to colorize
+ * @returns colorized string
+ */
 export function colorize(color: Color | StandardChalk | undefined, text: string): string {
   if (isStandardChalk(color)) return chalk[color](text)
 
