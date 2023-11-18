@@ -33,7 +33,7 @@
     "wrap-ansi": "^7.0.0"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^17.7.0",
+    "@commitlint/config-conventional": "^17.8.1",
     "@oclif/plugin-help": "^5.2.20",
     "@oclif/plugin-plugins": "^3.3.0",
     "@oclif/prettier-config": "^0.2.1",
