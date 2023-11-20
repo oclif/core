@@ -5,6 +5,7 @@ import stripAnsi from 'strip-ansi'
 import widestLine from 'widest-line'
 import wrap from 'wrap-ansi'
 
+import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
@@ -176,11 +177,15 @@ export class HelpFormatter {
     }
 
     const output = [
-      chalk.bold(header),
-      this.indent(
-        Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
+      colorize(this.config?.theme?.sectionHeader, chalk.bold(header)),
+      colorize(
+        this.config?.theme?.sectionDescription,
+        this.indent(
+          Array.isArray(newBody) ? this.renderList(newBody, {indentation: 2, stripAnsi: this.opts.stripAnsi}) : newBody,
+        ),
       ),
     ].join('\n')
+
     return this.opts.stripAnsi ? stripAnsi(output) : output
   }
 

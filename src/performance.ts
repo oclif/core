@@ -194,9 +194,15 @@ export class Performance {
     if (!Performance.enabled) return
 
     const oclifDebug = require('debug')('oclif-perf')
-    oclifDebug('Total Time: %sms', Performance.oclifPerf['oclif.runMs'].toFixed(4))
+    const processUpTime = (process.uptime() * 1000).toFixed(4)
+    oclifDebug('Process Uptime: %sms', processUpTime)
+    oclifDebug('Oclif Time: %sms', Performance.oclifPerf['oclif.runMs'].toFixed(4))
     oclifDebug('Init Time: %sms', Performance.oclifPerf['oclif.initMs'].toFixed(4))
     oclifDebug('Config Load Time: %sms', Performance.oclifPerf['oclif.configLoadMs'].toFixed(4))
+    oclifDebug(
+      '  • Root Plugin Load Time: %sms',
+      Performance.getResult(OCLIF_MARKER_OWNER, 'plugin.load#root')?.duration.toFixed(4) ?? 0,
+    )
     oclifDebug(
       '  • Plugins Load Time: %sms',
       Performance.getResult(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')?.duration.toFixed(4) ?? 0,
@@ -227,6 +233,11 @@ export class Performance {
 
     oclifDebug('Command Load Time: %sms', Performance.oclifPerf['oclif.commandLoadMs'].toFixed(4))
     oclifDebug('Command Run Time: %sms', Performance.oclifPerf['oclif.commandRunMs'].toFixed(4))
+    if (Performance.oclifPerf['oclif.configLoadMs'] > Performance.oclifPerf['oclif.runMs']) {
+      oclifDebug(
+        '! Config load time is greater than total oclif time. This might mean that Config was instantiated before oclif was run.',
+      )
+    }
 
     const nonCoreDebug = require('debug')('non-oclif-perf')
 

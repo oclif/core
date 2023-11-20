@@ -2,6 +2,7 @@ import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
 import {PJSON} from './pjson'
 import {Options, Plugin} from './plugin'
+import {Theme} from './theme'
 import {Topic} from './topic'
 
 export type LoadOptions = Config | Options | string | undefined
@@ -122,6 +123,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
+  readonly theme?: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   /**
