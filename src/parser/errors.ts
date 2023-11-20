@@ -3,10 +3,8 @@ import chalk from 'chalk'
 import Cache from '../cache'
 import {renderList} from '../cli-ux/list'
 import {CLIError} from '../errors'
-import {Flag, OptionFlag} from '../interfaces'
-import {Arg, ArgInput, CLIParseErrorOptions} from '../interfaces/parser'
+import {Arg, ArgInput, CLIParseErrorOptions, OptionFlag} from '../interfaces/parser'
 import {uniq} from '../util/util'
-import {flagUsages} from './help'
 
 export {CLIError} from '../errors'
 
@@ -78,18 +76,6 @@ export class RequiredArgsError extends CLIParseError {
   }
 }
 
-export class RequiredFlagError extends CLIParseError {
-  public flag: Flag<any>
-
-  constructor({exit, flag, parse}: CLIParseErrorOptions & {flag: Flag<any>}) {
-    const usage = renderList(flagUsages([flag], {displayRequired: false}))
-    const message = `Missing required flag:\n${usage}`
-    super({exit, message, parse})
-    super({exit: Cache.getInstance().get('exitCodes')?.requiredFlags ?? exit, message, parse})
-    this.flag = flag
-  }
-}
-
 export class UnexpectedArgsError extends CLIParseError {
   public args: unknown[]
 
@@ -131,5 +117,15 @@ export class FailedFlagValidationError extends CLIParseError {
     const errString = deduped.length === 1 ? 'error' : 'errors'
     const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
     super({exit: Cache.getInstance().get('exitCodes')?.failedFlagValidation ?? exit, message, parse})
+  }
+}
+
+export class FailedFlagParsingError extends CLIParseError {
+  constructor({flag, message}: {flag: string; message: string}) {
+    super({
+      exit: Cache.getInstance().get('exitCodes')?.failedFlagParsing,
+      message: `Parsing --${flag} \n\t${message}`,
+      parse: {},
+    })
   }
 }

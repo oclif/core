@@ -26,11 +26,11 @@ export namespace PJSON {
       description?: string
       devPlugins?: string[]
       exitCodes?: {
+        failedFlagParsing?: number
         failedFlagValidation?: number
         invalidArgsSpec?: number
         nonExistentFlag?: number
         requiredArgs?: number
-        requiredFlags?: number
         unexpectedArgs?: number
       }
       flexibleTaxonomy?: boolean

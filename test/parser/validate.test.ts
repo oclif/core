@@ -19,7 +19,6 @@ describe('validate', () => {
       invalidArgsSpec: 4,
       nonExistentFlag: 5,
       requiredArgs: 3,
-      requiredFlags: 8,
       unexpectedArgs: 6,
     })
   })
