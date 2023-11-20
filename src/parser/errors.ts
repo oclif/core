@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 
+import Cache from '../cache'
 import {renderList} from '../cli-ux/list'
 import {CLIError} from '../errors'
 import {Flag, OptionFlag} from '../interfaces'
@@ -41,7 +42,7 @@ export class InvalidArgsSpecError extends CLIParseError {
       message += `:\n${list}`
     }
 
-    super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.invalidArgsSpec ?? exit, message, parse})
     this.args = args
   }
 }
@@ -72,7 +73,7 @@ export class RequiredArgsError extends CLIParseError {
       message += '\nAlternatively, you can use "--" to signify the end of the flags and the beginning of arguments.'
     }
 
-    super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.requiredArgs ?? exit, message, parse})
     this.args = args
   }
 }
@@ -84,6 +85,7 @@ export class RequiredFlagError extends CLIParseError {
     const usage = renderList(flagUsages([flag], {displayRequired: false}))
     const message = `Missing required flag:\n${usage}`
     super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.requiredFlags ?? exit, message, parse})
     this.flag = flag
   }
 }
@@ -93,7 +95,7 @@ export class UnexpectedArgsError extends CLIParseError {
 
   constructor({args, exit, parse}: CLIParseErrorOptions & {args: unknown[]}) {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
-    super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.unexpectedArgs ?? exit, message, parse})
     this.args = args
   }
 }
@@ -103,7 +105,7 @@ export class NonExistentFlagsError extends CLIParseError {
 
   constructor({exit, flags, parse}: CLIParseErrorOptions & {flags: string[]}) {
     const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
-    super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.nonExistentFlag ?? exit, message, parse})
     this.flags = flags
   }
 }
@@ -128,6 +130,6 @@ export class FailedFlagValidationError extends CLIParseError {
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
     const message = `The following ${errString} occurred:\n  ${chalk.dim(deduped.join('\n  '))}`
-    super({exit, message, parse})
+    super({exit: Cache.getInstance().get('exitCodes')?.failedFlagValidation ?? exit, message, parse})
   }
 }

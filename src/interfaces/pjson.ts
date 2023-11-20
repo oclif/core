@@ -25,6 +25,14 @@ export namespace PJSON {
       default?: string
       description?: string
       devPlugins?: string[]
+      exitCodes?: {
+        failedFlagValidation?: number
+        invalidArgsSpec?: number
+        nonExistentFlag?: number
+        requiredArgs?: number
+        requiredFlags?: number
+        unexpectedArgs?: number
+      }
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions
@@ -97,13 +105,6 @@ export namespace PJSON {
       jitPlugins?: Record<string, string>
       npmRegistry?: string
       nsisCustomization?: string
-      exitCodes?: {
-        requiredArgs?: number
-        failedFlagValidation?: number
-        nonExistentFlag?: number
-        unexpectedArgs?: number
-        invalidArgsSpec?: number
-      }
       schema?: number
       scope?: string
       pluginPrefix?: string

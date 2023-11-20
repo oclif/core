@@ -1,4 +1,3 @@
-import Cache from '../config/cache'
 import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
 import {uniq} from '../util/util'
 import {
@@ -16,7 +15,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({
-        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.nonExistentFlag,
         flags: parse.output.nonExistentFlags,
         parse,
       })
@@ -27,7 +25,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({
         args: extras,
-        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.unexpectedArgs,
         parse,
       })
     }
@@ -43,7 +40,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         // optionals should follow required, not before
         throw new InvalidArgsSpecError({
           args: parse.input.args,
-          exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.invalidArgsSpec,
           parse,
         })
       }
@@ -60,7 +56,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
       throw new RequiredArgsError({
         args: missingRequiredArgs,
-        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.requiredArgs,
         flagsWithMultiple,
         parse,
       })
@@ -96,7 +91,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const failed = results.filter((r) => r.status === 'failed')
     if (failed.length > 0)
       throw new FailedFlagValidationError({
-        exit: Cache.getInstance().get('rootCli')?.pjson.oclif.exitCodes.failedFlagValidation,
         failed,
         parse,
       })

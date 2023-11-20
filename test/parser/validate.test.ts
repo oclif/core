@@ -2,42 +2,30 @@ import {expect} from 'chai'
 import {fail} from 'node:assert'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
-import Cache from '../../src/config/cache'
+import Cache from '../../src/cache'
 import {CLIError} from '../../src/errors'
 import {validate} from '../../src/parser/validate'
 
-let sandbox: SinonSandbox
-let cacheStub: SinonStub
-
-const cache = Cache.getInstance()
-before(() => {
-  sandbox = createSandbox()
-})
-
-beforeEach(() => {
-  // don't stub the entire rootCli object
-  // @ts-ignore
-  cacheStub = sandbox
-    .stub(cache, 'get')
-    .withArgs('rootCli')
-    .returns({
-      pjson: {
-        oclif: {
-          exitCodes: {
-            requiredArgs: 3,
-            failedFlagValidation: 7,
-            nonExistentFlag: 5,
-            unexpectedArgs: 6,
-            invalidArgsSpec: 4,
-          },
-        },
-      },
-    })
-})
-
-afterEach(() => sandbox.restore())
-
 describe('validate', () => {
+  let sandbox: SinonSandbox
+  let cacheStub: SinonStub
+
+  const cache = Cache.getInstance()
+
+  beforeEach(() => {
+    sandbox = createSandbox()
+    cacheStub = sandbox.stub(cache, 'get').withArgs('exitCodes').returns({
+      failedFlagValidation: 7,
+      invalidArgsSpec: 4,
+      nonExistentFlag: 5,
+      requiredArgs: 3,
+      requiredFlags: 8,
+      unexpectedArgs: 6,
+    })
+  })
+
+  afterEach(() => sandbox.restore())
+
   const input = {
     argv: [],
     flags: {
@@ -61,7 +49,7 @@ describe('validate', () => {
     '--': true,
   }
 
-  it('will exit 3 when a nonExistentFlags flag is passed', async () => {
+  it('will exit 5 when a nonExistentFlags flag is passed', async () => {
     const output = {
       args: {},
       argv: [],
@@ -79,7 +67,7 @@ describe('validate', () => {
     }
   })
 
-  it('will exit 4 when an unexpected argument is found', async () => {
+  it('will exit 6 when an unexpected argument is found', async () => {
     const output = {
       args: {},
       argv: ['found', 'me'],
@@ -97,7 +85,7 @@ describe('validate', () => {
     }
   })
 
-  it('throws when required flag is mixed with args -> exit 5', async () => {
+  it('throws when required flag is mixed with args -> exit 4', async () => {
     const input = {
       argv: [],
       flags: {
