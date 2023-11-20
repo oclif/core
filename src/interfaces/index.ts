@@ -10,5 +10,6 @@ export type {Arg, BooleanFlag, CustomOptions, Deprecation, Flag, FlagDefinition,
 export type {PJSON} from './pjson'
 export type {Options, Plugin, PluginOptions} from './plugin'
 export type {S3Manifest} from './s3-manifest'
+export type {Theme} from './theme'
 export type {Topic} from './topic'
 export type {TSConfig} from './ts-config'

@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "3.11.0",
+  "version": "3.11.1-dev.1",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -11,6 +11,7 @@
     "chalk": "^4.1.2",
     "clean-stack": "^3.0.1",
     "cli-progress": "^3.12.0",
+    "color": "^4.2.3",
     "debug": "^4.3.4",
     "ejs": "^3.1.9",
     "get-package-type": "^0.1.0",
@@ -44,7 +45,8 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/clean-stack": "^2.1.1",
     "@types/cli-progress": "^3.11.0",
-    "@types/debug": "^4.1.12",
+    "@types/color": "^3.0.5",
+    "@types/debug": "^4.1.10",
     "@types/ejs": "^3.1.3",
     "@types/indent-string": "^4.0.1",
     "@types/js-yaml": "^3.12.7",
@@ -107,6 +109,7 @@
     "access": "public"
   },
   "scripts": {
+    "build:dev": "shx rm -rf lib && tsc --sourceMap",
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "compile": "tsc",
@@ -117,9 +120,11 @@
     "prepare": "husky install",
     "pretest": "yarn build && tsc -p test --noEmit --skipLibCheck",
     "test:circular-deps": "madge lib/ -c",
+    "test:debug": "nyc mocha --debug-brk --inspect \"test/**/*.test.ts\"",
     "test:e2e": "mocha --forbid-only \"test/**/*.e2e.ts\" --parallel --timeout 1200000",
     "test:esm-cjs": "cross-env DEBUG=e2e:* ts-node test/integration/esm-cjs.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
+    "test:dev": "nyc mocha \"test/**/*.test.ts\"",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"

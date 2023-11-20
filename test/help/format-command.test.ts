@@ -524,26 +524,26 @@ ARGUMENTS
       const cmd = await makeLoadable(
         makeCommandClass({
           id: 'apps:create',
-          usage: '<%= config.bin %> <%= command.id %> usage',
+          usage: '<%= command.id %> usage',
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif oclif apps:create usage`)
+  $ oclif apps:create usage`)
     })
 
     it('should output usage arrays with templates', async () => {
       const cmd = await makeLoadable(
         makeCommandClass({
           id: 'apps:create',
-          usage: ['<%= config.bin %>', '<%= command.id %> usage'],
+          usage: ['<%= command.id %>', '<%= command.id %> usage'],
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif oclif
+  $ oclif apps:create
   $ oclif apps:create usage`)
     })
 
@@ -565,12 +565,13 @@ ARGUMENTS
       const cmd = await makeLoadable(
         makeCommandClass({
           examples: ['it handles a list of examples', 'more example text'],
+          id: 'command',
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif
+  $ oclif command
 
 EXAMPLES
   it handles a list of examples
@@ -582,12 +583,13 @@ EXAMPLES
       const cmd = await makeLoadable(
         makeCommandClass({
           examples: ['it handles a single example'],
+          id: 'command',
         }),
       )
 
       const output = help.formatCommand(cmd)
       expect(output).to.equal(`USAGE
-  $ oclif
+  $ oclif command
 
 EXAMPLES
   it handles a single example`)

@@ -1,9 +1,11 @@
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
 
+import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
+import {toStandardizedId} from '../util/ids'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
@@ -12,13 +14,6 @@ import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 // written on any platform, that may use \r\n or \n, will be
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
-
-let {dim} = chalk
-
-if (process.env.ConEmuANSI === 'ON') {
-  // eslint-disable-next-line unicorn/consistent-destructuring
-  dim = chalk.gray
-}
 
 export class CommandHelp extends HelpFormatter {
   constructor(
@@ -31,7 +26,15 @@ export class CommandHelp extends HelpFormatter {
 
   protected aliases(aliases: string[] | undefined): string | undefined {
     if (!aliases || aliases.length === 0) return
-    const body = aliases.map((a) => ['$', this.config.bin, a].join(' ')).join('\n')
+    const body = aliases
+      .map((a) =>
+        [
+          colorize(this.config?.theme?.dollarSign, '$'),
+          colorize(this.config?.theme?.bin, this.config.bin),
+          colorize(this.config?.theme?.alias, a),
+        ].join(' '),
+      )
+      .join('\n')
     return body
   }
 
@@ -47,9 +50,14 @@ export class CommandHelp extends HelpFormatter {
     return args.map((a) => {
       const name = a.name.toUpperCase()
       let description = a.description || ''
-      if (a.default) description = `[default: ${a.default}] ${description}`
-      if (a.options) description = `(${a.options.join('|')}) ${description}`
-      return [name, description ? dim(description) : undefined]
+      if (a.default)
+        description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
+      if (a.options)
+        description = `${colorize(this.config?.theme?.flagOptions, `(${a.options.join('|')})`)} ${description}`
+      return [
+        colorize(this.config?.theme?.flag, name),
+        description ? colorize(this.config?.theme?.sectionDescription, description) : undefined,
+      ]
     })
   }
 
@@ -142,7 +150,7 @@ export class CommandHelp extends HelpFormatter {
         }
       }
 
-      label = labels.join(flag.char ? ', ' : '  ')
+      label = labels.join(colorize(this.config?.theme?.flagSeparator, flag.char ? ', ' : '  '))
     }
 
     if (flag.type === 'option') {
@@ -165,22 +173,22 @@ export class CommandHelp extends HelpFormatter {
     const noChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
 
     return flags.map((flag) => {
-      let left = this.flagHelpLabel(flag)
+      let left = colorize(this.config?.theme?.flag, this.flagHelpLabel(flag))
 
       if (noChar) left = left.replace('    ', '')
 
       let right = flag.summary || flag.description || ''
       if (flag.type === 'option' && flag.default) {
-        right = `[default: ${flag.default}] ${right}`
+        right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${flag.default}]`)} ${right}`
       }
 
-      if (flag.required) right = `(required) ${right}`
+      if (flag.required) right = `${colorize(this.config?.theme?.flagRequired, '(required)')} ${right}`
 
       if (flag.type === 'option' && flag.options && !flag.helpValue && !this.opts.showFlagOptionsInTitle) {
-        right += `\n<options: ${flag.options.join('|')}>`
+        right += colorize(this.config?.theme?.flagOptions, `\n<options: ${flag.options.join('|')}>`)
       }
 
-      return [left, dim(right.trim())]
+      return [left, colorize(this.config?.theme?.sectionDescription, right.trim())]
     })
   }
 
@@ -309,11 +317,23 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected usage(): string {
-    const {usage} = this.command
+    const {id, usage} = this.command
+    const standardId = toStandardizedId(id, this.config)
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
-        const line = `$ ${this.config.bin} ${u}`.trim()
+
+        const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
+        const bin = colorize(this.config?.theme?.bin, this.config.bin)
+
+        const command = colorize(this.config?.theme?.command, '<%= command.id %>')
+
+        const commandDescription = colorize(
+          this.config?.theme?.sectionDescription,
+          u.replace('<%= command.id %>', '').replace(standardId, '').trim(),
+        )
+
+        const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()
         if (line.length > allowedSpacing) {
           const splitIndex = line.slice(0, Math.max(0, allowedSpacing)).lastIndexOf(' ')
           return (
@@ -331,13 +351,16 @@ export class CommandHelp extends HelpFormatter {
 
   private formatIfCommand(example: string): string {
     example = this.render(example)
-    if (example.startsWith(this.config.bin)) return dim(`$ ${example}`)
-    if (example.startsWith(`$ ${this.config.bin}`)) return dim(example)
+    const dollarSign = colorize(this.config?.theme?.dollarSign, '$')
+    if (example.startsWith(this.config.bin)) return `${dollarSign} ${example}`
+    if (example.startsWith(`$ ${this.config.bin}`)) return `${dollarSign}${example.replace(`$`, '')}`
     return example
   }
 
   private isCommand(example: string): boolean {
-    return stripAnsi(this.formatIfCommand(example)).startsWith(`$ ${this.config.bin}`)
+    return stripAnsi(this.formatIfCommand(example)).startsWith(
+      `${colorize(this.config?.theme?.dollarSign, '$')} ${this.config.bin}`,
+    )
   }
 }
 export default CommandHelp
