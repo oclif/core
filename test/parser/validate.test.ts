@@ -1,30 +1,10 @@
 import {expect} from 'chai'
 import {fail} from 'node:assert'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
-import Cache from '../../src/cache'
 import {CLIError} from '../../src/errors'
 import {validate} from '../../src/parser/validate'
 
 describe('validate', () => {
-  let sandbox: SinonSandbox
-  let cacheStub: SinonStub
-
-  const cache = Cache.getInstance()
-
-  beforeEach(() => {
-    sandbox = createSandbox()
-    cacheStub = sandbox.stub(cache, 'get').withArgs('exitCodes').returns({
-      failedFlagValidation: 7,
-      invalidArgsSpec: 4,
-      nonExistentFlag: 5,
-      requiredArgs: 3,
-      unexpectedArgs: 6,
-    })
-  })
-
-  afterEach(() => sandbox.restore())
-
   const input = {
     argv: [],
     flags: {
@@ -47,85 +27,6 @@ describe('validate', () => {
     context: {},
     '--': true,
   }
-
-  it('will exit 5 when a nonExistentFlags flag is passed', async () => {
-    const output = {
-      args: {},
-      argv: [],
-      nonExistentFlags: ['foobar'],
-    }
-
-    try {
-      // @ts-expect-error
-      await validate({input, output})
-      fail('should have thrown')
-    } catch (error) {
-      const err = error as CLIError
-      expect(err.oclif.exit).to.equal(5)
-      expect(err.message).to.include('Nonexistent flag: foobar')
-    }
-  })
-
-  it('will exit 6 when an unexpected argument is found', async () => {
-    const output = {
-      args: {},
-      argv: ['found', 'me'],
-      nonExistentFlags: [],
-    }
-
-    try {
-      // @ts-expect-error
-      await validate({input, output})
-      fail('should have thrown')
-    } catch (error) {
-      const err = error as CLIError
-      expect(err.oclif.exit).to.equal(6)
-      expect(err.message).to.include('Unexpected arguments: found, me')
-    }
-  })
-
-  it('throws when required flag is mixed with args -> exit 4', async () => {
-    const input = {
-      argv: [],
-      flags: {
-        foo: {
-          description: 'foo flag',
-          required: true,
-        },
-      },
-      raw: [
-        {
-          type: 'flag',
-          flag: 'foo',
-          input: 'value',
-        },
-      ],
-      args: {foo: {required: false}, bar: {required: true}},
-      strict: true,
-      context: {},
-      '--': true,
-    }
-
-    const output = {
-      args: {},
-      argv: [],
-      flags: {foobar: 'value'},
-      raw: [],
-      metadata: {
-        flags: {},
-      },
-    }
-
-    try {
-      // @ts-expect-error
-      await validate({input, output})
-      fail('should have thrown')
-    } catch (error) {
-      const err = error as CLIError
-      expect(err.message).to.include('Invalid argument spec')
-      expect(err.oclif.exit).to.equal(4)
-    }
-  })
 
   it('enforces exclusivity for flags', async () => {
     const output = {
@@ -157,7 +58,6 @@ describe('validate', () => {
       fail('should have thrown')
     } catch (error) {
       const err = error as CLIError
-      expect(err.oclif.exit).to.equal(7)
       expect(err.message).to.include('--dessert=cheesecake cannot also be provided when using --dinner')
     }
   })
@@ -253,50 +153,6 @@ describe('validate', () => {
     } catch (error) {
       const err = error as CLIError
       expect(err.message).to.include('Missing required flag')
-      expect(err.oclif.exit).to.equal(7)
-    }
-  })
-
-  it('throws when required flag is missing value', async () => {
-    const input = {
-      argv: [],
-      flags: {
-        foobar: {
-          description: 'foobar flag',
-          required: true,
-        },
-      },
-      raw: [
-        {
-          type: 'flag',
-          flag: 'foobar',
-          input: 'value',
-        },
-      ],
-      args: {foobar: {required: true}},
-      strict: true,
-      context: {},
-      '--': true,
-    }
-
-    const output = {
-      args: {},
-      argv: [],
-      flags: {foobar: 'value'},
-      raw: [],
-      metadata: {
-        flags: {},
-      },
-    }
-
-    try {
-      // @ts-expect-error
-      await validate({input, output})
-      fail('should have thrown')
-    } catch (error) {
-      const err = error as CLIError
-      expect(err.message).to.include('Missing 1 required arg')
-      expect(err.oclif.exit).to.equal(3)
     }
   })
 
@@ -416,8 +272,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -468,8 +322,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -520,8 +372,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include('All of the following must be provided when using --dessert: --cookies')
         }
       })
@@ -603,8 +453,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include(
             'One of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -655,8 +503,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include(
             'One of the following must be provided when using --dessert: --cookies, --sprinkles',
           )
@@ -707,8 +553,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include('One of the following must be provided when using --dessert: --cookies')
         }
       })
@@ -795,8 +639,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
@@ -854,8 +696,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include('--sprinkles=true cannot also be provided when using --dessert')
         }
       })
@@ -952,9 +792,6 @@ describe('validate', () => {
     })
 
     it('should fail if the specified flags whose when property resolves to true in exclusive, flag has a false value', async () => {
-      // no values set for error overrides, will default to 2
-      cacheStub.reset()
-
       const input = {
         argv: [],
         flags: {
@@ -990,7 +827,6 @@ describe('validate', () => {
         fail('should have thrown')
       } catch (error) {
         const err = error as CLIError
-        expect(err.oclif.exit).to.equal(2)
         expect(err.message).to.include('--cookies=false cannot also be provided when using --dessert')
       }
     })
@@ -1089,8 +925,6 @@ describe('validate', () => {
           fail('should have thrown')
         } catch (error) {
           const err = error as CLIError
-          expect(err.oclif.exit).to.equal(7)
-
           expect(err.message).to.include(
             'All of the following must be provided when using --dessert: --cookies, --cake',
           )

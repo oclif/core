@@ -1,0 +1,8 @@
+{
+  "name": "test-plugin",
+  "private": true,
+  "files": [],
+  "oclif": {
+    "commands": "./lib/commands"
+  }
+}
