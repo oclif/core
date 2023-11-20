@@ -12,7 +12,7 @@ import {getHelpFlagAdditions} from '../help/util'
 import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
-import {Theme, Themes} from '../interfaces/theme'
+import {Theme} from '../interfaces/theme'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
@@ -330,8 +330,8 @@ export class Config implements IConfig {
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
     if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
-      const {activeTheme} = await this.loadThemes()
-      this.theme = activeTheme
+      const {theme} = await this.loadThemes()
+      this.theme = theme
     }
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
@@ -401,18 +401,14 @@ export class Config implements IConfig {
 
   public async loadThemes(): Promise<{
     file: string
-    activeTheme: Theme | undefined
-    themes: Themes | undefined
+    theme: Theme | undefined
   }> {
-    const themesFile = this.pjson.oclif.themesFile
-      ? resolve(this.root, this.pjson.oclif.themesFile)
-      : resolve(this.configDir, 'themes.json')
-    const themes = await safeReadJson<Themes>(themesFile)
-    const activeTheme = themes ? parseTheme(themes) : undefined
+    const file = resolve(this.configDir, 'theme.json')
+    const themes = await safeReadJson<Record<string, string>>(file)
+    const theme = themes ? parseTheme(themes) : undefined
     return {
-      activeTheme,
-      file: themesFile,
-      themes,
+      file,
+      theme,
     }
   }
 

@@ -79,8 +79,3 @@ export type Theme = {
   topic?: string | StandardChalk
   version?: string | StandardChalk
 }
-
-export type Themes = {
-  selected?: string
-  themes?: Record<string, Record<string, string>>
-}

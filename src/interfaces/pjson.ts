@@ -43,7 +43,6 @@ export namespace PJSON {
       repositoryPrefix?: string
       schema?: number
       state?: 'beta' | 'deprecated' | string
-      themesFile?: string
       topicSeparator?: ' ' | ':'
       topics?: {
         [k: string]: {

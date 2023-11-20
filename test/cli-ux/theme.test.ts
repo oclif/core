@@ -53,10 +53,7 @@ describe('theme parsing', () => {
       version: '#FFFFFF',
     }
 
-    const theme = parseTheme({
-      selected: 'test',
-      themes: {test: untypedTheme},
-    })
+    const theme = parseTheme(untypedTheme)
 
     expect(theme).to.deep.equal(untypedTheme)
   })
@@ -66,10 +63,7 @@ describe('theme parsing', () => {
       alias: 'rgb(255, 255, 255)',
     }
 
-    const theme = parseTheme({
-      selected: 'test',
-      themes: {test: untypedTheme},
-    })
+    const theme = parseTheme(untypedTheme)
 
     expect(theme).to.deep.equal({alias: '#FFFFFF'})
   })
@@ -92,10 +86,7 @@ describe('theme parsing', () => {
       version: 'cyan',
     }
 
-    const theme = parseTheme({
-      selected: 'test',
-      themes: {test: untypedTheme},
-    })
+    const theme = parseTheme(untypedTheme)
     for (const value of Object.values(theme)) {
       expect(value).to.equal('cyan')
     }
@@ -106,10 +97,7 @@ describe('theme parsing', () => {
       alias: 'FOO',
     }
 
-    const theme = parseTheme({
-      selected: 'test',
-      themes: {test: untypedTheme},
-    })
+    const theme = parseTheme(untypedTheme)
     expect(theme).to.deep.equal({})
   })
 })
