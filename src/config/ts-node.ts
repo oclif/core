@@ -131,15 +131,15 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
   if (plugin?.moduleType !== 'module' || isProduction) return false
 
   const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
-  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes(`ts-node`)
+  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes('ts-node')
   return tsNodeExecIsUsed && nodeMajor >= 20
 }
 
 /**
  * Determine the path to the source file from the compiled ./lib files
  */
-async function determinePath(root: string, orig: string): Promise<string> {
-  const tsconfig = await registerTSNode(root)
+async function determinePath(root: string, orig: string, isTsx: boolean): Promise<string> {
+  const tsconfig = isTsx ? await loadTSConfig(root) : await registerTSNode(root)
   if (!tsconfig) return orig
 
   debug(`determining path for ${orig}`)
@@ -189,48 +189,50 @@ async function determinePath(root: string, orig: string): Promise<string> {
 export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
 export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
 export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
-  const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
-
   if (!orig) return orig
   orig = orig.startsWith(root) ? orig : join(root, orig)
 
   // NOTE: The order of these checks matter!
 
-  if (settings.tsnodeEnabled === false) {
-    debug(`Skipping ts-node registration for ${root} because tsNodeEnabled is explicitly set to false`)
-    return orig
-  }
-
+  const isTsx = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes('tsx')
   const isProduction = isProd()
 
-  // Do not skip ts-node registration if the plugin is linked
-  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
-    debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
-    return orig
-  }
+  if (!isTsx) {
+    if (settings.tsnodeEnabled === false) {
+      debug(`Skipping ts-node registration for ${root} because tsNodeEnabled is explicitly set to false`)
+      return orig
+    }
 
-  if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
-    debug(
-      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
-    )
-    if (plugin?.type === 'link')
-      memoizedWarn(
-        `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
+    // Do not skip ts-node registration if the plugin is linked
+    if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
+      debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
+      return orig
+    }
+
+    const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
+    if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
+      debug(
+        `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
       )
-    return orig
-  }
+      if (plugin?.type === 'link')
+        memoizedWarn(
+          `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
+        )
+      return orig
+    }
 
-  if (cannotUseTsNode(root, plugin, isProduction)) {
-    debug(`Skipping ts-node registration for ${root} because ts-node is run in node version ${process.version}"`)
-    memoizedWarn(
-      `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
-    )
-    return orig
+    if (cannotUseTsNode(root, plugin, isProduction)) {
+      debug(`Skipping ts-node registration for ${root} because ts-node is run in node version ${process.version}"`)
+      memoizedWarn(
+        `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
+      )
+      return orig
+    }
   }
 
   try {
-    return await determinePath(root, orig)
-  } catch (error: any) {
+    return await determinePath(root, orig, isTsx)
+  } catch (error) {
     debug(error)
     return orig
   }
