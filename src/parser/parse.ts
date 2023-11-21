@@ -200,7 +200,7 @@ export class Parser<
         }
       }
 
-      if (parsingFlags && this.currentFlag && this.currentFlag.multiple) {
+      if (parsingFlags && this.currentFlag && this.currentFlag.multiple && !this.currentFlag.multipleNonGreedy) {
         this.raw.push({flag: this.currentFlag.name, input, type: 'flag'})
         continue
       }
