@@ -51,6 +51,12 @@ describe('util', () => {
       expect(actual).to.deep.equal(['foo:bar', '--baz'])
     })
 
+    test.it('should return standardized id when topic separator is a space', () => {
+      config.topicSeparator = ' '
+      const actual = standardizeIDFromArgv(['foo', '', '--baz'], config)
+      expect(actual).to.deep.equal(['foo', '', '--baz'])
+    })
+
     test
       .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
       .it('should return standardized id when topic separator is a space', () => {
