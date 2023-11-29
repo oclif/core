@@ -5,9 +5,6 @@ export default class Test extends Command {
     arg1: Args.string({
       required: true,
     }),
-    // qux: Args.string({
-    //   required: true,
-    // }),
   }
 
   public static readonly flags = {

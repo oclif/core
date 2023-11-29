@@ -341,9 +341,6 @@ export class Parser<
 
         return await flag.parse(input, ctx, flag)
       } catch (error: any) {
-        // console.log(error)
-        // error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
-        // throw error
         throw new FailedFlagParsingError({flag: flag.name, message: error.message})
       }
     }
