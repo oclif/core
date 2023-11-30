@@ -122,3 +122,48 @@ jobs:
       TESTKIT_JWT_CLIENT_ID: ${{ secrets.TESTKIT_JWT_CLIENT_ID }}
       TESTKIT_JWT_KEY: ${{ secrets.TESTKIT_JWT_KEY }}
       TESTKIT_HUB_INSTANCE: ${{ secrets.TESTKIT_HUB_INSTANCE }}
+  external-unit-tests:
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        repo:
+          - oclif/plugin-autocomplete
+          - oclif/plugin-commands
+          - oclif/plugin-help
+          - oclif/plugin-not-found
+          - oclif/plugin-plugins
+          - oclif/plugin-update
+          - oclif/plugin-which
+          - oclif/plugin-warn-if-update-available
+          - oclif/plugin-version
+    uses: ./.github/workflows/external-test.yml
+    with:
+      repo: ${{ matrix.repo }}
+      os: ${{ matrix.os }}
+      command: "yarn mocha test/**/*.test.ts --timeout 1200000"
+  plugin-plugins-integration:
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    uses: ./.github/workflows/external-test.yml
+    with:
+      repo: oclif/plugin-plugins
+      os: ${{ matrix.os }}
+      command: "yarn test:integration"
+      # plugin-plugins integration tests depend on sf being installed globally
+      other-setup: npm install -g @salesforce/cli@nightly
+  plugin-update-integration:
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    uses: ./.github/workflows/external-test.yml
+    with:
+      repo: oclif/plugin-update
+      os: ${{ matrix.os }}
+      command: "yarn test:integration:sf"

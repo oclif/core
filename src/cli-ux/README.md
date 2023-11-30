@@ -180,7 +180,7 @@ export default class Users extends Command {
         extended: true
       }
     }, {
-      printLine: this.log,
+      printLine: this.log.bind(this),
       ...flags, // parsed flags
     })
   }

@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: false
+        description: "runs-on property, ex: ubuntu-latest, windows-latest"
+        type: string
+        default: "ubuntu-latest"
+      repo:
+        required: true
+        description: "Repository name, ex: 'owner/repo'"
+        type: string
+      command:
+        required: true
+        description: "Command to run, ex: 'yarn test'"
+        type: string
+      other-setup:
+        required: false
+        description: "Setup command, ex: 'yarn install'"
+        type: string
+
+jobs:
+  external-test:
+    name: ${{ inputs.repo }} ${{ inputs.command }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
+      - run: yarn build
+      - run: yarn link
+      - run: ${{ inputs.other-setup }}
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: main
+          path: test
+      - name: Build plugin
+        working-directory: test
+        run: |
+          yarn install --network-timeout 600000 --ignore-scripts
+          yarn link @oclif/core
+          yarn build
+      - name: Run tests in plugin
+        working-directory: test
+        run: ${{ inputs.command }}
