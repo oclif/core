@@ -3,8 +3,7 @@ import {arch} from 'node:os'
 
 import {Executor, setup} from './util'
 
-import StripAnsi = require('strip-ansi')
-const stripAnsi: typeof StripAnsi = require('strip-ansi')
+const stripAnsi = require('strip-ansi')
 
 const chalk = require('chalk')
 chalk.level = 0
