@@ -1,3 +1,12 @@
+# [3.13.0](https://github.com/oclif/core/compare/3.12.1...3.13.0) (2023-11-30)
+
+
+### Features
+
+* add 'multipleNonGreedy' flag option to assign only one value per multiple flag ([#880](https://github.com/oclif/core/issues/880)) ([#889](https://github.com/oclif/core/issues/889)) ([354cead](https://github.com/oclif/core/commit/354cead9ae44ac8036911fce8ba94f085294ceb9))
+
+
+
 ## [3.12.1](https://github.com/oclif/core/compare/3.12.0...3.12.1) (2023-11-30)
 
 
