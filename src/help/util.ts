@@ -23,7 +23,7 @@ function collateSpacedCmdIDFromArgs(argv: string[], config: IConfig): string[] {
 
     const final: string[] = []
     const idPresent = (id: string) => ids.has(id)
-    const finalizeId = (s?: string) => (s ? [...final, s].join(':') : final.join(':'))
+    const finalizeId = (s?: string) => (s ? [...final, s] : final).filter(Boolean).join(':')
 
     const hasArgs = () => {
       const id = finalizeId()
