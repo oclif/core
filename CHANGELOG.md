@@ -1,3 +1,12 @@
+## [3.13.1](https://github.com/oclif/core/compare/3.13.0...3.13.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* cache this.commandsDir ([#891](https://github.com/oclif/core/issues/891)) ([7b217a4](https://github.com/oclif/core/commit/7b217a45aac2aa44bc696054924ef2280ecdc944))
+
+
+
 # [3.13.0](https://github.com/oclif/core/compare/3.12.1...3.13.0) (2023-11-30)
 
 
