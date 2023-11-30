@@ -298,6 +298,7 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandsDir(): Promise<string | undefined> {
+    if (this.commandsDir) return this.commandsDir
     this.commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
     return this.commandsDir
   }
