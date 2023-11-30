@@ -631,6 +631,48 @@ See more help with --help`)
       })
     })
 
+    describe('multiple flags with single value', () => {
+      it('parses multiple flags with single value', async () => {
+        const out = await parse(['--bar', 'a', 'b', '--bar=c', '--baz=d', 'e'], {
+          args: {argOne: Args.string()},
+          flags: {
+            bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+            baz: Flags.string({multiple: true}),
+          },
+        })
+        expect(out.flags.baz?.join('|')).to.equal('d|e')
+        expect(out.flags.bar?.join('|')).to.equal('a|c')
+        expect(out.args).to.deep.equal({argOne: 'b'})
+      })
+
+      it('parses multiple flags with single value multiple args', async () => {
+        const out = await parse(['c', '--bar', 'a', 'b'], {
+          args: {argOne: Args.string(), argTwo: Args.string()},
+          flags: {
+            bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+          },
+        })
+        expect(out.flags.bar?.join('|')).to.equal('a')
+        expect(out.args).to.deep.equal({argOne: 'c', argTwo: 'b'})
+      })
+
+      it('fails to parse with single value and no args option', async () => {
+        let message = ''
+
+        try {
+          await parse(['--bar', 'a', 'b'], {
+            flags: {
+              bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('Unexpected argument: b')
+      })
+    })
+
     describe('strict: false', () => {
       it('skips flag parsing after "--"', async () => {
         const out = await parse(['foo', 'bar', '--', '--myflag'], {
