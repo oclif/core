@@ -1,3 +1,12 @@
+## [3.12.1](https://github.com/oclif/core/compare/3.12.0...3.12.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* command not found on empty arg ([#887](https://github.com/oclif/core/issues/887)) ([#888](https://github.com/oclif/core/issues/888)) ([a8ca6cc](https://github.com/oclif/core/commit/a8ca6cc495d7aeba2b276477ab8217ec22f0ce63))
+
+
+
 # [3.12.0](https://github.com/oclif/core/compare/3.11.0...3.12.0) (2023-11-20)
 
 
