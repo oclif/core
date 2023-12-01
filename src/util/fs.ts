@@ -2,8 +2,6 @@ import {Stats, existsSync as fsExistsSync, readFileSync} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 import {join} from 'node:path'
 
-import {mergeNestedObjects} from './util'
-
 export function requireJson<T>(...pathParts: string[]): T {
   return JSON.parse(readFileSync(join(...pathParts), 'utf8'))
 }
@@ -70,11 +68,4 @@ export async function safeReadJson<T>(path: string): Promise<T | undefined> {
 
 export function existsSync(path: string): boolean {
   return fsExistsSync(path)
-}
-
-export async function readTSConfig(path: string) {
-  const {parse} = await import('tsconfck')
-  const result = await parse(path)
-  const tsNodeOpts = mergeNestedObjects(result.extended ?? [result], 'tsconfig.ts-node')
-  return {...result.tsconfig, 'ts-node': tsNodeOpts}
 }
