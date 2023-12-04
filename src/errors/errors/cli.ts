@@ -3,6 +3,7 @@ import cs from 'clean-stack'
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
 
+import Cache from '../../cache'
 import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
 import {config} from '../config'
@@ -16,7 +17,7 @@ export function addOclifExitCode(error: Record<string, any>, options?: {exit?: f
     ;(error as unknown as OclifError).oclif = {}
   }
 
-  error.oclif.exit = options?.exit === undefined ? 2 : options.exit
+  error.oclif.exit = options?.exit === undefined ? Cache.getInstance().get('exitCodes')?.default ?? 2 : options.exit
   return error as OclifError
 }
 
