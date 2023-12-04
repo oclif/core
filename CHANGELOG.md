@@ -1,3 +1,12 @@
+## [3.13.2](https://github.com/oclif/core/compare/3.13.1...3.13.2) (2023-12-04)
+
+
+### Bug Fixes
+
+* add exit codes to different flag validation errors ([#861](https://github.com/oclif/core/issues/861)) ([1c841bf](https://github.com/oclif/core/commit/1c841bf296f89529183a182433ce2baddc697072))
+
+
+
 ## [3.13.1](https://github.com/oclif/core/compare/3.13.0...3.13.1) (2023-11-30)
 
 
