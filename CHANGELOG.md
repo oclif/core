@@ -1,3 +1,30 @@
+## [3.13.1](https://github.com/oclif/core/compare/3.13.0...3.13.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* cache this.commandsDir ([#891](https://github.com/oclif/core/issues/891)) ([7b217a4](https://github.com/oclif/core/commit/7b217a45aac2aa44bc696054924ef2280ecdc944))
+
+
+
+# [3.13.0](https://github.com/oclif/core/compare/3.12.1...3.13.0) (2023-11-30)
+
+
+### Features
+
+* add 'multipleNonGreedy' flag option to assign only one value per multiple flag ([#880](https://github.com/oclif/core/issues/880)) ([#889](https://github.com/oclif/core/issues/889)) ([354cead](https://github.com/oclif/core/commit/354cead9ae44ac8036911fce8ba94f085294ceb9))
+
+
+
+## [3.12.1](https://github.com/oclif/core/compare/3.12.0...3.12.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* command not found on empty arg ([#887](https://github.com/oclif/core/issues/887)) ([#888](https://github.com/oclif/core/issues/888)) ([a8ca6cc](https://github.com/oclif/core/commit/a8ca6cc495d7aeba2b276477ab8217ec22f0ce63))
+
+
+
 # [3.12.0](https://github.com/oclif/core/compare/3.11.0...3.12.0) (2023-11-20)
 
 
