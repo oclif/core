@@ -19,7 +19,7 @@ import {
   ParsingToken,
 } from '../interfaces/parser'
 import {isTruthy, last, pickBy} from '../util/util'
-import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
+import {ArgInvalidOptionError, CLIError, FailedFlagParsingError, FlagInvalidOptionError} from './errors'
 
 let debug: any
 try {
@@ -341,8 +341,7 @@ export class Parser<
 
         return await flag.parse(input, ctx, flag)
       } catch (error: any) {
-        error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
-        throw error
+        throw new FailedFlagParsingError({flag: flag.name, message: error.message})
       }
     }
 
