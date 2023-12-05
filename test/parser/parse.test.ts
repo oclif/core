@@ -1867,6 +1867,7 @@ describe('stdin', () => {
     OutputFlags<any>,
     OutputArgs<any>
   >
+  const stdinValue = 'x'
 
   const execute = async (): Promise<void> => {
     out = await parse(['--myflag', '-'], {
@@ -1883,14 +1884,14 @@ describe('stdin', () => {
   describe('allow stdin', () => {
     beforeEach(() => {
       execute()
-      stdin.send('x')
+      stdin.send(stdinValue)
       stdin.end()
     })
 
     it('should read stdin as input for command', () => {
       afterEach(() => {
-        expect(out.raw[0].input).to.equal('x')
-        expect(out.flags.myflag).to.equals('x')
+        expect(out.raw[0].input).to.equal(stdinValue)
+        expect(out.flags.myflag).to.equals(stdinValue)
       })
     })
   })
