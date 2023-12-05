@@ -221,6 +221,10 @@ export type OptionFlagProps = FlagProps & {
    * separate on spaces.
    */
   delimiter?: ','
+  /**
+   * Allow input value to be read from stdin.
+   */
+  allowStdin?: boolean
 }
 
 export type FlagParserContext = Command & {token: FlagToken}

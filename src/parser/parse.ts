@@ -122,6 +122,8 @@ export class Parser<
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
+    let stdinRead = false
+
     const parseFlag = (arg: string): boolean => {
       const {isLong, name} = this.findFlag(arg)
       if (!name) {
@@ -155,6 +157,11 @@ export class Parser<
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
+        if (flag.allowStdin && input === '-') {
+          stdinRead = true
+          return true
+        }
+
         this.raw.push({flag: flag.name, input, type: 'flag'})
       } else {
         this.raw.push({flag: flag.name, input: arg, type: 'flag'})
@@ -182,6 +189,14 @@ export class Parser<
         }
 
         if (parseFlag(input)) {
+          if (parsingFlags && this.currentFlag && stdinRead) {
+            let stdin = await readStdin()
+            if (stdin) {
+              stdin = stdin.trim()
+              this.raw.push({flag: this.currentFlag.name, input: stdin, type: 'flag'})
+            }
+          }
+
           continue
         }
 
