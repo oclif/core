@@ -1890,6 +1890,7 @@ describe('stdin', () => {
     it('should read stdin as input for command', () => {
       afterEach(() => {
         expect(out.raw[0].input).to.equal('x')
+        expect(out.flags.myflag).to.equals('x')
       })
     })
   })
