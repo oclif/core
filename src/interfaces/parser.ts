@@ -223,6 +223,7 @@ export type OptionFlagProps = FlagProps & {
   delimiter?: ','
   /**
    * Allow input value to be read from stdin.
+   * Should only be used on one flag at a time.
    */
   allowStdin?: boolean
 }
