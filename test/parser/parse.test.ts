@@ -1,14 +1,13 @@
 import {assert, config, expect} from 'chai'
-// eslint-disable-next-line node/no-extraneous-import
-import mockStdin from 'mock-stdin'
 import * as fs from 'node:fs'
 import {URL} from 'node:url'
-import {SinonStub, createSandbox} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
-import {FlagDefault, OutputArgs, OutputFlags, ParserOutput} from '../../src/interfaces/parser'
+import {FlagDefault} from '../../src/interfaces/parser'
 import {parse} from '../../src/parser'
+import * as parser from '../../src/parser/parse'
 
 config.truncateThreshold = 0
 const stripAnsi = require('strip-ansi')
@@ -1858,41 +1857,30 @@ See more help with --help`)
   })
 })
 
-describe('stdin', () => {
-  let stdin: ReturnType<typeof mockStdin.stdin>
-  let out: ParserOutput<
-    {
-      myflag: string | undefined
-    },
-    OutputFlags<any>,
-    OutputArgs<any>
-  >
+describe('allowStdin', () => {
+  let sandbox: SinonSandbox
   const stdinValue = 'x'
+  const stdinPromise = new Promise<null | string>((resolve) => {
+    resolve(stdinValue)
+  })
 
-  const execute = async (): Promise<void> => {
-    out = await parse(['--myflag', '-'], {
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  it('should read stdin as input for flag', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', '-'], {
       flags: {
         myflag: Flags.string({allowStdin: true}),
       },
     })
-  }
 
-  beforeEach(() => {
-    stdin = mockStdin.stdin()
-  })
-
-  describe('allow stdin', () => {
-    beforeEach(() => {
-      execute()
-      stdin.send(stdinValue)
-      stdin.end()
-    })
-
-    it('should read stdin as input for command', () => {
-      afterEach(() => {
-        expect(out.raw[0].input).to.equal(stdinValue)
-        expect(out.flags.myflag).to.equals(stdinValue)
-      })
-    })
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
   })
 })

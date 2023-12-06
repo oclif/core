@@ -35,7 +35,7 @@ try {
   }
 }
 
-const readStdin = async (): Promise<null | string> => {
+export const readStdin = async (): Promise<null | string> => {
   const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
