@@ -1,12 +1,13 @@
 import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
 import {URL} from 'node:url'
-import {SinonStub, createSandbox} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
 import {FlagDefault} from '../../src/interfaces/parser'
 import {parse} from '../../src/parser'
+import * as parser from '../../src/parser/parse'
 
 config.truncateThreshold = 0
 const stripAnsi = require('strip-ansi')
@@ -1853,5 +1854,33 @@ See more help with --help`)
         expect(message).to.include('can only be specified once')
       })
     })
+  })
+})
+
+describe('allowStdin', () => {
+  let sandbox: SinonSandbox
+  const stdinValue = 'x'
+  const stdinPromise = new Promise<null | string>((resolve) => {
+    resolve(stdinValue)
+  })
+
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  it('should read stdin as input for flag', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', '-'], {
+      flags: {
+        myflag: Flags.string({allowStdin: true}),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
   })
 })
