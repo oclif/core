@@ -733,7 +733,7 @@ EXAMPLES
   })
 })
 
-describe.only('formatCommand with `none` flagSortOrder', () => {
+describe('formatCommand with `none` flagSortOrder', () => {
   let config: Config
   let help: TestHelp
 
