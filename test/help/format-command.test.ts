@@ -732,3 +732,38 @@ EXAMPLES
     })
   })
 })
+
+describe.only('formatCommand with `none` flagSortOrder', () => {
+  let config: Config
+  let help: TestHelp
+
+  before(async () => {
+    config = await Config.load(process.cwd())
+  })
+
+  beforeEach(() => {
+    help = new TestHelp(config, {flagSortOrder: 'none'})
+  })
+
+  it('should not sort flags', async () => {
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        id: 'apps:create',
+        flags: {
+          cFlag: flags.string({char: 'c'}),
+          aFlag: flags.string({char: 'a'}),
+          bFlag: flags.string({char: 'b'}),
+        },
+      }),
+    )
+
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
+  $ oclif apps:create [-c <value>] [-a <value>] [-b <value>]
+
+FLAGS
+  -c, --cFlag=<value>
+  -a, --aFlag=<value>
+  -b, --bFlag=<value>`)
+  })
+})

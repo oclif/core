@@ -218,15 +218,17 @@ export class CommandHelp extends HelpFormatter {
 
   generate(): string {
     const cmd = this.command
-    const flags = sortBy(
-      Object.entries(cmd.flags || {})
-        .filter(([, v]) => !v.hidden)
-        .map(([k, v]) => {
-          v.name = k
-          return v
-        }),
-      (f) => [!f.char, f.char, f.name],
-    )
+    const unsortedFlags = Object.entries(cmd.flags || {})
+      .filter(([, v]) => !v.hidden)
+      .map(([k, v]) => {
+        v.name = k
+        return v
+      })
+
+    const flags =
+      this.opts.flagSortOrder === 'alphabetical' || !this.opts.flagSortOrder
+        ? sortBy(unsortedFlags, (f) => [!f.char, f.char, f.name])
+        : unsortedFlags
 
     const args = Object.values(ensureArgObject(cmd.args)).filter((a) => !a.hidden)
     const output = compact(
