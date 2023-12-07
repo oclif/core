@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import {createInterface} from 'node:readline'
 
+import Cache from '../cache'
 import {
   ArgParserContext,
   ArgToken,
@@ -19,7 +20,7 @@ import {
   ParsingToken,
 } from '../interfaces/parser'
 import {isTruthy, last, pickBy} from '../util/util'
-import {ArgInvalidOptionError, CLIError, FailedFlagParsingError, FlagInvalidOptionError} from './errors'
+import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 
 let debug: any
 try {
@@ -348,7 +349,10 @@ export class Parser<
 
         return await flag.parse(input, ctx, flag)
       } catch (error: any) {
-        throw new FailedFlagParsingError({flag: flag.name, message: error.message})
+        error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
+        if (Cache.getInstance().get('exitCodes')?.failedFlagParsing)
+          error.oclif = {exit: Cache.getInstance().get('exitCodes')?.failedFlagParsing}
+        throw error
       }
     }
 
