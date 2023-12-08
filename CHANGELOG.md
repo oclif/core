@@ -1,3 +1,12 @@
+## [3.14.1](https://github.com/oclif/core/compare/3.14.0...3.14.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* peserve original error coming from failed flag parsing ([#897](https://github.com/oclif/core/issues/897)) ([a7a3bba](https://github.com/oclif/core/commit/a7a3bbabdf2a6cce19dd86583ca91409e0de3123))
+
+
+
 # [3.14.0](https://github.com/oclif/core/compare/3.13.2...3.14.0) (2023-12-07)
 
 
