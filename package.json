@@ -44,7 +44,7 @@
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
     "@types/clean-stack": "^2.1.1",
-    "@types/cli-progress": "^3.11.0",
+    "@types/cli-progress": "^3.11.5",
     "@types/color": "^3.0.5",
     "@types/debug": "^4.1.10",
     "@types/ejs": "^3.1.3",
