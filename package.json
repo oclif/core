@@ -40,7 +40,7 @@
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^3.0.3",
     "@types/ansi-styles": "^3.2.1",
-    "@types/benchmark": "^2.1.2",
+    "@types/benchmark": "^2.1.5",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
     "@types/clean-stack": "^2.1.1",
