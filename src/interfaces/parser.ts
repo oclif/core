@@ -222,10 +222,11 @@ export type OptionFlagProps = FlagProps & {
    */
   delimiter?: ','
   /**
-   * Allow input value to be read from stdin.
+   * Allow input value to be read from stdin if the provided value is `-`.
+   * If set to `only`, the flag will only accept input from stdin.
    * Should only be used on one flag at a time.
    */
-  allowStdin?: boolean
+  allowStdin?: boolean | 'only'
 }
 
 export type FlagParserContext = Command & {token: FlagToken}
