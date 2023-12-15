@@ -15,6 +15,17 @@ import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
 
+/**
+ * Determines the sort order of flags. Will default to alphabetical if not set or set to an invalid value.
+ */
+function determineSortOrder(
+  flagSortOrder: HelpFormatter['opts']['flagSortOrder'],
+): NonNullable<HelpFormatter['opts']['flagSortOrder']> {
+  if (flagSortOrder === 'alphabetical') return 'alphabetical'
+  if (flagSortOrder === 'none') return 'none'
+  return 'alphabetical'
+}
+
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Command.Loadable,
@@ -218,15 +229,17 @@ export class CommandHelp extends HelpFormatter {
 
   generate(): string {
     const cmd = this.command
-    const flags = sortBy(
-      Object.entries(cmd.flags || {})
-        .filter(([, v]) => !v.hidden)
-        .map(([k, v]) => {
-          v.name = k
-          return v
-        }),
-      (f) => [!f.char, f.char, f.name],
-    )
+    const unsortedFlags = Object.entries(cmd.flags || {})
+      .filter(([, v]) => !v.hidden)
+      .map(([k, v]) => {
+        v.name = k
+        return v
+      })
+
+    const flags =
+      determineSortOrder(this.opts.flagSortOrder) === 'alphabetical'
+        ? sortBy(unsortedFlags, (f) => [!f.char, f.char, f.name])
+        : unsortedFlags
 
     const args = Object.values(ensureArgObject(cmd.args)).filter((a) => !a.hidden)
     const output = compact(
