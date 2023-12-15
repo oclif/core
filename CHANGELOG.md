@@ -1,3 +1,12 @@
+# [3.15.0](https://github.com/oclif/core/compare/3.14.1...3.15.0) (2023-12-15)
+
+
+### Features
+
+* add flagSortOrder to help options ([#896](https://github.com/oclif/core/issues/896)) ([3903720](https://github.com/oclif/core/commit/3903720377dde5c9f92d8c24f57cf9a32e516b3d))
+
+
+
 ## [3.14.1](https://github.com/oclif/core/compare/3.14.0...3.14.1) (2023-12-08)
 
 
