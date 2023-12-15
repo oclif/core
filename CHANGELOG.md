@@ -1,3 +1,21 @@
+## [3.14.1](https://github.com/oclif/core/compare/3.14.0...3.14.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* peserve original error coming from failed flag parsing ([#897](https://github.com/oclif/core/issues/897)) ([a7a3bba](https://github.com/oclif/core/commit/a7a3bbabdf2a6cce19dd86583ca91409e0de3123))
+
+
+
+# [3.14.0](https://github.com/oclif/core/compare/3.13.2...3.14.0) (2023-12-07)
+
+
+### Features
+
+* allowStdin option for flags ([#894](https://github.com/oclif/core/issues/894)) ([#895](https://github.com/oclif/core/issues/895)) ([379e940](https://github.com/oclif/core/commit/379e9401f8c8f7400be71e2e45c65fd6564a8c21))
+
+
+
 ## [3.13.2](https://github.com/oclif/core/compare/3.13.1...3.13.2) (2023-12-04)
 
 

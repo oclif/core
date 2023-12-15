@@ -119,13 +119,3 @@ export class FailedFlagValidationError extends CLIParseError {
     super({exit: Cache.getInstance().get('exitCodes')?.failedFlagValidation ?? exit, message, parse})
   }
 }
-
-export class FailedFlagParsingError extends CLIParseError {
-  constructor({flag, message}: {flag: string; message: string}) {
-    super({
-      exit: Cache.getInstance().get('exitCodes')?.failedFlagParsing,
-      message: `Parsing --${flag} \n\t${message}`,
-      parse: {},
-    })
-  }
-}

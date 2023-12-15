@@ -24,8 +24,18 @@ describe('main', () => {
   })
 
   it('should run plugins', async () => {
-    const result = await run(['plugins'], resolve(__dirname, '../../package.json'))
-    expect(result).to.deep.equal([])
+    const result = (await run(['plugins'], resolve(__dirname, '../../package.json'))) as Array<{
+      name: string
+      type: string
+    }>
+    expect(result.length).to.equal(3)
+    const rootPlugin = result.find((r) => r.name === '@oclif/core')
+    const pluginHelp = result.find((r) => r.name === '@oclif/plugin-help')
+    const pluginPlugins = result.find((r) => r.name === '@oclif/plugin-plugins')
+
+    expect(rootPlugin).to.exist
+    expect(pluginHelp).to.exist
+    expect(pluginPlugins).to.exist
   })
 
   it('should run version', async () => {
