@@ -15,6 +15,17 @@ import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 // split on any platform, not just the os specific EOL at runtime.
 const POSSIBLE_LINE_FEED = /\r\n|\n/
 
+/**
+ * Determines the sort order of flags. Will default to alphabetical if not set or set to an invalid value.
+ */
+function determineSortOrder(
+  flagSortOrder: HelpFormatter['opts']['flagSortOrder'],
+): NonNullable<HelpFormatter['opts']['flagSortOrder']> {
+  if (flagSortOrder === 'alphabetical') return 'alphabetical'
+  if (flagSortOrder === 'none') return 'none'
+  return 'alphabetical'
+}
+
 export class CommandHelp extends HelpFormatter {
   constructor(
     public command: Command.Loadable,
@@ -226,7 +237,7 @@ export class CommandHelp extends HelpFormatter {
       })
 
     const flags =
-      this.opts.flagSortOrder === 'alphabetical' || !this.opts.flagSortOrder
+      determineSortOrder(this.opts.flagSortOrder) === 'alphabetical'
         ? sortBy(unsortedFlags, (f) => [!f.char, f.char, f.name])
         : unsortedFlags
 
