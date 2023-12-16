@@ -50,7 +50,7 @@
     "@types/ejs": "^3.1.5",
     "@types/indent-string": "^4.0.1",
     "@types/js-yaml": "^3.12.7",
-    "@types/mocha": "^10.0.2",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^18",
     "@types/node-notifier": "^8.0.2",
     "@types/pnpapi": "^0.0.4",
