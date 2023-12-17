@@ -57,7 +57,7 @@
     "@types/slice-ansi": "^4.0.0",
     "@types/strip-ansi": "^5.2.1",
     "@types/supports-color": "^8.1.1",
-    "@types/wordwrap": "^1.0.1",
+    "@types/wordwrap": "^1.0.3",
     "@types/wrap-ansi": "^3.0.0",
     "benchmark": "^2.1.4",
     "chai": "^4.3.10",
