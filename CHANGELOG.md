@@ -1,3 +1,12 @@
+## [3.15.1](https://github.com/oclif/core/compare/3.15.0...3.15.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* **deps:** bump password-prompt from 1.1.2 to 1.1.3 ([39f8860](https://github.com/oclif/core/commit/39f8860e6da3b9bd98ed9c5357cbdbe66f73b186))
+
+
+
 # [3.15.0](https://github.com/oclif/core/compare/3.14.1...3.15.0) (2023-12-15)
 
 
