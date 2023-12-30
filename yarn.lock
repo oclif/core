@@ -1098,10 +1098,10 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
 
-"@types/pnpapi@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@types/pnpapi/-/pnpapi-0.0.4.tgz#8e9efb1f898246e120d9546c3407a20080576133"
-  integrity sha512-GWOPbNkJcIjb+CM2tyWI1/dwVq3pO7w+OEnjkYEIX09U7K3xkuZ2+/2JXjaeLc8uAHp2F/V2fsdRlKKvVjdXAg==
+"@types/pnpapi@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@types/pnpapi/-/pnpapi-0.0.5.tgz#3b27c1c8d142e3ef9b40ddbcfeec0236ab498928"
+  integrity sha512-tjymquatF9seZGE3GcN1barqNqpmyEpqIN0rBKTcoZWwgDC0SgBp5LFqCRJE6YhzXA7TjpXbpTdcL5A8cwyryw==
 
 "@types/semver@^7.5.0":
   version "7.5.2"
