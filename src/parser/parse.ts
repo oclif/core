@@ -156,6 +156,10 @@ export class Parser<
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
+        if (flag.allowStdin === 'only' && input !== '-') {
+          throw new CLIError(`Flag --${name} can only be read from stdin. The value must be "-".`)
+        }
+
         if (flag.allowStdin && input === '-') {
           const stdin = await readStdin()
           if (stdin) {
