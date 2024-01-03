@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig-local-no-extends.json",
+  "compilerOptions": {
+    "tsconfig-local-extends-local": true
+  },
+  "ts-node": {
+    "tsconfig-local-extends-local": true
+  }
+}

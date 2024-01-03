@@ -32,7 +32,7 @@ async function upUntil(path: string, test: (path: string) => Promise<boolean>): 
   return upUntil(parent, test)
 }
 
-export async function readTSConfig(root: string): Promise<TSConfig | undefined> {
+export async function readTSConfig(root: string, tsconfigName = 'tsconfig.json'): Promise<TSConfig | undefined> {
   const found: Record<string, any>[] = []
 
   let typescript: typeof import('typescript') | undefined
@@ -80,7 +80,7 @@ export async function readTSConfig(root: string): Promise<TSConfig | undefined> 
     }
   }
 
-  await read(join(root, 'tsconfig.json'))
+  await read(join(root, tsconfigName))
 
   return {
     compilerOptions: mergeNestedObjects(found, 'compilerOptions'),
