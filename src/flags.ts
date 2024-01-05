@@ -6,7 +6,23 @@ import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfac
 import {dirExists, fileExists} from './util/fs'
 
 type NotArray<T> = T extends Array<any> ? never : T
-
+/**
+ * Create a custom flag.
+ *
+ * @example
+ * type Id = string
+ * type IdOpts = { startsWith: string; length: number }
+ *
+ * export const myFlag = custom<Id, IdOpts>({
+ *   parse: async (input, opts) => {
+ *     if (input.startsWith(opts.startsWith) && input.length === opts.length) {
+ *       return input
+ *     }
+ *
+ *     throw new Error('Invalid id')
+ *   },
+ * })
+ */
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults: Partial<OptionFlag<T[], P>> & {
     multiple: true
@@ -40,23 +56,7 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(): F
   P,
   {multiple: false; requiredOrDefaulted: false}
 >
-/**
- * Create a custom flag.
- *
- * @example
- * type Id = string
- * type IdOpts = { startsWith: string; length: number };
- *
- * export const myFlag = custom<Id, IdOpts>({
- *   parse: async (input, opts) => {
- *     if (input.startsWith(opts.startsWith) && input.length === opts.length) {
- *       return input
- *     }
- *
- *     throw new Error('Invalid id')
- *   },
- * })
- */
+
 export function custom<T = string, P extends CustomOptions = CustomOptions>(
   defaults?: Partial<OptionFlag<T, P>>,
 ): FlagDefinition<T, P, {multiple: boolean; requiredOrDefaulted: boolean}> {
@@ -70,6 +70,11 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(
   })
 }
 
+/**
+ * A boolean flag. Defaults to `false` unless default is set to `true`.
+ *
+ * - `allowNo` option allows `--no-` prefix to negate boolean flag.
+ */
 export function boolean<T = boolean>(options: Partial<BooleanFlag<T>> = {}): BooleanFlag<T> {
   return {
     parse: async (b, _) => b,
@@ -79,6 +84,12 @@ export function boolean<T = boolean>(options: Partial<BooleanFlag<T>> = {}): Boo
   } as BooleanFlag<T>
 }
 
+/**
+ * An integer flag. Throws an error if the provided value is not a valid integer.
+ *
+ * - `min` option allows to set a minimum value.
+ * - `max` option allows to set a maximum value.
+ */
 export const integer = custom<number, {max?: number; min?: number}>({
   async parse(input, _, opts) {
     if (!/^-?\d+$/.test(input)) throw new CLIError(`Expected an integer but received: ${input}`)
@@ -91,6 +102,11 @@ export const integer = custom<number, {max?: number; min?: number}>({
   },
 })
 
+/**
+ * A directory flag.
+ *
+ * - `exists` option allows you to throw an error if the directory does not exist.
+ */
 export const directory = custom<string, {exists?: boolean}>({
   async parse(input, _, opts) {
     if (opts.exists) return dirExists(input)
@@ -99,6 +115,11 @@ export const directory = custom<string, {exists?: boolean}>({
   },
 })
 
+/**
+ * A flag flag.
+ *
+ * - `exists` option allows you to throw an error if the file does not exist.
+ */
 export const file = custom<string, {exists?: boolean}>({
   async parse(input, _, opts) {
     if (opts.exists) return fileExists(input)
@@ -108,8 +129,9 @@ export const file = custom<string, {exists?: boolean}>({
 })
 
 /**
- * Initializes a string as a URL. Throws an error
- * if the string is not a valid URL.
+ * A URL flag that converts the provided value is a string.
+ *
+ * Throws an error if the string is not a valid URL.
  */
 export const url = custom<URL>({
   async parse(input) {
@@ -121,8 +143,14 @@ export const url = custom<URL>({
   },
 })
 
+/**
+ * A string flag.
+ */
 export const string = custom()
 
+/**
+ * Version flag that will print the CLI version and exit.
+ */
 export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> =>
   boolean({
     description: 'Show CLI version.',
@@ -133,6 +161,9 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<v
     },
   })
 
+/**
+ * A help flag that will print the CLI help and exit.
+ */
 export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void> =>
   boolean({
     description: 'Show CLI help.',
@@ -147,7 +178,20 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
   })
 
 type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
-
+/**
+ * Create a custom flag that infers the flag type from the provided options.
+ *
+ * The provided `options` must be a readonly array in order for type inference to work.
+ *
+ * @example
+ * export default class MyCommand extends Command {
+ *   static flags = {
+ *     name: Flags.option({
+ *       options: ['foo', 'bar'] as const,
+ *     })(),
+ *   }
+ * }
+ */
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ReadonlyElementOf<T>[], P>> & {
     multiple: true
@@ -185,18 +229,6 @@ export function option<T extends readonly string[], P extends CustomOptions>(
   },
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: true; requiredOrDefaulted: false}>
 
-/**
- * Create a custom flag that infers the flag type from the provided options.
- *
- * @example
- * export default class MyCommand extends Command {
- *   static flags = {
- *     name: Flags.option({
- *       options: ['foo', 'bar'] as const,
- *     })(),
- *   }
- * }
- */
 export function option<T extends readonly string[], P extends CustomOptions>(
   defaults: Partial<OptionFlag<ReadonlyElementOf<T>, P>> & {options: T},
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: boolean; requiredOrDefaulted: boolean}> {
