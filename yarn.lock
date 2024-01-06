@@ -726,7 +726,7 @@
     read-package-json-fast "^3.0.0"
     which "^4.0.0"
 
-"@oclif/core@^3.10.2", "@oclif/core@^3.14.1":
+"@oclif/core@^3.10.2", "@oclif/core@^3.14.1", "@oclif/core@^3.6.0":
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.14.1.tgz#634fc96124068e47b720d62f3b278d818a07495e"
   integrity sha512-HLFL2s45DFdqYI2CFjVS/CIQ4cQ4yZqH0XqO9nnwcRWYboz2rEW/vLmidjIYGDjh6xA/k5psiAL3O1KEjqSHuQ==
@@ -759,37 +759,6 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^3.6.0":
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.6.0.tgz#b9582f3bf1ad933a6ac0335d0437be9ac10ce3b6"
-  integrity sha512-qjLXQEHUajQPeHQYRU9kRv5tBCW8O4L/OvILF/8lt08RLlp24E8yK6J7ROCZMwPxYsD3YC1/AQ76br2R+O1Cqw==
-  dependencies:
-    ansi-escapes "^4.3.2"
-    ansi-styles "^4.3.0"
-    cardinal "^2.1.1"
-    chalk "^4.1.2"
-    clean-stack "^3.0.1"
-    cli-progress "^3.12.0"
-    debug "^4.3.4"
-    ejs "^3.1.9"
-    get-package-type "^0.1.0"
-    globby "^11.1.0"
-    hyperlinker "^1.0.0"
-    indent-string "^4.0.0"
-    is-wsl "^2.2.0"
-    js-yaml "^3.14.1"
-    natural-orderby "^2.0.3"
-    object-treeify "^1.1.33"
-    password-prompt "^1.1.2"
-    slice-ansi "^4.0.0"
-    string-width "^4.2.3"
-    strip-ansi "^6.0.1"
-    supports-color "^8.1.1"
-    supports-hyperlinks "^2.2.0"
-    widest-line "^3.1.0"
-    wordwrap "^1.0.0"
-    wrap-ansi "^7.0.0"
-
 "@oclif/plugin-help@^6":
   version "6.0.8"
   resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.0.8.tgz#9ad196f9ddbeae1f5353448d16e0cb68463bac31"
@@ -798,9 +767,9 @@
     "@oclif/core" "^3.14.1"
 
 "@oclif/plugin-plugins@^4":
-  version "4.1.10"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-4.1.10.tgz#937722dfabc0e9ca5643693d50897dfad7fd0a35"
-  integrity sha512-+tb9ME7J0Uje/XWxh60OBqkuysIValn+O70AAodWbHDTkQmmW+g50uEuyQUQW5iPKMeiZBVg9p+AhpT8d9R9jA==
+  version "4.1.14"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-4.1.14.tgz#7065d3aa379cb404b190264ec57d7436ed4dd7e9"
+  integrity sha512-wx8eY/ze9ypXsmITI2hM564bmTlChidW3gsAUeyyVHPAldmzmic/Vh6nXPHF10nOvvl0RXwOpjyA/IgrTyyVvQ==
   dependencies:
     "@oclif/core" "^3.10.2"
     chalk "^5.3.0"
