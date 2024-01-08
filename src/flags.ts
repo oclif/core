@@ -116,7 +116,7 @@ export const directory = custom<string, {exists?: boolean}>({
 })
 
 /**
- * A flag flag.
+ * A file flag.
  *
  * - `exists` option allows you to throw an error if the file does not exist.
  */
