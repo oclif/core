@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import {createInterface} from 'node:readline'
 
+import Cache from '../cache'
 import {
   ArgParserContext,
   ArgToken,
@@ -35,7 +36,7 @@ try {
   }
 }
 
-const readStdin = async (): Promise<null | string> => {
+export const readStdin = async (): Promise<null | string> => {
   const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
@@ -122,7 +123,7 @@ export class Parser<
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
-    const parseFlag = (arg: string): boolean => {
+    const parseFlag = async (arg: string): Promise<boolean> => {
       const {isLong, name} = this.findFlag(arg)
       if (!name) {
         const i = arg.indexOf('=')
@@ -130,7 +131,7 @@ export class Parser<
           const sliced = arg.slice(i + 1)
           this.argv.unshift(sliced)
 
-          const equalsParsed = parseFlag(arg.slice(0, i))
+          const equalsParsed = await parseFlag(arg.slice(0, i))
           if (!equalsParsed) {
             this.argv.shift()
           }
@@ -149,10 +150,21 @@ export class Parser<
         }
 
         this.currentFlag = flag
-        const input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
+        let input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
         // if the value ends up being one of the command's flags, the user didn't provide an input
         if (typeof input !== 'string' || this.findFlag(input).name) {
           throw new CLIError(`Flag --${name} expects a value`)
+        }
+
+        if (flag.allowStdin === 'only' && input !== '-') {
+          throw new CLIError(`Flag --${name} can only be read from stdin. The value must be "-".`)
+        }
+
+        if (flag.allowStdin && input === '-') {
+          const stdin = await readStdin()
+          if (stdin) {
+            input = stdin.trim()
+          }
         }
 
         this.raw.push({flag: flag.name, input, type: 'flag'})
@@ -181,7 +193,7 @@ export class Parser<
           continue
         }
 
-        if (parseFlag(input)) {
+        if (await parseFlag(input)) {
           continue
         }
 
@@ -342,6 +354,8 @@ export class Parser<
         return await flag.parse(input, ctx, flag)
       } catch (error: any) {
         error.message = `Parsing --${flag.name} \n\t${error.message}\nSee more help with --help`
+        if (Cache.getInstance().get('exitCodes')?.failedFlagParsing)
+          error.oclif = {exit: Cache.getInstance().get('exitCodes')?.failedFlagParsing}
         throw error
       }
     }

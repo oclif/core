@@ -732,3 +732,81 @@ EXAMPLES
     })
   })
 })
+
+describe('formatCommand with flagSortOrder', () => {
+  let config: Config
+
+  before(async () => {
+    config = await Config.load(process.cwd())
+  })
+
+  it('should not sort flags when set to "none"', async () => {
+    const help = new TestHelp(config, {flagSortOrder: 'none'})
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        id: 'apps:create',
+        flags: {
+          cFlag: flags.string({char: 'c'}),
+          aFlag: flags.string({char: 'a'}),
+          bFlag: flags.string({char: 'b'}),
+        },
+      }),
+    )
+
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
+  $ oclif apps:create [-c <value>] [-a <value>] [-b <value>]
+
+FLAGS
+  -c, --cFlag=<value>
+  -a, --aFlag=<value>
+  -b, --bFlag=<value>`)
+  })
+
+  it('should sort flags alphabetically when flagSortOrder is not set', async () => {
+    const help = new TestHelp(config)
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        id: 'apps:create',
+        flags: {
+          cFlag: flags.string({char: 'c'}),
+          aFlag: flags.string({char: 'a'}),
+          bFlag: flags.string({char: 'b'}),
+        },
+      }),
+    )
+
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
+  $ oclif apps:create [-c <value>] [-a <value>] [-b <value>]
+
+FLAGS
+  -a, --aFlag=<value>
+  -b, --bFlag=<value>
+  -c, --cFlag=<value>`)
+  })
+
+  it('should sort flags alphabetically when flagSortOrder is invalid', async () => {
+    // @ts-expect-error because we're testing an invalid flagSortOrder
+    const help = new TestHelp(config, {flagSortOrder: 'INVALID'})
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        id: 'apps:create',
+        flags: {
+          cFlag: flags.string({char: 'c'}),
+          aFlag: flags.string({char: 'a'}),
+          bFlag: flags.string({char: 'b'}),
+        },
+      }),
+    )
+
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
+  $ oclif apps:create [-c <value>] [-a <value>] [-b <value>]
+
+FLAGS
+  -a, --aFlag=<value>
+  -b, --bFlag=<value>
+  -c, --cFlag=<value>`)
+  })
+})

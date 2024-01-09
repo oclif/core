@@ -1,13 +1,13 @@
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
+import Cache from '../cache'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {existsSync} from '../util/fs'
 import {readTSConfig} from '../util/read-tsconfig'
 import {isProd} from '../util/util'
-import Cache from './cache'
 import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')

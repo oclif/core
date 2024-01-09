@@ -25,6 +25,15 @@ export namespace PJSON {
       default?: string
       description?: string
       devPlugins?: string[]
+      exitCodes?: {
+        default?: number
+        failedFlagParsing?: number
+        failedFlagValidation?: number
+        invalidArgsSpec?: number
+        nonExistentFlag?: number
+        requiredArgs?: number
+        unexpectedArgs?: number
+      }
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions

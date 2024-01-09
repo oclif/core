@@ -14,13 +14,19 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
   function validateArgs() {
     if (parse.output.nonExistentFlags?.length > 0) {
-      throw new NonExistentFlagsError({flags: parse.output.nonExistentFlags, parse})
+      throw new NonExistentFlagsError({
+        flags: parse.output.nonExistentFlags,
+        parse,
+      })
     }
 
     const maxArgs = Object.keys(parse.input.args).length
     if (parse.input.strict && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
-      throw new UnexpectedArgsError({args: extras, parse})
+      throw new UnexpectedArgsError({
+        args: extras,
+        parse,
+      })
     }
 
     const missingRequiredArgs: Arg<any>[] = []
@@ -32,7 +38,10 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       } else if (hasOptional) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
-        throw new InvalidArgsSpecError({args: parse.input.args, parse})
+        throw new InvalidArgsSpecError({
+          args: parse.input.args,
+          parse,
+        })
       }
 
       if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
@@ -45,7 +54,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         .filter(([_, flagDef]) => flagDef.type === 'option' && Boolean(flagDef.multiple))
         .map(([name]) => name)
 
-      throw new RequiredArgsError({args: missingRequiredArgs, flagsWithMultiple, parse})
+      throw new RequiredArgsError({
+        args: missingRequiredArgs,
+        flagsWithMultiple,
+        parse,
+      })
     }
   }
 
@@ -76,7 +89,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const results = await Promise.all(promises)
 
     const failed = results.filter((r) => r.status === 'failed')
-    if (failed.length > 0) throw new FailedFlagValidationError({failed, parse})
+    if (failed.length > 0)
+      throw new FailedFlagValidationError({
+        failed,
+        parse,
+      })
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {

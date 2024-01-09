@@ -5,6 +5,13 @@ export interface HelpOptions {
    */
   docopts?: boolean
   /**
+   * Order in which to sort flags in help output. Defaults to `alphabetical`.
+   *
+   * `alphabetical`: Sort flags alphabetically. All flags with short characters will come first.
+   * `none`: Do not sort flags. They will appear in the order in which they were defined on the command.
+   */
+  flagSortOrder?: 'alphabetical' | 'none'
+  /**
    * If true, hide command aliases from the root help output. Defaults to false.
    */
   hideAliasesFromRoot?: boolean
