@@ -10,3 +10,5 @@
 /test/tmp
 .DS_Store
 .idea
+/test/**/node_modules
+/test/**/yarn.lock
