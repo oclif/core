@@ -1,3 +1,12 @@
+# [3.18.0](https://github.com/oclif/core/compare/3.17.0...3.18.0) (2024-01-09)
+
+
+### Features
+
+* no longer use tsconfck ([79c4028](https://github.com/oclif/core/commit/79c40280f5bb75fca271fabd921702347f54445a))
+
+
+
 # [3.17.0](https://github.com/oclif/core/compare/3.16.0...3.17.0) (2024-01-09)
 
 
