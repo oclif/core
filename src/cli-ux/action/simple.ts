@@ -1,4 +1,5 @@
 import {ActionBase, ActionType} from './base'
+import {StatusOptions} from './types'
 
 export default class SimpleAction extends ActionBase {
   public type: ActionType = 'simple'
@@ -30,13 +31,13 @@ export default class SimpleAction extends ActionBase {
 
   protected _stop(status: string): void {
     if (!this.task) return
-    this._updateStatus(status, this.task.status, true)
+    this._updateStatus(status, this.task.status, {newline: true})
   }
 
-  protected _updateStatus(status: string, prevStatus?: string, newline = false): void {
+  protected _updateStatus(status: string, prevStatus?: string, opts?: StatusOptions): void {
     if (!this.task) return
     if (this.task.active && !prevStatus) this._write(this.std, ` ${status}`)
     else this._write(this.std, `${this.task.action}... ${status}`)
-    if (newline || !prevStatus) this._flush()
+    if (opts?.newline || !prevStatus) this._flush()
   }
 }
