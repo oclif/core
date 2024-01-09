@@ -1,3 +1,12 @@
+# [3.17.0](https://github.com/oclif/core/compare/3.16.0...3.17.0) (2024-01-09)
+
+
+### Features
+
+* add node.options to pjson typings ([#919](https://github.com/oclif/core/issues/919)) ([42b113b](https://github.com/oclif/core/commit/42b113b1d462267150deff7568d2974efba7e0f6)), closes [oclif/oclif#1238](https://github.com/oclif/oclif/issues/1238)
+
+
+
 # [3.16.0](https://github.com/oclif/core/compare/3.15.1...3.16.0) (2024-01-02)
 
 
