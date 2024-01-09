@@ -68,6 +68,7 @@ export namespace PJSON {
         node: {
           targets?: string[]
           version?: string
+          options?: string | string[]
         }
         s3: S3
       }
