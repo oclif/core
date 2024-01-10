@@ -4,6 +4,7 @@ import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
+import Cache from '../cache'
 import {ux} from '../cli-ux'
 import {parseTheme} from '../cli-ux/theme'
 import {Command} from '../command'
@@ -19,7 +20,6 @@ import {settings} from '../settings'
 import {requireJson, safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
-import Cache from './cache'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-node'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
@@ -290,7 +290,9 @@ export class Config implements IConfig {
 
     // Cache the root plugin so that we can reference it later when determining if
     // we should skip ts-node registration for an ESM plugin.
-    Cache.getInstance().set('rootPlugin', this.rootPlugin)
+    const cache = Cache.getInstance()
+    cache.set('rootPlugin', this.rootPlugin)
+    cache.set('exitCodes', this.rootPlugin.pjson.oclif.exitCodes ?? {})
 
     this.root = this.rootPlugin.root
     this.pjson = this.rootPlugin.pjson

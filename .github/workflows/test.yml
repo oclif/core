@@ -13,7 +13,7 @@ jobs:
   windows-unit-tests:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/unitTestsWindows.yml@main
-  e2e:
+  integration:
     needs: linux-unit-tests
     strategy:
       matrix:
@@ -33,10 +33,10 @@ jobs:
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
       - if: runner.os == 'Windows'
-        run: yarn mocha --forbid-only "test/**/*.e2e.ts" --exclude "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+        run: yarn mocha --forbid-only "test/**/*.integration.ts" --exclude "test/integration/sf.integration.ts" --parallel --timeout 1200000
       - if: runner.os == 'Linux'
-        run: yarn test:e2e
-  windows-sf-e2e:
+        run: yarn test:integration
+  windows-sf-integration:
     # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
     # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
     needs: linux-unit-tests
@@ -52,8 +52,8 @@ jobs:
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
       - run: yarn link
-      - run: New-Item -Path D:\a -Name "e2e" -ItemType "directory"
-      - run: New-Item -Path D:\a\e2e -Name "sf.e2e.ts" -ItemType "directory"
+      - run: New-Item -Path D:\a -Name "integration" -ItemType "directory"
+      - run: New-Item -Path D:\a\integration -Name "sf.integration.ts" -ItemType "directory"
       - run: |
           git clone https://github.com/salesforcecli/cli.git
           cd cli
@@ -66,12 +66,12 @@ jobs:
           yarn install --network-timeout 600000
           yarn link @oclif/core
           yarn build
-        working-directory: D:\a\e2e\sf.e2e.ts
-      - run: yarn mocha --forbid-only "test/integration/sf.e2e.ts" --parallel --timeout 1200000
+        working-directory: D:\a\integration\sf.integration.ts
+      - run: yarn mocha --forbid-only "test/integration/sf.integration.ts" --parallel --timeout 1200000
         env:
-          OCLIF_CORE_E2E_SKIP_SETUP: true
-          OCLIF_CORE_E2E_TEST_DIR: D:\a\e2e
-          DEBUG: e2e:*
+          OCLIF_CORE_INTEGRATION_SKIP_SETUP: true
+          OCLIF_CORE_INTEGRATION_TEST_DIR: D:\a\integration
+          DEBUG: integration:*
   esm-cjs-interop:
     needs: linux-unit-tests
     strategy:
@@ -108,13 +108,13 @@ jobs:
           - https://github.com/salesforcecli/plugin-schema
           - https://github.com/salesforcecli/plugin-user
     with:
-      packageName: "@oclif/core"
+      packageName: '@oclif/core'
       externalProjectGitUrl: ${{ matrix.externalProjectGitUrl }}
-      command: "yarn test:nuts"
+      command: 'yarn test:nuts'
       os: ${{ matrix.os }}
       useCache: false
-      preSwapCommands: "npx yarn-deduplicate; yarn install"
-      preExternalBuildCommands: "shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core"
+      preSwapCommands: 'npx yarn-deduplicate; yarn install'
+      preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core'
       ignoreScripts: true
     secrets:
       TESTKIT_AUTH_URL: ${{ secrets.TESTKIT_AUTH_URL }}
@@ -142,7 +142,7 @@ jobs:
     with:
       repo: ${{ matrix.repo }}
       os: ${{ matrix.os }}
-      command: "yarn mocha test/**/*.test.ts --timeout 1200000"
+      command: 'yarn mocha test/**/*.test.ts --timeout 1200000'
   plugin-plugins-integration:
     needs: linux-unit-tests
     strategy:
@@ -153,7 +153,7 @@ jobs:
     with:
       repo: oclif/plugin-plugins
       os: ${{ matrix.os }}
-      command: "yarn test:integration"
+      command: 'yarn test:integration'
       # plugin-plugins integration tests depend on sf being installed globally
       other-setup: npm install -g @salesforce/cli@nightly
   plugin-update-integration:
@@ -166,4 +166,4 @@ jobs:
     with:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
-      command: "yarn test:integration:sf"
+      command: 'yarn test:integration:sf'

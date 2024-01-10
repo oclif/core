@@ -25,6 +25,15 @@ export namespace PJSON {
       default?: string
       description?: string
       devPlugins?: string[]
+      exitCodes?: {
+        default?: number
+        failedFlagParsing?: number
+        failedFlagValidation?: number
+        invalidArgsSpec?: number
+        nonExistentFlag?: number
+        requiredArgs?: number
+        unexpectedArgs?: number
+      }
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions
@@ -59,6 +68,7 @@ export namespace PJSON {
         node: {
           targets?: string[]
           version?: string
+          options?: string | string[]
         }
         s3: S3
       }

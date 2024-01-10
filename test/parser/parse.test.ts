@@ -1,12 +1,13 @@
 import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
 import {URL} from 'node:url'
-import {SinonStub, createSandbox} from 'sinon'
+import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 
 import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
 import {FlagDefault} from '../../src/interfaces/parser'
 import {parse} from '../../src/parser'
+import * as parser from '../../src/parser/parse'
 
 config.truncateThreshold = 0
 const stripAnsi = require('strip-ansi')
@@ -628,6 +629,48 @@ See more help with --help`)
             expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
           }
         })
+      })
+    })
+
+    describe('multiple flags with single value', () => {
+      it('parses multiple flags with single value', async () => {
+        const out = await parse(['--bar', 'a', 'b', '--bar=c', '--baz=d', 'e'], {
+          args: {argOne: Args.string()},
+          flags: {
+            bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+            baz: Flags.string({multiple: true}),
+          },
+        })
+        expect(out.flags.baz?.join('|')).to.equal('d|e')
+        expect(out.flags.bar?.join('|')).to.equal('a|c')
+        expect(out.args).to.deep.equal({argOne: 'b'})
+      })
+
+      it('parses multiple flags with single value multiple args', async () => {
+        const out = await parse(['c', '--bar', 'a', 'b'], {
+          args: {argOne: Args.string(), argTwo: Args.string()},
+          flags: {
+            bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+          },
+        })
+        expect(out.flags.bar?.join('|')).to.equal('a')
+        expect(out.args).to.deep.equal({argOne: 'c', argTwo: 'b'})
+      })
+
+      it('fails to parse with single value and no args option', async () => {
+        let message = ''
+
+        try {
+          await parse(['--bar', 'a', 'b'], {
+            flags: {
+              bar: Flags.string({multiple: true, multipleNonGreedy: true}),
+            },
+          })
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include('Unexpected argument: b')
       })
     })
 
@@ -1811,5 +1854,75 @@ See more help with --help`)
         expect(message).to.include('can only be specified once')
       })
     })
+  })
+})
+
+describe('allowStdin', () => {
+  let sandbox: SinonSandbox
+  const stdinValue = 'x'
+  const stdinPromise = new Promise<null | string>((resolve) => {
+    resolve(stdinValue)
+  })
+
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  it('should read stdin as input for flag when value is "-"', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', '-'], {
+      flags: {
+        myflag: Flags.string({allowStdin: true}),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
+  })
+
+  it('should not read stdin when value is not "-"', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', 'foo'], {
+      flags: {
+        myflag: Flags.string({allowStdin: true}),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals('foo')
+    expect(out.raw[0].input).to.equal('foo')
+  })
+
+  it('should read stdin as input for flag when allowStdin is "only" and when value is "-"', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', '-'], {
+      flags: {
+        myflag: Flags.string({allowStdin: 'only'}),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
+  })
+
+  it('should throw if allowStdin is "only" but value is not "-"', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    try {
+      await parse(['--myflag', 'INVALID'], {
+        flags: {
+          myflag: Flags.string({allowStdin: 'only'}),
+        },
+      })
+      expect.fail('Should have thrown an error')
+    } catch (error) {
+      if (error instanceof CLIError) {
+        expect(error.message).to.equal('Flag --myflag can only be read from stdin. The value must be "-".')
+      } else {
+        expect.fail('Should have thrown a CLIError')
+      }
+    }
   })
 })

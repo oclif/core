@@ -9,6 +9,7 @@ export type CLIParseErrorOptions = {
     input?: ParserInput
     output?: ParserOutput
   }
+  exit?: number
 }
 
 export type OutputArgs<T extends ParserInput['args']> = {[P in keyof T]: any}
@@ -209,11 +210,23 @@ export type OptionFlagProps = FlagProps & {
   options?: readonly string[]
   multiple?: boolean
   /**
+   * Parse one value per flag; allow `-m val1 -m val2`, disallow `-m val1 val2`.
+   * Set to true to use "multiple: true" flags together with args.
+   * Only respected if multiple is set to true.
+   */
+  multipleNonGreedy?: boolean
+  /**
    * Delimiter to separate the values for a multiple value flag.
    * Only respected if multiple is set to true. Default behavior is to
    * separate on spaces.
    */
   delimiter?: ','
+  /**
+   * Allow input value to be read from stdin if the provided value is `-`.
+   * If set to `only`, the flag will only accept input from stdin.
+   * Should only be used on one flag at a time.
+   */
+  allowStdin?: boolean | 'only'
 }
 
 export type FlagParserContext = Command & {token: FlagToken}

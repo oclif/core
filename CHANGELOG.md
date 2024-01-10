@@ -1,3 +1,102 @@
+# [3.18.0](https://github.com/oclif/core/compare/3.17.0...3.18.0) (2024-01-09)
+
+
+### Features
+
+* no longer use tsconfck ([79c4028](https://github.com/oclif/core/commit/79c40280f5bb75fca271fabd921702347f54445a))
+
+
+
+# [3.17.0](https://github.com/oclif/core/compare/3.16.0...3.17.0) (2024-01-09)
+
+
+### Features
+
+* add node.options to pjson typings ([#919](https://github.com/oclif/core/issues/919)) ([42b113b](https://github.com/oclif/core/commit/42b113b1d462267150deff7568d2974efba7e0f6)), closes [oclif/oclif#1238](https://github.com/oclif/oclif/issues/1238)
+
+
+
+# [3.16.0](https://github.com/oclif/core/compare/3.15.1...3.16.0) (2024-01-02)
+
+
+### Features
+
+* add 'only' option to allowStdin ([#900](https://github.com/oclif/core/issues/900)) ([4f7346e](https://github.com/oclif/core/commit/4f7346e2ebcbf72181f147e38a7d94bcd443c08b))
+
+
+
+## [3.15.1](https://github.com/oclif/core/compare/3.15.0...3.15.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* **deps:** bump password-prompt from 1.1.2 to 1.1.3 ([39f8860](https://github.com/oclif/core/commit/39f8860e6da3b9bd98ed9c5357cbdbe66f73b186))
+
+
+
+# [3.15.0](https://github.com/oclif/core/compare/3.14.1...3.15.0) (2023-12-15)
+
+
+### Features
+
+* add flagSortOrder to help options ([#896](https://github.com/oclif/core/issues/896)) ([3903720](https://github.com/oclif/core/commit/3903720377dde5c9f92d8c24f57cf9a32e516b3d))
+
+
+
+## [3.14.1](https://github.com/oclif/core/compare/3.14.0...3.14.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* peserve original error coming from failed flag parsing ([#897](https://github.com/oclif/core/issues/897)) ([a7a3bba](https://github.com/oclif/core/commit/a7a3bbabdf2a6cce19dd86583ca91409e0de3123))
+
+
+
+# [3.14.0](https://github.com/oclif/core/compare/3.13.2...3.14.0) (2023-12-07)
+
+
+### Features
+
+* allowStdin option for flags ([#894](https://github.com/oclif/core/issues/894)) ([#895](https://github.com/oclif/core/issues/895)) ([379e940](https://github.com/oclif/core/commit/379e9401f8c8f7400be71e2e45c65fd6564a8c21))
+
+
+
+## [3.13.2](https://github.com/oclif/core/compare/3.13.1...3.13.2) (2023-12-04)
+
+
+### Bug Fixes
+
+* add exit codes to different flag validation errors ([#861](https://github.com/oclif/core/issues/861)) ([1c841bf](https://github.com/oclif/core/commit/1c841bf296f89529183a182433ce2baddc697072))
+
+
+
+## [3.13.1](https://github.com/oclif/core/compare/3.13.0...3.13.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* cache this.commandsDir ([#891](https://github.com/oclif/core/issues/891)) ([7b217a4](https://github.com/oclif/core/commit/7b217a45aac2aa44bc696054924ef2280ecdc944))
+
+
+
+# [3.13.0](https://github.com/oclif/core/compare/3.12.1...3.13.0) (2023-11-30)
+
+
+### Features
+
+* add 'multipleNonGreedy' flag option to assign only one value per multiple flag ([#880](https://github.com/oclif/core/issues/880)) ([#889](https://github.com/oclif/core/issues/889)) ([354cead](https://github.com/oclif/core/commit/354cead9ae44ac8036911fce8ba94f085294ceb9))
+
+
+
+## [3.12.1](https://github.com/oclif/core/compare/3.12.0...3.12.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* command not found on empty arg ([#887](https://github.com/oclif/core/issues/887)) ([#888](https://github.com/oclif/core/issues/888)) ([a8ca6cc](https://github.com/oclif/core/commit/a8ca6cc495d7aeba2b276477ab8217ec22f0ce63))
+
+
+
 # [3.12.0](https://github.com/oclif/core/compare/3.11.0...3.12.0) (2023-11-20)
 
 
