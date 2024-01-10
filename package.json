@@ -5,6 +5,7 @@
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
+    "@types/cli-progress": "^3.11.5",
     "ansi-escapes": "^4.3.2",
     "ansi-styles": "^4.3.0",
     "cardinal": "^2.1.1",
@@ -43,7 +44,6 @@
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
     "@types/clean-stack": "^2.1.1",
-    "@types/cli-progress": "^3.11.5",
     "@types/color": "^3.0.5",
     "@types/debug": "^4.1.10",
     "@types/ejs": "^3.1.5",
