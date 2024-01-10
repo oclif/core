@@ -1,3 +1,12 @@
+## [3.18.1](https://github.com/oclif/core/compare/3.18.0...3.18.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* make @types/cli-progress a dependency ([#922](https://github.com/oclif/core/issues/922)) ([6528850](https://github.com/oclif/core/commit/6528850442e7c537d089f119f3f71299a1b54e5b))
+
+
+
 # [3.18.0](https://github.com/oclif/core/compare/3.17.0...3.18.0) (2024-01-09)
 
 
