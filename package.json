@@ -59,7 +59,7 @@
     "@types/wordwrap": "^1.0.3",
     "@types/wrap-ansi": "^3.0.0",
     "benchmark": "^2.1.4",
-    "chai": "^4.3.10",
+    "chai": "^4.4.1",
     "chai-as-promised": "^7.1.1",
     "commitlint": "^17.7.2",
     "cross-env": "^7.0.3",
