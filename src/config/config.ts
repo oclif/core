@@ -332,7 +332,7 @@ export class Config implements IConfig {
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
     if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
-      const {theme} = await this.loadThemes()
+      const {theme} = await this.loadTheme()
       this.theme = theme
     }
 
@@ -401,16 +401,17 @@ export class Config implements IConfig {
     }
   }
 
-  public async loadThemes(): Promise<{
+  public async loadTheme(): Promise<{
     file: string
     theme: Theme | undefined
   }> {
-    const file = resolve(this.configDir, 'theme.json')
-    const themes = await safeReadJson<Record<string, string>>(file)
-    const theme = themes ? parseTheme(themes) : undefined
+    const file = this.pjson.oclif.theme
+      ? resolve(this.root, this.pjson.oclif.theme)
+      : resolve(this.configDir, 'theme.json')
+    const themeRaw = await safeReadJson<Record<string, string>>(file)
     return {
       file,
-      theme,
+      theme: themeRaw ? parseTheme(themeRaw) : undefined,
     }
   }
 
