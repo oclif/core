@@ -415,16 +415,12 @@ export class Config implements IConfig {
       await safeReadJson<Record<string, string>>(userThemeFile),
     ])
 
-    if (userTheme) {
-      return {
-        file: userThemeFile,
-        theme: parseTheme(userTheme),
-      }
-    }
-
     return {
-      file: defaultThemeFile,
-      theme: parseTheme(defaultTheme ?? {}),
+      // Point to the user file if it exists, otherwise use the default file.
+      // This doesn't really serve a purpose to anyone but removing it would be a breaking change.
+      file: userTheme ? userThemeFile : defaultThemeFile,
+      // Merge the default theme with the user theme, giving the user theme precedence.
+      theme: parseTheme({...defaultTheme, ...userTheme}),
     }
   }
 
