@@ -1,3 +1,12 @@
+## [3.18.2](https://github.com/oclif/core/compare/3.18.1...3.18.2) (2024-01-31)
+
+
+### Bug Fixes
+
+* update keywords ([#933](https://github.com/oclif/core/issues/933)) ([a733b58](https://github.com/oclif/core/commit/a733b5866933a2df489678d64d6e0ad037241756))
+
+
+
 ## [3.18.1](https://github.com/oclif/core/compare/3.18.0...3.18.1) (2024-01-10)
 
 
