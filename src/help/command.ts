@@ -161,7 +161,7 @@ export class CommandHelp extends HelpFormatter {
         }
       }
 
-      label = labels.join(colorize(this.config?.theme?.flagSeparator, flag.char ? ', ' : '  '))
+      label = labels.join(flag.char ? colorize(this.config?.theme?.flagSeparator, ', ') : '  ')
     }
 
     if (flag.type === 'option') {
@@ -175,7 +175,7 @@ export class CommandHelp extends HelpFormatter {
       label += `=${value}`
     }
 
-    return label
+    return colorize(this.config.theme?.flag, label)
   }
 
   protected flags(flags: Array<Command.Flag.Any>): [string, string | undefined][] | undefined {
@@ -184,7 +184,7 @@ export class CommandHelp extends HelpFormatter {
     const noChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
 
     return flags.map((flag) => {
-      let left = colorize(this.config?.theme?.flag, this.flagHelpLabel(flag))
+      let left = this.flagHelpLabel(flag)
 
       if (noChar) left = left.replace('    ', '')
 
