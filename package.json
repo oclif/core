@@ -92,7 +92,13 @@
   ],
   "homepage": "https://github.com/oclif/core",
   "keywords": [
-    "oclif"
+    "oclif",
+    "cli",
+    "command",
+    "command line",
+    "parser",
+    "args",
+    "argv"
   ],
   "license": "MIT",
   "main": "./lib/index.js",
