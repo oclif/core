@@ -168,20 +168,17 @@ export class Parser<
 
         this.currentFlag = flag
         let input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
-        // if the value ends up being one of the command's flags, the user didn't provide an input
-        if (typeof input !== 'string' || this.findFlag(input).name) {
-          throw new CLIError(`Flag --${name} expects a value`)
-        }
 
-        if (flag.allowStdin === 'only' && input !== '-') {
-          throw new CLIError(`Flag --${name} can only be read from stdin. The value must be "-".`)
-        }
-
-        if (flag.allowStdin && input === '-') {
+        if ((flag.allowStdin && input === '-') || flag.allowStdin === 'only') {
           const stdin = await readStdin()
           if (stdin) {
             input = stdin.trim()
           }
+        }
+
+        // if the value ends up being one of the command's flags, the user didn't provide an input
+        if (typeof input !== 'string' || this.findFlag(input).name) {
+          throw new CLIError(`Flag --${name} expects a value`)
         }
 
         this.raw.push({flag: flag.name, input, type: 'flag'})
