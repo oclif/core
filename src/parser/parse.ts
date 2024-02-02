@@ -36,6 +36,20 @@ try {
   }
 }
 
+declare global {
+  /**
+   * Cache the stdin so that it can be read multiple times.
+   *
+   * This fixes a bug where the stdin would be read multiple times (because Parser.parse() was called more than once)
+   * but only the first read would be successful - all other reads would return null.
+   *
+   * Storing in global is necessary because we want the cache to be shared across all versions of @oclif/core in
+   * in the dependency tree. Storing in a variable would only share the cache within the same version of @oclif/core.
+   */
+  // eslint-disable-next-line no-var
+  var stdinCache: string
+}
+
 export const readStdin = async (): Promise<null | string> => {
   const {stdin, stdout} = process
 
@@ -48,6 +62,8 @@ export const readStdin = async (): Promise<null | string> => {
   if (stdin.isTTY) return null
 
   return new Promise((resolve) => {
+    if (global.stdinCache) resolve(global.stdinCache)
+
     let result = ''
     const ac = new AbortController()
     const {signal} = ac
@@ -66,6 +82,7 @@ export const readStdin = async (): Promise<null | string> => {
     rl.once('close', () => {
       clearTimeout(timeout)
       debug('resolved from stdin', result)
+      global.stdinCache = result
       resolve(result)
     })
 
