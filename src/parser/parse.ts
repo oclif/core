@@ -140,6 +140,7 @@ export class Parser<
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
     this._debugInput()
 
+    // eslint-disable-next-line complexity
     const parseFlag = async (arg: string): Promise<boolean> => {
       const {isLong, name} = this.findFlag(arg)
       if (!name) {
@@ -168,6 +169,12 @@ export class Parser<
 
         this.currentFlag = flag
         let input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
+
+        if (flag.allowStdin === 'only' && input !== '-' && input !== undefined) {
+          throw new CLIError(
+            `Flag --${name} can only be read from stdin. The value must be "-" or not provided at all.`,
+          )
+        }
 
         if ((flag.allowStdin && input === '-') || flag.allowStdin === 'only') {
           const stdin = await readStdin()
