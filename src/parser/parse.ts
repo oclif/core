@@ -67,7 +67,7 @@ export const readStdin = async (): Promise<null | string> => {
     let result = ''
     const ac = new AbortController()
     const {signal} = ac
-    const timeout = setTimeout(() => ac.abort(), 100)
+    const timeout = setTimeout(() => ac.abort(), 10)
 
     const rl = createInterface({
       input: stdin,
