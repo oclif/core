@@ -726,7 +726,7 @@
     read-package-json-fast "^3.0.0"
     which "^4.0.0"
 
-"@oclif/core@^3.10.2", "@oclif/core@^3.14.1", "@oclif/core@^3.18.1":
+"@oclif/core@^3.10.2", "@oclif/core@^3.18.1":
   version "3.18.1"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.18.1.tgz#a8c9ee3848ad663d5694bef6079116c70d32fc55"
   integrity sha512-l0LsjzGcqjbUEdeSBX6bdZieVmEv82Q0W3StiyaDMEnPZ9KLH28HrLpcZg6d50mCYW9CUZNzmRo6qrCHWrgLKw==
@@ -760,11 +760,11 @@
     wrap-ansi "^7.0.0"
 
 "@oclif/plugin-help@^6":
-  version "6.0.8"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.0.8.tgz#9ad196f9ddbeae1f5353448d16e0cb68463bac31"
-  integrity sha512-q7OWy0JSrsZVynPkWQxmd3dEFA2czym9FdqS06YteRldIH/Csvovst+35KneM4iD8ewqPbY8KAMYZMkMavao0g==
+  version "6.0.12"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.0.12.tgz#d71b84531644ecf65fcd8df671cff6f4aa178d42"
+  integrity sha512-KMxQ5Oli1tkWiWNSdrjNtiFIFZvX0+IsvuuGcDwJIn1Jm+SzEQF90vkK6WzIjFACmyKIwXbGMmimcFaLrslJPQ==
   dependencies:
-    "@oclif/core" "^3.14.1"
+    "@oclif/core" "^3.18.1"
 
 "@oclif/plugin-plugins@^4":
   version "4.1.14"
