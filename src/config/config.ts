@@ -402,15 +402,26 @@ export class Config implements IConfig {
   }
 
   public async loadThemes(): Promise<{
-    file: string
+    file: string | undefined
     theme: Theme | undefined
   }> {
-    const file = resolve(this.configDir, 'theme.json')
-    const themes = await safeReadJson<Record<string, string>>(file)
-    const theme = themes ? parseTheme(themes) : undefined
+    const defaultThemeFile = this.pjson.oclif.theme
+      ? resolve(this.root, this.pjson.oclif.theme)
+      : this.pjson.oclif.theme
+    const userThemeFile = resolve(this.configDir, 'theme.json')
+
+    const [defaultTheme, userTheme] = await Promise.all([
+      defaultThemeFile ? await safeReadJson<Record<string, string>>(defaultThemeFile) : undefined,
+      await safeReadJson<Record<string, string>>(userThemeFile),
+    ])
+
+    // Merge the default theme with the user theme, giving the user theme precedence.
+    const merged = {...defaultTheme, ...userTheme}
     return {
-      file,
-      theme,
+      // Point to the user file if it exists, otherwise use the default file.
+      // This doesn't really serve a purpose to anyone but removing it would be a breaking change.
+      file: userTheme ? userThemeFile : defaultThemeFile,
+      theme: Object.keys(merged).length > 0 ? parseTheme(merged) : undefined,
     }
   }
 
