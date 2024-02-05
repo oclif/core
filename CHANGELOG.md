@@ -1,3 +1,20 @@
+# [3.19.0](https://github.com/oclif/core/compare/3.18.2...3.19.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* dont indent when no shor char ([03c597a](https://github.com/oclif/core/commit/03c597a851442be8785401680b89af295ed95e52))
+* merge default and user theme ([3798f4c](https://github.com/oclif/core/commit/3798f4cc4ec6165917b61c009ad7a044dc556b7a))
+* prefer user theme ([5eaed66](https://github.com/oclif/core/commit/5eaed66ead363e29c324ce171ef6ebe01e694ad9))
+* return undefined if no theme ([3cb3373](https://github.com/oclif/core/commit/3cb33734ff0a69e3d24f129ff210e8e52139002d))
+
+
+### Features
+
+* allow theme file to be configurable ([ab502b4](https://github.com/oclif/core/commit/ab502b4e151d854dacd6025fb1dd27bc94c2f154))
+
+
+
 ## [3.18.2](https://github.com/oclif/core/compare/3.18.1...3.18.2) (2024-01-31)
 
 
