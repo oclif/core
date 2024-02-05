@@ -62,7 +62,7 @@ export const readStdin = async (): Promise<null | string> => {
   if (stdin.isTTY) return null
 
   return new Promise((resolve) => {
-    if (global.oclif.stdinCache) resolve(global.oclif.stdinCache)
+    if (global.oclif?.stdinCache) resolve(global.oclif.stdinCache)
 
     let result = ''
     const ac = new AbortController()
@@ -82,7 +82,7 @@ export const readStdin = async (): Promise<null | string> => {
     rl.once('close', () => {
       clearTimeout(timeout)
       debug('resolved from stdin', result)
-      global.oclif.stdinCache = result
+      global.oclif = {...global.oclif, stdinCache: result}
       resolve(result)
     })
 
