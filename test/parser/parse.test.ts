@@ -1908,7 +1908,19 @@ describe('allowStdin', () => {
     expect(out.raw[0].input).to.equal('x')
   })
 
-  it('should throw if allowStdin is "only" but value is not "-"', async () => {
+  it('should read stdin as input for flag when allowStdin is "only" and no value is given', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag'], {
+      flags: {
+        myflag: Flags.string({allowStdin: 'only'}),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
+  })
+
+  it('should throw if allowStdin is "only" but value is not "-" or undefined', async () => {
     sandbox.stub(parser, 'readStdin').returns(stdinPromise)
     try {
       await parse(['--myflag', 'INVALID'], {
@@ -1919,7 +1931,9 @@ describe('allowStdin', () => {
       expect.fail('Should have thrown an error')
     } catch (error) {
       if (error instanceof CLIError) {
-        expect(error.message).to.equal('Flag --myflag can only be read from stdin. The value must be "-".')
+        expect(error.message).to.equal(
+          'Flag --myflag can only be read from stdin. The value must be "-" or not provided at all.',
+        )
       } else {
         expect.fail('Should have thrown a CLIError')
       }
