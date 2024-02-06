@@ -1,3 +1,12 @@
+## [3.19.1](https://github.com/oclif/core/compare/3.19.0...3.19.1) (2024-02-06)
+
+
+### Bug Fixes
+
+* **parser:** cache stdin value in global scope ([#935](https://github.com/oclif/core/issues/935)) ([c8bf886](https://github.com/oclif/core/commit/c8bf886c570ab4dc3b8a139be4a716d4e6a053af))
+
+
+
 # [3.19.0](https://github.com/oclif/core/compare/3.18.2...3.19.0) (2024-02-05)
 
 
