@@ -14,6 +14,43 @@ export interface PJSON {
   version: string
 }
 
+export type CommandDiscovery = {
+  /**
+   * The strategy to use for loading commands.
+   *
+   * - `glob` will use `glob` to find command files in the specified `directory`.
+   * - `import` will use `import` (or `require` for CJS) to load the commands from the root of the plugin.
+   */
+  strategy: 'glob' | 'import'
+  /**
+   * The directory to use to find command files. This is only used when `strategy` is `glob`.
+   */
+  directory?: string
+  /**
+   * The glob patterns to use to find command files. This is only used when `strategy` is `glob`.
+   */
+  globPatterns?: string[]
+  /**
+   * The name of the file that contains the exported commands. This is only used when `strategy` is `import`.
+   *
+   * This export must be the default export and  an object with keys that are the command names
+   * and values that are the command classes.
+   *
+   * @example
+   * ```typescript
+   * // in src/index.ts
+   * import Hello from './commands/hello/index.js'
+   * import HelloWorld from './commands/hello/world.js'
+   *
+   * export default {
+   *   hello: Hello,
+   *   'hello:world': HelloWorld,
+   * }
+   * ```
+   */
+  file?: string
+}
+
 export namespace PJSON {
   export interface Plugin extends PJSON {
     name: string
@@ -21,7 +58,13 @@ export namespace PJSON {
       additionalHelpFlags?: string[]
       additionalVersionFlags?: string[]
       aliases?: {[name: string]: null | string}
+      /**
+       * The directory to use to find command files.
+       *
+       * @deprecated Use `commandDiscovery` instead.
+       */
       commands?: string
+      commandDiscovery?: CommandDiscovery
       default?: string
       description?: string
       devPlugins?: string[]

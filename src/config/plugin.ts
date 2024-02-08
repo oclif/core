@@ -5,10 +5,10 @@ import {inspect} from 'node:util'
 import {Command} from '../command'
 import {CLIError, error} from '../errors'
 import {Manifest} from '../interfaces/manifest'
-import {PJSON} from '../interfaces/pjson'
+import {CommandDiscovery, PJSON} from '../interfaces/pjson'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
-import {loadWithData, loadWithDataFromManifest} from '../module-loader'
+import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
@@ -54,6 +54,35 @@ function processCommandIds(files: string[]): string[] {
     const id = [...topics, command].filter(Boolean).join(':')
     return id === '' ? '.' : id
   })
+}
+
+function determineCommandDiscoveryStrategy(
+  commandDiscovery: CommandDiscovery | undefined,
+  commands: string | undefined,
+): CommandDiscovery {
+  if (commandDiscovery) {
+    if (commandDiscovery.strategy === 'import') {
+      if (!commandDiscovery.file)
+        throw new CLIError('commandDiscovery.exportName is required when using import strategy')
+      return commandDiscovery
+    }
+
+    if (commandDiscovery.strategy === 'glob') {
+      if (!commandDiscovery.directory) {
+        if (!commands) throw new CLIError('commands is required when using glob strategy')
+        return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'glob'}
+      }
+
+      return commandDiscovery
+    }
+  }
+
+  if (commands) return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'glob'}
+  throw new CLIError('either oclif.commandDiscovery or oclif.commands are required to be set in package.json')
+}
+
+type CommandExportModule = {
+  default: Record<string, Command.Class>
 }
 
 export class Plugin implements IPlugin {
@@ -103,6 +132,8 @@ export class Plugin implements IPlugin {
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
+  private commandDiscoveryOpts: CommandDiscovery | undefined
+  private commandExportModule: CommandExportModule | undefined
   private flexibleTaxonomy!: boolean
 
   constructor(public options: PluginOptions) {}
@@ -122,6 +153,16 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
+      const commandsFromExport = await this.loadCommandsFromExport()
+      if (commandsFromExport) {
+        const cmd = commandsFromExport[id]
+        if (!cmd) return
+
+        cmd.id = id
+        cmd.plugin = this
+        return cmd
+      }
+
       const commandsDir = await this.getCommandsDir()
       if (!commandsDir) return
       let module
@@ -182,6 +223,13 @@ export class Plugin implements IPlugin {
     }
 
     this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
+
+    this.commandDiscoveryOpts = determineCommandDiscoveryStrategy(
+      this.pjson.oclif?.commandDiscovery,
+      this.pjson.oclif?.commands,
+    )
+
+    this._debug('command discovery options', this.commandDiscoveryOpts)
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
@@ -284,12 +332,19 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandIDs(): Promise<string[]> {
+    const commandsFromExport = await this.loadCommandsFromExport()
+    if (commandsFromExport) {
+      const ids = Object.keys(commandsFromExport)
+      this._debug('found commands', ids)
+      return ids
+    }
+
     const commandsDir = await this.getCommandsDir()
     if (!commandsDir) return []
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
+    const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
     const ids = processCommandIds(files)
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
@@ -301,6 +356,15 @@ export class Plugin implements IPlugin {
     if (this.commandsDir) return this.commandsDir
     this.commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
     return this.commandsDir
+  }
+
+  private async loadCommandsFromExport(): Promise<Record<string, Command.Class> | undefined> {
+    if (this.commandDiscoveryOpts?.strategy === 'import' && this.commandDiscoveryOpts.file) {
+      if (this.commandExportModule) return this.commandExportModule.default
+      const filePath = await tsPath(this.root, this.commandDiscoveryOpts.file, this)
+      this.commandExportModule = await load<CommandExportModule>(this, filePath)
+      return this.commandExportModule?.default
+    }
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
