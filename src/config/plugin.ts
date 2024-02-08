@@ -289,7 +289,7 @@ export class Plugin implements IPlugin {
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
+    const files = await globby(this.pjson.oclif?.commandGlobPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
     const ids = processCommandIds(files)
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})

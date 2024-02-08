@@ -22,6 +22,11 @@ export namespace PJSON {
       additionalVersionFlags?: string[]
       aliases?: {[name: string]: null | string}
       commands?: string
+      /**
+       * Override the default globs for finding commands
+       * within the configured commands directory.
+       */
+      commandGlobPatterns?: string[]
       default?: string
       description?: string
       devPlugins?: string[]
