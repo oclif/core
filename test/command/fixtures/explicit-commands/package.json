@@ -1,0 +1,32 @@
+{
+  "name": "oclif",
+  "version": "0.0.0",
+  "description": "base library for oclif CLIs",
+  "private": true,
+  "files": [],
+  "oclif": {
+    "commands": {
+      "strategy": "explicit",
+      "target": "./lib/commands.js"
+    },
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topics": {
+      "foo": {
+        "description": "foo topic description",
+        "subtopics": {
+          "bar": {
+            "description": "foo bar topic description"
+          }
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "globby": "^8.0.1",
+    "ts-node": "^6.0.2"
+  }
+}
