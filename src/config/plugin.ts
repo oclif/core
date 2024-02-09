@@ -56,29 +56,50 @@ function processCommandIds(files: string[]): string[] {
   })
 }
 
-function determineCommandDiscoveryStrategy(
-  commandDiscovery: CommandDiscovery | undefined,
-  commands: string | undefined,
-): CommandDiscovery {
-  if (commandDiscovery) {
-    if (commandDiscovery.strategy === 'import') {
-      if (!commandDiscovery.file)
-        throw new CLIError('commandDiscovery.exportName is required when using import strategy')
-      return commandDiscovery
-    }
+// function determineCommandDiscoveryOptions(
+//   commandDiscovery: CommandDiscovery | undefined,
+//   commands: string | undefined,
+// ): CommandDiscovery | undefined {
+//   if (commandDiscovery) {
+//     if (commandDiscovery.strategy === 'explicit') {
+//       if (!commandDiscovery.file) throw new CLIError('commandDiscovery.file is required when using `explicit` strategy')
+//       return commandDiscovery
+//     }
 
-    if (commandDiscovery.strategy === 'glob') {
-      if (!commandDiscovery.directory) {
-        if (!commands) throw new CLIError('commands is required when using glob strategy')
-        return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'glob'}
-      }
+//     if (commandDiscovery.strategy === 'search') {
+//       if (!commandDiscovery.directory) {
+//         if (!commands) throw new CLIError('commands is required when using `search` strategy')
+//         return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'search'}
+//       }
 
-      return commandDiscovery
-    }
+//       return commandDiscovery
+//     }
+//   }
+
+//   if (commands) return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'search'}
+// }
+
+function determineCommandDiscoveryOptions(
+  commandDiscovery: string | CommandDiscovery | undefined,
+): CommandDiscovery | undefined {
+  if (!commandDiscovery) return
+
+  if (typeof commandDiscovery === 'string') {
+    return {globPatterns: GLOB_PATTERNS, strategy: 'search', target: commandDiscovery}
   }
 
-  if (commands) return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'glob'}
-  throw new CLIError('either oclif.commandDiscovery or oclif.commands are required to be set in package.json')
+  if (commandDiscovery.strategy === 'explicit') {
+    if (!commandDiscovery.target) throw new CLIError('`oclif.commandDiscovery.target` is required.')
+    return commandDiscovery
+  }
+
+  if (commandDiscovery.strategy === 'search') {
+    if (!commandDiscovery.target) {
+      throw new CLIError('`oclif.commandDiscovery.target` is required.')
+    }
+
+    return commandDiscovery
+  }
 }
 
 type CommandExportModule = {
@@ -224,10 +245,7 @@ export class Plugin implements IPlugin {
 
     this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
 
-    this.commandDiscoveryOpts = determineCommandDiscoveryStrategy(
-      this.pjson.oclif?.commandDiscovery,
-      this.pjson.oclif?.commands,
-    )
+    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands)
 
     this._debug('command discovery options', this.commandDiscoveryOpts)
 
@@ -332,17 +350,23 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandIDs(): Promise<string[]> {
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
     const commandsFromExport = await this.loadCommandsFromExport()
     if (commandsFromExport) {
       const ids = Object.keys(commandsFromExport)
       this._debug('found commands', ids)
+      marker?.addDetails({count: ids.length})
+      marker?.stop()
       return ids
     }
 
     const commandsDir = await this.getCommandsDir()
-    if (!commandsDir) return []
+    if (!commandsDir) {
+      marker?.addDetails({count: 0})
+      marker?.stop()
+      return []
+    }
 
-    const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
     this._debug(`loading IDs from ${commandsDir}`)
     const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
     const ids = processCommandIds(files)
@@ -354,14 +378,15 @@ export class Plugin implements IPlugin {
 
   private async getCommandsDir(): Promise<string | undefined> {
     if (this.commandsDir) return this.commandsDir
-    this.commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
+
+    this.commandsDir = await tsPath(this.root, this.commandDiscoveryOpts?.target, this)
     return this.commandsDir
   }
 
   private async loadCommandsFromExport(): Promise<Record<string, Command.Class> | undefined> {
-    if (this.commandDiscoveryOpts?.strategy === 'import' && this.commandDiscoveryOpts.file) {
+    if (this.commandDiscoveryOpts?.strategy === 'explicit' && this.commandDiscoveryOpts.target) {
       if (this.commandExportModule) return this.commandExportModule.default
-      const filePath = await tsPath(this.root, this.commandDiscoveryOpts.file, this)
+      const filePath = await tsPath(this.root, this.commandDiscoveryOpts.target, this)
       this.commandExportModule = await load<CommandExportModule>(this, filePath)
       return this.commandExportModule?.default
     }
