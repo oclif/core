@@ -15,7 +15,7 @@ import {settings} from './settings'
  * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
  * import { execute } from "@oclif/core"
  *
- * await oclif.execute({development: true, dir: import.meta.url})
+ * await execute({development: true, dir: import.meta.url})
  * ```
  *
  * @example For ESM run.js
@@ -23,7 +23,7 @@ import {settings} from './settings'
  * #!/usr/bin/env node
  * import { execute } from "@oclif/core"
  *
- * await oclif.execute({dir: import.meta.url})
+ * await execute({dir: import.meta.url})
  * ```
  *
  * @example For CJS dev.js
