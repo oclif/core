@@ -281,7 +281,14 @@ export class Plugin implements IPlugin {
         await Promise.all(
           this.commandIDs.map(async (id) => {
             try {
-              const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+              const found = await this.findCommand(id, {must: true})
+              const cached = await cacheCommand(found, this, respectNoCacheDefault)
+
+              // Ensure that id is set to the id being processed
+              // This is necessary because the id is set by findCommand but if there
+              // are multiple instances of a Command, then the id will be set to the
+              // last one found.
+              cached.id = id
               if (this.flexibleTaxonomy) {
                 const permutations = getCommandIdPermutations(id)
                 const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
