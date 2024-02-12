@@ -18,15 +18,15 @@ export type CommandDiscovery = {
   /**
    * The strategy to use for loading commands.
    *
-   * - `search` will use glob patterns to find command files in the specified `directory`.
+   * - `pattern` will use glob patterns to find command files in the specified `directory`.
    * - `explicit` will use `import` (or `require` for CJS) to load the commands from the
    *    specified `file`.
    *
    * In both cases, the `oclif.manifest.json` file will be used to find the commands if it exists.
    */
-  strategy: 'search' | 'explicit'
+  strategy: 'pattern' | 'explicit'
   /**
-   * If the `strategy` is `search`, this is the **directory** to use to find command files.
+   * If the `strategy` is `pattern`, this is the **directory** to use to find command files.
    *
    * If the `strategy` is `explicit`, this is the **file** that default exports the commands.
    *   - This export must be the default export and an object with keys that are the command names
@@ -47,7 +47,7 @@ export type CommandDiscovery = {
   target: string
   /**
    * The glob patterns to use to find command files when no `oclif.manifest.json` is present.
-   * This is only used when `strategy` is `search`.
+   * This is only used when `strategy` is `pattern`.
    */
   globPatterns?: string[]
 }

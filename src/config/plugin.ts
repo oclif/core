@@ -56,36 +56,13 @@ function processCommandIds(files: string[]): string[] {
   })
 }
 
-// function determineCommandDiscoveryOptions(
-//   commandDiscovery: CommandDiscovery | undefined,
-//   commands: string | undefined,
-// ): CommandDiscovery | undefined {
-//   if (commandDiscovery) {
-//     if (commandDiscovery.strategy === 'explicit') {
-//       if (!commandDiscovery.file) throw new CLIError('commandDiscovery.file is required when using `explicit` strategy')
-//       return commandDiscovery
-//     }
-
-//     if (commandDiscovery.strategy === 'search') {
-//       if (!commandDiscovery.directory) {
-//         if (!commands) throw new CLIError('commands is required when using `search` strategy')
-//         return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'search'}
-//       }
-
-//       return commandDiscovery
-//     }
-//   }
-
-//   if (commands) return {directory: commands, globPatterns: GLOB_PATTERNS, strategy: 'search'}
-// }
-
 function determineCommandDiscoveryOptions(
   commandDiscovery: string | CommandDiscovery | undefined,
 ): CommandDiscovery | undefined {
   if (!commandDiscovery) return
 
   if (typeof commandDiscovery === 'string') {
-    return {globPatterns: GLOB_PATTERNS, strategy: 'search', target: commandDiscovery}
+    return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
   }
 
   if (commandDiscovery.strategy === 'explicit') {
@@ -93,7 +70,7 @@ function determineCommandDiscoveryOptions(
     return commandDiscovery
   }
 
-  if (commandDiscovery.strategy === 'search') {
+  if (commandDiscovery.strategy === 'pattern') {
     if (!commandDiscovery.target) {
       throw new CLIError('`oclif.commandDiscovery.target` is required.')
     }
