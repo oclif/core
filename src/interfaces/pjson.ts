@@ -21,10 +21,12 @@ export type CommandDiscovery = {
    * - `pattern` will use glob patterns to find command files in the specified `directory`.
    * - `explicit` will use `import` (or `require` for CJS) to load the commands from the
    *    specified `file`.
+   * - `single` will use the `target` which should export a command class. This is for CLIs that
+   *    only have a single command.
    *
    * In both cases, the `oclif.manifest.json` file will be used to find the commands if it exists.
    */
-  strategy: 'pattern' | 'explicit'
+  strategy: 'pattern' | 'explicit' | 'single'
   /**
    * If the `strategy` is `pattern`, this is the **directory** to use to find command files.
    *
@@ -60,6 +62,12 @@ export namespace PJSON {
       additionalVersionFlags?: string[]
       aliases?: {[name: string]: null | string}
       commands?: string | CommandDiscovery
+      /**
+       * Default command id when no command is found. This is used to support single command CLIs.
+       * Only supported value is "."
+       *
+       * @deprecated Use `commands.strategy: 'single'` instead.
+       */
       default?: string
       description?: string
       devPlugins?: string[]

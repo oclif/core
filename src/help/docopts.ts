@@ -77,7 +77,7 @@ export class DocOpts {
   }
 
   public toString(): string {
-    const opts = this.cmd.id === '.' || this.cmd.id === '' ? [] : ['<%= command.id %>']
+    const opts = ['<%= command.id %>']
     if (this.cmd.args) {
       const a =
         Object.values(ensureArgObject(this.cmd.args)).map((arg) =>

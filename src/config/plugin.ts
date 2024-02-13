@@ -10,6 +10,7 @@ import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
 import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
+import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson, requireJson} from '../util/fs'
@@ -35,7 +36,7 @@ function topicsToArray(input: any, base?: string): Topic[] {
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
   Boolean(manifest?.commands[id] && 'isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
 
-const search = (cmd: any) => {
+const searchForCommandClass = (cmd: any) => {
   if (typeof cmd.run === 'function') return cmd
   if (cmd.default && cmd.default.run) return cmd.default
   return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
@@ -52,14 +53,19 @@ function processCommandIds(files: string[]): string[] {
     const topics = p.dir.split('/')
     const command = p.name !== 'index' && p.name
     const id = [...topics, command].filter(Boolean).join(':')
-    return id === '' ? '.' : id
+    return id === '' ? SINGLE_COMMAND_CLI_SYMBOL : id
   })
 }
 
 function determineCommandDiscoveryOptions(
   commandDiscovery: string | CommandDiscovery | undefined,
+  defaultCmdId?: string | undefined,
 ): CommandDiscovery | undefined {
   if (!commandDiscovery) return
+
+  if (typeof commandDiscovery === 'string' && defaultCmdId) {
+    return {globPatterns: GLOB_PATTERNS, strategy: 'single', target: commandDiscovery}
+  }
 
   if (typeof commandDiscovery === 'string') {
     return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
@@ -71,9 +77,13 @@ function determineCommandDiscoveryOptions(
   return commandDiscovery
 }
 
-type CommandExportModule = {
-  default: Record<string, Command.Class>
-}
+/**
+ * Cached commands, where the key is the command ID and the value is the command class.
+ *
+ * This is only populated if the `strategy` is `explicit` and the `target` is a file that default exports the id-to-command-class object.
+ * Or if the strategy is `single` and the `target` is the file containing a command class.
+ */
+type CommandCache = Record<string, Command.Class>
 
 export class Plugin implements IPlugin {
   alias!: string
@@ -122,8 +132,8 @@ export class Plugin implements IPlugin {
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
+  private commandCache: CommandCache | undefined
   private commandDiscoveryOpts: CommandDiscovery | undefined
-  private commandExportModule: CommandExportModule | undefined
   private flexibleTaxonomy!: boolean
 
   constructor(public options: PluginOptions) {}
@@ -143,9 +153,9 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      const commandsFromExport = await this.loadCommandsFromExport()
-      if (commandsFromExport) {
-        const cmd = commandsFromExport[id]
+      const commandCache = await this.loadCommandsFromTarget()
+      if (commandCache) {
+        const cmd = commandCache[id]
         if (!cmd) return
 
         cmd.id = id
@@ -168,7 +178,7 @@ export class Plugin implements IPlugin {
         throw error
       }
 
-      const cmd = search(module)
+      const cmd = searchForCommandClass(module)
       if (!cmd) return
       cmd.id = id
       cmd.plugin = this
@@ -214,7 +224,7 @@ export class Plugin implements IPlugin {
 
     this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
 
-    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands)
+    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands, this.pjson.oclif?.default)
 
     this._debug('command discovery options', this.commandDiscoveryOpts)
 
@@ -327,29 +337,49 @@ export class Plugin implements IPlugin {
 
   private async getCommandIDs(): Promise<string[]> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
-    const commandsFromExport = await this.loadCommandsFromExport()
-    if (commandsFromExport) {
-      const ids = Object.keys(commandsFromExport)
-      this._debug('found commands', ids)
-      marker?.addDetails({count: ids.length})
-      marker?.stop()
-      return ids
+
+    let ids: string[]
+    switch (this.commandDiscoveryOpts?.strategy) {
+      case 'explicit': {
+        ids = (await this.getCommandIdsFromTarget()) ?? []
+        break
+      }
+
+      case 'pattern': {
+        ids = await this.getCommandIdsFromPattern()
+        break
+      }
+
+      case 'single': {
+        ids = (await this.getCommandIdsFromTarget()) ?? []
+        break
+      }
+
+      default: {
+        ids = []
+      }
     }
 
-    const commandsDir = await this.getCommandsDir()
-    if (!commandsDir) {
-      marker?.addDetails({count: 0})
-      marker?.stop()
-      return []
-    }
-
-    this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
-    const ids = processCommandIds(files)
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
     marker?.stop()
     return ids
+  }
+
+  private async getCommandIdsFromPattern(): Promise<string[]> {
+    const commandsDir = await this.getCommandsDir()
+    if (!commandsDir) return []
+
+    this._debug(`loading IDs from ${commandsDir}`)
+    const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
+    return processCommandIds(files)
+  }
+
+  private async getCommandIdsFromTarget(): Promise<string[] | undefined> {
+    const commandsFromExport = await this.loadCommandsFromTarget()
+    if (commandsFromExport) {
+      return Object.keys(commandsFromExport)
+    }
   }
 
   private async getCommandsDir(): Promise<string | undefined> {
@@ -359,12 +389,21 @@ export class Plugin implements IPlugin {
     return this.commandsDir
   }
 
-  private async loadCommandsFromExport(): Promise<Record<string, Command.Class> | undefined> {
+  private async loadCommandsFromTarget(): Promise<Record<string, Command.Class> | undefined> {
+    if (this.commandCache) return this.commandCache
+
     if (this.commandDiscoveryOpts?.strategy === 'explicit' && this.commandDiscoveryOpts.target) {
-      if (this.commandExportModule) return this.commandExportModule.default
       const filePath = await tsPath(this.root, this.commandDiscoveryOpts.target, this)
-      this.commandExportModule = await load<CommandExportModule>(this, filePath)
-      return this.commandExportModule?.default
+      const module = await load<{default?: CommandCache}>(this, filePath)
+      this.commandCache = module.default ?? {}
+      return this.commandCache
+    }
+
+    if (this.commandDiscoveryOpts?.strategy === 'single' && this.commandDiscoveryOpts.target) {
+      const filePath = await tsPath(this.root, this.commandDiscoveryOpts?.target ?? this.root, this)
+      const module = await load(this, filePath)
+      this.commandCache = {[SINGLE_COMMAND_CLI_SYMBOL]: searchForCommandClass(module)}
+      return this.commandCache
     }
   }
 

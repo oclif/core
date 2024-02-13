@@ -85,6 +85,7 @@ export class Config implements IConfig {
   public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
+  public isSingleCommandCLI = false
   public name!: string
   public npmRegistry?: string
   public nsisCustomization?: string
@@ -362,6 +363,12 @@ export class Config implements IConfig {
         ...(s3.templates && s3.templates.vanilla),
       },
     }
+    this.isSingleCommandCLI = Boolean(
+      this.pjson.oclif.default ||
+        (typeof this.pjson.oclif.commands !== 'string' &&
+          this.pjson.oclif.commands?.strategy === 'single' &&
+          this.pjson.oclif.commands?.target),
+    )
 
     await this.loadPluginsAndCommands()
 

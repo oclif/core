@@ -4,7 +4,9 @@
   "description": "Single Command CLI",
   "private": true,
   "oclif": {
-    "default": ".",
-    "commands": "./dist"
+    "commands": {
+      "strategy": "single",
+      "target": "./dist"
+    }
   }
 }
