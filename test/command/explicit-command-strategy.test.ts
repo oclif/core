@@ -26,14 +26,20 @@ USAGE
   $ oclif foo COMMAND
 
 COMMANDS
-  foo bar  foo bar description
-  foo baz  foo baz description
+  foo alias  foo bar description
+  foo bar    foo bar description
+  foo baz    foo baz description
 
 `)
   })
 
   it('should run command', async () => {
     await run(['foo:bar'], resolve(__dirname, 'fixtures/explicit-commands/package.json'))
+    expect(stdoutStub.firstCall.firstArg).to.equal('hello world!\n')
+  })
+
+  it('should run alias', async () => {
+    await run(['foo:alias'], resolve(__dirname, 'fixtures/explicit-commands/package.json'))
     expect(stdoutStub.firstCall.firstArg).to.equal('hello world!\n')
   })
 })

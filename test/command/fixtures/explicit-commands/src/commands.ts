@@ -4,4 +4,5 @@ import FooBaz from './commands/foo/baz'
 export default {
   'foo:bar': FooBar,
   'foo:baz': FooBaz,
+  'foo:alias': FooBar,
 }

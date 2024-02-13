@@ -65,18 +65,10 @@ function determineCommandDiscoveryOptions(
     return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
   }
 
-  if (commandDiscovery.strategy === 'explicit') {
-    if (!commandDiscovery.target) throw new CLIError('`oclif.commandDiscovery.target` is required.')
-    return commandDiscovery
-  }
+  if (!commandDiscovery.target) throw new CLIError('`oclif.commandDiscovery.target` is required.')
+  if (!commandDiscovery.strategy) throw new CLIError('`oclif.commandDiscovery.strategy` is required.')
 
-  if (commandDiscovery.strategy === 'pattern') {
-    if (!commandDiscovery.target) {
-      throw new CLIError('`oclif.commandDiscovery.target` is required.')
-    }
-
-    return commandDiscovery
-  }
+  return commandDiscovery
 }
 
 type CommandExportModule = {
