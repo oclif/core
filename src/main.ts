@@ -51,7 +51,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const config = await Config.load(options ?? require.main?.filename ?? __dirname)
 
-  // If this is a single command CLI, then insert the '.' command into the argv array to serve as the command id.
+  // If this is a single command CLI, then insert the SINGLE_COMMAND_CLI_SYMBOL into the argv array to serve as the command id.
   if (config.isSingleCommandCLI) {
     argv = [SINGLE_COMMAND_CLI_SYMBOL, ...argv]
   }

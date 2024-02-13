@@ -64,7 +64,7 @@ function determineCommandDiscoveryOptions(
   if (!commandDiscovery) return
 
   if (typeof commandDiscovery === 'string' && defaultCmdId) {
-    return {globPatterns: GLOB_PATTERNS, strategy: 'single', target: commandDiscovery}
+    return {strategy: 'single', target: commandDiscovery}
   }
 
   if (typeof commandDiscovery === 'string') {
