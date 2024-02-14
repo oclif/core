@@ -153,38 +153,40 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      const commandCache = await this.loadCommandsFromTarget()
-      if (commandCache) {
-        const cmd = commandCache[id]
+      if (this.commandDiscoveryOpts?.strategy === 'pattern') {
+        const commandsDir = await this.getCommandsDir()
+        if (!commandsDir) return
+        let module
+        let isESM: boolean | undefined
+        let filePath: string | undefined
+        try {
+          ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
+            ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
+            : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          this._debug(isESM ? '(import)' : '(require)', filePath)
+        } catch (error: any) {
+          if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
+          throw error
+        }
+
+        const cmd = searchForCommandClass(module)
+        if (!cmd) return
+        cmd.id = id
+        cmd.plugin = this
+        cmd.isESM = isESM
+        cmd.relativePath = relative(this.root, filePath || '').split(sep)
+        return cmd
+      }
+
+      if (this.commandDiscoveryOpts?.strategy === 'single' || this.commandDiscoveryOpts?.strategy === 'explicit') {
+        const commandCache = await this.loadCommandsFromTarget()
+        const cmd = commandCache?.[id]
         if (!cmd) return
 
         cmd.id = id
         cmd.plugin = this
         return cmd
       }
-
-      const commandsDir = await this.getCommandsDir()
-      if (!commandsDir) return
-      let module
-      let isESM: boolean | undefined
-      let filePath: string | undefined
-      try {
-        ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
-          ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
-        this._debug(isESM ? '(import)' : '(require)', filePath)
-      } catch (error: any) {
-        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
-        throw error
-      }
-
-      const cmd = searchForCommandClass(module)
-      if (!cmd) return
-      cmd.id = id
-      cmd.plugin = this
-      cmd.isESM = isESM
-      cmd.relativePath = relative(this.root, filePath || '').split(sep)
-      return cmd
     }
 
     const cmd = await fetch()
@@ -308,13 +310,10 @@ export class Plugin implements IPlugin {
       )
         // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
         .filter((f): f is [string, Command.Cached] => Boolean(f))
-        .reduce(
-          (commands, [id, c]) => {
-            commands[id] = c
-            return commands
-          },
-          {} as {[k: string]: Command.Cached},
-        ),
+        .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
+          commands[id] = c
+          return commands
+        }, {}),
       version: this.version,
     }
     marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: false})
