@@ -388,7 +388,7 @@ export class Plugin implements IPlugin {
     return this.commandsDir
   }
 
-  private async loadCommandsFromTarget(): Promise<Record<string, Command.Class> | undefined> {
+  private async loadCommandsFromTarget(): Promise<CommandCache | undefined> {
     if (this.commandCache) return this.commandCache
 
     if (this.commandDiscoveryOpts?.strategy === 'explicit' && this.commandDiscoveryOpts.target) {
