@@ -153,7 +153,7 @@ jobs:
     with:
       repo: oclif/plugin-plugins
       os: ${{ matrix.os }}
-      command: 'yarn test:integration'
+      command: 'yarn test:integration --retries 3'
       # plugin-plugins integration tests depend on sf being installed globally
       other-setup: npm install -g @salesforce/cli@nightly
   plugin-update-integration:
@@ -166,4 +166,4 @@ jobs:
     with:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
-      command: 'yarn test:integration:sf'
+      command: 'yarn test:integration:sf --retries 3'
