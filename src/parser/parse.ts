@@ -642,7 +642,8 @@ export class Parser<
     }
   }
 
-  private findShortFlag([_, char]: string): string | undefined {
+  private findShortFlag(arg: string): string | undefined {
+    const char = arg.replace(/^-/, '')
     if (this.flagAliases[char]) {
       return this.flagAliases[char].name
     }
