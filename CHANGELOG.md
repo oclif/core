@@ -1,3 +1,12 @@
+## [3.19.2](https://github.com/oclif/core/compare/3.19.1...3.19.2) (2024-02-14)
+
+
+### Bug Fixes
+
+* allow long text in ux.prompt ([7d521b2](https://github.com/oclif/core/commit/7d521b2350e488bf5c1570f8f82bf7a582eea0d8))
+
+
+
 ## [3.19.1](https://github.com/oclif/core/compare/3.19.0...3.19.1) (2024-02-06)
 
 
