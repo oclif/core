@@ -1,13 +1,13 @@
 import {expect} from 'chai'
-import {resolve} from 'node:path'
+import {readFileSync} from 'node:fs'
+import {join, resolve} from 'node:path'
 import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
 import stripAnsi from 'strip-ansi'
 
-import {Interfaces, ux} from '../../src/index'
+import {ux} from '../../src/index'
 import {run} from '../../src/main'
-import {requireJson} from '../../src/util/fs'
 
-const pjson = requireJson<Interfaces.PJSON>(__dirname, '..', '..', 'package.json')
+const pjson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'))
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
 
 describe('main', () => {

@@ -2,10 +2,11 @@ import globby from 'globby'
 import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
+import Cache from '../cache'
 import {Command} from '../command'
 import {CLIError, error} from '../errors'
 import {Manifest} from '../interfaces/manifest'
-import {CommandDiscovery, PJSON} from '../interfaces/pjson'
+import {CommandDiscovery, HookOptions, PJSON} from '../interfaces/pjson'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
 import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
@@ -13,12 +14,12 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
-import {readJson, requireJson} from '../util/fs'
+import {readJson} from '../util/fs'
 import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-node'
 import {Debug, getCommandIdPermutations} from './util'
 
-const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const _pjson = Cache.getInstance().get('@oclif/core')
 
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
@@ -74,7 +75,17 @@ function determineCommandDiscoveryOptions(
   if (!commandDiscovery.target) throw new CLIError('`oclif.commandDiscovery.target` is required.')
   if (!commandDiscovery.strategy) throw new CLIError('`oclif.commandDiscovery.strategy` is required.')
 
+  if (commandDiscovery.strategy === 'explicit' && !commandDiscovery.identifier) {
+    commandDiscovery.identifier = 'default'
+  }
+
   return commandDiscovery
+}
+
+function determineHookOptions(hook: string | HookOptions): HookOptions {
+  if (typeof hook === 'string') return {identifier: 'default', target: hook}
+  if (!hook.identifier) return {...hook, identifier: 'default'}
+  return hook
 }
 
 /**
@@ -101,7 +112,7 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
-  hooks!: {[k: string]: string[]}
+  hooks!: {[key: string]: HookOptions[]}
 
   isRoot = false
 
@@ -224,7 +235,12 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
+    this.hooks = Object.fromEntries(
+      Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [
+        k,
+        castArray<string | HookOptions>(v).map((v) => determineHookOptions(v)),
+      ]),
+    )
 
     this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands, this.pjson.oclif?.default)
 
@@ -393,8 +409,8 @@ export class Plugin implements IPlugin {
 
     if (this.commandDiscoveryOpts?.strategy === 'explicit' && this.commandDiscoveryOpts.target) {
       const filePath = await tsPath(this.root, this.commandDiscoveryOpts.target, this)
-      const module = await load<{default?: CommandCache}>(this, filePath)
-      this.commandCache = module.default ?? {}
+      const module = await load<Record<string, CommandCache>>(this, filePath)
+      this.commandCache = module[this.commandDiscoveryOpts?.identifier ?? 'default'] ?? {}
       return this.commandCache
     }
 

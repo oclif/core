@@ -7,7 +7,14 @@
   "oclif": {
     "commands": {
       "strategy": "explicit",
-      "target": "./lib/commands.js"
+      "target": "./lib/index.js",
+      "identifier": "commands"
+    },
+    "hooks": {
+      "init": {
+        "target": "./lib/index.js",
+        "identifier": "initHook"
+      }
     },
     "topicSeparator": " ",
     "plugins": [

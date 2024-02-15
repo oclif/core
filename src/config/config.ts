@@ -17,7 +17,7 @@ import {Theme} from '../interfaces/theme'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
-import {requireJson, safeReadJson} from '../util/fs'
+import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import PluginLoader from './plugin-loader'
@@ -27,7 +27,7 @@ import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
-const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
 
 function channelFromVersion(version: string) {
@@ -554,12 +554,13 @@ export class Config implements IConfig {
         const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook, p))
+          const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook.target, p))
           debug('start', isESM ? '(import)' : '(require)', filePath)
 
+          const hookFn = module[hook.identifier] ?? search(module)
           const result = timeout
-            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this, context}))
-            : await search(module).call(context, {...(opts as any), config: this, context})
+            ? await withTimeout(timeout, hookFn.call(context, {...(opts as any), config: this, context}))
+            : await hookFn.call(context, {...(opts as any), config: this, context})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
@@ -585,7 +586,7 @@ export class Config implements IConfig {
 
         marker?.addDetails({
           event,
-          hook,
+          hook: hook.target,
           plugin: p.name,
         })
         marker?.stop()

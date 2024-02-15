@@ -18,9 +18,9 @@ export type CommandDiscovery = {
   /**
    * The strategy to use for loading commands.
    *
-   * - `pattern` will use glob patterns to find command files in the specified `directory`.
+   * - `pattern` will use glob patterns to find command files in the specified `target`.
    * - `explicit` will use `import` (or `require` for CJS) to load the commands from the
-   *    specified `file`.
+   *    specified `target`.
    * - `single` will use the `target` which should export a command class. This is for CLIs that
    *    only have a single command.
    *
@@ -30,9 +30,9 @@ export type CommandDiscovery = {
   /**
    * If the `strategy` is `pattern`, this is the **directory** to use to find command files.
    *
-   * If the `strategy` is `explicit`, this is the **file** that default exports the commands.
-   *   - This export must be the default export and an object with keys that are the command names
-   *     and values that are the command classes.
+   * If the `strategy` is `explicit`, this is the **file** that exports the commands.
+   *   - This export must be an object with keys that are the command names and values that are the command classes.
+   *   - Unless `identifier` is specified, the default export will be used.
    *
    * @example
    * ```typescript
@@ -52,6 +52,46 @@ export type CommandDiscovery = {
    * This is only used when `strategy` is `pattern`.
    */
   globPatterns?: string[]
+  /**
+   * The name of the export to used when loading the command object from the `target` file. Only
+   * used when `strategy` is `explicit`. Defaults to `default`.
+   *
+   * @example
+   * ```typescript
+   * // in src/commands.ts
+   * import Hello from './commands/hello/index.js'
+   * import HelloWorld from './commands/hello/world.js'
+   *
+   * export const MY_COMMANDS = {
+   *  hello: Hello,
+   * 'hello:world': HelloWorld,
+   * }
+   * ```
+   *
+   * In the package.json:
+   * ```json
+   * {
+   *  "oclif": {
+   *   "commands": {
+   *     "strategy": "explicit",
+   *     "target": "./dist/index.js",
+   *     "identifier": "MY_COMMANDS"
+   *    }
+   * }
+   * ```
+   */
+  identifier?: string
+}
+
+export type HookOptions = {
+  /**
+   * The file path containing hook.
+   */
+  target: string
+  /**
+   * The name of the export to use when loading the hook function from the `target` file. Defaults to `default`.
+   */
+  identifier: string
 }
 
 export namespace PJSON {
@@ -83,7 +123,7 @@ export namespace PJSON {
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions
-      hooks?: {[name: string]: string | string[]}
+      hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
       jitPlugins?: Record<string, string>
       macos?: {
         identifier?: string

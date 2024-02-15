@@ -19,8 +19,10 @@ describe('explicit command discovery strategy', () => {
   })
 
   it('should show help for commands', async () => {
-    await run(['--help', 'foo'], resolve(__dirname, 'fixtures/explicit-commands/package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
+    await run(['--help', 'foo'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
+    const [first, ...rest] = stdoutStub.args.map((a) => stripAnsi(a[0]))
+    expect(first).to.equal('example hook running --help\n')
+    expect(rest.join('')).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -34,12 +36,16 @@ COMMANDS
   })
 
   it('should run command', async () => {
-    await run(['foo:bar'], resolve(__dirname, 'fixtures/explicit-commands/package.json'))
-    expect(stdoutStub.firstCall.firstArg).to.equal('hello world!\n')
+    await run(['foo:bar'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
+    const [first, second] = stdoutStub.args.map((a) => stripAnsi(a[0]))
+    expect(first).to.equal('example hook running foo:bar\n')
+    expect(second).to.equal('hello world!\n')
   })
 
   it('should run alias', async () => {
-    await run(['foo:alias'], resolve(__dirname, 'fixtures/explicit-commands/package.json'))
-    expect(stdoutStub.firstCall.firstArg).to.equal('hello world!\n')
+    await run(['foo:alias'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
+    const [first, second] = stdoutStub.args.map((a) => stripAnsi(a[0]))
+    expect(first).to.equal('example hook running foo:alias\n')
+    expect(second).to.equal('hello world!\n')
   })
 })
