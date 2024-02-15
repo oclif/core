@@ -551,7 +551,7 @@ export class Config implements IConfig {
       const hooks = p.hooks[event] || []
 
       for (const hook of hooks) {
-        const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
+        const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook.target})`)
         try {
           /* eslint-disable no-await-in-loop */
           const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook.target, p))
