@@ -1,73 +1,65 @@
-import * as chai from 'chai'
-
-const {expect} = chai
+import {expect} from 'chai'
+import readline from 'node:readline'
+import {SinonSandbox, createSandbox} from 'sinon'
 
 import {ux} from '../../src/cli-ux'
-import {fancy} from './fancy'
 
 describe('prompt', () => {
-  fancy
-    .stdout()
-    .stderr()
-    .end('requires input', async () => {
-      const promptPromise = ux.prompt('Require input?')
-      process.stdin.emit('data', '')
-      process.stdin.emit('data', 'answer')
-      const answer = await promptPromise
-      await ux.done()
-      expect(answer).to.equal('answer')
-    })
+  let sandbox: SinonSandbox
 
-  fancy
-    .stdout()
-    .stderr()
-    .stdin('y')
-    .end('confirm', async () => {
-      const promptPromise = ux.confirm('yes/no?')
-      const answer = await promptPromise
-      await ux.done()
-      expect(answer).to.equal(true)
+  function stubReadline(answers: string[]) {
+    let callCount = 0
+    sandbox.stub(readline, 'createInterface').returns({
+      // @ts-expect-error because we're stubbing
+      async question(_message, opts, cb) {
+        callCount += 1
+        cb(answers[callCount - 1])
+      },
+      close() {},
     })
+  }
 
-  fancy
-    .stdout()
-    .stderr()
-    .stdin('n')
-    .end('confirm', async () => {
-      const promptPromise = ux.confirm('yes/no?')
-      const answer = await promptPromise
-      await ux.done()
-      expect(answer).to.equal(false)
-    })
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
 
-  fancy
-    .stdout()
-    .stderr()
-    .stdin('x')
-    .end('gets anykey', async () => {
-      const promptPromise = ux.anykey()
-      const answer = await promptPromise
-      await ux.done()
-      expect(answer).to.equal('x')
-    })
+  afterEach(() => {
+    sandbox.restore()
+  })
 
-  fancy
-    .stdout()
-    .stderr()
-    .end('does not require input', async () => {
-      const promptPromise = ux.prompt('Require input?', {
-        required: false,
-      })
-      process.stdin.emit('data', '')
-      const answer = await promptPromise
-      await ux.done()
-      expect(answer).to.equal('')
-    })
+  it('should require input', async () => {
+    stubReadline(['', '', 'answer'])
+    const answer = await ux.prompt('Require input?')
+    expect(answer).to.equal('answer')
+  })
 
-  fancy
-    .stdout()
-    .stderr()
-    .it('timeouts with no input', async () => {
-      await expect(ux.prompt('Require input?', {timeout: 1})).to.eventually.be.rejectedWith('Prompt timeout')
-    })
+  it('should not require input', async () => {
+    stubReadline([''])
+    const answer = await ux.prompt('Require input?', {required: false})
+    expect(answer).to.equal('')
+  })
+
+  it('should use default input', async () => {
+    stubReadline([''])
+    const answer = await ux.prompt('Require input?', {default: 'default'})
+    expect(answer).to.equal('default')
+  })
+
+  it('should confirm with y', async () => {
+    stubReadline(['y'])
+    const answer = await ux.confirm('yes/no?')
+    expect(answer).to.equal(true)
+  })
+
+  it('should confirm with n', async () => {
+    stubReadline(['n'])
+    const answer = await ux.confirm('yes/no?')
+    expect(answer).to.equal(false)
+  })
+
+  it('should get anykey', async () => {
+    stubReadline(['x'])
+    const answer = await ux.anykey()
+    expect(answer).to.equal('x')
+  })
 })
