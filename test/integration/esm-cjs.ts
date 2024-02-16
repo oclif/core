@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**
  * These integration tests do not use mocha because we encountered an issue with
  * spawning child processes for testing root ESM plugins with linked ESM plugins.
@@ -6,7 +7,7 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
-import {expect} from 'chai'
+import {Assertion, expect} from 'chai'
 import chalk from 'chalk'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
@@ -15,6 +16,52 @@ import {Executor, setup} from './util'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
+
+/**
+ * Deeply compare two objects to see if they are equal.
+ * It will return true even if oject keys are in different order.
+ */
+function deepCompare(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) return true
+
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false
+
+  const keys1 = Object.keys(obj1)
+  const keys2 = Object.keys(obj2)
+
+  if (keys1.length !== keys2.length) return false
+
+  for (const key of keys1) {
+    if (!keys2.includes(key)) return false
+
+    const val1 = obj1[key]
+    const val2 = obj2[key]
+
+    if (!deepCompare(val1, val2)) return false
+  }
+
+  return true
+}
+
+Assertion.addMethod('deepEqualAnyOrder', function (expected) {
+  const actual = this._obj
+  this.assert(
+    deepCompare(actual, expected),
+    'expected #{act} to deeply equal #{exp}',
+    'expected #{act} not to deeply equal #{exp}',
+    expected,
+    actual,
+  )
+})
+
+// Extend the Chai Assertion interface to include the new method
+declare global {
+  namespace Chai {
+    interface Assertion {
+      deepEqualAnyOrder(expected: any): Assertion
+    }
+  }
+}
 
 async function test(name: string, fn: () => Promise<void>) {
   try {
@@ -219,6 +266,15 @@ type PluginConfig = {
       hookText: 'Greetings! from plugin-test-core-v2 init hook',
       ...commonProps,
     },
+    esbuild: {
+      name: 'plugin-test-esbuild',
+      command: 'esbuild',
+      package: '@oclif/plugin-test-esbuild',
+      repo: 'https://github.com/oclif/plugin-test-esbuild',
+      commandText: 'hello I am a bundled (esbuild) plugin',
+      hookText: 'Greetings! from plugin-test-esbuild init hook',
+      ...commonProps,
+    },
   }
 
   async function installPlugin(options: InstallPluginOptions): Promise<void> {
@@ -275,7 +331,7 @@ type PluginConfig = {
       const split = result.stdout?.split('\n') ?? []
       const idx = split.findIndex((i) => i.startsWith('{'))
       const json = JSON.parse(split.slice(idx).join('\n'))
-      expect(json).to.deep.equal(options.expectJson)
+      expect(json).to.deepEqualAnyOrder(options.expectJson)
     }
   }
 
@@ -298,6 +354,7 @@ type PluginConfig = {
     precore: tests.includes('precore') && !skips.includes('precore'),
     coreV1: tests.includes('coreV1') && !skips.includes('coreV1'),
     coreV2: tests.includes('coreV2') && !skips.includes('coreV2'),
+    esbuild: tests.includes('esbuild') && !skips.includes('esbuild'),
   }
 
   console.log('Node version:', process.version)
@@ -305,6 +362,7 @@ type PluginConfig = {
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
+  let esbuildExecutor: Executor
 
   const cjsBefore = async () => {
     cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
@@ -327,6 +385,12 @@ type PluginConfig = {
   const coreV2Before = async () => {
     if (!cjsExecutor) await cjsBefore()
     if (!esmExecutor) await esmBefore()
+  }
+
+  const esbuildBefore = async () => {
+    if (!cjsExecutor) await cjsBefore()
+    if (!esmExecutor) await esmBefore()
+    esbuildExecutor = await setup(__filename, {repo: PLUGINS.esbuild.repo, subDir: 'esbuild'})
   }
 
   const installTest = async (plugin: PluginConfig, executor: Executor) => {
@@ -563,17 +627,37 @@ type PluginConfig = {
     })
   }
 
+  const esbuildTests = async () => {
+    await test('Install esbuild plugin to ESM root plugin', async () => {
+      await installTest(PLUGINS.esbuild, esmExecutor)
+    })
+
+    await test('Install esbuild plugin to CJS root plugin', async () => {
+      await installTest(PLUGINS.esbuild, cjsExecutor)
+    })
+
+    await test('Install ESM plugin to esbuild root plugin', async () => {
+      await installTest(PLUGINS.esm1, esbuildExecutor)
+    })
+
+    await test('Install CJS plugin to esbuild root plugin', async () => {
+      await installTest(PLUGINS.cjs1, esbuildExecutor)
+    })
+  }
+
   if (runTests.cjs) await cjsBefore()
   if (runTests.esm) await esmBefore()
   if (runTests.precore) await precoreBefore()
   if (runTests.coreV1) await coreV1Before()
   if (runTests.coreV2) await coreV2Before()
+  if (runTests.esbuild) await esbuildBefore()
 
   if (runTests.cjs) await cjsTests()
   if (runTests.esm) await esmTests()
   if (runTests.precore) await preCoreTests()
   if (runTests.coreV1) await coreV1Tests()
   if (runTests.coreV2) await coreV2Tests()
+  if (runTests.esbuild) await esbuildTests()
 
   exit()
 })()

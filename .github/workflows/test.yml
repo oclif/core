@@ -72,13 +72,13 @@ jobs:
           OCLIF_CORE_INTEGRATION_SKIP_SETUP: true
           OCLIF_CORE_INTEGRATION_TEST_DIR: D:\a\integration
           DEBUG: integration:*
-  esm-cjs-interop:
+  interoperability:
     needs: linux-unit-tests
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
-        test: [esm, cjs, precore, coreV1, coreV2]
+        test: [esm, cjs, precore, coreV1, coreV2, esbuild]
         exclude:
           - os: windows-latest
             node_version: lts/*
@@ -93,7 +93,7 @@ jobs:
           cache: yarn
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs --test=${{ matrix.test }}
+      - run: yarn test:interoperability --test=${{ matrix.test }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
@@ -138,6 +138,7 @@ jobs:
           - oclif/plugin-which
           - oclif/plugin-warn-if-update-available
           - oclif/plugin-version
+          - oclif/plugin-test-esbuild
     uses: ./.github/workflows/external-test.yml
     with:
       repo: ${{ matrix.repo }}
