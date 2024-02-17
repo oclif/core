@@ -726,10 +726,10 @@
     read-package-json-fast "^3.0.0"
     which "^4.0.0"
 
-"@oclif/core@^3.10.2", "@oclif/core@^3.18.1", "@oclif/core@^3.18.2":
-  version "3.19.1"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.19.1.tgz#18af989f4b086ba9b6dfac891fb27f8281664084"
-  integrity sha512-dd1h4Hz+LwpuYhKvgBjDmW3/HgUAm93JM95cnbzSv5VcmiBeC+utjLvY96PmPbYxxDoz7XazEOl8oOpSLSEgcg==
+"@oclif/core@^3.10.2", "@oclif/core@^3.18.1", "@oclif/core@^3.19.1":
+  version "3.19.2"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.19.2.tgz#1672061e7309f0048f9f9991607b303a9e5082fc"
+  integrity sha512-/kUZZQZO92esToSTn+fnfMQdAj8uDJ/lsMNXBRBCiLQpwnIskHXy8JzYpynxxkzY2wbGREBceQhxCyDV0XpY4g==
   dependencies:
     "@types/cli-progress" "^3.11.5"
     ansi-escapes "^4.3.2"
@@ -786,14 +786,14 @@
   resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.1.tgz#1def9f38134f9bfb229257f48a35f7d0d183dc78"
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
-"@oclif/test@^3.1.14":
-  version "3.1.14"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.1.14.tgz#19d768adc14eafc31eb83ca75eb9d210a4af1635"
-  integrity sha512-HzzK6Zwddx2HMeyDGBrD1Ky/OXvsR2uiRKsIA+p0n+HNhEUhb9J/xWQ+apql1G+a8UkUKMfaBbDeYQj9JF+6mQ==
+"@oclif/test@^3.1.16":
+  version "3.1.16"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.1.16.tgz#acb66688a0caf08b5089da3d8f05201e1cf75819"
+  integrity sha512-LeoojG2tD8XDN9HzEt1j+JUKSyYz7qGp55SfvnXCa8d7k4Hq9jTzTiubu+s2mE4Nq9Ns5X40NZNSm85COxbsqw==
   dependencies:
-    "@oclif/core" "^3.18.2"
+    "@oclif/core" "^3.19.1"
     chai "^4.4.1"
-    fancy-test "^3.0.9"
+    fancy-test "^3.0.10"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -2974,7 +2974,7 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-fancy-test@^3.0.1, fancy-test@^3.0.9:
+fancy-test@^3.0.1, fancy-test@^3.0.10:
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.10.tgz#341be69e6eb35fcf1be33c041bed978837502e84"
   integrity sha512-6pwRQ7gqW57FKoTyRPPmcZktHLvrX+LS5ZQdXvQTMAq6vOVGCUrtJ4WP2BD4sZisRBnasaT4981L/8Q+qfh3wg==
