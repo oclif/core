@@ -7,7 +7,7 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
-import {Assertion, expect} from 'chai'
+import {expect} from 'chai'
 import chalk from 'chalk'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
@@ -16,52 +16,6 @@ import {Executor, setup} from './util'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
-
-/**
- * Deeply compare two objects to see if they are equal.
- * It will return true even if oject keys are in different order.
- */
-function deepCompare(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) return true
-
-  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false
-
-  const keys1 = Object.keys(obj1)
-  const keys2 = Object.keys(obj2)
-
-  if (keys1.length !== keys2.length) return false
-
-  for (const key of keys1) {
-    if (!keys2.includes(key)) return false
-
-    const val1 = obj1[key]
-    const val2 = obj2[key]
-
-    if (!deepCompare(val1, val2)) return false
-  }
-
-  return true
-}
-
-Assertion.addMethod('deepEqualAnyOrder', function (expected) {
-  const actual = this._obj
-  this.assert(
-    deepCompare(actual, expected),
-    'expected #{act} to deeply equal #{exp}',
-    'expected #{act} not to deeply equal #{exp}',
-    expected,
-    actual,
-  )
-})
-
-// Extend the Chai Assertion interface to include the new method
-declare global {
-  namespace Chai {
-    interface Assertion {
-      deepEqualAnyOrder(expected: any): Assertion
-    }
-  }
-}
 
 async function test(name: string, fn: () => Promise<void>) {
   try {
@@ -331,7 +285,7 @@ type PluginConfig = {
       const split = result.stdout?.split('\n') ?? []
       const idx = split.findIndex((i) => i.startsWith('{'))
       const json = JSON.parse(split.slice(idx).join('\n'))
-      expect(json).to.deepEqualAnyOrder(options.expectJson)
+      expect(json).to.deep.equal(options.expectJson)
     }
   }
 
