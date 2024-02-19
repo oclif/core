@@ -1,3 +1,9 @@
+## [3.19.3](https://github.com/oclif/core/compare/3.19.2...3.19.3) (2024-02-19)
+
+### Bug Fixes
+
+- clear timeout when prompt times out ([#961](https://github.com/oclif/core/issues/961)) ([f5c698a](https://github.com/oclif/core/commit/f5c698af081d171f246fefc0d1509e4dd84d7e3a))
+
 ## [3.19.2](https://github.com/oclif/core/compare/3.19.1...3.19.2) (2024-02-14)
 
 ### Bug Fixes
