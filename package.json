@@ -61,7 +61,7 @@
     "benchmark": "^2.1.4",
     "chai": "^4.4.1",
     "chai-as-promised": "^7.1.1",
-    "commitlint": "^17.7.2",
+    "commitlint": "^17.8.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "eslint-config-oclif": "^5.0.0",
