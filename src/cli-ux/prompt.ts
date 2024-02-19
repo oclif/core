@@ -35,28 +35,31 @@ function normal(options: IPromptConfig, retries = 100): Promise<string> {
       input: process.stdin,
       output: process.stdout,
     })
+    let timeout: NodeJS.Timeout
+    if (options.timeout) {
+      timeout = setTimeout(() => ac.abort(), options.timeout)
+      signal.addEventListener(
+        'abort',
+        () => {
+          rl.close()
+          clearTimeout(timeout)
+          reject(new Error('Prompt timeout'))
+        },
+        {once: true},
+      )
+    }
 
     rl.question(options.prompt, {signal}, (answer) => {
       rl.close()
       const data = answer.trim()
       if (!options.default && options.required && data === '') {
+        clearTimeout(timeout)
         resolve(normal(options, retries - 1))
       } else {
+        clearTimeout(timeout)
         resolve(data || (options.default as string))
       }
     })
-
-    if (options.timeout) {
-      signal.addEventListener(
-        'abort',
-        () => {
-          reject(new Error('Prompt timeout'))
-        },
-        {once: true},
-      )
-
-      setTimeout(() => ac.abort(), options.timeout)
-    }
   })
 }
 
