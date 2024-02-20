@@ -1,7 +1,7 @@
 import {inspect} from 'node:util'
 
 import {castArray} from '../../util/util'
-import {Options} from './types'
+import {Options, StatusOptions} from './types'
 
 export interface ITask {
   action: string
@@ -93,6 +93,20 @@ export class ActionBase {
     }
 
     return ret
+  }
+
+  public setStatus(status: string, opts: StatusOptions = {}): void {
+    const {task} = this
+    if (!task) {
+      return
+    }
+
+    if (task.status === status) {
+      return
+    }
+
+    this._updateStatus(status, task.status, opts)
+    task.status = status
   }
 
   public start(action: string, status?: string, opts: Options = {}): void {
@@ -187,7 +201,7 @@ export class ActionBase {
     throw new Error('not implemented')
   }
 
-  protected _updateStatus(_: string | undefined, __?: string): void {
+  protected _updateStatus(_: string | undefined, __?: string, ___?: StatusOptions): void {
     // Not implemented
   }
 
