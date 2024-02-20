@@ -1,3 +1,83 @@
+## [3.19.3](https://github.com/oclif/core/compare/3.19.2...3.19.3) (2024-02-19)
+
+
+### Bug Fixes
+
+* clear timeout when prompt times out ([#961](https://github.com/oclif/core/issues/961)) ([f5c698a](https://github.com/oclif/core/commit/f5c698af081d171f246fefc0d1509e4dd84d7e3a))
+
+
+
+## [3.19.2](https://github.com/oclif/core/compare/3.19.1...3.19.2) (2024-02-14)
+
+
+### Bug Fixes
+
+* allow long text in ux.prompt ([7d521b2](https://github.com/oclif/core/commit/7d521b2350e488bf5c1570f8f82bf7a582eea0d8))
+
+
+
+## [3.19.1](https://github.com/oclif/core/compare/3.19.0...3.19.1) (2024-02-06)
+
+
+### Bug Fixes
+
+* **parser:** cache stdin value in global scope ([#935](https://github.com/oclif/core/issues/935)) ([c8bf886](https://github.com/oclif/core/commit/c8bf886c570ab4dc3b8a139be4a716d4e6a053af))
+
+
+
+# [3.19.0](https://github.com/oclif/core/compare/3.18.2...3.19.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* dont indent when no shor char ([03c597a](https://github.com/oclif/core/commit/03c597a851442be8785401680b89af295ed95e52))
+* merge default and user theme ([3798f4c](https://github.com/oclif/core/commit/3798f4cc4ec6165917b61c009ad7a044dc556b7a))
+* prefer user theme ([5eaed66](https://github.com/oclif/core/commit/5eaed66ead363e29c324ce171ef6ebe01e694ad9))
+* return undefined if no theme ([3cb3373](https://github.com/oclif/core/commit/3cb33734ff0a69e3d24f129ff210e8e52139002d))
+
+
+### Features
+
+* allow theme file to be configurable ([ab502b4](https://github.com/oclif/core/commit/ab502b4e151d854dacd6025fb1dd27bc94c2f154))
+
+
+
+## [3.18.2](https://github.com/oclif/core/compare/3.18.1...3.18.2) (2024-01-31)
+
+
+### Bug Fixes
+
+* update keywords ([#933](https://github.com/oclif/core/issues/933)) ([a733b58](https://github.com/oclif/core/commit/a733b5866933a2df489678d64d6e0ad037241756))
+
+
+
+## [3.18.1](https://github.com/oclif/core/compare/3.18.0...3.18.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* make @types/cli-progress a dependency ([#922](https://github.com/oclif/core/issues/922)) ([6528850](https://github.com/oclif/core/commit/6528850442e7c537d089f119f3f71299a1b54e5b))
+
+
+
+# [3.18.0](https://github.com/oclif/core/compare/3.17.0...3.18.0) (2024-01-09)
+
+
+### Features
+
+* no longer use tsconfck ([79c4028](https://github.com/oclif/core/commit/79c40280f5bb75fca271fabd921702347f54445a))
+
+
+
+# [3.17.0](https://github.com/oclif/core/compare/3.16.0...3.17.0) (2024-01-09)
+
+
+### Features
+
+* add node.options to pjson typings ([#919](https://github.com/oclif/core/issues/919)) ([42b113b](https://github.com/oclif/core/commit/42b113b1d462267150deff7568d2974efba7e0f6)), closes [oclif/oclif#1238](https://github.com/oclif/oclif/issues/1238)
+
+
+
 # [3.16.0](https://github.com/oclif/core/compare/3.15.1...3.16.0) (2024-01-02)
 
 

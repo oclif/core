@@ -1,0 +1,7 @@
+{
+  "name": "tsconfig-tests",
+  "dependencies": {
+    "@salesforce/dev-config": "4.1.0",
+    "@tsconfig/strictest": "2.0.2"
+  }
+}

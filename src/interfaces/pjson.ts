@@ -43,15 +43,11 @@ export namespace PJSON {
         identifier?: string
         sign?: string
       }
-      windows?: {
-        homepage?: string
-        keypath?: string
-        name?: string
-      }
       plugins?: string[]
       repositoryPrefix?: string
       schema?: number
       state?: 'beta' | 'deprecated' | string
+      theme?: string
       topicSeparator?: ' ' | ':'
       topics?: {
         [k: string]: {
@@ -68,8 +64,14 @@ export namespace PJSON {
         node: {
           targets?: string[]
           version?: string
+          options?: string | string[]
         }
         s3: S3
+      }
+      windows?: {
+        homepage?: string
+        keypath?: string
+        name?: string
       }
     }
     version: string

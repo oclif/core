@@ -7,7 +7,7 @@ import {basename, dirname, join, resolve} from 'node:path'
 
 import {Interfaces} from '../../src'
 
-const debug = require('debug')('e2e')
+const debug = require('debug')('integration')
 
 export type ExecError = ExecException & {stderr: string; stdout: string}
 
@@ -122,12 +122,12 @@ export class Executor {
  * Builds the package
  *
  * Environment Variables
- * - OCLIF_CORE_E2E_TEST_DIR: the directory that you want the setup to happen in
- * - OCLIF_CORE_E2E_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
+ * - OCLIF_CORE_INTEGRATION_TEST_DIR: the directory that you want the setup to happen in
+ * - OCLIF_CORE_INTEGRATION_SKIP_SETUP: skip all the setup steps (useful if iterating on tests)
  */
 export async function setup(testFile: string, options: SetupOptions): Promise<Executor> {
   const testFileName = basename(testFile)
-  const dir = process.env.OCLIF_CORE_E2E_TEST_DIR || tmpdir()
+  const dir = process.env.OCLIF_CORE_INTEGRATION_TEST_DIR || tmpdir()
   const testDir = options.subDir ? join(dir, testFileName, options.subDir) : join(dir, testFileName)
 
   const name = options.repo.slice(options.repo.lastIndexOf('/') + 1)
@@ -136,8 +136,8 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
 
   executor.debug('plugin directory:', pluginDir)
 
-  if (process.env.OCLIF_CORE_E2E_SKIP_SETUP === 'true') {
-    console.log(chalk.yellow.bold('OCLIF_CORE_E2E_SKIP_SETUP is true. Skipping test setup...'))
+  if (process.env.OCLIF_CORE_INTEGRATION_SKIP_SETUP === 'true') {
+    console.log(chalk.yellow.bold('OCLIF_CORE_INTEGRATION_SKIP_SETUP is true. Skipping test setup...'))
     return executor
   }
 

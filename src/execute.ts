@@ -13,23 +13,17 @@ import {settings} from './settings'
  * @example For ESM dev.js
  * ```
  * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning
- * async function main() {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({development: true, dir: import.meta.url})
- * }
+ * import { execute } from '@oclif/core'
  *
- * await main()
+ * await execute({development: true, dir: import.meta.url})
  * ```
  *
  * @example For ESM run.js
  * ```
  * #!/usr/bin/env node
- * async function main() {
- *   const oclif = await import('@oclif/core')
- *   await oclif.execute({dir: import.meta.url})
- * }
+ * import { execute } from '@oclif/core'
  *
- * await main()
+ * await execute({dir: import.meta.url})
  * ```
  *
  * @example For CJS dev.js

@@ -5,13 +5,14 @@ import Cache from '../cache'
 import {memoizedWarn} from '../errors'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
-import {existsSync, readTSConfig} from '../util/fs'
+import {existsSync} from '../util/fs'
+import {readTSConfig} from '../util/read-tsconfig'
 import {isProd} from '../util/util'
 import {Debug} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug('ts-node')
 
-export const TS_CONFIGS: Record<string, TSConfig> = {}
+export const TS_CONFIGS: Record<string, TSConfig | undefined> = {}
 const REGISTERED = new Set<string>()
 
 function isErrno(error: any): error is NodeJS.ErrnoException {
@@ -22,7 +23,7 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
 
-    TS_CONFIGS[root] = await readTSConfig(join(root, 'tsconfig.json'))
+    TS_CONFIGS[root] = await readTSConfig(root)
 
     return TS_CONFIGS[root]
   } catch (error) {

@@ -5,7 +5,7 @@ import * as tsNode from 'ts-node'
 
 import * as configTsNode from '../../src/config/ts-node'
 import {Interfaces, settings} from '../../src/index'
-import * as util from '../../src/util/fs'
+import * as util from '../../src/util/read-tsconfig'
 
 const root = resolve(__dirname, 'fixtures/typescript')
 const tsSource = 'src/hooks/init.ts'
@@ -77,7 +77,7 @@ describe('tsPath', () => {
   })
 
   it('should resolve .js with no rootDir and outDir', async () => {
-    sandbox.stub(util, 'readTSConfig').resolves({compilerOptions: {strict: true}})
+    sandbox.stub(util, 'readTSConfig').resolves({compilerOptions: {sourceMap: true}})
     const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
   })
