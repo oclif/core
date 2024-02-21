@@ -25,14 +25,10 @@ export type Settings = {
    */
   performanceEnabled?: boolean
   /**
-   * Try to use ts-node to load typescript source files instead of
-   * javascript files.
+   * Try to use ts-node to load typescript source files instead of javascript files.
+   * Defaults to true in development and test environments (e.g. using bin/dev.js or
+   * NODE_ENV=development or NODE_ENV=test).
    *
-   * NOTE: This requires registering ts-node first.
-   * require('ts-node').register();
-   *
-   * Environment Variable:
-   *   NODE_ENV=development
    */
   tsnodeEnabled?: boolean
 }

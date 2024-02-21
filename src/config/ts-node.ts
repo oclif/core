@@ -10,10 +10,49 @@ import {readTSConfig} from '../util/read-tsconfig'
 import {isProd} from '../util/util'
 import {Debug} from './util'
 // eslint-disable-next-line new-cap
-const debug = Debug('ts-node')
+const debug = Debug('ts-path')
 
 export const TS_CONFIGS: Record<string, TSConfig | undefined> = {}
 const REGISTERED = new Set<string>()
+
+function determineRuntime(): 'node' | 'bun' | 'ts-node' | 'tsx' {
+  /**
+   * Examples:
+   * #!/usr/bin/env bun
+   * bun bin/run.js
+   * bun bin/dev.js
+   */
+  if (process.execPath.split(sep).includes('bun')) return 'bun'
+  /**
+   * Examples:
+   * #!/usr/bin/env node
+   * #!/usr/bin/env node --loader ts-node/esm --experimental-specifier-resolution=node --no-warnings
+   * node bin/run.js
+   * node bin/dev.js
+   */
+  if (process.execArgv.length === 0) return 'node'
+  /**
+   * Examples:
+   * #!/usr/bin/env ts-node
+   * #!/usr/bin/env node_modules/.bin/ts-node
+   * ts-node bin/run.js
+   * ts-node bin/dev.js
+   */
+  if (process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes('ts-node')) return 'ts-node'
+  if (process.execArgv[0].split(sep).includes('ts-node')) return 'ts-node'
+  /**
+   * Examples:
+   * #!/usr/bin/env tsx
+   * #!/usr/bin/env node_modules/.bin/tsx
+   * tsx bin/run.js
+   * tsx bin/dev.js
+   */
+  if (process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes('tsx')) return 'tsx'
+
+  return 'node'
+}
+
+const RUN_TIME = determineRuntime()
 
 function isErrno(error: any): error is NodeJS.ErrnoException {
   return 'code' in error && error.code === 'ENOENT'
@@ -29,7 +68,7 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   } catch (error) {
     if (isErrno(error)) return
 
-    debug(`Could not parse tsconfig.json. Skipping ts-node registration for ${root}.`)
+    debug(`Could not parse tsconfig.json. Skipping typescript path lookup for ${root}.`)
     memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
 }
@@ -38,21 +77,6 @@ async function registerTSNode(root: string): Promise<TSConfig | undefined> {
   const tsconfig = await loadTSConfig(root)
   if (!tsconfig) return
   if (REGISTERED.has(root)) return tsconfig
-
-  debug('registering ts-node at', root)
-  const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
-  debug('ts-node path:', tsNodePath)
-  let tsNode: typeof TSNode
-
-  try {
-    tsNode = require(tsNodePath)
-  } catch {
-    debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
-    memoizedWarn(
-      `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
-    )
-    return
-  }
 
   const typeRoots = [join(root, 'node_modules', '@types')]
 
@@ -70,31 +94,52 @@ async function registerTSNode(root: string): Promise<TSConfig | undefined> {
     rootDirs.push(join(root, 'src'))
   }
 
-  // Because we need to provide a modified `rootDirs` to ts-node, we need to
-  // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
-  // don't conflict.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
-  const conf: TSNode.RegisterOptions = {
-    compilerOptions: {
-      ...rest,
-      rootDirs,
-      typeRoots,
-    },
-    ...tsconfig['ts-node'],
-    cwd: root,
-    esm: tsconfig['ts-node']?.esm ?? true,
-    experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
-    scope: true,
-    scopeDir: root,
-    skipProject: true,
-    transpileOnly: true,
+  debug('tsconfig: %O', tsconfig)
+
+  if (RUN_TIME === 'tsx' || RUN_TIME === 'bun') {
+    debug(`Skipping ts-node registration for ${root} because the runtime is: ${RUN_TIME}`)
+  } else {
+    debug('registering ts-node at', root)
+    const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
+    debug('ts-node path:', tsNodePath)
+    let tsNode: typeof TSNode
+
+    try {
+      tsNode = require(tsNodePath)
+    } catch {
+      debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
+      memoizedWarn(
+        `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
+      )
+      return
+    }
+
+    // Because we need to provide a modified `rootDirs` to ts-node, we need to
+    // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
+    // don't conflict.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
+    const conf: TSNode.RegisterOptions = {
+      compilerOptions: {
+        ...rest,
+        rootDirs,
+        typeRoots,
+      },
+      ...tsconfig['ts-node'],
+      cwd: root,
+      esm: tsconfig['ts-node']?.esm ?? true,
+      experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
+      scope: true,
+      scopeDir: root,
+      skipProject: true,
+      transpileOnly: true,
+    }
+
+    debug('ts-node options: %O', conf)
+    tsNode.register(conf)
   }
 
-  tsNode.register(conf)
   REGISTERED.add(root)
-  debug('tsconfig: %O', tsconfig)
-  debug('ts-node options: %O', conf)
 
   return tsconfig
 }
@@ -132,8 +177,7 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
   if (plugin?.moduleType !== 'module' || isProduction) return false
 
   const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
-  const tsNodeExecIsUsed = process.execArgv[0] === '--require' && process.execArgv[1].split(sep).includes(`ts-node`)
-  return tsNodeExecIsUsed && nodeMajor >= 20
+  return RUN_TIME === 'ts-node' && nodeMajor >= 20
 }
 
 /**
@@ -198,7 +242,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
   // NOTE: The order of these checks matter!
 
   if (settings.tsnodeEnabled === false) {
-    debug(`Skipping ts-node registration for ${root} because tsNodeEnabled is explicitly set to false`)
+    debug(`Skipping typescript path lookup for ${root} because tsNodeEnabled is explicitly set to false`)
     return orig
   }
 
@@ -206,13 +250,13 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
 
   // Do not skip ts-node registration if the plugin is linked
   if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
-    debug(`Skipping ts-node registration for ${root} because NODE_ENV is NOT "test" or "development"`)
+    debug(`Skipping typescript path lookup for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }
 
   if (cannotTranspileEsm(rootPlugin, plugin, isProduction)) {
     debug(
-      `Skipping ts-node registration for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
+      `Skipping typescript path lookup for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
     )
     if (plugin?.type === 'link')
       memoizedWarn(
@@ -222,7 +266,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
   }
 
   if (cannotUseTsNode(root, plugin, isProduction)) {
-    debug(`Skipping ts-node registration for ${root} because ts-node is run in node version ${process.version}"`)
+    debug(`Skipping typescript path lookup for ${root} because ts-node is run in node version ${process.version}"`)
     memoizedWarn(
       `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
     )
