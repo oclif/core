@@ -62,8 +62,10 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   try {
     if (TS_CONFIGS[root]) return TS_CONFIGS[root]
 
-    TS_CONFIGS[root] = await readTSConfig(root)
-
+    const tsconfig = await readTSConfig(root)
+    if (!tsconfig) return
+    debug('tsconfig: %O', tsconfig)
+    TS_CONFIGS[root] = tsconfig
     return TS_CONFIGS[root]
   } catch (error) {
     if (isErrno(error)) return
@@ -73,10 +75,23 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   }
 }
 
-async function registerTSNode(root: string): Promise<TSConfig | undefined> {
-  const tsconfig = await loadTSConfig(root)
-  if (!tsconfig) return
-  if (REGISTERED.has(root)) return tsconfig
+async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
+  if (REGISTERED.has(root)) return
+
+  debug('registering ts-node at', root)
+  const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
+  debug('ts-node path:', tsNodePath)
+  let tsNode: typeof TSNode
+
+  try {
+    tsNode = require(tsNodePath)
+  } catch {
+    debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
+    memoizedWarn(
+      `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
+    )
+    return
+  }
 
   const typeRoots = [join(root, 'node_modules', '@types')]
 
@@ -94,54 +109,30 @@ async function registerTSNode(root: string): Promise<TSConfig | undefined> {
     rootDirs.push(join(root, 'src'))
   }
 
-  debug('tsconfig: %O', tsconfig)
-
-  if (RUN_TIME === 'tsx' || RUN_TIME === 'bun') {
-    debug(`Skipping ts-node registration for ${root} because the runtime is: ${RUN_TIME}`)
-  } else {
-    debug('registering ts-node at', root)
-    const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
-    debug('ts-node path:', tsNodePath)
-    let tsNode: typeof TSNode
-
-    try {
-      tsNode = require(tsNodePath)
-    } catch {
-      debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
-      memoizedWarn(
-        `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
-      )
-      return
-    }
-
-    // Because we need to provide a modified `rootDirs` to ts-node, we need to
-    // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
-    // don't conflict.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
-    const conf: TSNode.RegisterOptions = {
-      compilerOptions: {
-        ...rest,
-        rootDirs,
-        typeRoots,
-      },
-      ...tsconfig['ts-node'],
-      cwd: root,
-      esm: tsconfig['ts-node']?.esm ?? true,
-      experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
-      scope: true,
-      scopeDir: root,
-      skipProject: true,
-      transpileOnly: true,
-    }
-
-    debug('ts-node options: %O', conf)
-    tsNode.register(conf)
+  // Because we need to provide a modified `rootDirs` to ts-node, we need to
+  // remove `baseUrl` and `rootDir` from `compilerOptions` so that they
+  // don't conflict.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {baseUrl, rootDir, ...rest} = tsconfig.compilerOptions
+  const conf: TSNode.RegisterOptions = {
+    compilerOptions: {
+      ...rest,
+      rootDirs,
+      typeRoots,
+    },
+    ...tsconfig['ts-node'],
+    cwd: root,
+    esm: tsconfig['ts-node']?.esm ?? true,
+    experimentalSpecifierResolution: tsconfig['ts-node']?.experimentalSpecifierResolution ?? 'explicit',
+    scope: true,
+    scopeDir: root,
+    skipProject: true,
+    transpileOnly: true,
   }
 
+  debug('ts-node options: %O', conf)
+  tsNode.register(conf)
   REGISTERED.add(root)
-
-  return tsconfig
 }
 
 /**
@@ -184,10 +175,17 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
  * Determine the path to the source file from the compiled ./lib files
  */
 async function determinePath(root: string, orig: string): Promise<string> {
-  const tsconfig = await registerTSNode(root)
+  const tsconfig = await loadTSConfig(root)
   if (!tsconfig) return orig
 
-  debug(`determining path for ${orig}`)
+  debug(`Determining path for ${orig}`)
+
+  if (RUN_TIME === 'tsx' || RUN_TIME === 'bun') {
+    debug(`Skipping ts-node registration for ${root} because the runtime is: ${RUN_TIME}`)
+  } else {
+    await registerTSNode(root, tsconfig)
+  }
+
   const {baseUrl, outDir, rootDir, rootDirs} = tsconfig.compilerOptions
   const rootDirPath = rootDir ?? (rootDirs ?? [])[0] ?? baseUrl
   if (!rootDirPath) {
