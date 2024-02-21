@@ -239,15 +239,17 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
 
   // NOTE: The order of these checks matter!
 
-  if (settings.tsnodeEnabled === false) {
-    debug(`Skipping typescript path lookup for ${root} because tsNodeEnabled is explicitly set to false`)
+  const enableAutoTranspile = settings.enableAutoTranspile ?? settings.tsnodeEnabled
+
+  if (enableAutoTranspile === false) {
+    debug(`Skipping typescript path lookup for ${root} because enableAutoTranspile is explicitly set to false`)
     return orig
   }
 
   const isProduction = isProd()
 
   // Do not skip ts-node registration if the plugin is linked
-  if (settings.tsnodeEnabled === undefined && isProduction && plugin?.type !== 'link') {
+  if (enableAutoTranspile === undefined && isProduction && plugin?.type !== 'link') {
     debug(`Skipping typescript path lookup for ${root} because NODE_ENV is NOT "test" or "development"`)
     return orig
   }

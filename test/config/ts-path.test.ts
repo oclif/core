@@ -84,7 +84,7 @@ describe('tsPath', () => {
 
   it('should resolve to .ts file if enabled and prod', async () => {
     sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
-    settings.tsnodeEnabled = true
+    settings.enableAutoTranspile = true
     const originalNodeEnv = process.env.NODE_ENV
     delete process.env.NODE_ENV
 
@@ -92,15 +92,15 @@ describe('tsPath', () => {
     expect(result).to.equal(join(root, tsModule))
 
     process.env.NODE_ENV = originalNodeEnv
-    delete settings.tsnodeEnabled
+    delete settings.enableAutoTranspile
   })
 
   it('should resolve to js if disabled', async () => {
     sandbox.stub(util, 'readTSConfig').resolves(DEFAULT_TS_CONFIG)
-    settings.tsnodeEnabled = false
+    settings.enableAutoTranspile = false
     const result = await configTsNode.tsPath(root, jsCompiled)
     expect(result).to.equal(join(root, jsCompiled))
 
-    delete settings.tsnodeEnabled
+    delete settings.enableAutoTranspile
   })
 })
