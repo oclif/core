@@ -1,3 +1,9 @@
+## [3.19.4](https://github.com/oclif/core/compare/3.19.3...3.19.4) (2024-02-21)
+
+### Bug Fixes
+
+- **deps:** bump ip from 2.0.0 to 2.0.1 ([c2dcb43](https://github.com/oclif/core/commit/c2dcb4371a0468367677f0b575aad067e75c5136))
+
 ## [3.19.3](https://github.com/oclif/core/compare/3.19.2...3.19.3) (2024-02-19)
 
 ### Bug Fixes
