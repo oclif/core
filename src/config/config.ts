@@ -21,7 +21,7 @@ import {requireJson, safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import PluginLoader from './plugin-loader'
-import {tsPath} from './ts-node'
+import {tsPath} from './ts-path'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 
 // eslint-disable-next-line new-cap

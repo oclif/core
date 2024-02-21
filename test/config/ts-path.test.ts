@@ -3,7 +3,7 @@ import {join, resolve} from 'node:path'
 import {SinonSandbox, createSandbox} from 'sinon'
 import * as tsNode from 'ts-node'
 
-import * as configTsNode from '../../src/config/ts-node'
+import * as configTsNode from '../../src/config/ts-path'
 import {Interfaces, settings} from '../../src/index'
 import * as util from '../../src/util/read-tsconfig'
 
