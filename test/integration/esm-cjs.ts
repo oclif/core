@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**
  * These integration tests do not use mocha because we encountered an issue with
  * spawning child processes for testing root ESM plugins with linked ESM plugins.
@@ -11,7 +12,7 @@ import chalk from 'chalk'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import {Executor, setup} from './util'
+import {Executor, Script, setup} from './util'
 
 const FAILED: string[] = []
 const PASSED: string[] = []
@@ -53,8 +54,6 @@ type Plugin = {
   package: string
   repo: string
 }
-
-type Script = 'run' | 'dev'
 
 type InstallPluginOptions = {
   executor: Executor
@@ -288,6 +287,9 @@ type PluginConfig = {
   const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
   const providedSkips = args.find((arg) => arg.startsWith('--skip='))
   const providedTests = args.find((arg) => arg.startsWith('--test=')) ?? '=cjs,esm,precore,coreV1,coreV2'
+  const devRunTime = (args.find((arg) => arg.startsWith('--dev-runtime='))?.replace('--dev-runtime=', '') ??
+    'default') as 'default' | 'bun' | 'tsx'
+  const devExecutable = (devRunTime === 'default' ? 'dev' : `${devRunTime} dev`) as 'dev' | 'bun dev' | 'tsx dev'
 
   const skips = providedSkips ? providedSkips.split('=')[1].split(',') : []
   const tests = providedTests ? providedTests.split('=')[1].split(',') : []
@@ -370,7 +372,7 @@ type PluginConfig = {
     await runCommand({
       executor,
       plugin,
-      script: 'dev',
+      script: devExecutable,
       expectStrings: [plugin.commandText],
     })
 
@@ -401,7 +403,7 @@ type PluginConfig = {
     await runCommand({
       executor,
       plugin,
-      script: 'dev',
+      script: devExecutable,
       expectStrings: ['cheers', plugin.hookText],
     })
 
@@ -440,7 +442,7 @@ type PluginConfig = {
       await runCommand({
         executor: cjsExecutor,
         plugin,
-        script: 'dev',
+        script: devExecutable,
         expectStrings: [plugin.commandText, plugin.hookText],
       })
 

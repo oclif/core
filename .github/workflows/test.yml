@@ -79,9 +79,26 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
         test: [esm, cjs, precore, coreV1, coreV2]
+        dev_runtime: [default, bun, tsx]
         exclude:
           - os: windows-latest
             node_version: lts/*
+          - os: windows-latest
+            dev_runtime: tsx
+          - os: windows-latest
+            dev_runtime: bun
+          - test: precore
+            dev_runtime: tsx
+          - test: precore
+            dev_runtime: bun
+          - test: coreV1
+            dev_runtime: tsx
+          - test: coreV1
+            dev_runtime: bun
+          - test: coreV2
+            dev_runtime: tsx
+          - test: coreV2
+            dev_runtime: bun
       fail-fast: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 75
@@ -91,9 +108,13 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
+      - if: matrix.dev_runtime == 'bun'
+        uses: oven-sh/setup-bun@v1
+      - if: matrix.dev_runtime == 'tsx'
+        run: 'npm install -g tsx'
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs --test=${{ matrix.test }}
+      - run: yarn test:esm-cjs --test=${{ matrix.test }} --dev-runtime=${{ matrix.dev_runtime }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
