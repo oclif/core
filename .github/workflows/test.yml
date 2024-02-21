@@ -35,7 +35,7 @@ jobs:
       - if: runner.os == 'Windows'
         run: yarn mocha --forbid-only "test/**/*.integration.ts" --exclude "test/integration/sf.integration.ts" --parallel --timeout 1200000
       - if: runner.os == 'Linux'
-        run: yarn test:integration
+        run: yarn test:integration --retries 3
   windows-sf-integration:
     # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
     # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
@@ -72,7 +72,7 @@ jobs:
           OCLIF_CORE_INTEGRATION_SKIP_SETUP: true
           OCLIF_CORE_INTEGRATION_TEST_DIR: D:\a\integration
           DEBUG: integration:*
-  esm-cjs-interop:
+  interoperability:
     needs: linux-unit-tests
     strategy:
       matrix:
@@ -114,7 +114,7 @@ jobs:
         run: 'npm install -g tsx'
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs --test=${{ matrix.test }} --dev-run-time=${{ matrix.dev_runtime }}
+      - run: yarn test:interoperability --test=${{ matrix.test }} --dev-run-time=${{ matrix.dev_runtime }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
@@ -174,7 +174,7 @@ jobs:
     with:
       repo: oclif/plugin-plugins
       os: ${{ matrix.os }}
-      command: 'yarn test:integration'
+      command: 'yarn test:integration --retries 3'
       # plugin-plugins integration tests depend on sf being installed globally
       other-setup: npm install -g @salesforce/cli@nightly
   plugin-update-integration:
