@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /**
  * These integration tests do not use mocha because we encountered an issue with
  * spawning child processes for testing root ESM plugins with linked ESM plugins.
@@ -9,44 +8,14 @@
  */
 import {expect} from 'chai'
 import chalk from 'chalk'
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
+import {Command, Flags, flush, handle} from '../../src'
 import {Executor, Script, setup} from './util'
 
-const FAILED: string[] = []
-const PASSED: string[] = []
-
-async function test(name: string, fn: () => Promise<void>) {
-  try {
-    await fn()
-    PASSED.push(name)
-    console.log(chalk.green('✓'), name)
-  } catch (error) {
-    FAILED.push(name)
-    console.log(chalk.red('𐄂'), name)
-    console.log(error)
-  }
-}
-
-function exit(): never {
-  console.log()
-  console.log(chalk.bold('#### Summary ####'))
-
-  for (const name of PASSED) {
-    console.log(chalk.green('✓'), name)
-  }
-
-  for (const name of FAILED) {
-    console.log(chalk.red('𐄂'), name)
-  }
-
-  console.log(`${chalk.green('Passed:')} ${PASSED.length}`)
-  console.log(`${chalk.red('Failed:')} ${FAILED.length}`)
-
-  // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
-  process.exit(FAILED.length)
-}
+const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2'] as const
+const DEV_RUN_TIMES = ['default', 'bun', 'tsx'] as const
 
 type Plugin = {
   name: string
@@ -110,8 +79,16 @@ type PluginConfig = {
   }
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
-;(async () => {
+async function testRunner({
+  tests,
+  devRunTime,
+}: {
+  tests: Array<(typeof TESTS)[number]>
+  devRunTime: (typeof DEV_RUN_TIMES)[number]
+}): Promise<{failed: string[]; passed: string[]}> {
+  const failed: string[] = []
+  const passed: string[] = []
+
   const commonProps = {
     expectJson: {
       whenProvided: {
@@ -220,6 +197,18 @@ type PluginConfig = {
     },
   }
 
+  async function test(name: string, fn: () => Promise<void>) {
+    try {
+      await fn()
+      passed.push(name)
+      console.log(chalk.green('✓'), name)
+    } catch (error) {
+      failed.push(name)
+      console.log(chalk.red('𐄂'), name)
+      console.log(error)
+    }
+  }
+
   async function installPlugin(options: InstallPluginOptions): Promise<void> {
     const result = await options.executor.executeCommand(`plugins:install ${options.plugin.package}`, options.script)
     expect(result.code).to.equal(0)
@@ -284,26 +273,7 @@ type PluginConfig = {
     expect(stdout).to.not.include(options.plugin.package)
   }
 
-  const args = process.argv.slice(process.argv.indexOf(__filename) + 1)
-  const providedSkips = args.find((arg) => arg.startsWith('--skip='))
-  const providedTests = args.find((arg) => arg.startsWith('--test=')) ?? '=cjs,esm,precore,coreV1,coreV2'
-  const devRunTime = (args.find((arg) => arg.startsWith('--dev-runtime='))?.replace('--dev-runtime=', '') ??
-    'default') as 'default' | 'bun' | 'tsx'
   const devExecutable = (devRunTime === 'default' ? 'dev' : `${devRunTime} dev`) as 'dev' | 'bun dev' | 'tsx dev'
-
-  const skips = providedSkips ? providedSkips.split('=')[1].split(',') : []
-  const tests = providedTests ? providedTests.split('=')[1].split(',') : []
-
-  const runTests = {
-    esm: tests.includes('esm') && !skips.includes('esm'),
-    cjs: tests.includes('cjs') && !skips.includes('cjs'),
-    precore: tests.includes('precore') && !skips.includes('precore'),
-    coreV1: tests.includes('coreV1') && !skips.includes('coreV1'),
-    coreV2: tests.includes('coreV2') && !skips.includes('coreV2'),
-  }
-
-  console.log('Node version:', process.version)
-  console.log('Running tests:', runTests)
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
@@ -565,17 +535,68 @@ type PluginConfig = {
     })
   }
 
-  if (runTests.cjs) await cjsBefore()
-  if (runTests.esm) await esmBefore()
-  if (runTests.precore) await precoreBefore()
-  if (runTests.coreV1) await coreV1Before()
-  if (runTests.coreV2) await coreV2Before()
+  if (tests.includes('cjs')) await cjsBefore()
+  if (tests.includes('esm')) await esmBefore()
+  if (tests.includes('precore')) await precoreBefore()
+  if (tests.includes('coreV1')) await coreV1Before()
+  if (tests.includes('coreV2')) await coreV2Before()
 
-  if (runTests.cjs) await cjsTests()
-  if (runTests.esm) await esmTests()
-  if (runTests.precore) await preCoreTests()
-  if (runTests.coreV1) await coreV1Tests()
-  if (runTests.coreV2) await coreV2Tests()
+  if (tests.includes('cjs')) await cjsTests()
+  if (tests.includes('esm')) await esmTests()
+  if (tests.includes('precore')) await preCoreTests()
+  if (tests.includes('coreV1')) await coreV1Tests()
+  if (tests.includes('coreV2')) await coreV2Tests()
 
-  exit()
+  return {passed, failed}
+}
+
+class InteropTest extends Command {
+  static description = 'Execute interoperability tests'
+  static flags = {
+    test: Flags.option({
+      description: 'Run a specific test',
+      options: TESTS,
+      required: true,
+      multiple: true,
+    })(),
+    'dev-run-time': Flags.option({
+      description: 'Set the dev runtime to use when executing bin/dev.js',
+      options: DEV_RUN_TIMES,
+      default: 'default',
+    })(),
+  }
+
+  public async run(): Promise<void> {
+    const {flags} = await this.parse(InteropTest)
+
+    this.log('Node version:', process.version)
+    this.log('Running tests:', flags.test.join(', '))
+    this.log('Dev runtime:', flags['dev-run-time'])
+
+    const results = await testRunner({tests: flags.test, devRunTime: flags['dev-run-time']})
+
+    this.processResults(results)
+  }
+
+  private processResults({failed, passed}: {failed: string[]; passed: string[]}): never {
+    this.log()
+    this.log(chalk.bold('#### Summary ####'))
+
+    for (const name of passed) this.log(chalk.green('✓'), name)
+
+    for (const name of failed) this.log(chalk.red('𐄂'), name)
+
+    this.log(`${chalk.green('Passed:')} ${passed.length}`)
+    this.log(`${chalk.red('Failed:')} ${failed.length}`)
+
+    this.exit(failed.length)
+  }
+}
+
+// eslint-disable-next-line unicorn/prefer-top-level-await
+;(async () => {
+  InteropTest.run().then(
+    async () => flush(),
+    async (error) => handle(error),
+  )
 })()

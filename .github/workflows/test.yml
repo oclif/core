@@ -114,7 +114,7 @@ jobs:
         run: 'npm install -g tsx'
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:esm-cjs --test=${{ matrix.test }} --dev-runtime=${{ matrix.dev_runtime }}
+      - run: yarn test:esm-cjs --test=${{ matrix.test }} --dev-run-time=${{ matrix.dev_runtime }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
