@@ -12,6 +12,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import {Command, Flags, flush, handle} from '../../src'
+import {PluginConfig, plugins} from './interop-plugins-matrix'
 import {Executor, Script, setup} from './util'
 
 const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2'] as const
@@ -60,23 +61,68 @@ type CleanUpOptions = {
   plugin: Plugin
 }
 
-type PluginConfig = {
-  name: string
-  command: string
-  package: string
-  repo: string
-  commandText: string
-  hookText: string
-  expectJson: {
-    whenProvided: {
-      args: Record<string, string | boolean>
-      flags: Record<string, string | boolean>
-    }
-    whenNotProvided: {
-      args: Record<string, string | null | boolean>
-      flags: Record<string, string | null | boolean>
+async function installPlugin(options: InstallPluginOptions): Promise<void> {
+  const result = await options.executor.executeCommand(`plugins:install ${options.plugin.package}`, options.script)
+  expect(result.code).to.equal(0)
+
+  const pluginsResult = await options.executor.executeCommand('plugins', options.script)
+  expect(pluginsResult.stdout).to.include(options.plugin.name)
+}
+
+async function linkPlugin(options: LinkPluginOptions): Promise<Executor> {
+  const pluginExecutor = await setup(__filename, {
+    repo: options.plugin.repo,
+    subDir: options.executor.parentDir,
+    noLinkCore: options.noLinkCore ?? false,
+  })
+
+  const result = await options.executor.executeCommand(
+    `plugins:link ${pluginExecutor.pluginDir} --no-install`,
+    options.script,
+  )
+  expect(result.code).to.equal(0)
+
+  const pluginsResult = await options.executor.executeCommand('plugins', options.script)
+  expect(pluginsResult.stdout).to.include(options.plugin.name)
+
+  return pluginExecutor
+}
+
+async function modifyCommand(options: ModifyCommandOptions): Promise<void> {
+  const filePath = path.join(options.executor.pluginDir, 'src', 'commands', `${options.plugin.command}.ts`)
+  const content = await fs.readFile(filePath, 'utf8')
+  const modifiedContent = content.replace(options.from, options.to)
+  await fs.writeFile(filePath, modifiedContent)
+}
+
+async function runCommand(options: RunCommandOptions): Promise<void> {
+  const env = {...process.env, ...options.env}
+  const result = await options.executor.executeCommand(
+    `${options.plugin.command} ${options.args?.join(' ') ?? ''}`,
+    options.script,
+    {env},
+  )
+  expect(result.code).to.equal(0)
+
+  if (options.expectStrings) {
+    for (const expectString of options.expectStrings) {
+      expect(result.stdout).to.include(expectString)
     }
   }
+
+  if (options.expectJson && options.args?.includes('--json')) {
+    // clear any non-json output from hooks
+    const split = result.stdout?.split('\n') ?? []
+    const idx = split.findIndex((i) => i.startsWith('{'))
+    const json = JSON.parse(split.slice(idx).join('\n'))
+    expect(json).to.deep.equal(options.expectJson)
+  }
+}
+
+async function cleanUp(options: CleanUpOptions): Promise<void> {
+  await options.executor.executeCommand(`plugins:uninstall ${options.plugin.package}`)
+  const {stdout} = await options.executor.executeCommand('plugins')
+  expect(stdout).to.not.include(options.plugin.package)
 }
 
 async function testRunner({
@@ -88,114 +134,6 @@ async function testRunner({
 }): Promise<{failed: string[]; passed: string[]}> {
   const failed: string[] = []
   const passed: string[] = []
-
-  const commonProps = {
-    expectJson: {
-      whenProvided: {
-        args: {
-          optionalArg: 'arg1',
-          defaultArg: 'arg2',
-          defaultFnArg: 'arg3',
-        },
-        flags: {
-          optionalString: 'flag1',
-          defaultString: 'flag2',
-          defaultFnString: 'flag3',
-          json: true,
-        },
-      },
-      whenNotProvided: {
-        args: {
-          defaultArg: 'simple string default',
-          defaultFnArg: 'async fn default',
-        },
-        flags: {
-          defaultString: 'simple string default',
-          defaultFnString: 'async fn default',
-          json: true,
-        },
-      },
-    },
-  }
-
-  const PLUGINS: Record<string, PluginConfig> = {
-    esm1: {
-      name: 'plugin-test-esm-1',
-      command: 'esm1',
-      package: '@oclif/plugin-test-esm-1',
-      repo: 'https://github.com/oclif/plugin-test-esm-1',
-      commandText: 'hello I am an ESM plugin',
-      hookText: 'Greetings! from plugin-test-esm-1 init hook',
-      ...commonProps,
-    },
-    esm2: {
-      name: 'plugin-test-esm-2',
-      command: 'esm2',
-      package: '@oclif/plugin-test-esm-2',
-      repo: 'https://github.com/oclif/plugin-test-esm-2',
-      commandText: 'hello I am an ESM plugin',
-      hookText: 'Greetings! from plugin-test-esm-2 init hook',
-      ...commonProps,
-    },
-    cjs1: {
-      name: 'plugin-test-cjs-1',
-      command: 'cjs1',
-      package: '@oclif/plugin-test-cjs-1',
-      repo: 'https://github.com/oclif/plugin-test-cjs-1',
-      commandText: 'hello I am a CJS plugin',
-      hookText: 'Greetings! from plugin-test-cjs-1 init hook',
-      ...commonProps,
-    },
-    cjs2: {
-      name: 'plugin-test-cjs-2',
-      command: 'cjs2',
-      package: '@oclif/plugin-test-cjs-2',
-      repo: 'https://github.com/oclif/plugin-test-cjs-2',
-      commandText: 'hello I am a CJS plugin',
-      hookText: 'Greetings! from plugin-test-cjs-2 init hook',
-      ...commonProps,
-    },
-    precore: {
-      name: 'plugin-test-pre-core',
-      command: 'pre-core',
-      package: '@oclif/plugin-test-pre-core',
-      repo: 'https://github.com/oclif/plugin-test-pre-core',
-      commandText: 'hello I am a pre-core plugin',
-      hookText: 'Greetings! from plugin-test-pre-core init hook',
-      expectJson: {
-        whenProvided: commonProps.expectJson.whenProvided,
-        whenNotProvided: {
-          args: {
-            defaultArg: 'simple string default',
-            defaultFnArg: 'fn default',
-          },
-          flags: {
-            defaultString: 'simple string default',
-            defaultFnString: 'fn default',
-            json: true,
-          },
-        },
-      },
-    },
-    coreV1: {
-      name: 'plugin-test-core-v1',
-      command: 'core-v1',
-      package: '@oclif/plugin-test-core-v1',
-      repo: 'https://github.com/oclif/plugin-test-core-v1',
-      commandText: 'hello I am an @oclif/core@v1 plugin',
-      hookText: 'Greetings! from plugin-test-core-v1 init hook',
-      ...commonProps,
-    },
-    coreV2: {
-      name: 'plugin-test-core-v2',
-      command: 'core-v2',
-      package: '@oclif/plugin-test-core-v2',
-      repo: 'https://github.com/oclif/plugin-test-core-v2',
-      commandText: 'hello I am an @oclif/core@v2 plugin',
-      hookText: 'Greetings! from plugin-test-core-v2 init hook',
-      ...commonProps,
-    },
-  }
 
   async function test(name: string, fn: () => Promise<void>) {
     try {
@@ -209,81 +147,17 @@ async function testRunner({
     }
   }
 
-  async function installPlugin(options: InstallPluginOptions): Promise<void> {
-    const result = await options.executor.executeCommand(`plugins:install ${options.plugin.package}`, options.script)
-    expect(result.code).to.equal(0)
-
-    const pluginsResult = await options.executor.executeCommand('plugins', options.script)
-    expect(pluginsResult.stdout).to.include(options.plugin.name)
-  }
-
-  async function linkPlugin(options: LinkPluginOptions): Promise<Executor> {
-    const pluginExecutor = await setup(__filename, {
-      repo: options.plugin.repo,
-      subDir: options.executor.parentDir,
-      noLinkCore: options.noLinkCore ?? false,
-    })
-
-    const result = await options.executor.executeCommand(
-      `plugins:link ${pluginExecutor.pluginDir} --no-install`,
-      options.script,
-    )
-    expect(result.code).to.equal(0)
-
-    const pluginsResult = await options.executor.executeCommand('plugins', options.script)
-    expect(pluginsResult.stdout).to.include(options.plugin.name)
-
-    return pluginExecutor
-  }
-
-  async function modifyCommand(options: ModifyCommandOptions): Promise<void> {
-    const filePath = path.join(options.executor.pluginDir, 'src', 'commands', `${options.plugin.command}.ts`)
-    const content = await fs.readFile(filePath, 'utf8')
-    const modifiedContent = content.replace(options.from, options.to)
-    await fs.writeFile(filePath, modifiedContent)
-  }
-
-  async function runCommand(options: RunCommandOptions): Promise<void> {
-    const env = {...process.env, ...options.env}
-    const result = await options.executor.executeCommand(
-      `${options.plugin.command} ${options.args?.join(' ') ?? ''}`,
-      options.script,
-      {env},
-    )
-    expect(result.code).to.equal(0)
-
-    if (options.expectStrings) {
-      for (const expectString of options.expectStrings) {
-        expect(result.stdout).to.include(expectString)
-      }
-    }
-
-    if (options.expectJson && options.args?.includes('--json')) {
-      // clear any non-json output from hooks
-      const split = result.stdout?.split('\n') ?? []
-      const idx = split.findIndex((i) => i.startsWith('{'))
-      const json = JSON.parse(split.slice(idx).join('\n'))
-      expect(json).to.deep.equal(options.expectJson)
-    }
-  }
-
-  async function cleanUp(options: CleanUpOptions): Promise<void> {
-    await options.executor.executeCommand(`plugins:uninstall ${options.plugin.package}`)
-    const {stdout} = await options.executor.executeCommand('plugins')
-    expect(stdout).to.not.include(options.plugin.package)
-  }
-
   const devExecutable = (devRunTime === 'default' ? 'dev' : `${devRunTime} dev`) as 'dev' | 'bun dev' | 'tsx dev'
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
 
   const cjsBefore = async () => {
-    cjsExecutor = await setup(__filename, {repo: PLUGINS.cjs1.repo, subDir: 'cjs'})
+    cjsExecutor = await setup(__filename, {repo: plugins.cjs1.repo, subDir: 'cjs'})
   }
 
   const esmBefore = async () => {
-    esmExecutor = await setup(__filename, {repo: PLUGINS.esm1.repo, subDir: 'esm'})
+    esmExecutor = await setup(__filename, {repo: plugins.esm1.repo, subDir: 'esm'})
   }
 
   const precoreBefore = async () => {
@@ -382,21 +256,21 @@ async function testRunner({
 
   const cjsTests = async () => {
     await test('Install CJS plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.cjs2, cjsExecutor)
+      await installTest(plugins.cjs2, cjsExecutor)
     })
 
     await test('Install ESM plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.esm1, cjsExecutor)
+      await installTest(plugins.esm1, cjsExecutor)
     })
 
     await test('Link CJS plugin to CJS root plugin', async () => {
-      await linkTest(PLUGINS.cjs2, cjsExecutor)
+      await linkTest(plugins.cjs2, cjsExecutor)
     })
 
     await test('Link ESM plugin to CJS root plugin', async () => {
       // We don't use linkTest here because that would test that the
       // ESM plugin is auto-transpiled which we're not supporting at the moment.
-      const plugin = PLUGINS.esm2
+      const plugin = plugins.esm2
 
       await linkPlugin({executor: cjsExecutor, plugin, script: 'run'})
 
@@ -422,19 +296,19 @@ async function testRunner({
 
   const esmTests = async () => {
     await test('Install CJS plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.cjs1, esmExecutor)
+      await installTest(plugins.cjs1, esmExecutor)
     })
 
     await test('Install ESM plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.esm2, esmExecutor)
+      await installTest(plugins.esm2, esmExecutor)
     })
 
     await test('Link CJS plugin to ESM root plugin', async () => {
-      await linkTest(PLUGINS.cjs1, esmExecutor)
+      await linkTest(plugins.cjs1, esmExecutor)
     })
 
     await test('Link ESM plugin to ESM root plugin', async () => {
-      const plugin = PLUGINS.esm2
+      const plugin = plugins.esm2
 
       await linkPlugin({executor: esmExecutor, plugin, script: 'run'})
       // test bin/run
@@ -471,33 +345,33 @@ async function testRunner({
 
   const preCoreTests = async () => {
     await test('Install pre-core plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.precore, esmExecutor)
+      await installTest(plugins.precore, esmExecutor)
     })
 
     await test('Install pre-core plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.precore, cjsExecutor)
+      await installTest(plugins.precore, cjsExecutor)
     })
 
     await test('Link pre-core plugin to CJS root plugin', async () => {
       // Pass in true to skip linking the local version of @oclif/core
       // to the test pre-core plugin since it doesn't use core.
-      await linkTest(PLUGINS.precore, cjsExecutor, true)
+      await linkTest(plugins.precore, cjsExecutor, true)
     })
 
     await test('Link pre-core plugin to ESM root plugin', async () => {
       // Pass in true to skip linking the local version of @oclif/core
       // to the test pre-core plugin since it doesn't use core.
-      await linkTest(PLUGINS.precore, esmExecutor, true)
+      await linkTest(plugins.precore, esmExecutor, true)
     })
   }
 
   const coreV1Tests = async () => {
     await test('Install core v1 plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.coreV1, esmExecutor)
+      await installTest(plugins.coreV1, esmExecutor)
     })
 
     await test('Install core v1 plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.coreV1, cjsExecutor)
+      await installTest(plugins.coreV1, cjsExecutor)
     })
 
     await test('Link core v1 plugin to CJS root plugin', async () => {
@@ -505,7 +379,7 @@ async function testRunner({
       // to plugin-test-core-v1. There are breaking changes to how
       // args are defined in a command so the plugin won't compile if
       // we link the local version of core.
-      await linkTest(PLUGINS.coreV1, cjsExecutor, true)
+      await linkTest(plugins.coreV1, cjsExecutor, true)
     })
 
     await test('Link core v1 plugin to ESM root plugin', async () => {
@@ -513,25 +387,25 @@ async function testRunner({
       // to plugin-test-core-v1. There are breaking changes to how
       // args are defined in a command so the plugin won't compile if
       // we link the local version of core.
-      await linkTest(PLUGINS.coreV1, esmExecutor, true)
+      await linkTest(plugins.coreV1, esmExecutor, true)
     })
   }
 
   const coreV2Tests = async () => {
     await test('Install core v2 plugin to ESM root plugin', async () => {
-      await installTest(PLUGINS.coreV2, esmExecutor)
+      await installTest(plugins.coreV2, esmExecutor)
     })
 
     await test('Install core v2 plugin to CJS root plugin', async () => {
-      await installTest(PLUGINS.coreV2, cjsExecutor)
+      await installTest(plugins.coreV2, cjsExecutor)
     })
 
     await test('Link core v2 plugin to CJS root plugin', async () => {
-      await linkTest(PLUGINS.coreV2, cjsExecutor)
+      await linkTest(plugins.coreV2, cjsExecutor)
     })
 
     await test('Link core v2 plugin to ESM root plugin', async () => {
-      await linkTest(PLUGINS.coreV2, esmExecutor)
+      await linkTest(plugins.coreV2, esmExecutor)
     })
   }
 
