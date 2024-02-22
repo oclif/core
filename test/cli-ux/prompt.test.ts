@@ -33,7 +33,7 @@ describe('prompt', () => {
     expect(answer).to.equal('answer')
   })
 
-  it('should not require input', async () => {
+  it('should not require input if required = false', async () => {
     stubReadline([''])
     const answer = await ux.prompt('Require input?', {required: false})
     expect(answer).to.equal('')
@@ -43,6 +43,16 @@ describe('prompt', () => {
     stubReadline([''])
     const answer = await ux.prompt('Require input?', {default: 'default'})
     expect(answer).to.equal('default')
+  })
+
+  it('should timeout after provided timeout', async () => {
+    stubReadline([''])
+    try {
+      await ux.prompt('Require input?', {timeout: 10})
+      expect.fail('should have thrown')
+    } catch (error: any) {
+      expect(error.message).to.equal('Prompt timeout')
+    }
   })
 
   it('should confirm with y', async () => {
