@@ -47,6 +47,7 @@ describe('prompt', () => {
 
   it('should timeout after provided timeout', async () => {
     stubReadline([''])
+    sandbox.stub(process, 'stdin').value({isTTY: true})
     try {
       await ux.prompt('Require input?', {timeout: 10})
       expect.fail('should have thrown')
