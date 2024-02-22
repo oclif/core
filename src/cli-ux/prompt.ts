@@ -36,7 +36,8 @@ function normal(options: IPromptConfig, retries = 100): Promise<string> {
       output: process.stdout,
     })
     let timeout: NodeJS.Timeout
-    if (options.timeout) {
+    // Only set the timeout if the input is a TTY
+    if (options.timeout && options.isTTY) {
       timeout = setTimeout(() => ac.abort(), options.timeout)
       signal.addEventListener(
         'abort',
