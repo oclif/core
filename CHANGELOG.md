@@ -1,3 +1,12 @@
+## [3.19.6](https://github.com/oclif/core/compare/3.19.5...3.19.6) (2024-02-23)
+
+
+### Bug Fixes
+
+* revert to original prompt implementation ([a96e567](https://github.com/oclif/core/commit/a96e5679c366a300d3149cecd2ef8fd3fb11a954))
+
+
+
 ## [3.19.5](https://github.com/oclif/core/compare/3.19.4...3.19.5) (2024-02-22)
 
 
