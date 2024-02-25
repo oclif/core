@@ -64,7 +64,7 @@
     "commitlint": "^17.8.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
-    "eslint-config-oclif": "^5.0.0",
+    "eslint-config-oclif": "^5.0.2",
     "eslint-config-oclif-typescript": "^3.0.48",
     "eslint-config-prettier": "^9.1.0",
     "fancy-test": "^3.0.11",
