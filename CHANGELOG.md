@@ -1,3 +1,12 @@
+## [3.19.7](https://github.com/oclif/core/compare/3.19.6...3.19.7) (2024-02-26)
+
+
+### Bug Fixes
+
+* dont assume plugin-help is installed ([35acf97](https://github.com/oclif/core/commit/35acf97c04a3050305e496ff1d71ff484b18fce3))
+
+
+
 ## [3.19.6](https://github.com/oclif/core/compare/3.19.5...3.19.6) (2024-02-23)
 
 
