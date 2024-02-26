@@ -128,6 +128,7 @@ jobs:
           - https://github.com/salesforcecli/plugin-org
           - https://github.com/salesforcecli/plugin-schema
           - https://github.com/salesforcecli/plugin-user
+          - https://github.com/salesforcecli/plugin-settings
     with:
       packageName: '@oclif/core'
       externalProjectGitUrl: ${{ matrix.externalProjectGitUrl }}
@@ -174,7 +175,7 @@ jobs:
     with:
       repo: oclif/plugin-plugins
       os: ${{ matrix.os }}
-      command: 'yarn test:integration --retries 3'
+      command: yarn test:integration --retries 3
       # plugin-plugins integration tests depend on sf being installed globally
       other-setup: npm install -g @salesforce/cli@nightly
   plugin-update-integration:
@@ -187,4 +188,4 @@ jobs:
     with:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
-      command: 'yarn test:integration:sf'
+      command: yarn test:integration:sf --retries 3
