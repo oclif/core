@@ -43,6 +43,10 @@ const searchForCommandClass = (cmd: any) => {
   return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
 }
 
+const ensureCommandClass = (cmd: any) => {
+  if (cmd && typeof cmd.run === 'function') return cmd
+}
+
 const GLOB_PATTERNS = [
   '**/*.+(js|cjs|mjs|ts|tsx|mts|cts)',
   '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js|d.mts|d.cts)?(x)',
@@ -191,7 +195,7 @@ export class Plugin implements IPlugin {
 
       if (this.commandDiscoveryOpts?.strategy === 'single' || this.commandDiscoveryOpts?.strategy === 'explicit') {
         const commandCache = await this.loadCommandsFromTarget()
-        const cmd = commandCache?.[id]
+        const cmd = ensureCommandClass(commandCache?.[id])
         if (!cmd) return
 
         cmd.id = id

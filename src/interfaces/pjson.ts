@@ -37,13 +37,14 @@ export type CommandDiscovery = {
    * @example
    * ```typescript
    * // in src/commands.ts
+   * import {Command} from '@oclif/core'
    * import Hello from './commands/hello/index.js'
    * import HelloWorld from './commands/hello/world.js'
    *
    * export default {
    *   hello: Hello,
    *   'hello:world': HelloWorld,
-   * }
+   * } satisfies Record<string, Command.Class>
    * ```
    */
   target: string
@@ -59,13 +60,14 @@ export type CommandDiscovery = {
    * @example
    * ```typescript
    * // in src/commands.ts
+   * import {Command} from '@oclif/core'
    * import Hello from './commands/hello/index.js'
    * import HelloWorld from './commands/hello/world.js'
    *
    * export const MY_COMMANDS = {
    *  hello: Hello,
    * 'hello:world': HelloWorld,
-   * }
+   * } satisfies Record<string, Command.Class>
    * ```
    *
    * In the package.json:

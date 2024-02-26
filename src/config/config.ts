@@ -556,8 +556,14 @@ export class Config implements IConfig {
           /* eslint-disable no-await-in-loop */
           const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook.target, p))
           debug('start', isESM ? '(import)' : '(require)', filePath)
+          // If no hook is found using the identifier, then we should `search` for the hook but only if the hook identifier is 'default'
+          // A named identifier (e.g. MY_HOOK) that isn't found indicates that the hook isn't implemented in the plugin.
+          const hookFn = module[hook.identifier] ?? hook.identifier === 'default' ? search(module) : undefined
+          if (!hookFn) {
+            debug('No hook found for hook definition:', hook)
+            continue
+          }
 
-          const hookFn = module[hook.identifier] ?? search(module)
           const result = timeout
             ? await withTimeout(timeout, hookFn.call(context, {...(opts as any), config: this, context}))
             : await hookFn.call(context, {...(opts as any), config: this, context})
