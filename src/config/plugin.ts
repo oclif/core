@@ -397,7 +397,15 @@ export class Plugin implements IPlugin {
   private async getCommandIdsFromTarget(): Promise<string[] | undefined> {
     const commandsFromExport = await this.loadCommandsFromTarget()
     if (commandsFromExport) {
-      return Object.keys(commandsFromExport)
+      return (
+        Object.entries(commandsFromExport)
+          .map(([id, cmd]) => {
+            if (!ensureCommandClass(cmd)) return
+            return id
+          })
+          // eslint-disable-next-line unicorn/prefer-native-coercion-functions
+          .filter((f): f is string => Boolean(f))
+      )
     }
   }
 
@@ -427,6 +435,7 @@ export class Plugin implements IPlugin {
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
+    console.trace()
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))
