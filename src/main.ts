@@ -38,6 +38,12 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     Performance.debug()
   }
 
+  const showHelp = async (argv: string[]) => {
+    const Help = await loadHelpClass(config)
+    const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
+    await help.showHelp(argv)
+  }
+
   debug(`process.execPath: ${process.execPath}`)
   debug(`process.execArgv: ${process.execArgv}`)
   debug('process.argv: %O', process.argv)
@@ -63,9 +69,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // display help version if applicable
   if (helpAddition(argv, config)) {
-    const Help = await loadHelpClass(config)
-    const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
-    await help.showHelp(argv)
+    await showHelp(argv)
     await collectPerf()
     return
   }
@@ -74,7 +78,12 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   const cmd = config.findCommand(id)
   if (!cmd) {
     const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
-    if (topic) return config.runCommand('help', [id])
+    if (topic) {
+      await showHelp([id])
+      await collectPerf()
+      return
+    }
+
     if (config.pjson.oclif.default) {
       id = config.pjson.oclif.default
       argvSlice = argv
