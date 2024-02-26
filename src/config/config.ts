@@ -558,7 +558,7 @@ export class Config implements IConfig {
           debug('start', isESM ? '(import)' : '(require)', filePath)
           // If no hook is found using the identifier, then we should `search` for the hook but only if the hook identifier is 'default'
           // A named identifier (e.g. MY_HOOK) that isn't found indicates that the hook isn't implemented in the plugin.
-          const hookFn = module[hook.identifier] ?? hook.identifier === 'default' ? search(module) : undefined
+          const hookFn = module[hook.identifier] ?? (hook.identifier === 'default' ? search(module) : undefined)
           if (!hookFn) {
             debug('No hook found for hook definition:', hook)
             continue
