@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import readline from 'node:readline'
 
 import * as Errors from '../errors'
 import {config} from './config'
@@ -27,36 +26,26 @@ interface IPromptConfig {
 
 function normal(options: IPromptConfig, retries = 100): Promise<string> {
   if (retries < 0) throw new Error('no input')
-  const ac = new AbortController()
-  const {signal} = ac
-
   return new Promise((resolve, reject) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-    let timeout: NodeJS.Timeout
+    let timer: NodeJS.Timeout
     if (options.timeout) {
-      timeout = setTimeout(() => ac.abort(), options.timeout)
-      signal.addEventListener(
-        'abort',
-        () => {
-          rl.close()
-          clearTimeout(timeout)
-          reject(new Error('Prompt timeout'))
-        },
-        {once: true},
-      )
+      timer = setTimeout(() => {
+        process.stdin.pause()
+        reject(new Error('Prompt timeout'))
+      }, options.timeout)
+      timer.unref()
     }
 
-    rl.question(options.prompt, {signal}, (answer) => {
-      rl.close()
-      const data = answer.trim()
+    process.stdin.setEncoding('utf8')
+    process.stderr.write(options.prompt)
+    process.stdin.resume()
+    process.stdin.once('data', (b) => {
+      if (timer) clearTimeout(timer)
+      process.stdin.pause()
+      const data: string = (typeof b === 'string' ? b : b.toString()).trim()
       if (!options.default && options.required && data === '') {
-        clearTimeout(timeout)
         resolve(normal(options, retries - 1))
       } else {
-        clearTimeout(timeout)
         resolve(data || (options.default as string))
       }
     })

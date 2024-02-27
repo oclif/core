@@ -1,3 +1,28 @@
+# [3.20.0](https://github.com/oclif/core/compare/3.19.7...3.20.0) (2024-02-27)
+
+### Features
+
+- add enableAutoTranspile setting ([ae66106](https://github.com/oclif/core/commit/ae661065301da5f6e6c970633a246376acaf3a99))
+- support bun and tsx for development ([17ad3e6](https://github.com/oclif/core/commit/17ad3e69d40d4dcbfd35576ea61acd5f9b64334e))
+
+## [3.19.7](https://github.com/oclif/core/compare/3.19.6...3.19.7) (2024-02-26)
+
+### Bug Fixes
+
+- dont assume plugin-help is installed ([35acf97](https://github.com/oclif/core/commit/35acf97c04a3050305e496ff1d71ff484b18fce3))
+
+## [3.19.6](https://github.com/oclif/core/compare/3.19.5...3.19.6) (2024-02-23)
+
+### Bug Fixes
+
+- revert to original prompt implementation ([a96e567](https://github.com/oclif/core/commit/a96e5679c366a300d3149cecd2ef8fd3fb11a954))
+
+## [3.19.5](https://github.com/oclif/core/compare/3.19.4...3.19.5) (2024-02-22)
+
+### Bug Fixes
+
+- only set timeout for TTY ([8a97f20](https://github.com/oclif/core/commit/8a97f2087d07290474d9bf224057322ae2abe4bc))
+
 ## [3.19.4](https://github.com/oclif/core/compare/3.19.3...3.19.4) (2024-02-21)
 
 ### Bug Fixes

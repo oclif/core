@@ -35,7 +35,7 @@ jobs:
       - if: runner.os == 'Windows'
         run: yarn mocha --forbid-only "test/**/*.integration.ts" --exclude "test/integration/sf.integration.ts" --parallel --timeout 1200000
       - if: runner.os == 'Linux'
-        run: yarn test:integration
+        run: yarn test:integration --retries 3
   windows-sf-integration:
     # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
     # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
@@ -79,9 +79,26 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
         test: [esm, cjs, precore, coreV1, coreV2, esbuild]
+        dev_runtime: [default, bun, tsx]
         exclude:
           - os: windows-latest
             node_version: lts/*
+          - os: windows-latest
+            dev_runtime: tsx
+          - os: windows-latest
+            dev_runtime: bun
+          - test: precore
+            dev_runtime: tsx
+          - test: precore
+            dev_runtime: bun
+          - test: coreV1
+            dev_runtime: tsx
+          - test: coreV1
+            dev_runtime: bun
+          - test: coreV2
+            dev_runtime: tsx
+          - test: coreV2
+            dev_runtime: bun
       fail-fast: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 75
@@ -91,9 +108,13 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
           cache: yarn
+      - if: matrix.dev_runtime == 'bun'
+        uses: oven-sh/setup-bun@v1
+      - if: matrix.dev_runtime == 'tsx'
+        run: 'npm install -g tsx'
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build
-      - run: yarn test:interoperability --test=${{ matrix.test }}
+      - run: yarn test:interoperability --test=${{ matrix.test }} --dev-run-time=${{ matrix.dev_runtime }}
   nuts:
     needs: linux-unit-tests
     uses: salesforcecli/github-workflows/.github/workflows/externalNut.yml@main
@@ -107,6 +128,7 @@ jobs:
           - https://github.com/salesforcecli/plugin-org
           - https://github.com/salesforcecli/plugin-schema
           - https://github.com/salesforcecli/plugin-user
+          - https://github.com/salesforcecli/plugin-settings
     with:
       packageName: '@oclif/core'
       externalProjectGitUrl: ${{ matrix.externalProjectGitUrl }}
@@ -154,7 +176,7 @@ jobs:
     with:
       repo: oclif/plugin-plugins
       os: ${{ matrix.os }}
-      command: 'yarn test:integration --retries 3'
+      command: yarn test:integration --retries 3
       # plugin-plugins integration tests depend on sf being installed globally
       other-setup: npm install -g @salesforce/cli@nightly
   plugin-update-integration:
@@ -167,4 +189,4 @@ jobs:
     with:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
-      command: 'yarn test:integration:sf --retries 3'
+      command: yarn test:integration:sf --retries 3

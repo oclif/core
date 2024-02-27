@@ -9,7 +9,7 @@ export type Settings = {
   /**
    * Show additional debug output without DEBUG. Mainly shows stackstraces.
    *
-   * Useful to set in the ./bin/dev script.
+   * Useful to set in the ./bin/dev.js script.
    * oclif.settings.debug = true;
    */
   debug?: boolean
@@ -25,16 +25,19 @@ export type Settings = {
    */
   performanceEnabled?: boolean
   /**
-   * Try to use ts-node to load typescript source files instead of
-   * javascript files.
+   * Try to use ts-node to load typescript source files instead of javascript files.
+   * Defaults to true in development and test environments (e.g. using bin/dev.js or
+   * NODE_ENV=development or NODE_ENV=test).
    *
-   * NOTE: This requires registering ts-node first.
-   * require('ts-node').register();
-   *
-   * Environment Variable:
-   *   NODE_ENV=development
+   * @deprecated use enableAutoTranspile instead.
    */
   tsnodeEnabled?: boolean
+  /**
+   * Enable automatic transpilation of TypeScript files to JavaScript.
+   *
+   * Defaults to true in development and test environments (e.g. using bin/dev.js or NODE_ENV=development or NODE_ENV=test).
+   */
+  enableAutoTranspile?: boolean
 }
 
 // Set global.oclif to the new object if it wasn't set before

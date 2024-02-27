@@ -16,7 +16,7 @@ import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson} from '../util/fs'
 import {castArray, compact} from '../util/util'
-import {tsPath} from './ts-node'
+import {tsPath} from './ts-path'
 import {Debug, getCommandIdPermutations} from './util'
 
 const _pjson = Cache.getInstance().get('@oclif/core')

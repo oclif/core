@@ -33,6 +33,8 @@ export type ExecutorOptions = {
 
 export type ExecOptions = ExecSyncOptionsWithBufferEncoding & {silent?: boolean}
 
+export type Script = 'run' | 'dev' | 'bun dev' | 'tsx dev'
+
 function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interfaces.PJSON {
   const pkgJsonFile = join(testDir, 'package.json')
   const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf8'))
@@ -100,7 +102,16 @@ export class Executor {
     })
   }
 
-  public executeCommand(cmd: string, script: 'run' | 'dev' = 'run', options: ExecOptions = {}): Promise<Result> {
+  public executeCommand(cmd: string, script: Script = 'run', options: ExecOptions = {}): Promise<Result> {
+    if (script.includes(' ')) {
+      const [runtime, theScript] = script.split(' ')
+      const executable =
+        process.platform === 'win32'
+          ? join('bin', `${theScript}.cmd`)
+          : join('bin', `${theScript}${this.usesJsScript ? '.js' : ''}`)
+      return this.executeInTestDir(`${runtime} ${executable} ${cmd}`, options)
+    }
+
     const executable =
       process.platform === 'win32'
         ? join('bin', `${script}.cmd`)
