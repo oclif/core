@@ -397,15 +397,9 @@ export class Plugin implements IPlugin {
   private async getCommandIdsFromTarget(): Promise<string[] | undefined> {
     const commandsFromExport = await this.loadCommandsFromTarget()
     if (commandsFromExport) {
-      return (
-        Object.entries(commandsFromExport)
-          .map(([id, cmd]) => {
-            if (!ensureCommandClass(cmd)) return
-            return id
-          })
-          // eslint-disable-next-line unicorn/prefer-native-coercion-functions
-          .filter((f): f is string => Boolean(f))
-      )
+      return Object.entries((await this.loadCommandsFromTarget()) ?? [])
+        .filter(([, cmd]) => ensureCommandClass(cmd))
+        .map(([id]) => id)
     }
   }
 
