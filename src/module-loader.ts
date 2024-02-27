@@ -3,7 +3,7 @@ import {extname, join, sep} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
 import {Command} from './command'
-import {tsPath} from './config/ts-node'
+import {tsPath} from './config/ts-path'
 import {ModuleLoadError} from './errors'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {existsSync} from './util/fs'
