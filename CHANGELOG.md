@@ -1,3 +1,13 @@
+# [3.20.0](https://github.com/oclif/core/compare/3.19.7...3.20.0) (2024-02-27)
+
+
+### Features
+
+* add enableAutoTranspile setting ([ae66106](https://github.com/oclif/core/commit/ae661065301da5f6e6c970633a246376acaf3a99))
+* support bun and tsx for development ([17ad3e6](https://github.com/oclif/core/commit/17ad3e69d40d4dcbfd35576ea61acd5f9b64334e))
+
+
+
 ## [3.19.7](https://github.com/oclif/core/compare/3.19.6...3.19.7) (2024-02-26)
 
 
