@@ -48,6 +48,10 @@ export default class PluginLoader {
     return {errors: this.errors, plugins: this.plugins}
   }
 
+  public async loadCustomPlugins(root: string, plugins: ({name?: string; root?: string; tag?: string; url?: string} | string)[],): Promise<void> {
+    await this.loadPlugins(root, 'custom', plugins)
+  }
+
   public async loadRoot(): Promise<IPlugin> {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {

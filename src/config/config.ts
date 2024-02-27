@@ -375,6 +375,13 @@ export class Config implements IConfig {
     marker?.stop()
   }
 
+  public async loadCustomPlugins(root: string, plugins: string[]) {
+    const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.loadCustomPlugins')
+    await this.pluginLoader.loadCustomPlugins(root, plugins)
+    await this.loadPluginsAndCommands()
+    marker?.stop()
+  }
+
   async loadPluginsAndCommands(opts?: {force: boolean}): Promise<void> {
     const pluginsMarker = Performance.mark(OCLIF_MARKER_OWNER, 'config.loadAllPlugins')
     const {errors, plugins} = await this.pluginLoader.loadChildren({
