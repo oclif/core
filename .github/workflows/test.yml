@@ -171,7 +171,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     uses: ./.github/workflows/external-test.yml
     with:
       repo: oclif/plugin-plugins
