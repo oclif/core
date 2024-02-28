@@ -40,7 +40,7 @@ type LinkPluginOptions = {
 
 type RunCommandOptions = {
   executor: Executor
-  plugin: Plugin
+  command: string
   script: Script
   expectStrings?: string[]
   expectJson?: Record<string, any>
@@ -98,7 +98,7 @@ async function modifyCommand(options: ModifyCommandOptions): Promise<void> {
 async function runCommand(options: RunCommandOptions): Promise<void> {
   const env = {...process.env, ...options.env}
   const result = await options.executor.executeCommand(
-    `${options.plugin.command} ${options.args?.join(' ') ?? ''}`,
+    `${options.command} ${options.args?.join(' ') ?? ''}`,
     options.script,
     {env},
   )
@@ -188,7 +188,7 @@ async function testRunner({
     // test that the root plugin's bin/run can execute the installed plugin
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: 'run',
       expectStrings: [plugin.commandText],
     })
@@ -197,7 +197,7 @@ async function testRunner({
     // and that args and flags work as expected when no values are provided
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: 'run',
       args: ['--json'],
       expectJson: plugin.expectJson.whenNotProvided,
@@ -207,7 +207,7 @@ async function testRunner({
     // and that args and flags work as expected when values are provided
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: 'run',
       args: [
         ...Object.values(plugin.expectJson.whenProvided.args),
@@ -222,7 +222,7 @@ async function testRunner({
     // test that the root plugin's bin/dev can execute the installed plugin
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: devExecutable,
       expectStrings: [plugin.commandText],
     })
@@ -236,7 +236,7 @@ async function testRunner({
     // test bin/run
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: 'run',
       expectStrings: [plugin.commandText, plugin.hookText],
     })
@@ -244,7 +244,7 @@ async function testRunner({
     await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: 'run',
       expectStrings: ['howdy', plugin.hookText],
     })
@@ -253,7 +253,7 @@ async function testRunner({
     await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
     await runCommand({
       executor,
-      plugin,
+      command: plugin.command,
       script: devExecutable,
       expectStrings: ['cheers', plugin.hookText],
     })
@@ -284,7 +284,7 @@ async function testRunner({
       // test bin/run
       await runCommand({
         executor: cjsExecutor,
-        plugin,
+        command: plugin.command,
         script: 'run',
         expectStrings: [plugin.commandText, plugin.hookText],
       })
@@ -292,7 +292,7 @@ async function testRunner({
       // test bin/dev
       await runCommand({
         executor: cjsExecutor,
-        plugin,
+        command: plugin.command,
         script: devExecutable,
         expectStrings: [plugin.commandText, plugin.hookText],
       })
@@ -321,7 +321,7 @@ async function testRunner({
       // test bin/run
       await runCommand({
         executor: esmExecutor,
-        plugin,
+        command: plugin.command,
         script: 'run',
         expectStrings: [plugin.commandText, plugin.hookText],
       })
@@ -331,7 +331,7 @@ async function testRunner({
       // await modifyCommand({executor: linkedPlugin, plugin, from: 'hello', to: 'howdy'})
       // await runCommand({
       //   executor: esmExecutor,
-      //   plugin,
+      //   command: plugin.command,
       //   script: 'run',
       //   expectStrings: ['howdy', plugin.hookText],
       //   env: {NODE_OPTIONS: '--loader=ts-node/esm'},
@@ -340,7 +340,7 @@ async function testRunner({
       // await modifyCommand({executor: linkedPlugin, plugin, from: 'howdy', to: 'cheers'})
       // await runCommand({
       //   executor: esmExecutor,
-      //   plugin,
+      //   command: plugin.command,
       //   script: 'dev',
       //   expectStrings: ['cheers', plugin.hookText],
       //   env: {NODE_OPTIONS: '--loader=ts-node/esm'},
@@ -417,20 +417,21 @@ async function testRunner({
   }
 
   const esbuildTests = async () => {
+    await test('Run bundled commands and hooks from esbuild plugin', async () => {
+      await runCommand({
+        executor: esbuildExecutor,
+        command: plugins.esm1.command,
+        script: 'run',
+        expectStrings: [plugins.esm1.commandText, plugins.esm1.hookText],
+      })
+    })
+
     await test('Install esbuild plugin to ESM root plugin', async () => {
       await installTest(plugins.esbuild, esmExecutor)
     })
 
     await test('Install esbuild plugin to CJS root plugin', async () => {
       await installTest(plugins.esbuild, cjsExecutor)
-    })
-
-    await test('Install ESM plugin to esbuild root plugin', async () => {
-      await installTest(plugins.esm1, esbuildExecutor)
-    })
-
-    await test('Install CJS plugin to esbuild root plugin', async () => {
-      await installTest(plugins.cjs1, esbuildExecutor)
     })
   }
 
