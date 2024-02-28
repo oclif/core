@@ -1,0 +1,19 @@
+{
+  "name": "wildcard-plugins-fixture",
+  "version": "0.0.0",
+  "description": "fixture for testing wildcard plugins",
+  "private": true,
+  "files": [],
+  "dependencies": {
+    "@oclif/core": "^3",
+    "@oclif/plugin-help": "^6",
+    "@oclif/plugin-plugins": "^4"
+  },
+  "oclif": {
+    "commands": "./lib/commands",
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-*"
+    ]
+  }
+}

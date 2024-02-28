@@ -1,3 +1,4 @@
+import {minimatch} from 'minimatch'
 import {join} from 'node:path'
 
 import {PJSON} from '../interfaces'
@@ -22,9 +23,18 @@ type LoadOpts = {
   force?: boolean
   rootPlugin: IPlugin
   userPlugins?: boolean
+  pluginAdditions?: {
+    core?: string[]
+    dev?: string[]
+    path?: string
+  }
 }
 
 type PluginsMap = Map<string, IPlugin>
+
+function findMatchingDependencies(dependencies: Record<string, string>, patterns: string[]): string[] {
+  return Object.keys(dependencies).filter((p) => patterns.some((w) => minimatch(p, w)))
+}
 
 export default class PluginLoader {
   public errors: (Error | string)[] = []
@@ -73,8 +83,23 @@ export default class PluginLoader {
   }
 
   private async loadCorePlugins(opts: LoadOpts): Promise<void> {
-    if (opts.rootPlugin.pjson.oclif.plugins) {
-      await this.loadPlugins(opts.rootPlugin.root, 'core', opts.rootPlugin.pjson.oclif.plugins)
+    const {plugins: corePlugins} = opts.rootPlugin.pjson.oclif
+    if (corePlugins) {
+      const plugins = findMatchingDependencies(opts.rootPlugin.pjson.dependencies ?? {}, corePlugins)
+      await this.loadPlugins(opts.rootPlugin.root, 'core', plugins)
+    }
+
+    const {core: pluginAdditionsCore, path} = opts.pluginAdditions ?? {core: []}
+    if (pluginAdditionsCore) {
+      if (path) {
+        // If path is provided, load plugins from the path
+        const pjson = await readJson<PJSON>(join(path, 'package.json'))
+        const plugins = findMatchingDependencies(pjson.dependencies ?? {}, pluginAdditionsCore)
+        await this.loadPlugins(path, 'core', plugins)
+      } else {
+        const plugins = findMatchingDependencies(opts.rootPlugin.pjson.dependencies ?? {}, pluginAdditionsCore)
+        await this.loadPlugins(opts.rootPlugin.root, 'core', plugins)
+      }
     }
   }
 
@@ -84,7 +109,26 @@ export default class PluginLoader {
       if (isProd()) return
       try {
         const {devPlugins} = opts.rootPlugin.pjson.oclif
-        if (devPlugins) await this.loadPlugins(opts.rootPlugin.root, 'dev', devPlugins)
+        if (devPlugins) {
+          const allDeps = {...opts.rootPlugin.pjson.dependencies, ...opts.rootPlugin.pjson.devDependencies}
+          const plugins = findMatchingDependencies(allDeps ?? {}, devPlugins)
+          await this.loadPlugins(opts.rootPlugin.root, 'dev', plugins)
+        }
+
+        const {dev: pluginAdditionsDev, path} = opts.pluginAdditions ?? {core: []}
+        if (pluginAdditionsDev) {
+          if (path) {
+            // If path is provided, load plugins from the path
+            const pjson = await readJson<PJSON>(join(path, 'package.json'))
+            const allDeps = {...pjson.dependencies, ...pjson.devDependencies}
+            const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
+            await this.loadPlugins(path, 'dev', plugins)
+          } else {
+            const allDeps = {...opts.rootPlugin.pjson.dependencies, ...opts.rootPlugin.pjson.devDependencies}
+            const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
+            await this.loadPlugins(opts.rootPlugin.root, 'dev', plugins)
+          }
+        }
       } catch (error: any) {
         process.emitWarning(error)
       }
@@ -140,7 +184,14 @@ export default class PluginLoader {
             parent.children.push(instance)
           }
 
-          await this.loadPlugins(instance.root, type, instance.pjson.oclif.plugins || [], instance)
+          if (instance.pjson.oclif.plugins) {
+            const allDeps =
+              type === 'dev'
+                ? {...instance.pjson.dependencies, ...instance.pjson.devDependencies}
+                : instance.pjson.dependencies
+            const plugins = findMatchingDependencies(allDeps ?? {}, instance.pjson.oclif.plugins)
+            await this.loadPlugins(instance.root, type, plugins, instance)
+          }
         } catch (error: any) {
           this.errors.push(error)
         }

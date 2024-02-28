@@ -22,6 +22,11 @@ export interface Options extends PluginOptions {
   devPlugins?: boolean
   enablePerf?: boolean
   jitPlugins?: boolean
+  pluginAdditions?: {
+    core?: string[]
+    dev?: string[]
+    path?: string
+  }
   plugins?: Map<string, Plugin>
   userPlugins?: boolean
   version?: string
