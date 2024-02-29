@@ -433,6 +433,14 @@ async function testRunner({
     await test('Install esbuild plugin to CJS root plugin', async () => {
       await installTest(plugins.esbuild, cjsExecutor)
     })
+
+    await test('Install ESM plugin to esbuild root plugin', async () => {
+      await installTest(plugins.esm2, esbuildExecutor)
+    })
+
+    await test('Install CJS plugin to esbuild root plugin', async () => {
+      await installTest(plugins.cjs1, esbuildExecutor)
+    })
   }
 
   if (tests.includes('cjs')) await cjsBefore()
