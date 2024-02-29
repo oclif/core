@@ -161,7 +161,6 @@ jobs:
           - oclif/plugin-warn-if-update-available
           - oclif/plugin-version
           - oclif/plugin-test-esbuild
-          - oclif/plugin-test-esbuild-single
     uses: ./.github/workflows/external-test.yml
     with:
       repo: ${{ matrix.repo }}
@@ -191,3 +190,14 @@ jobs:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
       command: yarn test:integration:sf --retries 3
+  plugin-esbuild-integration:
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    uses: ./.github/workflows/external-test.yml
+    with:
+      repo: oclif/plugin-test-esbuild-single
+      os: ${{ matrix.os }}
+      command: yarn test
