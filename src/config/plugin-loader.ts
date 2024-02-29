@@ -48,14 +48,14 @@ export default class PluginLoader {
     return {errors: this.errors, plugins: this.plugins}
   }
 
-  public async loadRoot(): Promise<IPlugin> {
+  public async loadRoot({pjson}: {pjson?: PJSON.Plugin}): Promise<IPlugin> {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {
       const plugins = [...this.plugins.values()]
       rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin.Plugin({isRoot: true, root: this.options.root})
+      rootPlugin = new Plugin.Plugin({isRoot: true, pjson, root: this.options.root})
       await rootPlugin.load()
       marker?.addDetails({
         commandCount: rootPlugin.commands.length,

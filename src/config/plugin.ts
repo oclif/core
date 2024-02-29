@@ -219,17 +219,20 @@ export class Plugin implements IPlugin {
     // However there could be child plugins nested inside the linked plugin, in which
     // case we still need to search for the child plugin's root.
     const root =
-      this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
+      this.options.pjson && this.options.isRoot
+        ? this.options.root
+        : this.type === 'link' && !this.parent
+          ? this.options.root
+          : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug(`loading ${this.type} plugin from ${root}`)
-    this.pjson = await readJson(join(root, 'package.json'))
+    this.pjson = this.options.pjson ?? (await readJson(join(root, 'package.json')))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = join(root, 'package.json')
-    if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
+    if (!this.name) throw new CLIError(`no name in package.json (${root})`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
     this.version = this.pjson.version

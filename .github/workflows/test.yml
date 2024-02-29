@@ -161,6 +161,7 @@ jobs:
           - oclif/plugin-warn-if-update-available
           - oclif/plugin-version
           - oclif/plugin-test-esbuild
+          - oclif/plugin-test-esbuild-single
     uses: ./.github/workflows/external-test.yml
     with:
       repo: ${{ matrix.repo }}

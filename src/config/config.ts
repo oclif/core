@@ -287,7 +287,7 @@ export class Config implements IConfig {
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
-    this.rootPlugin = await this.pluginLoader.loadRoot()
+    this.rootPlugin = await this.pluginLoader.loadRoot({pjson: this.options.pjson})
 
     // Cache the root plugin so that we can reference it later when determining if
     // we should skip ts-node registration for an ESM plugin.

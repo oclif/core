@@ -10,6 +10,7 @@ export interface PluginOptions {
   isRoot?: boolean
   name?: string
   parent?: Plugin
+  pjson?: PJSON.Plugin
   respectNoCacheDefault?: boolean
   root: string
   tag?: string
@@ -22,6 +23,7 @@ export interface Options extends PluginOptions {
   devPlugins?: boolean
   enablePerf?: boolean
   jitPlugins?: boolean
+  pjson?: PJSON.Plugin
   plugins?: Map<string, Plugin>
   userPlugins?: boolean
   version?: string
