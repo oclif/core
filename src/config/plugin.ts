@@ -432,7 +432,6 @@ export class Plugin implements IPlugin {
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
-    console.trace()
     if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))

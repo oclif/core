@@ -3,6 +3,8 @@ import {join} from 'node:path'
 
 import {PJSON, Plugin} from './interfaces'
 
+type OclifCoreInfo = {name: string; version: string}
+
 type CacheContents = {
   rootPlugin: Plugin
   exitCodes: PJSON.Plugin['oclif']['exitCodes']
@@ -10,8 +12,6 @@ type CacheContents = {
 }
 
 type ValueOf<T> = T[keyof T]
-
-type OclifCoreInfo = {name: string; version: string}
 
 /**
  * A simple cache for storing values that need to be accessed globally.
