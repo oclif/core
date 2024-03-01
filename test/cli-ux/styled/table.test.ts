@@ -159,12 +159,16 @@ describe('styled/table', () => {
             name: 'supertable-test-2',
           },
           {
-            id: '123',
-            name: 'supertable-test-3,comma',
+            id: '1"2"3',
+            name: 'supertable-test-3',
           },
           {
             id: '123',
-            name: 'supertable-test-4',
+            name: 'supertable-test-4,comma',
+          },
+          {
+            id: '123',
+            name: 'supertable-test-5',
           },
         ],
         columns,
@@ -173,8 +177,9 @@ describe('styled/table', () => {
       expect(output.stdout).to.equal(`ID,Name
 "123\n2","supertable-test-1"
 "12""3","supertable-test-2"
-"123","supertable-test-3,comma"
-123,supertable-test-4\n`)
+"1""2""3","supertable-test-3"
+"123","supertable-test-4,comma"
+123,supertable-test-5\n`)
     })
 
     fancy.stdout().end('outputs in csv without headers', (output) => {
