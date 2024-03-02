@@ -767,9 +767,9 @@
     "@oclif/core" "^3.19.2"
 
 "@oclif/plugin-plugins@^4":
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-4.2.2.tgz#5edd8635ef915d999680806f13f878b5a042b8d1"
-  integrity sha512-4GgD2AxhtZRDL0UlsojfIhoLGRxhF7wuzDNJavtR1XcBTS6hfm6ASjIESKSVJUFlQ0LI0WLjB10gf/6s5dRCTg==
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-4.2.6.tgz#9facef7881789e408766b65413a8b4efd0bce145"
+  integrity sha512-HdPWRQYI4wsTcqRJFvEGFalgX1q7y0oeCKdZtMI6Wl1PsALloYlbbQ1rl1jqk3YFbHjyEWud34gccOdXLl3UAA==
   dependencies:
     "@oclif/core" "^3.10.2"
     chalk "^5.3.0"
