@@ -1,5 +1,5 @@
 import {Command} from '../command'
-import {PJSON} from './pjson'
+import {HookOptions, PJSON} from './pjson'
 import {Topic} from './topic'
 
 export interface PluginOptions {
@@ -10,6 +10,7 @@ export interface PluginOptions {
   isRoot?: boolean
   name?: string
   parent?: Plugin
+  pjson?: PJSON.Plugin
   respectNoCacheDefault?: boolean
   root: string
   tag?: string
@@ -22,6 +23,7 @@ export interface Options extends PluginOptions {
   devPlugins?: boolean
   enablePerf?: boolean
   jitPlugins?: boolean
+  pjson?: PJSON.Plugin
   pluginAdditions?: {
     core?: string[]
     dev?: string[]
@@ -47,7 +49,7 @@ export interface Plugin {
   findCommand(id: string, opts: {must: true}): Promise<Command.Class>
   findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class> | undefined
   readonly hasManifest: boolean
-  hooks: {[k: string]: string[]}
+  hooks: {[key: string]: HookOptions[]}
   /**
    * True if the plugin is the root plugin.
    */

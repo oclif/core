@@ -1,0 +1,10 @@
+{
+  "name": "single-cmd-cli",
+  "version": "0.0.0",
+  "description": "Single Command CLI",
+  "private": true,
+  "oclif": {
+    "default": ".",
+    "commands": "./dist"
+  }
+}

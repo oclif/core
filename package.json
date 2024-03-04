@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "3.20.0",
+  "version": "3.21.0",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -39,7 +39,7 @@
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^4",
     "@oclif/prettier-config": "^0.2.1",
-    "@oclif/test": "^3.1.16",
+    "@oclif/test": "^3.2.1",
     "@types/ansi-styles": "^3.2.1",
     "@types/benchmark": "^2.1.5",
     "@types/chai": "^4.3.11",
@@ -64,7 +64,7 @@
     "chai-as-promised": "^7.1.1",
     "commitlint": "^17.8.1",
     "cross-env": "^7.0.3",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-oclif": "^5.0.2",
     "eslint-config-oclif-typescript": "^3.0.48",
     "eslint-config-prettier": "^9.1.0",
@@ -115,7 +115,6 @@
     "access": "public"
   },
   "scripts": {
-    "build:dev": "shx rm -rf lib && tsc --sourceMap",
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "compile": "tsc",
@@ -130,7 +129,6 @@
     "test:integration": "mocha --forbid-only \"test/**/*.integration.ts\" --parallel --timeout 1200000",
     "test:interoperability": "cross-env DEBUG=integration:* ts-node test/integration/interop.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
-    "test:dev": "nyc mocha \"test/**/*.test.ts\"",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"

@@ -78,7 +78,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         node_version: [lts/*, latest]
-        test: [esm, cjs, precore, coreV1, coreV2]
+        test: [esm, cjs, precore, coreV1, coreV2, esbuild]
         dev_runtime: [default, bun, tsx]
         exclude:
           - os: windows-latest
@@ -160,6 +160,7 @@ jobs:
           - oclif/plugin-which
           - oclif/plugin-warn-if-update-available
           - oclif/plugin-version
+          - oclif/plugin-test-esbuild
     uses: ./.github/workflows/external-test.yml
     with:
       repo: ${{ matrix.repo }}
@@ -170,7 +171,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     uses: ./.github/workflows/external-test.yml
     with:
       repo: oclif/plugin-plugins
@@ -189,3 +190,14 @@ jobs:
       repo: oclif/plugin-update
       os: ${{ matrix.os }}
       command: yarn test:integration:sf --retries 3
+  plugin-esbuild-integration:
+    needs: linux-unit-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    uses: ./.github/workflows/external-test.yml
+    with:
+      repo: oclif/plugin-test-esbuild-single
+      os: ${{ matrix.os }}
+      command: yarn test

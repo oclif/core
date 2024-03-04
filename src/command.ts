@@ -2,12 +2,12 @@ import chalk from 'chalk'
 import {fileURLToPath} from 'node:url'
 import {inspect} from 'node:util'
 
+import Cache from './cache'
 import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv} from './help/util'
-import {PJSON} from './interfaces'
 import {LoadOptions} from './interfaces/config'
 import {CommandError} from './interfaces/errors'
 import {
@@ -27,11 +27,10 @@ import {
 import {Plugin} from './interfaces/plugin'
 import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
-import {requireJson} from './util/fs'
 import {toConfiguredId} from './util/ids'
 import {uniq} from './util/util'
 
-const pjson = requireJson<PJSON>(__dirname, '..', 'package.json')
+const pjson = Cache.getInstance().get('@oclif/core')
 
 /**
  * swallows stdout epipe errors

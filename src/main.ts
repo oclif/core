@@ -5,11 +5,12 @@ import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
+import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
 
 const debug = require('debug')('oclif:main')
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
-  if (argv.length === 0 && !config.pjson.oclif.default) return true
+  if (argv.length === 0 && !config.isSingleCommandCLI) return true
   const mergedHelpFlags = getHelpFlagAdditions(config)
   for (const arg of argv) {
     if (mergedHelpFlags.includes(arg)) return true
@@ -56,7 +57,13 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const config = await Config.load(options ?? require.main?.filename ?? __dirname)
 
-  let [id, ...argvSlice] = normalizeArgv(config, argv)
+  // If this is a single command CLI, then insert the SINGLE_COMMAND_CLI_SYMBOL into the argv array to serve as the command id.
+  if (config.isSingleCommandCLI) {
+    argv = [SINGLE_COMMAND_CLI_SYMBOL, ...argv]
+  }
+
+  const [id, ...argvSlice] = normalizeArgv(config, argv)
+
   // run init hook
   await config.runHook('init', {argv: argvSlice, id})
 
@@ -83,19 +90,9 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
       await collectPerf()
       return
     }
-
-    if (config.pjson.oclif.default) {
-      id = config.pjson.oclif.default
-      argvSlice = argv
-    }
   }
 
   initMarker?.stop()
-
-  // If the the default command is '.' (signifying that the CLI is a single command CLI) and '.' is provided
-  // as an argument, we need to add back the '.' to argv since it was stripped out earlier as part of the
-  // command id.
-  if (config.pjson.oclif.default === '.' && id === '.' && argv[0] === '.') argvSlice = ['.', ...argvSlice]
 
   try {
     return await config.runCommand(id, argvSlice, cmd)

@@ -91,6 +91,7 @@ export interface Config {
    * example: /home/myuser
    */
   readonly home: string
+  readonly isSingleCommandCLI: boolean
   readonly name: string
   /**
    * npm registry to use for installing plugins
