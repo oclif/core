@@ -1,3 +1,12 @@
+## [3.21.1](https://github.com/oclif/core/compare/3.21.0...3.21.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* allow arg to be empty string ([629d482](https://github.com/oclif/core/commit/629d482d0059486c78054a66983a3a228ece7993))
+
+
+
 # [3.21.0](https://github.com/oclif/core/compare/3.20.0...3.21.0) (2024-03-04)
 
 
