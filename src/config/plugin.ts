@@ -140,8 +140,6 @@ export class Plugin implements IPlugin {
 
   version!: string
 
-  protected warned = false
-
   _base = `${_pjson.name}@${_pjson.version}`
 
   // eslint-disable-next-line new-cap
@@ -324,7 +322,7 @@ export class Plugin implements IPlugin {
 
               return [id, cached]
             } catch (error: any) {
-              const scope = 'cacheCommand'
+              const scope = `findCommand (${id})`
               if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
               else throw this.addErrorScope(error, scope)
             }
@@ -432,7 +430,6 @@ export class Plugin implements IPlugin {
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {
-    if (this.warned) return
     if (typeof err === 'string') err = new Error(err)
     process.emitWarning(this.addErrorScope(err, scope))
   }

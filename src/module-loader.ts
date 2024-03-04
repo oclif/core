@@ -18,6 +18,14 @@ const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs', '.mts', '.cts']
 
 const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
 
+function handleError(error: any, isESM: boolean | undefined, path: string): never {
+  if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
+    throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${path}: ${error.message}`)
+  }
+
+  throw error
+}
+
 /**
  * Loads and returns a module.
  *
@@ -41,11 +49,7 @@ export async function load<T = any>(config: IConfig | IPlugin, modulePath: strin
     ;({filePath, isESM} = await resolvePath(config, modulePath))
     return (isESM ? await import(pathToFileURL(filePath).href) : require(filePath)) as T
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-      throw new ModuleLoadError(`${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}`)
-    }
-
-    throw error
+    handleError(error, isESM, filePath ?? modulePath)
   }
 }
 
@@ -77,13 +81,7 @@ export async function loadWithData<T = any>(
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
     return {filePath, isESM, module}
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-      throw new ModuleLoadError(
-        `${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`,
-      )
-    }
-
-    throw error
+    handleError(error, isESM, filePath ?? modulePath)
   }
 }
 
@@ -120,13 +118,7 @@ export async function loadWithDataFromManifest<T = any>(
     const module = isESM ? await import(pathToFileURL(filePath).href) : require(filePath)
     return {filePath, isESM, module}
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
-      throw new ModuleLoadError(
-        `${isESM ? 'import()' : 'require'} failed to load ${filePath || modulePath}: ${error.message}`,
-      )
-    }
-
-    throw error
+    handleError(error, isESM, filePath ?? modulePath)
   }
 }
 
