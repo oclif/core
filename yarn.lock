@@ -2744,12 +2744,12 @@ eslint-config-oclif-typescript@^3.0.48:
     eslint-plugin-node "^11.1.0"
     eslint-plugin-perfectionist "^2.5.0"
 
-eslint-config-oclif@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-5.0.2.tgz#127fbb803629e6f913353f6975e413f77dfec373"
-  integrity sha512-5Ut0Rb1UfTJD54KMIA34SiJ7j3uUHfgn73LqkNEZx+mgTAAAL1+6/6uN0RJhmyp+9/HBIlO3v3pCX0pRR5knWQ==
+eslint-config-oclif@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-5.0.4.tgz#7fcee2c19e98f4c89d0d0631d35aea51bfb62a8e"
+  integrity sha512-TMg45IJZAzCjvJWjjb8RZJelqZu3u0Qc953jfSgvi3xbL4hvrM03+KE1HEuHn75M5lWgK2NC+igmllwc/wRGtw==
   dependencies:
-    eslint-config-xo-space "^0.34.0"
+    eslint-config-xo-space "^0.35.0"
     eslint-plugin-mocha "^10.3.0"
     eslint-plugin-node "^11.1.0"
     eslint-plugin-unicorn "^48.0.1"
@@ -2759,26 +2759,12 @@ eslint-config-prettier@^9.1.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-9.1.0.tgz#31af3d94578645966c082fcb71a5846d3c94867f"
   integrity sha512-NSWl5BFQWEPi1j4TjVNItzYV7dZXZ+wP6I6ZhrBGpChQhZRUaElihE9uRRkcbRnNb76UMKDF3r+WTmNcGPKsqw==
 
-eslint-config-xo-space@^0.34.0:
-  version "0.34.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-xo-space/-/eslint-config-xo-space-0.34.0.tgz#974db7f7091edc23e2f29cc98acaa1be78ac87e5"
-  integrity sha512-8ZI0Ta/loUIL1Wk/ouWvk2ZWN8X6Un49MqnBf2b6uMjC9c5Pcfr1OivEOrvd3niD6BKgMNH2Q9nG0CcCWC+iVA==
-  dependencies:
-    eslint-config-xo "^0.43.0"
-
 eslint-config-xo-space@^0.35.0:
   version "0.35.0"
   resolved "https://registry.yarnpkg.com/eslint-config-xo-space/-/eslint-config-xo-space-0.35.0.tgz#fdc2741c601a011e3ba185f07e2e78b6eed9d3dc"
   integrity sha512-+79iVcoLi3PvGcjqYDpSPzbLfqYpNcMlhsCBRsnmDoHAn4npJG6YxmHpelQKpXM7v/EeZTUKb4e1xotWlei8KA==
   dependencies:
     eslint-config-xo "^0.44.0"
-
-eslint-config-xo@^0.43.0:
-  version "0.43.1"
-  resolved "https://registry.yarnpkg.com/eslint-config-xo/-/eslint-config-xo-0.43.1.tgz#c2ac8993f6e429048c813f599265d1636a0bc060"
-  integrity sha512-azv1L2PysRA0NkZOgbndUpN+581L7wPqkgJOgxxw3hxwXAbJgD6Hqb/SjHRiACifXt/AvxCzE/jIKFAlI7XjvQ==
-  dependencies:
-    confusing-browser-globals "1.0.11"
 
 eslint-config-xo@^0.44.0:
   version "0.44.0"
