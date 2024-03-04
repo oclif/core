@@ -2,22 +2,24 @@ import globby from 'globby'
 import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
 
+import Cache from '../cache'
 import {Command} from '../command'
 import {CLIError, error} from '../errors'
 import {Manifest} from '../interfaces/manifest'
-import {PJSON} from '../interfaces/pjson'
+import {CommandDiscovery, HookOptions, PJSON} from '../interfaces/pjson'
 import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
-import {loadWithData, loadWithDataFromManifest} from '../module-loader'
+import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
+import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
-import {readJson, requireJson} from '../util/fs'
+import {readJson} from '../util/fs'
 import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-path'
 import {Debug, getCommandIdPermutations} from './util'
 
-const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const _pjson = Cache.getInstance().get('@oclif/core')
 
 function topicsToArray(input: any, base?: string): Topic[] {
   if (!input) return []
@@ -35,10 +37,14 @@ function topicsToArray(input: any, base?: string): Topic[] {
 const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boolean =>
   Boolean(manifest?.commands[id] && 'isESM' in manifest.commands[id] && 'relativePath' in manifest.commands[id])
 
-const search = (cmd: any) => {
+const searchForCommandClass = (cmd: any) => {
   if (typeof cmd.run === 'function') return cmd
   if (cmd.default && cmd.default.run) return cmd.default
   return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
+}
+
+const ensureCommandClass = (cmd: any) => {
+  if (cmd && typeof cmd.run === 'function') return cmd
 }
 
 const GLOB_PATTERNS = [
@@ -52,9 +58,47 @@ function processCommandIds(files: string[]): string[] {
     const topics = p.dir.split('/')
     const command = p.name !== 'index' && p.name
     const id = [...topics, command].filter(Boolean).join(':')
-    return id === '' ? '.' : id
+    return id === '' ? SINGLE_COMMAND_CLI_SYMBOL : id
   })
 }
+
+function determineCommandDiscoveryOptions(
+  commandDiscovery: string | CommandDiscovery | undefined,
+  defaultCmdId?: string | undefined,
+): CommandDiscovery | undefined {
+  if (!commandDiscovery) return
+
+  if (typeof commandDiscovery === 'string' && defaultCmdId) {
+    return {strategy: 'single', target: commandDiscovery}
+  }
+
+  if (typeof commandDiscovery === 'string') {
+    return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
+  }
+
+  if (!commandDiscovery.target) throw new CLIError('`oclif.commandDiscovery.target` is required.')
+  if (!commandDiscovery.strategy) throw new CLIError('`oclif.commandDiscovery.strategy` is required.')
+
+  if (commandDiscovery.strategy === 'explicit' && !commandDiscovery.identifier) {
+    commandDiscovery.identifier = 'default'
+  }
+
+  return commandDiscovery
+}
+
+function determineHookOptions(hook: string | HookOptions): HookOptions {
+  if (typeof hook === 'string') return {identifier: 'default', target: hook}
+  if (!hook.identifier) return {...hook, identifier: 'default'}
+  return hook
+}
+
+/**
+ * Cached commands, where the key is the command ID and the value is the command class.
+ *
+ * This is only populated if the `strategy` is `explicit` and the `target` is a file that default exports the id-to-command-class object.
+ * Or if the strategy is `single` and the `target` is the file containing a command class.
+ */
+type CommandCache = Record<string, Command.Class>
 
 export class Plugin implements IPlugin {
   alias!: string
@@ -72,7 +116,7 @@ export class Plugin implements IPlugin {
 
   hasManifest = false
 
-  hooks!: {[k: string]: string[]}
+  hooks!: {[key: string]: HookOptions[]}
 
   isRoot = false
 
@@ -103,6 +147,8 @@ export class Plugin implements IPlugin {
   // eslint-disable-next-line new-cap
   protected _debug = Debug()
 
+  private commandCache: CommandCache | undefined
+  private commandDiscoveryOpts: CommandDiscovery | undefined
   private flexibleTaxonomy!: boolean
 
   constructor(public options: PluginOptions) {}
@@ -122,28 +168,40 @@ export class Plugin implements IPlugin {
     })
 
     const fetch = async () => {
-      const commandsDir = await this.getCommandsDir()
-      if (!commandsDir) return
-      let module
-      let isESM: boolean | undefined
-      let filePath: string | undefined
-      try {
-        ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
-          ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-          : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
-        this._debug(isESM ? '(import)' : '(require)', filePath)
-      } catch (error: any) {
-        if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
-        throw error
+      if (this.commandDiscoveryOpts?.strategy === 'pattern') {
+        const commandsDir = await this.getCommandsDir()
+        if (!commandsDir) return
+        let module
+        let isESM: boolean | undefined
+        let filePath: string | undefined
+        try {
+          ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
+            ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
+            : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+          this._debug(isESM ? '(import)' : '(require)', filePath)
+        } catch (error: any) {
+          if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
+          throw error
+        }
+
+        const cmd = searchForCommandClass(module)
+        if (!cmd) return
+        cmd.id = id
+        cmd.plugin = this
+        cmd.isESM = isESM
+        cmd.relativePath = relative(this.root, filePath || '').split(sep)
+        return cmd
       }
 
-      const cmd = search(module)
-      if (!cmd) return
-      cmd.id = id
-      cmd.plugin = this
-      cmd.isESM = isESM
-      cmd.relativePath = relative(this.root, filePath || '').split(sep)
-      return cmd
+      if (this.commandDiscoveryOpts?.strategy === 'single' || this.commandDiscoveryOpts?.strategy === 'explicit') {
+        const commandCache = await this.loadCommandsFromTarget()
+        const cmd = ensureCommandClass(commandCache?.[id])
+        if (!cmd) return
+
+        cmd.id = id
+        cmd.plugin = this
+        return cmd
+      }
     }
 
     const cmd = await fetch()
@@ -161,17 +219,20 @@ export class Plugin implements IPlugin {
     // However there could be child plugins nested inside the linked plugin, in which
     // case we still need to search for the child plugin's root.
     const root =
-      this.type === 'link' && !this.parent ? this.options.root : await findRoot(this.options.name, this.options.root)
+      this.options.pjson && this.options.isRoot
+        ? this.options.root
+        : this.type === 'link' && !this.parent
+          ? this.options.root
+          : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug(`loading ${this.type} plugin from ${root}`)
-    this.pjson = await readJson(join(root, 'package.json'))
+    this.pjson = this.options.pjson ?? (await readJson(join(root, 'package.json')))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
-    const pjsonPath = join(root, 'package.json')
-    if (!this.name) throw new CLIError(`no name in ${pjsonPath}`)
+    if (!this.name) throw new CLIError(`no name in package.json (${root})`)
     // eslint-disable-next-line new-cap
     this._debug = Debug(this.name)
     this.version = this.pjson.version
@@ -181,7 +242,16 @@ export class Plugin implements IPlugin {
       this.pjson.oclif = this.pjson['cli-engine'] || {}
     }
 
-    this.hooks = Object.fromEntries(Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [k, castArray(v)]))
+    this.hooks = Object.fromEntries(
+      Object.entries(this.pjson.oclif.hooks ?? {}).map(([k, v]) => [
+        k,
+        castArray<string | HookOptions>(v).map((v) => determineHookOptions(v)),
+      ]),
+    )
+
+    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands, this.pjson.oclif?.default)
+
+    this._debug('command discovery options', this.commandDiscoveryOpts)
 
     this.manifest = await this._manifest()
     this.commands = Object.entries(this.manifest.commands)
@@ -238,7 +308,14 @@ export class Plugin implements IPlugin {
         await Promise.all(
           this.commandIDs.map(async (id) => {
             try {
-              const cached = await cacheCommand(await this.findCommand(id, {must: true}), this, respectNoCacheDefault)
+              const found = await this.findCommand(id, {must: true})
+              const cached = await cacheCommand(found, this, respectNoCacheDefault)
+
+              // Ensure that id is set to the id being processed
+              // This is necessary because the id is set by findCommand but if there
+              // are multiple instances of a Command, then the id will be set to the
+              // last one found.
+              cached.id = id
               if (this.flexibleTaxonomy) {
                 const permutations = getCommandIdPermutations(id)
                 const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
@@ -256,13 +333,10 @@ export class Plugin implements IPlugin {
       )
         // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
         .filter((f): f is [string, Command.Cached] => Boolean(f))
-        .reduce(
-          (commands, [id, c]) => {
-            commands[id] = c
-            return commands
-          },
-          {} as {[k: string]: Command.Cached},
-        ),
+        .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
+          commands[id] = c
+          return commands
+        }, {}),
       version: this.version,
     }
     marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: false})
@@ -284,23 +358,77 @@ export class Plugin implements IPlugin {
   }
 
   private async getCommandIDs(): Promise<string[]> {
-    const commandsDir = await this.getCommandsDir()
-    if (!commandsDir) return []
-
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.getCommandIDs#${this.name}`, {plugin: this.name})
-    this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(GLOB_PATTERNS, {cwd: commandsDir})
-    const ids = processCommandIds(files)
+
+    let ids: string[]
+    switch (this.commandDiscoveryOpts?.strategy) {
+      case 'explicit': {
+        ids = (await this.getCommandIdsFromTarget()) ?? []
+        break
+      }
+
+      case 'pattern': {
+        ids = await this.getCommandIdsFromPattern()
+        break
+      }
+
+      case 'single': {
+        ids = (await this.getCommandIdsFromTarget()) ?? []
+        break
+      }
+
+      default: {
+        ids = []
+      }
+    }
+
     this._debug('found commands', ids)
     marker?.addDetails({count: ids.length})
     marker?.stop()
     return ids
   }
 
+  private async getCommandIdsFromPattern(): Promise<string[]> {
+    const commandsDir = await this.getCommandsDir()
+    if (!commandsDir) return []
+
+    this._debug(`loading IDs from ${commandsDir}`)
+    const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
+    return processCommandIds(files)
+  }
+
+  private async getCommandIdsFromTarget(): Promise<string[] | undefined> {
+    const commandsFromExport = await this.loadCommandsFromTarget()
+    if (commandsFromExport) {
+      return Object.entries((await this.loadCommandsFromTarget()) ?? [])
+        .filter(([, cmd]) => ensureCommandClass(cmd))
+        .map(([id]) => id)
+    }
+  }
+
   private async getCommandsDir(): Promise<string | undefined> {
     if (this.commandsDir) return this.commandsDir
-    this.commandsDir = await tsPath(this.root, this.pjson.oclif.commands, this)
+
+    this.commandsDir = await tsPath(this.root, this.commandDiscoveryOpts?.target, this)
     return this.commandsDir
+  }
+
+  private async loadCommandsFromTarget(): Promise<CommandCache | undefined> {
+    if (this.commandCache) return this.commandCache
+
+    if (this.commandDiscoveryOpts?.strategy === 'explicit' && this.commandDiscoveryOpts.target) {
+      const filePath = await tsPath(this.root, this.commandDiscoveryOpts.target, this)
+      const module = await load<Record<string, CommandCache>>(this, filePath)
+      this.commandCache = module[this.commandDiscoveryOpts?.identifier ?? 'default'] ?? {}
+      return this.commandCache
+    }
+
+    if (this.commandDiscoveryOpts?.strategy === 'single' && this.commandDiscoveryOpts.target) {
+      const filePath = await tsPath(this.root, this.commandDiscoveryOpts?.target ?? this.root, this)
+      const module = await load(this, filePath)
+      this.commandCache = {[SINGLE_COMMAND_CLI_SYMBOL]: searchForCommandClass(module)}
+      return this.commandCache
+    }
   }
 
   private warn(err: CLIError | Error | string, scope?: string): void {

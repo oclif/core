@@ -47,6 +47,15 @@ const commonProps = {
 }
 
 export const plugins: Record<string, PluginConfig> = {
+  esbuild: {
+    name: 'plugin-test-esbuild',
+    command: 'esbuild',
+    package: '@oclif/plugin-test-esbuild',
+    repo: 'https://github.com/oclif/plugin-test-esbuild',
+    commandText: 'hello I am a bundled (esbuild) plugin',
+    hookText: 'Greetings! from plugin-test-esbuild init hook',
+    ...commonProps,
+  },
   esm1: {
     name: 'plugin-test-esm-1',
     command: 'esm1',

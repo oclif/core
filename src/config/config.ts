@@ -17,7 +17,7 @@ import {Theme} from '../interfaces/theme'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
-import {requireJson, safeReadJson} from '../util/fs'
+import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import PluginLoader from './plugin-loader'
@@ -27,7 +27,7 @@ import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
 // eslint-disable-next-line new-cap
 const debug = Debug()
 
-const _pjson = requireJson<PJSON>(__dirname, '..', '..', 'package.json')
+const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
 
 function channelFromVersion(version: string) {
@@ -85,6 +85,7 @@ export class Config implements IConfig {
   public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
+  public isSingleCommandCLI = false
   public name!: string
   public npmRegistry?: string
   public nsisCustomization?: string
@@ -286,7 +287,7 @@ export class Config implements IConfig {
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
-    this.rootPlugin = await this.pluginLoader.loadRoot()
+    this.rootPlugin = await this.pluginLoader.loadRoot({pjson: this.options.pjson})
 
     // Cache the root plugin so that we can reference it later when determining if
     // we should skip ts-node registration for an ESM plugin.
@@ -362,6 +363,12 @@ export class Config implements IConfig {
         ...(s3.templates && s3.templates.vanilla),
       },
     }
+    this.isSingleCommandCLI = Boolean(
+      this.pjson.oclif.default ||
+        (typeof this.pjson.oclif.commands !== 'string' &&
+          this.pjson.oclif.commands?.strategy === 'single' &&
+          this.pjson.oclif.commands?.target),
+    )
 
     await this.loadPluginsAndCommands()
 
@@ -544,15 +551,22 @@ export class Config implements IConfig {
       const hooks = p.hooks[event] || []
 
       for (const hook of hooks) {
-        const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook})`)
+        const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook.target})`)
         try {
           /* eslint-disable no-await-in-loop */
-          const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook, p))
+          const {filePath, isESM, module} = await loadWithData(p, await tsPath(p.root, hook.target, p))
           debug('start', isESM ? '(import)' : '(require)', filePath)
+          // If no hook is found using the identifier, then we should `search` for the hook but only if the hook identifier is 'default'
+          // A named identifier (e.g. MY_HOOK) that isn't found indicates that the hook isn't implemented in the plugin.
+          const hookFn = module[hook.identifier] ?? (hook.identifier === 'default' ? search(module) : undefined)
+          if (!hookFn) {
+            debug('No hook found for hook definition:', hook)
+            continue
+          }
 
           const result = timeout
-            ? await withTimeout(timeout, search(module).call(context, {...(opts as any), config: this, context}))
-            : await search(module).call(context, {...(opts as any), config: this, context})
+            ? await withTimeout(timeout, hookFn.call(context, {...(opts as any), config: this, context}))
+            : await hookFn.call(context, {...(opts as any), config: this, context})
           final.successes.push({plugin: p, result})
 
           if (p.name === '@oclif/plugin-legacy' && event === 'init') {
@@ -578,7 +592,7 @@ export class Config implements IConfig {
 
         marker?.addDetails({
           event,
-          hook,
+          hook: hook.target,
           plugin: p.name,
         })
         marker?.stop()

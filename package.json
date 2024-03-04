@@ -1,7 +1,7 @@
 {
   "name": "@oclif/core",
   "description": "base library for oclif CLIs",
-  "version": "3.20.0",
+  "version": "3.20.1-dev.1",
   "author": "Salesforce",
   "bugs": "https://github.com/oclif/core/issues",
   "dependencies": {
@@ -114,7 +114,6 @@
     "access": "public"
   },
   "scripts": {
-    "build:dev": "shx rm -rf lib && tsc --sourceMap",
     "build": "shx rm -rf lib && tsc",
     "commitlint": "commitlint",
     "compile": "tsc",
@@ -129,7 +128,6 @@
     "test:integration": "mocha --forbid-only \"test/**/*.integration.ts\" --parallel --timeout 1200000",
     "test:interoperability": "cross-env DEBUG=integration:* ts-node test/integration/interop.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
-    "test:dev": "nyc mocha \"test/**/*.test.ts\"",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"

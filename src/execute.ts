@@ -1,4 +1,5 @@
 import {flush} from './cli-ux/flush'
+import {CLIError} from './errors'
 import {handle} from './errors/handle'
 import {LoadOptions} from './interfaces'
 import {run} from './main'
@@ -47,9 +48,13 @@ import {settings} from './settings'
 export async function execute(options: {
   args?: string[]
   development?: boolean
-  dir: string
+  dir?: string
   loadOptions?: LoadOptions
 }): Promise<unknown> {
+  if (!options.dir && !options.loadOptions) {
+    throw new CLIError('dir or loadOptions is required.')
+  }
+
   if (options.development) {
     // In dev mode -> use ts-node and dev plugins
     process.env.NODE_ENV = 'development'

@@ -5,7 +5,17 @@
   "private": true,
   "files": [],
   "oclif": {
-    "commands": "./lib/commands",
+    "commands": {
+      "strategy": "explicit",
+      "target": "./lib/index.js",
+      "identifier": "commands"
+    },
+    "hooks": {
+      "init": {
+        "target": "./lib/index.js",
+        "identifier": "initHook"
+      }
+    },
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help",

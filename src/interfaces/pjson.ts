@@ -14,6 +14,88 @@ export interface PJSON {
   version: string
 }
 
+export type CommandDiscovery = {
+  /**
+   * The strategy to use for loading commands.
+   *
+   * - `pattern` will use glob patterns to find command files in the specified `target`.
+   * - `explicit` will use `import` (or `require` for CJS) to load the commands from the
+   *    specified `target`.
+   * - `single` will use the `target` which should export a command class. This is for CLIs that
+   *    only have a single command.
+   *
+   * In both cases, the `oclif.manifest.json` file will be used to find the commands if it exists.
+   */
+  strategy: 'pattern' | 'explicit' | 'single'
+  /**
+   * If the `strategy` is `pattern`, this is the **directory** to use to find command files.
+   *
+   * If the `strategy` is `explicit`, this is the **file** that exports the commands.
+   *   - This export must be an object with keys that are the command names and values that are the command classes.
+   *   - Unless `identifier` is specified, the default export will be used.
+   *
+   * @example
+   * ```typescript
+   * // in src/commands.ts
+   * import {Command} from '@oclif/core'
+   * import Hello from './commands/hello/index.js'
+   * import HelloWorld from './commands/hello/world.js'
+   *
+   * export default {
+   *   hello: Hello,
+   *   'hello:world': HelloWorld,
+   * } satisfies Record<string, Command.Class>
+   * ```
+   */
+  target: string
+  /**
+   * The glob patterns to use to find command files when no `oclif.manifest.json` is present.
+   * This is only used when `strategy` is `pattern`.
+   */
+  globPatterns?: string[]
+  /**
+   * The name of the export to used when loading the command object from the `target` file. Only
+   * used when `strategy` is `explicit`. Defaults to `default`.
+   *
+   * @example
+   * ```typescript
+   * // in src/commands.ts
+   * import {Command} from '@oclif/core'
+   * import Hello from './commands/hello/index.js'
+   * import HelloWorld from './commands/hello/world.js'
+   *
+   * export const MY_COMMANDS = {
+   *  hello: Hello,
+   * 'hello:world': HelloWorld,
+   * } satisfies Record<string, Command.Class>
+   * ```
+   *
+   * In the package.json:
+   * ```json
+   * {
+   *  "oclif": {
+   *   "commands": {
+   *     "strategy": "explicit",
+   *     "target": "./dist/index.js",
+   *     "identifier": "MY_COMMANDS"
+   *    }
+   * }
+   * ```
+   */
+  identifier?: string
+}
+
+export type HookOptions = {
+  /**
+   * The file path containing hook.
+   */
+  target: string
+  /**
+   * The name of the export to use when loading the hook function from the `target` file. Defaults to `default`.
+   */
+  identifier: string
+}
+
 export namespace PJSON {
   export interface Plugin extends PJSON {
     name: string
@@ -21,7 +103,13 @@ export namespace PJSON {
       additionalHelpFlags?: string[]
       additionalVersionFlags?: string[]
       aliases?: {[name: string]: null | string}
-      commands?: string
+      commands?: string | CommandDiscovery
+      /**
+       * Default command id when no command is found. This is used to support single command CLIs.
+       * Only supported value is "."
+       *
+       * @deprecated Use `commands.strategy: 'single'` instead.
+       */
       default?: string
       description?: string
       devPlugins?: string[]
@@ -37,7 +125,7 @@ export namespace PJSON {
       flexibleTaxonomy?: boolean
       helpClass?: string
       helpOptions?: HelpOptions
-      hooks?: {[name: string]: string | string[]}
+      hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
       jitPlugins?: Record<string, string>
       macos?: {
         identifier?: string
