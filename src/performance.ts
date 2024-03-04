@@ -133,11 +133,11 @@ export class Performance {
             (acc, perfResult) => {
               const event = perfResult.details.event as string
               if (event) {
-                if (!acc[event]) acc[event] = {}
+                acc[event] ||= {}
                 acc[event][perfResult.scope!] = perfResult.duration
               } else {
                 const event = perfResult.scope!
-                if (!acc[event]) acc[event] = {}
+                acc[event] ||= {}
                 acc[event].total = perfResult.duration
               }
 

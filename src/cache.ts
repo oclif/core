@@ -13,9 +13,7 @@ type ValueOf<T> = T[keyof T]
 export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContents>> {
   static instance: Cache
   static getInstance(): Cache {
-    if (!Cache.instance) {
-      Cache.instance = new Cache()
-    }
+    Cache.instance ||= new Cache()
 
     return Cache.instance
   }

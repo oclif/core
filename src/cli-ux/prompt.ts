@@ -68,7 +68,7 @@ function getPrompt(name: string, type?: string, defaultValue?: string) {
 async function single(options: IPromptConfig): Promise<string> {
   const raw = process.stdin.isRaw
   if (process.stdin.setRawMode) process.stdin.setRawMode(true)
-  options.required = options.required ?? false
+  options.required ??= false
   const response = await normal(options)
   if (process.stdin.setRawMode) process.stdin.setRawMode(Boolean(raw))
   return response
@@ -170,11 +170,9 @@ export function confirm(message: string): Promise<boolean> {
  */
 export async function anykey(message?: string): Promise<string> {
   const tty = Boolean(process.stdin.setRawMode)
-  if (!message) {
-    message = tty
-      ? `Press any key to continue or ${chalk.yellow('q')} to exit`
-      : `Press enter to continue or ${chalk.yellow('q')} to exit`
-  }
+  message ||= tty
+    ? `Press any key to continue or ${chalk.yellow('q')} to exit`
+    : `Press enter to continue or ${chalk.yellow('q')} to exit`
 
   const char = await prompt(message, {required: false, type: 'single'})
   if (tty) process.stderr.write('\n')

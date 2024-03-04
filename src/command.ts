@@ -164,7 +164,7 @@ export abstract class Command {
     argv?: string[],
     opts?: LoadOptions,
   ): Promise<ReturnType<T['run']>> {
-    if (!argv) argv = process.argv.slice(2)
+    argv ||= process.argv.slice(2)
 
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
@@ -187,7 +187,7 @@ export abstract class Command {
   }
 
   protected async catch(err: CommandError): Promise<any> {
-    process.exitCode = process.exitCode ?? err.exitCode ?? 1
+    process.exitCode ??= err.exitCode ?? 1
     if (this.jsonEnabled()) {
       this.logJson(this.toErrorJson(err))
     } else {
@@ -229,7 +229,7 @@ export abstract class Command {
     if (this.config.debug) Errors.config.debug = true
     if (this.config.errlog) Errors.config.errlog = this.config.errlog
     const g: any = global
-    g['http-call'] = g['http-call'] || {}
+    g['http-call'] ||= {}
     g['http-call']!.userAgent = this.config.userAgent
     this.warnIfCommandDeprecated()
   }
@@ -277,7 +277,7 @@ export abstract class Command {
     options?: Input<F, B, A>,
     argv = this.argv,
   ): Promise<ParserOutput<F, B, A>> {
-    if (!options) options = this.ctor as Input<F, B, A>
+    options ||= this.ctor as Input<F, B, A>
 
     const opts = {
       context: this,

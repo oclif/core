@@ -13,6 +13,7 @@ export interface ConfigMessage {
 }
 
 const g: any = global
+// eslint-disable-next-line logical-assignment-operators
 const globals = g.ux || (g.ux = {})
 
 const actionType =

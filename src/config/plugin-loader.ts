@@ -136,7 +136,7 @@ export default class PluginLoader {
           this.plugins.set(instance.name, instance)
           if (parent) {
             instance.parent = parent
-            if (!parent.children) parent.children = []
+            parent.children ||= []
             parent.children.push(instance)
           }
 
@@ -157,8 +157,8 @@ export default class PluginLoader {
         const userPJSONPath = join(opts.dataDir, 'package.json')
         debug('reading user plugins pjson %s', userPJSONPath)
         const pjson = await readJson<PJSON>(userPJSONPath)
-        if (!pjson.oclif) pjson.oclif = {schema: 1}
-        if (!pjson.oclif.plugins) pjson.oclif.plugins = []
+        pjson.oclif ||= {schema: 1}
+        pjson.oclif.plugins ||= []
         await this.loadPlugins(
           userPJSONPath,
           'user',

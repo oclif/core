@@ -48,7 +48,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   debug(`process.execArgv: ${process.execArgv}`)
   debug('process.argv: %O', process.argv)
 
-  argv = argv ?? process.argv.slice(2)
+  argv ??= process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)

@@ -23,7 +23,7 @@ type ErrorToHandle = Error & Partial<PrettyPrintableError> & Partial<OclifError>
 
 export async function handle(err: ErrorToHandle): Promise<void> {
   try {
-    if (!err) err = new CLIError('no error?')
+    err ||= new CLIError('no error?')
     if (err.message === 'SIGINT') Exit.exit(1)
 
     const shouldPrint = !(err instanceof ExitError) && !err.skipOclifErrorHandling

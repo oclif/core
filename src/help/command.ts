@@ -269,7 +269,7 @@ export class CommandHelp extends HelpFormatter {
       const group = flag.helpGroup
 
       if (group) {
-        if (!flagGroups[group]) flagGroups[group] = []
+        flagGroups[group] ||= []
         flagGroups[group].push(flag)
       } else {
         mainFlags.push(flag)

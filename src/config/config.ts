@@ -336,7 +336,9 @@ export class Config implements IConfig {
       this.theme = theme
     }
 
+    // eslint-disable-next-line logical-assignment-operators
     this.pjson.oclif.update = this.pjson.oclif.update || {}
+    // eslint-disable-next-line logical-assignment-operators
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
     const s3 = this.pjson.oclif.update.s3 || {}
     this.pjson.oclif.update.s3 = s3
@@ -888,7 +890,7 @@ export class Config implements IConfig {
       const existing = this._topics.get(topic.name)
       if (existing) {
         existing.description = topic.description || existing.description
-        existing.hidden = existing.hidden || topic.hidden
+        existing.hidden ||= topic.hidden
       } else {
         this._topics.set(topic.name, topic)
       }

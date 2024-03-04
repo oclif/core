@@ -32,7 +32,7 @@ function getHelpSubject(args: string[], config: Interfaces.Config): string | und
 export abstract class HelpBase extends HelpFormatter {
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     super(config, opts)
-    if (!config.topicSeparator) config.topicSeparator = ':' // back-support @oclif/config
+    config.topicSeparator ||= ':' // back-support @oclif/config
   }
 
   /**
@@ -91,7 +91,7 @@ export class Help extends HelpBase {
   protected formatCommand(command: Command.Loadable): string {
     if (this.config.topicSeparator !== ':') {
       command.id = command.id.replaceAll(':', this.config.topicSeparator)
-      command.aliases = command.aliases && command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
+      command.aliases &&= command.aliases.map((a) => a.replaceAll(':', this.config.topicSeparator))
     }
 
     const help = this.getCommandHelpClass(command)
