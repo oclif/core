@@ -121,6 +121,31 @@ describe('validate', () => {
     await validate({input, output})
   })
 
+  it('allows empty string as arg', async () => {
+    const input = {
+      argv: [],
+      flags: {},
+      args: {
+        emptyString: {required: true},
+      },
+      strict: true,
+      context: {},
+      '--': true,
+    }
+
+    const output = {
+      args: {emptyString: ''},
+      argv: [''],
+      raw: [],
+      metadata: {
+        flags: {},
+      },
+    }
+
+    // @ts-expect-error
+    await validate({input, output})
+  })
+
   it('throws when required flag is undefined', async () => {
     const input = {
       argv: [],

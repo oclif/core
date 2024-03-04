@@ -44,7 +44,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         })
       }
 
-      if (arg.required && !parse.output.args[name] && parse.output.args[name] !== 0) {
+      // Only add if it's required and undefined. Allow falsy values like empty strings and 0.
+      if (arg.required && parse.output.args[name] === undefined) {
         missingRequiredArgs.push(arg)
       }
     }

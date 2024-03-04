@@ -305,7 +305,7 @@ export class Parser<
     }
 
     for (const token of tokens) {
-      if (args[token.arg]) continue
+      if (args[token.arg] !== undefined) continue
       argv.push(token.input)
     }
 
