@@ -1,3 +1,12 @@
+## [3.21.2](https://github.com/oclif/core/compare/3.21.1...3.21.2) (2024-03-04)
+
+
+### Bug Fixes
+
+* improve module load error handling ([#996](https://github.com/oclif/core/issues/996)) ([5cec2b2](https://github.com/oclif/core/commit/5cec2b20e637c536d2bbeefc1c6119676f65cfad))
+
+
+
 ## [3.21.1](https://github.com/oclif/core/compare/3.21.0...3.21.1) (2024-03-04)
 
 
