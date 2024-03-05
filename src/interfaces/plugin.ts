@@ -24,6 +24,11 @@ export interface Options extends PluginOptions {
   enablePerf?: boolean
   jitPlugins?: boolean
   pjson?: PJSON.Plugin
+  pluginAdditions?: {
+    core?: string[]
+    dev?: string[]
+    path?: string
+  }
   plugins?: Map<string, Plugin>
   userPlugins?: boolean
   version?: string

@@ -388,6 +388,7 @@ export class Config implements IConfig {
       dataDir: this.dataDir,
       devPlugins: this.options.devPlugins,
       force: opts?.force ?? false,
+      pluginAdditions: this.options.pluginAdditions,
       rootPlugin: this.rootPlugin,
       userPlugins: this.options.userPlugins,
     })
