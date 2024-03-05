@@ -11,6 +11,9 @@ import {stdtermwidth} from '../../screen'
 import {capitalize, sumBy} from '../../util/util'
 import write from '../write'
 
+/**
+ * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+ */
 class Table<T extends Record<string, unknown>> {
   columns: (table.Column<T> & {key: string; maxWidth?: number; width?: number})[]
 

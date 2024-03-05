@@ -147,28 +147,97 @@ const {
 const {error, exit, warn} = Errors
 
 export {
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   action,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   annotation,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   anykey,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   confirm,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   debug,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   done,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   error,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   exit,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   flush,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   info,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   log,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   logToStderr,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   progress,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   prompt,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   styledHeader,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   styledJSON,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   styledObject,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   table,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   trace,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   tree,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   url,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   wait,
+  /**
+   * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+   */
   warn,
 }
 
