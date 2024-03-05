@@ -1,3 +1,12 @@
+# [3.23.0](https://github.com/oclif/core/compare/3.22.0...3.23.0) (2024-03-05)
+
+
+### Features
+
+* deprecate ux module ([#1000](https://github.com/oclif/core/issues/1000)) ([503c7ae](https://github.com/oclif/core/commit/503c7ae39aa1e42cebf79bdd98c05d85c3721309))
+
+
+
 # [3.22.0](https://github.com/oclif/core/compare/3.21.2...3.22.0) (2024-03-05)
 
 
