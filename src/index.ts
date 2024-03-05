@@ -1,4 +1,3 @@
-import * as cliUx from './cli-ux'
 import write from './cli-ux/write'
 
 function checkCWD() {
@@ -14,12 +13,7 @@ function checkCWD() {
 checkCWD()
 
 export * as Args from './args'
-/**
- * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
- */
-export const ux = {
-  ...cliUx,
-}
+export * as ux from './cli-ux'
 export {flush} from './cli-ux/flush'
 export {stderr, stdout} from './cli-ux/stream' // Remove these in the next major version
 export {Command} from './command'

@@ -23,6 +23,9 @@ const actionType =
 
 const Action = actionType === 'spinner' ? spinner : simple
 
+/**
+ * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+ */
 export class Config {
   action: ActionBase = new Action()
 
@@ -57,5 +60,8 @@ function fetch() {
   return globals[major]
 }
 
+/**
+ * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+ */
 export const config: Config = fetch()
 export default config

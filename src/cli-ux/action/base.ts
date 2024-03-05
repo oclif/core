@@ -11,6 +11,9 @@ export interface ITask {
 
 export type ActionType = 'debug' | 'simple' | 'spinner'
 
+/**
+ * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+ */
 export class ActionBase {
   std: 'stderr' | 'stdout' = 'stderr'
 

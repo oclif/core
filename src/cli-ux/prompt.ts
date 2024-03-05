@@ -3,6 +3,9 @@ import chalk from 'chalk'
 import * as Errors from '../errors'
 import {config} from './config'
 
+/**
+ * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
+ */
 export interface IPromptOptions {
   default?: string
   prompt?: string
