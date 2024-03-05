@@ -61,7 +61,7 @@ export class DocOpts {
 
   private flagMap: {[index: string]: Command.Flag.Any}
 
-  public constructor(private cmd: Command.Cached | Command.Class | Command.Loadable) {
+  public constructor(private cmd: Command.Loadable) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -72,16 +72,18 @@ export class DocOpts {
       })
   }
 
-  public static generate(cmd: Command.Cached | Command.Class | Command.Loadable): string {
+  public static generate(cmd: Command.Loadable): string {
     return new DocOpts(cmd).toString()
   }
 
   public toString(): string {
     const opts = ['<%= command.id %>']
     if (this.cmd.args) {
+      // If static is false, add ellipsis to indicate that the argument takes multiple values
+      const suffix = this.cmd.static === false ? '...' : ''
       const a =
         Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
-          arg.required ? arg.name.toUpperCase() : `[${arg.name.toUpperCase()}]`,
+          arg.required ? `${arg.name.toUpperCase()}${suffix}` : `[${arg.name.toUpperCase()}${suffix}]`,
         ) || []
       opts.push(...a)
     }

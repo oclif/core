@@ -517,6 +517,25 @@ FLAG DESCRIPTIONS
 ARGUMENTS
   ARG1  (option1|option2) Show the options`)
     })
+
+    it('should output arg with ... if static is false', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          static: false,
+          args: {
+            arg1: Args.string({description: 'Show the options'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create [ARG1...]
+
+ARGUMENTS
+  ARG1...  Show the options`)
+    })
   })
 
   describe('usage', () => {
