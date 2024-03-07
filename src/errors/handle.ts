@@ -1,9 +1,7 @@
-/* eslint-disable no-process-exit */
 import clean from 'clean-stack'
 
 import Cache from '../cache'
 import {Help} from '../help/index'
-/* eslint-disable unicorn/no-process-exit */
 import {OclifError, PrettyPrintableError} from '../interfaces'
 import {CLIParseError} from '../parser/errors'
 import {config} from './config'
@@ -18,6 +16,7 @@ import prettyPrint from './errors/pretty-print'
  */
 export const Exit = {
   exit(code = 0) {
+    // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit
     process.exit(code)
   },
 }

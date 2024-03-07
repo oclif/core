@@ -98,7 +98,7 @@ let pnp: {
 function maybeRequirePnpApi(root: string): unknown {
   if (pnp) return pnp
   try {
-    // eslint-disable-next-line node/no-missing-require
+    // eslint-disable-next-line n/no-missing-require
     pnp = require(require.resolve('pnpapi', {paths: [root]}))
     return pnp
   } catch {}

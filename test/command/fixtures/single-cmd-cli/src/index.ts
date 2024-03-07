@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/no-unpublished-import
 import {Command} from '../../../../../src/index'
 
 export default class FooBar extends Command {
