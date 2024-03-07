@@ -40,7 +40,6 @@ export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContent
 
   private getOclifCoreMeta(): OclifCoreInfo {
     try {
-      // eslint-disable-next-line node/no-extraneous-require
       return {name: '@oclif/core', version: require('@oclif/core/package.json').version}
     } catch {
       try {
