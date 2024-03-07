@@ -2,7 +2,7 @@ import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import Cache from '../cache'
-import {memoizedWarn} from '../errors'
+import {memoizedWarn} from '../errors/warn'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {existsSync} from '../util/fs'

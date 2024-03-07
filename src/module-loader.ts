@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url'
 
 import {Command} from './command'
 import {tsPath} from './config/ts-path'
-import {ModuleLoadError} from './errors'
+import {ModuleLoadError} from './errors/errors/module-load'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {existsSync} from './util/fs'
 
