@@ -10,7 +10,6 @@ export {config} from './config'
 export {CLIError} from './errors/cli'
 export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
-export {handle} from './handle'
 
 export function exit(code = 0): never {
   throw new ExitError(code)
