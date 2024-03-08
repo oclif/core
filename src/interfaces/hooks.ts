@@ -1,5 +1,6 @@
 import {Command} from '../command'
 import {Config} from './config'
+import {Input, OutputFlags} from './parser'
 import {Plugin} from './plugin'
 
 interface HookMeta {
@@ -46,6 +47,13 @@ export interface Hooks {
       result?: any
     }
     return: void
+  }
+  preparse: {
+    options: {
+      argv: string[]
+      options: Input<OutputFlags<any>, OutputFlags<any>, OutputFlags<any>>
+    }
+    return: string[]
   }
   prerun: {
     options: {Command: Command.Class; argv: string[]}

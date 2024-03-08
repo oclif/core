@@ -1,0 +1,14 @@
+{
+  "name": "preparse-plugin",
+  "private": true,
+  "files": [],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "oclif": {
+    "commands": "./lib/commands",
+    "hooks": {
+      "preparse": "./lib/hooks/preparse.js"
+    }
+  }
+}

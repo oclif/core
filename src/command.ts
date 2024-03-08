@@ -284,7 +284,15 @@ export abstract class Command {
       flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
     }
 
-    const results = await Parser.parse<F, B, A>(argv, opts)
+    const hookResult = await this.config.runHook('preparse', {argv: [...argv], options: opts})
+
+    // Since config.runHook will only run the hook for the root plugin, hookResult.successes will always have a length of 0 or 1
+    // But to be extra safe, we find the result that matches the root plugin.
+    const argvToParse = hookResult.successes?.length
+      ? hookResult.successes.find((s) => s.plugin.root === Cache.getInstance().get('rootPlugin')?.root)?.result ?? argv
+      : argv
+
+    const results = await Parser.parse<F, B, A>(argvToParse, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
     return results

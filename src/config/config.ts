@@ -29,6 +29,7 @@ const debug = Debug()
 
 const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
+const ROOT_ONLY_HOOKS = new Set<keyof Hooks>(['preparse'])
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
@@ -530,7 +531,9 @@ export class Config implements IConfig {
       failures: [],
       successes: [],
     } as Hook.Result<Hooks[T]['return']>
-    const promises = [...this.plugins.values()].map(async (p) => {
+
+    const plugins = ROOT_ONLY_HOOKS.has(event) ? [this.rootPlugin] : [...this.plugins.values()]
+    const promises = plugins.map(async (p) => {
       const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
