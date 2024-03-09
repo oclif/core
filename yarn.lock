@@ -3073,10 +3073,10 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-fancy-test@^3.0.11:
-  version "3.0.11"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.11.tgz#b2d54ed8c31161ebdddb990bde27cf44e6876a01"
-  integrity sha512-cyfdbhT7LlkWHtPa2PaR5yWOTDzgmrpBqkTVXC5l7Uzs7og2Wnhj5lQnxA9+nSPr+WfY8jrH0Kf2v8HPsPQFKQ==
+fancy-test@^3.0.11, fancy-test@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.12.tgz#919482bd63ab949aec4a51690c857f8c125383b3"
+  integrity sha512-pboHMxTnbD72FBl/fgYAmBb6AjiF0OgI1osAnnzzuFgBrzbFQj5so3XlknKC9k3HFJIy0HerCTyDjz/YZ6aBIg==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
@@ -3084,7 +3084,7 @@ fancy-test@^3.0.11:
     "@types/sinon" "*"
     lodash "^4.17.13"
     mock-stdin "^1.0.0"
-    nock "^13.5.3"
+    nock "^13.5.4"
     sinon "^16.1.3"
     stdout-stderr "^0.1.9"
 
@@ -4960,10 +4960,10 @@ nise@^5.1.4:
     just-extend "^4.0.2"
     path-to-regexp "^1.7.0"
 
-nock@^13.5.3:
-  version "13.5.3"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-13.5.3.tgz#9858adf5b840696a410baf98bda720d5fad4f075"
-  integrity sha512-2NlGmHIK2rTeyy7UaY1ZNg0YZfEJMxghXgZi0b4DBsUyoDNTTxZeCSG1nmirAWF44RkkoV8NnegLVQijgVapNQ==
+nock@^13.5.4:
+  version "13.5.4"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.5.4.tgz#8918f0addc70a63736170fef7106a9721e0dc479"
+  integrity sha512-yAyTfdeNJGGBFxWdzSKCBYxs5FxLbCg5X5Q4ets974hcQzG1+qCxvIyOo4j2Ry6MUlhWVMX4OoYDefAIIwupjw==
   dependencies:
     debug "^4.1.0"
     json-stringify-safe "^5.0.1"
