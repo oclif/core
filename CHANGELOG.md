@@ -1,3 +1,12 @@
+## [3.23.1](https://github.com/oclif/core/compare/3.23.0...3.23.1) (2024-03-11)
+
+
+### Bug Fixes
+
+* remove configured id from usage override ([#1012](https://github.com/oclif/core/issues/1012)) ([a8efedd](https://github.com/oclif/core/commit/a8efedde818f0e62577c39c470c7419cc25de255))
+
+
+
 # [3.23.0](https://github.com/oclif/core/compare/3.22.0...3.23.0) (2024-03-05)
 
 
