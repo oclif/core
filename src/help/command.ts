@@ -59,8 +59,8 @@ export class CommandHelp extends HelpFormatter {
     if (args.filter((a) => a.description).length === 0) return
 
     return args.map((a) => {
-      // Add ellipsis to indicate that the argument takes multiple values if static is false
-      const name = this.command.static === false ? `${a.name.toUpperCase()}...` : a.name.toUpperCase()
+      // Add ellipsis to indicate that the argument takes multiple values if strict is false
+      const name = this.command.strict === false ? `${a.name.toUpperCase()}...` : a.name.toUpperCase()
       let description = a.description || ''
       if (a.default)
         description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`

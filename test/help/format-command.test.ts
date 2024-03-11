@@ -522,7 +522,7 @@ ARGUMENTS
       const cmd = await makeLoadable(
         makeCommandClass({
           id: 'apps:create',
-          static: false,
+          strict: false,
           args: {
             arg1: Args.string({description: 'Show the options'}),
           },

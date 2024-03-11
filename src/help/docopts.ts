@@ -79,8 +79,8 @@ export class DocOpts {
   public toString(): string {
     const opts = ['<%= command.id %>']
     if (this.cmd.args) {
-      // If static is false, add ellipsis to indicate that the argument takes multiple values
-      const suffix = this.cmd.static === false ? '...' : ''
+      // If strict is false, add ellipsis to indicate that the argument takes multiple values
+      const suffix = this.cmd.strict === false ? '...' : ''
       const a =
         Object.values(ensureArgObject(this.cmd.args)).map((arg) =>
           arg.required ? `${arg.name.toUpperCase()}${suffix}` : `[${arg.name.toUpperCase()}${suffix}]`,
