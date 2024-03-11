@@ -59,7 +59,7 @@ export async function makeLoadable(command: Command.Class): Promise<Command.Load
   }
 }
 
-export function makeCommandClass(cmdProps: Partial<Command.Class>): Command.Class {
+export function makeCommandClass(cmdProps: Partial<Command.Class & Command.Loadable>): Command.Class {
   return class extends Command {
     async run(): Promise<void> {
       // do nothing
