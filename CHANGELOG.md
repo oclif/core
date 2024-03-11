@@ -1,3 +1,17 @@
+# [3.24.0](https://github.com/oclif/core/compare/3.23.1...3.24.0) (2024-03-11)
+
+
+### Bug Fixes
+
+* use correct prop name ([a509fa4](https://github.com/oclif/core/commit/a509fa4f999511f767c3eb0afb1f37476da64213))
+
+
+### Features
+
+* print ellipsis on arg if static is false ([7a71524](https://github.com/oclif/core/commit/7a71524c88906d2fbbfd7ede8dd16175560c9461))
+
+
+
 ## [3.23.1](https://github.com/oclif/core/compare/3.23.0...3.23.1) (2024-03-11)
 
 
