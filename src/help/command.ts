@@ -5,7 +5,7 @@ import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
-import {toStandardizedId} from '../util/ids'
+import {toConfiguredId, toStandardizedId} from '../util/ids'
 import {castArray, compact, sortBy} from '../util/util'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
@@ -332,6 +332,7 @@ export class CommandHelp extends HelpFormatter {
   protected usage(): string {
     const {id, usage} = this.command
     const standardId = toStandardizedId(id, this.config)
+    const configuredId = toConfiguredId(id, this.config)
     const body = (usage ? castArray(usage) : [this.defaultUsage()])
       .map((u) => {
         const allowedSpacing = this.opts.maxWidth - this.indentSpacing
@@ -343,7 +344,7 @@ export class CommandHelp extends HelpFormatter {
 
         const commandDescription = colorize(
           this.config?.theme?.sectionDescription,
-          u.replace('<%= command.id %>', '').replace(standardId, '').trim(),
+          u.replace('<%= command.id %>', '').replace(standardId, '').replace(configuredId, '').trim(),
         )
 
         const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()
