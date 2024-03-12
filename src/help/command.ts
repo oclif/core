@@ -281,7 +281,7 @@ export class CommandHelp extends HelpFormatter {
   }
 
   protected sections(): Array<{generate: HelpSectionRenderer; header: string}> {
-    return [
+    const sections: Array<{generate: HelpSectionRenderer; header: string}> = [
       {
         generate: () => this.usage(),
         header: this.opts.usageHeader || 'USAGE',
@@ -328,6 +328,10 @@ export class CommandHelp extends HelpFormatter {
         header: 'FLAG DESCRIPTIONS',
       },
     ]
+
+    const allowedSections = this.opts.sections?.map((s) => s.toLowerCase())
+
+    return sections.filter(({header}) => !allowedSections || allowedSections.includes(header.toLowerCase()))
   }
 
   protected usage(): string {

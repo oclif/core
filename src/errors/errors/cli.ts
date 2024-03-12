@@ -23,8 +23,8 @@ export function addOclifExitCode(error: Record<string, any>, options?: {exit?: f
 
 export class CLIError extends Error implements OclifError {
   code?: string
-
   oclif: OclifError['oclif'] = {}
+  skipOclifErrorHandling?: boolean
   suggestions?: string[]
 
   constructor(error: Error | string, options: {exit?: false | number} & PrettyPrintableError = {}) {

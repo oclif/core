@@ -25,6 +25,14 @@ export interface HelpOptions {
   hideCommandSummaryInDescription?: boolean
   maxWidth: number
   /**
+   * Only show the help for the specified sections. Defaults to all sections.
+   */
+  sections?: string[]
+  /**
+   * By default, the help output is sent to stdout. If this is true, it will be sent to stderr.
+   */
+  sendToStderr?: boolean
+  /**
    * By default, titles show flag values as `<value>`. Some CLI developers may prefer titles
    * to show the flag name as the value. i.e. `--myflag=myflag` instead of `--myflag=<value>`.
    * An individual flag can set this using `flag.helpValue=flag.name`.

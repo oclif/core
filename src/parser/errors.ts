@@ -17,6 +17,7 @@ export type Validation = {
 
 export class CLIParseError extends CLIError {
   public parse: CLIParseErrorOptions['parse']
+  public showHelp = false
 
   constructor(options: CLIParseErrorOptions & {message: string}) {
     options.message += '\nSee more help with --help'
@@ -73,6 +74,7 @@ export class RequiredArgsError extends CLIParseError {
 
     super({exit: Cache.getInstance().get('exitCodes')?.requiredArgs ?? exit, message, parse})
     this.args = args
+    this.showHelp = true
   }
 }
 
@@ -83,6 +85,7 @@ export class UnexpectedArgsError extends CLIParseError {
     const message = `Unexpected argument${args.length === 1 ? '' : 's'}: ${args.join(', ')}`
     super({exit: Cache.getInstance().get('exitCodes')?.unexpectedArgs ?? exit, message, parse})
     this.args = args
+    this.showHelp = true
   }
 }
 
@@ -93,6 +96,7 @@ export class NonExistentFlagsError extends CLIParseError {
     const message = `Nonexistent flag${flags.length === 1 ? '' : 's'}: ${flags.join(', ')}`
     super({exit: Cache.getInstance().get('exitCodes')?.nonExistentFlag ?? exit, message, parse})
     this.flags = flags
+    this.showHelp = true
   }
 }
 

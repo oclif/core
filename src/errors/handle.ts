@@ -1,6 +1,9 @@
 import clean from 'clean-stack'
 
+import Cache from '../cache'
+import {Help} from '../help/index'
 import {OclifError, PrettyPrintableError} from '../interfaces'
+import {CLIParseError} from '../parser/errors'
 import {config} from './config'
 import {CLIError} from './errors/cli'
 import {ExitError} from './errors/exit'
@@ -18,7 +21,11 @@ export const Exit = {
   },
 }
 
-type ErrorToHandle = Error & Partial<PrettyPrintableError> & Partial<OclifError> & {skipOclifErrorHandling?: boolean}
+type ErrorToHandle = Error &
+  Partial<PrettyPrintableError> &
+  Partial<OclifError> &
+  Partial<CLIError> &
+  Partial<CLIParseError>
 
 export async function handle(err: ErrorToHandle): Promise<void> {
   try {
@@ -31,6 +38,17 @@ export async function handle(err: ErrorToHandle): Promise<void> {
 
     if (shouldPrint) {
       console.error(pretty ?? stack)
+      const config = Cache.getInstance().get('config')
+      if (err.showHelp && err.parse?.input?.argv && config) {
+        const options = {
+          ...(config.pjson.oclif.helpOptions ?? config.pjson.helpOptions),
+          sections: ['flags', 'usage', 'arguments'],
+          sendToStderr: true,
+        }
+        const help = new Help(config, options)
+        console.error()
+        await help.showHelp(process.argv.slice(2))
+      }
     }
 
     const exitCode = err.oclif?.exit ?? 1

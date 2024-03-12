@@ -2,7 +2,7 @@ import makeDebug from 'debug'
 import {readFile, readdir} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
-import {memoizedWarn} from '../errors'
+import {memoizedWarn} from '../errors/warn'
 import {TSConfig} from '../interfaces'
 import {mergeNestedObjects} from './util'
 

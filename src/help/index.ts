@@ -4,7 +4,7 @@ import stripAnsi from 'strip-ansi'
 import {colorize} from '../cli-ux/theme'
 import write from '../cli-ux/write'
 import {Command} from '../command'
-import {error} from '../errors'
+import {error} from '../errors/error'
 import * as Interfaces from '../interfaces'
 import {load} from '../module-loader'
 import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
@@ -173,7 +173,9 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]) {
-    write.stdout(format.apply(this, args) + '\n')
+    this.opts.sendToStderr
+      ? write.stderr(format.apply(this, args) + '\n')
+      : write.stdout(format.apply(this, args) + '\n')
   }
 
   public async showCommandHelp(command: Command.Loadable): Promise<void> {
@@ -358,6 +360,7 @@ export class Help extends HelpBase {
   }
 
   protected summary(c: Command.Loadable): string | undefined {
+    if (this.opts.sections && !this.opts.sections.map((s) => s.toLowerCase()).includes('summary')) return
     if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
     return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
   }
