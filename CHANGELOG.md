@@ -1,3 +1,12 @@
+# [3.25.0](https://github.com/oclif/core/compare/3.24.0...3.25.0) (2024-03-12)
+
+
+### Features
+
+* show truncated help on some errors ([#1004](https://github.com/oclif/core/issues/1004)) ([7133a97](https://github.com/oclif/core/commit/7133a9725c1308e6b203d7e6fc192f529a9f48d1))
+
+
+
 # [3.24.0](https://github.com/oclif/core/compare/3.23.1...3.24.0) (2024-03-11)
 
 
