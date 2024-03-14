@@ -1,3 +1,12 @@
+## [3.25.1](https://github.com/oclif/core/compare/3.25.0...3.25.1) (2024-03-14)
+
+
+### Bug Fixes
+
+* ensure string is passed to process.emitWarning ([#1015](https://github.com/oclif/core/issues/1015)) ([47081db](https://github.com/oclif/core/commit/47081db8dedacc2f553d53cd157f1db8cbd9ad2e))
+
+
+
 # [3.25.0](https://github.com/oclif/core/compare/3.24.0...3.25.0) (2024-03-12)
 
 
