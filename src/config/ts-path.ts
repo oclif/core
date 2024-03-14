@@ -1,3 +1,4 @@
+import {access} from 'node:fs/promises'
 import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
@@ -212,8 +213,23 @@ async function determinePath(root: string, orig: string): Promise<string> {
 
   debug(`lib dir: ${lib}`)
   debug(`src dir: ${src}`)
-  debug(`src commands dir: ${out}`)
-  if (existsSync(out) || existsSync(out + '.ts')) {
+  debug(`src directory to find: ${out}`)
+
+  if (existsSync(out)) {
+    debug(`Found source directory for ${orig} at ${out}`)
+    return out
+  }
+
+  const sourceFiles = await Promise.all([
+    access(`${out}.ts`)
+      .then(() => `${out}.ts`)
+      .catch(() => false),
+    access(`${out}.tsx`)
+      .then(() => `${out}.tsx`)
+      .catch(() => false),
+  ])
+
+  if (sourceFiles.some(Boolean)) {
     debug(`Found source file for ${orig} at ${out}`)
     return out
   }
