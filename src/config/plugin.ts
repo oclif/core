@@ -343,7 +343,7 @@ export class Plugin implements IPlugin {
   }
 
   private addErrorScope(err: any, scope?: string) {
-    err.name = `${err.name} Plugin: ${this.name}`
+    err.name = err.name ?? inspect(err).trim()
     err.detail = compact([
       err.detail,
       `module: ${this._base}`,
@@ -431,6 +431,7 @@ export class Plugin implements IPlugin {
 
   private warn(err: CLIError | Error | string, scope?: string): void {
     if (typeof err === 'string') err = new Error(err)
-    process.emitWarning(this.addErrorScope(err, scope))
+    const warning = this.addErrorScope(err, scope)
+    process.emitWarning(warning.name, warning)
   }
 }
