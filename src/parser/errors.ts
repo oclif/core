@@ -58,7 +58,12 @@ export class RequiredArgsError extends CLIParseError {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter((a) => a.name)
     if (namedArgs.length > 0) {
-      const list = renderList(namedArgs.map((a) => [a.name, a.description] as [string, string]))
+      const list = renderList(
+        namedArgs.map((a) => {
+          const description = a.options ? `(${a.options.join('|')}) ${a.description}` : a.description
+          return [a.name, description]
+        }),
+      )
       message += `:\n${list}`
     }
 

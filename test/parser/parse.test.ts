@@ -146,6 +146,23 @@ describe('parse', () => {
         }
       })
 
+      it('throws error when no value provided to required flag with options', async () => {
+        try {
+          await parse(['--myflag', '--second', 'value'], {
+            flags: {
+              myflag: Flags.string({
+                required: true,
+                options: ['a', 'b'],
+              }),
+              second: Flags.string(),
+            },
+          })
+          assert.fail('should have thrown')
+        } catch (error) {
+          expect((error as CLIError).message).to.include('Flag --myflag expects one of these values: a, b')
+        }
+      })
+
       it('throws error when no value provided to required flag before a short char flag', async () => {
         try {
           await parse(['--myflag', '-s', 'value'], {
@@ -270,7 +287,7 @@ describe('parse', () => {
           await parse(['arg1'], {
             args: {
               arg1: Args.string({required: true}),
-              arg2: Args.string({required: true, description: 'arg2 desc'}),
+              arg2: Args.string({required: true, description: 'arg2 desc', options: ['a', 'b']}),
               arg3: Args.string({required: true, description: 'arg3 desc'}),
             },
           })
@@ -279,7 +296,7 @@ describe('parse', () => {
         }
 
         expect(message).to.include(`Missing 2 required args:
-arg2  arg2 desc
+arg2  (a|b) arg2 desc
 arg3  arg3 desc
 See more help with --help`)
       })
