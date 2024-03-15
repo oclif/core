@@ -1,3 +1,12 @@
+## [3.25.2](https://github.com/oclif/core/compare/3.25.1...3.25.2) (2024-03-15)
+
+
+### Bug Fixes
+
+* allow .tsx and .jsx help class files ([#1016](https://github.com/oclif/core/issues/1016)) ([0b7385f](https://github.com/oclif/core/commit/0b7385f4938368aa18110f1f79273d6476eb0ed7))
+
+
+
 ## [3.25.1](https://github.com/oclif/core/compare/3.25.0...3.25.1) (2024-03-14)
 
 
