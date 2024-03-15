@@ -13,8 +13,8 @@ const getPackageType = require('get-package-type')
 /**
  * Defines file extension resolution when source files do not have an extension.
  */
-// eslint-disable-next-line camelcase
-const s_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs', '.mts', '.cts']
+
+const SUPPORTED_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs', '.mts', '.cts', '.tsx', '.jsx']
 
 const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
 
@@ -215,8 +215,7 @@ async function resolvePath(config: IConfig | IPlugin, modulePath: string): Promi
  * @returns {string | null} Modified file path including extension or null if file is not found.
  */
 function findFile(filePath: string): null | string {
-  // eslint-disable-next-line camelcase
-  for (const extension of s_EXTENSIONS) {
+  for (const extension of SUPPORTED_EXTENSIONS) {
     const testPath = `${filePath}${extension}`
 
     if (existsSync(testPath)) {

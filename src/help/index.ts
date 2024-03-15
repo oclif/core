@@ -4,6 +4,7 @@ import stripAnsi from 'strip-ansi'
 import {colorize} from '../cli-ux/theme'
 import write from '../cli-ux/write'
 import {Command} from '../command'
+import {tsPath} from '../config/ts-path'
 import {error} from '../errors/error'
 import * as Interfaces from '../interfaces'
 import {load} from '../module-loader'
@@ -394,8 +395,9 @@ export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBase
 
   if (configuredClass) {
     try {
-      const exported = (await load(config, configuredClass)) as HelpBaseDerived
-      return extractClass(exported) as HelpBaseDerived
+      const path = (await tsPath(config.root, configuredClass)) ?? configuredClass
+      const exported = await load<HelpBaseDerived>(config, path)
+      return extractClass(exported)
     } catch (error: any) {
       throw new Error(
         `Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`,
