@@ -3039,10 +3039,10 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-fancy-test@^3.0.11, fancy-test@^3.0.12:
-  version "3.0.12"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.12.tgz#919482bd63ab949aec4a51690c857f8c125383b3"
-  integrity sha512-pboHMxTnbD72FBl/fgYAmBb6AjiF0OgI1osAnnzzuFgBrzbFQj5so3XlknKC9k3HFJIy0HerCTyDjz/YZ6aBIg==
+fancy-test@^3.0.11, fancy-test@^3.0.13:
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.13.tgz#4164de4251952f3055419537b09d59823399dc8d"
+  integrity sha512-lOXntvGxCLknfTx3zWggtoRGNyk/lSHg6OvR1r8WtUlBRt/lcyYzW9rvHP3eBgxRo6Ii7cvMlvtA53N8TOvmzw==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
