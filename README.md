@@ -66,3 +66,7 @@ Then run it like this:
 $ ts-node myscript.ts
 ...files in current dir...
 ```
+
+# Contributing
+
+See the [contributing guide](./CONRTIBUTING.md).
