@@ -188,6 +188,10 @@ export class Parser<
 
         // if the value ends up being one of the command's flags, the user didn't provide an input
         if (typeof input !== 'string' || this.findFlag(input).name) {
+          if (flag.options) {
+            throw new CLIError(`Flag --${name} expects one of these values: ${flag.options.join(', ')}`)
+          }
+
           throw new CLIError(`Flag --${name} expects a value`)
         }
 
