@@ -1,3 +1,12 @@
+## [3.25.3](https://github.com/oclif/core/compare/3.25.2...3.25.3) (2024-03-19)
+
+
+### Bug Fixes
+
+* show options when required flag or arg is not given a value ([#1017](https://github.com/oclif/core/issues/1017)) ([003ad6f](https://github.com/oclif/core/commit/003ad6fc2d28a53db3335237de02aa244cb9cbec))
+
+
+
 ## [3.25.2](https://github.com/oclif/core/compare/3.25.1...3.25.2) (2024-03-15)
 
 
