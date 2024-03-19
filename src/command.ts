@@ -291,7 +291,7 @@ export abstract class Command {
     const argvToParse = hookResult.successes?.length
       ? hookResult.successes.find((s) => s.plugin.root === Cache.getInstance().get('rootPlugin')?.root)?.result ?? argv
       : argv
-
+    this.argv = [...argvToParse]
     const results = await Parser.parse<F, B, A>(argvToParse, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
