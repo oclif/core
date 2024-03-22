@@ -1,3 +1,12 @@
+# [3.26.0](https://github.com/oclif/core/compare/3.25.3...3.26.0) (2024-03-22)
+
+
+### Features
+
+* add preparse hook ([#1005](https://github.com/oclif/core/issues/1005)) ([80745c4](https://github.com/oclif/core/commit/80745c46942cf69653afac8ed242da9f58631d82))
+
+
+
 ## [3.25.3](https://github.com/oclif/core/compare/3.25.2...3.25.3) (2024-03-19)
 
 
