@@ -2731,10 +2731,10 @@ escodegen@^2.0.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-oclif-typescript@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif-typescript/-/eslint-config-oclif-typescript-3.1.2.tgz#e3f0b13411e8a11efe2bea6f1a84d2b1d2fea245"
-  integrity sha512-6dk2DBzI5UGAg5Pl7b1k3a6d2/UQNO/uEJm92EEJp09fX3+HOy1Rj2BzcOxNKgLjdBV021HXgj5X/c1r1GS3jQ==
+eslint-config-oclif-typescript@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif-typescript/-/eslint-config-oclif-typescript-3.1.3.tgz#ddce24ca1b52ebb41887bc2ef3700ad92da03e0d"
+  integrity sha512-lRSkiSd2AGu/D0EgK5Bz/u92c2t5nK2lAgPPPlAGHUXEL2IhjR+KNWf2REZReMD4IzAGVbCKlVqDNTDybJ11qg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.21.0"
     "@typescript-eslint/parser" "^6.21.0"
@@ -2743,7 +2743,7 @@ eslint-config-oclif-typescript@^3.1.2:
     eslint-plugin-import "^2.29.1"
     eslint-plugin-mocha "^10.4.1"
     eslint-plugin-n "^15"
-    eslint-plugin-perfectionist "^2.6.0"
+    eslint-plugin-perfectionist "^2.7.0"
 
 eslint-config-oclif@^5.1.0:
   version "5.1.0"
@@ -2871,7 +2871,7 @@ eslint-plugin-n@^15, eslint-plugin-n@^15.1.0:
     resolve "^1.22.1"
     semver "^7.3.8"
 
-eslint-plugin-perfectionist@^2.6.0:
+eslint-plugin-perfectionist@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-perfectionist/-/eslint-plugin-perfectionist-2.7.0.tgz#28ae9d41813677ad5a19b0682c29090d7bbaa871"
   integrity sha512-RpSMc0T0DT9DlOj4APzwlAjCqQMxFdsIYlupe73eDkKLn1mMK7fVw2z3nj2y822szKOpvHA7bDa56ySOlr4GXw==
