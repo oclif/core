@@ -75,14 +75,44 @@ export type Hook<T extends keyof P, P extends Hooks = Hooks> = (
 ) => Promise<P[T]['return']>
 
 export namespace Hook {
+  /**
+   * Runs when the CLI is initialized before a command is executed.
+   */
   export type Init = Hook<'init'>
   export type PluginsPreinstall = Hook<'plugins:preinstall'>
+  /**
+   * Runs after the `init` hook, after a command is found but before it is executed.
+   */
   export type Prerun = Hook<'prerun'>
+  /**
+   * Runs after a command is successfully executed. Does not run if the command fails.
+   */
   export type Postrun = Hook<'postrun'>
+  /**
+   * Runs before the CLI is updated by `update` command from @oclif/plugin-update.
+   */
   export type Preupdate = Hook<'preupdate'>
+  /**
+   * Runs before a command's flags and args are parsed. Useful for modifying the command line arguments before they are parsed.
+   *
+   * The return value is a string[] of the modified arguments.
+   */
+  export type Preparse = Hook<'preparse'>
+  /**
+   * Runs once the `update` command from @oclif/plugin-update is run.
+   */
   export type Update = Hook<'update'>
+  /**
+   * Runs when a command is not found.
+   */
   export type CommandNotFound = Hook<'command_not_found'>
+  /**
+   * Runs when a partial command is entered and no matching command is found.
+   */
   export type CommandIncomplete = Hook<'command_incomplete'>
+  /**
+   * Runs when a command from an uninstalled JIT plugins is run.
+   */
   export type JitPluginNotInstalled = Hook<'jit_plugin_not_installed'>
 
   export interface Context {

@@ -3,7 +3,7 @@ import {join, parse} from 'node:path'
 
 import {Hook} from '../../../../../../src'
 
-const hook: Hook<'preparse'> = async function ({argv, options}) {
+const hook: Hook.Preparse = async function ({argv, options}) {
   const flagsToIgnore = new Set(
     Object.entries(options.flags ?? {})
       .filter(
