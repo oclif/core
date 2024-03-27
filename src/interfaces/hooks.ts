@@ -79,6 +79,9 @@ export namespace Hook {
    * Runs when the CLI is initialized before a command is executed.
    */
   export type Init = Hook<'init'>
+  /**
+   * Runs before the `plugins install` command from @oclif/plugin-plugins is run.
+   */
   export type PluginsPreinstall = Hook<'plugins:preinstall'>
   /**
    * Runs after the `init` hook, after a command is found but before it is executed.
