@@ -1,7 +1,9 @@
 CLI UX
 ======
 
-cli IO utilities
+cli UX utilities.
+
+**This module has been deprecated** and will be majorly rewritten the next major version. See [discussion](https://github.com/oclif/core/discussions/999)
 
 # Usage
 
