@@ -744,7 +744,7 @@
     node-gyp "^10.0.0"
     which "^4.0.0"
 
-"@oclif/core@^3.23.0", "@oclif/core@^3.25.2":
+"@oclif/core@^3.23.0", "@oclif/core@^3.25.2", "@oclif/core@^3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.26.0.tgz#959d5e9f13f4ad6a4e98235ad125189df9ee4279"
   integrity sha512-TpMdfD4tfA2tVVbd4l0PrP02o5KoUXYmudBbTC7CeguDo/GLoprw4uL8cMsaVA26+cbcy7WYtOEydQiHVtJixA==
@@ -779,11 +779,11 @@
     wrap-ansi "^7.0.0"
 
 "@oclif/plugin-help@^6":
-  version "6.0.18"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.0.18.tgz#9ba4151b5d77b78a345ad1308620a1fbf9731ac8"
-  integrity sha512-Ly0gu/+eq7GfIMT76cirbHgElYGlu+PaZ5elrAKmDiegBh31AXqaPQAj8PH4+sG8RSv5srYtrkrygZaw8IF9CQ==
+  version "6.0.20"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.0.20.tgz#e4a640505508224d7b9c0e61711ae4dad3f4782b"
+  integrity sha512-4UG/5q7O3dhUsC0JMqcUV0NU7jybkXkAXLnsRt+KVzDtZWwNOeBECimIFWOmwna5BaneTn8b0+lqO4JvUgeiqA==
   dependencies:
-    "@oclif/core" "^3.23.0"
+    "@oclif/core" "^3.26.0"
 
 "@oclif/plugin-plugins@^4":
   version "4.3.6"
