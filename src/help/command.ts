@@ -1,12 +1,11 @@
-import chalk from 'chalk'
-import stripAnsi from 'strip-ansi'
+import ansis from 'ansis'
 
-import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {ensureArgObject} from '../util/ensure-arg-object'
 import {toConfiguredId, toStandardizedId} from '../util/ids'
 import {castArray, compact, sortBy} from '../util/util'
+import {colorize} from '../ux/theme'
 import {DocOpts} from './docopts'
 import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
 
@@ -172,7 +171,7 @@ export class CommandHelp extends HelpFormatter {
       }
 
       if (flag.multiple) value += '...'
-      if (!value.includes('|')) value = chalk.underline(value)
+      if (!value.includes('|')) value = ansis.underline(value)
       label += `=${value}`
     }
 
@@ -377,9 +376,9 @@ export class CommandHelp extends HelpFormatter {
   }
 
   private isCommand(example: string): boolean {
-    return stripAnsi(this.formatIfCommand(example)).startsWith(
-      `${colorize(this.config?.theme?.dollarSign, '$')} ${this.config.bin}`,
-    )
+    return ansis
+      .strip(this.formatIfCommand(example))
+      .startsWith(`${colorize(this.config?.theme?.dollarSign, '$')} ${this.config.bin}`)
   }
 }
 export default CommandHelp

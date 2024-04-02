@@ -1,4 +1,4 @@
-import stripAnsi from 'strip-ansi'
+import ansis from 'ansis'
 
 import {Interfaces} from '../../src'
 import {Command} from '../../src/command'
@@ -46,7 +46,8 @@ export class TestHelp extends Help {
 }
 
 function cleanOutput(output: string) {
-  return stripAnsi(output)
+  return ansis
+    .strip(output)
     .split('\n')
     .map((s) => s.trimEnd())
     .join('\n')
@@ -79,7 +80,8 @@ export const topicsHelp = (topics: Interfaces.Topic[]) => ({
       console.log(topicsHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicsHelpOutput)
+    ctx.commandHelp = ansis
+      .strip(topicsHelpOutput)
       .split('\n')
       .map((s) => s.trimEnd())
       .join('\n')
@@ -94,7 +96,8 @@ export const topicHelp = (topic: Interfaces.Topic) => ({
       console.log(topicHelpOutput)
     }
 
-    ctx.commandHelp = stripAnsi(topicHelpOutput)
+    ctx.commandHelp = ansis
+      .strip(topicHelpOutput)
       .split('\n')
       .map((s) => s.trimEnd())
       .join('\n')

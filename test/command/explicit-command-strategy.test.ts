@@ -1,28 +1,15 @@
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
-import stripAnsi from 'strip-ansi'
 
-import {run, ux} from '../../src/index'
+import {runCommand} from '../test'
+
+const root = resolve(__dirname, 'fixtures/bundled-cli/package.json')
 
 describe('explicit command discovery strategy', () => {
-  let sandbox: SinonSandbox
-  let stdoutStub: SinonStub
-
-  beforeEach(() => {
-    sandbox = createSandbox()
-    stdoutStub = sandbox.stub(ux.write, 'stdout')
-  })
-
-  afterEach(() => {
-    sandbox.restore()
-  })
-
   it('should show help for commands', async () => {
-    await run(['--help', 'foo'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
-    const [first, ...rest] = stdoutStub.args.map((a) => stripAnsi(a[0]))
-    expect(first).to.equal('example hook running --help\n')
-    expect(rest.join('')).to.equal(`foo topic description
+    const {stdout} = await runCommand(['--help', 'foo'], {root})
+    expect(stdout).to.include('example hook running --help')
+    expect(stdout).to.include(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -36,16 +23,12 @@ COMMANDS
   })
 
   it('should run command', async () => {
-    await run(['foo:bar'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
-    const [first, second] = stdoutStub.args.map((a) => stripAnsi(a[0]))
-    expect(first).to.equal('example hook running foo:bar\n')
-    expect(second).to.equal('hello world!\n')
+    const {stdout} = await runCommand(['foo:bar'], {root})
+    expect(stdout).to.equal('example hook running foo:bar\nhello world!\n')
   })
 
   it('should run alias', async () => {
-    await run(['foo:alias'], resolve(__dirname, 'fixtures/bundled-cli/package.json'))
-    const [first, second] = stdoutStub.args.map((a) => stripAnsi(a[0]))
-    expect(first).to.equal('example hook running foo:alias\n')
-    expect(second).to.equal('hello world!\n')
+    const {stdout} = await runCommand(['foo:alias'], {root})
+    expect(stdout).to.equal('example hook running foo:alias\nhello world!\n')
   })
 })

@@ -1,8 +1,5 @@
-import {format} from 'node:util'
-import stripAnsi from 'strip-ansi'
+import ansis from 'ansis'
 
-import {colorize} from '../cli-ux/theme'
-import write from '../cli-ux/write'
 import {Command} from '../command'
 import {tsPath} from '../config/ts-path'
 import {error} from '../errors/error'
@@ -12,11 +9,12 @@ import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheDefaultValue} from '../util/cache-default-value'
 import {toConfiguredId} from '../util/ids'
 import {compact, sortBy, uniqBy} from '../util/util'
+import ux from '../ux'
+import {colorize} from '../ux/theme'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv} from './util'
-
 export {CommandHelp} from './command'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
 
@@ -110,7 +108,7 @@ export class Help extends HelpBase {
           const summary = this.summary(c)
           return [
             colorize(this.config?.theme?.command, c.id),
-            summary && colorize(this.config?.theme?.sectionDescription, stripAnsi(summary)),
+            summary && colorize(this.config?.theme?.sectionDescription, ansis.strip(summary)),
           ]
         }),
       {
@@ -146,7 +144,7 @@ export class Help extends HelpBase {
       description &&
         this.section('DESCRIPTION', this.wrap(colorize(this.config?.theme?.sectionDescription, description))),
     ]).join('\n\n')
-    if (this.opts.stripAnsi) output = stripAnsi(output)
+    if (this.opts.stripAnsi) output = ansis.strip(output)
     return output + '\n'
   }
 
@@ -174,9 +172,7 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]) {
-    this.opts.sendToStderr
-      ? write.stderr(format.apply(this, args) + '\n')
-      : write.stdout(format.apply(this, args) + '\n')
+    this.opts.sendToStderr ? ux.stderr(args) : ux.stdout(args)
   }
 
   public async showCommandHelp(command: Command.Loadable): Promise<void> {

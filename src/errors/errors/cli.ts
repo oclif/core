@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import cs from 'clean-stack'
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
@@ -36,7 +36,7 @@ export class CLIError extends Error implements OclifError {
 
   get bang(): string | undefined {
     try {
-      return chalk.red(process.platform === 'win32' ? '»' : '›')
+      return ansis.red(process.platform === 'win32' ? '»' : '›')
     } catch {}
   }
 
@@ -71,7 +71,7 @@ export namespace CLIError {
 
     get bang(): string | undefined {
       try {
-        return chalk.yellow(process.platform === 'win32' ? '»' : '›')
+        return ansis.yellow(process.platform === 'win32' ? '»' : '›')
       } catch {}
     }
   }

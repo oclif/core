@@ -1,9 +1,8 @@
 import {test as base, expect} from '@oclif/test'
+import ansis from 'ansis'
 
 import {Interfaces} from '../../src'
 import {Help} from '../../src/help'
-
-import stripAnsi = require('strip-ansi')
 
 const g: any = global
 g.oclif.columns = 80
@@ -28,7 +27,8 @@ const rootHelp = (ctxOverride?: (config: Interfaces.Config) => Interfaces.Config
       console.log(help)
     }
 
-    ctx.commandHelp = stripAnsi(root)
+    ctx.commandHelp = ansis
+      .strip(root)
       .split('\n')
       .map((s) => s.trimEnd())
       .join('\n')

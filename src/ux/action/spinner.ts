@@ -1,29 +1,24 @@
-import ansiStyles from 'ansi-styles'
-import chalk from 'chalk'
-import stripAnsi from 'strip-ansi'
-import * as supportsColor from 'supports-color'
+import ansis from 'ansis'
+import spinners from 'cli-spinners'
 
+import Cache from '../../cache'
 import {errtermwidth} from '../../screen'
+import {colorize} from '../theme'
 import {ActionBase, ActionType} from './base'
-import spinners from './spinners'
 import {Options} from './types'
 
 const ansiEscapes = require('ansi-escapes')
 
-function color(s: string): string {
-  if (!supportsColor) return s
-  const has256 = supportsColor.stdout ? supportsColor.stdout.has256 : (process.env.TERM || '').includes('256')
-  return has256 ? `\u001B[38;5;104m${s}${ansiStyles.reset.open}` : chalk.magenta(s)
-}
-
 export default class SpinnerAction extends ActionBase {
-  frameIndex: number
-
-  frames: string[]
-
-  spinner?: NodeJS.Timeout
-
   public type: ActionType = 'spinner'
+
+  private color = 'magenta'
+
+  private frameIndex: number
+
+  private frames: string[]
+
+  private spinner?: NodeJS.Timeout
 
   constructor() {
     super()
@@ -31,14 +26,20 @@ export default class SpinnerAction extends ActionBase {
     this.frameIndex = 0
   }
 
+  protected colorize(s: string): string {
+    return colorize(this.color, s)
+  }
+
   protected _frame(): string {
     const frame = this.frames[this.frameIndex]
     this.frameIndex = ++this.frameIndex % this.frames.length
-    return color(frame)
+    return this.colorize(frame)
   }
 
   private _lines(s: string): number {
-    return (stripAnsi(s).split('\n') as any[]).map((l) => Math.ceil(l.length / errtermwidth)).reduce((c, i) => c + i, 0)
+    return (ansis.strip(s).split('\n') as any[])
+      .map((l) => Math.ceil(l.length / errtermwidth))
+      .reduce((c, i) => c + i, 0)
   }
 
   protected _pause(icon?: string): void {
@@ -67,6 +68,7 @@ export default class SpinnerAction extends ActionBase {
   }
 
   protected _start(opts: Options): void {
+    this.color = (Cache.getInstance().get('config')?.theme?.spinner as string | undefined) ?? this.color
     if (opts.style) this.frames = this.getFrames(opts)
 
     this._reset()

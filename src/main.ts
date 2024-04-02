@@ -1,12 +1,12 @@
 import {URL, fileURLToPath} from 'node:url'
 
 import Cache from './cache'
-import {ux} from './cli-ux'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
+import ux from './ux'
 
 const debug = require('debug')('oclif:main')
 
@@ -70,7 +70,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // display version if applicable
   if (versionAddition(argv, config)) {
-    ux.log(config.userAgent)
+    ux.stdout(config.userAgent)
     await collectPerf()
     return
   }

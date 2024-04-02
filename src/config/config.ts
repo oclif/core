@@ -5,8 +5,6 @@ import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import Cache from '../cache'
-import {ux} from '../cli-ux'
-import {parseTheme} from '../cli-ux/theme'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
@@ -20,6 +18,8 @@ import {settings} from '../settings'
 import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
+import ux from '../ux'
+import {parseTheme} from '../ux/theme'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-path'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
@@ -333,10 +333,7 @@ export class Config implements IConfig {
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
-      const {theme} = await this.loadThemes()
-      this.theme = theme
-    }
+    this.theme = await this.loadTheme()
 
     this.pjson.oclif.update = this.pjson.oclif.update || {}
     this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
@@ -410,10 +407,8 @@ export class Config implements IConfig {
     }
   }
 
-  public async loadThemes(): Promise<{
-    file: string | undefined
-    theme: Theme | undefined
-  }> {
+  public async loadTheme(): Promise<Theme | undefined> {
+    if (this.scopedEnvVarTrue('DISABLE_THEME')) return
     const defaultThemeFile = this.pjson.oclif.theme
       ? resolve(this.root, this.pjson.oclif.theme)
       : this.pjson.oclif.theme
@@ -426,12 +421,7 @@ export class Config implements IConfig {
 
     // Merge the default theme with the user theme, giving the user theme precedence.
     const merged = {...defaultTheme, ...userTheme}
-    return {
-      // Point to the user file if it exists, otherwise use the default file.
-      // This doesn't really serve a purpose to anyone but removing it would be a breaking change.
-      file: userTheme ? userThemeFile : defaultThemeFile,
-      theme: Object.keys(merged).length > 0 ? parseTheme(merged) : undefined,
-    }
+    return Object.keys(merged).length > 0 ? parseTheme(merged) : undefined
   }
 
   protected macosCacheDir(): string | undefined {
@@ -545,7 +535,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          ux.info(message, ...args)
+          ux.stdout(message, ...args)
         },
         warn(message: string) {
           warn(message)

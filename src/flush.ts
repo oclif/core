@@ -1,4 +1,4 @@
-import {error} from '../errors'
+import {error} from './errors'
 
 function timeout(p: Promise<any>, ms: number) {
   function wait(ms: number, unref = false) {

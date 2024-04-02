@@ -3,7 +3,7 @@ import {inspect} from 'node:util'
 import {castArray} from '../../util/util'
 import {Options} from './types'
 
-export interface ITask {
+type Task = {
   action: string
   active: boolean
   status: string | undefined
@@ -11,9 +11,6 @@ export interface ITask {
 
 export type ActionType = 'debug' | 'simple' | 'spinner'
 
-/**
- * @deprecated `ux` will be removed in the next major. See https://github.com/oclif/core/discussions/999
- */
 export class ActionBase {
   std: 'stderr' | 'stdout' = 'stderr'
 
@@ -56,11 +53,11 @@ export class ActionBase {
     task.status = status
   }
 
-  public get task(): ITask | undefined {
+  public get task(): Task | undefined {
     return this.globals.action.task
   }
 
-  public set task(task: ITask | undefined) {
+  public set task(task: Task | undefined) {
     this.globals.action.task = task
   }
 
@@ -213,7 +210,7 @@ export class ActionBase {
     }
   }
 
-  private get globals(): {action: {task?: ITask}; output: string | undefined} {
+  private get globals(): {action: {task?: Task}; output: string | undefined} {
     ;(global as any).ux = (global as any).ux || {}
     const globals = (global as any).ux
     globals.action = globals.action || {}

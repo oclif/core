@@ -1,9 +1,8 @@
+import ansis from 'ansis'
 import {expect} from 'chai'
 
 import * as flags from '../../src/flags'
 import {flagUsages} from '../../src/parser/help'
-
-import stripAnsi = require('strip-ansi')
 
 describe('flagUsage', () => {
   it('shows usages', () => {
@@ -15,7 +14,7 @@ describe('flagUsage', () => {
       flags.string({name: 'foo', char: 'f', helpLabel: '-f'}),
       flags.boolean({char: 'g', description: 'goo'}),
     ]
-    expect(flagUsages(f).map(([name, desc]) => [name, desc && stripAnsi(desc)])).to.deep.equal([
+    expect(flagUsages(f).map(([name, desc]) => [name, desc && ansis.strip(desc)])).to.deep.equal([
       [' -b, --bar BAR', 'bar'],
       [' -f, --foo FOO', 'desc'],
       [' -f FOO', undefined],
