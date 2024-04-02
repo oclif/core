@@ -97,11 +97,13 @@ export class Config implements IConfig {
   public shell!: string
   public theme?: Theme
   public topicSeparator: ' ' | ':' = ':'
+  public updateConfig!: NonNullable<PJSON.CLI['oclif']['update']>
   public userAgent!: string
   public userPJSON?: PJSON.User
   public valid!: boolean
   public version!: string
   protected warned = false
+
   public windows!: boolean
 
   private _base = BASE
@@ -117,7 +119,6 @@ export class Config implements IConfig {
   private pluginLoader!: PluginLoader
 
   private rootPlugin!: IPlugin
-
   private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
@@ -335,10 +336,15 @@ export class Config implements IConfig {
 
     this.theme = await this.loadTheme()
 
-    this.pjson.oclif.update = this.pjson.oclif.update || {}
-    this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
-    const s3 = this.pjson.oclif.update.s3 || {}
-    this.pjson.oclif.update.s3 = s3
+    const s3 = this.pjson.oclif.update?.s3 ?? {
+      bucket: '',
+      host: '',
+      templates: {
+        target: {},
+        vanilla: {},
+      },
+    }
+
     s3.bucket = this.scopedEnvVar('S3_BUCKET') || s3.bucket
     if (s3.bucket && !s3.host) s3.host = `https://${s3.bucket}.s3.amazonaws.com`
     s3.templates = {
@@ -361,6 +367,13 @@ export class Config implements IConfig {
         ...(s3.templates && s3.templates.vanilla),
       },
     }
+
+    this.updateConfig = {
+      ...this.pjson.oclif.update,
+      node: this.pjson.oclif.update?.node ?? {},
+      s3,
+    }
+
     this.isSingleCommandCLI = Boolean(
       this.pjson.oclif.default ||
         (typeof this.pjson.oclif.commands !== 'string' &&
@@ -608,12 +621,12 @@ export class Config implements IConfig {
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 
   public s3Url(key: string): string {
-    const {host} = this.pjson.oclif.update.s3
+    const {host} = this.updateConfig.s3 ?? {host: undefined}
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
     url.pathname = join(url.pathname, key)

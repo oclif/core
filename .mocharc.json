@@ -4,5 +4,6 @@
   "require": ["test/helpers/init.js", "ts-node/register"],
   "timeout": 60000,
   "watch-extensions": ["ts"],
-  "watch-files": ["src", "test"]
+  "watch-files": ["src", "test"],
+  "watch-ignore": ["test/tmp"]
 }

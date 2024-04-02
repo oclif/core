@@ -1,5 +1,5 @@
 import ansis from 'ansis'
-import {expect, fancy} from 'fancy-test'
+import {expect} from 'chai'
 
 import {CLIError} from '../../src/errors'
 import {config} from '../../src/errors/config'
@@ -7,7 +7,7 @@ import prettyPrint from '../../src/errors/errors/pretty-print'
 import {PrettyPrintableError} from '../../src/interfaces/errors'
 
 describe('pretty-print', () => {
-  fancy.it('pretty prints an error', async () => {
+  it('pretty prints an error', async () => {
     const sampleError: Error & PrettyPrintableError = new Error('Something very serious has gone wrong with the flags!')
     sampleError.ref = 'https://oclif.io/docs/flags'
     sampleError.code = 'OCLIF_BAD_FLAG'
@@ -20,7 +20,7 @@ describe('pretty-print', () => {
     Reference: https://oclif.io/docs/flags`)
   })
 
-  fancy.it('pretty prints multiple suggestions', async () => {
+  it('pretty prints multiple suggestions', async () => {
     const sampleError: Error & PrettyPrintableError = new Error('Something very serious has gone wrong with the flags!')
     sampleError.suggestions = ['Use a good flag', 'Use no flags']
     expect(ansis.strip(prettyPrint(sampleError) ?? '')).to
@@ -30,7 +30,7 @@ describe('pretty-print', () => {
       * Use no flags`)
   })
 
-  fancy.it('pretty prints with omitted fields', async () => {
+  it('pretty prints with omitted fields', async () => {
     const sampleError = new Error('Something very serious has gone wrong with the flags!')
 
     expect(ansis.strip(prettyPrint(sampleError) ?? '')).to.equal(
@@ -39,7 +39,7 @@ describe('pretty-print', () => {
   })
 
   describe('CLI Error properties', () => {
-    fancy.it('supports the bang property', async () => {
+    it('supports the bang property', async () => {
       class SampleCLIError extends CLIError {
         get bang() {
           return '>>>'
@@ -50,7 +50,7 @@ describe('pretty-print', () => {
       expect(ansis.strip(prettyPrint(sampleError) ?? '')).to.equal(' >>>   Error: This is a CLI error')
     })
 
-    fancy.it("supports the 'name' message prefix property", async () => {
+    it("supports the 'name' message prefix property", async () => {
       const defaultBang = process.platform === 'win32' ? '»' : '›'
       const sampleError = new CLIError('This is a CLI error')
       sampleError.name = 'Errorz'
@@ -70,7 +70,7 @@ describe('pretty-print', () => {
       config.debug = initialConfigDebug
     })
 
-    fancy.it('shows the stack for an error', async () => {
+    it('shows the stack for an error', async () => {
       const error = new Error('oh no!')
       error.stack = 'this is the error stack property'
       expect(prettyPrint(error)).to.equal('this is the error stack property')

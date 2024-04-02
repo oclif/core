@@ -13,10 +13,10 @@ describe('plugins defined as patterns in package.json', () => {
       },
     })
 
-    expect(result.length).to.equal(3)
-    const rootPlugin = result.find((r) => r.name === 'wildcard-plugins-fixture')
-    const pluginHelp = result.find((r) => r.name === '@oclif/plugin-help')
-    const pluginPlugins = result.find((r) => r.name === '@oclif/plugin-plugins')
+    expect(result?.length).to.equal(3)
+    const rootPlugin = result?.find((r) => r.name === 'wildcard-plugins-fixture')
+    const pluginHelp = result?.find((r) => r.name === '@oclif/plugin-help')
+    const pluginPlugins = result?.find((r) => r.name === '@oclif/plugin-plugins')
 
     expect(rootPlugin).to.exist
     expect(pluginHelp).to.exist
@@ -32,10 +32,10 @@ describe('plugins defined as patterns in package.json', () => {
       },
     })
 
-    expect(result.length).to.equal(3)
-    const rootPlugin = result.find((r) => r.name === 'wildcard-plugins-fixture')
-    const pluginHelp = result.find((r) => r.name === '@oclif/plugin-help')
-    const pluginPlugins = result.find((r) => r.name === '@oclif/plugin-plugins')
+    expect(result?.length).to.equal(3)
+    const rootPlugin = result?.find((r) => r.name === 'wildcard-plugins-fixture')
+    const pluginHelp = result?.find((r) => r.name === '@oclif/plugin-help')
+    const pluginPlugins = result?.find((r) => r.name === '@oclif/plugin-plugins')
 
     expect(rootPlugin).to.exist
     expect(pluginHelp).to.exist

@@ -1,17 +1,17 @@
-import {expect, test} from '@oclif/test'
+import {expect} from 'chai'
 
 import {collectUsableIds, getCommandIdPermutations} from '../../src/config/util'
 
 describe('util', () => {
   describe('collectUsableIds', () => {
-    test.it('returns all usable command ids', async () => {
+    it('returns all usable command ids', async () => {
       const ids = collectUsableIds(['foo:bar:baz', 'one:two:three'])
       expect(ids).to.deep.equal(new Set(['foo', 'foo:bar', 'foo:bar:baz', 'one', 'one:two', 'one:two:three']))
     })
   })
 
   describe('getCommandIdPermutations', () => {
-    test.it('returns all usable command ids', async () => {
+    it('returns all usable command ids', async () => {
       const permutations = getCommandIdPermutations('foo:bar:baz')
       expect(permutations).to.deep.equal([
         'foo:bar:baz',
@@ -31,7 +31,7 @@ describe('util', () => {
       return result
     }
 
-    test.it('returns the correct number of permutations', async () => {
+    it('returns the correct number of permutations', async () => {
       expect(getCommandIdPermutations('one').length).to.equal(numberOfPermutations('one'))
       expect(getCommandIdPermutations('one:two').length).to.equal(numberOfPermutations('one:two'))
       expect(getCommandIdPermutations('one:two:three').length).to.equal(numberOfPermutations('one:two:three'))

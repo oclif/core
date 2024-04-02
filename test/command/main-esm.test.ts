@@ -1,8 +1,8 @@
-import {expect, fancy} from 'fancy-test'
+import {expect} from 'chai'
 import {resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
-import {run} from '../../src/main'
+import {runCommand} from '../test'
 
 // This tests file URL / import.meta.url simulation.
 const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString()
@@ -14,23 +14,19 @@ const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch
 root = convertToFileURL(root)
 
 describe('main-esm', () => {
-  fancy
-    .stdout()
-    .do(() => run(['plugins'], root))
-    .do((output: any) => expect(output.stdout).to.equal('No plugins installed.\n'))
-    .it('runs plugins')
+  it('runs plugins', async () => {
+    const {stdout} = await runCommand(['plugins'], {root})
+    expect(stdout).to.equal('No plugins installed.\n')
+  })
 
-  fancy
-    .stdout()
-    .do(() => run(['--version'], root))
-    .do((output: any) => expect(output.stdout).to.equal(version + '\n'))
-    .it('runs --version')
+  it('runs --version', async () => {
+    const {stdout} = await runCommand(['--version'], {root})
+    expect(stdout).to.equal(version + '\n')
+  })
 
-  fancy
-    .stdout()
-    .do(() => run(['--help'], root))
-    .do((output: any) =>
-      expect(output.stdout).to.equal(`base library for oclif CLIs
+  it('runs --help', async () => {
+    const {stdout} = await runCommand(['--help'], {root})
+    expect(stdout).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -45,15 +41,15 @@ COMMANDS
   help     Display help for oclif.
   plugins  List installed plugins.
 
-`),
-    )
-    .it('runs --help')
+`)
+  })
 
-  fancy
-    .stdout()
-    .do(() => run(['--help', 'foo'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
-    .do((output: any) =>
-      expect(output.stdout).to.equal(`foo topic description
+  it('runs spaced topic help', async () => {
+    const {stdout} = await runCommand(
+      ['--help', 'foo'],
+      convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json')),
+    )
+    expect(stdout).to.equal(`foo topic description
 
 USAGE
   $ oclif-esm foo COMMAND
@@ -64,15 +60,15 @@ TOPICS
 COMMANDS
   foo baz  foo baz description
 
-`),
-    )
-    .it('runs spaced topic help')
+`)
+  })
 
-  fancy
-    .stdout()
-    .do(() => run(['foo', 'bar', '--help'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
-    .do((output: any) =>
-      expect(output.stdout).to.equal(`foo bar topic description
+  it('runs spaced topic help v2', async () => {
+    const {stdout} = await runCommand(
+      ['foo', 'bar', '--help'],
+      convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json')),
+    )
+    expect(stdout).to.equal(`foo bar topic description
 
 USAGE
   $ oclif-esm foo bar COMMAND
@@ -81,19 +77,19 @@ COMMANDS
   foo bar fail     fail description
   foo bar succeed  succeed description
 
-`),
+`)
+  })
+
+  it('runs foo:baz with space separator', async () => {
+    const {stdout} = await runCommand(['foo', 'baz'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json')))
+    expect(stdout).to.equal('running Baz\n')
+  })
+
+  it('runs foo:bar:succeed with space separator', async () => {
+    const {stdout} = await runCommand(
+      ['foo', 'bar', 'succeed'],
+      convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json')),
     )
-    .it('runs spaced topic help v2')
-
-  fancy
-    .stdout()
-    .do(() => run(['foo', 'baz'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
-    .do((output: any) => expect(output.stdout).to.equal('running Baz\n'))
-    .it('runs foo:baz with space separator')
-
-  fancy
-    .stdout()
-    .do(() => run(['foo', 'bar', 'succeed'], convertToFileURL(resolve(__dirname, 'fixtures/esm/package.json'))))
-    .do((output: any) => expect(output.stdout).to.equal('it works!\n'))
-    .it('runs foo:bar:succeed with space separator')
+    expect(stdout).to.equal('it works!\n')
+  })
 })

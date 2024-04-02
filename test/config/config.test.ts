@@ -1,18 +1,15 @@
-import {join} from 'node:path'
+import {expect} from 'chai'
+import {join, resolve} from 'node:path'
+import sinon from 'sinon'
 
 import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as fs from '../../src/util/fs'
 import * as os from '../../src/util/os'
-import {expect, fancy} from './test'
 
 interface Options {
   commandIds?: string[]
-  env?: {[k: string]: string}
-  homedir?: string
-  pjson?: any
-  platform?: string
   types?: string[]
 }
 
@@ -45,191 +42,216 @@ const pjson = {
 }
 
 describe('Config', () => {
-  const testConfig = ({pjson, homedir = '/my/home', platform = 'darwin', env = {}}: Options = {}, theme?: any) => {
-    let test = fancy
-      .resetConfig()
-      .env(env, {clear: true})
-      .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-      .stub(os, 'getPlatform', (stub) => stub.returns(platform))
+  let sandbox: sinon.SinonSandbox
+  const originalEnv = {...process.env}
+  const root = resolve(__dirname, '..')
+  beforeEach(() => {
+    sandbox = sinon.createSandbox()
+    process.env = {}
+  })
 
-    if (theme) test = test.stub(fs, 'safeReadJson', (stub) => stub.resolves(theme))
-    if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
-
-    test = test.add('config', () => Config.load())
-
-    return {
-      hasS3Key(k: keyof Interfaces.PJSON.S3.Templates, expected: string, extra: any = {}) {
-        return this.it(`renders ${k} template as ${expected}`, (config) => {
-          // Config.load reads the package.json to determine the version and channel
-          // In order to allow prerelease branches to pass, we need to strip the prerelease
-          // tag from the version and switch the channel to stable.
-          // @ts-expect-error because readonly property
-          config.version = config.version.replaceAll(/-beta\.\d/g, '')
-          // @ts-expect-error because readonly property
-          config.channel = 'stable'
-
-          let {ext, ...options} = extra
-          options = {
-            bin: 'oclif-cli',
-            version: '1.0.0',
-            ext: '.tar.gz',
-            ...options,
-          }
-          const o = ext ? config.s3Key(k as any, ext, options) : config.s3Key(k, options)
-          expect(o).to.equal(expected)
-        })
-      },
-      hasProperty<K extends keyof Interfaces.Config>(k: K | undefined, v: Interfaces.Config[K] | undefined) {
-        return this.it(`has ${k}=${v}`, (config) => expect(config).to.have.property(k!, v))
-      },
-      it(expectation: string, fn: (config: Interfaces.Config) => any) {
-        test.do(({config}) => fn(config)).it(expectation)
-        return this
-      },
-    }
-  }
+  afterEach(() => {
+    sandbox.restore()
+    process.env = originalEnv
+  })
 
   describe('darwin', () => {
-    testConfig()
-      .hasProperty('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
-      .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
-      .hasProperty('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
-      .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
-      .hasProperty('home', join('/my/home'))
+    it('should have darwin specific paths', async () => {
+      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getPlatform').returns('darwin')
+      const config = await Config.load()
+
+      expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
+      expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
+      expect(config).to.have.property('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
+      expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
+      expect(config).to.have.property('home', join('/my/home'))
+    })
   })
 
   describe('binAliases', () => {
-    testConfig({pjson}).it('will have binAliases set', (config) => {
+    it('will have binAliases set', async () => {
+      const config = await Config.load({pjson, root})
+
       expect(config.binAliases).to.deep.equal(['bar', 'baz'])
     })
 
-    testConfig({pjson}).it('will get scoped env vars with bin aliases', (config) => {
+    it('will get scoped env vars with bin aliases', async () => {
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarKeys('abc')).to.deep.equal(['FOO_ABC', 'BAR_ABC', 'BAZ_ABC'])
     })
 
-    testConfig({pjson}).it('will get scoped env vars', (config) => {
+    it('will get scoped env vars', async () => {
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarKey('abc')).to.equal('FOO_ABC')
     })
 
-    testConfig({pjson}).it('will get scopedEnvVar', (config) => {
+    it('will get scopedEnvVar', async () => {
       process.env.FOO_ABC = 'find me'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVar('abc')).to.deep.equal('find me')
-      delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVar via alias', (config) => {
+    it('will get scopedEnvVar via alias', async () => {
       process.env.BAZ_ABC = 'find me'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVar('abc')).to.deep.equal('find me')
-      delete process.env.BAZ_ABC
     })
 
-    testConfig({pjson}).it('will get scoped env vars', (config) => {
+    it('will get scoped env vars', async () => {
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarKey('abc')).to.equal('FOO_ABC')
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue', (config) => {
+    it('will get scopedEnvVarTrue', async () => {
       process.env.FOO_ABC = 'true'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
-      delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue via alias', (config) => {
+    it('will get scopedEnvVarTrue via alias', async () => {
       process.env.BAR_ABC = 'true'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
-      delete process.env.BAR_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1', (config) => {
+    it('will get scopedEnvVarTrue=1', async () => {
       process.env.FOO_ABC = '1'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
-      delete process.env.FOO_ABC
     })
 
-    testConfig({pjson}).it('will get scopedEnvVarTrue=1 via alias', (config) => {
+    it('will get scopedEnvVarTrue=1 via alias', async () => {
       process.env.BAR_ABC = '1'
+      const config = await Config.load({pjson, root})
       expect(config.scopedEnvVarTrue('abc')).to.equal(true)
-      delete process.env.BAR_ABC
     })
   })
 
   describe('linux', () => {
-    testConfig({platform: 'linux'})
-      .hasProperty('cacheDir', join('/my/home/.cache/@oclif/core'))
-      .hasProperty('configDir', join('/my/home/.config/@oclif/core'))
-      .hasProperty('errlog', join('/my/home/.cache/@oclif/core/error.log'))
-      .hasProperty('dataDir', join('/my/home/.local/share/@oclif/core'))
-      .hasProperty('home', join('/my/home'))
+    it('should have linux specific paths', async () => {
+      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getPlatform').returns('linux')
+      const config = await Config.load()
+
+      expect(config).to.have.property('cacheDir', join('/my/home/.cache/@oclif/core'))
+      expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
+      expect(config).to.have.property('errlog', join('/my/home/.cache/@oclif/core/error.log'))
+      expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
+      expect(config).to.have.property('home', join('/my/home'))
+    })
   })
 
   describe('win32', () => {
-    testConfig({
-      platform: 'win32',
-      env: {LOCALAPPDATA: '/my/home/localappdata'},
+    it('should have win32 specific paths', async () => {
+      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getPlatform').returns('win32')
+      process.env.LOCALAPPDATA = '/my/home/localappdata'
+      const config = await Config.load()
+
+      expect(config).to.have.property('cacheDir', join('/my/home/localappdata/@oclif\\core'))
+      expect(config).to.have.property('configDir', join('/my/home/localappdata/@oclif\\core'))
+      expect(config).to.have.property('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
+      expect(config).to.have.property('dataDir', join('/my/home/localappdata/@oclif\\core'))
+      expect(config).to.have.property('home', join('/my/home'))
     })
-      .hasProperty('cacheDir', join('/my/home/localappdata/@oclif\\core'))
-      .hasProperty('configDir', join('/my/home/localappdata/@oclif\\core'))
-      .hasProperty('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
-      .hasProperty('dataDir', join('/my/home/localappdata/@oclif\\core'))
-      .hasProperty('home', join('/my/home'))
   })
 
-  describe('s3Key', () => {
+  describe('s3Key', async () => {
     const target = {platform: 'darwin', arch: 'x64'}
     const beta = {version: '2.0.0-beta', channel: 'beta'}
-    testConfig()
-      .hasS3Key('baseDir', 'oclif-cli')
-      .hasS3Key('manifest', 'version')
-      .hasS3Key('manifest', 'channels/beta/version', beta)
-      .hasS3Key('manifest', 'darwin-x64', target)
-      .hasS3Key('manifest', 'channels/beta/darwin-x64', {...beta, ...target})
-      .hasS3Key('unversioned', 'oclif-cli.tar.gz')
-      .hasS3Key('unversioned', 'oclif-cli.tar.gz')
-      .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
-      .hasS3Key('unversioned', 'channels/beta/oclif-cli.tar.gz', beta)
-      .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
-      .hasS3Key('unversioned', 'oclif-cli-darwin-x64.tar.gz', target)
-      .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
-      .hasS3Key('unversioned', 'channels/beta/oclif-cli-darwin-x64.tar.gz', {...beta, ...target})
-      .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0.tar.gz')
-      .hasS3Key('versioned', 'oclif-cli-v1.0.0/oclif-cli-v1.0.0-darwin-x64.tar.gz', target)
-      .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta.tar.gz', beta)
-      .hasS3Key('versioned', 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta-darwin-x64.tar.gz', {
-        ...beta,
-        ...target,
+    let config: Config
+
+    before(async () => {
+      config = await Config.load()
+      // Config.load reads the package.json to determine the version and channel
+      // In order to allow prerelease branches to pass, we need to strip the prerelease
+      // tag from the version and switch the channel to stable.
+      config.version = config.version.replaceAll(/-beta\.\d/g, '')
+      config.channel = 'stable'
+    })
+
+    const tests: Array<{
+      key: keyof Interfaces.PJSON.S3.Templates
+      expected: string
+      extra?: Record<string, string> & {ext?: '.tar.gz' | '.tar.xz' | Interfaces.Config.s3Key.Options}
+    }> = [
+      {key: 'baseDir', expected: 'oclif-cli'},
+      {key: 'manifest', expected: 'version'},
+      {key: 'manifest', expected: 'channels/beta/version', extra: beta},
+      {key: 'manifest', expected: 'darwin-x64', extra: target},
+      {key: 'manifest', expected: 'channels/beta/darwin-x64', extra: {...beta, ...target}},
+      {key: 'unversioned', expected: 'oclif-cli.tar.gz'},
+      {key: 'unversioned', expected: 'oclif-cli.tar.gz'},
+      {key: 'unversioned', expected: 'channels/beta/oclif-cli.tar.gz', extra: beta},
+      {key: 'unversioned', expected: 'channels/beta/oclif-cli.tar.gz', extra: beta},
+      {key: 'unversioned', expected: 'oclif-cli-darwin-x64.tar.gz', extra: target},
+      {key: 'unversioned', expected: 'oclif-cli-darwin-x64.tar.gz', extra: target},
+      {key: 'unversioned', expected: 'channels/beta/oclif-cli-darwin-x64.tar.gz', extra: {...beta, ...target}},
+      {key: 'unversioned', expected: 'channels/beta/oclif-cli-darwin-x64.tar.gz', extra: {...beta, ...target}},
+      {key: 'versioned', expected: 'oclif-cli-v1.0.0/oclif-cli-v1.0.0.tar.gz'},
+      {key: 'versioned', expected: 'oclif-cli-v1.0.0/oclif-cli-v1.0.0-darwin-x64.tar.gz', extra: target},
+      {key: 'versioned', expected: 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta.tar.gz', extra: beta},
+      {
+        key: 'versioned',
+        expected: 'channels/beta/oclif-cli-v2.0.0-beta/oclif-cli-v2.0.0-beta-darwin-x64.tar.gz',
+        extra: {...beta, ...target},
+      },
+    ]
+
+    for (const testCase of tests) {
+      const {key, expected, extra} = testCase
+      let {ext, ...options} = extra ?? {}
+      options = {
+        bin: 'oclif-cli',
+        version: '1.0.0',
+        ext: '.tar.gz',
+        ...options,
+      }
+      it(`renders ${key} template as ${expected}`, () => {
+        const o = ext ? config.s3Key(key, ext, options) : config.s3Key(key, options)
+        expect(o).to.equal(expected)
       })
+    }
   })
 
   describe('options', () => {
     it('should set the channel and version', async () => {
-      const config = new Config({root: process.cwd(), channel: 'test-channel', version: '0.1.2-test'})
-      await config.load()
+      const config = await Config.load({root, channel: 'test-channel', version: '0.1.2-test'})
       expect(config).to.have.property('channel', 'test-channel')
       expect(config).to.have.property('version', '0.1.2-test')
     })
   })
 
-  testConfig().it('has s3Url', (config) => {
-    const orig = config.pjson.oclif.update.s3.host
-    config.pjson.oclif.update.s3.host = 'https://bar.com/a/'
+  it('has s3Url', async () => {
+    const config = await Config.load({
+      root,
+      pjson: {
+        ...pjson,
+        oclif: {
+          ...pjson.oclif,
+          update: {
+            // @ts-expect-error - not worth stubbing out every single required prop on s3
+            s3: {
+              host: 'https://bar.com/a/',
+            },
+          },
+        },
+      },
+    })
     expect(config.s3Url('/b/c')).to.equal('https://bar.com/a/b/c')
-    config.pjson.oclif.update.s3.host = orig
   })
 
-  testConfig({
-    pjson,
-  }).it('has subtopics', (config) => {
+  it('has subtopics', async () => {
+    const config = await Config.load({root, pjson})
     expect(config.topics.map((t) => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
   })
 
   describe('findCommand', () => {
-    const findCommandTestConfig = ({
-      pjson,
-      homedir = '/my/home',
-      platform = 'darwin',
-      env = {},
-      commandIds = ['foo:bar', 'foo:baz'],
-      types = [],
-    }: Options = {}) => {
+    async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
+      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getPlatform').returns('darwin')
+
       class MyCommandClass extends Command {
         aliases: string[] = []
 
@@ -322,129 +344,125 @@ describe('Config', () => {
         commandsDir: './lib/commands',
       }
       const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
-      let test = fancy
-        .resetConfig()
-        .env(env, {clear: true})
-        .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-        .stub(os, 'getPlatform', (stub) => stub.returns(platform))
 
-      if (pjson) test = test.stub(fs, 'readJson', (stub) => stub.resolves(pjson))
-      test = test.add('config', async () => {
-        const config = await Config.load()
-        config.plugins = plugins
-        config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
-        config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
-        for (const plugin of config.plugins.values()) {
-          // @ts-expect-error private method
-          config.loadCommands(plugin)
-          // @ts-expect-error private method
-          config.loadTopics(plugin)
-        }
-
-        return config
+      const config = await Config.load({
+        root,
+        pjson,
       })
-      // @ts-ignore
-      return {
-        it(expectation: string, fn: (config: Interfaces.Config) => any) {
-          test.do(({config}) => fn(config)).it(expectation)
-          return this
+      config.plugins = plugins
+      config.pjson = {
+        ...pjson,
+        dependencies: {
+          '@My/pluginb': '0.0.0',
+          '@My/plugina': '0.0.0',
+        },
+        oclif: {
+          ...pjson.oclif,
+          plugins: ['@My/pluginb', '@My/plugina'],
         },
       }
+      for (const plugin of config.plugins.values()) {
+        // @ts-expect-error private method
+        config.loadCommands(plugin)
+        // @ts-expect-error private method
+        config.loadTopics(plugin)
+      }
+
+      return config
     }
 
-    findCommandTestConfig().it('find command with no duplicates', (config) => {
+    it('find command with no duplicates', async () => {
+      const config = await loadConfig()
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar']}).it(
-      'find command with duplicates and choose the one that appears first in oclif.plugins',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('pluginAlias', '@My/pluginb')
-      },
-    )
-    findCommandTestConfig({types: ['core', 'user']}).it('find command with no duplicates core/user', (config) => {
+
+    it('find command with duplicates and choose the one that appears first in oclif.plugins', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    })
+
+    it('find command with no duplicates core/user', async () => {
+      const config = await loadConfig({types: ['core', 'user']})
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'core')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({types: ['user', 'core']}).it('find command with no duplicates user/core', (config) => {
+
+    it('find command with no duplicates user/core', async () => {
+      const config = await loadConfig({types: ['user', 'core']})
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'user')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']}).it(
-      'find command with duplicates core/user',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'core')
-        expect(command).to.have.property('pluginAlias', '@My/plugina')
-      },
-    )
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']}).it(
-      'find command with duplicates user/core',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'core')
-        expect(command).to.have.property('pluginAlias', '@My/pluginb')
-      },
-    )
-    findCommandTestConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']}).it(
-      'find command with duplicates user/user',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'user')
-        expect(command).to.have.property('pluginAlias', '@My/plugina')
-      },
-    )
+
+    it('find command with duplicates core/user', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
+
+    it('find command with duplicates user/core', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    })
+
+    it('find command with duplicates user/user', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'user')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
   })
 
   describe('theme', () => {
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}, {bin: '#FF0000'}).it(
-      'should not be set when DISABLE_THEME is true and theme.json exists',
-      (config) => {
-        expect(config).to.have.property('theme', undefined)
-      },
-    )
+    it('should not be set when DISABLE_THEME is true and theme.json exists', async () => {
+      process.env.FOO_DISABLE_THEME = 'true'
+      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      const config = await Config.load({root, pjson})
+      expect(config).to.have.property('theme', undefined)
+    })
 
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}, {bin: '#FF0000'}).it(
-      'should be set when DISABLE_THEME is false and theme.json exists',
-      (config) => {
-        expect(config.theme).to.have.property('bin', '#FF0000')
-      },
-    )
+    it('should be set when DISABLE_THEME is false and theme.json exists', async () => {
+      process.env.FOO_DISABLE_THEME = 'false'
+      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      const config = await Config.load({root, pjson})
+      expect(config.theme).to.have.property('bin', '#FF0000')
+    })
 
-    testConfig({pjson, env: {}}, {bin: '#FF0000'}).it(
-      'should be set when DISABLE_THEME is unset and theme.json exists',
-      (config) => {
-        expect(config.theme).to.have.property('bin', '#FF0000')
-      },
-    )
+    it('should be set when DISABLE_THEME is unset and theme.json exists', async () => {
+      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      const config = await Config.load({root, pjson})
+      expect(config.theme).to.have.property('bin', '#FF0000')
+    })
 
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'true'}}).it(
-      'should not be set when DISABLE_THEME is true and theme.json does not exist',
-      (config) => {
-        expect(config).to.have.property('theme', undefined)
-      },
-    )
+    it('should not be set when DISABLE_THEME is true and theme.json does not exist', async () => {
+      process.env.FOO_DISABLE_THEME = 'true'
+      sandbox.stub(fs, 'safeReadJson').resolves()
+      const config = await Config.load({root, pjson})
+      expect(config).to.have.property('theme', undefined)
+    })
 
-    testConfig({pjson, env: {FOO_DISABLE_THEME: 'false'}}).it(
-      'should not be set when DISABLE_THEME is false and theme.json does not exist',
-      (config) => {
-        expect(config).to.have.property('theme', undefined)
-      },
-    )
+    it('should not be set when DISABLE_THEME is false and theme.json does not exist', async () => {
+      process.env.FOO_DISABLE_THEME = 'false'
+      sandbox.stub(fs, 'safeReadJson').resolves()
+      const config = await Config.load({root, pjson})
+      expect(config).to.have.property('theme', undefined)
+    })
 
-    testConfig({pjson, env: {}}).it(
-      'should not be set when DISABLE_THEME is unset and theme.json does not exist',
-      (config) => {
-        expect(config).to.have.property('theme', undefined)
-      },
-    )
+    it('should not be set when DISABLE_THEME is unset and theme.json does not exist', async () => {
+      sandbox.stub(fs, 'safeReadJson').resolves()
+      const config = await Config.load({root, pjson})
+      expect(config).to.have.property('theme', undefined)
+    })
   })
 })

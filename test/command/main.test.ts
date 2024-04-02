@@ -15,10 +15,10 @@ describe('main', () => {
         type: string
       }>
     >(['plugins'])
-    expect(result.length).to.equal(3)
-    const rootPlugin = result.find((r) => r.name === '@oclif/core')
-    const pluginHelp = result.find((r) => r.name === '@oclif/plugin-help')
-    const pluginPlugins = result.find((r) => r.name === '@oclif/plugin-plugins')
+    expect(result?.length).to.equal(3)
+    const rootPlugin = result?.find((r) => r.name === '@oclif/core')
+    const pluginHelp = result?.find((r) => r.name === '@oclif/plugin-help')
+    const pluginPlugins = result?.find((r) => r.name === '@oclif/plugin-plugins')
 
     expect(rootPlugin).to.exist
     expect(pluginHelp).to.exist

@@ -127,6 +127,7 @@ export interface Config {
   readonly theme?: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
+  readonly updateConfig: NonNullable<PJSON.CLI['oclif']['update']>
   /**
    * user agent to use for http calls
    *
