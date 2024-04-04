@@ -215,19 +215,10 @@ export abstract class Command {
     Errors.exit(code)
   }
 
-  protected async finally(_: Error | undefined): Promise<any> {
-    try {
-      const {config} = Errors
-      if (config.errorLogger) await config.errorLogger.flush()
-    } catch (error: any) {
-      console.error(error)
-    }
-  }
+  protected async finally(_: Error | undefined): Promise<any> {}
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    // if (this.config.debug) Errors.config.debug = true
-    if (this.config.errlog) Errors.config.errlog = this.config.errlog
     const g: any = global
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent

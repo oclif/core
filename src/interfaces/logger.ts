@@ -6,5 +6,4 @@ export type Logger = {
   warn: (formatter: unknown, ...args: unknown[]) => void
   child: (namespace: string) => Logger
   namespace: string
-  enabled: () => boolean
 }

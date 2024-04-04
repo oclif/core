@@ -3,7 +3,7 @@ import wrap from 'wrap-ansi'
 
 import {PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
-import {config} from '../config'
+import {settings} from '../../settings'
 
 // These exist for backwards compatibility with CLIError
 type CLIErrorDisplayOptions = {bang?: string; name?: string}
@@ -31,7 +31,7 @@ const formatSuggestions = (suggestions?: string[]): string | undefined => {
 }
 
 export default function prettyPrint(error: Error & PrettyPrintableError & CLIErrorDisplayOptions): string | undefined {
-  if (config.debug) {
+  if (settings.debug) {
     return error.stack
   }
 

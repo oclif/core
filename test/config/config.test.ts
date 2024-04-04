@@ -122,7 +122,6 @@ describe('Config', () => {
 
       expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
       expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
-      expect(config).to.have.property('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
       expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
       expect(config).to.have.property('home', join('/my/home'))
     })
@@ -136,7 +135,6 @@ describe('Config', () => {
 
       expect(config).to.have.property('cacheDir', join('/my/home/.cache/@oclif/core'))
       expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
-      expect(config).to.have.property('errlog', join('/my/home/.cache/@oclif/core/error.log'))
       expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
       expect(config).to.have.property('home', join('/my/home'))
     })
@@ -151,7 +149,6 @@ describe('Config', () => {
 
       expect(config).to.have.property('cacheDir', join('/my/home/localappdata/@oclif\\core'))
       expect(config).to.have.property('configDir', join('/my/home/localappdata/@oclif\\core'))
-      expect(config).to.have.property('errlog', join('/my/home/localappdata/@oclif\\core/error.log'))
       expect(config).to.have.property('dataDir', join('/my/home/localappdata/@oclif\\core'))
       expect(config).to.have.property('home', join('/my/home'))
     })

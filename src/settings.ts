@@ -14,12 +14,6 @@ export type Settings = {
    */
   debug?: boolean
   /**
-   * The path to the error.log file.
-   *
-   * NOTE: This is read-only and setting it will have no effect.
-   */
-  errlog?: string
-  /**
    * Enable performance tracking. Resulting data is available in the `perf` property of the `Config` class.
    * This will be overridden by the `enablePerf` property passed into Config constructor.
    */

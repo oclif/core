@@ -10,8 +10,7 @@ function makeLogger(namespace: string = OCLIF_NS): Logger {
   return {
     child: (ns: string, delimiter?: string) => makeLogger(`${namespace}${delimiter ?? ':'}${ns}`),
     debug,
-    enabled: () => debug.enabled,
-    error: debug,
+    error: (formatter: unknown, ...args: unknown[]) => makeLogger(`${namespace}:error`).debug(formatter, ...args),
     info: debug,
     namespace,
     trace: debug,

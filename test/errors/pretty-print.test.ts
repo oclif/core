@@ -1,8 +1,8 @@
 import ansis from 'ansis'
 import {expect} from 'chai'
 
+import {settings} from '../../src'
 import {CLIError} from '../../src/errors'
-import {config} from '../../src/errors/config'
 import prettyPrint from '../../src/errors/errors/pretty-print'
 import {PrettyPrintableError} from '../../src/interfaces/errors'
 
@@ -58,16 +58,16 @@ describe('pretty-print', () => {
     })
   })
 
-  describe('config.debug set to true', () => {
-    let initialConfigDebug: any
+  describe('settings.debug set to true', () => {
+    let initialSettingsDebug: boolean | undefined
 
     beforeEach(() => {
-      initialConfigDebug = config.debug
-      config.debug = true
+      initialSettingsDebug = settings.debug
+      settings.debug = true
     })
 
     afterEach(() => {
-      config.debug = initialConfigDebug
+      settings.debug = initialSettingsDebug
     })
 
     it('shows the stack for an error', async () => {

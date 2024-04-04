@@ -1,12 +1,5 @@
 import {getLogger} from '../logger'
 
-if (process.listenerCount('warning') === 1) {
-  process.on('warning', (warning: any) => {
-    console.error(warning.stack)
-    if (warning.detail) console.error(warning.detail)
-  })
-}
-
 export function makeDebug(...scope: string[]): (..._: any) => void {
   return (formatter: unknown, ...args: unknown[]) => getLogger(['config', ...scope].join(':')).debug(formatter, ...args)
 }

@@ -3,8 +3,8 @@ import clean from 'clean-stack'
 import Cache from '../cache'
 import {Help} from '../help/index'
 import {OclifError, PrettyPrintableError} from '../interfaces'
+import {getLogger} from '../logger'
 import {CLIParseError} from '../parser/errors'
-import {config} from './config'
 import {CLIError} from './errors/cli'
 import {ExitError} from './errors/exit'
 import prettyPrint from './errors/pretty-print'
@@ -53,16 +53,11 @@ export async function handle(err: ErrorToHandle): Promise<void> {
 
     const exitCode = err.oclif?.exit ?? 1
 
-    if (config.errorLogger && err.code !== 'EEXIT') {
-      if (stack) {
-        config.errorLogger.log(stack)
-      }
+    if (err.code !== 'EEXIT' && stack) {
+      getLogger().error(stack)
+    }
 
-      await config.errorLogger
-        .flush()
-        .then(() => Exit.exit(exitCode))
-        .catch(console.error)
-    } else Exit.exit(exitCode)
+    Exit.exit(exitCode)
   } catch (error: any) {
     console.error(err.stack)
     console.error(error.stack)

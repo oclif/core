@@ -31,6 +31,14 @@ const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
 const ROOT_ONLY_HOOKS = new Set<keyof Hooks>(['preparse'])
 
+function displayWarnings() {
+  if (process.listenerCount('warning') > 1) return
+  process.on('warning', (warning: any) => {
+    console.error(warning.stack)
+    if (warning.detail) console.error(warning.detail)
+  })
+}
+
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
   return (m && m[1]) || 'stable'
@@ -82,7 +90,6 @@ export class Config implements IConfig {
   public configDir!: string
   public dataDir!: string
   public dirname!: string
-  public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
   public isSingleCommandCLI = false
@@ -285,6 +292,7 @@ export class Config implements IConfig {
   public async load(): Promise<void> {
     settings.performanceEnabled =
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    if (settings.debug) displayWarnings()
     setLogger(this.options)
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
@@ -327,7 +335,6 @@ export class Config implements IConfig {
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
     this.configDir = this.scopedEnvVar('CONFIG_DIR') || this.dir('config')
     this.dataDir = this.scopedEnvVar('DATA_DIR') || this.dir('data')
-    this.errlog = join(this.cacheDir, 'error.log')
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
@@ -347,6 +354,7 @@ export class Config implements IConfig {
           this.pjson.oclif.commands?.target),
     )
 
+    this.maybeAdjustDebugSetting()
     await this.loadPluginsAndCommands()
 
     debug('config done')
@@ -617,8 +625,8 @@ export class Config implements IConfig {
 
   /**
    * gets the scoped env var keys for a given key, including bin aliases
-   * @param {string} k, the env key e.g. 'npm_registry'
-   * @returns {string[]} e.g. ['SF_NPM_REGISTRY', 'SFDX_NPM_REGISTRY']
+   * @param {string} k, the env key e.g. 'debug'
+   * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
     return [this.bin, ...(this.binAliases ?? [])]
@@ -883,6 +891,13 @@ export class Config implements IConfig {
     }
 
     marker?.stop()
+  }
+
+  private maybeAdjustDebugSetting(): void {
+    if (this.scopedEnvVarTrue('DEBUG')) {
+      settings.debug = true
+      displayWarnings()
+    }
   }
 
   private warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
