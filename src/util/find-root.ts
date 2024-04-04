@@ -178,7 +178,7 @@ function findPnpRoot(name: string, root: string): string | undefined {
  *
  * If no path is found, undefined is returned which will eventually result in a thrown Error from Plugin.
  */
-export async function findRoot(name: string | undefined, root: string) {
+export async function findRoot(name: string | undefined, root: string): Promise<string | undefined> {
   if (name) {
     debug(name)(`Finding root using ${root}`)
     let pkgPath
