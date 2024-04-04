@@ -17,7 +17,7 @@ import {findRoot} from '../util/find-root'
 import {readJson} from '../util/fs'
 import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-path'
-import {Debug, getCommandIdPermutations} from './util'
+import {getCommandIdPermutations, makeDebug} from './util'
 
 const _pjson = Cache.getInstance().get('@oclif/core')
 
@@ -142,8 +142,7 @@ export class Plugin implements IPlugin {
 
   _base = `${_pjson.name}@${_pjson.version}`
 
-  // eslint-disable-next-line new-cap
-  protected _debug = Debug()
+  protected _debug = makeDebug()
 
   private commandCache: CommandCache | undefined
   private commandDiscoveryOpts: CommandDiscovery | undefined
@@ -231,8 +230,8 @@ export class Plugin implements IPlugin {
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     if (!this.name) throw new CLIError(`no name in package.json (${root})`)
-    // eslint-disable-next-line new-cap
-    this._debug = Debug(this.name)
+
+    this._debug = makeDebug(this.name)
     this.version = this.pjson.version
     if (this.pjson.oclif) {
       this.valid = true

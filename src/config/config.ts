@@ -12,6 +12,7 @@ import {Hook, Hooks, PJSON, Topic} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {Theme} from '../interfaces/theme'
+import {makeDebug as loggerMakeDebug, setLogger} from '../logger'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
@@ -22,10 +23,9 @@ import ux from '../ux'
 import {parseTheme} from '../ux/theme'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-path'
-import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
+import {collectUsableIds, getCommandIdPermutations, makeDebug} from './util'
 
-// eslint-disable-next-line new-cap
-const debug = Debug()
+const debug = makeDebug()
 
 const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
@@ -81,7 +81,6 @@ export class Config implements IConfig {
   public channel!: string
   public configDir!: string
   public dataDir!: string
-  public debug = 0
   public dirname!: string
   public errlog!: string
   public flexibleTaxonomy!: boolean
@@ -123,6 +122,7 @@ export class Config implements IConfig {
 
   constructor(public options: Options) {}
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
+    setLogger(opts)
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
       opts = fileURLToPath(opts)
@@ -285,6 +285,7 @@ export class Config implements IConfig {
   public async load(): Promise<void> {
     settings.performanceEnabled =
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    setLogger(this.options)
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
     this.rootPlugin = await this.pluginLoader.loadRoot({pjson: this.options.pjson})
@@ -321,7 +322,6 @@ export class Config implements IConfig {
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
-    this.debug = this._debug()
 
     this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
@@ -503,7 +503,7 @@ export class Config implements IConfig {
 
     const plugins = ROOT_ONLY_HOOKS.has(event) ? [this.rootPlugin] : [...this.plugins.values()]
     const promises = plugins.map(async (p) => {
-      const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
+      const debug = loggerMakeDebug([p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
         debug,
@@ -617,8 +617,8 @@ export class Config implements IConfig {
 
   /**
    * gets the scoped env var keys for a given key, including bin aliases
-   * @param {string} k, the env key e.g. 'debug'
-   * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
+   * @param {string} k, the env key e.g. 'npm_registry'
+   * @returns {string[]} e.g. ['SF_NPM_REGISTRY', 'SFDX_NPM_REGISTRY']
    */
   public scopedEnvVarKeys(k: string): string[] {
     return [this.bin, ...(this.binAliases ?? [])]
@@ -631,44 +631,6 @@ export class Config implements IConfig {
     return v === '1' || v === 'true'
   }
 
-  protected warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
-    if (this.warned) return
-
-    if (typeof err === 'string') {
-      process.emitWarning(err)
-      return
-    }
-
-    if (err instanceof Error) {
-      const modifiedErr: any = err
-      modifiedErr.name = `${err.name} Plugin: ${this.name}`
-      modifiedErr.detail = compact([
-        (err as any).detail,
-        `module: ${this._base}`,
-        scope && `task: ${scope}`,
-        `plugin: ${this.name}`,
-        `root: ${this.root}`,
-        'See more details with DEBUG=*',
-      ]).join('\n')
-      process.emitWarning(err)
-      return
-    }
-
-    // err is an object
-    process.emitWarning('Config.warn expected either a string or Error, but instead received an object')
-    err.name = `${err.name} Plugin: ${this.name}`
-    err.detail = compact([
-      err.detail,
-      `module: ${this._base}`,
-      scope && `task: ${scope}`,
-      `plugin: ${this.name}`,
-      `root: ${this.root}`,
-      'See more details with DEBUG=*',
-    ]).join('\n')
-
-    process.emitWarning(JSON.stringify(err))
-  }
-
   protected windowsHome(): string | undefined {
     return this.windowsHomedriveHome() || this.windowsUserprofileHome()
   }
@@ -679,16 +641,6 @@ export class Config implements IConfig {
 
   protected windowsUserprofileHome(): string | undefined {
     return process.env.USERPROFILE
-  }
-
-  protected _debug(): number {
-    if (this.scopedEnvVarTrue('DEBUG')) return 1
-    try {
-      const {enabled} = require('debug')(this.bin)
-      if (enabled) return 1
-    } catch {}
-
-    return 0
   }
 
   protected _shell(): string {
@@ -931,5 +883,43 @@ export class Config implements IConfig {
     }
 
     marker?.stop()
+  }
+
+  private warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
+    if (this.warned) return
+
+    if (typeof err === 'string') {
+      process.emitWarning(err)
+      return
+    }
+
+    if (err instanceof Error) {
+      const modifiedErr: any = err
+      modifiedErr.name = `${err.name} Plugin: ${this.name}`
+      modifiedErr.detail = compact([
+        (err as any).detail,
+        `module: ${this._base}`,
+        scope && `task: ${scope}`,
+        `plugin: ${this.name}`,
+        `root: ${this.root}`,
+        'See more details with DEBUG=*',
+      ]).join('\n')
+      process.emitWarning(err)
+      return
+    }
+
+    // err is an object
+    process.emitWarning('Config.warn expected either a string or Error, but instead received an object')
+    err.name = `${err.name} Plugin: ${this.name}`
+    err.detail = compact([
+      err.detail,
+      `module: ${this._base}`,
+      scope && `task: ${scope}`,
+      `plugin: ${this.name}`,
+      `root: ${this.root}`,
+      'See more details with DEBUG=*',
+    ]).join('\n')
+
+    process.emitWarning(JSON.stringify(err))
   }
 }

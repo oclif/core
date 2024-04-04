@@ -1,5 +1,6 @@
 import {PerformanceObserver, performance} from 'node:perf_hooks'
 
+import {makeDebug} from './logger'
 import {settings} from './settings'
 
 type Details = Record<string, boolean | number | string | string[]>
@@ -193,7 +194,7 @@ export class Performance {
   public static debug(): void {
     if (!Performance.enabled) return
 
-    const oclifDebug = require('debug')('oclif-perf')
+    const oclifDebug = makeDebug('perf')
     const processUpTime = (process.uptime() * 1000).toFixed(4)
     oclifDebug('Process Uptime: %sms', processUpTime)
     oclifDebug('Oclif Time: %sms', Performance.oclifPerf['oclif.runMs'].toFixed(4))
@@ -239,7 +240,7 @@ export class Performance {
       )
     }
 
-    const nonCoreDebug = require('debug')('non-oclif-perf')
+    const nonCoreDebug = makeDebug('non-oclif-perf')
 
     const nonCorePerf = Performance.results
     if (nonCorePerf.size > 0) {

@@ -1,4 +1,5 @@
 import {Command} from '../command'
+import {Logger} from './logger'
 import {HookOptions, PJSON} from './pjson'
 import {Topic} from './topic'
 
@@ -23,6 +24,7 @@ export interface Options extends PluginOptions {
   devPlugins?: boolean
   enablePerf?: boolean
   jitPlugins?: boolean
+  logger?: Logger
   pjson?: PJSON.Plugin
   pluginAdditions?: {
     core?: string[]

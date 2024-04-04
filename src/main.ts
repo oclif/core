@@ -4,11 +4,10 @@ import Cache from './cache'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
+import {getLogger, setLogger} from './logger'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
 import ux from './ux'
-
-const debug = require('debug')('oclif:main')
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.isSingleCommandCLI) return true
@@ -46,6 +45,9 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     await help.showHelp(argv)
   }
 
+  setLogger(options)
+
+  const {debug} = getLogger('main')
   debug(`process.execPath: ${process.execPath}`)
   debug(`process.execArgv: ${process.execArgv}`)
   debug('process.argv: %O', process.argv)

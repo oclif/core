@@ -9,9 +9,9 @@ import {settings} from '../settings'
 import {existsSync} from '../util/fs'
 import {readTSConfig} from '../util/read-tsconfig'
 import {isProd} from '../util/util'
-import {Debug} from './util'
-// eslint-disable-next-line new-cap
-const debug = Debug('ts-path')
+import {makeDebug} from './util'
+
+const debug = makeDebug('ts-path')
 
 export const TS_CONFIGS: Record<string, TSConfig | undefined> = {}
 const REGISTERED = new Set<string>()

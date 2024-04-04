@@ -61,12 +61,6 @@ export interface Config {
    */
   readonly dataDir: string
   /**
-   * debugging level
-   *
-   * set by ${BIN}_DEBUG or DEBUG=$BIN
-   */
-  readonly debug: number
-  /**
    * base dirname to use in cacheDir/configDir/dataDir
    */
   readonly dirname: string

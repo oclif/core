@@ -1,13 +1,16 @@
 /* eslint-disable no-await-in-loop */
 import type {PackageInformation, PackageLocator, getPackageInformation} from 'pnpapi'
 
-import makeDebug from 'debug'
 import {basename, dirname, join} from 'node:path'
 
 import {PJSON} from '../interfaces'
+import {getLogger} from '../logger'
 import {safeReadJson} from './fs'
 
-const debug = makeDebug('find-root')
+export function debug(...scope: string[]): (..._: any) => void {
+  return (formatter: unknown, ...args: unknown[]) =>
+    getLogger(['find-root', ...scope].join(':')).debug(formatter, ...args)
+}
 
 // essentially just "cd .."
 function* up(from: string) {
@@ -28,11 +31,11 @@ function* up(from: string) {
 async function findPluginRoot(root: string, name?: string) {
   // If we know the plugin name then we just need to traverse the file
   // system until we find the directory that matches the plugin name.
-  debug.extend(name ?? 'root-plugin')(`Finding root starting at ${root}`)
+  debug(name ?? 'root-plugin')(`Finding root starting at ${root}`)
   if (name) {
     for (const next of up(root)) {
       if (next.endsWith(basename(name))) {
-        debug.extend(name)('Found root based on plugin name!')
+        debug(name)('Found root based on plugin name!')
         return next
       }
     }
@@ -51,9 +54,9 @@ async function findPluginRoot(root: string, name?: string) {
 
     try {
       const cur = join(next, 'package.json')
-      debug.extend(name ?? 'root-plugin')(`Checking ${cur}`)
+      debug(name ?? 'root-plugin')(`Checking ${cur}`)
       if (await safeReadJson<PJSON>(cur)) {
-        debug.extend(name ?? 'root-plugin')('Found root by traversing up from starting point!')
+        debug(name ?? 'root-plugin')('Found root by traversing up from starting point!')
         return dirname(cur)
       }
     } catch {}
@@ -67,7 +70,7 @@ async function findPluginRoot(root: string, name?: string) {
  * See https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
 async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
-  debug.extend(name ?? 'root-plugin')('Finding root using legacy method')
+  debug(name ?? 'root-plugin')('Finding root using legacy method')
   for (const next of up(root)) {
     let cur
     if (name) {
@@ -120,7 +123,7 @@ function findPnpRoot(name: string, root: string): string | undefined {
   maybeRequirePnpApi(root)
   if (!pnp) return
 
-  debug.extend(name)('Finding root for using pnp method')
+  debug(name)('Finding root for using pnp method')
   const seen = new Set()
 
   const traverseDependencyTree = (locator: PackageLocator, parentPkg?: PackageInformation): string | undefined => {
@@ -177,30 +180,30 @@ function findPnpRoot(name: string, root: string): string | undefined {
  */
 export async function findRoot(name: string | undefined, root: string) {
   if (name) {
-    debug.extend(name)(`Finding root using ${root}`)
+    debug(name)(`Finding root using ${root}`)
     let pkgPath
     try {
       pkgPath = require.resolve(name, {paths: [root]})
-      debug.extend(name)(`Found starting point with require.resolve`)
+      debug(name)(`Found starting point with require.resolve`)
     } catch {
-      debug.extend(name)(`require.resolve could not find plugin starting point`)
+      debug(name)(`require.resolve could not find plugin starting point`)
     }
 
     if (pkgPath) {
       const found = await findPluginRoot(dirname(pkgPath), name)
       if (found) {
-        debug.extend(name)(`Found root at ${found}`)
+        debug(name)(`Found root at ${found}`)
         return found
       }
     }
 
     const found = process.versions.pnp ? findPnpRoot(name, root) : await findRootLegacy(name, root)
-    debug.extend(name)(found ? `Found root at ${found}` : 'No root found!')
+    debug(name)(found ? `Found root at ${found}` : 'No root found!')
     return found
   }
 
-  debug.extend('root-plugin')(`Finding root plugin using ${root}`)
+  debug('root-plugin')(`Finding root plugin using ${root}`)
   const found = await findPluginRoot(root)
-  debug.extend('root-plugin')(found ? `Found root at ${found}` : 'No root found!')
+  debug('root-plugin')(found ? `Found root at ${found}` : 'No root found!')
   return found
 }

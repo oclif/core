@@ -24,6 +24,7 @@ import {
   ParserOutput,
 } from './interfaces/parser'
 import {Plugin} from './interfaces/plugin'
+import {makeDebug} from './logger'
 import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
 import {toConfiguredId} from './util/ids'
@@ -137,7 +138,7 @@ export abstract class Command {
   ) {
     this.id = this.ctor.id
     try {
-      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
+      this.debug = makeDebug(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
     } catch {
       this.debug = () => {
         // noop
@@ -225,7 +226,7 @@ export abstract class Command {
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    if (this.config.debug) Errors.config.debug = true
+    // if (this.config.debug) Errors.config.debug = true
     if (this.config.errlog) Errors.config.errlog = this.config.errlog
     const g: any = global
     g['http-call'] = g['http-call'] || {}
