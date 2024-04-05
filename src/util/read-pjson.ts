@@ -12,14 +12,14 @@ const debug = makeDebug('read-pjson')
  *
  * We can assume that the package.json file exists because the plugin root has already been loaded at this point.
  */
-export async function readPjson(path: string): Promise<PJSON.Plugin> {
+export async function readPjson(path: string): Promise<PJSON> {
   const pjsonPath = join(path, 'package.json')
   if (process.env.OCLIF_DISABLE_RC) {
     debug('OCLIF_DISABLE_RC is set, skipping rc search')
-    return readJson<PJSON.Plugin>(pjsonPath)
+    return readJson<PJSON>(pjsonPath)
   }
 
-  const pjson = await readJson<PJSON.Plugin>(pjsonPath)
+  const pjson = await readJson<PJSON>(pjsonPath)
 
   // don't bother with cosmiconfig if the plugin's package.json already has an oclif config
   if (pjson.oclif) {

@@ -1,19 +1,5 @@
 import {HelpOptions} from './help'
 
-export interface PJSON {
-  [k: string]: any
-  dependencies?: {[name: string]: string}
-  devDependencies?: {[name: string]: string}
-  oclif: {
-    bin?: string
-    dirname?: string
-    hooks?: Record<string, string | string[]>
-    plugins?: string[]
-    schema?: number
-  }
-  version: string
-}
-
 export type CommandDiscovery = {
   /**
    * The strategy to use for loading commands.
@@ -96,139 +82,125 @@ export type HookOptions = {
   identifier: string
 }
 
-export namespace PJSON {
-  export interface Plugin extends PJSON {
-    name: string
-    oclif: PJSON['oclif'] & {
-      additionalHelpFlags?: string[]
-      additionalVersionFlags?: string[]
-      aliases?: {[name: string]: null | string}
-      commands?: string | CommandDiscovery
-      /**
-       * Default command id when no command is found. This is used to support single command CLIs.
-       * Only supported value is "."
-       *
-       * @deprecated Use `commands.strategy: 'single'` instead.
-       */
-      default?: string
+export type S3Templates = {
+  baseDir?: string
+  manifest?: string
+  unversioned?: string
+  versioned?: string
+}
+
+export type S3 = {
+  acl?: string
+  bucket?: string
+  folder?: string
+  gz?: boolean
+  host?: string
+  templates: {
+    target: S3Templates
+    vanilla: S3Templates
+  }
+  xz?: boolean
+}
+
+export type Configuration = {
+  additionalHelpFlags?: string[]
+  additionalVersionFlags?: string[]
+  aliases?: {[name: string]: null | string}
+  bin?: string
+  binAliases?: string[]
+  commands?: string | CommandDiscovery
+  description?: string
+  devPlugins?: string[]
+  dirname?: string
+  examplePlugin?: string
+  exitCodes?: {
+    default?: number
+    failedFlagParsing?: number
+    failedFlagValidation?: number
+    invalidArgsSpec?: number
+    nonExistentFlag?: number
+    requiredArgs?: number
+    unexpectedArgs?: number
+  }
+  flexibleTaxonomy?: boolean
+  helpClass?: string
+  helpOptions?: HelpOptions
+  hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
+  jitPlugins?: Record<string, string>
+  macos?: {
+    identifier?: string
+    sign?: string
+  }
+  npmRegistry?: string
+  nsisCustomization?: string
+  pluginPrefix?: string
+  plugins?: string[]
+  repositoryPrefix?: string
+  schema?: number
+  state?: 'beta' | 'deprecated' | string
+  theme?: string
+  topicSeparator?: ' ' | ':'
+  topics?: {
+    [k: string]: {
       description?: string
-      devPlugins?: string[]
-      exitCodes?: {
-        default?: number
-        failedFlagParsing?: number
-        failedFlagValidation?: number
-        invalidArgsSpec?: number
-        nonExistentFlag?: number
-        requiredArgs?: number
-        unexpectedArgs?: number
-      }
-      flexibleTaxonomy?: boolean
-      helpClass?: string
-      helpOptions?: HelpOptions
-      hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
-      jitPlugins?: Record<string, string>
-      macos?: {
-        identifier?: string
-        sign?: string
-      }
-      plugins?: string[]
-      repositoryPrefix?: string
-      schema?: number
-      state?: 'beta' | 'deprecated' | string
-      theme?: string
-      topicSeparator?: ' ' | ':'
-      topics?: {
-        [k: string]: {
-          description?: string
-          hidden?: boolean
-          subtopics?: Plugin['oclif']['topics']
-        }
-      }
-      update?: {
-        autoupdate?: {
-          debounce?: number
-          rollout?: number
-        }
-        node: {
-          targets?: string[]
-          version?: string
-          options?: string | string[]
-        }
-        s3: S3
-      }
-      windows?: {
-        homepage?: string
-        keypath?: string
-        name?: string
-      }
+      hidden?: boolean
+      subtopics?: Configuration['topics']
     }
-    version: string
   }
+  update?: {
+    autoupdate?: {
+      debounce?: number
+      rollout?: number
+    }
+    node: {
+      targets?: string[]
+      version?: string
+      options?: string | string[]
+    }
+    s3: S3
+  }
+  'warn-if-update-available'?: {
+    authorization: string
+    message: string
+    registry: string
+    timeoutInDays: number
+    frequency: number
+    frequencyUnit: 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
+  }
+  windows?: {
+    homepage?: string
+    keypath?: string
+    name?: string
+  }
+}
 
-  export interface S3 {
-    acl?: string
-    bucket?: string
-    folder?: string
-    gz?: boolean
-    host?: string
-    templates: {
-      target: S3.Templates
-      vanilla: S3.Templates
-    }
-    xz?: boolean
-  }
+export type UserPlugin = {
+  name: string
+  tag?: string
+  type: 'user'
+  url?: string
+}
 
-  export namespace S3 {
-    export interface Templates {
-      baseDir?: string
-      manifest?: string
-      unversioned?: string
-      versioned?: string
-    }
-  }
+export type LinkedPlugin = {
+  name: string
+  root: string
+  type: 'link'
+}
 
-  export interface CLI extends Plugin {
-    oclif: Plugin['oclif'] & {
-      bin?: string
-      binAliases?: string[]
-      dirname?: string
-      flexibleTaxonomy?: boolean
-      jitPlugins?: Record<string, string>
-      npmRegistry?: string
-      nsisCustomization?: string
-      schema?: number
-      scope?: string
-      pluginPrefix?: string
-      'warn-if-update-available'?: {
-        authorization: string
-        message: string
-        registry: string
-        timeoutInDays: number
-        frequency: number
-        frequencyUnit: 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
-      }
-    }
-  }
+export type PluginTypes = {root: string} | UserPlugin | LinkedPlugin
 
-  export interface User extends PJSON {
-    oclif: PJSON['oclif'] & {
-      plugins?: (PluginTypes.Link | PluginTypes.User | string)[]
-    }
-    private?: boolean
+export type UserPJSON = {
+  oclif: {
+    plugins?: PluginTypes[]
   }
+  private?: boolean
+}
 
-  export type PluginTypes = {root: string} | PluginTypes.Link | PluginTypes.User
-  export namespace PluginTypes {
-    export interface User {
-      name: string
-      tag?: string
-      type: 'user'
-      url?: string
-    }
-    export interface Link {
-      name: string
-      root: string
-      type: 'link'
-    }
-  }
+export type PJSON = {
+  [k: string]: any
+  dependencies?: {[name: string]: string}
+  devDependencies?: {[name: string]: string}
+  name: string
+  oclif: Configuration
+  version: string
 }

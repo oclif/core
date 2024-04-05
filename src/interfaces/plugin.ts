@@ -11,7 +11,7 @@ export interface PluginOptions {
   isRoot?: boolean
   name?: string
   parent?: Plugin
-  pjson?: PJSON.Plugin
+  pjson?: PJSON
   respectNoCacheDefault?: boolean
   root: string
   tag?: string
@@ -25,7 +25,7 @@ export interface Options extends PluginOptions {
   enablePerf?: boolean
   jitPlugins?: boolean
   logger?: Logger
-  pjson?: PJSON.Plugin
+  pjson?: PJSON
   pluginAdditions?: {
     core?: string[]
     dev?: string[]
@@ -74,7 +74,7 @@ export interface Plugin {
    *
    * parsed with read-pkg
    */
-  pjson: PJSON.CLI | PJSON.Plugin
+  pjson: PJSON
   /**
    * base path of plugin
    */

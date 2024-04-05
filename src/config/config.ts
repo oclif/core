@@ -8,7 +8,7 @@ import Cache from '../cache'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
-import {Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Configuration, Hook, Hooks, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {Theme} from '../interfaces/theme'
@@ -96,16 +96,16 @@ export class Config implements IConfig {
   public name!: string
   public npmRegistry?: string
   public nsisCustomization?: string
-  public pjson!: PJSON.CLI
+  public pjson!: PJSON
   public platform!: PlatformTypes
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
   public theme?: Theme
   public topicSeparator: ' ' | ':' = ':'
-  public updateConfig!: NonNullable<PJSON.CLI['oclif']['update']>
+  public updateConfig!: NonNullable<Configuration['update']>
   public userAgent!: string
-  public userPJSON?: PJSON.User
+  public userPJSON?: UserPJSON
   public valid!: boolean
   public version!: string
   protected warned = false
@@ -348,10 +348,9 @@ export class Config implements IConfig {
     }
 
     this.isSingleCommandCLI = Boolean(
-      this.pjson.oclif.default ||
-        (typeof this.pjson.oclif.commands !== 'string' &&
-          this.pjson.oclif.commands?.strategy === 'single' &&
-          this.pjson.oclif.commands?.target),
+      typeof this.pjson.oclif.commands !== 'string' &&
+        this.pjson.oclif.commands?.strategy === 'single' &&
+        this.pjson.oclif.commands?.target,
     )
 
     this.maybeAdjustDebugSetting()
@@ -589,7 +588,7 @@ export class Config implements IConfig {
   }
 
   public s3Key(
-    type: keyof PJSON.S3.Templates,
+    type: keyof S3Templates,
     ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options,
     options: IConfig.s3Key.Options = {},
   ): string {

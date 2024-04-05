@@ -57,7 +57,7 @@ export default class PluginLoader {
     return {errors: this.errors, plugins: this.plugins}
   }
 
-  public async loadRoot({pjson}: {pjson?: PJSON.Plugin}): Promise<IPlugin> {
+  public async loadRoot({pjson}: {pjson?: PJSON}): Promise<IPlugin> {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {
       const plugins = [...this.plugins.values()]

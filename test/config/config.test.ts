@@ -169,7 +169,7 @@ describe('Config', () => {
     })
 
     const tests: Array<{
-      key: keyof Interfaces.PJSON.S3.Templates
+      key: keyof Interfaces.S3Templates
       expected: string
       extra?: Record<string, string> & {ext?: '.tar.gz' | '.tar.xz' | Interfaces.Config.s3Key.Options}
     }> = [

@@ -22,25 +22,3 @@ DESCRIPTION
     expect(stdout).to.equal('hello world!\n')
   })
 })
-
-describe('single command cli (deprecated)', () => {
-  it('should show help for commands', async () => {
-    const {stdout} = await runCommand(['--help'], {
-      root: resolve(__dirname, 'fixtures/single-cmd-cli-deprecated/package.json'),
-    })
-    expect(stdout).to.equal(`Description of single command CLI.
-
-USAGE
-  $ single-cmd-cli
-
-DESCRIPTION
-  Description of single command CLI.
-
-`)
-  })
-
-  it('should run command', async () => {
-    const {stdout} = await runCommand([], {root: resolve(__dirname, 'fixtures/single-cmd-cli-deprecated/package.json')})
-    expect(stdout).to.equal('hello world!\n')
-  })
-})

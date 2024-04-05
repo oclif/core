@@ -1,6 +1,6 @@
 import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
-import {PJSON} from './pjson'
+import {Configuration, PJSON, S3Templates} from './pjson'
 import {Options, Plugin} from './plugin'
 import {Theme} from './theme'
 import {Topic} from './topic'
@@ -86,7 +86,7 @@ export interface Config {
    */
   readonly npmRegistry?: string
   readonly nsisCustomization?: string
-  readonly pjson: PJSON.CLI
+  readonly pjson: PJSON
   /**
    * process.platform
    */
@@ -102,7 +102,7 @@ export interface Config {
     captureErrors?: boolean,
   ): Promise<Hook.Result<Hooks[T]['return']>>
   s3Key(type: 'unversioned' | 'versioned', ext: '.tar.gz' | '.tar.xz', options?: Config.s3Key.Options): string
-  s3Key(type: keyof PJSON.S3.Templates, options?: Config.s3Key.Options): string
+  s3Key(type: keyof S3Templates, options?: Config.s3Key.Options): string
   s3Url(key: string): string
   scopedEnvVar(key: string): string | undefined
   scopedEnvVarKey(key: string): string
@@ -115,7 +115,7 @@ export interface Config {
   readonly theme?: Theme
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
-  readonly updateConfig: NonNullable<PJSON.CLI['oclif']['update']>
+  readonly updateConfig: NonNullable<Configuration['update']>
   /**
    * user agent to use for http calls
    *
