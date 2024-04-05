@@ -406,36 +406,36 @@ export namespace Command {
    */
   export type Cached = {
     [key: string]: unknown
-    aliasPermutations?: string[]
+    aliasPermutations?: string[] | undefined
     aliases: string[]
     args: {[name: string]: Arg.Cached}
-    deprecateAliases?: boolean
-    deprecationOptions?: Deprecation
-    description?: string
-    examples?: Example[]
+    deprecateAliases?: boolean | undefined
+    deprecationOptions?: Deprecation | undefined
+    description?: string | undefined
+    examples?: Example[] | undefined
     flags: {[name: string]: Flag.Cached}
     hasDynamicHelp?: boolean
     hidden: boolean
     hiddenAliases: string[]
     id: string
-    isESM?: boolean
-    permutations?: string[]
-    pluginAlias?: string
-    pluginName?: string
-    pluginType?: string
-    relativePath?: string[]
-    state?: 'beta' | 'deprecated' | string
-    strict?: boolean
-    summary?: string
-    type?: string
-    usage?: string | string[]
+    isESM?: boolean | undefined
+    permutations?: string[] | undefined
+    pluginAlias?: string | undefined
+    pluginName?: string | undefined
+    pluginType?: string | undefined
+    relativePath?: string[] | undefined
+    state?: 'beta' | 'deprecated' | string | undefined
+    strict?: boolean | undefined
+    summary?: string | undefined
+    type?: string | undefined
+    usage?: string | string[] | undefined
   }
 
   export type Flag = IFlag<any>
 
   export namespace Flag {
     export type Cached = Omit<Flag, 'input' | 'parse'> &
-      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
+      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean | undefined}
     export type Any = Cached | Flag
   }
 

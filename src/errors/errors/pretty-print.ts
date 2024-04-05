@@ -6,7 +6,7 @@ import {errtermwidth} from '../../screen'
 import {settings} from '../../settings'
 
 // These exist for backwards compatibility with CLIError
-type CLIErrorDisplayOptions = {bang?: string; name?: string}
+type CLIErrorDisplayOptions = {bang?: string | undefined; name?: string | undefined}
 
 export function applyPrettyPrintOptions(error: Error, options: PrettyPrintableError): PrettyPrintableError {
   const prettyErrorKeys: (keyof PrettyPrintableError)[] = ['message', 'code', 'ref', 'suggestions']

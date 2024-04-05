@@ -13,8 +13,8 @@ const tokenTypes = [
 ]
 
 type Options = {
-  pretty?: boolean
-  theme?: Record<string, string>
+  pretty?: boolean | undefined
+  theme?: Record<string, string> | undefined
 }
 
 function formatInput(json?: unknown, options?: Options) {

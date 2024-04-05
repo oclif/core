@@ -122,13 +122,13 @@ export class Plugin implements IPlugin {
 
   name!: string
 
-  parent: Plugin | undefined
+  parent?: Plugin | undefined
 
   pjson!: PJSON
 
   root!: string
 
-  tag?: string
+  tag?: string | undefined
 
   type!: string
 

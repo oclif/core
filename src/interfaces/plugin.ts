@@ -4,36 +4,38 @@ import {HookOptions, PJSON} from './pjson'
 import {Topic} from './topic'
 
 export interface PluginOptions {
-  children?: Plugin[]
-  errorOnManifestCreate?: boolean
-  flexibleTaxonomy?: boolean
-  ignoreManifest?: boolean
-  isRoot?: boolean
-  name?: string
-  parent?: Plugin
-  pjson?: PJSON
-  respectNoCacheDefault?: boolean
+  children?: Plugin[] | undefined
+  errorOnManifestCreate?: boolean | undefined
+  flexibleTaxonomy?: boolean | undefined
+  ignoreManifest?: boolean | undefined
+  isRoot?: boolean | undefined
+  name?: string | undefined
+  parent?: Plugin | undefined
+  pjson?: PJSON | undefined
+  respectNoCacheDefault?: boolean | undefined
   root: string
-  tag?: string
-  type?: string
-  url?: string
+  tag?: string | undefined
+  type?: string | undefined
+  url?: string | undefined
 }
 
 export interface Options extends PluginOptions {
-  channel?: string
-  devPlugins?: boolean
-  enablePerf?: boolean
-  jitPlugins?: boolean
-  logger?: Logger
-  pjson?: PJSON
-  pluginAdditions?: {
-    core?: string[]
-    dev?: string[]
-    path?: string
-  }
-  plugins?: Map<string, Plugin>
-  userPlugins?: boolean
-  version?: string
+  channel?: string | undefined
+  devPlugins?: boolean | undefined
+  enablePerf?: boolean | undefined
+  jitPlugins?: boolean | undefined
+  logger?: Logger | undefined
+  pjson?: PJSON | undefined
+  pluginAdditions?:
+    | {
+        core?: string[]
+        dev?: string[]
+        path?: string
+      }
+    | undefined
+  plugins?: Map<string, Plugin> | undefined
+  userPlugins?: boolean | undefined
+  version?: string | undefined
 }
 
 export interface Plugin {
@@ -68,7 +70,7 @@ export interface Plugin {
    */
   name: string
   readonly options: Options
-  parent?: Plugin
+  parent?: Plugin | undefined
   /**
    * full package.json
    *
@@ -83,7 +85,7 @@ export interface Plugin {
    * npm dist-tag of plugin
    * only used for user plugins
    */
-  tag?: string
+  tag?: string | undefined
 
   readonly topics: Topic[]
   /**

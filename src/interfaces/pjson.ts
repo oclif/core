@@ -90,16 +90,18 @@ export type S3Templates = {
 }
 
 export type S3 = {
-  acl?: string
-  bucket?: string
-  folder?: string
-  gz?: boolean
-  host?: string
-  templates: {
-    target: S3Templates
-    vanilla: S3Templates
-  }
-  xz?: boolean
+  acl?: string | undefined
+  bucket?: string | undefined
+  folder?: string | undefined
+  gz?: boolean | undefined
+  host?: string | undefined
+  templates?:
+    | {
+        target: S3Templates
+        vanilla: S3Templates
+      }
+    | undefined
+  xz?: boolean | undefined
 }
 
 export type Configuration = {
@@ -109,7 +111,7 @@ export type Configuration = {
   bin?: string
   binAliases?: string[]
   commands?: string | CommandDiscovery
-  description?: string
+  description?: string | undefined
   devPlugins?: string[]
   dirname?: string
   examplePlugin?: string

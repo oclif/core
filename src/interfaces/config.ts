@@ -37,8 +37,8 @@ export interface Config {
   /**
    * name of any bin aliases that will execute the cli
    */
-  readonly binAliases?: string[]
-  readonly binPath?: string
+  readonly binAliases?: string[] | undefined
+  readonly binPath?: string | undefined
   /**
    * cache directory to use for CLI
    *
@@ -84,8 +84,8 @@ export interface Config {
   /**
    * npm registry to use for installing plugins
    */
-  readonly npmRegistry?: string
-  readonly nsisCustomization?: string
+  readonly npmRegistry?: string | undefined
+  readonly nsisCustomization?: string | undefined
   readonly pjson: PJSON
   /**
    * process.platform
@@ -112,7 +112,7 @@ export interface Config {
    * active shell
    */
   readonly shell: string
-  readonly theme?: Theme
+  readonly theme?: Theme | undefined
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
   readonly updateConfig: NonNullable<Configuration['update']>

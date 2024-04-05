@@ -77,7 +77,12 @@ export class HelpFormatter {
 
   public renderList(
     input: (string | undefined)[][],
-    opts: {indentation: number; multiline?: boolean; spacer?: string; stripAnsi?: boolean},
+    opts: {
+      indentation: number
+      multiline?: boolean | undefined
+      spacer?: string | undefined
+      stripAnsi?: boolean | undefined
+    },
   ): string {
     if (input.length === 0) {
       return ''

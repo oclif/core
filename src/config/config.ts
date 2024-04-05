@@ -83,8 +83,8 @@ export class Config implements IConfig {
   public arch!: ArchTypes
 
   public bin!: string
-  public binAliases?: string[]
-  public binPath?: string
+  public binAliases?: string[] | undefined
+  public binPath?: string | undefined
   public cacheDir!: string
   public channel!: string
   public configDir!: string
@@ -94,18 +94,18 @@ export class Config implements IConfig {
   public home!: string
   public isSingleCommandCLI = false
   public name!: string
-  public npmRegistry?: string
-  public nsisCustomization?: string
+  public npmRegistry?: string | undefined
+  public nsisCustomization?: string | undefined
   public pjson!: PJSON
   public platform!: PlatformTypes
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
-  public theme?: Theme
+  public theme?: Theme | undefined
   public topicSeparator: ' ' | ':' = ':'
   public updateConfig!: NonNullable<Configuration['update']>
   public userAgent!: string
-  public userPJSON?: UserPJSON
+  public userPJSON?: UserPJSON | undefined
   public valid!: boolean
   public version!: string
   protected warned = false
@@ -594,7 +594,7 @@ export class Config implements IConfig {
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.updateConfig.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3.templates?.[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 

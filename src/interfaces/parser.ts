@@ -6,10 +6,10 @@ export type ArgOutput = {[name: string]: any}
 
 export type CLIParseErrorOptions = {
   parse: {
-    input?: ParserInput
-    output?: ParserOutput
+    input?: ParserInput | undefined
+    output?: ParserOutput | undefined
   }
-  exit?: number
+  exit?: number | undefined
 }
 
 export type OutputArgs<T extends ParserInput['args']> = {[P in keyof T]: any}
@@ -295,10 +295,10 @@ type FlagReturnType<T, R extends ReturnTypeSwitches> = R['requiredOrDefaulted'] 
       : T[]
     : T
   : R['multiple'] extends true
-  ? [T] extends [Array<unknown>]
-    ? T | undefined
-    : T[] | undefined
-  : T | undefined
+    ? [T] extends [Array<unknown>]
+      ? T | undefined
+      : T[] | undefined
+    : T | undefined
 
 /**
  * FlagDefinition types a function that takes `options` and returns an OptionFlag<T>.
@@ -421,7 +421,7 @@ export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags e
   baseFlags?: FlagInput<BFlags>
   enableJsonFlag?: true | false
   args?: ArgInput<AFlags>
-  strict?: boolean
+  strict?: boolean | undefined
   context?: ParserContext
   '--'?: boolean
 }
@@ -432,11 +432,11 @@ export type ParserInput = {
   args: ArgInput<any>
   strict: boolean
   context: ParserContext | undefined
-  '--'?: boolean
+  '--'?: boolean | undefined
 }
 
 export type ParserContext = Command & {
-  token?: FlagToken | ArgToken
+  token?: FlagToken | ArgToken | undefined
 }
 
 export type FlagInput<T extends FlagOutput = {[flag: string]: any}> = {[P in keyof T]: Flag<T[P]>}
