@@ -805,14 +805,14 @@
   resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.1.tgz#1def9f38134f9bfb229257f48a35f7d0d183dc78"
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
-"@oclif/test@^3.2.6":
-  version "3.2.6"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.6.tgz#5ee01bcda02ca5f64488b5ee214a1d94e7eeeefc"
-  integrity sha512-UZAHGAG31lJUyLkGpE94E2Tt+cstGZ4FnS/fvcjeZMkUzlh78HcSHOQWj6FhT8Sd4v62TYYobXNADxEgp+qnng==
+"@oclif/test@^3.2.8":
+  version "3.2.8"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.8.tgz#ce2388e1910d315005c6a66fbde8cffaf1b77a20"
+  integrity sha512-aC523gJxzRxzL1P1m2Mrdu/xl0FG+ho8GAcZtdUKNOMM6te2iwR481GRzs8B0xDtAPNi0jZWiPFetbyR7mh/kA==
   dependencies:
-    "@oclif/core" "^3.25.2"
+    "@oclif/core" "^3.26.0"
     chai "^4.4.1"
-    fancy-test "^3.0.13"
+    fancy-test "^3.0.14"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -3075,7 +3075,7 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
   integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
 
-fancy-test@^3.0.13, fancy-test@^3.0.14:
+fancy-test@^3.0.14:
   version "3.0.14"
   resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.14.tgz#c5007291d7c36b07f0a8e7f235f2aa454bd66aac"
   integrity sha512-FkiDltQA8PBZzw5tUnMrP1QtwIdNQWxxbZK5C22M9wu6HfFNciwkG3D9siT4l4s1fBTDaEG+Fdkbpi9FDTxtrg==
