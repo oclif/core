@@ -960,10 +960,10 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.3.tgz#472eaab5f15c1ffdd7f8628bd4c4f753995ec79e"
   integrity sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==
 
-"@tsd/typescript@~5.3.3":
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-5.3.3.tgz#bc01854b6e0e746b5f70a6b48c30c7b95b81a74e"
-  integrity sha512-CQlfzol0ldaU+ftWuG52vH29uRoKboLinLy84wS8TQOu+m+tWoaUfk4svL4ij2V8M5284KymJBlHUusKj6k34w==
+"@tsd/typescript@~5.4.3":
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-5.4.4.tgz#241a482bdeacc7718e28673e81a7f8d7fc2ecf41"
+  integrity sha512-sqE6Rz9UNHBuCtuREo/PwsuUaegP1KDSfxMd+9K1qPpt7XO8BmkIImUp7zAqyvwXWUHs+sj6osEkkpyE0tFgfA==
 
 "@tufjs/canonical-json@2.0.0":
   version "2.0.0"
@@ -6682,12 +6682,12 @@ tsconfig-paths@^3.15.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tsd@^0.30.7:
-  version "0.30.7"
-  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.30.7.tgz#319a0403073df6d3f572c4089378901662554ae5"
-  integrity sha512-oTiJ28D6B/KXoU3ww/Eji+xqHJojiuPVMwA12g4KYX1O72N93Nb6P3P3h2OAhhf92Xl8NIhb/xFmBZd5zw/xUw==
+tsd@^0.31.0:
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.31.0.tgz#8fe1e19f2116c5208732ab10e1b435b4b0e06559"
+  integrity sha512-yjBiQ5n8OMv/IZOuhDjBy0ZLCoJ7rky/RxRh5W4sJ0oNNCU/kf6s3puPAkGNi59PptDdkcpUm+RsKSdjR2YbNg==
   dependencies:
-    "@tsd/typescript" "~5.3.3"
+    "@tsd/typescript" "~5.4.3"
     eslint-formatter-pretty "^4.1.0"
     globby "^11.0.1"
     jest-diff "^29.0.3"
