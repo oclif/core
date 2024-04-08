@@ -173,7 +173,7 @@ export class Parser<
         this.currentFlag = flag
         let input = isLong || arg.length < 3 ? this.argv.shift() : arg.slice(arg[2] === '=' ? 3 : 2)
 
-        if (flag.allowStdin === 'only' && input !== '-' && input !== undefined) {
+        if (flag.allowStdin === 'only' && input !== '-' && input !== undefined && !this.findFlag(input).name) {
           throw new CLIError(
             `Flag --${name} can only be read from stdin. The value must be "-" or not provided at all.`,
           )
