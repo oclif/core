@@ -83,6 +83,17 @@ export type HookOptions = {
   identifier: string
 }
 
+export type HelpLocationOptions = {
+  /**
+   * The file path containing help class.
+   */
+  target: string
+  /**
+   * The name of the export to use when loading the help class from the `target` file. Defaults to `default`.
+   */
+  identifier: string
+}
+
 export type S3Templates = {
   baseDir?: string
   manifest?: string
@@ -126,7 +137,7 @@ export type Configuration = {
     unexpectedArgs?: number
   }
   flexibleTaxonomy?: boolean
-  helpClass?: string
+  helpClass?: string | HelpLocationOptions
   helpOptions?: HelpOptions
   hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
   jitPlugins?: Record<string, string>

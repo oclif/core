@@ -6,6 +6,7 @@ import {Args, Command, Config} from '../../src'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
+import {MyHelp} from './_test-help-class-identifier'
 
 describe('util', () => {
   let config: Config
@@ -43,6 +44,29 @@ describe('util', () => {
 
       expect(configuredHelpClass).to.not.be.undefined
       expect(await loadHelpClass(config)).to.deep.equal(configuredHelpClass)
+    })
+
+    it('loads help class defined using target but no identifier', async () => {
+      config.pjson.oclif.helpClass = {
+        target: '../test/help/_test-help-class',
+        // @ts-expect-error for testing purposes
+        identifier: undefined,
+      }
+      config.root = resolve(__dirname, '..')
+
+      expect(configuredHelpClass).to.not.be.undefined
+      expect(await loadHelpClass(config)).to.deep.equal(configuredHelpClass)
+    })
+
+    it('loads help class defined using target and identifier', async () => {
+      config.pjson.oclif.helpClass = {
+        target: '../test/help/_test-help-class-identifier',
+        identifier: 'MyHelp',
+      }
+      config.root = resolve(__dirname, '..')
+
+      expect(MyHelp).to.not.be.undefined
+      expect(await loadHelpClass(config)).to.deep.equal(MyHelp)
     })
 
     describe('error cases', () => {
