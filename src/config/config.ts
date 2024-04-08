@@ -395,13 +395,19 @@ export class Config implements IConfig {
 
   public async loadTheme(): Promise<Theme | undefined> {
     if (this.scopedEnvVarTrue('DISABLE_THEME')) return
-    const defaultThemeFile = this.pjson.oclif.theme
-      ? resolve(this.root, this.pjson.oclif.theme)
-      : this.pjson.oclif.theme
+
     const userThemeFile = resolve(this.configDir, 'theme.json')
+    const getDefaultTheme = async () => {
+      if (!this.pjson.oclif.theme) return
+      if (typeof this.pjson.oclif.theme === 'string') {
+        return safeReadJson<Record<string, string>>(resolve(this.root, this.pjson.oclif.theme))
+      }
+
+      return this.pjson.oclif.theme
+    }
 
     const [defaultTheme, userTheme] = await Promise.all([
-      defaultThemeFile ? await safeReadJson<Record<string, string>>(defaultThemeFile) : undefined,
+      await getDefaultTheme(),
       await safeReadJson<Record<string, string>>(userThemeFile),
     ])
 

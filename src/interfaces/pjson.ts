@@ -1,4 +1,5 @@
 import {HelpOptions} from './help'
+import {Theme} from './theme'
 
 export type CommandDiscovery = {
   /**
@@ -140,7 +141,7 @@ export type Configuration = {
   repositoryPrefix?: string
   schema?: number
   state?: 'beta' | 'deprecated' | string
-  theme?: string
+  theme?: string | Theme
   topicSeparator?: ' ' | ':'
   topics?: {
     [k: string]: {
