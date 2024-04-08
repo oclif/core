@@ -1,3 +1,12 @@
+## [3.26.1](https://github.com/oclif/core/compare/3.26.0...3.26.1) (2024-04-08)
+
+
+### Bug Fixes
+
+* **deps:** bump minimatch from 9.0.3 to 9.0.4 ([#1041](https://github.com/oclif/core/issues/1041)) ([87cd0e6](https://github.com/oclif/core/commit/87cd0e6cafba4e2d461a9a9d61f729e694091558))
+
+
+
 # [3.26.0](https://github.com/oclif/core/compare/3.25.3...3.26.0) (2024-03-22)
 
 
