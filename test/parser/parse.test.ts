@@ -1956,4 +1956,17 @@ describe('allowStdin', () => {
       }
     }
   })
+
+  it('should read stdin as input for flag when allowStdin is "only" and no value is given, and a second flag is used after', async () => {
+    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    const out = await parse(['--myflag', '--myflag2'], {
+      flags: {
+        myflag: Flags.string({allowStdin: 'only'}),
+        myflag2: Flags.boolean(),
+      },
+    })
+
+    expect(out.flags.myflag).to.equals(stdinValue)
+    expect(out.raw[0].input).to.equal('x')
+  })
 })
