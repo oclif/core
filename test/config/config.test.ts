@@ -255,6 +255,7 @@ describe('Config', () => {
         aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[0], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
+        hiddenAliases: [],
         pluginType: types[0] ?? 'core',
         pluginAlias: '@My/plugina',
       }
@@ -263,6 +264,7 @@ describe('Config', () => {
         aliases: [], args: {}, flags: {}, hidden: false, id: commandIds[1], async load(): Promise<Command.Class> {
           return MyCommandClass
         },
+        hiddenAliases: [],
         pluginType: types[1] ?? 'core',
         pluginAlias: '@My/pluginb',
       }

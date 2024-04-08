@@ -120,6 +120,7 @@ describe('command', () => {
         id: 'foo:bar',
         type: 'mytype',
         hidden: true,
+        hiddenAliases: [],
         pluginName: undefined,
         pluginAlias: undefined,
         pluginType: undefined,

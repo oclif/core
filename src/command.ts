@@ -75,6 +75,9 @@ export abstract class Command {
   /** Hide the command from help */
   public static hidden: boolean
 
+  /** An array of aliases for this command that are hidden from help. */
+  public static hiddenAliases: string[]
+
   /** Mark the command as a given state (e.g. beta or deprecated) in help */
   public static state?: 'beta' | 'deprecated' | string;
 
@@ -418,6 +421,7 @@ export namespace Command {
     [key: string]: unknown;
     id: string;
     hidden: boolean;
+    hiddenAliases: string[];
     state?: 'beta' | 'deprecated' | string;
     deprecationOptions?: Deprecation;
     aliases: string[];

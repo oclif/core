@@ -676,6 +676,20 @@ export class Config implements IConfig {
           this.commandPermutations.add(permutation, command.id)
         }
       }
+
+      for (const alias of command.hiddenAliases ?? []) {
+        if (this._commands.has(alias)) {
+          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
+          this._commands.set(alias, {...prioritizedCommand, id: alias})
+        } else {
+          this._commands.set(alias, {...command, id: alias})
+        }
+
+        const aliasPermutations = this.flexibleTaxonomy ? getCommandIdPermutations(alias) : [alias]
+        for (const permutation of aliasPermutations) {
+          this.commandPermutations.add(permutation, command.id)
+        }
+      }
     }
 
     marker?.addDetails({commandCount: plugin.commands.length})
@@ -915,6 +929,7 @@ export async function toCached(c: Command.Class, plugin?: IPlugin | undefined, i
     hidden: c.hidden,
     state: c.state,
     aliases: c.aliases || [],
+    hiddenAliases: c.hiddenAliases || [],
     examples: c.examples || (c as any).example,
     deprecationOptions: c.deprecationOptions,
     deprecateAliases: c.deprecateAliases,
