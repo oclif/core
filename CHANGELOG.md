@@ -1,3 +1,12 @@
+## [3.26.2](https://github.com/oclif/core/compare/3.26.1...3.26.2) (2024-04-08)
+
+
+### Bug Fixes
+
+* do not throw an error if a flag with allowStdin='only' is immediately followed by another flag ([#1046](https://github.com/oclif/core/issues/1046)) ([#1047](https://github.com/oclif/core/issues/1047)) ([f05b0c8](https://github.com/oclif/core/commit/f05b0c8119853b8a9de62d9076a42d8d93a94046))
+
+
+
 ## [3.26.1](https://github.com/oclif/core/compare/3.26.0...3.26.1) (2024-04-08)
 
 
