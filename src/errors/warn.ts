@@ -6,10 +6,20 @@ import prettyPrint from './errors/pretty-print'
 
 const WARNINGS = new Set<Error | string>()
 
+type Options = {
+  /**
+   * If true, will only print the same warning once.
+   */
+  ignoreDuplicates?: boolean
+}
+
 /**
  * Prints a pretty warning message to stderr.
+ *
+ * @param input The error or string to print.
+ * @param options.ignoreDuplicates If true, will only print the same warning once.
  */
-export function warn(input: Error | string, options?: {ignoreDuplicates: boolean}): void {
+export function warn(input: Error | string, options?: Options): void {
   const ignoreDuplicates = options?.ignoreDuplicates ?? true
   if (ignoreDuplicates && WARNINGS.has(input)) return
   WARNINGS.add(input)

@@ -30,10 +30,7 @@ export function colorize(color: string | StandardAnsi | undefined, text: string)
 export function parseTheme(theme: Record<string, string>): Theme {
   return Object.fromEntries(
     Object.entries(theme)
-      .map(([key, value]) => {
-        if (typeof value === 'string') return [key, isValid(value)]
-        return [key, parseTheme(value)]
-      })
+      .map(([key, value]) => [key, typeof value === 'string' ? isValid(value) : parseTheme(value)])
       .filter(([_, value]) => value),
   )
 }

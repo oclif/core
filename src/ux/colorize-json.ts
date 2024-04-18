@@ -69,5 +69,6 @@ function hasRemainingTokens(input: string | undefined, foundToken: boolean) {
  * - null
  */
 export default function colorizeJson(json: unknown, options?: Options) {
-  return tokenize(json, options).reduce((acc, token) => acc + colorize(options?.theme?.[token.type], token.value), '')
+  const opts = {...options, pretty: options?.pretty ?? true}
+  return tokenize(json, opts).reduce((acc, token) => acc + colorize(options?.theme?.[token.type], token.value), '')
 }

@@ -122,7 +122,6 @@ export class Config implements IConfig {
   private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
-
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
@@ -202,7 +201,6 @@ export class Config implements IConfig {
   }
 
   public findCommand(id: string, opts: {must: true}): Command.Loadable
-
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
@@ -336,42 +334,10 @@ export class Config implements IConfig {
 
     this.theme = await this.loadTheme()
 
-    const s3 = this.pjson.oclif.update?.s3 ?? {
-      bucket: '',
-      host: '',
-      templates: {
-        target: {},
-        vanilla: {},
-      },
-    }
-
-    s3.bucket = this.scopedEnvVar('S3_BUCKET') || s3.bucket
-    if (s3.bucket && !s3.host) s3.host = `https://${s3.bucket}.s3.amazonaws.com`
-    s3.templates = {
-      ...s3.templates,
-      target: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
-        unversioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        ...(s3.templates && s3.templates.target),
-      },
-      vanilla: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
-        ...(s3.templates && s3.templates.vanilla),
-      },
-    }
-
     this.updateConfig = {
       ...this.pjson.oclif.update,
       node: this.pjson.oclif.update?.node ?? {},
-      s3,
+      s3: this.buildS3Config(),
     }
 
     this.isSingleCommandCLI = Boolean(
@@ -738,6 +704,37 @@ export class Config implements IConfig {
     }
 
     return shellPath.at(-1) ?? 'unknown'
+  }
+
+  private buildS3Config() {
+    const s3 = this.pjson.oclif.update?.s3
+    const bucket = this.scopedEnvVar('S3_BUCKET') ?? s3?.bucket
+    const host = s3?.host ?? (bucket && `https://${bucket}.s3.amazonaws.com`)
+    const templates = {
+      ...s3?.templates,
+      target: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
+        unversioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        ...(s3?.templates && s3?.templates.target),
+      },
+      vanilla: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
+        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        ...(s3?.templates && s3?.templates.vanilla),
+      },
+    }
+    return {
+      bucket,
+      host,
+      templates,
+    }
   }
 
   /**
