@@ -1,3 +1,12 @@
+## [3.26.4](https://github.com/oclif/core/compare/3.26.3...3.26.4) (2024-04-18)
+
+
+### Bug Fixes
+
+* **deps:** bump tar from 6.1.15 to 6.2.1 ([#1049](https://github.com/oclif/core/issues/1049)) ([6507e37](https://github.com/oclif/core/commit/6507e37007b565060aed26bfe9d5c371830d80cf))
+
+
+
 ## [3.26.3](https://github.com/oclif/core/compare/3.26.2...3.26.3) (2024-04-13)
 
 
