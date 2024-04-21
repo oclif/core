@@ -744,7 +744,7 @@
     node-gyp "^10.0.0"
     which "^4.0.0"
 
-"@oclif/core@^3.25.2", "@oclif/core@^3.26.0", "@oclif/core@^3.26.2":
+"@oclif/core@^3.25.2", "@oclif/core@^3.26.2", "@oclif/core@^3.26.3":
   version "3.26.4"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.26.4.tgz#ab0c6d06f699abaf0fa6186466f64f02a8435c61"
   integrity sha512-ntfo2ut7enNtAn/jB/dryMUPBM2Fh8Fydmi3k/Ybo6lCGU/hmsPFkBRjCEJAQMyNkK2yVZARaWogdOrcVgFz+w==
@@ -805,12 +805,12 @@
   resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.1.tgz#1def9f38134f9bfb229257f48a35f7d0d183dc78"
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
-"@oclif/test@^3.2.9":
-  version "3.2.9"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.9.tgz#73b40d80f8e94b15dded0dd9333f5cf95a136f4c"
-  integrity sha512-eVZO4I29Ipp7WlwAZOmQ/Z0Dm/J9qnTUTAqKHlylEmp9JYfVQ3C+SqZVNNp3KJ+D/XJMC7xQ748JDBQFUZebbA==
+"@oclif/test@^3.2.10":
+  version "3.2.10"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.10.tgz#48fdf3ebb339e81955a42c1e9a23f5f673c39261"
+  integrity sha512-9h6rMHnFS7zf0CLmfqtbAmdDSLpYF8otu25YpeqQXOX3b9TYeyfOvD61TkkxJ2T3zpqnrViNzifsF6gfM6xanQ==
   dependencies:
-    "@oclif/core" "^3.26.0"
+    "@oclif/core" "^3.26.3"
     chai "^4.4.1"
     fancy-test "^3.0.14"
 
