@@ -2731,19 +2731,19 @@ escodegen@^2.0.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-oclif-typescript@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif-typescript/-/eslint-config-oclif-typescript-3.1.4.tgz#2adb5702ce78487bf3481dbf9dd99c59226d35a9"
-  integrity sha512-sqqAQEmw++8x5b1OOzly11s6s8nlHiH0mYGgTp5kDpzXztVsqUAvK1eQID7ZEEe5jYAd42MMv4T4LIGoUVF//g==
+eslint-config-oclif-typescript@^3.1.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif-typescript/-/eslint-config-oclif-typescript-3.1.5.tgz#1d3ecc7fda5d7e8b12b9c9d128d170f3082590c0"
+  integrity sha512-bw6HYbv5UQcfK5knAPemViB+CpbxmAOsnaxtvFAEeOvQM61eVaNKtPyCj1DRgUOBUN7knJ0NBXOqUny+0nwSkQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.21.0"
     "@typescript-eslint/parser" "^6.21.0"
     eslint-config-xo-space "^0.35.0"
     eslint-import-resolver-typescript "^3.6.1"
     eslint-plugin-import "^2.29.1"
-    eslint-plugin-mocha "^10.4.1"
+    eslint-plugin-mocha "^10.4.2"
     eslint-plugin-n "^15"
-    eslint-plugin-perfectionist "^2.8.0"
+    eslint-plugin-perfectionist "^2.9.0"
 
 eslint-config-oclif@^5.1.2:
   version "5.1.2"
@@ -2848,7 +2848,7 @@ eslint-plugin-import@^2.29.1:
     semver "^6.3.1"
     tsconfig-paths "^3.15.0"
 
-eslint-plugin-mocha@^10.4.1, eslint-plugin-mocha@^10.4.2:
+eslint-plugin-mocha@^10.4.2:
   version "10.4.3"
   resolved "https://registry.yarnpkg.com/eslint-plugin-mocha/-/eslint-plugin-mocha-10.4.3.tgz#bf641379d9f1c7d6a84646a3fc1a0baa50da8bfd"
   integrity sha512-emc4TVjq5Ht0/upR+psftuz6IBG5q279p+1dSRDeHf+NS9aaerBi3lXKo1SEzwC29hFIW21gO89CEWSvRsi8IQ==
@@ -2871,10 +2871,10 @@ eslint-plugin-n@^15, eslint-plugin-n@^15.1.0:
     resolve "^1.22.1"
     semver "^7.3.8"
 
-eslint-plugin-perfectionist@^2.8.0:
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-perfectionist/-/eslint-plugin-perfectionist-2.8.0.tgz#4bcca444dae8144e4d8d7711907116c9f98c6bdc"
-  integrity sha512-XBjQ4ctU1rOzQ4bFJoUowe8XdsIIz42JqNrouFlae1TO78HjoyYBaRP8+gAHDDQCSdHY10pbChyzlJeBA6D51w==
+eslint-plugin-perfectionist@^2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-perfectionist/-/eslint-plugin-perfectionist-2.9.0.tgz#f0f48ae37734d0c85f25f2ff117e548c89a30034"
+  integrity sha512-ipFtDrqtF99qVVo+FE1fo6aHyLLp7hg6PNGfzY5KxQjcl0XCbyEFvjtR1NfkHDTN9rdFeEDxg59LLOv3VOAHAw==
   dependencies:
     "@typescript-eslint/utils" "^6.13.0"
     minimatch "^9.0.3"
