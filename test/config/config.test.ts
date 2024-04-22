@@ -55,20 +55,6 @@ describe('Config', () => {
     process.env = originalEnv
   })
 
-  describe('darwin', () => {
-    it('should have darwin specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns('/my/home')
-      sandbox.stub(os, 'getPlatform').returns('darwin')
-      const config = await Config.load()
-
-      expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
-      expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
-      expect(config).to.have.property('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
-      expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
-      expect(config).to.have.property('home', join('/my/home'))
-    })
-  })
-
   describe('binAliases', () => {
     it('will have binAliases set', async () => {
       const config = await Config.load({pjson, root})
@@ -128,9 +114,23 @@ describe('Config', () => {
     })
   })
 
+  describe('darwin', () => {
+    it('should have darwin specific paths', async () => {
+      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
+      sandbox.stub(os, 'getPlatform').returns('darwin')
+      const config = await Config.load()
+
+      expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
+      expect(config).to.have.property('configDir', join('/my/home/.config/@oclif/core'))
+      expect(config).to.have.property('errlog', join('/my/home/Library/Caches/@oclif/core/error.log'))
+      expect(config).to.have.property('dataDir', join('/my/home/.local/share/@oclif/core'))
+      expect(config).to.have.property('home', join('/my/home'))
+    })
+  })
+
   describe('linux', () => {
     it('should have linux specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
       sandbox.stub(os, 'getPlatform').returns('linux')
       const config = await Config.load()
 
