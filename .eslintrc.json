@@ -4,6 +4,7 @@
     "unicorn/prefer-module": "off",
     "unicorn/no-array-reduce": "off",
     "no-useless-constructor": "off",
+    "perfectionist/sort-intersection-types": "off",
     "perfectionist/sort-object-types": "off",
     "perfectionist/sort-union-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
