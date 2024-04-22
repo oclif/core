@@ -144,7 +144,7 @@ describe('Config', () => {
 
   describe('win32', () => {
     it('should have win32 specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns('/my/home')
+      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
       sandbox.stub(os, 'getPlatform').returns('win32')
       process.env.LOCALAPPDATA = '/my/home/localappdata'
       const config = await Config.load()
