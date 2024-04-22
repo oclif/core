@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {mkdir, rm} from 'node:fs/promises'
@@ -77,7 +77,7 @@ export class Executor {
     const cwd = options?.cwd ?? process.cwd()
     const silent = options?.silent ?? true
     return new Promise((resolve) => {
-      this.debug(cmd, chalk.dim(`(cwd: ${cwd})`))
+      this.debug(cmd, ansis.dim(`(cwd: ${cwd})`))
       if (silent) {
         try {
           const r = execSync(cmd, {...options, stdio: 'pipe', cwd})
@@ -148,7 +148,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   executor.debug('plugin directory:', pluginDir)
 
   if (process.env.OCLIF_CORE_INTEGRATION_SKIP_SETUP === 'true') {
-    console.log(chalk.yellow.bold('OCLIF_CORE_INTEGRATION_SKIP_SETUP is true. Skipping test setup...'))
+    console.log(ansis.yellow.bold('OCLIF_CORE_INTEGRATION_SKIP_SETUP is true. Skipping test setup...'))
     return executor
   }
 

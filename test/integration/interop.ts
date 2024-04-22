@@ -6,8 +6,8 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
+import ansis from 'ansis'
 import {expect} from 'chai'
-import chalk from 'chalk'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -139,10 +139,10 @@ async function testRunner({
     try {
       await fn()
       passed.push(name)
-      console.log(chalk.green('✓'), name)
+      console.log(ansis.green('✓'), name)
     } catch (error) {
       failed.push(name)
-      console.log(chalk.red('𐄂'), name)
+      console.log(ansis.red('𐄂'), name)
       console.log(error)
     }
   }
@@ -490,14 +490,14 @@ class InteropTest extends Command {
 
   private processResults({failed, passed}: {failed: string[]; passed: string[]}): never {
     this.log()
-    this.log(chalk.bold('#### Summary ####'))
+    this.log(ansis.bold('#### Summary ####'))
 
-    for (const name of passed) this.log(chalk.green('✓'), name)
+    for (const name of passed) this.log(ansis.green('✓'), name)
 
-    for (const name of failed) this.log(chalk.red('𐄂'), name)
+    for (const name of failed) this.log(ansis.red('𐄂'), name)
 
-    this.log(`${chalk.green('Passed:')} ${passed.length}`)
-    this.log(`${chalk.red('Failed:')} ${failed.length}`)
+    this.log(`${ansis.green('Passed:')} ${passed.length}`)
+    this.log(`${ansis.red('Failed:')} ${failed.length}`)
 
     this.exit(failed.length)
   }

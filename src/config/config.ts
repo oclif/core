@@ -5,8 +5,6 @@ import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import Cache from '../cache'
-import {ux} from '../cli-ux'
-import {parseTheme} from '../cli-ux/theme'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
@@ -20,6 +18,8 @@ import {settings} from '../settings'
 import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
+import ux from '../ux'
+import {parseTheme} from '../ux/theme'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-path'
 import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
@@ -97,11 +97,13 @@ export class Config implements IConfig {
   public shell!: string
   public theme?: Theme
   public topicSeparator: ' ' | ':' = ':'
+  public updateConfig!: NonNullable<PJSON.CLI['oclif']['update']>
   public userAgent!: string
   public userPJSON?: PJSON.User
   public valid!: boolean
   public version!: string
   protected warned = false
+
   public windows!: boolean
 
   private _base = BASE
@@ -117,11 +119,9 @@ export class Config implements IConfig {
   private pluginLoader!: PluginLoader
 
   private rootPlugin!: IPlugin
-
   private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
-
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
@@ -201,7 +201,6 @@ export class Config implements IConfig {
   }
 
   public findCommand(id: string, opts: {must: true}): Command.Loadable
-
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
@@ -333,37 +332,14 @@ export class Config implements IConfig {
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
-      const {theme} = await this.loadThemes()
-      this.theme = theme
+    this.theme = await this.loadTheme()
+
+    this.updateConfig = {
+      ...this.pjson.oclif.update,
+      node: this.pjson.oclif.update?.node ?? {},
+      s3: this.buildS3Config(),
     }
 
-    this.pjson.oclif.update = this.pjson.oclif.update || {}
-    this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
-    const s3 = this.pjson.oclif.update.s3 || {}
-    this.pjson.oclif.update.s3 = s3
-    s3.bucket = this.scopedEnvVar('S3_BUCKET') || s3.bucket
-    if (s3.bucket && !s3.host) s3.host = `https://${s3.bucket}.s3.amazonaws.com`
-    s3.templates = {
-      ...s3.templates,
-      target: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
-        unversioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        ...(s3.templates && s3.templates.target),
-      },
-      vanilla: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
-        ...(s3.templates && s3.templates.vanilla),
-      },
-    }
     this.isSingleCommandCLI = Boolean(
       this.pjson.oclif.default ||
         (typeof this.pjson.oclif.commands !== 'string' &&
@@ -410,10 +386,8 @@ export class Config implements IConfig {
     }
   }
 
-  public async loadThemes(): Promise<{
-    file: string | undefined
-    theme: Theme | undefined
-  }> {
+  public async loadTheme(): Promise<Theme | undefined> {
+    if (this.scopedEnvVarTrue('DISABLE_THEME')) return
     const defaultThemeFile = this.pjson.oclif.theme
       ? resolve(this.root, this.pjson.oclif.theme)
       : this.pjson.oclif.theme
@@ -426,12 +400,7 @@ export class Config implements IConfig {
 
     // Merge the default theme with the user theme, giving the user theme precedence.
     const merged = {...defaultTheme, ...userTheme}
-    return {
-      // Point to the user file if it exists, otherwise use the default file.
-      // This doesn't really serve a purpose to anyone but removing it would be a breaking change.
-      file: userTheme ? userThemeFile : defaultThemeFile,
-      theme: Object.keys(merged).length > 0 ? parseTheme(merged) : undefined,
-    }
+    return Object.keys(merged).length > 0 ? parseTheme(merged) : undefined
   }
 
   protected macosCacheDir(): string | undefined {
@@ -545,7 +514,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          ux.info(message, ...args)
+          ux.stdout(message, ...args)
         },
         warn(message: string) {
           warn(message)
@@ -618,12 +587,12 @@ export class Config implements IConfig {
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 
   public s3Url(key: string): string {
-    const {host} = this.pjson.oclif.update.s3
+    const {host} = this.updateConfig.s3 ?? {host: undefined}
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
     url.pathname = join(url.pathname, key)
@@ -735,6 +704,37 @@ export class Config implements IConfig {
     }
 
     return shellPath.at(-1) ?? 'unknown'
+  }
+
+  private buildS3Config() {
+    const s3 = this.pjson.oclif.update?.s3
+    const bucket = this.scopedEnvVar('S3_BUCKET') ?? s3?.bucket
+    const host = s3?.host ?? (bucket && `https://${bucket}.s3.amazonaws.com`)
+    const templates = {
+      ...s3?.templates,
+      target: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
+        unversioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        ...(s3?.templates && s3?.templates.target),
+      },
+      vanilla: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
+        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        ...(s3?.templates && s3?.templates.vanilla),
+      },
+    }
+    return {
+      bucket,
+      host,
+      templates,
+    }
   }
 
   /**

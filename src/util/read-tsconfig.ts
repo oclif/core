@@ -2,7 +2,7 @@ import makeDebug from 'debug'
 import {readFile, readdir} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
-import {memoizedWarn} from '../errors/warn'
+import {warn} from '../errors/warn'
 import {TSConfig} from '../interfaces'
 import {mergeNestedObjects} from './util'
 
@@ -45,7 +45,7 @@ export async function readTSConfig(root: string, tsconfigName = 'tsconfig.json')
   }
 
   if (!typescript) {
-    memoizedWarn(
+    warn(
       'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
     )
     return

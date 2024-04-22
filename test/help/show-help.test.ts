@@ -1,7 +1,5 @@
-import {test as base} from '@oclif/test'
 import {expect} from 'chai'
-import {resolve} from 'node:path'
-import {SinonStub, stub} from 'sinon'
+import sinon from 'sinon'
 
 import {Config, Interfaces} from '../../src'
 import {Help} from '../../src/help'
@@ -20,12 +18,25 @@ import {
 } from './fixtures/fixtures'
 import {monkeyPatchCommands} from './help-test-utils'
 
-const g: any = global
-g.oclif.columns = 80
-
 // extension makes previously protected methods public
 class TestHelp extends Help {
-  public declare config: any
+  public declare config: Config
+  public output: string[] = []
+
+  constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
+    opts.stripAnsi = true
+    super(config, opts)
+  }
+
+  public getOutput() {
+    return this.output.join('\n').trimEnd()
+  }
+
+  // push logs to this.output instead of logging to the console
+  // this makes it easier to test the output
+  protected log(...args: any[]) {
+    this.output.push(...args)
+  }
 
   public async showRootHelp() {
     return super.showRootHelp()
@@ -36,60 +47,29 @@ class TestHelp extends Help {
   }
 }
 
-const test = base
-  .register('setupHelp', () => ({
-    async run(ctx: {help: TestHelp; stubs: {[k: string]: SinonStub}}) {
-      ctx.stubs = {
-        showRootHelp: stub(TestHelp.prototype, 'showRootHelp').resolves(),
-        showTopicHelp: stub(TestHelp.prototype, 'showTopicHelp').resolves(),
-        showCommandHelp: stub(TestHelp.prototype, 'showCommandHelp').resolves(),
-      }
-
-      // use devPlugins: true to bring in plugins-plugin with topic commands for testing
-      const config = await Config.load({devPlugins: true, root: resolve(__dirname, '..')})
-      ctx.help = new TestHelp(config)
-    },
-    finally(ctx) {
-      for (const stub of Object.values(ctx.stubs)) stub.restore()
-    },
-  }))
-  .register('makeTopicsWithoutCommand', () => ({
-    async run(ctx: {help: TestHelp; makeTopicOnlyStub: SinonStub}) {
-      // by returning no matching command for a subject, it becomes a topic only
-      // with no corresponding command (in which case the showCommandHelp is shown)
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      ctx.makeTopicOnlyStub = stub(ctx.help.config, 'findCommand').returns(undefined)
-    },
-    finally(ctx) {
-      ctx.makeTopicOnlyStub.restore()
-    },
-  }))
-
 describe('showHelp for root', () => {
-  test
-    .loadConfig()
-    .stdout()
-    .do(async () => {
-      const config = await Config.load({root: resolve(__dirname, '..')})
+  let config: Config
 
-      ;(config as any).plugins = [
+  beforeEach(async () => {
+    config = await Config.load()
+  })
+
+  it('shows a command and topic when the index has siblings', async () => {
+    monkeyPatchCommands(
+      config,
+      [
         {
+          name: 'plugin-1',
           commands: [AppsIndex, AppsCreate, AppsDestroy],
           topics: [],
         },
-      ]
-      for (const plugin of config.plugins) {
-        // @ts-expect-error private method
-        config.loadCommands(plugin)
-        // @ts-expect-error private method
-        config.loadTopics(plugin)
-      }
-
-      const help = new TestHelp(config as any)
-      await help.showHelp([])
-    })
-    .it('shows a command and topic when the index has siblings', ({stdout, config}) => {
-      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+      ],
+      false,
+    )
+    const help = new TestHelp(config)
+    await help.showHelp([])
+    const output = help.getOutput()
+    expect(output).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -105,27 +85,20 @@ COMMANDS
   apps     List all apps (app index command)
   help     Display help for oclif.
   plugins  List installed plugins.`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
-
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsIndex],
-          topics: [],
-        },
-      ])
-
-      const help = new TestHelp(config as any)
-      await help.showHelp([])
-    })
-    .it('shows a command only when the topic only contains an index', ({stdout, config}) => {
-      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+  it('shows a command only when the topic only contains an index', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsIndex],
+        topics: [],
+      },
+    ])
+    const help = new TestHelp(config)
+    await help.showHelp([])
+    const output = help.getOutput()
+    expect(output).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -135,27 +108,21 @@ USAGE
 
 COMMANDS
   apps  List all apps (app index command)`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
+  it('shows root help without aliases if hideAliasesFromRoot=true', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [CommandWithAliases],
+        topics: [],
+      },
+    ])
 
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [CommandWithAliases],
-          topics: [],
-        },
-      ])
-
-      const help = new TestHelp(config as any, {hideAliasesFromRoot: true})
-      await help.showHelp([])
-    })
-    .it('shows root help without aliases if hideAliasesFromRoot=true', ({stdout, config}) => {
-      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+    const help = new TestHelp(config as any, {hideAliasesFromRoot: true})
+    await help.showHelp([])
+    const output = help.getOutput()
+    expect(output).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -165,27 +132,21 @@ USAGE
 
 COMMANDS
   foo  This is a command with aliases`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
+  it('shows root help with aliases commands by default', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [CommandWithAliases],
+        topics: [],
+      },
+    ])
 
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [CommandWithAliases],
-          topics: [],
-        },
-      ])
-
-      const help = new TestHelp(config as any)
-      await help.showHelp([])
-    })
-    .it('shows root help with aliases commands by default', ({stdout, config}) => {
-      expect(stdout.trim()).to.equal(`base library for oclif CLIs
+    const help = new TestHelp(config as any)
+    await help.showHelp([])
+    const output = help.getOutput()
+    expect(output).to.equal(`base library for oclif CLIs
 
 VERSION
   ${config.userAgent}
@@ -198,29 +159,29 @@ COMMANDS
   baz  This is a command with aliases
   foo  This is a command with aliases
   qux  This is a command with aliases`)
-    })
+  })
 })
 
 describe('showHelp for a topic', () => {
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
+  let config: Config
 
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsCreate, AppsDestroy],
-          topics: [AppsTopic],
-        },
-      ])
+  beforeEach(async () => {
+    config = await Config.load()
+  })
 
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps'])
-    })
-    .it('shows topic help with commands', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`This topic is for the apps topic
+  it('shows topic help with commands', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsCreate, AppsDestroy],
+        topics: [AppsTopic],
+      },
+    ])
+
+    const help = new TestHelp(config as any)
+    await help.showHelp(['apps'])
+    const output = help.getOutput()
+    expect(output).to.equal(`This topic is for the apps topic
 
 USAGE
   $ oclif apps:COMMAND
@@ -228,27 +189,21 @@ USAGE
 COMMANDS
   apps:create   Create an app
   apps:destroy  Destroy an app`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
+  it('shows topic help with topic and commands', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsCreate, AppsDestroy, AppsAdminAdd],
+        topics: [AppsTopic, AppsAdminTopic],
+      },
+    ])
 
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsCreate, AppsDestroy, AppsAdminAdd],
-          topics: [AppsTopic, AppsAdminTopic],
-        },
-      ])
-
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps'])
-    })
-    .it('shows topic help with topic and commands', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`This topic is for the apps topic
+    const help = new TestHelp(config as any)
+    await help.showHelp(['apps'])
+    const output = help.getOutput()
+    expect(output).to.equal(`This topic is for the apps topic
 
 USAGE
   $ oclif apps:COMMAND
@@ -259,27 +214,21 @@ TOPICS
 COMMANDS
   apps:create   Create an app
   apps:destroy  Destroy an app`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
+  it('shows topic help with topic and commands and topic command', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsCreate, AppsDestroy, AppsAdminIndex, AppsAdminAdd],
+        topics: [AppsTopic, AppsAdminTopic],
+      },
+    ])
 
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsCreate, AppsDestroy, AppsAdminIndex, AppsAdminAdd],
-          topics: [AppsTopic, AppsAdminTopic],
-        },
-      ])
-
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps'])
-    })
-    .it('shows topic help with topic and commands and topic command', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`This topic is for the apps topic
+    const help = new TestHelp(config as any)
+    await help.showHelp(['apps'])
+    const output = help.getOutput()
+    expect(output).to.equal(`This topic is for the apps topic
 
 USAGE
   $ oclif apps:COMMAND
@@ -291,26 +240,21 @@ COMMANDS
   apps:admin    List of admins for an app
   apps:create   Create an app
   apps:destroy  Destroy an app`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsCreate, AppsDestroy, AppsAdminAdd, DbCreate],
-          topics: [AppsTopic, AppsAdminTopic, DbTopic],
-        },
-      ])
+  it('ignores other topics and commands', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsCreate, AppsDestroy, AppsAdminAdd, DbCreate],
+        topics: [AppsTopic, AppsAdminTopic, DbTopic],
+      },
+    ])
 
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps'])
-    })
-    .it('ignores other topics and commands', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`This topic is for the apps topic
+    const help = new TestHelp(config as any)
+    await help.showHelp(['apps'])
+    const output = help.getOutput()
+    expect(output).to.equal(`This topic is for the apps topic
 
 USAGE
   $ oclif apps:COMMAND
@@ -321,54 +265,50 @@ TOPICS
 COMMANDS
   apps:create   Create an app
   apps:destroy  Destroy an app`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [DeprecateAliases],
-          topics: [],
-        },
-      ])
+  it('show deprecation warning when using alias', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [DeprecateAliases],
+        topics: [],
+      },
+    ])
 
-      const help = new TestHelp(config as any)
-      await help.showHelp(['foo:bar:alias'])
-    })
-    .it('show deprecation warning when using alias', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`The "foo:bar:alias" command has been deprecated. Use "foo:bar" instead.
+    const help = new TestHelp(config as any)
+    await help.showHelp(['foo:bar:alias'])
+    const output = help.getOutput()
+    expect(output).to.equal(`The "foo:bar:alias" command has been deprecated. Use "foo:bar" instead.
 
 USAGE
   $ oclif foo:bar:alias
 
 ALIASES
   $ oclif foo:bar:alias`)
-    })
+  })
 })
 
 describe('showHelp for a command', () => {
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsCreate],
-          topics: [AppsTopic],
-        },
-      ])
+  let config: Config
 
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps:create'])
-    })
-    .it('shows help for a leaf (or childless) command', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`Create an app
+  beforeEach(async () => {
+    config = await Config.load()
+  })
+
+  it('shows help for a leaf (or childless) command', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsCreate],
+        topics: [AppsTopic],
+      },
+    ])
+
+    const help = new TestHelp(config)
+    await help.showHelp(['apps:create'])
+    const output = help.getOutput()
+    expect(output).to.equal(`Create an app
 
 USAGE
   $ oclif apps:create
@@ -377,26 +317,21 @@ DESCRIPTION
   Create an app
 
   this only shows up in command help under DESCRIPTION`)
-    })
+  })
 
-  test
-    .loadConfig()
-    .stdout()
-    .do(async (ctx) => {
-      const {config} = ctx
-      monkeyPatchCommands(config, [
-        {
-          name: 'plugin-1',
-          commands: [AppsIndex, AppsCreate, AppsAdminAdd],
-          topics: [AppsTopic, AppsAdminTopic],
-        },
-      ])
+  it('shows help for a command that has children topics and commands', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [AppsIndex, AppsCreate, AppsAdminAdd],
+        topics: [AppsTopic, AppsAdminTopic],
+      },
+    ])
 
-      const help = new TestHelp(config as any)
-      await help.showHelp(['apps'])
-    })
-    .it('shows help for a command that has children topics and commands', ({stdout}) => {
-      expect(stdout.trim()).to.equal(`List all apps (app index command)
+    const help = new TestHelp(config as any)
+    await help.showHelp(['apps'])
+    const output = help.getOutput()
+    expect(output).to.equal(`List all apps (app index command)
 
 USAGE
   $ oclif apps
@@ -406,12 +341,34 @@ TOPICS
 
 COMMANDS
   apps:create  Create an app`)
-    })
+  })
 })
 
 describe('showHelp routing', () => {
+  let config: Config
+  let sandbox: sinon.SinonSandbox
+  let help: TestHelp
+  const stubs = {
+    showRootHelp: sinon.stub(),
+    showTopicHelp: sinon.stub(),
+    showCommandHelp: sinon.stub(),
+  }
+
+  beforeEach(async () => {
+    config = await Config.load()
+    sandbox = sinon.createSandbox()
+    stubs.showCommandHelp = sandbox.stub(TestHelp.prototype, 'showCommandHelp').resolves()
+    stubs.showRootHelp = sandbox.stub(TestHelp.prototype, 'showRootHelp').resolves()
+    stubs.showTopicHelp = sandbox.stub(TestHelp.prototype, 'showTopicHelp').resolves()
+    help = new TestHelp(config)
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
   describe('shows root help', () => {
-    test.setupHelp().it('shows root help when no subject is provided', async ({help, stubs}) => {
+    it('shows root help when no subject is provided', async () => {
       await help.showHelp([])
       expect(stubs.showRootHelp.called).to.be.true
 
@@ -419,7 +376,7 @@ describe('showHelp routing', () => {
       expect(stubs.showTopicHelp.called).to.be.false
     })
 
-    test.setupHelp().it('shows root help when help is the only arg', async ({help, stubs}) => {
+    it('shows root help when help is the only arg', async () => {
       await help.showHelp(['help'])
       expect(stubs.showRootHelp.called).to.be.true
 
@@ -429,44 +386,38 @@ describe('showHelp routing', () => {
   })
 
   describe('shows topic help', () => {
-    test
-      .setupHelp()
-      .makeTopicsWithoutCommand()
-      .it('shows the topic help when a topic has no matching command', async ({help, stubs}) => {
-        await help.showHelp(['plugins'])
-        expect(stubs.showTopicHelp.called).to.be.true
+    beforeEach(() => {
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      sandbox.stub(config, 'findCommand').returns(undefined)
+    })
 
-        expect(stubs.showRootHelp.called).to.be.false
-        expect(stubs.showCommandHelp.called).to.be.false
-      })
+    it('shows the topic help when a topic has no matching command', async () => {
+      await help.showHelp(['plugins'])
+      expect(stubs.showTopicHelp.called).to.be.true
 
-    test
-      .setupHelp()
-      .makeTopicsWithoutCommand()
-      .it(
-        'shows the topic help when a topic has no matching command and is preceded by help',
-        async ({help, stubs}) => {
-          await help.showHelp(['help', 'plugins'])
-          expect(stubs.showTopicHelp.called).to.be.true
+      expect(stubs.showRootHelp.called).to.be.false
+      expect(stubs.showCommandHelp.called).to.be.false
+    })
 
-          expect(stubs.showRootHelp.called).to.be.false
-          expect(stubs.showCommandHelp.called).to.be.false
-        },
-      )
+    it('shows the topic help when a topic has no matching command and is preceded by help', async () => {
+      await help.showHelp(['help', 'plugins'])
+      expect(stubs.showTopicHelp.called).to.be.true
+
+      expect(stubs.showRootHelp.called).to.be.false
+      expect(stubs.showCommandHelp.called).to.be.false
+    })
   })
 
   describe('shows command help', () => {
-    test
-      .setupHelp()
-      .it('calls showCommandHelp when a topic that is also a command is called', async ({help, stubs}) => {
-        await help.showHelp(['plugins'])
-        expect(stubs.showCommandHelp.called).to.be.true
+    it('calls showCommandHelp when a topic that is also a command is called', async () => {
+      await help.showHelp(['plugins'])
+      expect(stubs.showCommandHelp.called).to.be.true
 
-        expect(stubs.showRootHelp.called).to.be.false
-        expect(stubs.showTopicHelp.called).to.be.false
-      })
+      expect(stubs.showRootHelp.called).to.be.false
+      expect(stubs.showTopicHelp.called).to.be.false
+    })
 
-    test.setupHelp().it('calls showCommandHelp when a command is called', async ({help, stubs}) => {
+    it('calls showCommandHelp when a command is called', async () => {
       await help.showHelp(['plugins:install'])
       expect(stubs.showCommandHelp.called).to.be.true
 
@@ -474,7 +425,7 @@ describe('showHelp routing', () => {
       expect(stubs.showTopicHelp.called).to.be.false
     })
 
-    test.setupHelp().it('calls showCommandHelp when a command is preceded by the help arg', async ({help, stubs}) => {
+    it('calls showCommandHelp when a command is preceded by the help arg', async () => {
       await help.showHelp(['help', 'plugins:install'])
       expect(stubs.showCommandHelp.called).to.be.true
 
@@ -484,10 +435,8 @@ describe('showHelp routing', () => {
   })
 
   describe('errors', () => {
-    test
-      .setupHelp()
-      .it('shows an error when there is a subject but it does not match a topic or command', async ({help}) => {
-        await expect(help.showHelp(['meow'])).to.be.rejectedWith('Command meow not found')
-      })
+    it('shows an error when there is a subject but it does not match a topic or command', async () => {
+      await expect(help.showHelp(['meow'])).to.be.rejectedWith('Command meow not found')
+    })
   })
 })

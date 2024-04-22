@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 
 import {Flag, FlagUsageOptions} from '../interfaces/parser'
 import {sortBy} from '../util/util'
@@ -17,7 +17,7 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
 
   let description: string | undefined = flag.summary || flag.description || ''
   if (options.displayRequired && flag.required) description = `(required) ${description}`
-  description = description ? chalk.dim(description) : undefined
+  description = description ? ansis.dim(description) : undefined
 
   return [` ${label.join(',').trim()}${usage}`, description] as [string, string | undefined]
 }

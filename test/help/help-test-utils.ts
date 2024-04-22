@@ -1,4 +1,4 @@
-import stripAnsi from 'strip-ansi'
+import ansis from 'ansis'
 
 import {Interfaces} from '../../src'
 import {Command} from '../../src/command'
@@ -46,7 +46,8 @@ export class TestHelp extends Help {
 }
 
 function cleanOutput(output: string) {
-  return stripAnsi(output)
+  return ansis
+    .strip(output)
     .split('\n')
     .map((s) => s.trimEnd())
     .join('\n')
@@ -71,40 +72,10 @@ export function makeCommandClass(cmdProps: Partial<Command.Class & Command.Loada
   }
 }
 
-export const topicsHelp = (topics: Interfaces.Topic[]) => ({
-  run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const topicsHelpOutput = ctx.help.formatTopics(topics) || ''
-
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(topicsHelpOutput)
-    }
-
-    ctx.commandHelp = stripAnsi(topicsHelpOutput)
-      .split('\n')
-      .map((s) => s.trimEnd())
-      .join('\n')
-    ctx.expectation = 'has topicsHelp'
-  },
-})
-
-export const topicHelp = (topic: Interfaces.Topic) => ({
-  run(ctx: {help: TestHelp; commandHelp: string; expectation: string}) {
-    const topicHelpOutput = ctx.help.formatTopic(topic)
-    if (process.env.TEST_OUTPUT === '1') {
-      console.log(topicHelpOutput)
-    }
-
-    ctx.commandHelp = stripAnsi(topicHelpOutput)
-      .split('\n')
-      .map((s) => s.trimEnd())
-      .join('\n')
-    ctx.expectation = 'has topicHelp'
-  },
-})
-
 export function monkeyPatchCommands(
   config: any,
   plugins: Array<{name: string; commands: Command.Class[]; topics: Interfaces.Topic[]}>,
+  override: boolean = true,
 ) {
   const pluginsMap = new Map()
   for (const plugin of plugins) {
@@ -112,10 +83,17 @@ export function monkeyPatchCommands(
   }
 
   config.plugins = pluginsMap
-  config._commands = new Map()
-  config._topics = new Map()
+  if (override) {
+    // // @ts-expect-error private member
+    config._commands = new Map()
+    // // @ts-expect-error private member
+    config._topics = new Map()
+  }
+
   for (const plugin of config.plugins.values()) {
+    // // @ts-expect-error private method
     config.loadCommands(plugin)
+    // // @ts-expect-error private method
     config.loadTopics(plugin)
   }
 }

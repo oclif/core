@@ -1,3 +1,4 @@
+import ansis from 'ansis'
 import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
 import {URL} from 'node:url'
@@ -10,7 +11,6 @@ import {parse} from '../../src/parser'
 import * as parser from '../../src/parser/parse'
 
 config.truncateThreshold = 0
-const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
   it('--bool', async () => {
@@ -265,7 +265,7 @@ describe('parse', () => {
           },
         })
       } catch (error: any) {
-        message = stripAnsi(error.message)
+        message = ansis.strip(error.message)
       }
 
       expect(message).to.include('Missing required flag myflag')

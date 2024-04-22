@@ -1,7 +1,7 @@
 import {Hook, ux} from '../../../../../../src/index'
 
-const hook: Hook<'init'> = async function (opts) {
-  ux.log(`example hook running ${opts.id}`)
+const hook: Hook.Init = async function (opts) {
+  ux.stdout(`example hook running ${opts.id}`)
 }
 
 export default hook

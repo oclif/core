@@ -144,7 +144,7 @@ export namespace PJSON {
           subtopics?: Plugin['oclif']['topics']
         }
       }
-      update: {
+      update?: {
         autoupdate?: {
           debounce?: number
           rollout?: number

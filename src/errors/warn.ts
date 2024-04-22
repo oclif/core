@@ -1,10 +1,29 @@
-import write from '../cli-ux/write'
 import {OclifError} from '../interfaces'
+import {stderr} from '../ux/write'
 import {config} from './config'
 import {CLIError, addOclifExitCode} from './errors/cli'
 import prettyPrint from './errors/pretty-print'
 
-export function warn(input: Error | string): void {
+const WARNINGS = new Set<Error | string>()
+
+type Options = {
+  /**
+   * If true, will only print the same warning once.
+   */
+  ignoreDuplicates?: boolean
+}
+
+/**
+ * Prints a pretty warning message to stderr.
+ *
+ * @param input The error or string to print.
+ * @param options.ignoreDuplicates If true, will only print the same warning once.
+ */
+export function warn(input: Error | string, options?: Options): void {
+  const ignoreDuplicates = options?.ignoreDuplicates ?? true
+  if (ignoreDuplicates && WARNINGS.has(input)) return
+  WARNINGS.add(input)
+
   let err: Error & OclifError
 
   if (typeof input === 'string') {
@@ -16,15 +35,8 @@ export function warn(input: Error | string): void {
   }
 
   const message = prettyPrint(err)
-  if (message) write.stderr(message + '\n')
+  if (message) stderr(message)
   if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
-}
-
-const WARNINGS = new Set<Error | string>()
-export function memoizedWarn(input: Error | string): void {
-  if (!WARNINGS.has(input)) warn(input)
-
-  WARNINGS.add(input)
 }
 
 export default warn

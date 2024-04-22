@@ -1,13 +1,14 @@
 {
   "extends": ["oclif", "oclif-typescript", "prettier"],
   "rules": {
-    "unicorn/prefer-module": "off",
-    "unicorn/no-array-reduce": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "import/no-named-as-default-member": "off",
     "no-useless-constructor": "off",
     "perfectionist/sort-object-types": "off",
     "perfectionist/sort-union-types": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-namespace": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/prefer-module": "off",
     "valid-jsdoc": "off"
   }
 }

@@ -1,30 +1,40 @@
-import {test as base, expect} from '@oclif/test'
+import ansis from 'ansis'
+import {expect} from 'chai'
 
-import {TestHelp, topicsHelp} from './help-test-utils'
-
-const g: any = global
-g.oclif.columns = 80
-
-const test = base
-  .loadConfig()
-  .add('help', (ctx) => new TestHelp(ctx.config as any))
-  .register('topicsHelp', topicsHelp)
+import {Config, Interfaces} from '../../src'
+import {TestHelp} from './help-test-utils'
 
 describe('formatTopics', () => {
-  test
-    .topicsHelp([
+  let config: Config
+
+  beforeEach(async () => {
+    config = await Config.load()
+  })
+
+  function getTopicsHelp(topic: Interfaces.Topic[]): string {
+    const help = new TestHelp(config)
+    const root = help.formatTopics(topic) ?? ''
+    return ansis
+      .strip(root)
+      .split('\n')
+      .map((s) => s.trimEnd())
+      .join('\n')
+  }
+
+  it('shows a single topic in the list', () => {
+    const topic = [
       {
         name: 'topic',
         description: 'this is a description of my topic',
       },
-    ])
-    .it('shows ouputs a single topic in the list', (ctx) =>
-      expect(ctx.commandHelp).to.equal(`TOPICS
-  topic  this is a description of my topic`),
-    )
+    ]
+    const output = getTopicsHelp(topic)
+    expect(output).to.equal(`TOPICS
+  topic  this is a description of my topic`)
+  })
 
-  test
-    .topicsHelp([
+  it('shows multiple topics in list', () => {
+    const topic = [
       {
         name: 'topic',
         description: 'this is a description of my topic',
@@ -37,11 +47,11 @@ describe('formatTopics', () => {
         name: 'thirdtopic',
         description: 'description for thirdtopic',
       },
-    ])
-    .it('shows ouputs for multiple topics in the list', (ctx) =>
-      expect(ctx.commandHelp).to.equal(`TOPICS
+    ]
+    const output = getTopicsHelp(topic)
+    expect(output).to.equal(`TOPICS
   topic       this is a description of my topic
   othertopic  here we have a description for othertopic
-  thirdtopic  description for thirdtopic`),
-    )
+  thirdtopic  description for thirdtopic`)
+  })
 })

@@ -1,7 +1,6 @@
+import ansis from 'ansis'
 import {appendFile, mkdir} from 'node:fs/promises'
 import {dirname} from 'node:path'
-
-import stripAnsi = require('strip-ansi')
 
 const timestamp = () => new Date().toISOString()
 let timer: any
@@ -36,7 +35,7 @@ export class Logger {
   }
 
   log(msg: string): void {
-    msg = stripAnsi(chomp(msg))
+    msg = ansis.strip(chomp(msg))
     const lines = msg.split('\n').map((l) => `${timestamp()} ${l}`.trimEnd())
     this.buffer.push(...lines)
     this.flush(50).catch(console.error)

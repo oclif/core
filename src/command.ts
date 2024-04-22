@@ -1,9 +1,8 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import {fileURLToPath} from 'node:url'
 import {inspect} from 'node:util'
 
 import Cache from './cache'
-import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -29,6 +28,7 @@ import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
 import {toConfiguredId} from './util/ids'
 import {uniq} from './util/util'
+import ux from './ux'
 
 const pjson = Cache.getInstance().get('@oclif/core')
 
@@ -192,7 +192,7 @@ export abstract class Command {
     } else {
       if (!err.message) throw err
       try {
-        ux.action.stop(chalk.bold.red('!'))
+        ux.action.stop(ansis.bold.red('!'))
       } catch {}
 
       throw err
@@ -257,18 +257,18 @@ export abstract class Command {
   public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      ux.info(message, ...args)
+      ux.stdout(message, ...args)
     }
   }
 
   protected logJson(json: unknown): void {
-    ux.styledJSON(json)
+    ux.stdout(ux.colorizeJson(json, {pretty: true, theme: this.config.theme?.json}))
   }
 
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      ux.logToStderr(message, ...args)
+      ux.stderr(message, ...args)
     }
   }
 
