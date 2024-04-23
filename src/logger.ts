@@ -18,14 +18,36 @@ function makeLogger(namespace: string = OCLIF_NS): Logger {
   }
 }
 
-let cachedLogger: Logger | undefined
+/**
+ * Cache of logger instances. This is used to prevent creating multiple logger instances for the same namespace.
+ *
+ * The root logger is stored under the 'root' key as well as it's namespace.
+ */
+const cachedLoggers = new Map<string, Logger>()
 
+/**
+ * Returns a logger instance for the given namespace.
+ * If a namespace is provided, a child logger is returned.
+ * If no namespace is provided, the root logger is returned.
+ */
 export function getLogger(namespace?: string): Logger {
-  if (!cachedLogger) {
-    cachedLogger = makeLogger(OCLIF_NS)
+  let rootLogger = cachedLoggers.get('root')
+  if (!rootLogger) {
+    set(makeLogger(OCLIF_NS))
   }
 
-  return namespace && cachedLogger.namespace !== namespace ? cachedLogger.child(namespace) : cachedLogger
+  rootLogger = cachedLoggers.get('root')!
+
+  if (namespace) {
+    const cachedLogger = cachedLoggers.get(namespace)
+    if (cachedLogger) return cachedLogger
+
+    const logger = rootLogger.child(namespace)
+    cachedLoggers.set(namespace, logger)
+    return logger
+  }
+
+  return rootLogger
 }
 
 function ensureItMatchesInterface(newLogger: Logger): boolean {
@@ -41,10 +63,12 @@ function ensureItMatchesInterface(newLogger: Logger): boolean {
 }
 
 function set(newLogger: Logger): void {
-  if (cachedLogger) return
+  if (cachedLoggers.has(newLogger.namespace)) return
+  if (cachedLoggers.has('root')) return
 
   if (ensureItMatchesInterface(newLogger)) {
-    cachedLogger = newLogger
+    cachedLoggers.set(newLogger.namespace, newLogger)
+    cachedLoggers.set('root', newLogger)
   } else {
     process.emitWarning('Logger does not match the Logger interface. Using default logger.')
   }
@@ -63,4 +87,8 @@ export function setLogger(loadOptions: LoadOptions) {
   } else {
     set(makeLogger(OCLIF_NS))
   }
+}
+
+export function clearLoggers() {
+  cachedLoggers.clear()
 }
