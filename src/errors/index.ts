@@ -1,11 +1,8 @@
 export {PrettyPrintableError} from '../interfaces'
-export {config} from './config'
 export {error} from './error'
 export {CLIError} from './errors/cli'
 export {ExitError} from './errors/exit'
 export {ModuleLoadError} from './errors/module-load'
 export {exit} from './exit'
 export {handle} from './handle'
-export {Logger} from './logger'
-
 export {warn} from './warn'

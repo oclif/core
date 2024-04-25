@@ -1,6 +1,6 @@
 import {OclifError} from '../interfaces'
+import {getLogger} from '../logger'
 import {stderr} from '../ux/write'
-import {config} from './config'
 import {CLIError, addOclifExitCode} from './errors/cli'
 import prettyPrint from './errors/pretty-print'
 
@@ -36,7 +36,7 @@ export function warn(input: Error | string, options?: Options): void {
 
   const message = prettyPrint(err)
   if (message) stderr(message)
-  if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
+  if (err?.stack) getLogger().error(err.stack)
 }
 
 export default warn

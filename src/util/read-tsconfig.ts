@@ -1,9 +1,9 @@
-import makeDebug from 'debug'
 import {readFile, readdir} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
 import {warn} from '../errors/warn'
 import {TSConfig} from '../interfaces'
+import {makeDebug} from '../logger'
 import {mergeNestedObjects} from './util'
 
 const debug = makeDebug('read-tsconfig')

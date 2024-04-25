@@ -19,6 +19,7 @@ import {
   ParserOutput,
   ParsingToken,
 } from '../interfaces/parser'
+import {makeDebug} from '../logger'
 import {isTruthy, last, pickBy} from '../util/util'
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 
@@ -26,7 +27,7 @@ let debug: any
 try {
   debug =
     process.env.CLI_FLAGS_DEBUG === '1'
-      ? require('debug')('../parser')
+      ? makeDebug('parser')
       : () => {
           // noop
         }

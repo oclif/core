@@ -1,22 +1,7 @@
-const debug = require('debug')
+import {getLogger} from '../logger'
 
-function displayWarnings() {
-  if (process.listenerCount('warning') > 1) return
-  process.on('warning', (warning: any) => {
-    console.error(warning.stack)
-    if (warning.detail) console.error(warning.detail)
-  })
-}
-
-export function Debug(...scope: string[]): (..._: any) => void {
-  if (!debug)
-    return (..._: any[]) => {
-      // noop
-    }
-
-  const d = debug(['config', ...scope].join(':'))
-  if (d.enabled) displayWarnings()
-  return (...args: any[]) => d(...args)
+export function makeDebug(...scope: string[]): (..._: any) => void {
+  return (formatter: unknown, ...args: unknown[]) => getLogger(['config', ...scope].join(':')).debug(formatter, ...args)
 }
 
 // Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js

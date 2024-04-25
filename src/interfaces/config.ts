@@ -61,21 +61,9 @@ export interface Config {
    */
   readonly dataDir: string
   /**
-   * debugging level
-   *
-   * set by ${BIN}_DEBUG or DEBUG=$BIN
-   */
-  readonly debug: number
-  /**
    * base dirname to use in cacheDir/configDir/dataDir
    */
   readonly dirname: string
-  /**
-   * points to a file that should be appended to for error logs
-   *
-   * example: ~/Library/Caches/mycli/error.log
-   */
-  readonly errlog: string
   findCommand(id: string, opts: {must: true}): Command.Loadable
   findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
   findMatches(id: string, argv: string[]): Command.Loadable[]

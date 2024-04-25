@@ -6,7 +6,7 @@ import wrap from 'wrap-ansi'
 import Cache from '../../cache'
 import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
-import {config} from '../config'
+import {settings} from '../../settings'
 
 /**
  * properties specific to internal oclif error handling
@@ -49,7 +49,7 @@ export class CLIError extends Error implements OclifError {
    * @return {string} returns a string representing the dispay of the error
    */
   render(): string {
-    if (config.debug) {
+    if (settings.debug) {
       return this.stack
     }
 

@@ -7,10 +7,9 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {readJson} from '../util/fs'
 import {isProd} from '../util/util'
 import * as Plugin from './plugin'
-import {Debug} from './util'
+import {makeDebug} from './util'
 
-// eslint-disable-next-line new-cap
-const debug = Debug()
+const debug = makeDebug()
 
 type PluginLoaderOptions = {
   plugins?: IPlugin[] | PluginsMap
