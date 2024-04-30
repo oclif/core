@@ -1,3 +1,12 @@
+## [3.26.5](https://github.com/oclif/core/compare/3.26.4...3.26.5) (2024-04-30)
+
+
+### Bug Fixes
+
+* better warnings ([439e933](https://github.com/oclif/core/commit/439e9339e693fcf116ba41cb62cc831a2dc27f59))
+
+
+
 ## [3.26.4](https://github.com/oclif/core/compare/3.26.3...3.26.4) (2024-04-18)
 
 
