@@ -350,6 +350,8 @@ export class Plugin implements IPlugin {
       scope && `task: ${scope}`,
       `plugin: ${this.name}`,
       `root: ${this.root}`,
+      ...(err.code ? [`code: ${err.code}`] : []),
+      ...(err.message ? [`message: ${err.message}`] : []),
       'See more details with DEBUG=*',
     ]).join('\n')
     return err
