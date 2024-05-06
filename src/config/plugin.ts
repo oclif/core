@@ -15,6 +15,7 @@ import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson} from '../util/fs'
+import {readPjson} from '../util/read-pjson'
 import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-path'
 import {getCommandIdPermutations, makeDebug} from './util'
@@ -224,7 +225,7 @@ export class Plugin implements IPlugin {
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug(`loading ${this.type} plugin from ${root}`)
-    this.pjson = this.options.pjson ?? (await readJson(join(root, 'package.json')))
+    this.pjson = this.options.pjson ?? (await readPjson(root))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
