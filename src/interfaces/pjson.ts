@@ -149,7 +149,7 @@ export namespace PJSON {
           debounce?: number
           rollout?: number
         }
-        disableNpmLookup: boolean
+        disableNpmLookup?: boolean
         node: {
           targets?: string[]
           version?: string
