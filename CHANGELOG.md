@@ -1,3 +1,12 @@
+## [3.26.6](https://github.com/oclif/core/compare/3.26.5...3.26.6) (2024-05-06)
+
+
+### Bug Fixes
+
+* new "dont check npm" option for plugin-update  ([#1071](https://github.com/oclif/core/issues/1071)) ([9ccc797](https://github.com/oclif/core/commit/9ccc797c314d032daaee6ffd9a27da4dbbca882a))
+
+
+
 ## [3.26.5](https://github.com/oclif/core/compare/3.26.4...3.26.5) (2024-04-30)
 
 
