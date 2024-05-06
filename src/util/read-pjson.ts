@@ -8,7 +8,7 @@ import {readJson} from './fs'
 const debug = makeDebug('read-pjson')
 
 /**
- * Read the package.json file from a given path and merge with the config found by cosmiconfig.
+ * Read the package.json file from a given path and add the oclif config (found by cosmiconfig) if it exists.
  *
  * We can assume that the package.json file exists because the plugin root has already been loaded at this point.
  */
@@ -59,6 +59,6 @@ export async function readPjson(path: string): Promise<PJSON.Plugin> {
   debug(`found oclif config for ${path}: %O`, result)
   return {
     ...pjson,
-    oclif: result?.config ?? pjson.oclif ?? {},
+    oclif: result?.config ?? {},
   }
 }
