@@ -245,6 +245,7 @@ export type Configuration = {
       debounce?: number
       rollout?: number
     }
+    disableNpmLookup?: boolean
     node: {
       targets?: string[]
       version?: string

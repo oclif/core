@@ -5,6 +5,7 @@
     "@typescript-eslint/no-namespace": "off",
     "import/no-named-as-default-member": "off",
     "no-useless-constructor": "off",
+    "perfectionist/sort-intersection-types": "off",
     "perfectionist/sort-object-types": "off",
     "perfectionist/sort-union-types": "off",
     "unicorn/no-array-reduce": "off",
