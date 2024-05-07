@@ -329,7 +329,7 @@ export class Plugin implements IPlugin {
           }),
         )
       )
-        // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
+        // eslint-disable-next-line unicorn/prefer-native-coercion-functions
         .filter((f): f is [string, Command.Cached] => Boolean(f))
         .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
           commands[id] = c
@@ -350,6 +350,8 @@ export class Plugin implements IPlugin {
       scope && `task: ${scope}`,
       `plugin: ${this.name}`,
       `root: ${this.root}`,
+      ...(err.code ? [`code: ${err.code}`] : []),
+      ...(err.message ? [`message: ${err.message}`] : []),
       'See more details with DEBUG=*',
     ]).join('\n')
     return err
