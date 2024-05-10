@@ -214,6 +214,10 @@ export type Configuration = {
   repositoryPrefix?: string
   schema?: number
   /**
+   * The namespace to be used for plugins of your CLI, e.g. `@salesforce`.
+   */
+  scope?: string
+  /**
    * State of your CLI
    *
    * - `beta` - will show message to user that command or CLI is in beta
