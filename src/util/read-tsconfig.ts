@@ -1,7 +1,7 @@
 import {readFile, readdir} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
-import {warn} from '../errors/warn'
+import {memoizedWarn} from '../errors/warn'
 import {TSConfig} from '../interfaces'
 import {makeDebug} from '../logger'
 import {mergeNestedObjects} from './util'
@@ -45,17 +45,14 @@ export async function readTSConfig(root: string, tsconfigName = 'tsconfig.json')
   }
 
   if (!typescript) {
-    warn(
+    memoizedWarn(
       'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
     )
     return
   }
 
   const read = async (path: string): Promise<unknown> => {
-    const localRoot = await upUntil(path, async (p) =>
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      (await readdir(p)).includes('package.json'),
-    )
+    const localRoot = await upUntil(path, async (p) => (await readdir(p)).includes('package.json'))
     if (!localRoot) return
 
     try {
