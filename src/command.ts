@@ -29,7 +29,7 @@ import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
 import {toConfiguredId} from './util/ids'
 import {uniq} from './util/util'
-import ux from './ux'
+import {ux} from './ux'
 
 const pjson = Cache.getInstance().get('@oclif/core')
 

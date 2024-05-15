@@ -77,5 +77,3 @@ export const ux = {
    */
   warn,
 }
-
-export default ux
