@@ -92,6 +92,7 @@
     "./help": "./lib/help/index.js",
     "./hooks": "./lib/interfaces/hooks.js",
     "./interfaces": "./lib/interfaces/index.js",
+    "./logger": "./lib/logger.js",
     "./performance": "./lib/performance.js",
     "./run": "./lib/main.js",
     "./settings": "./lib/settings.js",
