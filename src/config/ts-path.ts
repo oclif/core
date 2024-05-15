@@ -3,7 +3,7 @@ import {join, relative as pathRelative, sep} from 'node:path'
 import * as TSNode from 'ts-node'
 
 import Cache from '../cache'
-import {warn} from '../errors/warn'
+import {memoizedWarn} from '../errors/warn'
 import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {existsSync} from '../util/fs'
@@ -72,7 +72,7 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
     if (isErrno(error)) return
 
     debug(`Could not parse tsconfig.json. Skipping typescript path lookup for ${root}.`)
-    warn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
+    memoizedWarn(`Could not parse tsconfig.json for ${root}. Falling back to compiled source.`)
   }
 }
 
@@ -88,7 +88,7 @@ async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
     tsNode = require(tsNodePath)
   } catch {
     debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
-    warn(
+    memoizedWarn(
       `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
     )
     return
@@ -235,7 +235,7 @@ async function determinePath(root: string, orig: string): Promise<string> {
   }
 
   debug(`No source file found. Returning default path ${orig}`)
-  if (!isProd()) warn(`Could not find source for ${orig} based on tsconfig. Defaulting to compiled source.`)
+  if (!isProd()) memoizedWarn(`Could not find source for ${orig} based on tsconfig. Defaulting to compiled source.`)
 
   return orig
 }
@@ -275,7 +275,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
       `Skipping typescript path lookup for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
     )
     if (plugin?.type === 'link')
-      warn(
+      memoizedWarn(
         `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
     return orig
@@ -283,7 +283,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
 
   if (cannotUseTsNode(root, plugin, isProduction)) {
     debug(`Skipping typescript path lookup for ${root} because ts-node is run in node version ${process.version}"`)
-    warn(
+    memoizedWarn(
       `ts-node executable cannot transpile ESM in Node 20. Existing compiled source will be used instead. See https://github.com/oclif/core/issues/817.`,
     )
     return orig
