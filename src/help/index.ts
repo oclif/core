@@ -17,6 +17,7 @@ import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 export {CommandHelp} from './command'
+export {HelpFormatter, type HelpSection, type HelpSectionKeyValueTable, type HelpSectionRenderer} from './formatter'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {

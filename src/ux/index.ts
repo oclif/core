@@ -7,6 +7,13 @@ import colorizeJson from './colorize-json'
 import {colorize} from './theme'
 import {stderr, stdout} from './write'
 
+export {error} from '../errors/error'
+export {exit} from '../errors/exit'
+export {warn} from '../errors/warn'
+export {default as colorizeJson} from './colorize-json'
+export {colorize} from './theme'
+export {stderr, stdout} from './write'
+
 const ACTION_TYPE =
   (Boolean(process.stderr.isTTY) &&
     !process.env.CI &&
@@ -14,7 +21,7 @@ const ACTION_TYPE =
     'spinner') ||
   'simple'
 
-export const methods = {
+export const ux = {
   action: ACTION_TYPE === 'spinner' ? new Spinner() : new Simple(),
   /**
    * Add color to text.
@@ -71,4 +78,4 @@ export const methods = {
   warn,
 }
 
-export default methods
+export default ux

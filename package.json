@@ -66,10 +66,7 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "/lib",
-    "/flush.js",
-    "/flush.d.ts",
-    "/handle.js"
+    "/lib"
   ],
   "homepage": "https://github.com/oclif/core",
   "keywords": [
@@ -82,7 +79,25 @@
     "argv"
   ],
   "license": "MIT",
-  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./args": "./lib/args.js",
+    "./command": "./lib/command.js",
+    "./config": "./lib/config/index.js",
+    "./errors": "./lib/errors/index.js",
+    "./execute": "./lib/execute.js",
+    "./flags": "./lib/flags.js",
+    "./flush": "./lib/flush.js",
+    "./handle": "./lib/errors/handle.js",
+    "./help": "./lib/help/index.js",
+    "./hooks": "./lib/interfaces/hooks.js",
+    "./interfaces": "./lib/interfaces/index.js",
+    "./performance": "./lib/performance.js",
+    "./run": "./lib/main.js",
+    "./settings": "./lib/settings.js",
+    "./util/ids": "./lib/util/ids.js",
+    "./ux": "./lib/ux/index.js"
+  },
   "repository": "oclif/core",
   "oclif": {
     "bin": "oclif",

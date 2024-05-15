@@ -1,4 +1,4 @@
-import {Config} from '../interfaces'
+import {type Config} from '../interfaces/config'
 
 export function toStandardizedId(commandID: string, config: Config): string {
   return commandID.replaceAll(new RegExp(config.topicSeparator, 'g'), ':')

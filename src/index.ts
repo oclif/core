@@ -18,10 +18,17 @@ export {handle} from './errors/handle'
 export {execute} from './execute'
 export * as Flags from './flags'
 export {flush} from './flush'
-export {CommandHelp, Help, HelpBase, loadHelpClass} from './help'
-export {HelpSection, HelpSectionKeyValueTable, HelpSectionRenderer} from './help/formatter'
+export {
+  CommandHelp,
+  Help,
+  HelpBase,
+  type HelpSection,
+  type HelpSectionKeyValueTable,
+  type HelpSectionRenderer,
+  loadHelpClass,
+} from './help'
 export * as Interfaces from './interfaces'
-export {Hook} from './interfaces/hooks'
+export {type Hook} from './interfaces/hooks'
 export {getLogger} from './logger'
 export {run} from './main'
 export * as ModuleLoader from './module-loader'
@@ -29,4 +36,4 @@ export * as Parser from './parser'
 export {Performance} from './performance'
 export {Settings, settings} from './settings'
 export {toConfiguredId, toStandardizedId} from './util/ids'
-export {methods as ux} from './ux'
+export {default as ux} from './ux'
