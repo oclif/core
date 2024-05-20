@@ -4,11 +4,10 @@ import {validate} from './validate'
 
 export {flagUsages} from './help'
 
-export async function parse<
-  TFlags extends OutputFlags<any>,
-  BFlags extends OutputFlags<any>,
-  TArgs extends OutputArgs<any>,
->(argv: string[], options: Input<TFlags, BFlags, TArgs>): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
+export async function parse<TFlags extends OutputFlags<any>, TArgs extends OutputArgs<any>>(
+  argv: string[],
+  options: Input<TFlags, TArgs>,
+): Promise<ParserOutput<TFlags, TArgs>> {
   const input = {
     '--': options['--'],
     args: (options.args ?? {}) as ArgInput<any>,
@@ -20,5 +19,5 @@ export async function parse<
   const parser = new Parser(input)
   const output = await parser.parse()
   await validate({input, output})
-  return output as ParserOutput<TFlags, BFlags, TArgs>
+  return output as ParserOutput<TFlags, TArgs>
 }

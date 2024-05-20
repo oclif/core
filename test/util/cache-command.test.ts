@@ -162,11 +162,12 @@ describe('cacheCommand', () => {
   it('should return a cached command with multiple Command classes in inheritance chain', async () => {
     class Base extends Command {
       public static aliases = ['base']
-      public static baseFlags = {
+      public static enableJsonFlag = true
+
+      public static flags = {
         parentFlag: Flags.boolean(),
       }
 
-      public static enableJsonFlag = true
       public static state = 'beta'
       public static summary = 'base summary'
 
@@ -175,6 +176,7 @@ describe('cacheCommand', () => {
 
     class Child extends Base {
       static flags = {
+        ...Base.flags,
         childFlag: Flags.boolean(),
       }
 

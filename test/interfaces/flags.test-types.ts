@@ -8,16 +8,16 @@ import {expectNotType, expectType} from 'tsd'
 import {Command, Flags, Interfaces} from '../../src'
 
 abstract class BaseCommand extends Command {
-  static baseFlags = {
+  static enableJsonFlag = true
+
+  static flags = {
     optionalGlobalFlag: Flags.string(),
     requiredGlobalFlag: Flags.string({required: true}),
     defaultGlobalFlag: Flags.string({default: 'default'}),
   }
-
-  static enableJsonFlag = true
 }
 
-type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags & typeof MyCommand.baseFlags>
+type MyFlags = Interfaces.InferredFlags<typeof MyCommand.flags>
 
 type MyType = {
   foo: boolean
@@ -101,6 +101,7 @@ class MyCommand extends BaseCommand {
   static examples = ['<%= config.bin %> <%= command.id %>']
 
   static flags = {
+    ...BaseCommand.flags,
     string: Flags.string(),
     'string#opts:required': Flags.string({required: true}),
     'string#opts:default': Flags.string({default: 'default'}),
