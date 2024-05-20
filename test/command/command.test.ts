@@ -1,7 +1,7 @@
+import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
 import {Command as Base, Flags} from '../../src'
-import {captureOutput} from '../test'
 
 class Command extends Base {
   static description = 'test command'

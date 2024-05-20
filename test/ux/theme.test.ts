@@ -4,6 +4,7 @@ import {config, expect} from 'chai'
 config.truncateThreshold = 0
 
 import {colorize, parseTheme} from '../../src/ux/theme'
+
 describe('colorize', () => {
   it('should return text with ansi characters when given hex code', () => {
     const color = '#FF0000'
@@ -30,6 +31,17 @@ describe('colorize', () => {
   it('should return empty text without ansi characters when given undefined', () => {
     const text = colorize(undefined, '')
     expect(text).to.equal('')
+  })
+
+  it('should return text with ansi characters when given rgb color', () => {
+    const color = 'rgb(255, 0, 0)'
+    const text = colorize(color, 'brazil')
+    expect(text).to.equal(ansis.rgb(255, 0, 0)('brazil'))
+  })
+
+  it('should do nothing if color is not a valid color', () => {
+    const text = colorize('INVALID_COLOR', 'brazil')
+    expect(text).to.equal('brazil')
   })
 })
 
@@ -98,5 +110,22 @@ describe('theme parsing', () => {
 
     const theme = parseTheme(untypedTheme)
     expect(theme).to.deep.equal({})
+  })
+
+  it('should recursively parse nested theme', () => {
+    const untypedTheme = {
+      alias: 'red',
+      json: {
+        key: 'green',
+      },
+    }
+
+    const theme = parseTheme(untypedTheme)
+    expect(theme).to.deep.equal({
+      alias: 'red',
+      json: {
+        key: 'green',
+      },
+    })
   })
 })

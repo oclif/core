@@ -1,8 +1,8 @@
+import {runCommand, runHook} from '@oclif/test'
 import {expect} from 'chai'
 import {join, resolve} from 'node:path'
 
 import {Config} from '../../src/config'
-import {runCommand, runHook} from '../test'
 
 const root = resolve(__dirname, 'fixtures/typescript')
 

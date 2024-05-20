@@ -28,6 +28,7 @@
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
     "@oclif/prettier-config": "^0.2.1",
+    "@oclif/test": "^4.0.1-beta.4",
     "@types/benchmark": "^2.1.5",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",

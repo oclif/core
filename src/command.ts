@@ -170,6 +170,9 @@ export abstract class Command {
     }
 
     const config = await Config.load(opts || require.main?.filename || __dirname)
+    const cache = Cache.getInstance()
+    if (!cache.has('config')) cache.set('config', config)
+
     const cmd = new this(argv, config)
     if (!cmd.id) {
       const id = cmd.constructor.name.toLowerCase()

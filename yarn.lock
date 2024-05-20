@@ -815,6 +815,14 @@
   resolved "https://registry.yarnpkg.com/@oclif/prettier-config/-/prettier-config-0.2.1.tgz#1def9f38134f9bfb229257f48a35f7d0d183dc78"
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
+"@oclif/test@^4.0.1-beta.4":
+  version "4.0.1-beta.4"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.0.1-beta.4.tgz#001a261e750ab2efa1df620c7615b9fa1570ed41"
+  integrity sha512-gDKZERVna7tyoB4ZFOoCgm1LW6x+AQ3bXO7tb1XI5q4TcZg5dE9VU7cTboPZWPF9o+6mO62vApMHbCWrx4LKug==
+  dependencies:
+    ansis "^3.2.0"
+    debug "^4.3.4"
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -1461,6 +1469,11 @@ ansis@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.0.1.tgz#46e731a2973e55378a18b87713906153c23c4229"
   integrity sha512-NMqcJGNewJ+tVAK5fJFY7kBo698ViFSH8ceUfEwBHGZb4SNxHnbJPDBW0wNQU6rYjnBGBwBfUSmeIab/KrA5/A==
+
+ansis@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.2.0.tgz#0e050c5be94784f32ffdac4b84fccba064aeae4b"
+  integrity sha512-Yk3BkHH9U7oPyCN3gL5Tc7CpahG/+UFv/6UG03C311Vy9lzRmA5uoxDTpU9CO3rGHL6KzJz/pdDeXZCZ5Mu/Sg==
 
 any-promise@^1.1.0:
   version "1.3.0"
@@ -2516,7 +2529,7 @@ eastasianwidth@^0.2.0:
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
-ejs@^3.1.10:
+ejs@^3.1.10, ejs@^3.1.9:
   version "3.1.10"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.10.tgz#69ab8358b14e896f80cc39e62087b88500c3ac3b"
   integrity sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==

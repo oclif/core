@@ -53,9 +53,9 @@ function cleanOutput(output: string) {
     .join('\n')
 }
 
-export async function makeLoadable(command: Command.Class): Promise<Command.Loadable> {
+export async function makeLoadable(command: Command.Class, plugin?: Interfaces.Plugin): Promise<Command.Loadable> {
   return {
-    ...(await cacheCommand(command)),
+    ...(await cacheCommand(command, plugin)),
     load: async () => command,
   }
 }

@@ -1,7 +1,6 @@
+import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-
-import {runCommand} from '../test'
 
 describe('single command cli', () => {
   it('should show help for commands', async () => {

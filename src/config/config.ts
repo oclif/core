@@ -16,6 +16,7 @@ import {makeDebug as loggerMakeDebug, setLogger} from '../logger'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
+import {determinePriority} from '../util/determine-priority'
 import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
@@ -702,64 +703,6 @@ export class Config implements IConfig {
     }
   }
 
-  /**
-   * This method is responsible for locating the correct plugin to use for a named command id
-   * It searches the {Config} registered commands to match either the raw command id or the command alias
-   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
-   * create the same command or command alias.
-   *
-   * In the case of more than one found command, the function will select the command based on the order in which
-   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
-   * is selected as the command to run.
-   *
-   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
-   * is present, this function defers to the core plugin.
-   *
-   * If there is not a core plugin command present, this function will return the first
-   * plugin as discovered (will not change the order)
-   *
-   * @param commands commands to determine the priority of
-   * @returns command instance {Command.Loadable} or undefined
-   */
-  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
-    const oclifPlugins = this.pjson.oclif?.plugins ?? []
-    const commandPlugins = commands.sort((a, b) => {
-      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
-      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
-      const aIndex = oclifPlugins.indexOf(pluginAliasA)
-      const bIndex = oclifPlugins.indexOf(pluginAliasB)
-      // When both plugin types are 'core' plugins sort based on index
-      if (a.pluginType === 'core' && b.pluginType === 'core') {
-        // If b appears first in the pjson.plugins sort it first
-        return aIndex - bIndex
-      }
-
-      // if b is a core plugin and a is not sort b first
-      if (b.pluginType === 'core' && a.pluginType !== 'core') {
-        return 1
-      }
-
-      // if a is a core plugin and b is not sort a first
-      if (a.pluginType === 'core' && b.pluginType !== 'core') {
-        return -1
-      }
-
-      // if a is a jit plugin and b is not sort b first
-      if (a.pluginType === 'jit' && b.pluginType !== 'jit') {
-        return 1
-      }
-
-      // if b is a jit plugin and a is not sort a first
-      if (b.pluginType === 'jit' && a.pluginType !== 'jit') {
-        return -1
-      }
-
-      // neither plugin is core, so do not change the order
-      return 0
-    })
-    return commandPlugins[0]
-  }
-
   private getCmdLookupId(id: string): string {
     if (this._commands.has(id)) return id
     if (this.commandPermutations.hasValid(id)) return this.commandPermutations.getValid(id)!
@@ -786,7 +729,7 @@ export class Config implements IConfig {
       this.plugins.set(plugin.name, plugin)
 
       // Delete all commands from the legacy plugin so that we can re-add them.
-      // This is necessary because this.determinePriority will pick the initial
+      // This is necessary because determinePriority will pick the initial
       // command that was added, which won't have been converted by PluginLegacy yet.
       for (const cmd of plugin.commands ?? []) {
         this._commands.delete(cmd.id)
@@ -812,7 +755,10 @@ export class Config implements IConfig {
     for (const command of plugin.commands) {
       // set canonical command id
       if (this._commands.has(command.id)) {
-        const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
+        const prioritizedCommand = determinePriority(this.pjson.oclif.plugins ?? [], [
+          this._commands.get(command.id)!,
+          command,
+        ])
         this._commands.set(prioritizedCommand.id, prioritizedCommand)
       } else {
         this._commands.set(command.id, command)
@@ -831,7 +777,10 @@ export class Config implements IConfig {
 
       const handleAlias = (alias: string, hidden = false) => {
         if (this._commands.has(alias)) {
-          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
+          const prioritizedCommand = determinePriority(this.pjson.oclif.plugins ?? [], [
+            this._commands.get(alias)!,
+            command,
+          ])
           this._commands.set(alias, {...prioritizedCommand, id: alias})
         } else {
           this._commands.set(alias, {...command, hidden, id: alias})
