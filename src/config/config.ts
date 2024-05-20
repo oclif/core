@@ -8,7 +8,7 @@ import Cache from '../cache'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
-import {Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Configuration, Hook, Hooks, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {Theme} from '../interfaces/theme'
@@ -19,7 +19,7 @@ import {settings} from '../settings'
 import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
-import ux from '../ux'
+import {ux} from '../ux'
 import {parseTheme} from '../ux/theme'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-path'
@@ -83,8 +83,8 @@ export class Config implements IConfig {
   public arch!: ArchTypes
 
   public bin!: string
-  public binAliases?: string[]
-  public binPath?: string
+  public binAliases?: string[] | undefined
+  public binPath?: string | undefined
   public cacheDir!: string
   public channel!: string
   public configDir!: string
@@ -94,18 +94,18 @@ export class Config implements IConfig {
   public home!: string
   public isSingleCommandCLI = false
   public name!: string
-  public npmRegistry?: string
-  public nsisCustomization?: string
-  public pjson!: PJSON.CLI
+  public npmRegistry?: string | undefined
+  public nsisCustomization?: string | undefined
+  public pjson!: PJSON
   public platform!: PlatformTypes
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
-  public theme?: Theme
+  public theme?: Theme | undefined
   public topicSeparator: ' ' | ':' = ':'
-  public updateConfig!: NonNullable<PJSON.CLI['oclif']['update']>
+  public updateConfig!: NonNullable<Configuration['update']>
   public userAgent!: string
-  public userPJSON?: PJSON.User
+  public userPJSON?: UserPJSON | undefined
   public valid!: boolean
   public version!: string
   protected warned = false
@@ -348,10 +348,9 @@ export class Config implements IConfig {
     }
 
     this.isSingleCommandCLI = Boolean(
-      this.pjson.oclif.default ||
-        (typeof this.pjson.oclif.commands !== 'string' &&
-          this.pjson.oclif.commands?.strategy === 'single' &&
-          this.pjson.oclif.commands?.target),
+      typeof this.pjson.oclif.commands !== 'string' &&
+        this.pjson.oclif.commands?.strategy === 'single' &&
+        this.pjson.oclif.commands?.target,
     )
 
     this.maybeAdjustDebugSetting()
@@ -396,13 +395,19 @@ export class Config implements IConfig {
 
   public async loadTheme(): Promise<Theme | undefined> {
     if (this.scopedEnvVarTrue('DISABLE_THEME')) return
-    const defaultThemeFile = this.pjson.oclif.theme
-      ? resolve(this.root, this.pjson.oclif.theme)
-      : this.pjson.oclif.theme
+
     const userThemeFile = resolve(this.configDir, 'theme.json')
+    const getDefaultTheme = async () => {
+      if (!this.pjson.oclif.theme) return
+      if (typeof this.pjson.oclif.theme === 'string') {
+        return safeReadJson<Record<string, string>>(resolve(this.root, this.pjson.oclif.theme))
+      }
+
+      return this.pjson.oclif.theme
+    }
 
     const [defaultTheme, userTheme] = await Promise.all([
-      defaultThemeFile ? await safeReadJson<Record<string, string>>(defaultThemeFile) : undefined,
+      await getDefaultTheme(),
       await safeReadJson<Record<string, string>>(userThemeFile),
     ])
 
@@ -589,13 +594,13 @@ export class Config implements IConfig {
   }
 
   public s3Key(
-    type: keyof PJSON.S3.Templates,
+    type: keyof S3Templates,
     ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options,
     options: IConfig.s3Key.Options = {},
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.updateConfig.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3.templates?.[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 

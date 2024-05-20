@@ -1,6 +1,6 @@
 import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
-import {PJSON} from './pjson'
+import {Configuration, PJSON, S3Templates} from './pjson'
 import {Options, Plugin} from './plugin'
 import {Theme} from './theme'
 import {Topic} from './topic'
@@ -37,8 +37,8 @@ export interface Config {
   /**
    * name of any bin aliases that will execute the cli
    */
-  readonly binAliases?: string[]
-  readonly binPath?: string
+  readonly binAliases?: string[] | undefined
+  readonly binPath?: string | undefined
   /**
    * cache directory to use for CLI
    *
@@ -84,9 +84,9 @@ export interface Config {
   /**
    * npm registry to use for installing plugins
    */
-  readonly npmRegistry?: string
-  readonly nsisCustomization?: string
-  readonly pjson: PJSON.CLI
+  readonly npmRegistry?: string | undefined
+  readonly nsisCustomization?: string | undefined
+  readonly pjson: PJSON
   /**
    * process.platform
    */
@@ -102,7 +102,7 @@ export interface Config {
     captureErrors?: boolean,
   ): Promise<Hook.Result<Hooks[T]['return']>>
   s3Key(type: 'unversioned' | 'versioned', ext: '.tar.gz' | '.tar.xz', options?: Config.s3Key.Options): string
-  s3Key(type: keyof PJSON.S3.Templates, options?: Config.s3Key.Options): string
+  s3Key(type: keyof S3Templates, options?: Config.s3Key.Options): string
   s3Url(key: string): string
   scopedEnvVar(key: string): string | undefined
   scopedEnvVarKey(key: string): string
@@ -112,10 +112,10 @@ export interface Config {
    * active shell
    */
   readonly shell: string
-  readonly theme?: Theme
+  readonly theme?: Theme | undefined
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
-  readonly updateConfig: NonNullable<PJSON.CLI['oclif']['update']>
+  readonly updateConfig: NonNullable<Configuration['update']>
   /**
    * user agent to use for http calls
    *

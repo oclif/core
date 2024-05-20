@@ -12,7 +12,10 @@ import {settings} from '../../settings'
  * properties specific to internal oclif error handling
  */
 
-export function addOclifExitCode(error: Record<string, any>, options?: {exit?: false | number}): OclifError {
+export function addOclifExitCode(
+  error: Record<string, any>,
+  options?: {exit?: false | number | undefined},
+): OclifError {
   if (!('oclif' in error)) {
     ;(error as unknown as OclifError).oclif = {}
   }
@@ -22,12 +25,12 @@ export function addOclifExitCode(error: Record<string, any>, options?: {exit?: f
 }
 
 export class CLIError extends Error implements OclifError {
-  code?: string
+  code?: string | undefined
   oclif: OclifError['oclif'] = {}
-  skipOclifErrorHandling?: boolean
-  suggestions?: string[]
+  skipOclifErrorHandling?: boolean | undefined
+  suggestions?: string[] | undefined
 
-  constructor(error: Error | string, options: {exit?: false | number} & PrettyPrintableError = {}) {
+  constructor(error: Error | string, options: {exit?: false | number | undefined} & PrettyPrintableError = {}) {
     super(error instanceof Error ? error.message : error)
     addOclifExitCode(this, options)
     this.code = options.code

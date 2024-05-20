@@ -65,13 +65,8 @@ function processCommandIds(files: string[]): string[] {
 
 function determineCommandDiscoveryOptions(
   commandDiscovery: string | CommandDiscovery | undefined,
-  defaultCmdId?: string | undefined,
 ): CommandDiscovery | undefined {
   if (!commandDiscovery) return
-
-  if (typeof commandDiscovery === 'string' && defaultCmdId) {
-    return {strategy: 'single', target: commandDiscovery}
-  }
 
   if (typeof commandDiscovery === 'string') {
     return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
@@ -127,13 +122,13 @@ export class Plugin implements IPlugin {
 
   name!: string
 
-  parent: Plugin | undefined
+  parent?: Plugin | undefined
 
-  pjson!: PJSON.Plugin
+  pjson!: PJSON
 
   root!: string
 
-  tag?: string
+  tag?: string | undefined
 
   type!: string
 
@@ -247,7 +242,7 @@ export class Plugin implements IPlugin {
       ]),
     )
 
-    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands, this.pjson.oclif?.default)
+    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands)
 
     this._debug('command discovery options', this.commandDiscoveryOpts)
 

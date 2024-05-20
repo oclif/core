@@ -12,21 +12,23 @@ import {makeDebug} from './util'
 const debug = makeDebug()
 
 type PluginLoaderOptions = {
-  plugins?: IPlugin[] | PluginsMap
+  plugins?: IPlugin[] | PluginsMap | undefined
   root: string
 }
 
 type LoadOpts = {
   dataDir: string
-  devPlugins?: boolean
-  force?: boolean
+  devPlugins?: boolean | undefined
+  force?: boolean | undefined
   rootPlugin: IPlugin
-  userPlugins?: boolean
-  pluginAdditions?: {
-    core?: string[]
-    dev?: string[]
-    path?: string
-  }
+  userPlugins?: boolean | undefined
+  pluginAdditions?:
+    | {
+        core?: string[]
+        dev?: string[]
+        path?: string
+      }
+    | undefined
 }
 
 type PluginsMap = Map<string, IPlugin>
@@ -57,7 +59,7 @@ export default class PluginLoader {
     return {errors: this.errors, plugins: this.plugins}
   }
 
-  public async loadRoot({pjson}: {pjson?: PJSON.Plugin}): Promise<IPlugin> {
+  public async loadRoot({pjson}: {pjson?: PJSON | undefined}): Promise<IPlugin> {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {
       const plugins = [...this.plugins.values()]

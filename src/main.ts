@@ -7,7 +7,7 @@ import * as Interfaces from './interfaces'
 import {getLogger, setLogger} from './logger'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
-import ux from './ux'
+import {ux} from './ux'
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.isSingleCommandCLI) return true

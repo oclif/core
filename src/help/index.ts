@@ -4,18 +4,20 @@ import {Command} from '../command'
 import {tsPath} from '../config/ts-path'
 import {error} from '../errors/error'
 import * as Interfaces from '../interfaces'
+import {HelpLocationOptions} from '../interfaces/pjson'
 import {load} from '../module-loader'
 import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheDefaultValue} from '../util/cache-default-value'
 import {toConfiguredId} from '../util/ids'
 import {compact, sortBy, uniqBy} from '../util/util'
-import ux from '../ux'
+import {ux} from '../ux'
 import {colorize} from '../ux/theme'
 import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv} from './util'
 export {CommandHelp} from './command'
+export {HelpFormatter, type HelpSection, type HelpSectionKeyValueTable, type HelpSectionRenderer} from './formatter'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
 
 function getHelpSubject(args: string[], config: Interfaces.Config): string | undefined {
@@ -385,19 +387,22 @@ function extractClass(exported: any): HelpBaseDerived {
   return exported && exported.default ? exported.default : exported
 }
 
-export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
-  const {pjson} = config
-  const configuredClass = pjson.oclif?.helpClass
+function determineLocation(helpClass: string | HelpLocationOptions): HelpLocationOptions {
+  if (typeof helpClass === 'string') return {identifier: 'default', target: helpClass}
+  if (!helpClass.identifier) return {...helpClass, identifier: 'default'}
+  return helpClass
+}
 
-  if (configuredClass) {
+export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
+  if (config.pjson.oclif?.helpClass) {
+    const {identifier, target} = determineLocation(config.pjson.oclif?.helpClass)
     try {
-      const path = (await tsPath(config.root, configuredClass)) ?? configuredClass
-      const exported = await load<HelpBaseDerived>(config, path)
-      return extractClass(exported)
+      const path = (await tsPath(config.root, target)) ?? target
+      const module = await load(config, path)
+      const helpClass = module[identifier] ?? (identifier === 'default' ? extractClass(module) : undefined)
+      return extractClass(helpClass)
     } catch (error: any) {
-      throw new Error(
-        `Unable to load configured help class "${configuredClass}", failed with message:\n${error.message}`,
-      )
+      throw new Error(`Unable to load configured help class "${target}", failed with message:\n${error.message}`)
     }
   }
 

@@ -210,7 +210,7 @@ export class ActionBase {
     }
   }
 
-  private get globals(): {action: {task?: Task}; output: string | undefined} {
+  private get globals(): {action: {task?: Task | undefined}; output: string | undefined} {
     ;(global as any).ux = (global as any).ux || {}
     const globals = (global as any).ux
     globals.action = globals.action || {}

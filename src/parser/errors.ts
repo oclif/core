@@ -10,7 +10,7 @@ export {CLIError} from '../errors'
 
 export type Validation = {
   name: string
-  reason?: string
+  reason?: string | undefined
   status: 'failed' | 'success'
   validationFn: string
 }

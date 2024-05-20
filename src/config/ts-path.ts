@@ -246,8 +246,16 @@ async function determinePath(root: string, orig: string): Promise<string> {
  * if there is a tsconfig and the original sources exist, it attempts to require ts-node
  */
 export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
+export async function tsPath(
+  root: string,
+  orig: string | undefined,
+  plugin?: Plugin | undefined,
+): Promise<string | undefined>
+export async function tsPath(
+  root: string,
+  orig: string | undefined,
+  plugin?: Plugin | undefined,
+): Promise<string | undefined> {
   const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig

@@ -560,15 +560,19 @@ export class Parser<
       ) as TFlags & BFlags & {json: boolean | undefined}
 
     type FlagWithStrategy = {
-      helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>
+      helpFunction?: (
+        fws: FlagWithStrategy,
+        flags: Record<string, string>,
+        ...args: any
+      ) => Promise<string | undefined> | undefined
       inputFlag: {
         flag: Flag<any>
         name: string
       }
-      metadata?: MetadataFlag
-      tokens?: FlagToken[]
-      value?: any
-      valueFunction?: ValueFunction
+      metadata?: MetadataFlag | undefined
+      tokens?: FlagToken[] | undefined
+      value?: any | undefined
+      valueFunction?: ValueFunction | undefined
     }
 
     const flagTokenMap = this.mapAndValidateFlags()
@@ -624,7 +628,7 @@ export class Parser<
     }
   }
 
-  private findFlag(arg: string): {isLong: boolean; name?: string} {
+  private findFlag(arg: string): {isLong: boolean; name?: string | undefined} {
     const isLong = arg.startsWith('--')
     const short = isLong ? false : arg.startsWith('-')
     const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined

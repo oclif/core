@@ -169,7 +169,7 @@ describe('Config', () => {
     })
 
     const tests: Array<{
-      key: keyof Interfaces.PJSON.S3.Templates
+      key: keyof Interfaces.S3Templates
       expected: string
       extra?: Record<string, string> & {ext?: '.tar.gz' | '.tar.xz' | Interfaces.Config.s3Key.Options}
     }> = [
@@ -227,8 +227,8 @@ describe('Config', () => {
         ...pjson,
         oclif: {
           ...pjson.oclif,
+          // @ts-expect-error - not worth stubbing out every single required prop on s3
           update: {
-            // @ts-expect-error - not worth stubbing out every single required prop on s3
             s3: {
               host: 'https://bar.com/a/',
             },
