@@ -31,21 +31,19 @@ class MyCommandClass extends Command {
 
 describe('Config with flexible taxonomy', () => {
   const originalEnv = {...process.env}
-  let sandbox: sinon.SinonSandbox
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
     process.env = {}
   })
 
   afterEach(() => {
     process.env = originalEnv
-    sandbox.restore()
+    sinon.restore()
   })
 
   async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
-    sandbox.stub(os, 'getHomeDir').returns('/my/home')
-    sandbox.stub(os, 'getPlatform').returns('darwin')
+    sinon.stub(os, 'getHomeDir').returns('/my/home')
+    sinon.stub(os, 'getPlatform').returns('darwin')
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<Command.Class> => MyCommandClass

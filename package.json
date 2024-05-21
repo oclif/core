@@ -58,7 +58,7 @@
     "nyc": "^15.1.0",
     "prettier": "^3.2.5",
     "shx": "^0.3.4",
-    "sinon": "^17",
+    "sinon": "^18",
     "ts-node": "^10.9.2",
     "tsd": "^0.31.0",
     "typescript": "^5"
@@ -113,20 +113,18 @@
   },
   "scripts": {
     "build": "shx rm -rf lib && tsc",
-    "commitlint": "commitlint",
     "compile": "tsc",
     "format": "prettier --write \"+(src|test)/**/*.+(ts|js|json)\"",
     "lint": "eslint . --ext .ts",
     "posttest": "yarn lint && yarn test:circular-deps",
     "prepack": "yarn run build",
     "prepare": "husky",
-    "pretest": "yarn build && tsc -p test --noEmit --skipLibCheck",
-    "test:circular-deps": "madge lib/ -c",
+    "test:circular-deps": "yarn build && madge lib/ -c",
     "test:debug": "nyc mocha --debug-brk --inspect \"test/**/*.test.ts\"",
     "test:integration": "mocha --forbid-only \"test/**/*.integration.ts\" --parallel --timeout 1200000",
     "test:interoperability": "cross-env DEBUG=integration:* ts-node test/integration/interop.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.ts\""
+    "test": "nyc mocha --forbid-only \"test/**/*.test.ts\" --parallel"
   },
   "types": "lib/index.d.ts"
 }

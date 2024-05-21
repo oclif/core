@@ -42,16 +42,14 @@ const pjson = {
 }
 
 describe('Config', () => {
-  let sandbox: sinon.SinonSandbox
   const originalEnv = {...process.env}
   const root = resolve(__dirname, '..')
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
     process.env = {}
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
     process.env = originalEnv
   })
 
@@ -116,8 +114,8 @@ describe('Config', () => {
 
   describe('darwin', () => {
     it('should have darwin specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sandbox.stub(os, 'getPlatform').returns('darwin')
+      sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
+      sinon.stub(os, 'getPlatform').returns('darwin')
       const config = await Config.load()
 
       expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
@@ -129,8 +127,8 @@ describe('Config', () => {
 
   describe('linux', () => {
     it('should have linux specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sandbox.stub(os, 'getPlatform').returns('linux')
+      sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
+      sinon.stub(os, 'getPlatform').returns('linux')
       const config = await Config.load()
 
       expect(config).to.have.property('cacheDir', join('/my/home/.cache/@oclif/core'))
@@ -142,8 +140,8 @@ describe('Config', () => {
 
   describe('win32', () => {
     it('should have win32 specific paths', async () => {
-      sandbox.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sandbox.stub(os, 'getPlatform').returns('win32')
+      sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
+      sinon.stub(os, 'getPlatform').returns('win32')
       process.env.LOCALAPPDATA = '/my/home/localappdata'
       const config = await Config.load()
 
@@ -245,8 +243,8 @@ describe('Config', () => {
 
   describe('findCommand', () => {
     async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
-      sandbox.stub(os, 'getHomeDir').returns('/my/home')
-      sandbox.stub(os, 'getPlatform').returns('darwin')
+      sinon.stub(os, 'getHomeDir').returns('/my/home')
+      sinon.stub(os, 'getPlatform').returns('darwin')
 
       class MyCommandClass extends Command {
         aliases: string[] = []
@@ -423,40 +421,40 @@ describe('Config', () => {
   describe('theme', () => {
     it('should not be set when DISABLE_THEME is true and theme.json exists', async () => {
       process.env.FOO_DISABLE_THEME = 'true'
-      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      sinon.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
       const config = await Config.load({root, pjson})
       expect(config).to.have.property('theme', undefined)
     })
 
     it('should be set when DISABLE_THEME is false and theme.json exists', async () => {
       process.env.FOO_DISABLE_THEME = 'false'
-      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      sinon.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
       const config = await Config.load({root, pjson})
       expect(config.theme).to.have.property('bin', '#FF0000')
     })
 
     it('should be set when DISABLE_THEME is unset and theme.json exists', async () => {
-      sandbox.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
+      sinon.stub(fs, 'safeReadJson').resolves({bin: '#FF0000'})
       const config = await Config.load({root, pjson})
       expect(config.theme).to.have.property('bin', '#FF0000')
     })
 
     it('should not be set when DISABLE_THEME is true and theme.json does not exist', async () => {
       process.env.FOO_DISABLE_THEME = 'true'
-      sandbox.stub(fs, 'safeReadJson').resolves()
+      sinon.stub(fs, 'safeReadJson').resolves()
       const config = await Config.load({root, pjson})
       expect(config).to.have.property('theme', undefined)
     })
 
     it('should not be set when DISABLE_THEME is false and theme.json does not exist', async () => {
       process.env.FOO_DISABLE_THEME = 'false'
-      sandbox.stub(fs, 'safeReadJson').resolves()
+      sinon.stub(fs, 'safeReadJson').resolves()
       const config = await Config.load({root, pjson})
       expect(config).to.have.property('theme', undefined)
     })
 
     it('should not be set when DISABLE_THEME is unset and theme.json does not exist', async () => {
-      sandbox.stub(fs, 'safeReadJson').resolves()
+      sinon.stub(fs, 'safeReadJson').resolves()
       const config = await Config.load({root, pjson})
       expect(config).to.have.property('theme', undefined)
     })

@@ -6,7 +6,7 @@ import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {readJson} from '../util/fs'
 import {isProd} from '../util/util'
-import * as Plugin from './plugin'
+import {Plugin} from './plugin'
 import {makeDebug} from './util'
 
 const debug = makeDebug()
@@ -66,7 +66,7 @@ export default class PluginLoader {
       rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin.Plugin({isRoot: true, pjson, root: this.options.root})
+      rootPlugin = new Plugin({isRoot: true, pjson, root: this.options.root})
       await rootPlugin.load()
       marker?.addDetails({
         commandCount: rootPlugin.commands.length,
@@ -140,7 +140,7 @@ export default class PluginLoader {
     root: string,
     type: string,
     plugins: ({name?: string; root?: string; tag?: string; url?: string} | string)[],
-    parent?: Plugin.Plugin,
+    parent?: Plugin,
   ): Promise<void> {
     if (!plugins || plugins.length === 0) return
     const mark = Performance.mark(OCLIF_MARKER_OWNER, `config.loadPlugins#${type}`)
@@ -166,7 +166,7 @@ export default class PluginLoader {
 
           if (this.plugins.has(name)) return
           const pluginMarker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.load#${name}`)
-          const instance = new Plugin.Plugin(opts)
+          const instance = new Plugin(opts)
           await instance.load()
           pluginMarker?.addDetails({
             commandCount: instance.commands.length,

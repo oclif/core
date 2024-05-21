@@ -5,14 +5,12 @@ import {Config} from '../src/config/config'
 import {clearLoggers, getLogger, setLogger} from '../src/logger'
 
 describe('getLogger', () => {
-  let sandbox: sinon.SinonSandbox
   let childStub: sinon.SinonStub
   let config: Config
 
   beforeEach(async () => {
     clearLoggers()
-    sandbox = sinon.createSandbox()
-    childStub = sandbox
+    childStub = sinon
       .stub()
       .callsFake((ns: string, delimiter?: string) => customLogger(`MY_CLI${delimiter ?? ':'}${ns}`))
     const customLogger = (namespace: string) => ({
@@ -33,7 +31,7 @@ describe('getLogger', () => {
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   it('should return the root logger if no namespace is provided', () => {

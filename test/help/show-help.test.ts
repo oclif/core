@@ -346,7 +346,6 @@ COMMANDS
 
 describe('showHelp routing', () => {
   let config: Config
-  let sandbox: sinon.SinonSandbox
   let help: TestHelp
   const stubs = {
     showRootHelp: sinon.stub(),
@@ -356,15 +355,14 @@ describe('showHelp routing', () => {
 
   beforeEach(async () => {
     config = await Config.load()
-    sandbox = sinon.createSandbox()
-    stubs.showCommandHelp = sandbox.stub(TestHelp.prototype, 'showCommandHelp').resolves()
-    stubs.showRootHelp = sandbox.stub(TestHelp.prototype, 'showRootHelp').resolves()
-    stubs.showTopicHelp = sandbox.stub(TestHelp.prototype, 'showTopicHelp').resolves()
+    stubs.showCommandHelp = sinon.stub(TestHelp.prototype, 'showCommandHelp').resolves()
+    stubs.showRootHelp = sinon.stub(TestHelp.prototype, 'showRootHelp').resolves()
+    stubs.showTopicHelp = sinon.stub(TestHelp.prototype, 'showTopicHelp').resolves()
     help = new TestHelp(config)
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   describe('shows root help', () => {
@@ -388,7 +386,7 @@ describe('showHelp routing', () => {
   describe('shows topic help', () => {
     beforeEach(() => {
       // eslint-disable-next-line unicorn/no-useless-undefined
-      sandbox.stub(config, 'findCommand').returns(undefined)
+      sinon.stub(config, 'findCommand').returns(undefined)
     })
 
     it('shows the topic help when a topic has no matching command', async () => {

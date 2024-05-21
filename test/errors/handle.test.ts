@@ -1,7 +1,7 @@
 import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 import process from 'node:process'
-import {SinonSandbox, SinonStub, createSandbox, createStubInstance} from 'sinon'
+import sinon from 'sinon'
 
 import {Command, Flags} from '../../src'
 // import Cache from '../../src/cache'
@@ -13,16 +13,14 @@ import * as Help from '../../src/help'
 const x = process.platform === 'win32' ? '»' : '›'
 
 describe('handle', () => {
-  let sandbox: SinonSandbox
-  let exitStub: SinonStub
+  let exitStub: sinon.SinonStub
 
   beforeEach(() => {
-    sandbox = createSandbox()
-    exitStub = sandbox.stub(Exit, 'exit')
+    exitStub = sinon.stub(Exit, 'exit')
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   it('hides an exit error', async () => {
@@ -99,8 +97,8 @@ describe('handle', () => {
       }
     }
 
-    const classStubbedInstance = createStubInstance(Help.Help)
-    const constructorStub = sandbox.stub(Help, 'Help').returns(classStubbedInstance)
+    const classStubbedInstance = sinon.createStubInstance(Help.Help)
+    const constructorStub = sinon.stub(Help, 'Help').returns(classStubbedInstance)
     await captureOutput(async () => {
       try {
         await MyCommand.run(['--DOES_NOT_EXIST'])
