@@ -8,7 +8,7 @@ import Cache from '../cache'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
-import {Configuration, Hook, Hooks, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
+import {Hook, Hooks, OclifConfiguration, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {Theme} from '../interfaces/theme'
@@ -104,7 +104,7 @@ export class Config implements IConfig {
   public shell!: string
   public theme?: Theme | undefined
   public topicSeparator: ' ' | ':' = ':'
-  public updateConfig!: NonNullable<Configuration['update']>
+  public updateConfig!: NonNullable<OclifConfiguration['update']>
   public userAgent!: string
   public userPJSON?: UserPJSON | undefined
   public valid!: boolean
@@ -601,7 +601,7 @@ export class Config implements IConfig {
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.updateConfig.s3.templates?.[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3?.templates?.[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 

@@ -107,6 +107,7 @@ export type S3 = {
   folder?: string | undefined
   gz?: boolean | undefined
   host?: string | undefined
+  indexVersionLimit?: number | undefined
   templates?:
     | {
         target: S3Templates
@@ -116,7 +117,7 @@ export type S3 = {
   xz?: boolean | undefined
 }
 
-export type Configuration = {
+export type OclifConfiguration = {
   /**
    * Flags in addition to --help that should trigger help output.
    */
@@ -241,7 +242,7 @@ export type Configuration = {
     [k: string]: {
       description?: string
       hidden?: boolean
-      subtopics?: Configuration['topics']
+      subtopics?: OclifConfiguration['topics']
     }
   }
   update?: {
@@ -250,12 +251,12 @@ export type Configuration = {
       rollout?: number
     }
     disableNpmLookup?: boolean
-    node: {
+    node?: {
       targets?: string[]
       version?: string
       options?: string | string[]
     }
-    s3: S3
+    s3?: S3
   }
   'warn-if-update-available'?: {
     authorization?: string
@@ -299,6 +300,6 @@ export type PJSON = {
   dependencies?: {[name: string]: string}
   devDependencies?: {[name: string]: string}
   name: string
-  oclif: Configuration
+  oclif: OclifConfiguration
   version: string
 }

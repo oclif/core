@@ -227,7 +227,6 @@ describe('Config', () => {
         ...pjson,
         oclif: {
           ...pjson.oclif,
-          // @ts-expect-error - not worth stubbing out every single required prop on s3
           update: {
             s3: {
               host: 'https://bar.com/a/',

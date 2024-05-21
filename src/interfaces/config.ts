@@ -1,6 +1,6 @@
 import {Command} from '../command'
 import {Hook, Hooks} from './hooks'
-import {Configuration, PJSON, S3Templates} from './pjson'
+import {OclifConfiguration, PJSON, S3Templates} from './pjson'
 import {Options, Plugin} from './plugin'
 import {Theme} from './theme'
 import {Topic} from './topic'
@@ -115,7 +115,7 @@ export interface Config {
   readonly theme?: Theme | undefined
   topicSeparator: ' ' | ':'
   readonly topics: Topic[]
-  readonly updateConfig: NonNullable<Configuration['update']>
+  readonly updateConfig: NonNullable<OclifConfiguration['update']>
   /**
    * user agent to use for http calls
    *
