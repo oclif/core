@@ -132,4 +132,13 @@ export const plugins: Record<string, PluginConfig> = {
     hookText: 'Greetings! from plugin-test-core-v2 init hook',
     ...commonProps,
   },
+  coreV3: {
+    name: 'plugin-test-core-v3',
+    command: 'core-v3',
+    package: '@oclif/plugin-test-core-v3',
+    repo: 'https://github.com/oclif/plugin-test-core-v3',
+    commandText: 'hello I am an @oclif/core@v3 plugin',
+    hookText: 'Greetings! from plugin-test-core-v3 init hook',
+    ...commonProps,
+  },
 }
