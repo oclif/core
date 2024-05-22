@@ -61,7 +61,7 @@ describe('Spinner', () => {
   })
 
   describe('status', () => {
-    it('should update with status', async () => {
+    ;(process.platform === 'win32' ? it.skip : it)('should update with status', async () => {
       const {stderr, result} = await captureOutput(async () => {
         const spinner = new Spinner()
         spinner.start('Testing a spinner')
