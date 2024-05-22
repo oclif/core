@@ -4,11 +4,9 @@ import process from 'node:process'
 import sinon from 'sinon'
 
 import {Command, Flags} from '../../src'
-// import Cache from '../../src/cache'
 import {CLIError, ExitError, exit as exitErrorThrower} from '../../src/errors'
 import {Exit, handle} from '../../src/errors/handle'
 import * as Help from '../../src/help'
-// import {NonExistentFlagsError} from '../../src/parser/errors'
 
 const x = process.platform === 'win32' ? '»' : '›'
 
