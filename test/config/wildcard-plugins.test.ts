@@ -1,7 +1,6 @@
+import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {resolve} from 'node:path'
-
-import {runCommand} from '../test'
 
 describe('plugins defined as patterns in package.json', () => {
   it('should load all core plugins in dependencies that match pattern', async () => {

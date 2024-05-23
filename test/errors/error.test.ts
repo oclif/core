@@ -1,8 +1,8 @@
+import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
 import {error} from '../../src/errors'
 import {PrettyPrintableError} from '../../src/interfaces/errors'
-import {captureOutput} from '../test'
 
 function isPrettyPrintableError(error: any): error is PrettyPrintableError {
   return error.code !== undefined && error.ref !== undefined && error.suggestions !== undefined

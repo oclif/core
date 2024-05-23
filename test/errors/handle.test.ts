@@ -1,24 +1,24 @@
+import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 import process from 'node:process'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
+import sinon from 'sinon'
 
+import {Command, Flags} from '../../src'
 import {CLIError, ExitError, exit as exitErrorThrower} from '../../src/errors'
 import {Exit, handle} from '../../src/errors/handle'
-import {captureOutput} from '../test'
+import * as Help from '../../src/help'
 
 const x = process.platform === 'win32' ? '»' : '›'
 
 describe('handle', () => {
-  let sandbox: SinonSandbox
-  let exitStub: SinonStub
+  let exitStub: sinon.SinonStub
 
   beforeEach(() => {
-    sandbox = createSandbox()
-    exitStub = sandbox.stub(Exit, 'exit')
+    exitStub = sinon.stub(Exit, 'exit')
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   it('hides an exit error', async () => {
@@ -81,6 +81,36 @@ describe('handle', () => {
     expect(stdout).to.be.empty
     expect(stderr).to.include('foo bar baz')
     expect(exitStub.firstCall.firstArg).to.equal(9999)
+  })
+
+  it('should print help', async () => {
+    class MyCommand extends Command {
+      static flags = {
+        foo: Flags.string(),
+        bar: Flags.string(),
+      }
+
+      async run() {
+        await this.parse(MyCommand)
+      }
+    }
+
+    const classStubbedInstance = sinon.createStubInstance(Help.Help)
+    const constructorStub = sinon.stub(Help, 'Help').returns(classStubbedInstance)
+    await captureOutput(async () => {
+      try {
+        await MyCommand.run(['--DOES_NOT_EXIST'])
+      } catch (error: any) {
+        await handle(error)
+      }
+    })
+
+    expect(constructorStub.calledOnce).to.be.true
+    const [, options] = constructorStub.firstCall.args
+    expect(options).to.deep.equal({
+      sections: ['flags', 'usage', 'arguments'],
+      sendToStderr: true,
+    })
   })
 
   describe('exit', () => {

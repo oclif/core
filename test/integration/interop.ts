@@ -15,7 +15,7 @@ import {Command, Flags, flush, handle} from '../../src'
 import {PluginConfig, plugins} from './interop-plugins-matrix'
 import {Executor, Script, setup} from './util'
 
-const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2', 'esbuild'] as const
+const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2', 'coreV3', 'esbuild'] as const
 const DEV_RUN_TIMES = ['default', 'bun', 'tsx'] as const
 
 type Plugin = {
@@ -178,6 +178,11 @@ async function testRunner({
   }
 
   const coreV2Before = async () => {
+    if (!cjsExecutor) await cjsBefore()
+    if (!esmExecutor) await esmBefore()
+  }
+
+  const coreV3Before = async () => {
     if (!cjsExecutor) await cjsBefore()
     if (!esmExecutor) await esmBefore()
   }
@@ -416,6 +421,24 @@ async function testRunner({
     })
   }
 
+  const coreV3Tests = async () => {
+    await test('Install core v3 plugin to ESM root plugin', async () => {
+      await installTest(plugins.coreV3, esmExecutor)
+    })
+
+    await test('Install core v3 plugin to CJS root plugin', async () => {
+      await installTest(plugins.coreV3, cjsExecutor)
+    })
+
+    await test('Link core v3 plugin to CJS root plugin', async () => {
+      await linkTest(plugins.coreV3, cjsExecutor)
+    })
+
+    await test('Link core v3 plugin to ESM root plugin', async () => {
+      await linkTest(plugins.coreV3, esmExecutor)
+    })
+  }
+
   const esbuildTests = async () => {
     await test('Run bundled commands and hooks from esbuild plugin', async () => {
       await runCommand({
@@ -448,6 +471,7 @@ async function testRunner({
   if (tests.includes('precore')) await precoreBefore()
   if (tests.includes('coreV1')) await coreV1Before()
   if (tests.includes('coreV2')) await coreV2Before()
+  if (tests.includes('coreV3')) await coreV3Before()
   if (tests.includes('esbuild')) await esbuildBefore()
 
   if (tests.includes('cjs')) await cjsTests()
@@ -455,6 +479,7 @@ async function testRunner({
   if (tests.includes('precore')) await preCoreTests()
   if (tests.includes('coreV1')) await coreV1Tests()
   if (tests.includes('coreV2')) await coreV2Tests()
+  if (tests.includes('coreV3')) await coreV3Tests()
   if (tests.includes('esbuild')) await esbuildTests()
 
   return {passed, failed}

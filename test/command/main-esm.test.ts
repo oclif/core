@@ -1,8 +1,7 @@
+import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
-
-import {runCommand} from '../test'
 
 // This tests file URL / import.meta.url simulation.
 const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString()

@@ -10,21 +10,19 @@ import {MyHelp} from './_test-help-class-identifier'
 
 describe('util', () => {
   let config: Config
-  let sandbox: sinon.SinonSandbox
 
   beforeEach(async () => {
     config = await Config.load()
     config.topicSeparator = ' '
-    sandbox = sinon.createSandbox()
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   function stubCommands(...commands: Array<Partial<Command.Cached>>) {
     // @ts-expect-error private member
-    sandbox.stub(config, '_commands').value(new Map(commands.map((cmd) => [cmd.id, cmd])))
+    sinon.stub(config, '_commands').value(new Map(commands.map((cmd) => [cmd.id, cmd])))
   }
 
   describe('#loadHelpClass', () => {
@@ -92,19 +90,19 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
       expect(actual).to.deep.equal(['foo:bar', '--baz'])
     })
 
     it('should return standardized id when topic separator is a space and command is misspelled', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
       expect(actual).to.deep.equal(['foo:ba', '--baz'])
     })
 
     it('should return standardized id when topic separator is a space and has args and command is misspelled', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         args: {
@@ -116,7 +114,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has args', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         args: {
@@ -128,7 +126,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has variable arguments', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         strict: false,
@@ -138,7 +136,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         strict: false,
@@ -148,7 +146,7 @@ describe('util', () => {
     })
 
     it('should return full id when topic separator is a space and does not have arguments', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         args: {},
@@ -159,7 +157,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has arg with value', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
       })
@@ -168,7 +166,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has variable args with value', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         strict: false,
@@ -178,7 +176,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has flags', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         strict: false,
@@ -188,7 +186,7 @@ describe('util', () => {
     })
 
     it('should return standardized id when topic separator is a space and has flags, arg, and arg with value', () => {
-      sandbox.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
       stubCommands({
         id: 'foo:bar',
         args: {

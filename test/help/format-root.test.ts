@@ -10,15 +10,13 @@ const USER_AGENT = `@oclif/core/${VERSION} ${process.platform}-${process.arch} n
 
 describe('formatRoot', () => {
   let config: Config
-  let sandbox: sinon.SinonSandbox
 
   beforeEach(async () => {
     config = await Config.load()
-    sandbox = sinon.createSandbox()
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   function getRootHelp(): string {
@@ -43,7 +41,7 @@ USAGE
 
   describe('description', () => {
     it('splits on \\n for the description into the top-level and description sections', () => {
-      sandbox
+      sinon
         .stub(config.pjson, 'description')
         .value(
           'This is the top-level description that appears in the root\nThis appears in the description section after usage',
@@ -64,7 +62,7 @@ DESCRIPTION
     })
 
     it('shows description from a template', () => {
-      sandbox
+      sinon
         .stub(config.pjson, 'description')
         .value(
           'This is the top-level description for <%= config.bin %>\nThis <%= config.bin %> appears in the description section after usage',
@@ -84,8 +82,8 @@ DESCRIPTION
     })
 
     it('prefers the oclif description over the package.json description', () => {
-      sandbox.stub(config.pjson, 'description').value('THIS IS THE PJSON DESCRIPTION')
-      sandbox.stub(config.pjson, 'oclif').value({
+      sinon.stub(config.pjson, 'description').value('THIS IS THE PJSON DESCRIPTION')
+      sinon.stub(config.pjson, 'oclif').value({
         ...config.pjson.oclif,
         description: 'THIS IS THE OCLIF DESCRIPTION IN PJSON',
       })
@@ -101,8 +99,8 @@ USAGE
     })
 
     it('uses package.json description when the oclif description is not set', () => {
-      sandbox.stub(config.pjson, 'description').value('THIS IS THE PJSON DESCRIPTION')
-      sandbox.stub(config.pjson, 'oclif').value({
+      sinon.stub(config.pjson, 'description').value('THIS IS THE PJSON DESCRIPTION')
+      sinon.stub(config.pjson, 'oclif').value({
         ...config.pjson.oclif,
         description: undefined,
       })

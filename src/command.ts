@@ -54,8 +54,6 @@ export abstract class Command {
   /** An order-dependent object of arguments for the command */
   public static args: ArgInput = {}
 
-  public static baseFlags: FlagInput
-
   /**
    * Emit deprecation warning when a command alias is used
    */
@@ -172,6 +170,9 @@ export abstract class Command {
     }
 
     const config = await Config.load(opts || require.main?.filename || __dirname)
+    const cache = Cache.getInstance()
+    if (!cache.has('config')) cache.set('config', config)
+
     const cmd = new this(argv, config)
     if (!cmd.id) {
       const id = cmd.constructor.name.toLowerCase()
@@ -264,16 +265,16 @@ export abstract class Command {
     }
   }
 
-  protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
-    options?: Input<F, B, A>,
+  protected async parse<F extends FlagOutput, A extends ArgOutput>(
+    options?: Input<F, A>,
     argv = this.argv,
-  ): Promise<ParserOutput<F, B, A>> {
-    if (!options) options = this.ctor as Input<F, B, A>
+  ): Promise<ParserOutput<F, A>> {
+    if (!options) options = this.ctor as Input<F, A>
 
     const opts = {
       context: this,
       ...options,
-      flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
+      flags: aggregateFlags<F>(options.flags, options.enableJsonFlag),
     }
 
     const hookResult = await this.config.runHook('preparse', {argv: [...argv], options: opts})
@@ -284,7 +285,7 @@ export abstract class Command {
       ? hookResult.successes.find((s) => s.plugin.root === Cache.getInstance().get('rootPlugin')?.root)?.result ?? argv
       : argv
     this.argv = [...argvToParse]
-    const results = await Parser.parse<F, B, A>(argvToParse, opts)
+    const results = await Parser.parse<F, A>(argvToParse, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
 
     return results
@@ -319,7 +320,7 @@ export abstract class Command {
   }
 
   protected warnIfFlagDeprecated(flags: Record<string, unknown>): void {
-    const allFlags = aggregateFlags(this.ctor.flags, this.ctor.baseFlags, this.ctor.enableJsonFlag)
+    const allFlags = aggregateFlags(this.ctor.flags, this.ctor.enableJsonFlag)
     for (const flag of Object.keys(flags)) {
       const flagDef = allFlags[flag]
       const deprecated = flagDef?.deprecated

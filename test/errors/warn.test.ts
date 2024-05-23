@@ -1,7 +1,7 @@
+import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
 import {warn} from '../../src/errors'
-import {captureOutput} from '../test'
 
 describe('warn', () => {
   it('warns', async () => {
