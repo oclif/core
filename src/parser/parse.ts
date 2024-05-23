@@ -433,9 +433,7 @@ export class Parser<
                       }),
                     ),
                 )
-              )
-                // eslint-disable-next-line unicorn/no-await-expression-member
-                .map((v) => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
+              ).map((v) => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
 

@@ -286,11 +286,9 @@ export type LinkedPlugin = {
   type: 'link'
 }
 
-export type PluginTypes = {root: string} | UserPlugin | LinkedPlugin
-
 export type UserPJSON = {
   oclif: {
-    plugins?: PluginTypes[]
+    plugins?: (UserPlugin | LinkedPlugin)[]
   }
   private?: boolean
 }

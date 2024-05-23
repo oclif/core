@@ -1,6 +1,8 @@
 import {Stats, existsSync as fsExistsSync, readFileSync} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 
+import {isProd} from './util'
+
 /**
  * Parser for Args.directory and Flags.directory. Checks that the provided path
  * exists and is a directory.
@@ -43,7 +45,17 @@ export const fileExists = async (input: string): Promise<string> => {
   return input
 }
 
-const cache = new Map<string, string>()
+class ProdOnlyCache extends Map<string, string> {
+  set(key: string, value: string): this {
+    if (isProd() ?? false) {
+      super.set(key, value)
+    }
+
+    return this
+  }
+}
+
+const cache = new ProdOnlyCache()
 
 export async function readJson<T = unknown>(path: string): Promise<T> {
   if (cache.has(path)) {
