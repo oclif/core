@@ -51,7 +51,7 @@ export interface Hooks {
   preparse: {
     options: {
       argv: string[]
-      options: Input<OutputFlags<any>, OutputFlags<any>>
+      options: Input<OutputFlags<any>, OutputFlags<any>, OutputFlags<any>>
     }
     return: string[]
   }

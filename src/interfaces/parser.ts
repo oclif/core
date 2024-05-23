@@ -416,8 +416,9 @@ export type FlagDefinition<
 
 export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 
-export type Input<TFlags extends FlagOutput, AFlags extends ArgOutput> = {
+export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
   flags?: FlagInput<TFlags>
+  baseFlags?: FlagInput<BFlags>
   enableJsonFlag?: true | false
   args?: ArgInput<AFlags>
   strict?: boolean | undefined

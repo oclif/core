@@ -6,9 +6,11 @@ const json = boolean({
   helpGroup: 'GLOBAL',
 })
 
-export function aggregateFlags<F extends FlagOutput>(
+export function aggregateFlags<F extends FlagOutput, B extends FlagOutput>(
   flags: FlagInput<F> | undefined,
+  baseFlags: FlagInput<B> | undefined,
   enableJsonFlag: boolean | undefined,
 ): FlagInput<F> {
-  return (enableJsonFlag ? {json, ...flags} : flags) as FlagInput<F>
+  const combinedFlags = {...baseFlags, ...flags}
+  return (enableJsonFlag ? {json, ...combinedFlags} : combinedFlags) as FlagInput<F>
 }

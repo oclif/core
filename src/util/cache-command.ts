@@ -7,7 +7,8 @@ import {ensureArgObject} from './ensure-arg-object'
 import {pickBy} from './util'
 
 // In order to collect static properties up the inheritance chain, we need to recursively
-// access the prototypes until there's nothing left.
+// access the prototypes until there's nothing left. This allows us to combine baseFlags
+// and flags as well as add in the json flag if enableJsonFlag is enabled.
 function mergePrototype(result: Command.Class, cmd: Command.Class): Command.Class {
   const proto = Object.getPrototypeOf(cmd)
   const filteredProto = pickBy(proto, (v) => v !== undefined) as Command.Class
@@ -85,14 +86,11 @@ export async function cacheCommand(
 
   // @ts-expect-error because v2 commands have flags stored in _flags
   const uncachedFlags = cmd.flags ?? cmd._flags
-  // @ts-expect-error because v2 commands have base flags stored in `_baseFlags` and v4 commands never have `baseFlags`
+  // @ts-expect-error because v2 commands have base flags stored in _baseFlags
   const uncachedBaseFlags = cmd.baseFlags ?? cmd._baseFlags
 
   const [flags, args] = await Promise.all([
-    await cacheFlags(
-      aggregateFlags({...uncachedFlags, ...uncachedBaseFlags}, cmd.enableJsonFlag),
-      respectNoCacheDefault,
-    ),
+    await cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
     await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
   ])
 
