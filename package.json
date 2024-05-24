@@ -44,7 +44,7 @@
     "@types/wrap-ansi": "^3.0.0",
     "benchmark": "^2.1.4",
     "chai": "^4.4.1",
-    "chai-as-promised": "^7.1.1",
+    "chai-as-promised": "^7.1.2",
     "commitlint": "^19",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
