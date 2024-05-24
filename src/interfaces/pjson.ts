@@ -182,7 +182,7 @@ export type OclifConfiguration = {
   /**
    * Register hooks to run at various points in the CLI lifecycle.
    */
-  hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
+  hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[] | (string | HookOptions)[]}
   /**
    * Plugins that can be installed just-in-time.
    */
