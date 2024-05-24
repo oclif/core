@@ -25,9 +25,14 @@ describe('write', () => {
       expect(stdout).to.equal('foo bar\n')
     })
 
-    it('should format undefined input', async () => {
+    it('should handle undefined input', async () => {
       const {stdout} = await captureOutput(async () => writeStdout(undefined, 'bar'))
-      expect(stdout).to.equal('undefined bar\n')
+      expect(stdout).to.equal('bar\n')
+    })
+
+    it('should write a new line with no input', async () => {
+      const {stdout} = await captureOutput(async () => writeStdout())
+      expect(stdout).to.equal('\n')
     })
   })
 
@@ -52,9 +57,14 @@ describe('write', () => {
       expect(stderr).to.equal('foo bar\n')
     })
 
-    it('should format undefined input', async () => {
+    it('should handle undefined input', async () => {
       const {stderr} = await captureOutput(async () => writeStderr(undefined, 'bar'))
-      expect(stderr).to.equal('undefined bar\n')
+      expect(stderr).to.equal('bar\n')
+    })
+
+    it('should write a new line with no input', async () => {
+      const {stderr} = await captureOutput(async () => writeStderr())
+      expect(stderr).to.equal('\n')
     })
   })
 })
