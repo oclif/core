@@ -96,7 +96,7 @@ export class DocOpts {
         ...this.flagList.map((flag) => {
           const name = flag.char ? `-${flag.char}` : `--${flag.name}`
           if (flag.type === 'boolean') return name
-          return `${name}=<value>`
+          return `${name}=${this.formatUsageType(flag)}`
         }),
       )
     }
@@ -135,6 +135,19 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
+  private formatUsageType(flag: Command.Flag.Any) {
+    if (flag.type !== 'option') return
+
+    let usageValues: string[]
+    if (flag.usageType === undefined) {
+      usageValues = ['<value>']
+    } else {
+      usageValues = typeof flag.usageType === 'string' ? [flag.usageType] : flag.usageType
+    }
+
+    return usageValues.map((v) => `${v}${flag.multiple ? '...' : ''}`).join(' ')
+  }
+
   private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Command.Flag.Any[] = []): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
@@ -142,7 +155,7 @@ export class DocOpts {
       // not all flags have short names
       const flagName = flag.char ? `-${flag.char}` : `--${flag.name}`
       if (flag.type === 'option') {
-        type = flag.options ? ` ${flag.options.join('|')}` : ' <value>'
+        type = flag.options ? ` ${flag.options.join('|')}` : ` ${this.formatUsageType(flag)}`
       }
 
       const element = `${flagName}${type}`
