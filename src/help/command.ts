@@ -349,7 +349,11 @@ export class CommandHelp extends HelpFormatter {
 
         const commandDescription = colorize(
           this.config?.theme?.sectionDescription,
-          u.replace('<%= command.id %>', '').replace(standardId, '').replace(configuredId, '').trim(),
+          u
+            .replace('<%= command.id %>', '')
+            .replace(new RegExp(`^${standardId}`), '')
+            .replace(new RegExp(`^${configuredId}`), '')
+            .trim(),
         )
 
         const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()
