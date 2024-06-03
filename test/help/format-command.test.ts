@@ -577,6 +577,53 @@ ARGUMENTS
       expect(output).to.equal(`USAGE
   $ oclif apps:create`)
     })
+
+    it('should output usage with hardcoded command', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          usage: ['apps:create'],
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create`)
+    })
+
+    it('should output default usage for single letter command', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'a',
+          flags: {
+            'a-flag': flags.string({char: 'a', options: ['a', 'aa', 'aaa']}),
+          },
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif a [-a a|aa|aaa]
+
+FLAGS
+  -a, --a-flag=<option>  <options: a|aa|aaa>`)
+    })
+
+    it('should output usage for single letter command', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'a',
+          flags: {
+            'a-flag': flags.string({char: 'a', options: ['a', 'aa', 'aaa']}),
+          },
+          usage: 'a [-a a|aa|aaa]',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif a [-a a|aa|aaa]
+
+FLAGS
+  -a, --a-flag=<option>  <options: a|aa|aaa>`)
+    })
   })
 
   describe('examples', () => {
