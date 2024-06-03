@@ -48,7 +48,7 @@ export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContent
       try {
         return {
           name: '@oclif/core',
-          version: JSON.parse(readFileSync(join(__dirname, '..', 'package.json').version, 'utf8')),
+          version: JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8')).version,
         }
       } catch {
         return {name: '@oclif/core', version: 'unknown'}
