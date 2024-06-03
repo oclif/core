@@ -1,8 +1,9 @@
 import ansis from 'ansis'
+import {stderr, stdout} from 'supports-color'
 
 import {STANDARD_ANSI, StandardAnsi, Theme} from '../interfaces/theme'
 
-function isStandardChalk(color: any): color is StandardAnsi {
+function isStandardAnsi(color: any): color is StandardAnsi {
   return STANDARD_ANSI.includes(color)
 }
 
@@ -14,7 +15,9 @@ function isStandardChalk(color: any): color is StandardAnsi {
  */
 export function colorize(color: string | StandardAnsi | undefined, text: string): string {
   if (!color) return text
-  if (isStandardChalk(color)) return ansis[color](text)
+  if (!stdout) return text
+  if (!stderr) return text
+  if (isStandardAnsi(color)) return ansis[color](text)
   if (color.startsWith('#')) return ansis.hex(color)(text)
   if (color.startsWith('rgb')) {
     const [red, green, blue] = color
@@ -36,5 +39,5 @@ export function parseTheme(theme: Record<string, string | Record<string, string>
 }
 
 function isValid(color: string): string | undefined {
-  return color.startsWith('#') || color.startsWith('rgb') || isStandardChalk(color) ? color : undefined
+  return color.startsWith('#') || color.startsWith('rgb') || isStandardAnsi(color) ? color : undefined
 }
