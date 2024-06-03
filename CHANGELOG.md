@@ -1,3 +1,12 @@
+## [3.26.7](https://github.com/oclif/core/compare/3.26.6...3.26.7) (2024-06-03)
+
+
+### Bug Fixes
+
+* get core meta version ([#1094](https://github.com/oclif/core/issues/1094)) ([9639fd4](https://github.com/oclif/core/commit/9639fd421824f58fbd209b771f0bdd5eac0426d0))
+
+
+
 ## [3.26.6](https://github.com/oclif/core/compare/3.26.5...3.26.6) (2024-05-06)
 
 
