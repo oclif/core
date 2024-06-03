@@ -1,3 +1,12 @@
+## [3.26.9](https://github.com/oclif/core/compare/3.26.8...3.26.9) (2024-06-03)
+
+
+### Bug Fixes
+
+* only replace command id in usage if it's at beginning of string ([#1090](https://github.com/oclif/core/issues/1090)) ([3916945](https://github.com/oclif/core/commit/391694559446ef82bc5fc307e6e9ff72e44f7558))
+
+
+
 ## [3.26.8](https://github.com/oclif/core/compare/3.26.7...3.26.8) (2024-06-03)
 
 
