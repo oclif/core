@@ -1,3 +1,12 @@
+# [3.27.0](https://github.com/oclif/core/compare/3.26.9...3.27.0) (2024-06-04)
+
+
+### Features
+
+* added option to specify example flag value in docopts ([#1095](https://github.com/oclif/core/issues/1095)) ([0345ac3](https://github.com/oclif/core/commit/0345ac33bb8726c4d9870d4f2a8f3dcdee8bd07a)), closes [#1091](https://github.com/oclif/core/issues/1091)
+
+
+
 ## [3.26.9](https://github.com/oclif/core/compare/3.26.8...3.26.9) (2024-06-03)
 
 
