@@ -9,6 +9,7 @@
     "strict": true,
     "target": "ES2022",
     "allowSyntheticDefaultImports": true,
+    "exactOptionalPropertyTypes": true,
     "noErrorTruncation": true,
     "moduleResolution": "Node16"
   },

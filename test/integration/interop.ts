@@ -6,8 +6,8 @@
  * Instead of spending more time diagnosing the root cause, we are just going to
  * run these integration tests using ts-node and a lightweight homemade test runner.
  */
+import ansis from 'ansis'
 import {expect} from 'chai'
-import chalk from 'chalk'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -15,7 +15,7 @@ import {Command, Flags, flush, handle} from '../../src'
 import {PluginConfig, plugins} from './interop-plugins-matrix'
 import {Executor, Script, setup} from './util'
 
-const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2', 'esbuild'] as const
+const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2', 'coreV3', 'esbuild'] as const
 const DEV_RUN_TIMES = ['default', 'bun', 'tsx'] as const
 
 type Plugin = {
@@ -139,10 +139,10 @@ async function testRunner({
     try {
       await fn()
       passed.push(name)
-      console.log(chalk.green('✓'), name)
+      console.log(ansis.green('✓'), name)
     } catch (error) {
       failed.push(name)
-      console.log(chalk.red('𐄂'), name)
+      console.log(ansis.red('𐄂'), name)
       console.log(error)
     }
   }
@@ -178,6 +178,11 @@ async function testRunner({
   }
 
   const coreV2Before = async () => {
+    if (!cjsExecutor) await cjsBefore()
+    if (!esmExecutor) await esmBefore()
+  }
+
+  const coreV3Before = async () => {
     if (!cjsExecutor) await cjsBefore()
     if (!esmExecutor) await esmBefore()
   }
@@ -416,6 +421,24 @@ async function testRunner({
     })
   }
 
+  const coreV3Tests = async () => {
+    await test('Install core v3 plugin to ESM root plugin', async () => {
+      await installTest(plugins.coreV3, esmExecutor)
+    })
+
+    await test('Install core v3 plugin to CJS root plugin', async () => {
+      await installTest(plugins.coreV3, cjsExecutor)
+    })
+
+    await test('Link core v3 plugin to CJS root plugin', async () => {
+      await linkTest(plugins.coreV3, cjsExecutor)
+    })
+
+    await test('Link core v3 plugin to ESM root plugin', async () => {
+      await linkTest(plugins.coreV3, esmExecutor)
+    })
+  }
+
   const esbuildTests = async () => {
     await test('Run bundled commands and hooks from esbuild plugin', async () => {
       await runCommand({
@@ -448,6 +471,7 @@ async function testRunner({
   if (tests.includes('precore')) await precoreBefore()
   if (tests.includes('coreV1')) await coreV1Before()
   if (tests.includes('coreV2')) await coreV2Before()
+  if (tests.includes('coreV3')) await coreV3Before()
   if (tests.includes('esbuild')) await esbuildBefore()
 
   if (tests.includes('cjs')) await cjsTests()
@@ -455,6 +479,7 @@ async function testRunner({
   if (tests.includes('precore')) await preCoreTests()
   if (tests.includes('coreV1')) await coreV1Tests()
   if (tests.includes('coreV2')) await coreV2Tests()
+  if (tests.includes('coreV3')) await coreV3Tests()
   if (tests.includes('esbuild')) await esbuildTests()
 
   return {passed, failed}
@@ -490,14 +515,14 @@ class InteropTest extends Command {
 
   private processResults({failed, passed}: {failed: string[]; passed: string[]}): never {
     this.log()
-    this.log(chalk.bold('#### Summary ####'))
+    this.log(ansis.bold('#### Summary ####'))
 
-    for (const name of passed) this.log(chalk.green('✓'), name)
+    for (const name of passed) this.log(ansis.green('✓'), name)
 
-    for (const name of failed) this.log(chalk.red('𐄂'), name)
+    for (const name of failed) this.log(ansis.red('𐄂'), name)
 
-    this.log(`${chalk.green('Passed:')} ${passed.length}`)
-    this.log(`${chalk.red('Failed:')} ${failed.length}`)
+    this.log(`${ansis.green('Passed:')} ${passed.length}`)
+    this.log(`${ansis.red('Failed:')} ${failed.length}`)
 
     this.exit(failed.length)
   }

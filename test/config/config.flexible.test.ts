@@ -1,19 +1,15 @@
-import {join} from 'node:path'
+import {expect} from 'chai'
+import sinon from 'sinon'
 
-import {Flags, Interfaces} from '../../src'
+import {Flags} from '../../src'
 import {Command} from '../../src/command'
 import {Config} from '../../src/config/config'
 import {getCommandIdPermutations} from '../../src/config/util'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as os from '../../src/util/os'
-import {expect, fancy} from './test'
 
 interface Options {
   commandIds?: string[]
-  env?: {[k: string]: string}
-  homedir?: string
-  pjson?: any
-  platform?: string
   types?: string[]
 }
 
@@ -34,18 +30,20 @@ class MyCommandClass extends Command {
 }
 
 describe('Config with flexible taxonomy', () => {
-  const testConfig = ({
-    homedir = '/my/home',
-    platform = 'darwin',
-    env = {},
-    commandIds = ['foo:bar', 'foo:baz'],
-    types = [],
-  }: Options = {}) => {
-    let test = fancy
-      .resetConfig()
-      .env(env, {clear: true})
-      .stub(os, 'getHomeDir', (stub) => stub.returns(join(homedir)))
-      .stub(os, 'getPlatform', (stub) => stub.returns(platform))
+  const originalEnv = {...process.env}
+
+  beforeEach(() => {
+    process.env = {}
+  })
+
+  afterEach(() => {
+    process.env = originalEnv
+    sinon.restore()
+  })
+
+  async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
+    sinon.stub(os, 'getHomeDir').returns('/my/home')
+    sinon.stub(os, 'getPlatform').returns('darwin')
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<Command.Class> => MyCommandClass
@@ -132,133 +130,129 @@ describe('Config with flexible taxonomy', () => {
     }
     const plugins = new Map().set(pluginA.name, pluginA).set(pluginB.name, pluginB)
 
-    test = test.add('config', async () => {
-      const config = await Config.load()
-      config.flexibleTaxonomy = true
-      config.plugins = plugins
-      config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
-      config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
-      for (const plugin of config.plugins.values()) {
-        // @ts-expect-error private method
-        config.loadCommands(plugin)
-        // @ts-expect-error private method
-        config.loadTopics(plugin)
-      }
-
-      return config
-    })
-    // @ts-ignore
-    return {
-      it(expectation: string, fn: (config: Interfaces.Config) => any) {
-        test.do(({config}) => fn(config)).it(expectation)
-        return this
-      },
+    const config = await Config.load()
+    config.flexibleTaxonomy = true
+    config.plugins = plugins
+    config.pjson.oclif.plugins = ['@My/pluginb', '@My/plugina']
+    config.pjson.dependencies = {'@My/pluginb': '0.0.0', '@My/plugina': '0.0.0'}
+    for (const plugin of config.plugins.values()) {
+      // @ts-expect-error private method
+      config.loadCommands(plugin)
+      // @ts-expect-error private method
+      config.loadTopics(plugin)
     }
+
+    return config
   }
 
-  testConfig()
-    .it('has populated topic index', (config) => {
-      // @ts-expect-error because private member
-      const topics = config._topics
-      expect(topics.has('foo')).to.be.true
-      expect(topics.has('foo:bar')).to.be.true
-      expect(topics.has('foo:baz')).to.be.true
-    })
-    .it('has populated command permutation index', (config) => {
-      // @ts-expect-error because private member
-      const {commandPermutations} = config
-      expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
-      expect(commandPermutations.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
-      expect(commandPermutations.get('bar')).to.deep.equal(new Set(['foo:bar']))
-      expect(commandPermutations.get('bar:foo')).to.deep.equal(new Set(['foo:bar']))
-      expect(commandPermutations.get('foo:baz')).to.deep.equal(new Set(['foo:baz']))
-      expect(commandPermutations.get('baz')).to.deep.equal(new Set(['foo:baz']))
-      expect(commandPermutations.get('baz:foo')).to.deep.equal(new Set(['foo:baz']))
-    })
-    .it('has populated command index', (config) => {
-      // @ts-expect-error because private member
-      const commands = config._commands
-      expect(commands.has('foo:bar')).to.be.true
-      expect(commands.has('foo:baz')).to.be.true
-    })
-    .it('has all command id permutations', (config) => {
-      expect(config.getAllCommandIDs()).to.deep.equal(['foo:bar', 'foo:baz', 'bar:foo', 'baz:foo'])
-    })
+  it('has populated topic index', async () => {
+    const config = await loadConfig()
+    // @ts-expect-error because private member
+    const topics = config._topics
+    expect(topics.has('foo')).to.be.true
+    expect(topics.has('foo:bar')).to.be.true
+    expect(topics.has('foo:baz')).to.be.true
+  })
+
+  it('has populated command permutation index', async () => {
+    const config = await loadConfig()
+    // @ts-expect-error because private member
+    const {commandPermutations} = config
+    expect(commandPermutations.get('foo')).to.deep.equal(new Set(['foo:bar', 'foo:baz']))
+    expect(commandPermutations.get('foo:bar')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('bar')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('bar:foo')).to.deep.equal(new Set(['foo:bar']))
+    expect(commandPermutations.get('foo:baz')).to.deep.equal(new Set(['foo:baz']))
+    expect(commandPermutations.get('baz')).to.deep.equal(new Set(['foo:baz']))
+    expect(commandPermutations.get('baz:foo')).to.deep.equal(new Set(['foo:baz']))
+  })
+
+  it('has populated command index', async () => {
+    const config = await loadConfig()
+    // @ts-expect-error because private member
+    const commands = config._commands
+    expect(commands.has('foo:bar')).to.be.true
+    expect(commands.has('foo:baz')).to.be.true
+  })
+
+  it('has all command id permutations', async () => {
+    const config = await loadConfig()
+    expect(config.getAllCommandIDs()).to.deep.equal(['foo:bar', 'foo:baz', 'bar:foo', 'baz:foo'])
+  })
 
   describe('findMatches', () => {
-    testConfig()
-      .it('finds command that contains a partial id', (config) => {
-        const matches = config.findMatches('foo', [])
-        expect(matches.length).to.equal(2)
-      })
-      .it('finds command that contains a partial id and matching full flag', (config) => {
-        const matches = config.findMatches('foo', ['--flagB'])
-        expect(matches.length).to.equal(1)
-        expect(matches[0].id).to.equal('foo:baz')
-      })
-      .it('finds command that contains a partial id and matching short flag', (config) => {
-        const matches = config.findMatches('foo', ['-a'])
-        expect(matches.length).to.equal(1)
-        expect(matches[0].id).to.equal('foo:bar')
-      })
+    it('finds command that contains a partial id', async () => {
+      const config = await loadConfig()
+      const matches = config.findMatches('foo', [])
+      expect(matches.length).to.equal(2)
+    })
+
+    it('finds command that contains a partial id and matching full flag', async () => {
+      const config = await loadConfig()
+      const matches = config.findMatches('foo', ['--flagB'])
+      expect(matches.length).to.equal(1)
+      expect(matches[0].id).to.equal('foo:baz')
+    })
+
+    it('finds command that contains a partial id and matching short flag', async () => {
+      const config = await loadConfig()
+      const matches = config.findMatches('foo', ['-a'])
+      expect(matches.length).to.equal(1)
+      expect(matches[0].id).to.equal('foo:bar')
+    })
   })
 
   describe('findCommand', () => {
-    testConfig().it('find command with no duplicates', (config) => {
+    it('find command with no duplicates', async () => {
+      const config = await loadConfig()
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
 
-    testConfig({commandIds: ['foo:bar', 'foo:bar']}).it(
-      'find command with duplicates and choose the one that appears first in oclif.plugins',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('pluginAlias', '@My/pluginb')
-      },
-    )
+    it('find command with duplicates and choose the one that appears first in oclif.plugins', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    })
 
-    testConfig({types: ['core', 'user']}).it('find command with no duplicates core/user', (config) => {
+    it('find command with no duplicates core/user', async () => {
+      const config = await loadConfig({types: ['core', 'user']})
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'core')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
 
-    testConfig({types: ['user', 'core']}).it('find command with no duplicates user/core', (config) => {
+    it('find command with no duplicates user/core', async () => {
+      const config = await loadConfig({types: ['user', 'core']})
       const command = config.findCommand('foo:bar', {must: true})
       expect(command).to.have.property('id', 'foo:bar')
       expect(command).to.have.property('pluginType', 'user')
       expect(command).to.have.property('pluginAlias', '@My/plugina')
     })
 
-    testConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']}).it(
-      'find command with duplicates core/user',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'core')
-        expect(command).to.have.property('pluginAlias', '@My/plugina')
-      },
-    )
+    it('find command with duplicates core/user', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['core', 'user']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
 
-    testConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']}).it(
-      'find command with duplicates user/core',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'core')
-        expect(command).to.have.property('pluginAlias', '@My/pluginb')
-      },
-    )
+    it('find command with duplicates user/core', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'core']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'core')
+      expect(command).to.have.property('pluginAlias', '@My/pluginb')
+    })
 
-    testConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']}).it(
-      'find command with duplicates user/user',
-      (config) => {
-        const command = config.findCommand('foo:bar', {must: true})
-        expect(command).to.have.property('id', 'foo:bar')
-        expect(command).to.have.property('pluginType', 'user')
-        expect(command).to.have.property('pluginAlias', '@My/plugina')
-      },
-    )
+    it('find command with duplicates user/user', async () => {
+      const config = await loadConfig({commandIds: ['foo:bar', 'foo:bar'], types: ['user', 'user']})
+      const command = config.findCommand('foo:bar', {must: true})
+      expect(command).to.have.property('id', 'foo:bar')
+      expect(command).to.have.property('pluginType', 'user')
+      expect(command).to.have.property('pluginAlias', '@My/plugina')
+    })
   })
 })

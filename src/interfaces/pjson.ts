@@ -1,18 +1,5 @@
 import {HelpOptions} from './help'
-
-export interface PJSON {
-  [k: string]: any
-  dependencies?: {[name: string]: string}
-  devDependencies?: {[name: string]: string}
-  oclif: {
-    bin?: string
-    dirname?: string
-    hooks?: Record<string, string | string[]>
-    plugins?: string[]
-    schema?: number
-  }
-  version: string
-}
+import {Theme} from './theme'
 
 export type CommandDiscovery = {
   /**
@@ -96,140 +83,221 @@ export type HookOptions = {
   identifier: string
 }
 
-export namespace PJSON {
-  export interface Plugin extends PJSON {
-    name: string
-    oclif: PJSON['oclif'] & {
-      additionalHelpFlags?: string[]
-      additionalVersionFlags?: string[]
-      aliases?: {[name: string]: null | string}
-      commands?: string | CommandDiscovery
-      /**
-       * Default command id when no command is found. This is used to support single command CLIs.
-       * Only supported value is "."
-       *
-       * @deprecated Use `commands.strategy: 'single'` instead.
-       */
-      default?: string
+export type HelpLocationOptions = {
+  /**
+   * The file path containing help class.
+   */
+  target: string
+  /**
+   * The name of the export to use when loading the help class from the `target` file. Defaults to `default`.
+   */
+  identifier: string
+}
+
+export type S3Templates = {
+  baseDir?: string
+  manifest?: string
+  unversioned?: string
+  versioned?: string
+}
+
+export type S3 = {
+  acl?: string | undefined
+  bucket?: string | undefined
+  folder?: string | undefined
+  gz?: boolean | undefined
+  host?: string | undefined
+  indexVersionLimit?: number | undefined
+  templates?:
+    | {
+        target: S3Templates
+        vanilla: S3Templates
+      }
+    | undefined
+  xz?: boolean | undefined
+}
+
+export type OclifConfiguration = {
+  /**
+   * Flags in addition to --help that should trigger help output.
+   */
+  additionalHelpFlags?: string[]
+  /**
+   * Flags in addition to --version that should trigger version output.
+   */
+  additionalVersionFlags?: string[]
+  /**
+   * Plugin aliases.
+   */
+  aliases?: {[name: string]: null | string}
+  /**
+   * The name of the executable.
+   */
+  bin?: string
+  /**
+   * Aliases for the executable.
+   */
+  binAliases?: string[]
+  commands?: string | CommandDiscovery
+  /**
+   * Your CLI's description. Overrides the description in the package.json.
+   */
+  description?: string | undefined
+  /**
+   * Plugins to load when in development mode.
+   */
+  devPlugins?: string[]
+  /**
+   * The directory name to use when determining the cache, config, and data directories.
+   */
+  dirname?: string
+  /**
+   * Example plugin to use in @oclif/plugin-plugin's help output.
+   */
+  examplePlugin?: string
+  /**
+   * Customize the exit codes for the CLI.
+   */
+  exitCodes?: {
+    default?: number
+    failedFlagParsing?: number
+    failedFlagValidation?: number
+    invalidArgsSpec?: number
+    nonExistentFlag?: number
+    requiredArgs?: number
+    unexpectedArgs?: number
+  }
+  /**
+   * Enable flexible taxonomy for commands.
+   */
+  flexibleTaxonomy?: boolean
+  /**
+   * The location of your custom help class.
+   */
+  helpClass?: string | HelpLocationOptions
+  /**
+   * Options for the help output.
+   */
+  helpOptions?: HelpOptions
+  /**
+   * Register hooks to run at various points in the CLI lifecycle.
+   */
+  hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[] | (string | HookOptions)[]}
+  /**
+   * Plugins that can be installed just-in-time.
+   */
+  jitPlugins?: Record<string, string>
+  macos?: {
+    identifier?: string
+    sign?: string
+  }
+  /**
+   * Use a private or alternate npm registry.
+   */
+  npmRegistry?: string
+  /**
+   * Script to run during postinstall on windows.
+   */
+  nsisCustomization?: string
+  /**
+   * Plugin prefix to use when working with plugins with @oclif/plugin-plugins.
+   *
+   * Defaults to `plugin-`.
+   */
+  pluginPrefix?: string
+  /**
+   * Plugins to load.
+   */
+  plugins?: string[]
+  /**
+   * Template string used to build links to source code in CLI's README (when using `oclif readme`).
+   */
+  repositoryPrefix?: string
+  schema?: number
+  /**
+   * The namespace to be used for plugins of your CLI, e.g. `@salesforce`.
+   */
+  scope?: string
+  /**
+   * State of your CLI
+   *
+   * - `beta` - will show message to user that command or CLI is in beta
+   * - `deprecated` - will show message to user that command or CLI is deprecated
+   */
+  state?: 'beta' | 'deprecated' | string
+  /**
+   * The theme to ship with the CLI.
+   *
+   * Can be a path to a JSON file or a Theme object.
+   */
+  theme?: string | Theme
+  /**
+   * Separator to use for your CLI. Can be `:` or ` `.
+   */
+  topicSeparator?: ' ' | ':'
+  /**
+   * Customize the topics in the CLI.
+   */
+  topics?: {
+    [k: string]: {
       description?: string
-      devPlugins?: string[]
-      exitCodes?: {
-        default?: number
-        failedFlagParsing?: number
-        failedFlagValidation?: number
-        invalidArgsSpec?: number
-        nonExistentFlag?: number
-        requiredArgs?: number
-        unexpectedArgs?: number
-      }
-      flexibleTaxonomy?: boolean
-      helpClass?: string
-      helpOptions?: HelpOptions
-      hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[]}
-      jitPlugins?: Record<string, string>
-      macos?: {
-        identifier?: string
-        sign?: string
-      }
-      plugins?: string[]
-      repositoryPrefix?: string
-      schema?: number
-      state?: 'beta' | 'deprecated' | string
-      theme?: string
-      topicSeparator?: ' ' | ':'
-      topics?: {
-        [k: string]: {
-          description?: string
-          hidden?: boolean
-          subtopics?: Plugin['oclif']['topics']
-        }
-      }
-      update: {
-        autoupdate?: {
-          debounce?: number
-          rollout?: number
-        }
-        disableNpmLookup?: boolean
-        node: {
-          targets?: string[]
-          version?: string
-          options?: string | string[]
-        }
-        s3: S3
-      }
-      windows?: {
-        homepage?: string
-        keypath?: string
-        name?: string
-      }
+      hidden?: boolean
+      subtopics?: OclifConfiguration['topics']
     }
-    version: string
   }
+  update?: {
+    autoupdate?: {
+      debounce?: number
+      rollout?: number
+    }
+    disableNpmLookup?: boolean
+    node?: {
+      targets?: string[]
+      version?: string
+      options?: string | string[]
+    }
+    s3?: S3
+  }
+  'warn-if-update-available'?: {
+    authorization?: string
+    message?: string
+    registry?: string
+    timeoutInDays?: number
+    frequency?: number
+    frequencyUnit?: 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
+  }
+  windows?: {
+    homepage?: string
+    keypath?: string
+    name?: string
+  }
+}
 
-  export interface S3 {
-    acl?: string
-    bucket?: string
-    folder?: string
-    gz?: boolean
-    host?: string
-    templates: {
-      target: S3.Templates
-      vanilla: S3.Templates
-    }
-    xz?: boolean
-  }
+export type UserPlugin = {
+  name: string
+  tag?: string
+  type: 'user'
+  url?: string
+}
 
-  export namespace S3 {
-    export interface Templates {
-      baseDir?: string
-      manifest?: string
-      unversioned?: string
-      versioned?: string
-    }
-  }
+export type LinkedPlugin = {
+  name: string
+  root: string
+  type: 'link'
+}
 
-  export interface CLI extends Plugin {
-    oclif: Plugin['oclif'] & {
-      bin?: string
-      binAliases?: string[]
-      dirname?: string
-      flexibleTaxonomy?: boolean
-      jitPlugins?: Record<string, string>
-      npmRegistry?: string
-      nsisCustomization?: string
-      schema?: number
-      scope?: string
-      pluginPrefix?: string
-      'warn-if-update-available'?: {
-        authorization: string
-        message: string
-        registry: string
-        timeoutInDays: number
-        frequency: number
-        frequencyUnit: 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
-      }
-    }
+export type UserPJSON = {
+  oclif: {
+    plugins?: (UserPlugin | LinkedPlugin)[]
   }
+  private?: boolean
+}
 
-  export interface User extends PJSON {
-    oclif: PJSON['oclif'] & {
-      plugins?: (PluginTypes.Link | PluginTypes.User | string)[]
-    }
-    private?: boolean
-  }
-
-  export type PluginTypes = {root: string} | PluginTypes.Link | PluginTypes.User
-  export namespace PluginTypes {
-    export interface User {
-      name: string
-      tag?: string
-      type: 'user'
-      url?: string
-    }
-    export interface Link {
-      name: string
-      root: string
-      type: 'link'
-    }
-  }
+export type PJSON = {
+  [k: string]: any
+  dependencies?: {[name: string]: string}
+  devDependencies?: {[name: string]: string}
+  name: string
+  oclif: OclifConfiguration
+  version: string
 }

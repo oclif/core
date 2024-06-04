@@ -1,21 +1,17 @@
+import ansis from 'ansis'
 import {expect} from 'chai'
 import {arch} from 'node:os'
 
 import {Executor, setup} from './util'
 
-const stripAnsi = require('strip-ansi')
-
-const chalk = require('chalk')
-chalk.level = 0
-
 function parseJson(json: string) {
-  return JSON.parse(stripAnsi(json))
+  return JSON.parse(ansis.strip(json))
 }
 
 describe('Salesforce CLI (sf)', () => {
   let executor: Executor
   before(async () => {
-    process.env.SFDX_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
+    process.env.SF_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
     executor = await setup(__filename, {
       repo: 'https://github.com/salesforcecli/cli',
     })

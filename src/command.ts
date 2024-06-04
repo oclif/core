@@ -1,9 +1,8 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import {fileURLToPath} from 'node:url'
 import {inspect} from 'node:util'
 
 import Cache from './cache'
-import {ux} from './cli-ux'
 import {Config} from './config'
 import * as Errors from './errors'
 import {PrettyPrintableError} from './errors'
@@ -25,10 +24,12 @@ import {
   ParserOutput,
 } from './interfaces/parser'
 import {Plugin} from './interfaces/plugin'
+import {makeDebug} from './logger'
 import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
 import {toConfiguredId} from './util/ids'
 import {uniq} from './util/util'
+import {ux} from './ux'
 
 const pjson = Cache.getInstance().get('@oclif/core')
 
@@ -137,7 +138,7 @@ export abstract class Command {
   ) {
     this.id = this.ctor.id
     try {
-      this.debug = require('debug')(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
+      this.debug = makeDebug(this.id ? `${this.config.bin}:${this.id}` : this.config.bin)
     } catch {
       this.debug = () => {
         // noop
@@ -171,6 +172,9 @@ export abstract class Command {
     }
 
     const config = await Config.load(opts || require.main?.filename || __dirname)
+    const cache = Cache.getInstance()
+    if (!cache.has('config')) cache.set('config', config)
+
     const cmd = new this(argv, config)
     if (!cmd.id) {
       const id = cmd.constructor.name.toLowerCase()
@@ -192,7 +196,7 @@ export abstract class Command {
     } else {
       if (!err.message) throw err
       try {
-        ux.action.stop(chalk.bold.red('!'))
+        ux.action.stop(ansis.bold.red('!'))
       } catch {}
 
       throw err
@@ -214,19 +218,10 @@ export abstract class Command {
     Errors.exit(code)
   }
 
-  protected async finally(_: Error | undefined): Promise<any> {
-    try {
-      const {config} = Errors
-      if (config.errorLogger) await config.errorLogger.flush()
-    } catch (error: any) {
-      console.error(error)
-    }
-  }
+  protected async finally(_: Error | undefined): Promise<any> {}
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    if (this.config.debug) Errors.config.debug = true
-    if (this.config.errlog) Errors.config.errlog = this.config.errlog
     const g: any = global
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent
@@ -257,25 +252,25 @@ export abstract class Command {
   public log(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      ux.info(message, ...args)
+      ux.stdout(message, ...args)
     }
   }
 
   protected logJson(json: unknown): void {
-    ux.styledJSON(json)
+    ux.stdout(ux.colorizeJson(json, {pretty: true, theme: this.config.theme?.json}))
   }
 
   public logToStderr(message = '', ...args: any[]): void {
     if (!this.jsonEnabled()) {
       message = typeof message === 'string' ? message : inspect(message)
-      ux.logToStderr(message, ...args)
+      ux.stderr(message, ...args)
     }
   }
 
   protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
     options?: Input<F, B, A>,
     argv = this.argv,
-  ): Promise<ParserOutput<F, B, A>> {
+  ): Promise<ParserOutput<F, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
 
     const opts = {
@@ -414,36 +409,36 @@ export namespace Command {
    */
   export type Cached = {
     [key: string]: unknown
-    aliasPermutations?: string[]
+    aliasPermutations?: string[] | undefined
     aliases: string[]
     args: {[name: string]: Arg.Cached}
-    deprecateAliases?: boolean
-    deprecationOptions?: Deprecation
-    description?: string
-    examples?: Example[]
+    deprecateAliases?: boolean | undefined
+    deprecationOptions?: Deprecation | undefined
+    description?: string | undefined
+    examples?: Example[] | undefined
     flags: {[name: string]: Flag.Cached}
     hasDynamicHelp?: boolean
     hidden: boolean
     hiddenAliases: string[]
     id: string
-    isESM?: boolean
-    permutations?: string[]
-    pluginAlias?: string
-    pluginName?: string
-    pluginType?: string
-    relativePath?: string[]
-    state?: 'beta' | 'deprecated' | string
-    strict?: boolean
-    summary?: string
-    type?: string
-    usage?: string | string[]
+    isESM?: boolean | undefined
+    permutations?: string[] | undefined
+    pluginAlias?: string | undefined
+    pluginName?: string | undefined
+    pluginType?: string | undefined
+    relativePath?: string[] | undefined
+    state?: 'beta' | 'deprecated' | string | undefined
+    strict?: boolean | undefined
+    summary?: string | undefined
+    type?: string | undefined
+    usage?: string | string[] | undefined
   }
 
   export type Flag = IFlag<any>
 
   export namespace Flag {
     export type Cached = Omit<Flag, 'input' | 'parse'> &
-      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean}
+      (BooleanFlagProps | OptionFlagProps) & {hasDynamicHelp?: boolean | undefined}
     export type Any = Cached | Flag
   }
 

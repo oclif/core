@@ -6,28 +6,29 @@ import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {readJson} from '../util/fs'
 import {isProd} from '../util/util'
-import * as Plugin from './plugin'
-import {Debug} from './util'
+import {Plugin} from './plugin'
+import {makeDebug} from './util'
 
-// eslint-disable-next-line new-cap
-const debug = Debug()
+const debug = makeDebug()
 
 type PluginLoaderOptions = {
-  plugins?: IPlugin[] | PluginsMap
+  plugins?: IPlugin[] | PluginsMap | undefined
   root: string
 }
 
 type LoadOpts = {
   dataDir: string
-  devPlugins?: boolean
-  force?: boolean
+  devPlugins?: boolean | undefined
+  force?: boolean | undefined
   rootPlugin: IPlugin
-  userPlugins?: boolean
-  pluginAdditions?: {
-    core?: string[]
-    dev?: string[]
-    path?: string
-  }
+  userPlugins?: boolean | undefined
+  pluginAdditions?:
+    | {
+        core?: string[]
+        dev?: string[]
+        path?: string
+      }
+    | undefined
 }
 
 type PluginsMap = Map<string, IPlugin>
@@ -58,14 +59,14 @@ export default class PluginLoader {
     return {errors: this.errors, plugins: this.plugins}
   }
 
-  public async loadRoot({pjson}: {pjson?: PJSON.Plugin}): Promise<IPlugin> {
+  public async loadRoot({pjson}: {pjson?: PJSON | undefined}): Promise<IPlugin> {
     let rootPlugin: IPlugin
     if (this.pluginsProvided) {
       const plugins = [...this.plugins.values()]
       rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin.Plugin({isRoot: true, pjson, root: this.options.root})
+      rootPlugin = new Plugin({isRoot: true, pjson, root: this.options.root})
       await rootPlugin.load()
       marker?.addDetails({
         commandCount: rootPlugin.commands.length,
@@ -139,7 +140,7 @@ export default class PluginLoader {
     root: string,
     type: string,
     plugins: ({name?: string; root?: string; tag?: string; url?: string} | string)[],
-    parent?: Plugin.Plugin,
+    parent?: Plugin,
   ): Promise<void> {
     if (!plugins || plugins.length === 0) return
     const mark = Performance.mark(OCLIF_MARKER_OWNER, `config.loadPlugins#${type}`)
@@ -165,7 +166,7 @@ export default class PluginLoader {
 
           if (this.plugins.has(name)) return
           const pluginMarker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.load#${name}`)
-          const instance = new Plugin.Plugin(opts)
+          const instance = new Plugin(opts)
           await instance.load()
           pluginMarker?.addDetails({
             commandCount: instance.commands.length,

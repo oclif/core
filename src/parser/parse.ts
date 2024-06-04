@@ -19,6 +19,7 @@ import {
   ParserOutput,
   ParsingToken,
 } from '../interfaces/parser'
+import {makeDebug} from '../logger'
 import {isTruthy, last, pickBy} from '../util/util'
 import {ArgInvalidOptionError, CLIError, FlagInvalidOptionError} from './errors'
 
@@ -26,7 +27,7 @@ let debug: any
 try {
   debug =
     process.env.CLI_FLAGS_DEBUG === '1'
-      ? require('debug')('../parser')
+      ? makeDebug('parser')
       : () => {
           // noop
         }
@@ -432,9 +433,7 @@ export class Parser<
                       }),
                     ),
                 )
-              )
-                // eslint-disable-next-line unicorn/no-await-expression-member
-                .map((v) => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
+              ).map((v) => validateOptions(i.inputFlag.flag as OptionFlag<any>, v)),
           }
         }
 
@@ -559,15 +558,19 @@ export class Parser<
       ) as TFlags & BFlags & {json: boolean | undefined}
 
     type FlagWithStrategy = {
-      helpFunction?: (fws: FlagWithStrategy, flags: Record<string, string>, ...args: any) => Promise<string | undefined>
+      helpFunction?: (
+        fws: FlagWithStrategy,
+        flags: Record<string, string>,
+        ...args: any
+      ) => Promise<string | undefined> | undefined
       inputFlag: {
         flag: Flag<any>
         name: string
       }
-      metadata?: MetadataFlag
-      tokens?: FlagToken[]
-      value?: any
-      valueFunction?: ValueFunction
+      metadata?: MetadataFlag | undefined
+      tokens?: FlagToken[] | undefined
+      value?: any | undefined
+      valueFunction?: ValueFunction | undefined
     }
 
     const flagTokenMap = this.mapAndValidateFlags()
@@ -623,7 +626,7 @@ export class Parser<
     }
   }
 
-  private findFlag(arg: string): {isLong: boolean; name?: string} {
+  private findFlag(arg: string): {isLong: boolean; name?: string | undefined} {
     const isLong = arg.startsWith('--')
     const short = isLong ? false : arg.startsWith('-')
     const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined

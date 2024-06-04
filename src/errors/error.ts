@@ -1,6 +1,6 @@
-import write from '../cli-ux/write'
 import {OclifError, PrettyPrintableError} from '../interfaces'
-import {config} from './config'
+import {getLogger} from '../logger'
+import {stderr} from '../ux/write'
 import {CLIError, addOclifExitCode} from './errors/cli'
 import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
 
@@ -21,8 +21,8 @@ export function error(input: Error | string, options: {exit?: false | number} & 
 
   if (options.exit === false) {
     const message = prettyPrint(err)
-    if (message) write.stderr(message + '\n')
-    if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
+    if (message) stderr(message)
+    if (err?.stack) getLogger().error(err.stack)
   } else throw err
 }
 

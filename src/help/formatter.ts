@@ -1,14 +1,13 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import indent from 'indent-string'
 import width from 'string-width'
-import stripAnsi from 'strip-ansi'
 import widestLine from 'widest-line'
 import wrap from 'wrap-ansi'
 
-import {colorize} from '../cli-ux/theme'
 import {Command} from '../command'
 import * as Interfaces from '../interfaces'
 import {stdtermwidth} from '../screen'
+import {colorize} from '../ux/theme'
 import {template} from './util'
 
 export type HelpSectionKeyValueTable = {description: string; name: string}[]
@@ -78,7 +77,12 @@ export class HelpFormatter {
 
   public renderList(
     input: (string | undefined)[][],
-    opts: {indentation: number; multiline?: boolean; spacer?: string; stripAnsi?: boolean},
+    opts: {
+      indentation: number
+      multiline?: boolean | undefined
+      spacer?: string | undefined
+      stripAnsi?: boolean | undefined
+    },
   ): string {
     if (input.length === 0) {
       return ''
@@ -89,12 +93,12 @@ export class HelpFormatter {
       for (let [left, right] of input) {
         if (!left && !right) continue
         if (left) {
-          if (opts.stripAnsi) left = stripAnsi(left)
+          if (opts.stripAnsi) left = ansis.strip(left)
           output += this.wrap(left.trim(), opts.indentation)
         }
 
         if (right) {
-          if (opts.stripAnsi) right = stripAnsi(right)
+          if (opts.stripAnsi) right = ansis.strip(right)
           output += '\n'
           output += this.indent(this.wrap(right.trim(), opts.indentation + 2), 4)
         }
@@ -118,13 +122,13 @@ export class HelpFormatter {
       }
 
       cur = left || ''
-      if (opts.stripAnsi) cur = stripAnsi(cur)
+      if (opts.stripAnsi) cur = ansis.strip(cur)
       if (!right) {
         cur = cur.trim()
         continue
       }
 
-      if (opts.stripAnsi) right = stripAnsi(right)
+      if (opts.stripAnsi) right = ansis.strip(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
       const [first, ...lines] = right!.split('\n').map((s) => s.trim())
@@ -177,7 +181,7 @@ export class HelpFormatter {
     }
 
     const output = [
-      colorize(this.config?.theme?.sectionHeader, chalk.bold(header)),
+      colorize(this.config?.theme?.sectionHeader, ansis.bold(header)),
       colorize(
         this.config?.theme?.sectionDescription,
         this.indent(
@@ -186,7 +190,7 @@ export class HelpFormatter {
       ),
     ].join('\n')
 
-    return this.opts.stripAnsi ? stripAnsi(output) : output
+    return this.opts.stripAnsi ? ansis.strip(output) : output
   }
 
   /**

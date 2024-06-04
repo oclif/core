@@ -11,6 +11,10 @@ import {makeLoadable} from './help-test-utils'
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {
+  constructor(public config: Config) {
+    super(config, {stripAnsi: true})
+  }
+
   public formatCommands(commands: Command.Loadable[]) {
     return super.formatCommands(commands)
   }

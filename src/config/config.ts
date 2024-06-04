@@ -5,31 +5,40 @@ import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
 
 import Cache from '../cache'
-import {ux} from '../cli-ux'
-import {parseTheme} from '../cli-ux/theme'
 import {Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
-import {Hook, Hooks, PJSON, Topic} from '../interfaces'
+import {Hook, Hooks, OclifConfiguration, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
 import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
 import {Plugin as IPlugin, Options} from '../interfaces/plugin'
 import {Theme} from '../interfaces/theme'
+import {makeDebug as loggerMakeDebug, setLogger} from '../logger'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
+import {determinePriority} from '../util/determine-priority'
 import {safeReadJson} from '../util/fs'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
+import {ux} from '../ux'
+import {parseTheme} from '../ux/theme'
 import PluginLoader from './plugin-loader'
 import {tsPath} from './ts-path'
-import {Debug, collectUsableIds, getCommandIdPermutations} from './util'
+import {collectUsableIds, getCommandIdPermutations, makeDebug} from './util'
 
-// eslint-disable-next-line new-cap
-const debug = Debug()
+const debug = makeDebug()
 
 const _pjson = Cache.getInstance().get('@oclif/core')
 const BASE = `${_pjson.name}@${_pjson.version}`
 const ROOT_ONLY_HOOKS = new Set<keyof Hooks>(['preparse'])
+
+function displayWarnings() {
+  if (process.listenerCount('warning') > 1) return
+  process.on('warning', (warning: any) => {
+    console.error(warning.stack)
+    if (warning.detail) console.error(warning.detail)
+  })
+}
 
 function channelFromVersion(version: string) {
   const m = version.match(/[^-]+(?:-([^.]+))?/)
@@ -75,33 +84,33 @@ export class Config implements IConfig {
   public arch!: ArchTypes
 
   public bin!: string
-  public binAliases?: string[]
-  public binPath?: string
+  public binAliases?: string[] | undefined
+  public binPath?: string | undefined
   public cacheDir!: string
   public channel!: string
   public configDir!: string
   public dataDir!: string
-  public debug = 0
   public dirname!: string
-  public errlog!: string
   public flexibleTaxonomy!: boolean
   public home!: string
   public isSingleCommandCLI = false
   public name!: string
-  public npmRegistry?: string
-  public nsisCustomization?: string
-  public pjson!: PJSON.CLI
+  public npmRegistry?: string | undefined
+  public nsisCustomization?: string | undefined
+  public pjson!: PJSON
   public platform!: PlatformTypes
   public plugins: Map<string, IPlugin> = new Map()
   public root!: string
   public shell!: string
-  public theme?: Theme
+  public theme?: Theme | undefined
   public topicSeparator: ' ' | ':' = ':'
+  public updateConfig!: NonNullable<OclifConfiguration['update']>
   public userAgent!: string
-  public userPJSON?: PJSON.User
+  public userPJSON?: UserPJSON | undefined
   public valid!: boolean
   public version!: string
   protected warned = false
+
   public windows!: boolean
 
   private _base = BASE
@@ -117,12 +126,11 @@ export class Config implements IConfig {
   private pluginLoader!: PluginLoader
 
   private rootPlugin!: IPlugin
-
   private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
-
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
+    setLogger(opts)
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
     if (typeof opts === 'string' && opts.startsWith('file://')) {
       opts = fileURLToPath(opts)
@@ -201,7 +209,6 @@ export class Config implements IConfig {
   }
 
   public findCommand(id: string, opts: {must: true}): Command.Loadable
-
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
@@ -286,6 +293,8 @@ export class Config implements IConfig {
   public async load(): Promise<void> {
     settings.performanceEnabled =
       (settings.performanceEnabled === undefined ? this.options.enablePerf : settings.performanceEnabled) ?? false
+    if (settings.debug) displayWarnings()
+    setLogger(this.options)
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
     this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
     this.rootPlugin = await this.pluginLoader.loadRoot({pjson: this.options.pjson})
@@ -322,55 +331,30 @@ export class Config implements IConfig {
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
     this.shell = this._shell()
-    this.debug = this._debug()
 
     this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
     this.configDir = this.scopedEnvVar('CONFIG_DIR') || this.dir('config')
     this.dataDir = this.scopedEnvVar('DATA_DIR') || this.dir('data')
-    this.errlog = join(this.cacheDir, 'error.log')
     this.binPath = this.scopedEnvVar('BINPATH')
 
     this.npmRegistry = this.scopedEnvVar('NPM_REGISTRY') || this.pjson.oclif.npmRegistry
 
-    if (!this.scopedEnvVarTrue('DISABLE_THEME')) {
-      const {theme} = await this.loadThemes()
-      this.theme = theme
+    this.theme = await this.loadTheme()
+
+    this.updateConfig = {
+      ...this.pjson.oclif.update,
+      node: this.pjson.oclif.update?.node ?? {},
+      s3: this.buildS3Config(),
     }
 
-    this.pjson.oclif.update = this.pjson.oclif.update || {}
-    this.pjson.oclif.update.node = this.pjson.oclif.update.node || {}
-    const s3 = this.pjson.oclif.update.s3 || {}
-    this.pjson.oclif.update.s3 = s3
-    s3.bucket = this.scopedEnvVar('S3_BUCKET') || s3.bucket
-    if (s3.bucket && !s3.host) s3.host = `https://${s3.bucket}.s3.amazonaws.com`
-    s3.templates = {
-      ...s3.templates,
-      target: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
-        unversioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        ...(s3.templates && s3.templates.target),
-      },
-      vanilla: {
-        baseDir: '<%- bin %>',
-        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
-        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
-        versioned:
-          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
-        ...(s3.templates && s3.templates.vanilla),
-      },
-    }
     this.isSingleCommandCLI = Boolean(
-      this.pjson.oclif.default ||
-        (typeof this.pjson.oclif.commands !== 'string' &&
-          this.pjson.oclif.commands?.strategy === 'single' &&
-          this.pjson.oclif.commands?.target),
+      typeof this.pjson.oclif.commands !== 'string' &&
+        this.pjson.oclif.commands?.strategy === 'single' &&
+        this.pjson.oclif.commands?.target,
     )
 
+    this.maybeAdjustDebugSetting()
     await this.loadPluginsAndCommands()
 
     debug('config done')
@@ -410,28 +394,27 @@ export class Config implements IConfig {
     }
   }
 
-  public async loadThemes(): Promise<{
-    file: string | undefined
-    theme: Theme | undefined
-  }> {
-    const defaultThemeFile = this.pjson.oclif.theme
-      ? resolve(this.root, this.pjson.oclif.theme)
-      : this.pjson.oclif.theme
+  public async loadTheme(): Promise<Theme | undefined> {
+    if (this.scopedEnvVarTrue('DISABLE_THEME')) return
+
     const userThemeFile = resolve(this.configDir, 'theme.json')
+    const getDefaultTheme = async () => {
+      if (!this.pjson.oclif.theme) return
+      if (typeof this.pjson.oclif.theme === 'string') {
+        return safeReadJson<Record<string, string>>(resolve(this.root, this.pjson.oclif.theme))
+      }
+
+      return this.pjson.oclif.theme
+    }
 
     const [defaultTheme, userTheme] = await Promise.all([
-      defaultThemeFile ? await safeReadJson<Record<string, string>>(defaultThemeFile) : undefined,
+      await getDefaultTheme(),
       await safeReadJson<Record<string, string>>(userThemeFile),
     ])
 
     // Merge the default theme with the user theme, giving the user theme precedence.
     const merged = {...defaultTheme, ...userTheme}
-    return {
-      // Point to the user file if it exists, otherwise use the default file.
-      // This doesn't really serve a purpose to anyone but removing it would be a breaking change.
-      file: userTheme ? userThemeFile : defaultThemeFile,
-      theme: Object.keys(merged).length > 0 ? parseTheme(merged) : undefined,
-    }
+    return Object.keys(merged).length > 0 ? parseTheme(merged) : undefined
   }
 
   protected macosCacheDir(): string | undefined {
@@ -534,7 +517,7 @@ export class Config implements IConfig {
 
     const plugins = ROOT_ONLY_HOOKS.has(event) ? [this.rootPlugin] : [...this.plugins.values()]
     const promises = plugins.map(async (p) => {
-      const debug = require('debug')([this.bin, p.name, 'hooks', event].join(':'))
+      const debug = loggerMakeDebug([p.name, 'hooks', event].join(':'))
       const context: Hook.Context = {
         config: this,
         debug,
@@ -545,7 +528,7 @@ export class Config implements IConfig {
           exit(code)
         },
         log(message?: any, ...args: any[]) {
-          ux.info(message, ...args)
+          ux.stdout(message, ...args)
         },
         warn(message: string) {
           warn(message)
@@ -612,18 +595,18 @@ export class Config implements IConfig {
   }
 
   public s3Key(
-    type: keyof PJSON.S3.Templates,
+    type: keyof S3Templates,
     ext?: '.tar.gz' | '.tar.xz' | IConfig.s3Key.Options,
     options: IConfig.s3Key.Options = {},
   ): string {
     if (typeof ext === 'object') options = ext
     else if (ext) options.ext = ext
-    const template = this.pjson.oclif.update.s3.templates[options.platform ? 'target' : 'vanilla'][type] ?? ''
+    const template = this.updateConfig.s3?.templates?.[options.platform ? 'target' : 'vanilla'][type] ?? ''
     return ejs.render(template, {...(this as any), ...options})
   }
 
   public s3Url(key: string): string {
-    const {host} = this.pjson.oclif.update.s3
+    const {host} = this.updateConfig.s3 ?? {host: undefined}
     if (!host) throw new Error('no s3 host is set')
     const url = new URL(host)
     url.pathname = join(url.pathname, key)
@@ -662,44 +645,6 @@ export class Config implements IConfig {
     return v === '1' || v === 'true'
   }
 
-  protected warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
-    if (this.warned) return
-
-    if (typeof err === 'string') {
-      process.emitWarning(err)
-      return
-    }
-
-    if (err instanceof Error) {
-      const modifiedErr: any = err
-      modifiedErr.name = `${err.name} Plugin: ${this.name}`
-      modifiedErr.detail = compact([
-        (err as any).detail,
-        `module: ${this._base}`,
-        scope && `task: ${scope}`,
-        `plugin: ${this.name}`,
-        `root: ${this.root}`,
-        'See more details with DEBUG=*',
-      ]).join('\n')
-      process.emitWarning(err)
-      return
-    }
-
-    // err is an object
-    process.emitWarning('Config.warn expected either a string or Error, but instead received an object')
-    err.name = `${err.name} Plugin: ${this.name}`
-    err.detail = compact([
-      err.detail,
-      `module: ${this._base}`,
-      scope && `task: ${scope}`,
-      `plugin: ${this.name}`,
-      `root: ${this.root}`,
-      'See more details with DEBUG=*',
-    ]).join('\n')
-
-    process.emitWarning(JSON.stringify(err))
-  }
-
   protected windowsHome(): string | undefined {
     return this.windowsHomedriveHome() || this.windowsUserprofileHome()
   }
@@ -710,16 +655,6 @@ export class Config implements IConfig {
 
   protected windowsUserprofileHome(): string | undefined {
     return process.env.USERPROFILE
-  }
-
-  protected _debug(): number {
-    if (this.scopedEnvVarTrue('DEBUG')) return 1
-    try {
-      const {enabled} = require('debug')(this.bin)
-      if (enabled) return 1
-    } catch {}
-
-    return 0
   }
 
   protected _shell(): string {
@@ -737,62 +672,35 @@ export class Config implements IConfig {
     return shellPath.at(-1) ?? 'unknown'
   }
 
-  /**
-   * This method is responsible for locating the correct plugin to use for a named command id
-   * It searches the {Config} registered commands to match either the raw command id or the command alias
-   * It is possible that more than one command will be found. This is due the ability of two distinct plugins to
-   * create the same command or command alias.
-   *
-   * In the case of more than one found command, the function will select the command based on the order in which
-   * the plugin is included in the package.json `oclif.plugins` list. The command that occurs first in the list
-   * is selected as the command to run.
-   *
-   * Commands can also be present from either an install or a link. When a command is one of these and a core plugin
-   * is present, this function defers to the core plugin.
-   *
-   * If there is not a core plugin command present, this function will return the first
-   * plugin as discovered (will not change the order)
-   *
-   * @param commands commands to determine the priority of
-   * @returns command instance {Command.Loadable} or undefined
-   */
-  private determinePriority(commands: Command.Loadable[]): Command.Loadable {
-    const oclifPlugins = this.pjson.oclif?.plugins ?? []
-    const commandPlugins = commands.sort((a, b) => {
-      const pluginAliasA = a.pluginAlias ?? 'A-Cannot-Find-This'
-      const pluginAliasB = b.pluginAlias ?? 'B-Cannot-Find-This'
-      const aIndex = oclifPlugins.indexOf(pluginAliasA)
-      const bIndex = oclifPlugins.indexOf(pluginAliasB)
-      // When both plugin types are 'core' plugins sort based on index
-      if (a.pluginType === 'core' && b.pluginType === 'core') {
-        // If b appears first in the pjson.plugins sort it first
-        return aIndex - bIndex
-      }
-
-      // if b is a core plugin and a is not sort b first
-      if (b.pluginType === 'core' && a.pluginType !== 'core') {
-        return 1
-      }
-
-      // if a is a core plugin and b is not sort a first
-      if (a.pluginType === 'core' && b.pluginType !== 'core') {
-        return -1
-      }
-
-      // if a is a jit plugin and b is not sort b first
-      if (a.pluginType === 'jit' && b.pluginType !== 'jit') {
-        return 1
-      }
-
-      // if b is a jit plugin and a is not sort a first
-      if (b.pluginType === 'jit' && a.pluginType !== 'jit') {
-        return -1
-      }
-
-      // neither plugin is core, so do not change the order
-      return 0
-    })
-    return commandPlugins[0]
+  private buildS3Config() {
+    const s3 = this.pjson.oclif.update?.s3
+    const bucket = this.scopedEnvVar('S3_BUCKET') ?? s3?.bucket
+    const host = s3?.host ?? (bucket && `https://${bucket}.s3.amazonaws.com`)
+    const templates = {
+      ...s3?.templates,
+      target: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- platform %>-<%- arch %>",
+        unversioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
+        ...(s3?.templates && s3?.templates.target),
+      },
+      vanilla: {
+        baseDir: '<%- bin %>',
+        manifest: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %>version",
+        unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
+        versioned:
+          "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
+        ...(s3?.templates && s3?.templates.vanilla),
+      },
+    }
+    return {
+      bucket,
+      host,
+      templates,
+    }
   }
 
   private getCmdLookupId(id: string): string {
@@ -821,7 +729,7 @@ export class Config implements IConfig {
       this.plugins.set(plugin.name, plugin)
 
       // Delete all commands from the legacy plugin so that we can re-add them.
-      // This is necessary because this.determinePriority will pick the initial
+      // This is necessary because determinePriority will pick the initial
       // command that was added, which won't have been converted by PluginLegacy yet.
       for (const cmd of plugin.commands ?? []) {
         this._commands.delete(cmd.id)
@@ -847,7 +755,10 @@ export class Config implements IConfig {
     for (const command of plugin.commands) {
       // set canonical command id
       if (this._commands.has(command.id)) {
-        const prioritizedCommand = this.determinePriority([this._commands.get(command.id)!, command])
+        const prioritizedCommand = determinePriority(this.pjson.oclif.plugins ?? [], [
+          this._commands.get(command.id)!,
+          command,
+        ])
         this._commands.set(prioritizedCommand.id, prioritizedCommand)
       } else {
         this._commands.set(command.id, command)
@@ -866,7 +777,10 @@ export class Config implements IConfig {
 
       const handleAlias = (alias: string, hidden = false) => {
         if (this._commands.has(alias)) {
-          const prioritizedCommand = this.determinePriority([this._commands.get(alias)!, command])
+          const prioritizedCommand = determinePriority(this.pjson.oclif.plugins ?? [], [
+            this._commands.get(alias)!,
+            command,
+          ])
           this._commands.set(alias, {...prioritizedCommand, id: alias})
         } else {
           this._commands.set(alias, {...command, hidden, id: alias})
@@ -931,5 +845,50 @@ export class Config implements IConfig {
     }
 
     marker?.stop()
+  }
+
+  private maybeAdjustDebugSetting(): void {
+    if (this.scopedEnvVarTrue('DEBUG')) {
+      settings.debug = true
+      displayWarnings()
+    }
+  }
+
+  private warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
+    if (this.warned) return
+
+    if (typeof err === 'string') {
+      process.emitWarning(err)
+      return
+    }
+
+    if (err instanceof Error) {
+      const modifiedErr: any = err
+      modifiedErr.name = `${err.name} Plugin: ${this.name}`
+      modifiedErr.detail = compact([
+        (err as any).detail,
+        `module: ${this._base}`,
+        scope && `task: ${scope}`,
+        `plugin: ${this.name}`,
+        `root: ${this.root}`,
+        'See more details with DEBUG=*',
+      ]).join('\n')
+      process.emitWarning(err)
+      return
+    }
+
+    // err is an object
+    process.emitWarning('Config.warn expected either a string or Error, but instead received an object')
+    err.name = `${err.name} Plugin: ${this.name}`
+    err.detail = compact([
+      err.detail,
+      `module: ${this._base}`,
+      scope && `task: ${scope}`,
+      `plugin: ${this.name}`,
+      `root: ${this.root}`,
+      'See more details with DEBUG=*',
+    ]).join('\n')
+
+    process.emitWarning(JSON.stringify(err))
   }
 }

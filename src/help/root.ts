@@ -1,8 +1,8 @@
-import stripAnsi from 'strip-ansi'
+import ansis from 'ansis'
 
-import {colorize} from '../cli-ux/theme'
 import * as Interfaces from '../interfaces'
 import {compact} from '../util/util'
+import {colorize} from '../ux/theme'
 import {HelpFormatter} from './formatter'
 
 export default class RootHelp extends HelpFormatter {
@@ -31,7 +31,7 @@ export default class RootHelp extends HelpFormatter {
       this.usage(),
       this.description(),
     ]).join('\n\n')
-    if (this.opts.stripAnsi) output = stripAnsi(output)
+    if (this.opts.stripAnsi) output = ansis.strip(output)
     return output
   }
 

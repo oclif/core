@@ -1,21 +1,32 @@
-import {test} from '@oclif/test'
 import {expect} from 'chai'
 import {resolve} from 'node:path'
+import sinon from 'sinon'
 
-import {Config, Interfaces} from '../../src'
+import {Args, Command, Config} from '../../src'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
+import {MyHelp} from './_test-help-class-identifier'
 
 describe('util', () => {
-  let config: Interfaces.Config
+  let config: Config
 
   beforeEach(async () => {
     config = await Config.load()
+    config.topicSeparator = ' '
   })
 
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  function stubCommands(...commands: Array<Partial<Command.Cached>>) {
+    // @ts-expect-error private member
+    sinon.stub(config, '_commands').value(new Map(commands.map((cmd) => [cmd.id, cmd])))
+  }
+
   describe('#loadHelpClass', () => {
-    test.it('defaults to the class exported', async () => {
+    it('defaults to the native help class', async () => {
       delete config.pjson.oclif.helpClass
 
       const helpClass = await loadHelpClass(config)
@@ -25,17 +36,39 @@ describe('util', () => {
       expect(helpClass.prototype.formatRoot)
     })
 
-    test.it('loads help class defined in pjson.oclif.helpClass', async () => {
+    it('loads help class defined in pjson.oclif.helpClass', async () => {
       config.pjson.oclif.helpClass = '../test/help/_test-help-class'
-      // @ts-expect-error readonly property
       config.root = resolve(__dirname, '..')
 
       expect(configuredHelpClass).to.not.be.undefined
       expect(await loadHelpClass(config)).to.deep.equal(configuredHelpClass)
     })
 
+    it('loads help class defined using target but no identifier', async () => {
+      config.pjson.oclif.helpClass = {
+        target: '../test/help/_test-help-class',
+        // @ts-expect-error for testing purposes
+        identifier: undefined,
+      }
+      config.root = resolve(__dirname, '..')
+
+      expect(configuredHelpClass).to.not.be.undefined
+      expect(await loadHelpClass(config)).to.deep.equal(configuredHelpClass)
+    })
+
+    it('loads help class defined using target and identifier', async () => {
+      config.pjson.oclif.helpClass = {
+        target: '../test/help/_test-help-class-identifier',
+        identifier: 'MyHelp',
+      }
+      config.root = resolve(__dirname, '..')
+
+      expect(MyHelp).to.not.be.undefined
+      expect(await loadHelpClass(config)).to.deep.equal(MyHelp)
+    })
+
     describe('error cases', () => {
-      test.it('throws an error when failing to load the help class defined in pjson.oclif.helpClass', async () => {
+      it('throws an error when failing to load the help class defined in pjson.oclif.helpClass', async () => {
         config.pjson.oclif.helpClass = './lib/does-not-exist-help-class'
         await expect(loadHelpClass(config)).to.be.rejectedWith(
           'Unable to load configured help class "./lib/does-not-exist-help-class", failed with message:',
@@ -45,148 +78,124 @@ describe('util', () => {
   })
 
   describe('#standardizeIDFromArgv', () => {
-    test.it('should return standardized id when topic separator is a colon', () => {
-      config.pjson.oclif.topicSeparator = ':'
+    it('should return standardized id when topic separator is a colon', () => {
+      config.topicSeparator = ':'
       const actual = standardizeIDFromArgv(['foo:bar', '--baz'], config)
       expect(actual).to.deep.equal(['foo:bar', '--baz'])
     })
 
-    test.it('should return standardized id when topic separator is a space', () => {
-      config.topicSeparator = ' '
+    it('should return standardized id when topic separator is a space', () => {
       const actual = standardizeIDFromArgv(['foo', '', '--baz'], config)
       expect(actual).to.deep.equal(['foo', '', '--baz'])
     })
 
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space', () => {
-        config.topicSeparator = ' '
-        const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
-        expect(actual).to.deep.equal(['foo:bar', '--baz'])
-      })
+    it('should return standardized id when topic separator is a space', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--baz'])
+    })
 
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and command is misspelled', () => {
-        config.topicSeparator = ' '
-        const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
-        expect(actual).to.deep.equal(['foo:ba', '--baz'])
-      })
+    it('should return standardized id when topic separator is a space and command is misspelled', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      const actual = standardizeIDFromArgv(['foo', 'ba', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:ba', '--baz'])
+    })
 
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it(
-        'should return standardized id when topic separator is a space and has args and command is misspelled',
-        () => {
-          config.topicSeparator = ' '
-          // @ts-expect-error private member
-          config._commands.set('foo:bar', {
-            id: 'foo:bar',
-            args: [{name: 'first'}],
-          })
-          const actual = standardizeIDFromArgv(['foo', 'ba', 'baz'], config)
-          expect(actual).to.deep.equal(['foo:ba:baz'])
+    it('should return standardized id when topic separator is a space and has args and command is misspelled', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        args: {
+          name: Args.string(),
         },
-      )
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has args', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {
-          id: 'foo:bar',
-          args: [{name: 'first'}],
-        })
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
-        expect(actual).to.deep.equal(['foo:bar', 'baz'])
       })
+      const actual = standardizeIDFromArgv(['foo', 'ba', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:ba:baz'])
+    })
 
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has variable arguments', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {
-          id: 'foo:bar',
-          strict: false,
-        })
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
-        expect(actual).to.deep.equal(['foo:bar', 'baz'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {
-          id: 'foo:bar',
-          strict: false,
-        })
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'baz', '--hello'], config)
-        expect(actual).to.deep.equal(['foo:bar', 'baz', '--hello'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return full id when topic separator is a space and does not have arguments', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {
-          id: 'foo:bar',
-          args: [],
-          strict: true,
-        })
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
-        expect(actual).to.deep.equal(['foo:bar:baz'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has arg with value', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {id: 'foo:bar'})
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world'], config)
-        expect(actual).to.deep.equal(['foo:bar', 'hello=world'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has variable args with value', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {id: 'foo:bar', strict: false})
-        const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world', 'my-arg=value'], config)
-        expect(actual).to.deep.equal(['foo:bar', 'hello=world', 'my-arg=value'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it('should return standardized id when topic separator is a space and has flags', () => {
-        config.topicSeparator = ' '
-        // @ts-expect-error private member
-        config._commands.set('foo:bar', {id: 'foo:bar'})
-        const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
-        expect(actual).to.deep.equal(['foo:bar', '--baz'])
-      })
-
-    test
-      .stub(util, 'collectUsableIds', (stub) => stub.returns(new Set(['foo', 'foo:bar'])))
-      .it(
-        'should return standardized id when topic separator is a space and has flags, arg, and arg with value',
-        () => {
-          config.topicSeparator = ' '
-          // @ts-expect-error private member
-          config._commands.set('foo:bar', {
-            id: 'foo:bar',
-            args: [{name: 'my-arg'}],
-            strict: true,
-          })
-          const actual = standardizeIDFromArgv(['foo', 'bar', 'my-arg', 'hello=world', '--baz'], config)
-          expect(actual).to.deep.equal(['foo:bar', 'my-arg', 'hello=world', '--baz'])
+    it('should return standardized id when topic separator is a space and has args', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        args: {
+          name: Args.string(),
         },
-      )
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz'])
+    })
+
+    it('should return standardized id when topic separator is a space and has variable arguments', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        strict: false,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz'])
+    })
+
+    it('should return standardized id when topic separator is a space and has variable arguments and flags', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        strict: false,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz', '--hello'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'baz', '--hello'])
+    })
+
+    it('should return full id when topic separator is a space and does not have arguments', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        args: {},
+        strict: true,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'baz'], config)
+      expect(actual).to.deep.equal(['foo:bar:baz'])
+    })
+
+    it('should return standardized id when topic separator is a space and has arg with value', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'hello=world'])
+    })
+
+    it('should return standardized id when topic separator is a space and has variable args with value', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        strict: false,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'hello=world', 'my-arg=value'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'hello=world', 'my-arg=value'])
+    })
+
+    it('should return standardized id when topic separator is a space and has flags', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        strict: false,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', '--baz'])
+    })
+
+    it('should return standardized id when topic separator is a space and has flags, arg, and arg with value', () => {
+      sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+      stubCommands({
+        id: 'foo:bar',
+        args: {
+          'my-arg': Args.string(),
+        },
+        strict: true,
+      })
+      const actual = standardizeIDFromArgv(['foo', 'bar', 'my-arg', 'hello=world', '--baz'], config)
+      expect(actual).to.deep.equal(['foo:bar', 'my-arg', 'hello=world', '--baz'])
+    })
   })
 })

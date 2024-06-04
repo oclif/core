@@ -1,24 +1,11 @@
-import {expect, fancy} from 'fancy-test'
-import {readFile} from 'node:fs/promises'
-import {join} from 'node:path'
+import {captureOutput} from '@oclif/test'
+import {expect} from 'chai'
 
-import {config, warn} from '../../src/errors'
-
-const errlog = join(__dirname, '../tmp/mytest/warn.log')
+import {warn} from '../../src/errors'
 
 describe('warn', () => {
-  fancy
-    .stderr()
-    .do(() => {
-      config.errlog = errlog
-    })
-    .finally(() => {
-      config.errlog = undefined
-    })
-    .it('warns', async (ctx) => {
-      warn('foo!')
-      expect(ctx.stderr).to.contain('Warning: foo!')
-      await config.errorLogger!.flush()
-      expect(await readFile(errlog, 'utf8')).to.contain('Warning: foo!')
-    })
+  it('warns', async () => {
+    const {stderr} = await captureOutput(async () => warn('foo!'))
+    expect(stderr).to.contain('Warning: foo!')
+  })
 })

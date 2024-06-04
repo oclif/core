@@ -9,9 +9,9 @@ import {settings} from '../settings'
 import {existsSync} from '../util/fs'
 import {readTSConfig} from '../util/read-tsconfig'
 import {isProd} from '../util/util'
-import {Debug} from './util'
-// eslint-disable-next-line new-cap
-const debug = Debug('ts-path')
+import {makeDebug} from './util'
+
+const debug = makeDebug('ts-path')
 
 export const TS_CONFIGS: Record<string, TSConfig | undefined> = {}
 const REGISTERED = new Set<string>()
@@ -76,12 +76,30 @@ async function loadTSConfig(root: string): Promise<TSConfig | undefined> {
   }
 }
 
+async function registerTsx(root: string, moduleType: 'commonjs' | 'module' | undefined): Promise<void> {
+  if (REGISTERED.has(root)) return
+
+  try {
+    const apiPath = moduleType === 'module' ? 'tsx/esm/api' : 'tsx/cjs/api'
+    const tsxPath = require.resolve(apiPath, {paths: [root]})
+    if (!tsxPath) return
+    debug('registering tsx at', root)
+    debug('tsx path:', tsxPath)
+    const {register} = await import(tsxPath)
+    register()
+    REGISTERED.add(root)
+  } catch {
+    debug(`Could not find tsx. Skipping tsx registration for ${root}.`)
+  }
+}
+
 async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
   if (REGISTERED.has(root)) return
 
   debug('registering ts-node at', root)
   const tsNodePath = require.resolve('ts-node', {paths: [root, __dirname]})
   debug('ts-node path:', tsNodePath)
+
   let tsNode: typeof TSNode
 
   try {
@@ -138,14 +156,14 @@ async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
 
 /**
  * Skip ts-node registration for ESM plugins in production.
- * The node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
+ * The node/ts-node ecosystem is not mature enough to support auto-transpiling ESM modules at this time.
  * See the following:
  * - https://github.com/TypeStrong/ts-node/issues/1791#issuecomment-1149754228
  * - https://github.com/nodejs/node/issues/49432
  * - https://github.com/nodejs/node/pull/49407
  * - https://github.com/nodejs/node/issues/34049
  *
- * We still register ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM
+ * We still register tsx/ts-node for ESM plugins when NODE_ENV is "test" or "development" and root plugin is also ESM
  * since that allows plugins to be auto-transpiled when developing locally using `bin/dev.js`.
  */
 function cannotTranspileEsm(
@@ -153,7 +171,11 @@ function cannotTranspileEsm(
   plugin: Plugin | undefined,
   isProduction: boolean,
 ): boolean {
-  return (isProduction || rootPlugin?.moduleType === 'commonjs') && plugin?.moduleType === 'module'
+  return (
+    (isProduction || rootPlugin?.moduleType === 'commonjs') &&
+    plugin?.moduleType === 'module' &&
+    !plugin?.pjson.devDependencies?.tsx
+  )
 }
 
 /**
@@ -175,15 +197,18 @@ function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction:
 /**
  * Determine the path to the source file from the compiled ./lib files
  */
-async function determinePath(root: string, orig: string): Promise<string> {
+async function determinePath(root: string, orig: string, plugin: Plugin | undefined): Promise<string> {
   const tsconfig = await loadTSConfig(root)
   if (!tsconfig) return orig
 
   debug(`Determining path for ${orig}`)
 
-  if (RUN_TIME === 'tsx' || RUN_TIME === 'bun') {
+  if (RUN_TIME === 'bun') {
     debug(`Skipping ts-node registration for ${root} because the runtime is: ${RUN_TIME}`)
   } else {
+    // attempt to register tsx first. If it fails to register, we will fall back to ts-node
+    await registerTsx(root, plugin?.moduleType)
+    // if tsx registration succeeded, then this will exit early since the path will be in REGISTERED already
     await registerTSNode(root, tsconfig)
   }
 
@@ -246,8 +271,16 @@ async function determinePath(root: string, orig: string): Promise<string> {
  * if there is a tsconfig and the original sources exist, it attempts to require ts-node
  */
 export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
-export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
+export async function tsPath(
+  root: string,
+  orig: string | undefined,
+  plugin?: Plugin | undefined,
+): Promise<string | undefined>
+export async function tsPath(
+  root: string,
+  orig: string | undefined,
+  plugin?: Plugin | undefined,
+): Promise<string | undefined> {
   const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig
@@ -290,7 +323,7 @@ export async function tsPath(root: string, orig: string | undefined, plugin?: Pl
   }
 
   try {
-    return await determinePath(root, orig)
+    return await determinePath(root, orig, plugin)
   } catch (error: any) {
     debug(error)
     return orig

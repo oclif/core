@@ -1,42 +1,38 @@
+import {runCommand, runHook} from '@oclif/test'
+import {expect} from 'chai'
 import {join, resolve} from 'node:path'
 
 import {Config} from '../../src/config'
-import {expect, fancy} from './test'
 
 const root = resolve(__dirname, 'fixtures/typescript')
-const p = (p: string) => join(root, p)
-
-const withConfig = fancy.add('config', () => Config.load(root))
 
 describe('typescript', () => {
-  withConfig.it('has commandsDir', ({config}) => {
+  it('has commandsDir', async () => {
+    const config = await Config.load(root)
     expect([...config.plugins.values()][0]).to.deep.include({
-      commandsDir: p('src/commands'),
+      commandsDir: join(root, 'src/commands'),
     })
   })
 
-  withConfig.stdout().it('runs ts command and prerun & postrun hooks', async (ctx) => {
-    await ctx.config.runCommand('foo:bar:baz')
-    expect(ctx.stdout).to.equal('running ts prerun hook\nit works!\nrunning ts postrun hook\n')
+  it('runs ts command and prerun & postrun hooks', async () => {
+    const {stdout} = await runCommand(['foo:bar:baz'], root)
+    expect(stdout).to.equal('running ts init hook\nrunning ts prerun hook\nit works!\nrunning ts postrun hook\n')
   })
 
-  withConfig.stdout().it('runs faulty command, only prerun hook triggers', async (ctx) => {
-    try {
-      await ctx.config.runCommand('foo:bar:fail')
-    } catch {
-      console.log('caught error')
-    }
-
-    expect(ctx.stdout).to.equal('running ts prerun hook\nit fails!\ncaught error\n')
+  it('runs faulty command, only prerun hook triggers', async () => {
+    const {stdout} = await runCommand(['foo:bar:fail'], root)
+    expect(stdout).to.equal('running ts init hook\nrunning ts prerun hook\nit fails!\n')
   })
 
-  withConfig.stdout().it('runs ts command, postrun hook captures command result', async (ctx) => {
-    await ctx.config.runCommand('foo:bar:test-result')
-    expect(ctx.stdout).to.equal('running ts prerun hook\nit works!\nrunning ts postrun hook\nreturned success!\n')
+  it('runs ts command, postrun hook captures command result', async () => {
+    const {stdout} = await runCommand(['foo:bar:test-result'], root)
+    expect(stdout).to.equal(
+      'running ts init hook\nrunning ts prerun hook\nit works!\nrunning ts postrun hook\nreturned success!\n',
+    )
   })
 
-  withConfig.stdout().it('runs init hook', async (ctx) => {
-    await ctx.config.runHook('init', {id: 'myid', argv: ['foo']})
-    expect(ctx.stdout).to.equal('running ts init hook\n')
+  it('runs init hook', async () => {
+    const {stdout} = await runHook('init', {id: 'myid', argv: ['foo']}, {root})
+    expect(stdout).to.equal('running ts init hook\n')
   })
 })

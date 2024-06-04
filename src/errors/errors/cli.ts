@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import ansis from 'ansis'
 import cs from 'clean-stack'
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
@@ -6,13 +6,16 @@ import wrap from 'wrap-ansi'
 import Cache from '../../cache'
 import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
-import {config} from '../config'
+import {settings} from '../../settings'
 
 /**
  * properties specific to internal oclif error handling
  */
 
-export function addOclifExitCode(error: Record<string, any>, options?: {exit?: false | number}): OclifError {
+export function addOclifExitCode(
+  error: Record<string, any>,
+  options?: {exit?: false | number | undefined},
+): OclifError {
   if (!('oclif' in error)) {
     ;(error as unknown as OclifError).oclif = {}
   }
@@ -22,12 +25,12 @@ export function addOclifExitCode(error: Record<string, any>, options?: {exit?: f
 }
 
 export class CLIError extends Error implements OclifError {
-  code?: string
+  code?: string | undefined
   oclif: OclifError['oclif'] = {}
-  skipOclifErrorHandling?: boolean
-  suggestions?: string[]
+  skipOclifErrorHandling?: boolean | undefined
+  suggestions?: string[] | undefined
 
-  constructor(error: Error | string, options: {exit?: false | number} & PrettyPrintableError = {}) {
+  constructor(error: Error | string, options: {exit?: false | number | undefined} & PrettyPrintableError = {}) {
     super(error instanceof Error ? error.message : error)
     addOclifExitCode(this, options)
     this.code = options.code
@@ -36,7 +39,7 @@ export class CLIError extends Error implements OclifError {
 
   get bang(): string | undefined {
     try {
-      return chalk.red(process.platform === 'win32' ? '»' : '›')
+      return ansis.red(process.platform === 'win32' ? '»' : '›')
     } catch {}
   }
 
@@ -49,7 +52,7 @@ export class CLIError extends Error implements OclifError {
    * @return {string} returns a string representing the dispay of the error
    */
   render(): string {
-    if (config.debug) {
+    if (settings.debug) {
       return this.stack
     }
 
@@ -71,7 +74,7 @@ export namespace CLIError {
 
     get bang(): string | undefined {
       try {
-        return chalk.yellow(process.platform === 'win32' ? '»' : '›')
+        return ansis.yellow(process.platform === 'win32' ? '»' : '›')
       } catch {}
     }
   }

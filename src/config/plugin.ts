@@ -15,9 +15,10 @@ import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson} from '../util/fs'
+import {readPjson} from '../util/read-pjson'
 import {castArray, compact} from '../util/util'
 import {tsPath} from './ts-path'
-import {Debug, getCommandIdPermutations} from './util'
+import {getCommandIdPermutations, makeDebug} from './util'
 
 const _pjson = Cache.getInstance().get('@oclif/core')
 
@@ -64,13 +65,8 @@ function processCommandIds(files: string[]): string[] {
 
 function determineCommandDiscoveryOptions(
   commandDiscovery: string | CommandDiscovery | undefined,
-  defaultCmdId?: string | undefined,
 ): CommandDiscovery | undefined {
   if (!commandDiscovery) return
-
-  if (typeof commandDiscovery === 'string' && defaultCmdId) {
-    return {strategy: 'single', target: commandDiscovery}
-  }
 
   if (typeof commandDiscovery === 'string') {
     return {globPatterns: GLOB_PATTERNS, strategy: 'pattern', target: commandDiscovery}
@@ -126,13 +122,13 @@ export class Plugin implements IPlugin {
 
   name!: string
 
-  parent: Plugin | undefined
+  parent?: Plugin | undefined
 
-  pjson!: PJSON.Plugin
+  pjson!: PJSON
 
   root!: string
 
-  tag?: string
+  tag?: string | undefined
 
   type!: string
 
@@ -142,8 +138,7 @@ export class Plugin implements IPlugin {
 
   _base = `${_pjson.name}@${_pjson.version}`
 
-  // eslint-disable-next-line new-cap
-  protected _debug = Debug()
+  protected _debug = makeDebug()
 
   private commandCache: CommandCache | undefined
   private commandDiscoveryOpts: CommandDiscovery | undefined
@@ -225,14 +220,14 @@ export class Plugin implements IPlugin {
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug(`loading ${this.type} plugin from ${root}`)
-    this.pjson = this.options.pjson ?? (await readJson(join(root, 'package.json')))
+    this.pjson = this.options.pjson ?? (await readPjson(root))
     this.flexibleTaxonomy = this.options?.flexibleTaxonomy || this.pjson.oclif?.flexibleTaxonomy || false
     this.moduleType = this.pjson.type === 'module' ? 'module' : 'commonjs'
     this.name = this.pjson.name
     this.alias = this.options.name ?? this.pjson.name
     if (!this.name) throw new CLIError(`no name in package.json (${root})`)
-    // eslint-disable-next-line new-cap
-    this._debug = Debug(this.name)
+
+    this._debug = makeDebug(this.name)
     this.version = this.pjson.version
     if (this.pjson.oclif) {
       this.valid = true
@@ -247,7 +242,7 @@ export class Plugin implements IPlugin {
       ]),
     )
 
-    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands, this.pjson.oclif?.default)
+    this.commandDiscoveryOpts = determineCommandDiscoveryOptions(this.pjson.oclif?.commands)
 
     this._debug('command discovery options', this.commandDiscoveryOpts)
 
@@ -329,7 +324,7 @@ export class Plugin implements IPlugin {
           }),
         )
       )
-        // eslint-disable-next-line unicorn/no-await-expression-member, unicorn/prefer-native-coercion-functions
+        // eslint-disable-next-line unicorn/prefer-native-coercion-functions
         .filter((f): f is [string, Command.Cached] => Boolean(f))
         .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
           commands[id] = c

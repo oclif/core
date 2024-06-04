@@ -2,14 +2,14 @@ import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 
 import {Config} from './config/config'
-import {PJSON, Plugin} from './interfaces'
+import {OclifConfiguration, Plugin} from './interfaces'
 
 type OclifCoreInfo = {name: string; version: string}
 
 type CacheContents = {
   rootPlugin: Plugin
   config: Config
-  exitCodes: PJSON.Plugin['oclif']['exitCodes']
+  exitCodes: OclifConfiguration['exitCodes']
   '@oclif/core': OclifCoreInfo
 }
 
@@ -36,7 +36,7 @@ export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContent
   public get(key: 'config'): Config | undefined
   public get(key: '@oclif/core'): OclifCoreInfo
   public get(key: 'rootPlugin'): Plugin | undefined
-  public get(key: 'exitCodes'): PJSON.Plugin['oclif']['exitCodes'] | undefined
+  public get(key: 'exitCodes'): OclifConfiguration['exitCodes'] | undefined
   public get(key: keyof CacheContents): ValueOf<CacheContents> | undefined {
     return super.get(key)
   }

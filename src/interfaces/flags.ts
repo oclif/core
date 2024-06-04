@@ -4,12 +4,12 @@ import {FlagInput} from './parser'
  * Infer the flags that are returned by Command.parse. This is useful for when you want to assign the flags as a class property.
  *
  * @example
- * export type StatusFlags = Interfaces.InferredFlags<typeof Status.flags & typeof Status.baseFlags>
+ * export type StatusFlags = Interfaces.InferredFlags<typeof Status.flags && typeof Status.baseFlags>
  *
  * export abstract class BaseCommand extends Command {
  *   static enableJsonFlag = true
  *
- *   static baseFlags = {
+ *   static flags = {
  *     config: Flags.string({
  *       description: 'specify config file',
  *     }),

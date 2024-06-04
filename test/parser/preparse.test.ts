@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import fs from 'node:fs/promises'
 import {join, resolve} from 'node:path'
-import {SinonSandbox, createSandbox, match} from 'sinon'
+import sinon from 'sinon'
 
 import {Config, Interfaces} from '../../src'
 import Test from './fixtures/preparse-plugin/src/commands/test'
@@ -12,16 +12,14 @@ type TestReturnType = {
 }
 
 describe('preparse hook', () => {
-  let sandbox: SinonSandbox
   let config: Config
 
   beforeEach(async () => {
-    sandbox = createSandbox()
     config = await Config.load(resolve(__dirname, join('fixtures', 'preparse-plugin')))
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   describe('implement groupAliases', () => {
@@ -75,10 +73,10 @@ describe('preparse hook', () => {
 
     function makeStubs(files: Array<{name: string; content: string}>) {
       // @ts-expect-error because sinon wants it to be a Dirent[] but node returns string[]
-      sandbox.stub(fs, 'readdir').resolves(files.map(({name}) => name))
+      sinon.stub(fs, 'readdir').resolves(files.map(({name}) => name))
 
       for (const {name, content} of files) {
-        sandbox.stub(fs, 'readFile').withArgs(match(name)).resolves(content)
+        sinon.stub(fs, 'readFile').withArgs(sinon.match(name)).resolves(content)
       }
     }
 

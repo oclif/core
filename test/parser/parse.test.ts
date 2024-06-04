@@ -1,7 +1,8 @@
+import ansis from 'ansis'
 import {assert, config, expect} from 'chai'
 import * as fs from 'node:fs'
 import {URL} from 'node:url'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
+import sinon from 'sinon'
 
 import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
@@ -10,7 +11,6 @@ import {parse} from '../../src/parser'
 import * as parser from '../../src/parser/parse'
 
 config.truncateThreshold = 0
-const stripAnsi = require('strip-ansi')
 
 describe('parse', () => {
   it('--bool', async () => {
@@ -265,7 +265,7 @@ describe('parse', () => {
           },
         })
       } catch (error: any) {
-        message = stripAnsi(error.message)
+        message = ansis.strip(error.message)
       }
 
       expect(message).to.include('Missing required flag myflag')
@@ -1611,15 +1611,14 @@ See more help with --help`)
   })
 
   describe('fs flags', () => {
-    const sandbox = createSandbox()
-    let statStub: SinonStub
+    let statStub: sinon.SinonStub
 
     beforeEach(() => {
-      statStub = sandbox.stub(fs.promises, 'stat')
+      statStub = sinon.stub(fs.promises, 'stat')
     })
 
     afterEach(() => {
-      sandbox.restore()
+      sinon.restore()
     })
 
     describe('directory', () => {
@@ -1875,22 +1874,17 @@ See more help with --help`)
 })
 
 describe('allowStdin', () => {
-  let sandbox: SinonSandbox
   const stdinValue = 'x'
   const stdinPromise = new Promise<null | string>((resolve) => {
     resolve(stdinValue)
   })
 
-  beforeEach(() => {
-    sandbox = createSandbox()
-  })
-
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   it('should read stdin as input for flag when value is "-"', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     const out = await parse(['--myflag', '-'], {
       flags: {
         myflag: Flags.string({allowStdin: true}),
@@ -1902,7 +1896,7 @@ describe('allowStdin', () => {
   })
 
   it('should not read stdin when value is not "-"', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     const out = await parse(['--myflag', 'foo'], {
       flags: {
         myflag: Flags.string({allowStdin: true}),
@@ -1914,7 +1908,7 @@ describe('allowStdin', () => {
   })
 
   it('should read stdin as input for flag when allowStdin is "only" and when value is "-"', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     const out = await parse(['--myflag', '-'], {
       flags: {
         myflag: Flags.string({allowStdin: 'only'}),
@@ -1926,7 +1920,7 @@ describe('allowStdin', () => {
   })
 
   it('should read stdin as input for flag when allowStdin is "only" and no value is given', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     const out = await parse(['--myflag'], {
       flags: {
         myflag: Flags.string({allowStdin: 'only'}),
@@ -1938,7 +1932,7 @@ describe('allowStdin', () => {
   })
 
   it('should throw if allowStdin is "only" but value is not "-" or undefined', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     try {
       await parse(['--myflag', 'INVALID'], {
         flags: {
@@ -1958,7 +1952,7 @@ describe('allowStdin', () => {
   })
 
   it('should read stdin as input for flag when allowStdin is "only" and no value is given, and a second flag is used after', async () => {
-    sandbox.stub(parser, 'readStdin').returns(stdinPromise)
+    sinon.stub(parser, 'readStdin').returns(stdinPromise)
     const out = await parse(['--myflag', '--myflag2'], {
       flags: {
         myflag: Flags.string({allowStdin: 'only'}),

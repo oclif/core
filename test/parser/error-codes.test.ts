@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {join, resolve} from 'node:path'
-import {SinonSandbox, createSandbox} from 'sinon'
+import sinon from 'sinon'
 
 import {Config} from '../../src'
 import Cache from '../../src/cache'
@@ -30,7 +30,6 @@ async function runCommand(fn: AsyncFunction, expectedCode: number): Promise<void
 }
 
 describe('configurable error codes', () => {
-  let sandbox: SinonSandbox
   let config: Config
 
   const defaultExitCode = 2
@@ -44,12 +43,11 @@ describe('configurable error codes', () => {
   }
 
   beforeEach(async () => {
-    sandbox = createSandbox()
     config = await Config.load(resolve(__dirname, join('fixtures', 'test-plugin')))
   })
 
   afterEach(() => {
-    sandbox.restore()
+    sinon.restore()
   })
 
   describe('failedFlagParsing', () => {
@@ -58,7 +56,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for failed flag parsing', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(
         () => config.runCommand('test', ['--flag1', '100', '--flag2', 'arg1']),
         exitCodes.failedFlagParsing,
@@ -72,7 +70,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for failed flag validation', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('test', ['--flag2', 'arg1']), exitCodes.failedFlagValidation)
     })
   })
@@ -83,7 +81,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for invalid args spec', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('invalid', ['arg1', 'arg2']), exitCodes.invalidArgsSpec)
     })
   })
@@ -94,7 +92,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for failed flag validation', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('test', ['--DOES_NOT_EXIST', 'arg1']), exitCodes.nonExistentFlag)
     })
   })
@@ -105,7 +103,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for failed flag validation', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('test', ['--flag1', '1']), exitCodes.requiredArgs)
     })
   })
@@ -116,7 +114,7 @@ describe('configurable error codes', () => {
     })
 
     it('should use configured exit code for failed flag validation', async () => {
-      sandbox.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('test', ['arg1', 'arg2', 'arg3']), exitCodes.unexpectedArgs)
     })
   })

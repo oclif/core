@@ -1,37 +1,23 @@
+import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {readFileSync} from 'node:fs'
 import {join, resolve} from 'node:path'
-import {SinonSandbox, SinonStub, createSandbox} from 'sinon'
-import stripAnsi from 'strip-ansi'
-
-import {ux} from '../../src/index'
-import {run} from '../../src/main'
 
 const pjson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'))
 const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
 
 describe('main', () => {
-  let sandbox: SinonSandbox
-  let stdoutStub: SinonStub
-
-  beforeEach(() => {
-    sandbox = createSandbox()
-    stdoutStub = sandbox.stub(ux.write, 'stdout')
-  })
-
-  afterEach(() => {
-    sandbox.restore()
-  })
-
   it('should run plugins', async () => {
-    const result = (await run(['plugins'], resolve(__dirname, '../../package.json'))) as Array<{
-      name: string
-      type: string
-    }>
-    expect(result.length).to.equal(3)
-    const rootPlugin = result.find((r) => r.name === '@oclif/core')
-    const pluginHelp = result.find((r) => r.name === '@oclif/plugin-help')
-    const pluginPlugins = result.find((r) => r.name === '@oclif/plugin-plugins')
+    const {result} = await runCommand<
+      Array<{
+        name: string
+        type: string
+      }>
+    >(['plugins'])
+    expect(result?.length).to.equal(3)
+    const rootPlugin = result?.find((r) => r.name === '@oclif/core')
+    const pluginHelp = result?.find((r) => r.name === '@oclif/plugin-help')
+    const pluginPlugins = result?.find((r) => r.name === '@oclif/plugin-plugins')
 
     expect(rootPlugin).to.exist
     expect(pluginHelp).to.exist
@@ -39,13 +25,13 @@ describe('main', () => {
   })
 
   it('should run version', async () => {
-    await run(['--version'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.firstCall.firstArg).to.equal(`${version}\n`)
+    const {stdout} = await runCommand(['--version'])
+    expect(stdout).to.equal(`${version}\n`)
   })
 
   it('should run help', async () => {
-    await run(['--help'], resolve(__dirname, '../../package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`base library for oclif CLIs
+    const {stdout} = await runCommand(['--help'])
+    expect(stdout).to.equal(`base library for oclif CLIs
 
 VERSION
   ${version}
@@ -64,8 +50,8 @@ COMMANDS
   })
 
   it('should show help for topics with spaces', async () => {
-    await run(['--help', 'foo'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo topic description
+    const {stdout} = await runCommand(['--help', 'foo'], {root: resolve(__dirname, 'fixtures/typescript/package.json')})
+    expect(stdout).to.equal(`foo topic description
 
 USAGE
   $ oclif foo COMMAND
@@ -80,8 +66,10 @@ COMMANDS
   })
 
   it('should run spaced topic help v2', async () => {
-    await run(['foo', 'bar', '--help'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(stdoutStub.args.map((a) => stripAnsi(a[0])).join('')).to.equal(`foo bar topic description
+    const {stdout} = await runCommand(['foo', 'bar', '--help'], {
+      root: resolve(__dirname, 'fixtures/typescript/package.json'),
+    })
+    expect(stdout).to.equal(`foo bar topic description
 
 USAGE
   $ oclif foo bar COMMAND
@@ -94,14 +82,14 @@ COMMANDS
   })
 
   it('should run foo:baz with space separator', async () => {
-    const consoleLogStub = sandbox.stub(console, 'log').returns()
-    await run(['foo', 'baz'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(consoleLogStub.firstCall.firstArg).to.equal('running Baz')
+    const {stdout} = await runCommand(['foo', 'baz'], {root: resolve(__dirname, 'fixtures/typescript/package.json')})
+    expect(stdout).to.equal('running Baz\n')
   })
 
   it('should run foo:bar:succeed with space separator', async () => {
-    const consoleLogStub = sandbox.stub(console, 'log').returns()
-    await run(['foo', 'bar', 'succeed'], resolve(__dirname, 'fixtures/typescript/package.json'))
-    expect(consoleLogStub.firstCall.firstArg).to.equal('it works!')
+    const {stdout} = await runCommand(['foo', 'bar', 'succeed'], {
+      root: resolve(__dirname, 'fixtures/typescript/package.json'),
+    })
+    expect(stdout).to.equal('it works!\n')
   })
 })

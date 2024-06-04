@@ -1,9 +1,14 @@
-import write from '../cli-ux/write'
 import {OclifError} from '../interfaces'
-import {config} from './config'
+import {getLogger} from '../logger'
+import {stderr} from '../ux/write'
 import {CLIError, addOclifExitCode} from './errors/cli'
 import prettyPrint from './errors/pretty-print'
 
+/**
+ * Prints a pretty warning message to stderr.
+ *
+ * @param input The error or string to print.
+ */
 export function warn(input: Error | string): void {
   let err: Error & OclifError
 
@@ -16,8 +21,8 @@ export function warn(input: Error | string): void {
   }
 
   const message = prettyPrint(err)
-  if (message) write.stderr(message + '\n')
-  if (config.errorLogger) config.errorLogger.log(err?.stack ?? '')
+  if (message) stderr(message)
+  if (err?.stack) getLogger().error(err.stack)
 }
 
 const WARNINGS = new Set<Error | string>()
