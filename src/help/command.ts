@@ -166,12 +166,11 @@ export class CommandHelp extends HelpFormatter {
     }
 
     if (flag.type === 'option') {
-      let value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
-      if (!flag.helpValue && flag.options) {
-        value = showOptions || this.opts.showFlagOptionsInTitle ? `${flag.options.join('|')}` : '<option>'
-      }
-
-      if (flag.multiple) value += '...'
+      let value = DocOpts.formatUsageType(
+        flag,
+        this.opts.showFlagNameInTitle ?? false,
+        this.opts.showFlagOptionsInTitle ?? showOptions,
+      )
       if (!value.includes('|')) value = chalk.underline(value)
       label += `=${value}`
     }
