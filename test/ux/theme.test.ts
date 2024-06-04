@@ -1,11 +1,19 @@
 import ansis from 'ansis'
-import {config, expect} from 'chai'
+import {expect} from 'chai'
+import sinon from 'sinon'
 
-config.truncateThreshold = 0
-
+import * as supportsColor from '../../src/ux/supports-color'
 import {colorize, parseTheme} from '../../src/ux/theme'
 
 describe('colorize', () => {
+  beforeEach(() => {
+    sinon.stub(supportsColor, 'supportsColor').returns(true)
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
   it('should return text with ansi characters when given hex code', () => {
     const color = '#FF0000'
     const text = colorize(color, 'brazil')

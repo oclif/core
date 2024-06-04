@@ -1,7 +1,7 @@
 import ansis from 'ansis'
-import {stderr, stdout} from 'supports-color'
 
 import {STANDARD_ANSI, StandardAnsi, Theme} from '../interfaces/theme'
+import {supportsColor} from './supports-color'
 
 function isStandardAnsi(color: any): color is StandardAnsi {
   return STANDARD_ANSI.includes(color)
@@ -15,8 +15,7 @@ function isStandardAnsi(color: any): color is StandardAnsi {
  */
 export function colorize(color: string | StandardAnsi | undefined, text: string): string {
   if (!color) return text
-  if (!stdout) return text
-  if (!stderr) return text
+  if (!supportsColor()) return text
   if (isStandardAnsi(color)) return ansis[color](text)
   if (color.startsWith('#')) return ansis.hex(color)(text)
   if (color.startsWith('rgb')) {
