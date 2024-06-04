@@ -1,3 +1,27 @@
+# [3.27.0](https://github.com/oclif/core/compare/3.26.9...3.27.0) (2024-06-04)
+
+### Features
+
+- added option to specify example flag value in docopts ([#1095](https://github.com/oclif/core/issues/1095)) ([0345ac3](https://github.com/oclif/core/commit/0345ac33bb8726c4d9870d4f2a8f3dcdee8bd07a)), closes [#1091](https://github.com/oclif/core/issues/1091)
+
+## [3.26.9](https://github.com/oclif/core/compare/3.26.8...3.26.9) (2024-06-03)
+
+### Bug Fixes
+
+- only replace command id in usage if it's at beginning of string ([#1090](https://github.com/oclif/core/issues/1090)) ([3916945](https://github.com/oclif/core/commit/391694559446ef82bc5fc307e6e9ff72e44f7558))
+
+## [3.26.8](https://github.com/oclif/core/compare/3.26.7...3.26.8) (2024-06-03)
+
+### Bug Fixes
+
+- **deps:** bump debug from 4.3.4 to 4.3.5 ([#1093](https://github.com/oclif/core/issues/1093)) ([58b9fed](https://github.com/oclif/core/commit/58b9fed6c7b32026279afc707227aab8dfb4ef6f))
+
+## [3.26.7](https://github.com/oclif/core/compare/3.26.6...3.26.7) (2024-06-03)
+
+### Bug Fixes
+
+- get core meta version ([#1094](https://github.com/oclif/core/issues/1094)) ([9639fd4](https://github.com/oclif/core/commit/9639fd421824f58fbd209b771f0bdd5eac0426d0))
+
 ## [3.26.6](https://github.com/oclif/core/compare/3.26.5...3.26.6) (2024-05-06)
 
 ### Bug Fixes

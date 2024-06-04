@@ -165,12 +165,11 @@ export class CommandHelp extends HelpFormatter {
     }
 
     if (flag.type === 'option') {
-      let value = flag.helpValue || (this.opts.showFlagNameInTitle ? flag.name : '<value>')
-      if (!flag.helpValue && flag.options) {
-        value = showOptions || this.opts.showFlagOptionsInTitle ? `${flag.options.join('|')}` : '<option>'
-      }
-
-      if (flag.multiple) value += '...'
+      let value = DocOpts.formatUsageType(
+        flag,
+        this.opts.showFlagNameInTitle ?? false,
+        this.opts.showFlagOptionsInTitle ?? showOptions,
+      )
       if (!value.includes('|')) value = ansis.underline(value)
       label += `=${value}`
     }
@@ -348,7 +347,11 @@ export class CommandHelp extends HelpFormatter {
 
         const commandDescription = colorize(
           this.config?.theme?.sectionDescription,
-          u.replace('<%= command.id %>', '').replace(standardId, '').replace(configuredId, '').trim(),
+          u
+            .replace('<%= command.id %>', '')
+            .replace(new RegExp(`^${standardId}`), '')
+            .replace(new RegExp(`^${configuredId}`), '')
+            .trim(),
         )
 
         const line = `${dollarSign} ${bin} ${command} ${commandDescription}`.trim()
