@@ -72,6 +72,26 @@ export class DocOpts {
       })
   }
 
+  public static formatUsageType(flag: Command.Flag.Any, showFlagName: boolean, showOptions: boolean): string {
+    if (flag.type !== 'option') return ''
+
+    let helpValues: string[]
+    if (flag.helpValue) {
+      // if there is a given helpValue, use it
+      helpValues = typeof flag.helpValue === 'string' ? [flag.helpValue] : flag.helpValue
+    } else if (flag.options) {
+      // if there are options, show them if wanted
+      helpValues = [showOptions ? flag.options.join('|') : '<option>']
+    } else if (showFlagName) {
+      helpValues = [flag.name]
+    } else {
+      // default to <value>
+      helpValues = ['<value>']
+    }
+
+    return helpValues.map((v) => `${v}${flag.multiple ? '...' : ''}`).join(' ')
+  }
+
   public static generate(cmd: Command.Loadable): string {
     return new DocOpts(cmd).toString()
   }
@@ -96,7 +116,7 @@ export class DocOpts {
         ...this.flagList.map((flag) => {
           const name = flag.char ? `-${flag.char}` : `--${flag.name}`
           if (flag.type === 'boolean') return name
-          return `${name}=<value>`
+          return `${name}=${DocOpts.formatUsageType(flag, false, true)}`
         }),
       )
     }
@@ -142,7 +162,7 @@ export class DocOpts {
       // not all flags have short names
       const flagName = flag.char ? `-${flag.char}` : `--${flag.name}`
       if (flag.type === 'option') {
-        type = flag.options ? ` ${flag.options.join('|')}` : ' <value>'
+        type = ` ${DocOpts.formatUsageType(flag, false, true)}`
       }
 
       const element = `${flagName}${type}`

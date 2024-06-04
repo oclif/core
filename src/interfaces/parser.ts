@@ -206,7 +206,7 @@ export type BooleanFlagProps = FlagProps & {
 
 export type OptionFlagProps = FlagProps & {
   type: 'option'
-  helpValue?: string
+  helpValue?: string | string[]
   options?: readonly string[]
   multiple?: boolean
   /**
@@ -295,10 +295,10 @@ type FlagReturnType<T, R extends ReturnTypeSwitches> = R['requiredOrDefaulted'] 
       : T[]
     : T
   : R['multiple'] extends true
-  ? [T] extends [Array<unknown>]
-    ? T | undefined
-    : T[] | undefined
-  : T | undefined
+    ? [T] extends [Array<unknown>]
+      ? T | undefined
+      : T[] | undefined
+    : T | undefined
 
 /**
  * FlagDefinition types a function that takes `options` and returns an OptionFlag<T>.
