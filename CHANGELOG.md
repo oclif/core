@@ -1,3 +1,12 @@
+## [4.0.1](https://github.com/oclif/core/compare/4.0.0...4.0.1) (2024-06-04)
+
+
+### Bug Fixes
+
+* parsed args regression ([#1096](https://github.com/oclif/core/issues/1096)) ([53f915b](https://github.com/oclif/core/commit/53f915b949596a0a30784586790f5cdee6a60426))
+
+
+
 # [4.0.0](https://github.com/oclif/core/compare/3.27.0...4.0.0) (2024-06-04)
 
 
