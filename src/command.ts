@@ -270,7 +270,7 @@ export abstract class Command {
   protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
     options?: Input<F, B, A>,
     argv = this.argv,
-  ): Promise<ParserOutput<F, A>> {
+  ): Promise<ParserOutput<F, B, A>> {
     if (!options) options = this.ctor as Input<F, B, A>
 
     const opts = {
