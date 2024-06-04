@@ -360,6 +360,27 @@ FLAGS
   --myenum=a|b|c`)
     })
 
+    it('should output helpValue in usage string', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          flags: {
+            files: flags.string({
+              helpValue: ['<input-json>', '<input-xml>'],
+              multiple: true,
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create [--files <input-json>... <input-xml>...]
+
+FLAGS
+  --files=<input-json>... <input-xml>...`)
+    })
+
     it('should output with default flag options', async () => {
       const cmd = await makeLoadable(
         makeCommandClass({

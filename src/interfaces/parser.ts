@@ -206,17 +206,7 @@ export type BooleanFlagProps = FlagProps & {
 
 export type OptionFlagProps = FlagProps & {
   type: 'option'
-  helpValue?: string
-  /**
-   * Specify types to show in help usage strings
-   *
-   * Ex: `usageType: ['input-json', 'input-xml']` gets
-   *
-   * `mycommand -i <input-json>... <input-xml>...`
-   *
-   * if `multiple` is also `true`
-   */
-  usageType?: string | string[]
+  helpValue?: string | string[]
   options?: readonly string[]
   multiple?: boolean
   /**

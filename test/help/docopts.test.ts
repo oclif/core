@@ -266,7 +266,7 @@ describe('doc opts', () => {
     expect(usage).to.contain(' (-s <value> -f <value>)')
   })
 
-  it('is uses usageTypes as expected', () => {
+  it('is uses helpValues as expected', () => {
     const usage = DocOpts.generate({
       flags: {
         testFlag: Flags.url({
@@ -274,7 +274,7 @@ describe('doc opts', () => {
           description: 'test',
           char: 's',
           required: true,
-          usageType: ['<test1>', '<test2>'],
+          helpValue: ['<test1>', '<test2>'],
           multiple: true,
         }),
         testFlag2: Flags.string({
@@ -282,7 +282,7 @@ describe('doc opts', () => {
           description: 'test',
           char: 'f',
           required: true,
-          usageType: '<test3>',
+          helpValue: '<test3>',
         }),
         testFlag3: Flags.string({
           name: 'testFlag3',
@@ -296,9 +296,10 @@ describe('doc opts', () => {
           description: 'test',
           char: 'p',
           required: true,
+          options: ['option1', 'option2'],
         }),
       },
     } as any)
-    expect(usage).to.contain('-s <test1>... <test2>... -f <test3> -g <value>... -p <value>')
+    expect(usage).to.contain('-s <test1>... <test2>... -f <test3> -g <value>... -p option1|option2')
   })
 })
