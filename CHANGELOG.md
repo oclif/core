@@ -1,3 +1,12 @@
+## [4.0.2](https://github.com/oclif/core/compare/4.0.1...4.0.2) (2024-06-05)
+
+
+### Bug Fixes
+
+* add export for parser ([#1098](https://github.com/oclif/core/issues/1098)) ([f7bfc76](https://github.com/oclif/core/commit/f7bfc7607ecafbe669696b6b18a332af617dd981))
+
+
+
 ## [4.0.1](https://github.com/oclif/core/compare/4.0.0...4.0.1) (2024-06-04)
 
 
