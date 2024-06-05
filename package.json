@@ -95,6 +95,7 @@
     "./hooks": "./lib/interfaces/hooks.js",
     "./interfaces": "./lib/interfaces/index.js",
     "./logger": "./lib/logger.js",
+    "./parser": "./lib/parser/index.js",
     "./performance": "./lib/performance.js",
     "./run": "./lib/main.js",
     "./settings": "./lib/settings.js",
