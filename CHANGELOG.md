@@ -1,3 +1,12 @@
+## [4.0.3](https://github.com/oclif/core/compare/4.0.2...4.0.3) (2024-06-06)
+
+
+### Bug Fixes
+
+* export parser related types ([#1099](https://github.com/oclif/core/issues/1099)) ([0daafdd](https://github.com/oclif/core/commit/0daafdd47f4f7925502513dc9097193a691bad1f))
+
+
+
 ## [4.0.2](https://github.com/oclif/core/compare/4.0.1...4.0.2) (2024-06-05)
 
 
