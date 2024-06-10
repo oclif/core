@@ -71,7 +71,6 @@ async function installPlugin(options: InstallPluginOptions): Promise<void> {
 }
 
 async function linkPlugin(options: LinkPluginOptions): Promise<Executor> {
-  console.log('USE TSX', options.useTsx)
   const pluginExecutor = await setup(__filename, {
     repo: options.plugin.repo,
     subDir: options.executor.parentDir,
