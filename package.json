@@ -124,7 +124,7 @@
     "test:circular-deps": "yarn build && madge lib/ -c",
     "test:debug": "nyc mocha --debug-brk --inspect \"test/**/*.test.ts\"",
     "test:integration": "mocha --forbid-only \"test/**/*.integration.ts\" --parallel --timeout 1200000",
-    "test:interoperability": "cross-env DEBUG=integration:*,*ts-path* ts-node test/integration/interop.ts",
+    "test:interoperability": "cross-env DEBUG=integration:*,*ts-path ts-node test/integration/interop.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
     "test": "nyc mocha --forbid-only \"test/**/*.test.ts\" --parallel"
   },

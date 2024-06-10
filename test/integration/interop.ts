@@ -261,6 +261,9 @@ async function testRunner({
       command: plugin.command,
       script: devExecutable,
       expectStrings: ['cheers', plugin.hookText],
+      env: {
+        DEBUG: '*ts-path',
+      },
     })
 
     await cleanUp({executor, plugin, script: 'run'})
