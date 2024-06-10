@@ -36,6 +36,7 @@ type LinkPluginOptions = {
   plugin: Plugin
   script: Script
   noLinkCore?: boolean
+  useTsx?: boolean
 }
 
 type RunCommandOptions = {
@@ -70,10 +71,12 @@ async function installPlugin(options: InstallPluginOptions): Promise<void> {
 }
 
 async function linkPlugin(options: LinkPluginOptions): Promise<Executor> {
+  console.log('USE TSX', options.useTsx)
   const pluginExecutor = await setup(__filename, {
     repo: options.plugin.repo,
     subDir: options.executor.parentDir,
     noLinkCore: options.noLinkCore ?? false,
+    useTsx: options.useTsx,
   })
 
   const result = await options.executor.executeCommand(
@@ -236,7 +239,7 @@ async function testRunner({
   }
 
   const linkTest = async (plugin: PluginConfig, executor: Executor, noLinkCore = false) => {
-    const linkedPlugin = await linkPlugin({executor, plugin, script: 'run', noLinkCore})
+    const linkedPlugin = await linkPlugin({executor, plugin, script: 'run', noLinkCore, useTsx: devRunTime === 'tsx'})
 
     // test bin/run
     await runCommand({

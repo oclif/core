@@ -24,6 +24,7 @@ export type SetupOptions = {
   plugins?: string[]
   subDir?: string
   noLinkCore?: boolean
+  useTsx?: boolean | undefined
 }
 
 export type ExecutorOptions = {
@@ -40,6 +41,7 @@ function updatePkgJson(testDir: string, obj: Record<string, unknown>): Interface
   const pkgJson = JSON.parse(readFileSync(pkgJsonFile, 'utf8'))
   obj.dependencies = Object.assign(pkgJson.dependencies || {}, obj.dependencies || {})
   obj.resolutions = Object.assign(pkgJson.resolutions || {}, obj.resolutions || {})
+  obj.devDependencies = Object.assign(pkgJson.devDependencies || {}, obj.devDependencies || {})
   const updated = Object.assign(pkgJson, obj)
   writeFileSync(pkgJsonFile, JSON.stringify(updated, null, 2))
 
@@ -159,6 +161,7 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
 
   executor.debug('Updating package.json')
   const dependencies = options.noLinkCore ? {} : {'@oclif/core': `file:${resolve('.')}`}
+  const devDependencies = options.useTsx ? {tsx: 'latest'} : {}
 
   let pjson: Interfaces.PJSON
   if (options.plugins) {
@@ -167,16 +170,19 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
     pjson = updatePkgJson(pluginDir, {
       ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
       dependencies: {...dependencies, ...pluginDeps},
+      devDependencies,
       oclif: {plugins: options.plugins},
     })
   } else {
     pjson = updatePkgJson(pluginDir, {
       ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
+      devDependencies,
       dependencies,
     })
   }
 
   executor.debug('updated dependencies:', JSON.stringify(pjson.dependencies, null, 2))
+  executor.debug('updated devDependencies:', JSON.stringify(pjson.devDependencies, null, 2))
   executor.debug('updated resolutions:', JSON.stringify(pjson.resolutions, null, 2))
   executor.debug('updated plugins:', JSON.stringify(pjson.oclif.plugins, null, 2))
 
