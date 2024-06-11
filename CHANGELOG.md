@@ -1,3 +1,12 @@
+## [4.0.4](https://github.com/oclif/core/compare/4.0.3...4.0.4) (2024-06-11)
+
+
+### Bug Fixes
+
+* use lilconfig ([#1108](https://github.com/oclif/core/issues/1108)) ([804db9b](https://github.com/oclif/core/commit/804db9b5a5c35a1d2cdc85d8635f61ca44a27e04))
+
+
+
 ## [4.0.3](https://github.com/oclif/core/compare/4.0.2...4.0.3) (2024-06-06)
 
 
