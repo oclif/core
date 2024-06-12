@@ -1,3 +1,12 @@
+## [4.0.6](https://github.com/oclif/core/compare/4.0.5...4.0.6) (2024-06-12)
+
+
+### Bug Fixes
+
+* single command cli symbol on help output ([#1112](https://github.com/oclif/core/issues/1112)) ([5de6a40](https://github.com/oclif/core/commit/5de6a402129299a3b0d17dc6ddc2dc1cd82b6005))
+
+
+
 ## [4.0.5](https://github.com/oclif/core/compare/4.0.4...4.0.5) (2024-06-12)
 
 
