@@ -239,6 +239,9 @@ export class Help extends HelpBase {
       if (this.config.isSingleCommandCLI) {
         const rootCmd = this.config.findCommand(SINGLE_COMMAND_CLI_SYMBOL)
         if (rootCmd) {
+          // set the command id to an empty string to prevent the
+          // SINGLE_COMMAND_CLI_SYMBOL from being displayed in the help output
+          rootCmd.id = ''
           await this.showCommandHelp(rootCmd)
           return
         }
