@@ -209,7 +209,7 @@ export default class PluginLoader {
         const userPJSONPath = join(opts.dataDir, 'package.json')
         debug('reading user plugins pjson %s', userPJSONPath)
         // ignore cache because the file might have changed within the same process (e.g. during a JIT plugin install)
-        const pjson = await readJson<PJSON>(userPJSONPath, true)
+        const pjson = await readJson<PJSON>(userPJSONPath, false)
         if (!pjson.oclif) pjson.oclif = {schema: 1}
         if (!pjson.oclif.plugins) pjson.oclif.plugins = []
         await this.loadPlugins(

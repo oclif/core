@@ -63,11 +63,11 @@ const cache = new ProdOnlyCache()
  * Will throw an error if the file does not exist.
  *
  * @param path file path of JSON file
- * @param ignoreCache if true, ignore cache and read file from disk
+ * @param useCache if false, ignore cache and read file from disk
  * @returns <T>
  */
-export async function readJson<T = unknown>(path: string, ignoreCache = false): Promise<T> {
-  if (!ignoreCache && cache.has(path)) {
+export async function readJson<T = unknown>(path: string, useCache = true): Promise<T> {
+  if (useCache && cache.has(path)) {
     return JSON.parse(cache.get(path)!) as T
   }
 
@@ -82,12 +82,12 @@ export async function readJson<T = unknown>(path: string, ignoreCache = false): 
  * Will return undefined if the file does not exist.
  *
  * @param path file path of JSON file
- * @param ignoreCache if true, ignore cache and read file from disk
+ * @param useCache if false, ignore cache and read file from disk
  * @returns <T> or undefined
  */
-export async function safeReadJson<T>(path: string, ignoreCache = false): Promise<T | undefined> {
+export async function safeReadJson<T>(path: string, useCache = true): Promise<T | undefined> {
   try {
-    return await readJson<T>(path, ignoreCache)
+    return await readJson<T>(path, useCache)
   } catch {}
 }
 
