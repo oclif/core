@@ -1,3 +1,12 @@
+## [4.0.7](https://github.com/oclif/core/compare/4.0.6...4.0.7) (2024-06-25)
+
+
+### Bug Fixes
+
+* ignore cache when reading user pjson ([#1124](https://github.com/oclif/core/issues/1124)) ([6038c5c](https://github.com/oclif/core/commit/6038c5c34aca5442e2034c6c574f9c20150bb2f9)), closes [#1125](https://github.com/oclif/core/issues/1125)
+
+
+
 ## [4.0.6](https://github.com/oclif/core/compare/4.0.5...4.0.6) (2024-06-12)
 
 
