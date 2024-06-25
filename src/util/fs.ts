@@ -1,4 +1,4 @@
-import {Stats, existsSync as fsExistsSync, readFileSync} from 'node:fs'
+import {Stats, existsSync as fsExistsSync} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 
 import {isProd} from './util'
@@ -57,8 +57,17 @@ class ProdOnlyCache extends Map<string, string> {
 
 const cache = new ProdOnlyCache()
 
-export async function readJson<T = unknown>(path: string): Promise<T> {
-  if (cache.has(path)) {
+/**
+ * Read a file from disk and cache its contents if in production environment.
+ *
+ * Will throw an error if the file does not exist.
+ *
+ * @param path file path of JSON file
+ * @param ignoreCache if true, ignore cache and read file from disk
+ * @returns <T>
+ */
+export async function readJson<T = unknown>(path: string, ignoreCache = false): Promise<T> {
+  if (!ignoreCache && cache.has(path)) {
     return JSON.parse(cache.get(path)!) as T
   }
 
@@ -67,25 +76,18 @@ export async function readJson<T = unknown>(path: string): Promise<T> {
   return JSON.parse(contents) as T
 }
 
-export function readJsonSync(path: string, parse: false): string
-export function readJsonSync<T = unknown>(path: string, parse?: true): T
-export function readJsonSync<T = unknown>(path: string, parse = true): T | string {
-  if (cache.has(path)) {
-    return JSON.parse(cache.get(path)!) as T
-  }
-
-  const contents = readFileSync(path, 'utf8')
-  cache.set(path, contents)
-  return parse ? (JSON.parse(contents) as T) : contents
-}
-
-export async function safeReadJson<T>(path: string): Promise<T | undefined> {
-  if (cache.has(path)) {
-    return JSON.parse(cache.get(path)!) as T
-  }
-
+/**
+ * Safely read a file from disk and cache its contents if in production environment.
+ *
+ * Will return undefined if the file does not exist.
+ *
+ * @param path file path of JSON file
+ * @param ignoreCache if true, ignore cache and read file from disk
+ * @returns <T> or undefined
+ */
+export async function safeReadJson<T>(path: string, ignoreCache = false): Promise<T | undefined> {
   try {
-    return await readJson<T>(path)
+    return await readJson<T>(path, ignoreCache)
   } catch {}
 }
 
