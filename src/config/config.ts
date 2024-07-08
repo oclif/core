@@ -663,6 +663,10 @@ export class Config implements IConfig {
     const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
+    } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
+      shellPath = ['pwsh']
+    } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
+      shellPath = ['cmd.exe']
     } else if (this.windows && COMSPEC) {
       shellPath = COMSPEC.split(/\\|\//)
     } else {
