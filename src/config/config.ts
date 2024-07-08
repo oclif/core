@@ -659,12 +659,17 @@ export class Config implements IConfig {
 
   protected _shell(): string {
     let shellPath
-    const {COMSPEC} = process.env
+    const {COMSPEC, PSModulePath} = process.env
     const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
+    } else if (!this.windows && PSModulePath) {
+      // PSModulePath is always set in powershell, regardless of the OS
+      // We can't use this on windows though since both powershell and cmd.exe set it
+      // https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.4
+      shellPath = ['powershell']
     } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
-      shellPath = ['pwsh']
+      shellPath = ['powershell']
     } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
       shellPath = ['cmd.exe']
     } else if (this.windows && COMSPEC) {
