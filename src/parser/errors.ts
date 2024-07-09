@@ -1,10 +1,9 @@
-import ansis from 'ansis'
-
 import Cache from '../cache'
 import {CLIError} from '../errors'
 import {Arg, ArgInput, CLIParseErrorOptions, OptionFlag} from '../interfaces/parser'
 import {uniq} from '../util/util'
 import renderList from '../ux/list'
+import {colorize} from '../ux/theme'
 
 export {CLIError} from '../errors'
 
@@ -124,7 +123,7 @@ export class FailedFlagValidationError extends CLIParseError {
     const reasons = failed.map((r) => r.reason)
     const deduped = uniq(reasons)
     const errString = deduped.length === 1 ? 'error' : 'errors'
-    const message = `The following ${errString} occurred:\n  ${ansis.dim(deduped.join('\n  '))}`
+    const message = `The following ${errString} occurred:\n  ${colorize('dim', deduped.join('\n  '))}`
     super({exit: Cache.getInstance().get('exitCodes')?.failedFlagValidation ?? exit, message, parse})
   }
 }

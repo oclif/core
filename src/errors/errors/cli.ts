@@ -1,4 +1,3 @@
-import ansis from 'ansis'
 import cs from 'clean-stack'
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
@@ -7,6 +6,7 @@ import Cache from '../../cache'
 import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
 import {settings} from '../../settings'
+import {colorize} from '../../ux/theme'
 
 /**
  * properties specific to internal oclif error handling
@@ -39,7 +39,7 @@ export class CLIError extends Error implements OclifError {
 
   get bang(): string | undefined {
     try {
-      return ansis.red(process.platform === 'win32' ? '»' : '›')
+      return colorize('red', process.platform === 'win32' ? '»' : '›')
     } catch {}
   }
 
@@ -74,7 +74,7 @@ export namespace CLIError {
 
     get bang(): string | undefined {
       try {
-        return ansis.yellow(process.platform === 'win32' ? '»' : '›')
+        return colorize('yellow', process.platform === 'win32' ? '»' : '›')
       } catch {}
     }
   }
