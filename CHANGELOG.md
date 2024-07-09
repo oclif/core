@@ -1,3 +1,12 @@
+## [4.0.9](https://github.com/oclif/core/compare/4.0.8...4.0.9) (2024-07-09)
+
+
+### Bug Fixes
+
+* correctly identify powershell on windows ([#1134](https://github.com/oclif/core/issues/1134)) ([bcec7df](https://github.com/oclif/core/commit/bcec7dfbcb27579ddd312f8ebda5a7b6c0829e98))
+
+
+
 ## [4.0.8](https://github.com/oclif/core/compare/4.0.7...4.0.8) (2024-07-01)
 
 
