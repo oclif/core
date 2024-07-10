@@ -1,3 +1,12 @@
+## [4.0.11](https://github.com/oclif/core/compare/4.0.10...4.0.11) (2024-07-10)
+
+
+### Bug Fixes
+
+* export ArgDefinition ([#1137](https://github.com/oclif/core/issues/1137)) ([db8d951](https://github.com/oclif/core/commit/db8d9513862d9702cb573d5d0544e0e164427032))
+
+
+
 ## [4.0.10](https://github.com/oclif/core/compare/4.0.9...4.0.10) (2024-07-10)
 
 
