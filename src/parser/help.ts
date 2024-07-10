@@ -1,7 +1,6 @@
-import ansis from 'ansis'
-
 import {Flag, FlagUsageOptions} from '../interfaces/parser'
 import {sortBy} from '../util/util'
+import {colorize} from '../ux'
 
 export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [string, string | undefined] {
   const label = []
@@ -17,7 +16,7 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
 
   let description: string | undefined = flag.summary || flag.description || ''
   if (options.displayRequired && flag.required) description = `(required) ${description}`
-  description = description ? ansis.dim(description) : undefined
+  description = description ? colorize('dim', description) : undefined
 
   return [` ${label.join(',').trim()}${usage}`, description] as [string, string | undefined]
 }

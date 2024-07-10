@@ -170,7 +170,7 @@ export class CommandHelp extends HelpFormatter {
         this.opts.showFlagNameInTitle ?? false,
         this.opts.showFlagOptionsInTitle ?? showOptions,
       )
-      if (!value.includes('|')) value = ansis.underline(value)
+      if (!value.includes('|')) value = colorize('underline', value)
       label += `=${value}`
     }
 

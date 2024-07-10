@@ -181,7 +181,7 @@ export class HelpFormatter {
     }
 
     const output = [
-      colorize(this.config?.theme?.sectionHeader, ansis.bold(header)),
+      colorize(this.config?.theme?.sectionHeader, colorize('bold', header)),
       colorize(
         this.config?.theme?.sectionDescription,
         this.indent(

@@ -1,4 +1,3 @@
-import ansis from 'ansis'
 import {fileURLToPath} from 'node:url'
 import {inspect} from 'node:util'
 
@@ -196,7 +195,7 @@ export abstract class Command {
     } else {
       if (!err.message) throw err
       try {
-        ux.action.stop(ansis.bold.red('!'))
+        ux.action.stop(ux.colorize('bold', ux.colorize('red', '!')))
       } catch {}
 
       throw err
