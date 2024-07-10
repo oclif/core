@@ -9,6 +9,7 @@ export type {Logger} from './logger'
 export type {Manifest} from './manifest'
 export type {
   Arg,
+  ArgDefinition,
   ArgInput,
   BooleanFlag,
   CustomOptions,
