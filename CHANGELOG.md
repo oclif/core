@@ -1,3 +1,12 @@
+## [4.0.10](https://github.com/oclif/core/compare/4.0.9...4.0.10) (2024-07-10)
+
+
+### Bug Fixes
+
+* use colorize to ensure proper TTY detection ([8a5d71f](https://github.com/oclif/core/commit/8a5d71f93104ce17555adc28998db0520a2a7187))
+
+
+
 ## [4.0.9](https://github.com/oclif/core/compare/4.0.8...4.0.9) (2024-07-09)
 
 
