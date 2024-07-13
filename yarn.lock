@@ -808,9 +808,9 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.3.3.tgz#792375160d20961ab08e8d45e0adec68c4568471"
-  integrity sha512-W071oAdmdMpHwI1q9kGcuKijP6zwuZXi2rQvzEGivjwg/Uj51B1RNKvOYy/O7pd0lCZu+1s6LAZmb8wCwii6yQ==
+  version "5.3.5"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.3.5.tgz#6fcbc8dd7ee9773c650f5cb4d306cea4a09b2e4f"
+  integrity sha512-0xa5AIx79XAZIfiV3aoe8iH7K4olytTQ/VRi2Mm7To1Lp2h2guh9/aEc5fUMpWrmgtK6YYWijV04vPs12faftA==
   dependencies:
     "@oclif/core" "^4"
     ansis "^3.2.0"
