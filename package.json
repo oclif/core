@@ -52,7 +52,7 @@
     "eslint-config-oclif": "^5.2.0",
     "eslint-config-oclif-typescript": "^3.1.8",
     "eslint-config-prettier": "^9.1.0",
-    "husky": "^9",
+    "husky": "^9.1.1",
     "lint-staged": "^15",
     "madge": "^6.1.0",
     "mocha": "^10.6.0",
