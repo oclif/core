@@ -1,3 +1,12 @@
+## [4.0.14](https://github.com/oclif/core/compare/4.0.13...4.0.14) (2024-07-23)
+
+
+### Bug Fixes
+
+* husky 9.1.1 fix ([#1147](https://github.com/oclif/core/issues/1147)) ([cd3720f](https://github.com/oclif/core/commit/cd3720f9722b619be229b1605f354020c44df21e))
+
+
+
 ## [4.0.13](https://github.com/oclif/core/compare/4.0.12...4.0.13) (2024-07-21)
 
 
