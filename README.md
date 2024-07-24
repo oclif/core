@@ -101,6 +101,30 @@ $ ts-node myscript.ts
 ...files in current dir...
 ```
 
+You can also use oclif's `Parser` separately:
+
+```javascript
+// index.js
+import {Args, Flags, Parser} from '@oclif/core'
+
+const {args, flags} = await Parser.parse(process.argv.slice(2), {
+  args: {
+    name: Args.string({required: true}),
+  },
+  flags: {
+    from: Flags.string({char: 'f', default: 'oclif'}),
+  },
+})
+
+console.log(`hello ${args.name} from ${flags.form}`)
+```
+
+```
+$ node index.js world --from oclif
+
+hello world from oclif
+```
+
 🚀 Contributing
 
 See the [contributing guide](./CONRTIBUTING.md).
