@@ -646,6 +646,14 @@ See more help with --help`)
             expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
           }
         })
+        it('does not split on escaped delimiter', async () => {
+          const out = await parse(['--foo', 'a\\,b,c'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a,b', 'c']})
+        })
       })
     })
 
