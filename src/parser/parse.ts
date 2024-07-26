@@ -412,17 +412,27 @@ export class Parser<
 
         // multiple with custom delimiter
         if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.delimiter && fws.inputFlag.flag.multiple) {
+          // regex that will identify unescaped delimiters
+          const makeDelimiter = (delimiter: string) => new RegExp(`(?<!\\\\)${delimiter}`)
           return {
             ...fws,
             valueFunction: async (i) =>
               (
                 await Promise.all(
                   (i.tokens ?? [])
-                    .flatMap((token) => token.input.split((i.inputFlag.flag as OptionFlag<any>).delimiter ?? ','))
+                    .flatMap((token) =>
+                      token.input.split(makeDelimiter((i.inputFlag.flag as OptionFlag<any>).delimiter ?? ',')),
+                    )
                     // trim, and remove surrounding doubleQuotes (which would hav been needed if the elements contain spaces)
                     .map((v) =>
                       v
                         .trim()
+                        // remove escaped characters from delimiter
+                        // example: --opt="a\,b,c" -> ["a,b", "c"]
+                        .replaceAll(
+                          new RegExp(`\\\\${(i.inputFlag.flag as OptionFlag<any>).delimiter}`, 'g'),
+                          (i.inputFlag.flag as OptionFlag<any>).delimiter ?? ',',
+                        )
                         .replace(/^"(.*)"$/, '$1')
                         .replace(/^'(.*)'$/, '$1'),
                     )

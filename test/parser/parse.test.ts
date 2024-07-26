@@ -519,6 +519,33 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
       })
+      it('parses single flag starting with with \\ escape char', async () => {
+        const out = await parse(['--foo', '\\file:foo'], {
+          flags: {
+            foo: Flags.custom({multiple: true})(),
+          },
+        })
+        expect(out.flags).to.deep.include({foo: ['\\file:foo']})
+      })
+      it('parses multiple space-delimited flags', async () => {
+        const out = await parse(['--foo', 'a', 'b', 'c'], {
+          flags: {foo: Flags.string({multiple: true})},
+        })
+        expect(out.flags).to.deep.include({foo: ['a', 'b', 'c']})
+      })
+      it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
+        const out = await parse(['--foo', 'c:\\', 'd:\\'], {
+          flags: {foo: Flags.string({multiple: true})},
+        })
+        expect(out.flags).to.deep.include({foo: ['c:\\', 'd:\\']})
+      })
+      it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
+        const out = await parse(['--foo', 'c:\\', 'd:\\'], {
+          flags: {foo: Flags.string({multiple: true})},
+        })
+        expect(out.flags).to.deep.include({foo: ['c:\\', 'd:\\']})
+      })
+
       it('allowed options on multiple', async () => {
         const out = await parse(['--foo', 'a', '--foo=b'], {
           flags: {
@@ -646,6 +673,41 @@ See more help with --help`)
             expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
           }
         })
+        it('retains escape char without delimiter', async () => {
+          const out = await parse(['--foo', 'a\\'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a\\']})
+        })
+        it('does not split on escaped delimiter', async () => {
+          const out = await parse(['--foo', 'a\\,b,c'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a,b', 'c']})
+        })
+        it('escapes with multiple invocation', async () => {
+          const out = await parse(['--foo', 'a\\,b', '--foo', 'b'], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: ['a,b', 'b']})
+        })
+
+        it('comma-escaped stringified json', async () => {
+          const val = '{"a":"b"\\,"c":"d"}'
+          const expected = '{"a":"b","c":"d"}'
+          const out = await parse(['--foo', val], {
+            flags: {
+              foo: Flags.string({multiple: true, delimiter: ','}),
+            },
+          })
+          expect(out.flags).to.deep.include({foo: [expected]})
+        })
       })
     })
 
@@ -709,7 +771,6 @@ See more help with --help`)
             strict: false,
             '--': false,
           })
-          console.log(out)
           expect(out.argv).to.deep.equal(['foo', 'bar', '--', '--myflag'])
           expect(out.args).to.deep.equal({argOne: 'foo'})
         })
