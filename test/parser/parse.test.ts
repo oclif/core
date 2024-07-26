@@ -527,6 +527,12 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({foo: ['\\file:foo']})
       })
+      it('parses multiple space-delimited flags', async () => {
+        const out = await parse(['--foo', 'a', 'b', 'c'], {
+          flags: {foo: Flags.string({multiple: true})},
+        })
+        expect(out.flags).to.deep.include({foo: ['a', 'b', 'c']})
+      })
       it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
         const out = await parse(['--foo', 'c:\\', 'd:\\'], {
           flags: {foo: Flags.string({multiple: true})},
