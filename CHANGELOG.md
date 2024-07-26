@@ -1,3 +1,12 @@
+## [4.0.15](https://github.com/oclif/core/compare/4.0.14...4.0.15) (2024-07-26)
+
+
+### Bug Fixes
+
+* ignore escaped delimiters ([#1148](https://github.com/oclif/core/issues/1148)) ([a41962a](https://github.com/oclif/core/commit/a41962af85fb9d84040614c4a1aab7a8e4c7d4af))
+
+
+
 ## [4.0.14](https://github.com/oclif/core/compare/4.0.13...4.0.14) (2024-07-23)
 
 
