@@ -1,3 +1,12 @@
+## [4.0.16](https://github.com/oclif/core/compare/4.0.15...4.0.16) (2024-07-27)
+
+
+### Bug Fixes
+
+* **deps:** bump requirejs from 2.3.6 to 2.3.7 ([216d8e7](https://github.com/oclif/core/commit/216d8e7a050c7bd4cdba82c6920c6e9744186ed2))
+
+
+
 ## [4.0.15](https://github.com/oclif/core/compare/4.0.14...4.0.15) (2024-07-26)
 
 
