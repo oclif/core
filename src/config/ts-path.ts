@@ -89,6 +89,7 @@ async function registerTsx(root: string, moduleType: 'commonjs' | 'module' | und
     const {href} = pathToFileURL(tsxPath)
     debug('tsx href:', href)
     const {register} = await import(href)
+    debug('Successfully imported tsx')
     register()
     REGISTERED.add(root)
   } catch (error) {
@@ -108,6 +109,7 @@ async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
 
   try {
     tsNode = require(tsNodePath)
+    debug('Successfully required ts-node')
   } catch (error) {
     debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
     debug(error)
