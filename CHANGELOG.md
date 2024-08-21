@@ -1,3 +1,12 @@
+## [4.0.18](https://github.com/oclif/core/compare/4.0.17...4.0.18) (2024-08-21)
+
+
+### Bug Fixes
+
+* **ts-path:** use file url to import `tsx` at runtime ([#1171](https://github.com/oclif/core/issues/1171)) ([be3f6e9](https://github.com/oclif/core/commit/be3f6e9c2a028d87a154ade81d032b311b2ca24f))
+
+
+
 ## [4.0.17](https://github.com/oclif/core/compare/4.0.16...4.0.17) (2024-07-28)
 
 
