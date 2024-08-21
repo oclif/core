@@ -1,5 +1,6 @@
 import {access} from 'node:fs/promises'
 import {join, relative as pathRelative, sep} from 'node:path'
+import {pathToFileURL} from 'node:url'
 import * as TSNode from 'ts-node'
 
 import Cache from '../cache'
@@ -85,11 +86,15 @@ async function registerTsx(root: string, moduleType: 'commonjs' | 'module' | und
     if (!tsxPath) return
     debug('registering tsx at', root)
     debug('tsx path:', tsxPath)
-    const {register} = await import(tsxPath)
+    const {href} = pathToFileURL(tsxPath)
+    debug('tsx href:', href)
+    const {register} = await import(href)
+    debug('Successfully imported tsx')
     register()
     REGISTERED.add(root)
-  } catch {
+  } catch (error) {
     debug(`Could not find tsx. Skipping tsx registration for ${root}.`)
+    debug(error)
   }
 }
 
@@ -104,8 +109,10 @@ async function registerTSNode(root: string, tsconfig: TSConfig): Promise<void> {
 
   try {
     tsNode = require(tsNodePath)
-  } catch {
+    debug('Successfully required ts-node')
+  } catch (error) {
     debug(`Could not find ts-node at ${tsNodePath}. Skipping ts-node registration for ${root}.`)
+    debug(error)
     memoizedWarn(
       `Could not find ts-node at ${tsNodePath}. Please ensure that ts-node is a devDependency. Falling back to compiled source.`,
     )
