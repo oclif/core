@@ -830,11 +830,11 @@
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
 "@oclif/test@^4":
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.0.7.tgz#7a8bb719d8ae5dd25a80a13102225d58030a2eae"
-  integrity sha512-yrWzyaagzv2XfJmdQi3V7S8dxlzjz36al8KdFKI7xQo+XAVyiUK4HaqxL71XYCPSa75Y9faWqCMyt+JgLMtW2w==
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.0.8.tgz#f8faacddf75992a70ee30df61d584c6bdd5fbf9c"
+  integrity sha512-1UDwN2zrNRquQiWfn5wcokeQOOlJMrrn5KPufcrXzrh5otX9C/rkAGyQsJnEisbruPjOO541hzdybUzvK7Kvwg==
   dependencies:
-    ansis "^3.3.1"
+    ansis "^3.3.2"
     debug "^4.3.6"
 
 "@pkgjs/parseargs@^0.11.0":
@@ -1458,7 +1458,7 @@ ansi-styles@^6.0.0, ansi-styles@^6.1.0, ansi-styles@^6.2.1:
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-6.2.1.tgz#0e62320cf99c21afff3b3012192546aacbfb05c5"
   integrity sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==
 
-ansis@^3.1.1, ansis@^3.3.1, ansis@^3.3.2:
+ansis@^3.1.1, ansis@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.3.2.tgz#15adc36fea112da95c74d309706e593618accac3"
   integrity sha512-cFthbBlt+Oi0i9Pv/j6YdVWJh54CtjGACaMPCIrEV4Ha7HWsIjXDwseYV79TIL0B4+KfSwD5S70PeQDkPUd1rA==
