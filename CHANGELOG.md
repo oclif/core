@@ -1,3 +1,12 @@
+## [4.0.19](https://github.com/oclif/core/compare/4.0.18...4.0.19) (2024-08-24)
+
+
+### Bug Fixes
+
+* **deps:** bump micromatch from 4.0.7 to 4.0.8 ([eb2aa14](https://github.com/oclif/core/commit/eb2aa14f4d75728f740ea0fe6ac2796d9323c315))
+
+
+
 ## [4.0.18](https://github.com/oclif/core/compare/4.0.17...4.0.18) (2024-08-21)
 
 
