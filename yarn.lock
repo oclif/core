@@ -830,9 +830,9 @@
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
 "@oclif/test@^4":
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.0.8.tgz#f8faacddf75992a70ee30df61d584c6bdd5fbf9c"
-  integrity sha512-1UDwN2zrNRquQiWfn5wcokeQOOlJMrrn5KPufcrXzrh5otX9C/rkAGyQsJnEisbruPjOO541hzdybUzvK7Kvwg==
+  version "4.0.9"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.0.9.tgz#c4b4b4878911489a79f296a15448e76d860b39d2"
+  integrity sha512-xDGBFBNE6ckoBT9EhMi6ZvwAaEeJRGvRmn2qZWujJl9EJ56a72KHZsvTJVgl2p/AQ2vZ1UH06YZ440GOnjExzQ==
   dependencies:
     ansis "^3.3.2"
     debug "^4.3.6"
