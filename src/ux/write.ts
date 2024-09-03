@@ -1,25 +1,24 @@
 import {format} from 'node:util'
-
 export const stdout = (str?: string | string[] | undefined, ...args: string[]): void => {
   if (!str && args) {
-    process.stdout.write(format(...args) + '\n')
+    console.log(format(...args))
   } else if (!str) {
-    process.stdout.write('\n')
+    console.log()
   } else if (typeof str === 'string') {
-    process.stdout.write((str && format(str, ...args)) + '\n')
+    console.log(format(str, ...args))
   } else {
-    process.stdout.write(format(...str, ...args) + '\n')
+    console.log(format(...str, ...args))
   }
 }
 
 export const stderr = (str?: string | string[] | undefined, ...args: string[]): void => {
   if (!str && args) {
-    process.stderr.write(format(...args) + '\n')
+    console.error(format(...args))
   } else if (!str) {
-    process.stderr.write('\n')
+    console.error()
   } else if (typeof str === 'string') {
-    process.stderr.write((str && format(str, ...args)) + '\n')
+    console.error(format(str, ...args))
   } else {
-    process.stderr.write(format(...str, ...args) + '\n')
+    console.error(format(...str, ...args))
   }
 }
