@@ -1,3 +1,12 @@
+## [4.0.20](https://github.com/oclif/core/compare/4.0.19...4.0.20) (2024-09-04)
+
+
+### Bug Fixes
+
+* handle large throughput writes ([5e336ce](https://github.com/oclif/core/commit/5e336cea259d33bc9e43c7656eb29ceff8f6e5c9))
+
+
+
 ## [4.0.19](https://github.com/oclif/core/compare/4.0.18...4.0.19) (2024-08-24)
 
 
