@@ -17,6 +17,7 @@
     "is-wsl": "^2.2.0",
     "lilconfig": "^3.1.2",
     "minimatch": "^9.0.5",
+    "semver": "^7.6.3",
     "string-width": "^4.2.3",
     "supports-color": "^8",
     "widest-line": "^3.1.0",

@@ -1,3 +1,4 @@
+import {isTruthy} from './util/util'
 function checkCWD() {
   try {
     process.cwd()
@@ -8,7 +9,25 @@ function checkCWD() {
   }
 }
 
+function checkNodeVersion() {
+  if (process.env.OCLIF_DISABLE_ENGINE_WARNING && isTruthy(process.env.OCLIF_DISABLE_ENGINE_WARNING)) return
+  try {
+    const semver = require('semver')
+    const path = require('node:path')
+    const root = path.join(__dirname, '..')
+    const pjson = require(path.join(root, 'package.json'))
+    if (!semver.satisfies(process.versions.node, pjson.engines.node)) {
+      process.emitWarning(
+        `Node version must be ${pjson.engines.node} to use this CLI. Current node version: ${process.versions.node}`,
+      )
+    }
+  } catch {
+    // ignore
+  }
+}
+
 checkCWD()
+checkNodeVersion()
 
 export * as Args from './args'
 export {Command} from './command'
