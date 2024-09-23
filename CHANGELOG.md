@@ -1,3 +1,12 @@
+## [4.0.23](https://github.com/oclif/core/compare/4.0.22...4.0.23) (2024-09-23)
+
+
+### Bug Fixes
+
+* warn about node version mismatch ([#1198](https://github.com/oclif/core/issues/1198)) ([ae2ceac](https://github.com/oclif/core/commit/ae2ceac79feea1d7c5acce7fbfdfae0a63711f6d))
+
+
+
 ## [4.0.22](https://github.com/oclif/core/compare/4.0.21...4.0.22) (2024-09-13)
 
 
