@@ -1,3 +1,12 @@
+## [4.0.24](https://github.com/oclif/core/compare/4.0.23...4.0.24) (2024-10-01)
+
+
+### Bug Fixes
+
+* use topic separator for deprecated alias warnings in `help` ([#1209](https://github.com/oclif/core/issues/1209)) ([fb6ace2](https://github.com/oclif/core/commit/fb6ace237c5f6b3f7707edb7ba93e00aeee9b412))
+
+
+
 ## [4.0.23](https://github.com/oclif/core/compare/4.0.22...4.0.23) (2024-09-23)
 
 
