@@ -283,7 +283,8 @@ export abstract class Command {
     // Since config.runHook will only run the hook for the root plugin, hookResult.successes will always have a length of 0 or 1
     // But to be extra safe, we find the result that matches the root plugin.
     const argvToParse = hookResult.successes?.length
-      ? hookResult.successes.find((s) => s.plugin.root === Cache.getInstance().get('rootPlugin')?.root)?.result ?? argv
+      ? (hookResult.successes.find((s) => s.plugin.root === Cache.getInstance().get('rootPlugin')?.root)?.result ??
+        argv)
       : argv
     this.argv = [...argvToParse]
     const results = await Parser.parse<F, B, A>(argvToParse, opts)
@@ -336,7 +337,7 @@ export abstract class Command {
         )
         if (aliases.length === 0) return
 
-        const foundAliases = aliases.filter((alias) => this.argv.some((a) => a.startsWith(alias)))
+        const foundAliases = aliases.filter((alias) => this.argv.includes(alias))
         for (const alias of foundAliases) {
           let preferredUsage = `--${flagDef?.name}`
           if (flagDef?.char) {

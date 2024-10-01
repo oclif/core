@@ -95,7 +95,7 @@ describe('command', () => {
     class CMD extends Command {
       static flags = {
         name: Flags.string({
-          aliases: ['username', 'target-user', 'u'],
+          aliases: ['username', 'target-user', 'u', 'nam'],
           deprecateAliases: true,
           char: 'o',
         }),
@@ -135,6 +135,11 @@ describe('command', () => {
 
     it('shows no warning when proper flag name with a value that matches a short char flag alias', async () => {
       const {stderr} = await captureOutput(async () => CMD.run(['--name', 'u']))
+      expect(stderr).to.be.empty
+    })
+
+    it('shows no warning when using flag with deprecated alias that starts with the actual flag', async () => {
+      const {stderr} = await captureOutput(async () => CMD.run(['--name', 'astro']))
       expect(stderr).to.be.empty
     })
   })
