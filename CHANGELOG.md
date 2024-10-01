@@ -1,3 +1,12 @@
+## [4.0.25](https://github.com/oclif/core/compare/4.0.24...4.0.25) (2024-10-01)
+
+
+### Bug Fixes
+
+* deprecated aliases bug ([#1208](https://github.com/oclif/core/issues/1208)) ([353e715](https://github.com/oclif/core/commit/353e715d483c24dcfd425ea03f4da3f5ab510c89))
+
+
+
 ## [4.0.24](https://github.com/oclif/core/compare/4.0.23...4.0.24) (2024-10-01)
 
 
