@@ -1,5 +1,4 @@
 import * as ejs from 'ejs'
-import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {join, resolve, sep} from 'node:path'
 import {URL, fileURLToPath} from 'node:url'
@@ -317,7 +316,7 @@ export class Config implements IConfig {
     this.valid = this.rootPlugin.valid
 
     this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
-    this.platform = WSL ? 'wsl' : getPlatform()
+    this.platform = (await import('is-wsl')) ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
@@ -773,7 +772,7 @@ export class Config implements IConfig {
       const permutations =
         this.flexibleTaxonomy && command.permutations === undefined
           ? getCommandIdPermutations(command.id)
-          : command.permutations ?? [command.id]
+          : (command.permutations ?? [command.id])
       // set every permutation
       for (const permutation of permutations) {
         this.commandPermutations.add(permutation, command.id)
@@ -796,7 +795,7 @@ export class Config implements IConfig {
         const aliasPermutations =
           this.flexibleTaxonomy && command.aliasPermutations === undefined
             ? getCommandIdPermutations(alias)
-            : command.permutations ?? [alias]
+            : (command.permutations ?? [alias])
         // set every permutation
         for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
