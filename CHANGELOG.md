@@ -1,3 +1,12 @@
+## [4.0.26](https://github.com/oclif/core/compare/4.0.25...4.0.26) (2024-10-02)
+
+
+### Bug Fixes
+
+* bump is-wsl to v3 ([#1211](https://github.com/oclif/core/issues/1211)) ([7fd9162](https://github.com/oclif/core/commit/7fd9162a165884657c2ead87f5c0e9e2fd9b708d))
+
+
+
 ## [4.0.25](https://github.com/oclif/core/compare/4.0.24...4.0.25) (2024-10-01)
 
 
