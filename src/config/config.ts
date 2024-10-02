@@ -316,7 +316,8 @@ export class Config implements IConfig {
     this.valid = this.rootPlugin.valid
 
     this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
-    this.platform = (await import('is-wsl')) ? 'wsl' : getPlatform()
+    const {default: isWSL} = await import('is-wsl')
+    this.platform = isWSL ? 'wsl' : getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
