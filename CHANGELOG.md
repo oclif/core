@@ -1,3 +1,12 @@
+## [4.0.27](https://github.com/oclif/core/compare/4.0.26...4.0.27) (2024-10-03)
+
+
+### Bug Fixes
+
+* add respectNoCacheDefault to help options ([7320fff](https://github.com/oclif/core/commit/7320fff4860fe788674e672e6c284340fdc48918))
+
+
+
 ## [4.0.26](https://github.com/oclif/core/compare/4.0.25...4.0.26) (2024-10-02)
 
 
