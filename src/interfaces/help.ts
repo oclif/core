@@ -25,6 +25,10 @@ export interface HelpOptions {
   hideCommandSummaryInDescription?: boolean
   maxWidth: number
   /**
+   * Respect the `noCacheDefault` property on flags. Defaults to false.
+   */
+  respectNoCacheDefault?: boolean
+  /**
    * Only show the help for the specified sections. Defaults to all sections.
    */
   sections?: string[]

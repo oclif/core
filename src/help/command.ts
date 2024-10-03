@@ -188,7 +188,8 @@ export class CommandHelp extends HelpFormatter {
       if (noChar) left = left.replace('    ', '')
 
       let right = flag.summary || flag.description || ''
-      if (flag.type === 'option' && flag.default) {
+      const canBeCached = !(this.opts.respectNoCacheDefault === true && flag.noCacheDefault === true)
+      if (flag.type === 'option' && flag.default && canBeCached) {
         right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${flag.default}]`)} ${right}`
       }
 
