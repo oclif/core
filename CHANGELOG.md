@@ -1,3 +1,12 @@
+## [4.0.28](https://github.com/oclif/core/compare/4.0.27...4.0.28) (2024-10-11)
+
+
+### Bug Fixes
+
+* remove circular references when colorizing json ([de9ed4e](https://github.com/oclif/core/commit/de9ed4e236b0f0db82ce84ee6ff22e356d5dd9dd))
+
+
+
 ## [4.0.27](https://github.com/oclif/core/compare/4.0.26...4.0.27) (2024-10-03)
 
 
