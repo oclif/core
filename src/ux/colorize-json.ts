@@ -17,6 +17,42 @@ type Options = {
   theme?: Record<string, string> | undefined
 }
 
+export function removeCycles(object: unknown) {
+  // Keep track of seen objects.
+  const seenObjects = new WeakMap<Record<string, unknown>, undefined>()
+
+  const _removeCycles = (obj: unknown) => {
+    // Use object prototype to get around type and null checks
+    if (Object.prototype.toString.call(obj) === '[object Object]') {
+      // We know it is a "Record<string, unknown>" because of the conditional
+      const dictionary = obj as Record<string, unknown>
+
+      // Seen, return undefined to remove.
+      if (seenObjects.has(dictionary)) return
+
+      seenObjects.set(dictionary, undefined)
+
+      for (const key in dictionary) {
+        // Delete the duplicate object if cycle found.
+        if (_removeCycles(dictionary[key]) === undefined) {
+          delete dictionary[key]
+        }
+      }
+    } else if (Array.isArray(obj)) {
+      for (const i in obj) {
+        if (_removeCycles(obj[i]) === undefined) {
+          // We don't want to delete the array, but we can replace the element with null.
+          obj[i] = null
+        }
+      }
+    }
+
+    return obj
+  }
+
+  return _removeCycles(object)
+}
+
 function formatInput(json?: unknown, options?: Options) {
   return options?.pretty
     ? JSON.stringify(typeof json === 'string' ? JSON.parse(json) : json, null, 2)
@@ -26,7 +62,7 @@ function formatInput(json?: unknown, options?: Options) {
 }
 
 export function tokenize(json?: unknown, options?: Options) {
-  let input = formatInput(json, options)
+  let input = formatInput(removeCycles(json), options)
 
   const tokens = []
   let foundToken = false

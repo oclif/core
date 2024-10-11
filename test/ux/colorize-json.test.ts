@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 
-import {tokenize} from '../../src/ux/colorize-json'
+import {removeCycles, tokenize} from '../../src/ux/colorize-json'
 
 describe('colorizeJson', () => {
   it('tokenizes a basic JSON object', () => {
@@ -123,5 +123,79 @@ describe('colorizeJson', () => {
     const result = tokenize()
 
     expect(result).to.deep.equal([])
+  })
+
+  it('removes circular references from json', () => {
+    const obj = {
+      foo: 'bar',
+      baz: {
+        qux: 'quux',
+      },
+    }
+    // @ts-expect-error
+    obj.circular = obj
+
+    const result = tokenize(obj)
+    expect(result).to.deep.equal([
+      {type: 'brace', value: '{'},
+      {type: 'key', value: '"foo"'},
+      {type: 'colon', value: ':'},
+      {type: 'string', value: '"bar"'},
+      {type: 'comma', value: ','},
+      {type: 'key', value: '"baz"'},
+      {type: 'colon', value: ':'},
+      {type: 'brace', value: '{'},
+      {type: 'key', value: '"qux"'},
+      {type: 'colon', value: ':'},
+      {type: 'string', value: '"quux"'},
+      {type: 'brace', value: '}'},
+      {type: 'brace', value: '}'},
+    ])
+  })
+})
+
+describe('removeCycles', () => {
+  it('removes circular references from objects', () => {
+    const obj = {
+      foo: 'bar',
+      baz: {
+        qux: 'quux',
+      },
+    }
+    // @ts-expect-error
+    obj.circular = obj
+
+    const result = removeCycles(obj)
+    expect(result).to.deep.equal({
+      foo: 'bar',
+      baz: {
+        qux: 'quux',
+      },
+    })
+  })
+
+  it('removes circular references from objects in array', () => {
+    const obj = {
+      foo: 'bar',
+      baz: {
+        qux: 'quux',
+      },
+    }
+    // @ts-expect-error
+    obj.circular = obj
+    const arr = [{foo: 'bar'}, obj]
+
+    const result = removeCycles(arr)
+    expect(result).to.deep.equal([
+      {
+        foo: 'bar',
+      },
+      {
+        baz: {
+          qux: 'quux',
+        },
+        foo: 'bar',
+      },
+    ])
   })
 })
