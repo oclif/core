@@ -1,3 +1,12 @@
+## [4.0.29](https://github.com/oclif/core/compare/4.0.28...4.0.29) (2024-10-15)
+
+
+### Bug Fixes
+
+* improve solution for handling circular json ([#1222](https://github.com/oclif/core/issues/1222)) ([9073052](https://github.com/oclif/core/commit/90730524f2e695dce3dc2b87ec43e480f0dcdd54))
+
+
+
 ## [4.0.28](https://github.com/oclif/core/compare/4.0.27...4.0.28) (2024-10-11)
 
 
