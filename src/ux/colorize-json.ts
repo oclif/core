@@ -17,53 +17,52 @@ type Options = {
   theme?: Record<string, string> | undefined
 }
 
-export function removeCycles(object: unknown) {
-  // Keep track of seen objects.
-  const seenObjects = new WeakMap<Record<string, unknown>, undefined>()
+type Replacer = (this: any, key: string, value: any) => any
 
-  const _removeCycles = (obj: unknown) => {
-    // Use object prototype to get around type and null checks
-    if (Object.prototype.toString.call(obj) === '[object Object]') {
-      // We know it is a "Record<string, unknown>" because of the conditional
-      const dictionary = obj as Record<string, unknown>
-
-      // Seen, return undefined to remove.
-      if (seenObjects.has(dictionary)) return
-
-      seenObjects.set(dictionary, undefined)
-
-      for (const key in dictionary) {
-        // Delete the duplicate object if cycle found.
-        if (_removeCycles(dictionary[key]) === undefined) {
-          delete dictionary[key]
-        }
-      }
-    } else if (Array.isArray(obj)) {
-      for (const i in obj) {
-        if (_removeCycles(obj[i]) === undefined) {
-          // We don't want to delete the array, but we can replace the element with null.
-          obj[i] = null
-        }
-      }
-    }
-
-    return obj
-  }
-
-  return _removeCycles(object)
+function stringify(value: any, replacer?: Replacer, spaces?: string | number) {
+  return JSON.stringify(value, serializer(replacer, replacer), spaces)
 }
 
-function formatInput(json?: unknown, options?: Options) {
-  return options?.pretty
-    ? JSON.stringify(typeof json === 'string' ? JSON.parse(json) : json, null, 2)
+// Inspired by https://github.com/moll/json-stringify-safe
+function serializer(replacer: Replacer | undefined, cycleReplacer: Replacer | undefined) {
+  const stack: any[] = []
+  const keys: any[] = []
+
+  if (!cycleReplacer)
+    cycleReplacer = function (key, value) {
+      if (stack[0] === value) return '[Circular ~]'
+      return '[Circular ~.' + keys.slice(0, stack.indexOf(value)).join('.') + ']'
+    }
+
+  return function (key: any, value: any) {
+    if (stack.length > 0) {
+      // @ts-expect-error because `this` is not typed
+      const thisPos = stack.indexOf(this)
+      // @ts-expect-error because `this` is not typed
+      // eslint-disable-next-line no-bitwise
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      // eslint-disable-next-line no-bitwise
+      ~thisPos ? keys.splice(thisPos, Number.POSITIVE_INFINITY, key) : keys.push(key)
+      // @ts-expect-error because `this` is not typed
+      if (stack.includes(value)) value = cycleReplacer.call(this, key, value)
+    } else stack.push(value)
+
+    // @ts-expect-error because `this` is not typed
+    return replacer ? replacer.call(this, key, value) : value
+  }
+}
+
+export function stringifyInput(json?: unknown, options?: Options): string {
+  const str = options?.pretty
+    ? stringify(typeof json === 'string' ? JSON.parse(json) : json, undefined, 2)
     : typeof json === 'string'
       ? json
-      : JSON.stringify(json)
+      : stringify(json)
+  return str
 }
 
 export function tokenize(json?: unknown, options?: Options) {
-  let input = formatInput(removeCycles(json), options)
-
+  let input = stringifyInput(json, options)
   const tokens = []
   let foundToken = false
 
