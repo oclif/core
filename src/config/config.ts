@@ -17,6 +17,7 @@ import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {settings} from '../settings'
 import {determinePriority} from '../util/determine-priority'
 import {safeReadJson} from '../util/fs'
+import {toStandardizedId} from '../util/ids'
 import {getHomeDir, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import {ux} from '../ux'
@@ -780,14 +781,18 @@ export class Config implements IConfig {
       }
 
       const handleAlias = (alias: string, hidden = false) => {
-        if (this._commands.has(alias)) {
+        const aliasWithDefaultTopicSeparator = toStandardizedId(alias, this)
+        if (this._commands.has(aliasWithDefaultTopicSeparator)) {
           const prioritizedCommand = determinePriority(this.pjson.oclif.plugins ?? [], [
-            this._commands.get(alias)!,
+            this._commands.get(aliasWithDefaultTopicSeparator)!,
             command,
           ])
-          this._commands.set(alias, {...prioritizedCommand, id: alias})
+          this._commands.set(aliasWithDefaultTopicSeparator, {
+            ...prioritizedCommand,
+            id: aliasWithDefaultTopicSeparator,
+          })
         } else {
-          this._commands.set(alias, {...command, hidden, id: alias})
+          this._commands.set(aliasWithDefaultTopicSeparator, {...command, hidden, id: aliasWithDefaultTopicSeparator})
         }
 
         // set every permutation of the aliases
@@ -795,8 +800,8 @@ export class Config implements IConfig {
         // the new manifest yet. For those, we need to calculate the permutations here.
         const aliasPermutations =
           this.flexibleTaxonomy && command.aliasPermutations === undefined
-            ? getCommandIdPermutations(alias)
-            : (command.permutations ?? [alias])
+            ? getCommandIdPermutations(aliasWithDefaultTopicSeparator)
+            : (command.permutations ?? [aliasWithDefaultTopicSeparator])
         // set every permutation
         for (const permutation of aliasPermutations) {
           this.commandPermutations.add(permutation, command.id)
