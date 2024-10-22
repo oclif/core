@@ -1,3 +1,12 @@
+## [4.0.30](https://github.com/oclif/core/compare/4.0.29...4.0.30) (2024-10-22)
+
+
+### Bug Fixes
+
+* fix aliases in config.commandIDs missing the default topic separator ([#1229](https://github.com/oclif/core/issues/1229)) ([#1230](https://github.com/oclif/core/issues/1230)) ([f86d9f7](https://github.com/oclif/core/commit/f86d9f736e40abb345dc9f261efb7aa5068d8a97))
+
+
+
 ## [4.0.29](https://github.com/oclif/core/compare/4.0.28...4.0.29) (2024-10-15)
 
 
