@@ -1,3 +1,12 @@
+## [4.0.31](https://github.com/oclif/core/compare/4.0.30...4.0.31) (2024-10-28)
+
+
+### Reverts
+
+* Revert "fix: bump is-wsl to v3 (#1211)" (#1235) ([fa76792](https://github.com/oclif/core/commit/fa767920b23e802e60c512fa42179aca0deffd12)), closes [#1211](https://github.com/oclif/core/issues/1211) [#1235](https://github.com/oclif/core/issues/1235)
+
+
+
 ## [4.0.30](https://github.com/oclif/core/compare/4.0.29...4.0.30) (2024-10-22)
 
 
