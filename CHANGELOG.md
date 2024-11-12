@@ -1,3 +1,12 @@
+## [4.0.32](https://github.com/oclif/core/compare/4.0.31...4.0.32) (2024-11-12)
+
+
+### Bug Fixes
+
+* add env var to disable link warning ([df48c93](https://github.com/oclif/core/commit/df48c93730712a728e56f63987ae67cc5f83be2d))
+
+
+
 ## [4.0.31](https://github.com/oclif/core/compare/4.0.30...4.0.31) (2024-10-28)
 
 
