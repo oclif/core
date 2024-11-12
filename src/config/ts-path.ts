@@ -9,7 +9,7 @@ import {Plugin, TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {existsSync} from '../util/fs'
 import {readTSConfig} from '../util/read-tsconfig'
-import {isProd} from '../util/util'
+import {isProd, isTruthy} from '../util/util'
 import {makeDebug} from './util'
 
 const debug = makeDebug('ts-path')
@@ -314,7 +314,12 @@ export async function tsPath(
     debug(
       `Skipping typescript path lookup for ${root} because it's an ESM module (NODE_ENV: ${process.env.NODE_ENV}, root plugin module type: ${rootPlugin?.moduleType})`,
     )
-    if (plugin?.type === 'link')
+
+    const warningIsDisabled =
+      process.env.OCLIF_DISABLE_LINKED_ESM_WARNING && isTruthy(process.env.OCLIF_DISABLE_LINKED_ESM_WARNING)
+
+    // Only warn if the plugin is linked AND the warning is not disabled
+    if (plugin?.type === 'link' && !warningIsDisabled)
       memoizedWarn(
         `${plugin?.name} is a linked ESM module and cannot be auto-transpiled. Existing compiled source will be used instead.`,
       )
