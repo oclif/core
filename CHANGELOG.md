@@ -1,3 +1,12 @@
+## [4.0.34](https://github.com/oclif/core/compare/4.0.33...4.0.34) (2024-12-02)
+
+
+### Bug Fixes
+
+* typo in ux module README ([#1250](https://github.com/oclif/core/issues/1250)) ([2c44e46](https://github.com/oclif/core/commit/2c44e46241337ba9f233837bef28d35e6da329f4))
+
+
+
 ## [4.0.33](https://github.com/oclif/core/compare/4.0.32...4.0.33) (2024-11-19)
 
 
