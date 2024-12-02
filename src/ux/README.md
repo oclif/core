@@ -104,7 +104,7 @@ import {stderr} from '@oclif/core/ux'
 stderr('hello %s', 'world')
 ```
 
-### `stderr`
+### `stdout`
 
 Log a formatted string to stdout
 
