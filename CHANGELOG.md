@@ -1,3 +1,12 @@
+## [4.0.36](https://github.com/oclif/core/compare/4.0.35...4.0.36) (2024-12-08)
+
+
+### Bug Fixes
+
+* **deps:** bump lilconfig from 3.1.2 to 3.1.3 ([7bdf5f3](https://github.com/oclif/core/commit/7bdf5f31b6f11be21d164e789c84d715cd21a778))
+
+
+
 ## [4.0.35](https://github.com/oclif/core/compare/4.0.34...4.0.35) (2024-12-08)
 
 
