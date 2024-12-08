@@ -755,10 +755,10 @@
     proc-log "^5.0.0"
     which "^5.0.0"
 
-"@oclif/core@^4", "@oclif/core@^4.0.32":
-  version "4.0.33"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.0.33.tgz#fcaf3dd2850c5999de20459a1445d31a230cd24b"
-  integrity sha512-NoTDwJ2L/ywpsSjcN7jAAHf3m70Px4Yim2SJrm16r70XpnfbNOdlj1x0HEJ0t95gfD+p/y5uy+qPT/VXTh/1gw==
+"@oclif/core@^4", "@oclif/core@^4.0.33":
+  version "4.0.34"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.0.34.tgz#2a1d10e6383383cae5fb81662d68147cc6a0dcef"
+  integrity sha512-jHww7lIqyifamynDSjDNNjNOwFTQdKYeOSYaxUaoWhqXnRwacZ+pfUN4Y0L9lqSN4MQtlWM9mwnBD7FvlT9kPw==
   dependencies:
     ansi-escapes "^4.3.2"
     ansis "^3.3.2"
@@ -787,11 +787,11 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.18"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.18.tgz#29fe0221ff77816e14a669a9ff94a9bec39b2ee7"
-  integrity sha512-2MdEMzNWYy1u3VJFxFLuvH3U9Q8q/OLxhletjZ6pSpeHpHOzG7dqtdstvZhqrexKYAhVEskcjhHkvOs9Yu3jtg==
+  version "5.4.19"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.19.tgz#ef617431f6af1a2b25452c6cda83c2f01f849af3"
+  integrity sha512-JiYBFLe7861i56YwHDnTW4TtfjnLj6brG9nfP5ZE4f9MzKwcQPhCaDzGuxdzoU2CnaUFGXBX+nBGA86csyTWbg==
   dependencies:
-    "@oclif/core" "^4.0.32"
+    "@oclif/core" "^4.0.33"
     ansis "^3.3.2"
     debug "^4.3.7"
     npm "^10.9.1"
