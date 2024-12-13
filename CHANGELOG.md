@@ -1,3 +1,12 @@
+## [4.0.37](https://github.com/oclif/core/compare/4.0.36...4.0.37) (2024-12-13)
+
+
+### Bug Fixes
+
+* **deps:** bump nanoid from 3.3.6 to 3.3.8 ([e9cbfdb](https://github.com/oclif/core/commit/e9cbfdb7ebdf374ea08dee8d62a896229768c062))
+
+
+
 ## [4.0.36](https://github.com/oclif/core/compare/4.0.35...4.0.36) (2024-12-08)
 
 
