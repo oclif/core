@@ -780,9 +780,9 @@
     wrap-ansi "^7.0.0"
 
 "@oclif/plugin-help@^6":
-  version "6.2.18"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.2.18.tgz#fab8173773bb0afcc7a8e459187021fe65c461df"
-  integrity sha512-mDYOl8RmldLkOg9i9YKgyBlpcyi/bNySoIVHJ2EJd2qCmZaXRKQKRW2Zkx92bwjik8jfs/A3EFI+p4DsrXi57g==
+  version "6.2.19"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.2.19.tgz#24ae926f2944628dd62a6bbfc495f85fc8e43b13"
+  integrity sha512-q2fIACWHJehppWTTgJm/llleKDgxt42IBVcK6Rp4H6qzET24t2zs0vbALx5XxsNCKl3/UuJhyW2XXQqvGmvWJQ==
   dependencies:
     "@oclif/core" "^4"
 
