@@ -1644,6 +1644,59 @@ See more help with --help`)
     })
   })
 
+  describe('atLeastOne', () => {
+    it('throws if none are set', async () => {
+      let message = ''
+      try {
+        await parse([], {
+          flags: {
+            foo: Flags.string({atLeastOne: ['foo', 'bar']}),
+            bar: Flags.string({char: 'b', atLeastOne: ['foo', 'bar']}),
+          },
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include('At least one of the following must be provided: --bar, --foo')
+    })
+
+    it('succeeds if one is set', async () => {
+      const out = await parse(['--foo', 'a'], {
+        flags: {
+          foo: Flags.string({atLeastOne: ['foo', 'bar', 'baz']}),
+          bar: Flags.string({char: 'b', atLeastOne: ['foo', 'bar', 'baz']}),
+          baz: Flags.string({char: 'z'}),
+        },
+      })
+      expect(out.flags.foo).to.equal('a')
+    })
+
+    it('succeeds if some are set', async () => {
+      const out = await parse(['--bar', 'b'], {
+        flags: {
+          foo: Flags.string({atLeastOne: ['foo', 'bar', 'baz']}),
+          bar: Flags.string({char: 'b', atLeastOne: ['foo', 'bar', 'baz']}),
+          baz: Flags.string({char: 'z'}),
+        },
+      })
+      expect(out.flags.bar).to.equal('b')
+    })
+
+    it('succeeds if all are set', async () => {
+      const out = await parse(['--foo', 'a', '--bar', 'b', '--baz', 'c'], {
+        flags: {
+          foo: Flags.string({atLeastOne: ['foo', 'bar', 'baz']}),
+          bar: Flags.string({char: 'b', atLeastOne: ['foo', 'bar', 'baz']}),
+          baz: Flags.string({char: 'z'}),
+        },
+      })
+      expect(out.flags.foo).to.equal('a')
+      expect(out.flags.bar).to.equal('b')
+      expect(out.flags.baz).to.equal('c')
+    })
+  })
+
   describe('allowNo', () => {
     it('is undefined if not set', async () => {
       const out = await parse([], {

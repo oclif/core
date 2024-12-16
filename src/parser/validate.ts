@@ -80,7 +80,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         }
 
         if (flag.exactlyOne && flag.exactlyOne.length > 0) {
-          return [validateAcrossFlags(flag)]
+          return [validateExactlyOneAcrossFlags(flag)]
+        }
+
+        if (flag.atLeastOne && flag.atLeastOne.length > 0) {
+          return [validateAtLeastOneAcrossFlags(flag)]
         }
 
         return []
@@ -115,8 +119,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   const getPresentFlags = (flags: Record<string, unknown>): string[] =>
     Object.keys(flags).filter((key) => key !== undefined)
 
-  function validateAcrossFlags(flag: Flag<any>): Validation {
-    const base = {name: flag.name, validationFn: 'validateAcrossFlags'}
+  function validateExactlyOneAcrossFlags(flag: Flag<any>): Validation {
+    const base = {name: flag.name, validationFn: 'validateExactlyOneAcrossFlags'}
     const intersection = Object.entries(parse.input.flags)
       .map((entry) => entry[0]) // array of flag names
       .filter((flagName) => parse.output.flags[flagName] !== undefined) // with values
@@ -125,6 +129,22 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       // the command's exactlyOne may or may not include itself, so we'll use Set to add + de-dupe
       const deduped = uniq(flag.exactlyOne?.map((flag) => `--${flag}`) ?? []).join(', ')
       const reason = `Exactly one of the following must be provided: ${deduped}`
+      return {...base, reason, status: 'failed'}
+    }
+
+    return {...base, status: 'success'}
+  }
+
+  function validateAtLeastOneAcrossFlags(flag: Flag<any>): Validation {
+    const base = {name: flag.name, validationFn: 'validateAtLeastOneAcrossFlags'}
+    const intersection = Object.entries(parse.input.flags)
+      .map((entry) => entry[0]) // array of flag names
+      .filter((flagName) => parse.output.flags[flagName] !== undefined) // with values
+      .filter((flagName) => flag.atLeastOne && flag.atLeastOne.includes(flagName)) // and in the atLeastOne list
+    if (intersection.length === 0) {
+      // the command's atLeastOne may or may not include itself, so we'll use Set to add + de-dupe
+      const deduped = uniq(flag.atLeastOne?.map((flag) => `--${flag}`) ?? []).join(', ')
+      const reason = `At least one of the following must be provided: ${deduped}`
       return {...base, reason, status: 'failed'}
     }
 

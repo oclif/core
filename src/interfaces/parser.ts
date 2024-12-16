@@ -171,6 +171,10 @@ export type FlagProps = {
    * This is helpful if the default value contains sensitive data that shouldn't be published to npm.
    */
   noCacheDefault?: boolean
+  /**
+   * At least one of these flags must be provided.
+   */
+  atLeastOne?: string[]
 }
 
 export type ArgProps = {
