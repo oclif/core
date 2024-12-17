@@ -1,3 +1,12 @@
+# [4.1.0](https://github.com/oclif/core/compare/4.0.37...4.1.0) (2024-12-17)
+
+
+### Features
+
+* add atLeastOne flag property ([d4746f3](https://github.com/oclif/core/commit/d4746f31272e66fa33493c27799de04444e4a285))
+
+
+
 ## [4.0.37](https://github.com/oclif/core/compare/4.0.36...4.0.37) (2024-12-13)
 
 
