@@ -1673,13 +1673,14 @@ See more help with --help`)
     })
 
     it('succeeds if some are set', async () => {
-      const out = await parse(['--bar', 'b'], {
+      const out = await parse(['--foo', 'a', '--bar', 'b'], {
         flags: {
           foo: Flags.string({atLeastOne: ['foo', 'bar', 'baz']}),
           bar: Flags.string({char: 'b', atLeastOne: ['foo', 'bar', 'baz']}),
           baz: Flags.string({char: 'z'}),
         },
       })
+      expect(out.flags.foo).to.equal('a')
       expect(out.flags.bar).to.equal('b')
     })
 
