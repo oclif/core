@@ -21,8 +21,10 @@ const ACTION_TYPE =
     'spinner') ||
   'simple'
 
+export const action = ACTION_TYPE === 'spinner' ? new Spinner() : new Simple()
+
 export const ux = {
-  action: ACTION_TYPE === 'spinner' ? new Spinner() : new Simple(),
+  action,
   /**
    * Add color to text.
    * @param color color to use. Can be hex code (e.g. `#ff0000`), rgb (e.g. `rgb(255, 255, 255)`) or a standard ansi color (e.g. `red`)
