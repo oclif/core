@@ -1,3 +1,12 @@
+## [4.1.1](https://github.com/oclif/core/compare/4.1.0...4.1.1) (2024-12-19)
+
+
+### Bug Fixes
+
+* export action from ux ([c7fad54](https://github.com/oclif/core/commit/c7fad547f318182effee3a3976220bdeb1b1e382))
+
+
+
 # [4.1.0](https://github.com/oclif/core/compare/4.0.37...4.1.0) (2024-12-17)
 
 
