@@ -73,6 +73,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // display version if applicable
   if (versionAddition(argv, config)) {
     ux.stdout(config.userAgent)
+    await config.runHook('deinit', {argv: argvSlice, id})
     await collectPerf()
     return
   }
@@ -80,6 +81,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   // display help version if applicable
   if (helpAddition(argv, config)) {
     await showHelp(argv)
+    await config.runHook('deinit', {argv: argvSlice, id})
     await collectPerf()
     return
   }
@@ -90,6 +92,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) {
       await showHelp([id])
+      await config.runHook('deinit', {argv: argvSlice, id})
       await collectPerf()
       return
     }
@@ -100,6 +103,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   try {
     return await config.runCommand(id, argvSlice, cmd)
   } finally {
+    await config.runHook('deinit', {argv: argvSlice, id})
     await collectPerf()
   }
 }
