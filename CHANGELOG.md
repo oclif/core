@@ -1,3 +1,12 @@
+# [4.2.0](https://github.com/oclif/core/compare/4.1.1...4.2.0) (2024-12-20)
+
+
+### Features
+
+* add finally hook ([16901c3](https://github.com/oclif/core/commit/16901c3d2af42655f9605bd2b9ad1a608fb1f973))
+
+
+
 ## [4.1.1](https://github.com/oclif/core/compare/4.1.0...4.1.1) (2024-12-19)
 
 
