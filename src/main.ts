@@ -32,13 +32,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const initMarker = Performance.mark(OCLIF_MARKER_OWNER, 'main.run#init')
 
-  const collectPerf = async () => {
-    marker?.stop()
-    if (!initMarker?.stopped) initMarker?.stop()
-    await Performance.collect()
-    Performance.debug()
-  }
-
   const showHelp = async (argv: string[]) => {
     const Help = await loadHelpClass(config)
     const help = new Help(config, config.pjson.oclif.helpOptions ?? config.pjson.helpOptions)
@@ -67,20 +60,28 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const [id, ...argvSlice] = normalizeArgv(config, argv)
 
+  const runFinally = async () => {
+    marker?.stop()
+    if (!initMarker?.stopped) initMarker?.stop()
+    await Performance.collect()
+    Performance.debug()
+    await config.runHook('finally', {argv: argvSlice, id})
+  }
+
   // run init hook
   await config.runHook('init', {argv: argvSlice, id})
 
   // display version if applicable
   if (versionAddition(argv, config)) {
     ux.stdout(config.userAgent)
-    await collectPerf()
+    await runFinally()
     return
   }
 
   // display help version if applicable
   if (helpAddition(argv, config)) {
     await showHelp(argv)
-    await collectPerf()
+    await runFinally()
     return
   }
 
@@ -90,7 +91,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) {
       await showHelp([id])
-      await collectPerf()
+      await runFinally()
       return
     }
   }
@@ -100,6 +101,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   try {
     return await config.runCommand(id, argvSlice, cmd)
   } finally {
-    await collectPerf()
+    await runFinally()
   }
 }
