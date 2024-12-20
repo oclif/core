@@ -26,6 +26,10 @@ export interface Hooks {
     options: {argv?: string[]; id: string}
     return: unknown
   }
+  finally: {
+    options: {argv: string[]; id: string}
+    return: void
+  }
   init: {
     options: {argv: string[]; id: string | undefined}
     return: void
@@ -75,6 +79,10 @@ export type Hook<T extends keyof P, P extends Hooks = Hooks> = (
 ) => Promise<P[T]['return']>
 
 export namespace Hook {
+  /**
+   * Runs at the end of the CLI lifecycle - regardless of success or failure.
+   */
+  export type Finally = Hook<'finally'>
   /**
    * Runs when the CLI is initialized before a command is executed.
    */
