@@ -63,7 +63,7 @@ export function standardizeIDFromArgv(argv: string[], config: IConfig): string[]
 export function getHelpFlagAdditions(config: IConfig): string[] {
   const helpFlags = ['--help']
   const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
-  return [...new Set([...helpFlags, ...additionalHelpFlags]).values()]
+  return [...new Set([...additionalHelpFlags, ...helpFlags]).values()]
 }
 
 export function formatFlagDeprecationWarning(flag: string, opts: Deprecation | true): string {

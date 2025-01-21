@@ -113,8 +113,8 @@ export interface Config {
    */
   readonly shell: string
   readonly theme?: Theme | undefined
-  topicSeparator: ' ' | ':'
   readonly topics: Topic[]
+  topicSeparator: ' ' | ':'
   readonly updateConfig: NonNullable<OclifConfiguration['update']>
   /**
    * user agent to use for http calls

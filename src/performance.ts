@@ -1,4 +1,4 @@
-import {PerformanceObserver, performance} from 'node:perf_hooks'
+import {performance, PerformanceObserver} from 'node:perf_hooks'
 
 import {makeDebug} from './logger'
 import {settings} from './settings'
@@ -35,7 +35,6 @@ class Marker {
   public module: string
   public scope: string
   public stopped = false
-
   private startMarker: string
   private stopMarker: string
 
@@ -94,6 +93,7 @@ export class Performance {
     }
 
     return new Promise((resolve) => {
+      // eslint-disable-next-line complexity
       const perfObserver = new PerformanceObserver((items) => {
         for (const entry of items.getEntries()) {
           const marker = Performance.markers.get(entry.name)
@@ -115,10 +115,10 @@ export class Performance {
         const oclifResults = Performance._results.get(OCLIF_MARKER_OWNER) ?? []
         const command = oclifResults.find((r) => r.name.startsWith('config.runCommand'))
         const commandLoadTime = command
-          ? Performance.getResult(
+          ? (Performance.getResult(
               OCLIF_MARKER_OWNER,
               `plugin.findCommand#${command.details.plugin}.${command.details.command}`,
-            )?.duration ?? 0
+            )?.duration ?? 0)
           : 0
 
         const pluginLoadTimes = Object.fromEntries(
@@ -189,7 +189,6 @@ export class Performance {
 
   /**
    * Add debug logs for plugin loading performance
-   * @returns void
    */
   public static debug(): void {
     if (!Performance.enabled) return
@@ -254,10 +253,6 @@ export class Performance {
     }
   }
 
-  public static get enabled(): boolean {
-    return settings.performanceEnabled ?? false
-  }
-
   public static getResult(owner: string, name: string): PerfResult | undefined {
     return Performance._results.get(owner)?.find((r) => r.name === name)
   }
@@ -277,6 +272,10 @@ export class Performance {
     Performance.markers.set(marker.name, marker)
 
     return marker
+  }
+
+  public static get enabled(): boolean {
+    return settings.performanceEnabled ?? false
   }
 
   public static get oclifPerf(): PerfHighlights | Record<string, never> {

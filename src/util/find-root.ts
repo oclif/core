@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import type {PackageInformation, PackageLocator, getPackageInformation} from 'pnpapi'
+import type {getPackageInformation, PackageInformation, PackageLocator} from 'pnpapi'
 
 import {basename, dirname, join} from 'node:path'
 

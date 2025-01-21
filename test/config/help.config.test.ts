@@ -22,7 +22,7 @@ describe('help and version flag additions', () => {
     expect(config.pjson.oclif.additionalHelpFlags).to.have.lengthOf(2)
     expect(config.pjson.oclif.additionalVersionFlags).to.have.lengthOf(3)
     const mergedHelpFlags = getHelpFlagAdditions(config)
-    expect(mergedHelpFlags).to.deep.equal(['--help', ...(config.pjson.oclif.additionalHelpFlags as string[])])
+    expect(mergedHelpFlags).to.deep.equal([...(config.pjson.oclif.additionalHelpFlags as string[]), '--help'])
     expect(helpAddition(['-h'], config)).to.be.true
     expect(helpAddition(['help'], config)).to.be.false
     expect(helpAddition(['--mycommandhelp'], config)).to.be.true

@@ -13,14 +13,18 @@ export type ActionType = 'debug' | 'simple' | 'spinner'
 
 export class ActionBase {
   std: 'stderr' | 'stdout' = 'stderr'
-
   protected stdmocks?: ['stderr' | 'stdout', string[]][]
-
   type!: ActionType
-
   private stdmockOrigs = {
     stderr: process.stderr.write,
     stdout: process.stdout.write,
+  }
+
+  private get globals(): {action: {task?: Task | undefined}; output: string | undefined} {
+    ;(global as any).ux = (global as any).ux || {}
+    const globals = (global as any).ux
+    globals.action = globals.action || {}
+    return globals
   }
 
   protected get output(): string | undefined {
@@ -59,62 +63,6 @@ export class ActionBase {
 
   public set task(task: Task | undefined) {
     this.globals.action.task = task
-  }
-
-  public pause(fn: () => any, icon?: string): Promise<any> {
-    const {task} = this
-    const active = task && task.active
-    if (task && active) {
-      this._pause(icon)
-      this._stdout(false)
-      task.active = false
-    }
-
-    const ret = fn()
-    if (task && active) {
-      this._resume()
-    }
-
-    return ret
-  }
-
-  public async pauseAsync<T>(fn: () => Promise<T>, icon?: string): Promise<T> {
-    const {task} = this
-    const active = task && task.active
-    if (task && active) {
-      this._pause(icon)
-      this._stdout(false)
-      task.active = false
-    }
-
-    const ret = await fn()
-    if (task && active) {
-      this._resume()
-    }
-
-    return ret
-  }
-
-  public start(action: string, status?: string, opts: Options = {}): void {
-    this.std = opts.stdout ? 'stdout' : 'stderr'
-    const task = {action, active: Boolean(this.task && this.task.active), status}
-    this.task = task
-
-    this._start(opts)
-    task.active = true
-    this._stdout(true)
-  }
-
-  public stop(msg = 'done'): void {
-    const {task} = this
-    if (!task) {
-      return
-    }
-
-    this._stop(msg)
-    task.active = false
-    this.task = undefined
-    this._stdout(false)
   }
 
   // flush mocked stdout/stderr
@@ -194,13 +142,13 @@ export class ActionBase {
   // write to the real stdout/stderr
   protected _write(std: 'stderr' | 'stdout', s: string | string[]): void {
     switch (std) {
-      case 'stdout': {
-        this.stdmockOrigs.stdout.apply(process.stdout, castArray(s) as [string])
+      case 'stderr': {
+        this.stdmockOrigs.stderr.apply(process.stderr, castArray(s) as [string])
         break
       }
 
-      case 'stderr': {
-        this.stdmockOrigs.stderr.apply(process.stderr, castArray(s) as [string])
+      case 'stdout': {
+        this.stdmockOrigs.stdout.apply(process.stdout, castArray(s) as [string])
         break
       }
 
@@ -210,10 +158,59 @@ export class ActionBase {
     }
   }
 
-  private get globals(): {action: {task?: Task | undefined}; output: string | undefined} {
-    ;(global as any).ux = (global as any).ux || {}
-    const globals = (global as any).ux
-    globals.action = globals.action || {}
-    return globals
+  public pause(fn: () => any, icon?: string): Promise<any> {
+    const {task} = this
+    const active = task && task.active
+    if (task && active) {
+      this._pause(icon)
+      this._stdout(false)
+      task.active = false
+    }
+
+    const ret = fn()
+    if (task && active) {
+      this._resume()
+    }
+
+    return ret
+  }
+
+  public async pauseAsync<T>(fn: () => Promise<T>, icon?: string): Promise<T> {
+    const {task} = this
+    const active = task && task.active
+    if (task && active) {
+      this._pause(icon)
+      this._stdout(false)
+      task.active = false
+    }
+
+    const ret = await fn()
+    if (task && active) {
+      this._resume()
+    }
+
+    return ret
+  }
+
+  public start(action: string, status?: string, opts: Options = {}): void {
+    this.std = opts.stdout ? 'stdout' : 'stderr'
+    const task = {action, active: Boolean(this.task && this.task.active), status}
+    this.task = task
+
+    this._start(opts)
+    task.active = true
+    this._stdout(true)
+  }
+
+  public stop(msg = 'done'): void {
+    const {task} = this
+    if (!task) {
+      return
+    }
+
+    this._stop(msg)
+    task.active = false
+    this.task = undefined
+    this._stdout(false)
   }
 }

@@ -119,14 +119,10 @@ export class Parser<
   TArgs extends OutputArgs<T['args']>,
 > {
   private readonly argv: string[]
-
   private readonly booleanFlags: {[k: string]: BooleanFlag<any>}
-
   private readonly context: ParserContext
   private currentFlag?: OptionFlag<any>
-
   private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
-
   private readonly raw: ParsingToken[] = []
 
   constructor(private readonly input: T) {
@@ -139,6 +135,10 @@ export class Parser<
         [...(flag.aliases ?? []), ...(flag.charAliases ?? [])].map((a) => [a, flag]),
       ),
     )
+  }
+
+  private get _argTokens(): ArgToken[] {
+    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
@@ -315,10 +315,6 @@ export class Parser<
     }
 
     return {args, argv}
-  }
-
-  private get _argTokens(): ArgToken[] {
-    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   private _debugInput() {

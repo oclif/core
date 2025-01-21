@@ -1,4 +1,4 @@
-import {Stats, existsSync as fsExistsSync} from 'node:fs'
+import {existsSync as fsExistsSync, Stats} from 'node:fs'
 import {readFile, stat} from 'node:fs/promises'
 
 import {isProd} from './util'

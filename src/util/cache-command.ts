@@ -129,7 +129,7 @@ export async function cacheCommand(
   ]
 
   // Add in any additional properties that are not standard command properties.
-  const stdKeysAndIgnored = new Set([...Object.keys(stdProperties), ...ignoreCommandProperties])
+  const stdKeysAndIgnored = new Set([...ignoreCommandProperties, ...Object.keys(stdProperties)])
   const keysToAdd = Object.keys(cmd).filter((property) => !stdKeysAndIgnored.has(property))
   const additionalProperties = Object.fromEntries(keysToAdd.map((key) => [key, (cmd as any)[key]]))
 

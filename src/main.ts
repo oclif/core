@@ -1,4 +1,4 @@
-import {URL, fileURLToPath} from 'node:url'
+import {fileURLToPath, URL} from 'node:url'
 
 import Cache from './cache'
 import {Config} from './config'
