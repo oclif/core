@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import {Args, Config, Flags as flags} from '../../src'
-import {TestHelp, makeCommandClass, makeLoadable} from './help-test-utils'
+import {makeCommandClass, makeLoadable, TestHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80
@@ -316,6 +316,7 @@ DESCRIPTION
   })
 
   const myEnumValues = ['a', 'b', 'c']
+
   describe('flags', () => {
     it('should output flag enum', async () => {
       const cmd = await makeLoadable(

@@ -12,7 +12,7 @@ type MyType = {
   foo: boolean
 }
 
-class MyCommand extends Command {
+export class MyCommand extends Command {
   static args = {
     requiredString: Args.string({required: true}),
     optionalString: Args.string(),

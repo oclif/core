@@ -1,4 +1,4 @@
-import {readFile, readdir} from 'node:fs/promises'
+import {readdir, readFile} from 'node:fs/promises'
 import {join, parse} from 'node:path'
 
 import {Hook} from '../../../../../../src'

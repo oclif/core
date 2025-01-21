@@ -530,7 +530,6 @@ class InteropTest extends Command {
   }
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 ;(async () => {
   InteropTest.run().then(
     async () => flush(),

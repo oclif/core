@@ -44,6 +44,7 @@ const pjson = {
 describe('Config', () => {
   const originalEnv = {...process.env}
   const root = resolve(__dirname, '..')
+
   beforeEach(() => {
     process.env = {}
   })

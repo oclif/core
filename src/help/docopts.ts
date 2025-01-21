@@ -58,7 +58,6 @@ import {ensureArgObject} from '../util/ensure-arg-object'
  */
 export class DocOpts {
   private flagList: Command.Flag.Any[]
-
   private flagMap: {[index: string]: Command.Flag.Any}
 
   public constructor(private cmd: Command.Loadable) {

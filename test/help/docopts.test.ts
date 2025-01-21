@@ -17,6 +17,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' -f <value>')
   })
+
   it('shows optional boolean field', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -30,6 +31,7 @@ describe('doc opts', () => {
     // boolean fields don't have a value
     expect(usage).to.contain(' [-f]')
   })
+
   it('shows no short char', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -42,6 +44,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' [--testFlag a|b]')
   })
+
   it('shows url type', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -54,6 +57,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' [-s <value>]')
   })
+
   it('does not show hidden type', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -86,6 +90,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' [-f <value> -s <value>]')
   })
+
   it('shows one-way depended field on required field', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -109,6 +114,7 @@ describe('doc opts', () => {
     // Maybe it should be just "-f <value> [-s <value>]""
     expect(usage).to.contain(' (-f <value> -s <value>)')
   })
+
   it('shows required one-way depended field on optional field', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -129,6 +135,7 @@ describe('doc opts', () => {
     // If the required flag depends on an optional, it isn't really optional.
     expect(usage).to.contain(' (-f <value> -s <value>)')
   })
+
   it('shows optional one-way exclusive fields', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -147,6 +154,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' [-f <value> | -s <value>]')
   })
+
   it('shows one-way exclusive field on required field', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -166,6 +174,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' (-f <value> | -s <value>)')
   })
+
   it('shows required one-way exclusive field on optional field', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -205,6 +214,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' (-f <value> | -s <value>)')
   })
+
   it('shows optional exclusive fields defined twice', () => {
     const usage = DocOpts.generate({
       flags: {
@@ -224,6 +234,7 @@ describe('doc opts', () => {
     } as any)
     expect(usage).to.contain(' [-s <value> | -f <value>]')
   })
+
   it('shows optional two-way depended fields', () => {
     const usage = DocOpts.generate({
       flags: {

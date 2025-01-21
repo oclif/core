@@ -8,9 +8,6 @@ import {settings} from './settings'
 /**
  * Load and run oclif CLI
  *
- * @param options - options to load the CLI
- * @returns Promise<void>
- *
  * @example For ESM dev.js
  * ```
  * #!/usr/bin/env -S node --loader ts-node/esm --no-warnings=ExperimentalWarning

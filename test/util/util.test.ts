@@ -6,6 +6,7 @@ describe('capitalize', () => {
   it('capitalizes the string', () => {
     expect(capitalize('dominik')).to.equal('Dominik')
   })
+
   it('works with an empty string', () => {
     expect(capitalize('')).to.equal('')
   })
@@ -18,6 +19,7 @@ describe('sumBy', () => {
     const arr: Item[] = []
     expect(sumBy(arr, (i) => i.x)).to.equal(0)
   })
+
   it('returns sum for non-empty array', () => {
     const arr: Item[] = [{x: 1}, {x: 2}, {x: 3}]
     expect(sumBy(arr, (i) => i.x)).to.equal(6)
@@ -29,6 +31,7 @@ describe('maxBy', () => {
     const arr: Item[] = []
     expect(maxBy(arr, (i) => i.x)).to.be.undefined
   })
+
   it('returns max value in the array', () => {
     const arr: Item[] = [{x: 1}, {x: 3}, {x: 2}]
     expect(maxBy(arr, (i) => i.x)).to.equal(arr[1])
@@ -39,13 +42,16 @@ describe('last', () => {
   it('returns undefined for empty array', () => {
     expect(last([])).to.be.undefined
   })
+
   it('returns undefined for undefined', () => {
     expect(last()).to.be.undefined
   })
+
   it('returns last value in the array', () => {
     const arr: Item[] = [{x: 1}, {x: 3}, {x: 2}]
     expect(last(arr)).to.equal(arr[2])
   })
+
   it('returns only item in array', () => {
     expect(last([6])).to.equal(6)
   })

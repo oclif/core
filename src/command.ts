@@ -47,30 +47,24 @@ process.stdout.on('error', (err: any) => {
  */
 
 export abstract class Command {
+  private static readonly _base = `${pjson.name}@${pjson.version}`
   /** An array of aliases for this command. */
   public static aliases: string[] = []
-
   /** An order-dependent object of arguments for the command */
   public static args: ArgInput = {}
-
   public static baseFlags: FlagInput
-
   /**
    * Emit deprecation warning when a command alias is used
    */
   static deprecateAliases?: boolean
-
   public static deprecationOptions?: Deprecation
-
   /**
    * A full description of how to use the command.
    *
    * If no summary, the first line of the description will be used as the summary.
    */
   public static description: string | undefined
-
   public static enableJsonFlag = false
-
   /**
    * An array of examples to show at the end of the command's help.
    *
@@ -86,35 +80,24 @@ export abstract class Command {
    * ```
    */
   public static examples: Command.Example[]
-
   /** A hash of flags for the command */
   public static flags: FlagInput
-
   public static hasDynamicHelp = false
-
   public static help: string | undefined
-
   /** Hide the command from help */
   public static hidden: boolean
-
   /** An array of aliases for this command that are hidden from help. */
   public static hiddenAliases: string[] = []
-
   /** A command ID, used mostly in error or verbose reporting. */
   public static id: string
-
   public static plugin: Plugin | undefined
-
   public static readonly pluginAlias?: string
   public static readonly pluginName?: string
   public static readonly pluginType?: string
-
   /** Mark the command as a given state (e.g. beta or deprecated) in help */
   public static state?: 'beta' | 'deprecated' | string
-
   /** When set to false, allows a variable amount of arguments */
   public static strict = true
-
   /**
    * The tweet-sized description for your class, used in a parent-commands
    * sub-command listing and as the header for the command help.
@@ -124,12 +107,8 @@ export abstract class Command {
    * An override string (or strings) for the default usage documentation.
    */
   public static usage: string | string[] | undefined
-
   protected debug: (...args: any[]) => void
-
   public id: string | undefined
-
-  private static readonly _base = `${pjson.name}@${pjson.version}`
 
   public constructor(
     public argv: string[],
@@ -144,11 +123,6 @@ export abstract class Command {
       }
     }
   }
-
-  /**
-   * actual command run code goes here
-   */
-  public abstract run(): Promise<any>
 
   /**
    * instantiate and run the command
@@ -186,6 +160,26 @@ export abstract class Command {
 
   protected get ctor(): typeof Command {
     return this.constructor as typeof Command
+  }
+
+  protected async _run<T>(): Promise<T> {
+    let err: Error | undefined
+    let result: T | undefined
+    try {
+      // remove redirected env var to allow subsessions to run autoupdated client
+      this.removeEnvVar('REDIRECTED')
+      await this.init()
+      result = await this.run()
+    } catch (error: any) {
+      err = error
+      await this.catch(error)
+    } finally {
+      await this.finally(err)
+    }
+
+    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
+
+    return result as T
   }
 
   protected async catch(err: CommandError): Promise<any> {
@@ -293,6 +287,11 @@ export abstract class Command {
     return results
   }
 
+  /**
+   * actual command run code goes here
+   */
+  public abstract run(): Promise<any>
+
   protected toErrorJson(err: unknown): any {
     return {error: err}
   }
@@ -348,26 +347,6 @@ export abstract class Command {
         }
       }
     }
-  }
-
-  protected async _run<T>(): Promise<T> {
-    let err: Error | undefined
-    let result: T | undefined
-    try {
-      // remove redirected env var to allow subsessions to run autoupdated client
-      this.removeEnvVar('REDIRECTED')
-      await this.init()
-      result = await this.run()
-    } catch (error: any) {
-      err = error
-      await this.catch(error)
-    } finally {
-      await this.finally(err)
-    }
-
-    if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
-
-    return result as T
   }
 
   private removeEnvVar(envVar: string): void {

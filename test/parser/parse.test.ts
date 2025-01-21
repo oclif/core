@@ -106,6 +106,7 @@ describe('parse', () => {
         expect(Boolean(out.flags.myflag)).to.equal(true)
         expect(Boolean(out.flags.myflag2)).to.equal(true)
       })
+
       it("doesn' throw if defaultHelp func fails", async () => {
         const out = await parse(['--foo', 'baz'], {
           flags: {
@@ -217,6 +218,7 @@ describe('parse', () => {
         expect(Boolean(out.flags.force)).to.equal(true)
       })
     })
+
     it('parses flag value with "=" to separate', async () => {
       const out = await parse(['--myflag=foo'], {
         flags: {
@@ -369,6 +371,7 @@ See more help with --help`)
         })
         expect(out.argv).to.deep.equal(['foo', 'bar'])
       })
+
       it('skips optional args', async () => {
         const out = await parse(['foo'], {
           args: {myarg: Args.string(), myarg2: Args.string()},
@@ -511,6 +514,7 @@ See more help with --help`)
         expect(out.flags.baz.toUpperCase()).to.equal('D')
         expect(out.flags.bar.join('|')).to.equal('a|b')
       })
+
       it('parses multiple flags on custom flags', async () => {
         const out = await parse(['--foo', 'a', '--foo=b'], {
           flags: {
@@ -519,6 +523,7 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
       })
+
       it('parses single flag starting with with \\ escape char', async () => {
         const out = await parse(['--foo', '\\file:foo'], {
           flags: {
@@ -527,18 +532,21 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({foo: ['\\file:foo']})
       })
+
       it('parses multiple space-delimited flags', async () => {
         const out = await parse(['--foo', 'a', 'b', 'c'], {
           flags: {foo: Flags.string({multiple: true})},
         })
         expect(out.flags).to.deep.include({foo: ['a', 'b', 'c']})
       })
+
       it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
         const out = await parse(['--foo', 'c:\\', 'd:\\'], {
           flags: {foo: Flags.string({multiple: true})},
         })
         expect(out.flags).to.deep.include({foo: ['c:\\', 'd:\\']})
       })
+
       it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
         const out = await parse(['--foo', 'c:\\', 'd:\\'], {
           flags: {foo: Flags.string({multiple: true})},
@@ -563,6 +571,7 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({foo: ['a']})
       })
+
       it('throws if non-allowed options on multiple', async () => {
         try {
           await parse(['--foo', 'a', '--foo=c'], {
@@ -574,6 +583,7 @@ See more help with --help`)
           expect(error.message).to.include('Expected --foo=c to be one of: a, b')
         }
       })
+
       describe('comma delimiter', () => {
         it('basic', async () => {
           const out = await parse(['--foo', 'a,b'], {
@@ -583,6 +593,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
         })
+
         it('preserves non-exterior double quotes (single and pairs)', async () => {
           const out = await parse(['--foo', 'a,",b,hi"yo"'], {
             flags: {
@@ -591,6 +602,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', '"', 'b', 'hi"yo"']})
         })
+
         it('preserves non-exterior single quotes (single and pairs)', async () => {
           const out = await parse(['--foo', "a,',b,hi'yo'"], {
             flags: {
@@ -599,6 +611,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', "'", 'b', "hi'yo'"]})
         })
+
         it('with spaces inside double quotes', async () => {
           const out = await parse(['--foo', '"a a","b b"'], {
             flags: {
@@ -607,6 +620,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
         })
+
         it('with spaces inside single quotes', async () => {
           const out = await parse(['--foo', "'a a','b b'"], {
             flags: {
@@ -615,6 +629,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
         })
+
         it('with options', async () => {
           const out = await parse(['--foo', 'a,b'], {
             flags: {
@@ -623,6 +638,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a', 'b']})
         })
+
         it('throws if non-allowed options on multiple', async () => {
           try {
             await parse(['--foo', 'a,c'], {
@@ -643,6 +659,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
         })
+
         it('with options and single quotes with spaces', async () => {
           const out = await parse(['--foo', "'a a','b b'"], {
             flags: {
@@ -651,6 +668,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a a', 'b b']})
         })
+
         it('throws if non-allowed with options and double quotes with spaces', async () => {
           try {
             await parse(['--foo', '"a a","b c"'], {
@@ -662,6 +680,7 @@ See more help with --help`)
             expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
           }
         })
+
         it('throws if non-allowed with options and single quotes with spaces', async () => {
           try {
             await parse(['--foo', "'a a','b c'"], {
@@ -673,6 +692,7 @@ See more help with --help`)
             expect(error.message).to.include('Expected --foo=b c to be one of: a a, b b')
           }
         })
+
         it('retains escape char without delimiter', async () => {
           const out = await parse(['--foo', 'a\\'], {
             flags: {
@@ -681,6 +701,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a\\']})
         })
+
         it('does not split on escaped delimiter', async () => {
           const out = await parse(['--foo', 'a\\,b,c'], {
             flags: {
@@ -689,6 +710,7 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({foo: ['a,b', 'c']})
         })
+
         it('escapes with multiple invocation', async () => {
           const out = await parse(['--foo', 'a\\,b', '--foo', 'b'], {
             flags: {
@@ -857,18 +879,21 @@ See more help with --help`)
           })
           expect(out.flags).to.deep.include({int: 10})
         })
+
         it('min pass gt', async () => {
           const out = await parse(['--int', '11'], {
             flags: {int: Flags.integer({min: 10, max: 20})},
           })
           expect(out.flags).to.deep.include({int: 11})
         })
+
         it('max pass lt', async () => {
           const out = await parse(['--int', '19'], {
             flags: {int: Flags.integer({min: 10, max: 20})},
           })
           expect(out.flags).to.deep.include({int: 19})
         })
+
         it('max pass equal', async () => {
           const out = await parse(['--int', '20'], {
             flags: {int: Flags.integer({min: 10, max: 20})},
@@ -890,6 +915,7 @@ See more help with --help`)
             'Parsing --int \n\tExpected an integer greater than or equal to 10 but received: 9',
           )
         })
+
         it('max fail gt', async () => {
           let message = ''
           try {
@@ -911,6 +937,7 @@ See more help with --help`)
       const customParseException = 'NOT_OK'
       const validateEvenNumberString = async (input: string) =>
         Number.parseInt(input, 10) % 2 === 0 ? Number.parseInt(input, 10) : assert.fail(customParseException)
+
       it('accepts custom parse that passes', async () => {
         const out = await parse([`--int=${testIntPass}`], {
           flags: {int: Flags.integer({parse: validateEvenNumberString})},
@@ -961,6 +988,7 @@ See more help with --help`)
           return this.prop
         }
       }
+
       it('uses default via value', async () => {
         const out = await parse([], {
           flags: {
@@ -972,6 +1000,7 @@ See more help with --help`)
         })
         expect(out.flags.foo?.prop).to.equal('baz')
       })
+
       it('uses default via function', async () => {
         const out = await parse([], {
           flags: {
@@ -983,6 +1012,7 @@ See more help with --help`)
         })
         expect(out.flags.foo?.prop).to.equal('baz')
       })
+
       it('should error with exclusive flag violation', async () => {
         try {
           const out = await parse(['--foo', 'baz', '--bar'], {
@@ -1002,6 +1032,7 @@ See more help with --help`)
           expect(error.message).to.include('--foo=bar cannot also be provided when using --bar')
         }
       })
+
       it('should error with exclusive flag violation and defaultHelp value', async () => {
         try {
           const out = await parse(['--foo', 'baz', '--bar'], {
@@ -1020,6 +1051,7 @@ See more help with --help`)
           expect(error.message).to.include('--foo=baz cannot also be provided when using --bar')
         }
       })
+
       it('uses parser when value provided', async () => {
         const out = await parse(['--foo=bar'], {
           flags: {
@@ -1076,6 +1108,7 @@ See more help with --help`)
       })
       expect(out.args).to.deep.include({num: '15'})
     })
+
     it('flag multiple with arguments and custom delimiter and parser', async () => {
       const out = await parse(['--foo', './a.txt,./b.txt', '--foo', './c.txt', '--', '15'], {
         args: {num: Args.string()},
@@ -1245,6 +1278,7 @@ See more help with --help`)
       })
       expect(out.flags).to.deep.include({foo: 100})
     })
+
     it('does not require parse fn', async () => {
       const foo = Flags.custom({char: 'f'})
       const out = await parse(['-f', 'bar'], {
@@ -1274,6 +1308,7 @@ See more help with --help`)
 
       expect(message).to.include('Expected --foo=invalidopt to be one of: myopt, myotheropt')
     })
+
     it('fails when invalid env var', async () => {
       let message = ''
       process.env.TEST_FOO = 'invalidopt'
@@ -1707,6 +1742,7 @@ See more help with --help`)
       })
       expect(out.flags.foo).to.equal(undefined)
     })
+
     it('is false', async () => {
       const out = await parse(['--no-foo'], {
         flags: {
@@ -1715,6 +1751,7 @@ See more help with --help`)
       })
       expect(out.flags.foo).to.equal(false)
     })
+
     it('is true', async () => {
       const out = await parse(['--foo'], {
         flags: {
@@ -1738,18 +1775,21 @@ See more help with --help`)
 
     describe('directory', () => {
       const testDir = 'some/dir'
+
       it('passes if dir !exists but exists:false', async () => {
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory({exists: false})},
         })
         expect(out.flags).to.deep.include({dir: testDir})
       })
+
       it('passes if dir !exists but exists not defined', async () => {
         const out = await parse([`--dir=${testDir}`], {
           flags: {dir: Flags.directory()},
         })
         expect(out.flags).to.deep.include({dir: testDir})
       })
+
       it('passes when dir exists', async () => {
         statStub.returns({isDirectory: () => true})
         const out = await parse([`--dir=${testDir}`], {
@@ -1757,6 +1797,7 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({dir: testDir})
       })
+
       it("fails when dir doesn't exist", async () => {
         statStub.throws()
         try {
@@ -1769,6 +1810,7 @@ See more help with --help`)
           expect(error.message).to.include(`Parsing --dir \n\tNo directory found at ${testDir}`)
         }
       })
+
       it('fails when dir exists but is not a dir', async () => {
         statStub.returns({isDirectory: () => false})
         try {
@@ -1781,8 +1823,10 @@ See more help with --help`)
           expect(error.message).to.include(`Parsing --dir \n\t${testDir} exists but is not a directory`)
         }
       })
+
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
+
         it('accepts custom parse that passes', async () => {
           statStub.returns({isDirectory: () => true})
           const out = await parse([`--dir=${testDir}`], {
@@ -1818,18 +1862,21 @@ See more help with --help`)
 
     describe('file', () => {
       const testFile = 'some/file.ext'
+
       it("passes if file doesn't exist but not exists:true", async () => {
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file({exists: false})},
         })
         expect(out.flags).to.deep.include({file: testFile})
       })
+
       it("passes if file doesn't exist but not exists not defined", async () => {
         const out = await parse([`--file=${testFile}`], {
           flags: {file: Flags.file()},
         })
         expect(out.flags).to.deep.include({file: testFile})
       })
+
       it('passes when file exists', async () => {
         statStub.returns({isFile: () => true})
         const out = await parse([`--file=${testFile}`], {
@@ -1837,6 +1884,7 @@ See more help with --help`)
         })
         expect(out.flags).to.deep.include({file: testFile})
       })
+
       it("fails when dir doesn't exist", async () => {
         statStub.throws()
         try {
@@ -1849,6 +1897,7 @@ See more help with --help`)
           expect(error.message).to.include(`Parsing --file \n\tNo file found at ${testFile}`)
         }
       })
+
       it('fails when file exists but is not a file', async () => {
         statStub.returns({isFile: () => false})
         try {
@@ -1861,8 +1910,10 @@ See more help with --help`)
           expect(error.message).to.include(`Parsing --file \n\t${testFile} exists but is not a file`)
         }
       })
+
       describe('custom parse functions', () => {
         const customParseException = 'NOT_OK'
+
         it('accepts custom parse that passes', async () => {
           statStub.returns({isFile: () => true})
           const out = await parse([`--dir=${testFile}`], {
@@ -1931,6 +1982,7 @@ See more help with --help`)
         })
         expect(out.flags.foo).to.equal(true)
       })
+
       it('string', async () => {
         const out = await parse(['-b', 'hello'], {
           flags: {
@@ -1941,6 +1993,7 @@ See more help with --help`)
         })
         expect(out.flags.foo).to.equal('hello')
       })
+
       it('empty charAliases', async () => {
         const out = await parse(['--foo', 'hello'], {
           flags: {
@@ -1951,6 +2004,7 @@ See more help with --help`)
         })
         expect(out.flags.foo).to.equal('hello')
       })
+
       it('duplicated flag via charAliases and full name throws error', async () => {
         let message = ''
         try {
@@ -1967,6 +2021,7 @@ See more help with --help`)
 
         expect(message).to.include('can only be specified once')
       })
+
       it('duplicated via aliases charAliases throws error', async () => {
         let message = ''
         try {

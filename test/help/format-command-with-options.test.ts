@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
 import {Args, Config, Flags as flags} from '../../src'
-import {TestHelpWithOptions as TestHelp, makeCommandClass, makeLoadable} from './help-test-utils'
+import {makeCommandClass, makeLoadable, TestHelpWithOptions as TestHelp} from './help-test-utils'
 
 const g: any = global
 g.oclif.columns = 80

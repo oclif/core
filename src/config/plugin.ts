@@ -97,49 +97,28 @@ function determineHookOptions(hook: string | HookOptions): HookOptions {
 type CommandCache = Record<string, Command.Class>
 
 export class Plugin implements IPlugin {
+  _base = `${_pjson.name}@${_pjson.version}`
+  protected _debug = makeDebug()
   alias!: string
-
   alreadyLoaded = false
-
   children: Plugin[] = []
-
   commandIDs: string[] = []
-
   // This will be initialized in the _manifest() method, which gets called in the load() method.
   commands!: Command.Loadable[]
-
   commandsDir: string | undefined
-
   hasManifest = false
-
   hooks!: {[key: string]: HookOptions[]}
-
   isRoot = false
-
   manifest!: Manifest
-
   moduleType!: 'commonjs' | 'module'
-
   name!: string
-
   parent?: Plugin | undefined
-
   pjson!: PJSON
-
   root!: string
-
   tag?: string | undefined
-
   type!: string
-
   valid = false
-
   version!: string
-
-  _base = `${_pjson.name}@${_pjson.version}`
-
-  protected _debug = makeDebug()
-
   private commandCache: CommandCache | undefined
   private commandDiscoveryOpts: CommandDiscovery | undefined
   private flexibleTaxonomy!: boolean
@@ -203,6 +182,7 @@ export class Plugin implements IPlugin {
     return cmd
   }
 
+  // eslint-disable-next-line complexity
   public async load(): Promise<void> {
     this.type = this.options.type ?? 'core'
     this.tag = this.options.tag
@@ -324,7 +304,7 @@ export class Plugin implements IPlugin {
           }),
         )
       )
-        // eslint-disable-next-line unicorn/prefer-native-coercion-functions
+
         .filter((f): f is [string, Command.Cached] => Boolean(f))
         .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
           commands[id] = c
