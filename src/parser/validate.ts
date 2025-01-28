@@ -231,12 +231,12 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
           return validateDependsOn(name, relationship.flags)
         }
 
-        case 'some': {
-          return validateSome(name, relationship.flags)
-        }
-
         case 'none': {
           return validateExclusive(name, relationship.flags)
+        }
+
+        case 'some': {
+          return validateSome(name, relationship.flags)
         }
 
         default: {

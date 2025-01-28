@@ -1,3 +1,4 @@
+const getPackageType = require('get-package-type')
 import {lstatSync} from 'node:fs'
 import {extname, join, sep} from 'node:path'
 import {pathToFileURL} from 'node:url'
@@ -7,8 +8,6 @@ import {tsPath} from './config/ts-path'
 import {ModuleLoadError} from './errors/errors/module-load'
 import {Config as IConfig, Plugin as IPlugin} from './interfaces'
 import {existsSync} from './util/fs'
-
-const getPackageType = require('get-package-type')
 
 /**
  * Defines file extension resolution when source files do not have an extension.

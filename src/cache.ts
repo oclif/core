@@ -4,14 +4,14 @@ import {join} from 'node:path'
 import {Config} from './config/config'
 import {OclifConfiguration, Plugin} from './interfaces'
 
-type OclifCoreInfo = {name: string; version: string}
-
 type CacheContents = {
   rootPlugin: Plugin
   config: Config
   exitCodes: OclifConfiguration['exitCodes']
   '@oclif/core': OclifCoreInfo
 }
+
+type OclifCoreInfo = {name: string; version: string}
 
 type ValueOf<T> = T[keyof T]
 
@@ -20,6 +20,7 @@ type ValueOf<T> = T[keyof T]
  */
 export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContents>> {
   static instance: Cache
+
   public constructor() {
     super()
     this.set('@oclif/core', this.getOclifCoreMeta())
@@ -33,10 +34,10 @@ export default class Cache extends Map<keyof CacheContents, ValueOf<CacheContent
     return Cache.instance
   }
 
-  public get(key: 'config'): Config | undefined
-  public get(key: '@oclif/core'): OclifCoreInfo
-  public get(key: 'rootPlugin'): Plugin | undefined
-  public get(key: 'exitCodes'): OclifConfiguration['exitCodes'] | undefined
+  public get(_key: 'config'): Config | undefined
+  public get(_key: '@oclif/core'): OclifCoreInfo
+  public get(_key: 'rootPlugin'): Plugin | undefined
+  public get(_key: 'exitCodes'): OclifConfiguration['exitCodes'] | undefined
   public get(key: keyof CacheContents): ValueOf<CacheContents> | undefined {
     return super.get(key)
   }

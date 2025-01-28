@@ -1,4 +1,4 @@
-import {readFile, readdir} from 'node:fs/promises'
+import {readdir, readFile} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
 import {memoizedWarn} from '../errors/warn'

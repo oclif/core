@@ -15,9 +15,6 @@ import {Command} from '../command'
  *
  * If there is not a core plugin command present, this function will return the first
  * plugin as discovered (will not change the order)
- *
- * @param commands commands to determine the priority of
- * @returns command instance {Command.Loadable} or undefined
  */
 export function determinePriority(plugins: string[], commands: Command.Loadable[]): Command.Loadable {
   const commandPlugins = commands.sort((a, b) => {

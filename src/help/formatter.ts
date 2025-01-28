@@ -21,11 +21,8 @@ export type HelpSectionRenderer = (
 
 export class HelpFormatter {
   protected config: Interfaces.Config
-
   indentSpacing = 2
-
   protected opts: Interfaces.HelpOptions
-
   /**
    * Takes a string and replaces `<%= prop =>` with the value of prop, where prop is anything on
    * `config=Interfaces.Config` or `opts=Interface.HelpOptions`.
@@ -69,7 +66,7 @@ export class HelpFormatter {
    * ```
    * @param body the text to indent
    * @param spacing the final number of spaces this text will be indented
-   * @return the formatted indented text
+   * @returns the formatted indented text
    */
   public indent(body: string, spacing = this.indentSpacing): string {
     return indent(body, spacing)

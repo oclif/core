@@ -2,7 +2,7 @@ import * as ejs from 'ejs'
 import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {join, resolve, sep} from 'node:path'
-import {URL, fileURLToPath} from 'node:url'
+import {fileURLToPath, URL} from 'node:url'
 
 import Cache from '../cache'
 import {Command} from '../command'
@@ -83,7 +83,6 @@ class Permutations extends Map<string, Set<string>> {
 
 export class Config implements IConfig {
   public arch!: ArchTypes
-
   public bin!: string
   public binAliases?: string[] | undefined
   public binPath?: string | undefined
@@ -111,25 +110,18 @@ export class Config implements IConfig {
   public valid!: boolean
   public version!: string
   protected warned = false
-
   public windows!: boolean
-
   private _base = BASE
-
   private _commandIDs!: string[]
-
   private _commands = new Map<string, Command.Loadable>()
-
   private _topics = new Map<string, Topic>()
-
   private commandPermutations = new Permutations()
-
   private pluginLoader!: PluginLoader
-
   private rootPlugin!: IPlugin
   private topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
+
   static async load(opts: LoadOptions = module.filename || __dirname): Promise<Config> {
     setLogger(opts)
     // Handle the case when a file URL string is passed in such as 'import.meta.url'; covert to file path.
@@ -164,10 +156,6 @@ export class Config implements IConfig {
     return config
   }
 
-  static get rootPlugin(): IPlugin | undefined {
-    return this.rootPlugin
-  }
-
   public get commandIDs(): string[] {
     if (this._commandIDs) return this._commandIDs
     this._commandIDs = this.commands.map((c) => c.id)
@@ -180,6 +168,10 @@ export class Config implements IConfig {
 
   protected get isProd(): boolean {
     return isProd()
+  }
+
+  static get rootPlugin(): IPlugin | undefined {
+    return this.rootPlugin
   }
 
   public get topics(): Topic[] {
@@ -201,6 +193,25 @@ export class Config implements IConfig {
     }
   }
 
+  protected _shell(): string {
+    let shellPath
+    const {COMSPEC} = process.env
+    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
+    if (SHELL) {
+      shellPath = SHELL.split('/')
+    } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
+      shellPath = ['powershell']
+    } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
+      shellPath = ['cmd.exe']
+    } else if (this.windows && COMSPEC) {
+      shellPath = COMSPEC.split(/\\|\//)
+    } else {
+      shellPath = ['unknown']
+    }
+
+    return shellPath.at(-1) ?? 'unknown'
+  }
+
   protected dir(category: 'cache' | 'config' | 'data'): string {
     const base =
       process.env[`XDG_${category.toUpperCase()}_HOME`] ||
@@ -208,8 +219,8 @@ export class Config implements IConfig {
       join(this.home, category === 'data' ? '.local/share' : '.' + category)
     return join(base, this.dirname)
   }
-
   public findCommand(id: string, opts: {must: true}): Command.Loadable
+
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
@@ -409,8 +420,8 @@ export class Config implements IConfig {
     }
 
     const [defaultTheme, userTheme] = await Promise.all([
-      await getDefaultTheme(),
-      await safeReadJson<Record<string, string>>(userThemeFile),
+      getDefaultTheme(),
+      safeReadJson<Record<string, string>>(userThemeFile),
     ])
 
     // Merge the default theme with the user theme, giving the user theme precedence.
@@ -466,7 +477,7 @@ export class Config implements IConfig {
     }
 
     const command = await c.load()
-    await this.runHook('prerun', {Command: command, argv})
+    await this.runHook('prerun', {argv, Command: command})
 
     const result = (await command.run(argv, this)) as T
     // If plugins:uninstall was run, we need to remove all the uninstalled plugins
@@ -476,7 +487,7 @@ export class Config implements IConfig {
       for (const arg of argv) this.plugins.delete(arg)
     }
 
-    await this.runHook('postrun', {Command: command, argv, result})
+    await this.runHook('postrun', {argv, Command: command, result})
 
     marker?.addDetails({command: id, plugin: c.pluginName!})
     marker?.stop()
@@ -620,7 +631,7 @@ export class Config implements IConfig {
 
   /**
    * this DOES NOT account for bin aliases, use scopedEnvVarKeys instead which will account for bin aliases
-   * @param {string} k, the unscoped key you want to get the value for
+   * @param k {string}, the unscoped key you want to get the value for
    * @returns {string} returns the env var key
    */
   public scopedEnvVarKey(k: string): string {
@@ -632,7 +643,7 @@ export class Config implements IConfig {
 
   /**
    * gets the scoped env var keys for a given key, including bin aliases
-   * @param {string} k, the env key e.g. 'debug'
+   * @param k {string}, the env key e.g. 'debug'
    * @returns {string[]} e.g. ['SF_DEBUG', 'SFDX_DEBUG']
    */
   public scopedEnvVarKeys(k: string): string[] {
@@ -656,25 +667,6 @@ export class Config implements IConfig {
 
   protected windowsUserprofileHome(): string | undefined {
     return process.env.USERPROFILE
-  }
-
-  protected _shell(): string {
-    let shellPath
-    const {COMSPEC} = process.env
-    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
-    if (SHELL) {
-      shellPath = SHELL.split('/')
-    } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
-      shellPath = ['powershell']
-    } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
-      shellPath = ['cmd.exe']
-    } else if (this.windows && COMSPEC) {
-      shellPath = COMSPEC.split(/\\|\//)
-    } else {
-      shellPath = ['unknown']
-    }
-
-    return shellPath.at(-1) ?? 'unknown'
   }
 
   private buildS3Config() {
@@ -727,7 +719,6 @@ export class Config implements IConfig {
    * with oclif-compatible ones returned by @oclif/plugin-legacy init hook.
    *
    * @param plugins array of oclif-compatible plugins
-   * @returns void
    */
   private insertLegacyPlugins(plugins: IPlugin[]) {
     for (const plugin of plugins) {

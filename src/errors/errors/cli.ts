@@ -20,7 +20,7 @@ export function addOclifExitCode(
     ;(error as unknown as OclifError).oclif = {}
   }
 
-  error.oclif.exit = options?.exit === undefined ? Cache.getInstance().get('exitCodes')?.default ?? 2 : options.exit
+  error.oclif.exit = options?.exit === undefined ? (Cache.getInstance().get('exitCodes')?.default ?? 2) : options.exit
   return error as OclifError
 }
 
@@ -37,6 +37,7 @@ export class CLIError extends Error implements OclifError {
     this.suggestions = options.suggestions
   }
 
+  // eslint-disable-next-line getter-return
   get bang(): string | undefined {
     try {
       return colorize('red', process.platform === 'win32' ? '»' : '›')
@@ -49,7 +50,7 @@ export class CLIError extends Error implements OclifError {
 
   /**
    * @deprecated `render` Errors display should be handled by display function, like pretty-print
-   * @return {string} returns a string representing the dispay of the error
+   * @returns {string} returns a string representing the display of the error
    */
   render(): string {
     if (settings.debug) {
@@ -72,6 +73,7 @@ export namespace CLIError {
       this.name = 'Warning'
     }
 
+    // eslint-disable-next-line getter-return
     get bang(): string | undefined {
       try {
         return colorize('yellow', process.platform === 'win32' ? '»' : '›')

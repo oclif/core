@@ -1,7 +1,7 @@
 import {OclifError} from '../interfaces'
 import {getLogger} from '../logger'
 import {stderr} from '../ux/write'
-import {CLIError, addOclifExitCode} from './errors/cli'
+import {addOclifExitCode, CLIError} from './errors/cli'
 import prettyPrint from './errors/pretty-print'
 
 /**

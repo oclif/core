@@ -90,8 +90,8 @@ export async function cacheCommand(
   const uncachedBaseFlags = cmd.baseFlags ?? cmd._baseFlags
 
   const [flags, args] = await Promise.all([
-    await cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
-    await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
+    cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
+    cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
   ])
 
   const stdProperties = {
@@ -129,7 +129,7 @@ export async function cacheCommand(
   ]
 
   // Add in any additional properties that are not standard command properties.
-  const stdKeysAndIgnored = new Set([...Object.keys(stdProperties), ...ignoreCommandProperties])
+  const stdKeysAndIgnored = new Set([...ignoreCommandProperties, ...Object.keys(stdProperties)])
   const keysToAdd = Object.keys(cmd).filter((property) => !stdKeysAndIgnored.has(property))
   const additionalProperties = Object.fromEntries(keysToAdd.map((key) => [key, (cmd as any)[key]]))
 

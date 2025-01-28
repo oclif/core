@@ -22,7 +22,7 @@ import {isNotFalsy} from './util/util'
  *   },
  * })
  */
-export function custom<T = string, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P>
+export function custom<T = string, P = Record<string, unknown>>(_defaults: Partial<Arg<T, P>>): ArgDefinition<T, P>
 export function custom<T, P = Record<string, unknown>>(defaults: Partial<Arg<T, P>>): ArgDefinition<T, P> {
   return (options: any = {}) => ({
     parse: async (i: string, _context: Command, _opts: P) => i,

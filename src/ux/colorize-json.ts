@@ -39,9 +39,9 @@ function serializer(replacer: Replacer | undefined, cycleReplacer: Replacer | un
       // @ts-expect-error because `this` is not typed
       const thisPos = stack.indexOf(this)
       // @ts-expect-error because `this` is not typed
-      // eslint-disable-next-line no-bitwise
+      // eslint-disable-next-line no-bitwise, @typescript-eslint/no-unused-expressions
       ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
-      // eslint-disable-next-line no-bitwise
+      // eslint-disable-next-line no-bitwise, @typescript-eslint/no-unused-expressions
       ~thisPos ? keys.splice(thisPos, Number.POSITIVE_INFINITY, key) : keys.push(key)
       // @ts-expect-error because `this` is not typed
       if (stack.includes(value)) value = cycleReplacer.call(this, key, value)

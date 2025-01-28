@@ -182,6 +182,7 @@ export class CommandHelp extends HelpFormatter {
 
     const noChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
 
+    // eslint-disable-next-line complexity
     return flags.map((flag) => {
       let left = this.flagHelpLabel(flag)
 

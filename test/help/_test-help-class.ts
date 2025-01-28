@@ -5,7 +5,7 @@
 
 import {HelpBase} from '../../src'
 
-export default class extends HelpBase {
+export default class CustomHelp extends HelpBase {
   getCommandHelpForReadme(): string {
     return 'help for readme'
   }

@@ -44,6 +44,7 @@ const pjson = {
 describe('Config', () => {
   const originalEnv = {...process.env}
   const root = resolve(__dirname, '..')
+
   beforeEach(() => {
     process.env = {}
   })
@@ -145,8 +146,11 @@ describe('Config', () => {
       process.env.LOCALAPPDATA = '/my/home/localappdata'
       const config = await Config.load()
 
+      // eslint-disable-next-line unicorn/prefer-string-raw
       expect(config).to.have.property('cacheDir', join('/my/home/localappdata/@oclif\\core'))
+      // eslint-disable-next-line unicorn/prefer-string-raw
       expect(config).to.have.property('configDir', join('/my/home/localappdata/@oclif\\core'))
+      // eslint-disable-next-line unicorn/prefer-string-raw
       expect(config).to.have.property('dataDir', join('/my/home/localappdata/@oclif\\core'))
       expect(config).to.have.property('home', join('/my/home'))
     })

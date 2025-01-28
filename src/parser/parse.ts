@@ -62,9 +62,9 @@ export const readStdin = async (): Promise<null | string> => {
 
   if (stdin.isTTY) return null
 
-  if (global.oclif?.stdinCache) {
-    debug('resolved stdin from global cache', global.oclif.stdinCache)
-    return global.oclif.stdinCache
+  if (globalThis.oclif?.stdinCache) {
+    debug('resolved stdin from global cache', globalThis.oclif.stdinCache)
+    return globalThis.oclif.stdinCache
   }
 
   return new Promise((resolve) => {
@@ -86,7 +86,7 @@ export const readStdin = async (): Promise<null | string> => {
     rl.once('close', () => {
       clearTimeout(timeout)
       debug('resolved from stdin', result)
-      global.oclif = {...global.oclif, stdinCache: result}
+      globalThis.oclif = {...globalThis.oclif, stdinCache: result}
       resolve(result)
     })
 
@@ -119,14 +119,10 @@ export class Parser<
   TArgs extends OutputArgs<T['args']>,
 > {
   private readonly argv: string[]
-
   private readonly booleanFlags: {[k: string]: BooleanFlag<any>}
-
   private readonly context: ParserContext
   private currentFlag?: OptionFlag<any>
-
   private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
-
   private readonly raw: ParsingToken[] = []
 
   constructor(private readonly input: T) {
@@ -139,6 +135,10 @@ export class Parser<
         [...(flag.aliases ?? []), ...(flag.charAliases ?? [])].map((a) => [a, flag]),
       ),
     )
+  }
+
+  private get _argTokens(): ArgToken[] {
+    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
@@ -315,10 +315,6 @@ export class Parser<
     }
 
     return {args, argv}
-  }
-
-  private get _argTokens(): ArgToken[] {
-    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
   }
 
   private _debugInput() {

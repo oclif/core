@@ -1,5 +1,5 @@
 import ansis from 'ansis'
-import {ExecException, ExecSyncOptionsWithBufferEncoding, execSync} from 'node:child_process'
+import {ExecException, execSync, ExecSyncOptionsWithBufferEncoding} from 'node:child_process'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {mkdir, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
@@ -165,7 +165,6 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
 
   let pjson: Interfaces.PJSON
   if (options.plugins) {
-    // eslint-disable-next-line unicorn/prefer-object-from-entries
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
     pjson = updatePkgJson(pluginDir, {
       ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),

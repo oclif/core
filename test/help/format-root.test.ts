@@ -40,7 +40,7 @@ USAGE
   })
 
   describe('description', () => {
-    it('splits on \\n for the description into the top-level and description sections', () => {
+    it(`splits on \n for the description into the top-level and description sections`, () => {
       sinon
         .stub(config.pjson, 'description')
         .value(

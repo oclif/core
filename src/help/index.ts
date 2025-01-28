@@ -58,6 +58,20 @@ export class Help extends HelpBase {
     super(config, opts)
   }
 
+  /*
+   * _topics is to work around Interfaces.topics mistakenly including commands that do
+   * not have children, as well as topics. A topic has children, either commands or other topics. When
+   * this is fixed upstream config.topics should return *only* topics with children,
+   * and this can be removed.
+   */
+  private get _topics(): Interfaces.Topic[] {
+    return this.config.topics.filter((topic: Interfaces.Topic) => {
+      // it is assumed a topic has a child if it has children
+      const hasChild = this.config.topics.some((subTopic) => subTopic.name.includes(`${topic.name}:`))
+      return hasChild
+    })
+  }
+
   protected get sortedCommands(): Command.Loadable[] {
     let {commands} = this.config
 
@@ -174,7 +188,7 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]) {
-    this.opts.sendToStderr ? ux.stderr(args) : ux.stdout(args)
+    return this.opts.sendToStderr ? ux.stderr(args) : ux.stdout(args)
   }
 
   public async showCommandHelp(command: Command.Loadable): Promise<void> {
@@ -366,20 +380,6 @@ export class Help extends HelpBase {
     if (this.opts.sections && !this.opts.sections.map((s) => s.toLowerCase()).includes('summary')) return
     if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
     return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
-  }
-
-  /*
-   * _topics is to work around Interfaces.topics mistakenly including commands that do
-   * not have children, as well as topics. A topic has children, either commands or other topics. When
-   * this is fixed upstream config.topics should return *only* topics with children,
-   * and this can be removed.
-   */
-  private get _topics(): Interfaces.Topic[] {
-    return this.config.topics.filter((topic: Interfaces.Topic) => {
-      // it is assumed a topic has a child if it has children
-      const hasChild = this.config.topics.some((subTopic) => subTopic.name.includes(`${topic.name}:`))
-      return hasChild
-    })
   }
 }
 

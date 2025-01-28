@@ -20,7 +20,7 @@ import {monkeyPatchCommands} from './help-test-utils'
 
 // extension makes previously protected methods public
 class TestHelp extends Help {
-  public declare config: Config
+  declare public config: Config
   public output: string[] = []
 
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
@@ -385,7 +385,6 @@ describe('showHelp routing', () => {
 
   describe('shows topic help', () => {
     beforeEach(() => {
-      // eslint-disable-next-line unicorn/no-useless-undefined
       sinon.stub(config, 'findCommand').returns(undefined)
     })
 

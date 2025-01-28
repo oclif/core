@@ -10,6 +10,7 @@ function parseJson(json: string) {
 
 describe('Salesforce CLI (sf)', () => {
   let executor: Executor
+
   before(async () => {
     process.env.SF_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
     executor = await setup(__filename, {

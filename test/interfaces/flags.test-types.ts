@@ -93,7 +93,7 @@ Flags.custom({multiple: false})({
   default: ['foo'],
 })
 
-class MyCommand extends BaseCommand {
+export class MyCommand extends BaseCommand {
   public static '--' = true
 
   static description = 'describe the command here'

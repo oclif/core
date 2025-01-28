@@ -104,8 +104,8 @@ describe('colorizeJson', () => {
   })
 
   it('tokenizes a string literal with an escaped quote', () => {
-    const result = tokenize('"a\\"b"')
-    expect(result).to.deep.equal([{type: 'string', value: '"a\\"b"'}])
+    const result = tokenize(String.raw`"a\"b"`)
+    expect(result).to.deep.equal([{type: 'string', value: String.raw`"a\"b"`}])
   })
 
   it('tokenizes a key-value pair with whitespace between the :', () => {

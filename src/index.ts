@@ -12,8 +12,8 @@ function checkCWD() {
 function checkNodeVersion() {
   if (process.env.OCLIF_DISABLE_ENGINE_WARNING && isTruthy(process.env.OCLIF_DISABLE_ENGINE_WARNING)) return
   try {
-    const semver = require('semver')
     const path = require('node:path')
+    const semver = require('semver')
     const root = path.join(__dirname, '..')
     const pjson = require(path.join(root, 'package.json'))
     if (!semver.satisfies(process.versions.node, pjson.engines.node)) {

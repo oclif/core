@@ -1,7 +1,7 @@
 import {OclifError, PrettyPrintableError} from '../interfaces'
 import {getLogger} from '../logger'
 import {stderr} from '../ux/write'
-import {CLIError, addOclifExitCode} from './errors/cli'
+import {addOclifExitCode, CLIError} from './errors/cli'
 import prettyPrint, {applyPrettyPrintOptions} from './errors/pretty-print'
 
 export function error(input: Error | string, options: {exit: false} & PrettyPrintableError): void
