@@ -304,7 +304,7 @@ export class Plugin implements IPlugin {
           }),
         )
       )
-
+        // eslint-disable-next-line unicorn/prefer-native-coercion-functions
         .filter((f): f is [string, Command.Cached] => Boolean(f))
         .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
           commands[id] = c

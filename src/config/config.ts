@@ -420,8 +420,8 @@ export class Config implements IConfig {
     }
 
     const [defaultTheme, userTheme] = await Promise.all([
-      await getDefaultTheme(),
-      await safeReadJson<Record<string, string>>(userThemeFile),
+      getDefaultTheme(),
+      safeReadJson<Record<string, string>>(userThemeFile),
     ])
 
     // Merge the default theme with the user theme, giving the user theme precedence.

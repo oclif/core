@@ -3,7 +3,7 @@ import {expect} from 'chai'
 import {Args, Config, Flags as flags} from '../../src'
 import {makeCommandClass, makeLoadable, TestHelpWithOptions as TestHelp} from './help-test-utils'
 
-const g: any = global
+const g: any = globalThis
 g.oclif.columns = 80
 
 describe('formatCommand', () => {
@@ -178,7 +178,7 @@ ALIASES
   })
 
   describe('description', () => {
-    it('should output command description with values after a \\n newline character', async () => {
+    it(`should output command description with values after a \n newline character`, async () => {
       const cmd = await makeLoadable(
         makeCommandClass({
           aliases: ['app:init', 'create'],

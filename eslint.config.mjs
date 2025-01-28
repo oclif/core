@@ -37,6 +37,9 @@ export default [
       'perfectionist/sort-classes': 'off',
       'perfectionist/sort-objects': 'off',
       'unicorn/consistent-function-scoping': 'off',
+      'unicorn/no-abusive-eslint-disable': 'off',
+      'unicorn/no-static-only-class': 'off',
+      'unicorn/no-useless-undefined': 'off',
     },
   },
   {
@@ -46,6 +49,8 @@ export default [
       'mocha/no-nested-tests': 'off',
       'mocha/no-sibling-hooks': 'off',
       'mocha/no-top-level-hooks': 'off',
+      'unicorn/prefer-object-from-entries': 'off',
+      'unicorn/prefer-top-level-await': 'off',
     },
   },
   {
@@ -54,6 +59,7 @@ export default [
       '@typescript-eslint/no-unused-expressions': 'off',
       camelcase: 'off',
       'no-undef': 'off',
+      'unicorn/filename-case': 'off',
     },
   },
 ]

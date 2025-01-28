@@ -7,6 +7,6 @@ const chaiAsPromised = require('chai-as-promised')
 
 chai.use(chaiAsPromised)
 
-global.oclif = global.oclif || {}
-global.oclif.columns = 80
-global.columns = '80'
+globalThis.oclif = globalThis.oclif || {}
+globalThis.oclif.columns = 80
+globalThis.columns = '80'

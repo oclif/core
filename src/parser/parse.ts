@@ -62,9 +62,9 @@ export const readStdin = async (): Promise<null | string> => {
 
   if (stdin.isTTY) return null
 
-  if (global.oclif?.stdinCache) {
-    debug('resolved stdin from global cache', global.oclif.stdinCache)
-    return global.oclif.stdinCache
+  if (globalThis.oclif?.stdinCache) {
+    debug('resolved stdin from global cache', globalThis.oclif.stdinCache)
+    return globalThis.oclif.stdinCache
   }
 
   return new Promise((resolve) => {
@@ -86,7 +86,7 @@ export const readStdin = async (): Promise<null | string> => {
     rl.once('close', () => {
       clearTimeout(timeout)
       debug('resolved from stdin', result)
-      global.oclif = {...global.oclif, stdinCache: result}
+      globalThis.oclif = {...globalThis.oclif, stdinCache: result}
       resolve(result)
     })
 

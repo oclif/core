@@ -524,13 +524,13 @@ See more help with --help`)
         expect(out.flags).to.deep.include({foo: ['a', 'b']})
       })
 
-      it('parses single flag starting with with \\ escape char', async () => {
-        const out = await parse(['--foo', '\\file:foo'], {
+      it(`parses single flag starting with with escape char`, async () => {
+        const out = await parse(['--foo', String.raw`\file:foo`], {
           flags: {
             foo: Flags.custom({multiple: true})(),
           },
         })
-        expect(out.flags).to.deep.include({foo: ['\\file:foo']})
+        expect(out.flags).to.deep.include({foo: [String.raw`\file:foo`]})
       })
 
       it('parses multiple space-delimited flags', async () => {
@@ -540,14 +540,14 @@ See more help with --help`)
         expect(out.flags).to.deep.include({foo: ['a', 'b', 'c']})
       })
 
-      it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
+      it(`parses multiple space-delimited flags ending with with escape char`, async () => {
         const out = await parse(['--foo', 'c:\\', 'd:\\'], {
           flags: {foo: Flags.string({multiple: true})},
         })
         expect(out.flags).to.deep.include({foo: ['c:\\', 'd:\\']})
       })
 
-      it('parses multiple space-delimited flags ending with with \\ escape char', async () => {
+      it(`parses multiple space-delimited flags ending with with escape char`, async () => {
         const out = await parse(['--foo', 'c:\\', 'd:\\'], {
           flags: {foo: Flags.string({multiple: true})},
         })
@@ -703,7 +703,7 @@ See more help with --help`)
         })
 
         it('does not split on escaped delimiter', async () => {
-          const out = await parse(['--foo', 'a\\,b,c'], {
+          const out = await parse(['--foo', String.raw`a\,b,c`], {
             flags: {
               foo: Flags.string({multiple: true, delimiter: ','}),
             },
@@ -712,7 +712,7 @@ See more help with --help`)
         })
 
         it('escapes with multiple invocation', async () => {
-          const out = await parse(['--foo', 'a\\,b', '--foo', 'b'], {
+          const out = await parse(['--foo', String.raw`a\,b`, '--foo', 'b'], {
             flags: {
               foo: Flags.string({multiple: true, delimiter: ','}),
             },
@@ -721,7 +721,7 @@ See more help with --help`)
         })
 
         it('comma-escaped stringified json', async () => {
-          const val = '{"a":"b"\\,"c":"d"}'
+          const val = String.raw`{"a":"b"\,"c":"d"}`
           const expected = '{"a":"b","c":"d"}'
           const out = await parse(['--foo', val], {
             flags: {

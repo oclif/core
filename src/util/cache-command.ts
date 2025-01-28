@@ -90,8 +90,8 @@ export async function cacheCommand(
   const uncachedBaseFlags = cmd.baseFlags ?? cmd._baseFlags
 
   const [flags, args] = await Promise.all([
-    await cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
-    await cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
+    cacheFlags(aggregateFlags(uncachedFlags, uncachedBaseFlags, cmd.enableJsonFlag), respectNoCacheDefault),
+    cacheArgs(ensureArgObject(cmd.args), respectNoCacheDefault),
   ])
 
   const stdProperties = {

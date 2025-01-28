@@ -4,7 +4,7 @@ import {HelpBase, Interfaces} from '../../../../../src'
 
 export type TestHelpClassConfig = Interfaces.Config & {showCommandHelpSpy?: SinonSpy; showHelpSpy?: SinonSpy}
 
-export default class extends HelpBase {
+export default class CustomHelp extends HelpBase {
   showCommandHelp = spy(async () => {
     console.log('hello from test-help-plugin #showCommandHelp')
   })

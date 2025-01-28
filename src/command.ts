@@ -215,7 +215,7 @@ export abstract class Command {
 
   protected async init(): Promise<any> {
     this.debug('init version: %s argv: %o', this.ctor._base, this.argv)
-    const g: any = global
+    const g: any = globalThis
     g['http-call'] = g['http-call'] || {}
     g['http-call']!.userAgent = this.config.userAgent
     this.warnIfCommandDeprecated()
@@ -237,9 +237,9 @@ export abstract class Command {
     const jsonIndex = this.argv.indexOf('--json')
     return passThroughIndex === -1
       ? // If '--' is not present, then check for `--json` in this.argv
-        jsonIndex > -1
+        jsonIndex !== -1
       : // If '--' is present, return true only the --json flag exists and is before the '--'
-        jsonIndex > -1 && jsonIndex < passThroughIndex
+        jsonIndex !== -1 && jsonIndex < passThroughIndex
   }
 
   public log(message = '', ...args: any[]): void {

@@ -21,8 +21,8 @@ export class ActionBase {
   }
 
   private get globals(): {action: {task?: Task | undefined}; output: string | undefined} {
-    ;(global as any).ux = (global as any).ux || {}
-    const globals = (global as any).ux
+    ;(globalThis as any).ux = (globalThis as any).ux || {}
+    const globals = (globalThis as any).ux
     globals.action = globals.action || {}
     return globals
   }

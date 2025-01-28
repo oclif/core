@@ -2,7 +2,7 @@ import {expect} from 'chai'
 
 import {Command} from '../../src/command'
 
-const g: any = global
+const g: any = globalThis
 g.oclif.columns = 80
 import {Config} from '../../src'
 import {Help} from '../../src/help'

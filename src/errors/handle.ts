@@ -16,7 +16,7 @@ import prettyPrint from './errors/pretty-print'
  */
 export const Exit = {
   exit(code = 0) {
-    // eslint-disable-next-line n/no-process-exit
+    // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit
     process.exit(code)
   },
 }

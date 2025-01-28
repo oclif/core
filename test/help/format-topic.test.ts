@@ -46,7 +46,7 @@ USAGE
 `)
   })
 
-  it('shows topic descriptions split from \\n for top-level and description section descriptions', () => {
+  it(`shows topic descriptions split from \n for top-level and description section descriptions`, () => {
     const topic = {
       name: 'topic',
       hidden: false,
@@ -63,7 +63,7 @@ DESCRIPTION
 `)
   })
 
-  it('shows templated topic descriptions split from \\n for top-level and description section descriptions', () => {
+  it(`shows templated topic descriptions split from \n for top-level and description section descriptions`, () => {
     const topic = {
       name: 'topic',
       hidden: false,
