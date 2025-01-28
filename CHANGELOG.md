@@ -1,3 +1,12 @@
+## [4.2.5](https://github.com/oclif/core/compare/4.2.4...4.2.5) (2025-01-28)
+
+
+### Bug Fixes
+
+* **W-17692101:** migrate to eslint 9 ([#1305](https://github.com/oclif/core/issues/1305)) ([e42713c](https://github.com/oclif/core/commit/e42713cc5b5965e9ed5ac1f696609ca33922d03d))
+
+
+
 ## [4.2.4](https://github.com/oclif/core/compare/4.2.3...4.2.4) (2025-01-21)
 
 
