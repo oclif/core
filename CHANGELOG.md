@@ -1,3 +1,12 @@
+## [4.2.7](https://github.com/oclif/core/compare/4.2.6...4.2.7) (2025-02-17)
+
+
+### Bug Fixes
+
+* **deps:** bump ansis from 3.10.0 to 3.14.0 ([#1319](https://github.com/oclif/core/issues/1319)) ([1de1085](https://github.com/oclif/core/commit/1de10854d7b51a92713c3e2275611a56f5b56e08))
+
+
+
 ## [4.2.6](https://github.com/oclif/core/compare/4.2.5...4.2.6) (2025-02-02)
 
 
