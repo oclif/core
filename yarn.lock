@@ -901,11 +901,11 @@
   integrity sha512-XB8kwQj8zynXjIIWRm+6gO/r8Qft2xKtwBMSmq1JRqtA6TpwpqECqiu8LosBCyg2JBXuUy2lU23/L98KIR7FrQ==
 
 "@oclif/test@^4":
-  version "4.1.10"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.10.tgz#2eccf034141f95fa1a7b1af0e8cfd68ebbc2d78b"
-  integrity sha512-46Uu4hXOa2JKrivE9b14R+QzV15z/d8ig4ZGyjhzf2oOV2b11HV6H7ZEXsupVLPS6Dp5TmIlVXo7/kdrlXmAHQ==
+  version "4.1.11"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.11.tgz#b05957153ff83c8eacff80f11b1032957693722e"
+  integrity sha512-j689R13E2so1Rj6jJUfQ67yJ4N7u6L5KFzv87cvUfD9AZ79xAtCxGrd34/iOLUDJmv1huFt/0QumBcjKoWUSYw==
   dependencies:
-    ansis "^3.14.0"
+    ansis "^3.16.0"
     debug "^4.4.0"
 
 "@pkgjs/parseargs@^0.11.0":
