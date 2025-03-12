@@ -1,3 +1,12 @@
+## [4.2.10](https://github.com/oclif/core/compare/4.2.9...4.2.10) (2025-03-12)
+
+
+### Bug Fixes
+
+* export validate from the Parse module ([#1331](https://github.com/oclif/core/issues/1331)) ([2fd297d](https://github.com/oclif/core/commit/2fd297d6071e442a4c11013502c7e68cdfeb128b))
+
+
+
 ## [4.2.9](https://github.com/oclif/core/compare/4.2.8...4.2.9) (2025-03-08)
 
 
