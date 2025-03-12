@@ -6,6 +6,7 @@ import {validate} from './validate'
 export type {ArgInput, FlagInput, Input, OutputArgs, OutputFlags, ParserOutput} from '../interfaces/parser'
 
 export {flagUsages} from './help'
+export {validate} from './validate'
 
 export async function parse<
   TFlags extends OutputFlags<any>,
