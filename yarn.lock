@@ -1248,9 +1248,9 @@
     undici-types "~5.25.1"
 
 "@types/node@^18":
-  version "18.19.81"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.81.tgz#e4b97e182bf9760f7469c9b4801cc982acfa15aa"
-  integrity sha512-7KO9oZ2//ivtSsryp0LQUqq79zyGXzwq1WqfywpC9ucjY7YyltMMmxWgtRFRKCxwa7VPxVBVy4kHf5UC1E8Lug==
+  version "18.19.84"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.19.84.tgz#29a1c36a9241a76351397993635f5b5fdbc2504c"
+  integrity sha512-ACYy2HGcZPHxEeWTqowTF7dhXN+JU1o7Gr4b41klnn6pj2LD6rsiGqSZojMdk1Jh2ys3m76ap+ae1vvE4+5+vg==
   dependencies:
     undici-types "~5.26.4"
 
