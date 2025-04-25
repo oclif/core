@@ -3102,9 +3102,9 @@ eslint-config-oclif@^5.2.2:
     eslint-plugin-unicorn "^48.0.1"
 
 eslint-config-oclif@^6:
-  version "6.0.42"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.42.tgz#50aed02fdd662db4d63b70ae71b1678c33904245"
-  integrity sha512-uG1wBVCqT7thYtlUaOdAmVF+2mcygGce571cXXlLzdYvm6g08id7PcrZ7z51FDDbp0a6MvQ6dRdfJwkLqtEzFg==
+  version "6.0.44"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.44.tgz#10f40b11b2590c0cc4ee47e1da78b545b655b9ab"
+  integrity sha512-FtPpysAeVFfOV+86lmCL99c7CzZLzYEbZxRCowyt2sSUE+OPc4Tkp3BJApLJ/G69Ae3sdQP6h8OGlnryDGsYsg==
   dependencies:
     "@eslint/compat" "^1.2.8"
     "@eslint/eslintrc" "^3.3.1"
@@ -3117,7 +3117,7 @@ eslint-config-oclif@^6:
     eslint-config-xo-space "^0.35.0"
     eslint-import-resolver-typescript "^3.10.0"
     eslint-plugin-import "^2.31.0"
-    eslint-plugin-jsdoc "^50.6.3"
+    eslint-plugin-jsdoc "^50.6.9"
     eslint-plugin-mocha "^10.5.0"
     eslint-plugin-n "^17.17.0"
     eslint-plugin-perfectionist "^4"
@@ -3237,10 +3237,10 @@ eslint-plugin-import@^2.31.0:
     string.prototype.trimend "^1.0.8"
     tsconfig-paths "^3.15.0"
 
-eslint-plugin-jsdoc@^50.6.3:
-  version "50.6.3"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-50.6.3.tgz#668dc4d32e823c84ede7310cffbf70c9d370d291"
-  integrity sha512-NxbJyt1M5zffPcYZ8Nb53/8nnbIScmiLAMdoe0/FAszwb7lcSiX3iYBTsuF7RV84dZZJC8r3NghomrUXsmWvxQ==
+eslint-plugin-jsdoc@^50.6.9:
+  version "50.6.9"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-50.6.9.tgz#b4afc06110958b9c525456b6c4348bf14e21c298"
+  integrity sha512-7/nHu3FWD4QRG8tCVqcv+BfFtctUtEDWc29oeDXB4bwmDM2/r1ndl14AG/2DUntdqH7qmpvdemJKwb3R97/QEw==
   dependencies:
     "@es-joy/jsdoccomment" "~0.49.0"
     are-docs-informative "^0.0.2"
