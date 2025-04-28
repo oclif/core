@@ -1,3 +1,12 @@
+# [4.3.0](https://github.com/oclif/core/compare/4.2.10...4.3.0) (2025-04-28)
+
+
+### Features
+
+* add generic for extending `Hooks` on `config.runHook` ([#1359](https://github.com/oclif/core/issues/1359)) ([#1362](https://github.com/oclif/core/issues/1362)) ([667e396](https://github.com/oclif/core/commit/667e39644c01937de913c1888339a52df4164881))
+
+
+
 ## [4.2.10](https://github.com/oclif/core/compare/4.2.9...4.2.10) (2025-03-12)
 
 
