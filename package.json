@@ -128,7 +128,7 @@
     "test:integration": "mocha --forbid-only \"test/**/*.integration.ts\" --parallel --timeout 1200000",
     "test:interoperability": "cross-env DEBUG=integration:* ts-node test/integration/interop.ts",
     "test:perf": "ts-node test/perf/parser.perf.ts",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.ts\" --parallel"
+    "test": "cross-env NODE_OPTIONS=--no-experimental-strip-types nyc mocha --forbid-only \"test/**/*.test.ts\" --parallel"
   },
   "types": "lib/index.d.ts"
 }
