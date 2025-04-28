@@ -494,12 +494,12 @@ export class Config implements IConfig {
     return result
   }
 
-  public async runHook<T extends keyof Hooks>(
+  public async runHook<T extends keyof Hooks, P extends Hooks = Hooks>(
     event: T,
-    opts: Hooks[T]['options'],
+    opts: P[T]['options'],
     timeout?: number,
     captureErrors?: boolean,
-  ): Promise<Hook.Result<Hooks[T]['return']>> {
+  ): Promise<Hook.Result<P[T]['return']>> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${event}`)
     debug('start %s hook', event)
     const search = (m: any): Hook<T> => {
@@ -522,10 +522,10 @@ export class Config implements IConfig {
       })
     }
 
-    const final = {
+    const final: Hook.Result<P[T]['return']> = {
       failures: [],
       successes: [],
-    } as Hook.Result<Hooks[T]['return']>
+    }
 
     const plugins = ROOT_ONLY_HOOKS.has(event) ? [this.rootPlugin] : [...this.plugins.values()]
     const promises = plugins.map(async (p) => {
