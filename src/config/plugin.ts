@@ -1,6 +1,6 @@
-import globby from 'globby'
 import {join, parse, relative, sep} from 'node:path'
 import {inspect} from 'node:util'
+import {glob} from 'tinyglobby'
 
 import Cache from '../cache'
 import {Command} from '../command'
@@ -368,7 +368,7 @@ export class Plugin implements IPlugin {
     if (!commandsDir) return []
 
     this._debug(`loading IDs from ${commandsDir}`)
-    const files = await globby(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
+    const files = await glob(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
     return processCommandIds(files)
   }
 
