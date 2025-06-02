@@ -1,3 +1,12 @@
+## [4.3.1](https://github.com/oclif/core/compare/4.3.0...4.3.1) (2025-06-02)
+
+
+### Bug Fixes
+
+* migrate from globby to tinyglobby ([#1363](https://github.com/oclif/core/issues/1363)) ([#1387](https://github.com/oclif/core/issues/1387)) ([a66a7eb](https://github.com/oclif/core/commit/a66a7eba84e354e1da8ba9f1323bdaf683db2852))
+
+
+
 # [4.3.0](https://github.com/oclif/core/compare/4.2.10...4.3.0) (2025-04-28)
 
 
