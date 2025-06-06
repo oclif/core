@@ -84,7 +84,24 @@ class LS extends Command {
   }
 }
 
-LS.run().then(
+LS.run(process.argv.slice(2), {
+  root: import.meta.dirname,
+  // Tell oclif what the contents of the package.json
+  // You could also set these in your package.json
+  // Specifying them here is useful if you're attempting to bundle your CLI without a package.json
+  pjson: {
+    name: 'ls',
+    version: '0.0.1',
+    oclif: {
+      // Tell oclif that this is a single command CLI
+      // See: https://oclif.io/docs/command_discovery_strategies
+      commands: {
+        strategy: 'single',
+        target: 'index.js',
+      },
+    },
+  },
+}).then(
   async () => {
     await flush()
   },
