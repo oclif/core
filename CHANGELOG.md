@@ -1,3 +1,12 @@
+## [4.3.2](https://github.com/oclif/core/compare/4.3.1...4.3.2) (2025-06-06)
+
+
+### Bug Fixes
+
+* prevent TypeError when using version flag ([#1391](https://github.com/oclif/core/issues/1391)) ([a3f08e1](https://github.com/oclif/core/commit/a3f08e1148829157f8bd7aad44d52c30668307da))
+
+
+
 ## [4.3.1](https://github.com/oclif/core/compare/4.3.0...4.3.1) (2025-06-02)
 
 
