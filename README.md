@@ -134,7 +134,7 @@ const {args, flags} = await Parser.parse(process.argv.slice(2), {
   },
 })
 
-console.log(`hello ${args.name} from ${flags.form}`)
+console.log(`hello ${args.name} from ${flags.from}`)
 ```
 
 ```
@@ -142,6 +142,8 @@ $ node index.js world --from oclif
 
 hello world from oclif
 ```
+
+**NOTE** If you're using the `Parser` class, you will not be able to use the builtin `help` and `version` flags since those require the context of an oclif project.
 
 🚀 Contributing
 
