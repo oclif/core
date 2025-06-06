@@ -84,7 +84,25 @@ class LS extends Command {
   }
 }
 
-LS.run().then(
+LS.run(process.argv.slice(2), {
+  root: import.meta.dirname,
+  // Tell oclif what the contents of the package.json are.
+  // You could also set these in your package.json but specifying
+  // them here is useful if you're attempting to bundle your CLI
+  // without a package.json
+  pjson: {
+    name: 'ls',
+    version: '0.0.1',
+    oclif: {
+      // Tell oclif that this is a single command CLI
+      // See: https://oclif.io/docs/command_discovery_strategies
+      commands: {
+        strategy: 'single',
+        target: 'index.js',
+      },
+    },
+  },
+}).then(
   async () => {
     await flush()
   },
@@ -116,7 +134,7 @@ const {args, flags} = await Parser.parse(process.argv.slice(2), {
   },
 })
 
-console.log(`hello ${args.name} from ${flags.form}`)
+console.log(`hello ${args.name} from ${flags.from}`)
 ```
 
 ```
@@ -124,6 +142,8 @@ $ node index.js world --from oclif
 
 hello world from oclif
 ```
+
+**NOTE** If you're using the `Parser` class, you will not be able to use the builtin `help` and `version` flags since those require the context of an oclif project.
 
 🚀 Contributing
 
