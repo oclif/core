@@ -65,7 +65,7 @@ export function custom<T = string, P extends CustomOptions = CustomOptions>(
     ...defaults,
     ...options,
     input: [] as string[],
-    multiple: Boolean(options.multiple === undefined ? defaults?.multiple ?? false : options.multiple),
+    multiple: Boolean(options.multiple === undefined ? (defaults?.multiple ?? false) : options.multiple),
     type: 'option',
   })
 }
