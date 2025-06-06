@@ -228,7 +228,7 @@ export abstract class Command {
    */
   public jsonEnabled(): boolean {
     // If the command doesn't support json, return false
-    if (!this.ctor.enableJsonFlag) return false
+    if (!this.ctor?.enableJsonFlag) return false
 
     // If the CONTENT_TYPE env var is set to json, return true
     if (this.config.scopedEnvVar?.('CONTENT_TYPE')?.toLowerCase() === 'json') return true

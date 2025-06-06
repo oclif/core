@@ -365,6 +365,7 @@ export class Parser<
         ...context,
         error: context?.error,
         exit: context?.exit,
+        jsonEnabled: context?.jsonEnabled,
         log: context?.log,
         logToStderr: context?.logToStderr,
         token,
