@@ -19,7 +19,7 @@
     "semver": "^7.6.3",
     "string-width": "^4.2.3",
     "supports-color": "^8",
-    "tinyglobby": "^0.2.13",
+    "tinyglobby": "^0.2.14",
     "widest-line": "^3.1.0",
     "wordwrap": "^1.0.0",
     "wrap-ansi": "^7.0.0"
