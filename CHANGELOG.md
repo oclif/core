@@ -1,3 +1,12 @@
+## [4.3.3](https://github.com/oclif/core/compare/4.3.2...4.3.3) (2025-06-09)
+
+
+### Bug Fixes
+
+* **deps:** bump tinyglobby from 0.2.13 to 0.2.14 ([#1393](https://github.com/oclif/core/issues/1393)) ([53a7354](https://github.com/oclif/core/commit/53a7354cc571e112973332e97064bd55603b3a28))
+
+
+
 ## [4.3.2](https://github.com/oclif/core/compare/4.3.1...4.3.2) (2025-06-06)
 
 
