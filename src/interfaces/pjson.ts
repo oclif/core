@@ -245,6 +245,20 @@ export type OclifConfiguration = {
       subtopics?: OclifConfiguration['topics']
     }
   }
+  /**
+   * Tar flags configuration for different platforms.
+   * 
+   * {
+   *  "tarFlags": {
+   *   "win32": "--force-local",
+   *   "darwin": "--no-xattrs"
+   *  }
+   * }
+   * 
+   */
+  tarFlags?: {
+    [platform: string]: string
+  }
   update?: {
     autoupdate?: {
       debounce?: number
