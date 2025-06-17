@@ -1,3 +1,12 @@
+# [4.4.0](https://github.com/oclif/core/compare/4.3.3...4.4.0) (2025-06-17)
+
+
+### Features
+
+* add tar flags config ([#1400](https://github.com/oclif/core/issues/1400)) ([1923c0f](https://github.com/oclif/core/commit/1923c0f95de747a88c328dcbe28a313d7cf14431))
+
+
+
 ## [4.3.3](https://github.com/oclif/core/compare/4.3.2...4.3.3) (2025-06-09)
 
 
