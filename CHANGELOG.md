@@ -1,3 +1,12 @@
+## [4.4.1](https://github.com/oclif/core/compare/4.4.0...4.4.1) (2025-07-03)
+
+
+### Bug Fixes
+
+* do not list hidden arguments in usage ([#1412](https://github.com/oclif/core/issues/1412)) ([#1413](https://github.com/oclif/core/issues/1413)) ([33d8dda](https://github.com/oclif/core/commit/33d8dda070c1c19275cf1118a8b5ae7c792a93a3))
+
+
+
 # [4.4.0](https://github.com/oclif/core/compare/4.3.3...4.4.0) (2025-06-17)
 
 
