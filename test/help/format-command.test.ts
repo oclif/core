@@ -76,6 +76,33 @@ ALIASES
   $ oclif create`)
   })
 
+  it('should not list hidden arguments and flags', async () => {
+    const cmd = await makeLoadable(
+      makeCommandClass({
+        id: 'apps:create',
+        description: 'creates an app',
+        args: {
+          // eslint-disable-next-line camelcase
+          app_name: Args.string({description: 'app to use', hidden: true}),
+        },
+        flags: {
+          app: flags.string({char: 'a', hidden: true}),
+          foo: flags.string({required: true}),
+        },
+      }),
+    )
+
+    const output = help.formatCommand(cmd)
+    expect(output).to.equal(`USAGE
+  $ oclif apps:create --foo <value>
+
+FLAGS
+  --foo=<value>  (required)
+
+DESCRIPTION
+  creates an app`)
+  })
+
   describe('arg and flag multiline handling', () => {
     it('should show args and flags side by side when their output do not exceed 4 lines ', async () => {
       const cmd = await makeLoadable(

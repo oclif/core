@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 
-import {Flags} from '../../src'
+import {Args, Flags} from '../../src'
 import {DocOpts} from '../../src/help/docopts'
 
 describe('doc opts', () => {
@@ -56,6 +56,18 @@ describe('doc opts', () => {
       },
     } as any)
     expect(usage).to.contain(' [-s <value>]')
+  })
+
+  it('does not show hidden args', () => {
+    const usage = DocOpts.generate({
+      args: {
+        hiddenarg: Args.string({
+          name: 'hiddenarg',
+          hidden: true,
+        }),
+      },
+    } as any)
+    expect(usage.toLowerCase()).to.not.contain('hiddenarg')
   })
 
   it('does not show hidden type', () => {
