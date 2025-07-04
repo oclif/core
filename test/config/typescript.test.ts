@@ -14,25 +14,45 @@ describe('typescript', () => {
     })
   })
 
-  it('runs ts command and prerun & postrun hooks', async () => {
+  it('runs ts command and prerun, postrun & finally hooks', async () => {
     const {stdout} = await runCommand(['foo:bar:baz'], root)
-    expect(stdout).to.equal('running ts init hook\nrunning ts prerun hook\nit works!\nrunning ts postrun hook\n')
+    expect(stdout.split('\n')).to.deep.equal([
+      'running ts init hook',
+      'running ts prerun hook',
+      'it works!',
+      'running ts postrun hook',
+      'running ts finally hook',
+      '',
+    ])
   })
 
-  it('runs faulty command, only prerun hook triggers', async () => {
+  it('runs faulty command, only prerun & finally hooks trigger', async () => {
     const {stdout} = await runCommand(['foo:bar:fail'], root)
-    expect(stdout).to.equal('running ts init hook\nrunning ts prerun hook\nit fails!\n')
+    expect(stdout.split('\n')).to.deep.equal([
+      'running ts init hook',
+      'running ts prerun hook',
+      'it fails!',
+      'running ts finally hook',
+      'an error occurred',
+      '',
+    ])
   })
 
-  it('runs ts command, postrun hook captures command result', async () => {
+  it('runs ts command, postrun & finally hooks capture command result', async () => {
     const {stdout} = await runCommand(['foo:bar:test-result'], root)
-    expect(stdout).to.equal(
-      'running ts init hook\nrunning ts prerun hook\nit works!\nrunning ts postrun hook\nreturned success!\n',
-    )
+    expect(stdout.split('\n')).to.deep.equal([
+      'running ts init hook',
+      'running ts prerun hook',
+      'it works!',
+      'running ts postrun hook',
+      'returned success!',
+      'running ts finally hook',
+      '',
+    ])
   })
 
   it('runs init hook', async () => {
     const {stdout} = await runHook('init', {id: 'myid', argv: ['foo']}, {root})
-    expect(stdout).to.equal('running ts init hook\n')
+    expect(stdout.split('\n')).to.deep.equal(['running ts init hook', ''])
   })
 })
