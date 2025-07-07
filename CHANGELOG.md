@@ -1,3 +1,12 @@
+# [4.5.0](https://github.com/oclif/core/compare/4.4.1...4.5.0) (2025-07-07)
+
+
+### Features
+
+* add error & Command to finally hook options ([#1422](https://github.com/oclif/core/issues/1422)) ([9dd3bca](https://github.com/oclif/core/commit/9dd3bcac43a3f40fb5cd07abc2d1b9415091d82a)), closes [#1417](https://github.com/oclif/core/issues/1417)
+
+
+
 ## [4.4.1](https://github.com/oclif/core/compare/4.4.0...4.4.1) (2025-07-03)
 
 
