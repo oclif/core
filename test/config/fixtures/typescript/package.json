@@ -11,6 +11,9 @@
       ],
       "postrun": [
         "./lib/hooks/postrun"
+      ],
+      "finally": [
+        "./lib/hooks/finally"
       ]
     }
   },
