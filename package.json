@@ -65,9 +65,6 @@
     "tsd": "^0.32.0",
     "typescript": "^5"
   },
-  "resolutions": {
-    "@oclif/core": "link:."
-  },
   "engines": {
     "node": ">=18.0.0"
   },
