@@ -27,7 +27,7 @@ export interface Hooks {
     return: unknown
   }
   finally: {
-    options: {argv: string[]; id: string}
+    options: {argv: string[]; id: string; Command: Command.Loadable | undefined; error: Error | undefined}
     return: void
   }
   init: {
