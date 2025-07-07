@@ -147,4 +147,4 @@ hello world from oclif
 
 🚀 Contributing
 
-See the [contributing guide](./CONRTIBUTING.md).
+See the [contributing guide](./CONTRIBUTING.md).
