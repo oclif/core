@@ -92,4 +92,13 @@ COMMANDS
     })
     expect(stdout).to.equal('it works!\n')
   })
+
+  it('should catch errors from commands', async () => {
+    const {stdout, error} = await runCommand(['foo', 'bar', 'fail'], {
+      root: resolve(__dirname, 'fixtures/typescript/package.json'),
+    })
+    expect(error, 'Error to be thrown').to.exist
+    expect(error?.message).to.include('random error')
+    expect(stdout).to.equal('it fails!\n')
+  })
 })
