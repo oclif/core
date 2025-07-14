@@ -104,6 +104,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
     return await config.runCommand(id, argvSlice, cmd)
   } catch (error) {
     err = error as Error
+    throw error
   } finally {
     await runFinally(cmd, err)
   }
