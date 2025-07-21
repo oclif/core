@@ -1,4 +1,3 @@
-/* eslint-disable max-depth */
 import {fileURLToPath} from 'node:url'
 import {inspect} from 'node:util'
 
@@ -182,125 +181,6 @@ export abstract class Command {
     return result as T
   }
 
-  public buildFlagDependencyGraph(flags: FlagInput): Command.FlagGraph {
-    // Implements: buildFlagDependencyGraph(flags: FlagInput): FlagGraph
-    // See prompt-generator.md for type definitions and relationship handling
-
-    // Helper to normalize relationships array
-    function getRelationships(flagDef: any): Command.FlagRelationship[] {
-      if (!flagDef) return []
-      // Support both 'relationships' and legacy keys
-      const rels: Command.FlagRelationship[] = []
-      if (Array.isArray(flagDef.relationships)) rels.push(...flagDef.relationships)
-      if (flagDef.required) rels.push({type: 'required'})
-      if (flagDef.dependsOn)
-        rels.push({
-          flags: Array.isArray(flagDef.dependsOn) ? flagDef.dependsOn : [flagDef.dependsOn],
-          type: 'dependsOn',
-        })
-      if (flagDef.exactlyOne)
-        rels.push({
-          flags: Array.isArray(flagDef.exactlyOne) ? flagDef.exactlyOne : [flagDef.exactlyOne],
-          type: 'exactlyOne',
-        })
-      if (flagDef.exclusive)
-        rels.push({
-          flags: Array.isArray(flagDef.exclusive) ? flagDef.exclusive : [flagDef.exclusive],
-          type: 'exclusive',
-        })
-      // 'all', 'some', 'none' handled only if present in relationships
-      return rels
-    }
-
-    // Helper to extract dependencies from FlagReference objects in group relationships
-    function extractConditionalDependencies(
-      flags: (string | Command.FlagReference)[],
-    ): {flag: string; dependencies: string[]; when: any}[] {
-      const result: {flag: string; dependencies: string[]; when: any}[] = []
-      for (const ref of flags) {
-        if (typeof ref === 'string') continue
-        if (ref && typeof ref === 'object' && ref.name) {
-          result.push({
-            dependencies: Array.isArray(ref.dependencies) ? ref.dependencies : [],
-            flag: ref.name,
-            when: ref.when,
-          })
-        }
-      }
-
-      return result
-    }
-
-    // Main graph construction
-    const graph: Command.FlagGraph = new Map()
-
-    // First pass: create nodes for all flags
-    for (const [name, definition] of Object.entries(flags)) {
-      graph.set(name, {
-        definition,
-        name,
-        relationships: [],
-      })
-    }
-
-    // Second pass: populate relationships, including implicit ones from group/conditional
-    for (const [name, definition] of Object.entries(flags)) {
-      const node = graph.get(name)!
-      const rels = getRelationships(definition)
-
-      for (const rel of rels) {
-        // For group relationships ('all', 'some', 'none'), handle FlagReference dependencies
-        if (rel.type === 'all' || rel.type === 'some' || rel.type === 'none') {
-          node.relationships.push(rel)
-
-          // For each FlagReference, add relationships
-          const condRefs = extractConditionalDependencies(rel.flags)
-          for (const cref of condRefs) {
-            // Add dependsOn to the referenced flag node for its dependencies
-            if (cref.dependencies && cref.dependencies.length > 0) {
-              const targetNode = graph.get(cref.flag)
-              if (targetNode) {
-                targetNode.relationships.push({
-                  flags: cref.dependencies,
-                  type: 'dependsOn',
-                })
-              }
-            }
-
-            // Add conditional relationship to the SOURCE flag (this node), not the target
-            if (cref.when) {
-              node.relationships.push({
-                dependencies: cref.dependencies,
-                flag: cref.flag,
-                type: 'conditional',
-                when: cref.when,
-              })
-            }
-          }
-        } else if (rel.type === 'conditional') {
-          // For direct conditional relationships, add to the source flag (this node)
-          node.relationships.push(rel)
-
-          // Add dependsOn to the target flag for explicit dependencies
-          if (rel.dependencies && rel.dependencies.length > 0) {
-            const targetNode = graph.get(rel.flag)
-            if (targetNode) {
-              targetNode.relationships.push({
-                flags: rel.dependencies,
-                type: 'dependsOn',
-              })
-            }
-          }
-        } else {
-          // All other relationships are attached to this node
-          node.relationships.push(rel)
-        }
-      }
-    }
-
-    return graph
-  }
-
   protected async catch(err: CommandError): Promise<any> {
     process.exitCode = process.exitCode ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
@@ -405,7 +285,6 @@ export abstract class Command {
 
     return results
   }
-
   /**
    * actual command run code goes here
    */
@@ -553,35 +432,4 @@ export namespace Command {
         description: string
       }
     | string
-
-  export type FlagRelationship =
-    | {type: 'required'}
-    | {type: 'dependsOn'; flags: string[]}
-    | {type: 'exactlyOne'; flags: string[]}
-    | {type: 'exclusive'; flags: string[]}
-    | {type: 'all' | 'some' | 'none'; flags: (string | FlagReference)[]}
-    | {type: 'conditional'; flag: string; when: (answers: Record<string, any>) => boolean; dependencies?: string[]}
-
-  // FlagReference allows for explicit dependency declarations in relationships
-  export type FlagReference =
-    | string
-    | {
-        name: string
-        when: (flags: Record<string, unknown>) => Promise<boolean>
-        dependencies?: string[]
-      }
-
-  export type FlagNode = {
-    name: string
-    definition: Flag.Cached | Flag
-    relationships: FlagRelationship[]
-  }
-
-  export type FlagGraph = Map<string, FlagNode>
-
-  export type FlagPromptInfo = {
-    name: string
-    // Flag definition contains all the metadata needed to prompt the user (default value, parse function, multiple, etc)
-    definition: Flag.Cached | Flag
-  }
 }

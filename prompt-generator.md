@@ -62,13 +62,18 @@ hello world! (./src/commands/hello/world.ts)
    _Pure_ function that converts oclif flag metadata into a canonical graph shape:
 
    ```ts
-   type FlagRelationship =
+   type FlagDependency =
      | {type: 'required'}
      | {type: 'dependsOn'; flags: string[]}
      | {type: 'exactlyOne'; flags: string[]}
      | {type: 'exclusive'; flags: string[]}
      | {type: 'all' | 'some' | 'none'; flags: (string | FlagReference)[]}
-     | {type: 'conditional'; flag: string; when: (answers: Record<string, any>) => boolean; dependencies?: string[]}
+     | {
+         type: 'conditional'
+         flag: string
+         when: (answers: Record<string, unknown>) => Promise<boolean>
+         dependencies?: string[]
+       }
 
    // FlagReference allows for explicit dependency declarations in relationships
    type FlagReference =
@@ -82,7 +87,7 @@ hello world! (./src/commands/hello/world.ts)
    type FlagNode = {
      name: string
      definition: Flag.Cached | Flag
-     relationships: FlagRelationship[]
+     relationships: FlagDependency[]
    }
 
    export type FlagGraph = Map<string, FlagNode>
