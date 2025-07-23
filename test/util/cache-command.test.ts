@@ -308,4 +308,20 @@ describe('cacheCommand', () => {
     const c = await cacheCommand(C, undefined, false)
     expect(c.envVars).to.deep.equal(['FOO_BAR'])
   })
+
+  it('should standardize aliases', async () => {
+    class C extends Command {
+      static aliases = ['alias1', 'alias2 with spaces']
+      static flags = {
+        flaga: Flags.boolean(),
+      }
+
+      static id = 'foo:bar'
+
+      public async run(): Promise<void> {}
+    }
+
+    const c = await cacheCommand(C, undefined, false)
+    expect(c.aliases).to.deep.equal(['alias1', 'alias2:with:spaces'])
+  })
 })

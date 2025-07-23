@@ -95,7 +95,8 @@ export async function cacheCommand(
   ])
 
   const stdProperties = {
-    aliases: cmd.aliases ?? [],
+    // Replace all spaces in aliases with colons to standardize them.
+    aliases: (cmd.aliases ?? []).map((a) => a.replaceAll(' ', ':')),
     args,
     deprecateAliases: cmd.deprecateAliases,
     deprecationOptions: cmd.deprecationOptions,
