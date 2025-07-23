@@ -1,3 +1,12 @@
+## [4.5.2](https://github.com/oclif/core/compare/4.5.1...4.5.2) (2025-07-23)
+
+
+### Bug Fixes
+
+* standardize aliases ([#1435](https://github.com/oclif/core/issues/1435)) ([0e3d572](https://github.com/oclif/core/commit/0e3d572cae9573d99efca9122ca409ee44711d09))
+
+
+
 ## [4.5.1](https://github.com/oclif/core/compare/4.5.0...4.5.1) (2025-07-14)
 
 
