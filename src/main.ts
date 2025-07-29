@@ -1,6 +1,7 @@
 import {fileURLToPath, URL} from 'node:url'
 
 import Cache from './cache'
+import {Command} from './command'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
@@ -60,12 +61,12 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const [id, ...argvSlice] = normalizeArgv(config, argv)
 
-  const runFinally = async () => {
+  const runFinally = async (cmd?: Command.Loadable, error?: Error) => {
     marker?.stop()
     if (!initMarker?.stopped) initMarker?.stop()
     await Performance.collect()
     Performance.debug()
-    await config.runHook('finally', {argv: argvSlice, id})
+    await config.runHook('finally', {argv: argvSlice, Command: cmd, error, id})
   }
 
   // run init hook
@@ -98,9 +99,13 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   initMarker?.stop()
 
+  let err: Error | undefined
   try {
     return await config.runCommand(id, argvSlice, cmd)
+  } catch (error) {
+    err = error as Error
+    throw error
   } finally {
-    await runFinally()
+    await runFinally(cmd, err)
   }
 }

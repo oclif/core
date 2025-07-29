@@ -1,3 +1,30 @@
+## [4.5.2](https://github.com/oclif/core/compare/4.5.1...4.5.2) (2025-07-23)
+
+
+### Bug Fixes
+
+* standardize aliases ([#1435](https://github.com/oclif/core/issues/1435)) ([0e3d572](https://github.com/oclif/core/commit/0e3d572cae9573d99efca9122ca409ee44711d09))
+
+
+
+## [4.5.1](https://github.com/oclif/core/compare/4.5.0...4.5.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* throw errors ([#1430](https://github.com/oclif/core/issues/1430)) ([ef46c3d](https://github.com/oclif/core/commit/ef46c3d4eb006a258b545812f074e6a9f4e280f1))
+
+
+
+# [4.5.0](https://github.com/oclif/core/compare/4.4.1...4.5.0) (2025-07-07)
+
+
+### Features
+
+* add error & Command to finally hook options ([#1422](https://github.com/oclif/core/issues/1422)) ([9dd3bca](https://github.com/oclif/core/commit/9dd3bcac43a3f40fb5cd07abc2d1b9415091d82a)), closes [#1417](https://github.com/oclif/core/issues/1417)
+
+
+
 ## [4.4.1](https://github.com/oclif/core/compare/4.4.0...4.4.1) (2025-07-03)
 
 
