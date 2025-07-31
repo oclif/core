@@ -6,7 +6,7 @@ import {error} from '../errors/error'
 import * as Interfaces from '../interfaces'
 import {HelpLocationOptions} from '../interfaces/pjson'
 import {load} from '../module-loader'
-import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
+import {ROOT_COMMAND_SYMBOL} from '../symbols'
 import {cacheDefaultValue} from '../util/cache-default-value'
 import {toConfiguredId} from '../util/ids'
 import {compact, sortBy, uniqBy} from '../util/util'
@@ -251,11 +251,11 @@ export class Help extends HelpBase {
     if (this.config.topicSeparator !== ':') argv = standardizeIDFromArgv(argv, this.config)
     const subject = getHelpSubject(argv, this.config)
     if (!subject) {
-      if (this.config.isSingleCommandCLI) {
-        const rootCmd = this.config.findCommand(SINGLE_COMMAND_CLI_SYMBOL)
+      if (this.config.isSingleCommandCLI || this.config.hasRootCommand) {
+        const rootCmd = this.config.findCommand(ROOT_COMMAND_SYMBOL)
         if (rootCmd) {
           // set the command id to an empty string to prevent the
-          // SINGLE_COMMAND_CLI_SYMBOL from being displayed in the help output
+          // ROOT_COMMAND_SYMBOL from being displayed in the help output
           rootCmd.id = ''
           await this.showCommandHelp(rootCmd)
           return
@@ -268,10 +268,10 @@ export class Help extends HelpBase {
 
     const command = this.config.findCommand(subject)
     if (command) {
-      if (command.id === SINGLE_COMMAND_CLI_SYMBOL) {
+      if (command.id === ROOT_COMMAND_SYMBOL) {
         // If the command is the root command of a single command CLI,
         // then set the command id to an empty string to prevent the
-        // the SINGLE_COMMAND_CLI_SYMBOL from being displayed in the help output.
+        // the ROOT_COMMAND_SYMBOL from being displayed in the help output.
         command.id = ''
       }
 

@@ -1,1 +1,1 @@
-export const SINGLE_COMMAND_CLI_SYMBOL = Symbol('SINGLE_COMMAND_CLI').toString()
+export const ROOT_COMMAND_SYMBOL = Symbol('ROOT_COMMAND_ID').toString()

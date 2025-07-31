@@ -7,11 +7,11 @@ import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
 import * as Interfaces from './interfaces'
 import {getLogger, setLogger} from './logger'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
-import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
+import {ROOT_COMMAND_SYMBOL} from './symbols'
 import {ux} from './ux'
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
-  if (argv.length === 0 && !config.isSingleCommandCLI) return true
+  if (argv.length === 0 && !config.isSingleCommandCLI && !config.hasRootCommand) return true
   const mergedHelpFlags = getHelpFlagAdditions(config)
   for (const arg of argv) {
     if (mergedHelpFlags.includes(arg)) return true
@@ -54,12 +54,14 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const config = await Config.load(options ?? require.main?.filename ?? __dirname)
   Cache.getInstance().set('config', config)
-  // If this is a single command CLI, then insert the SINGLE_COMMAND_CLI_SYMBOL into the argv array to serve as the command id.
-  if (config.isSingleCommandCLI) {
-    argv = [SINGLE_COMMAND_CLI_SYMBOL, ...argv]
+  // If this is a single command CLI or a multi-command CLI with a root command, then insert the ROOT_COMMAND_SYMBOL into the argv array to serve as the command id.
+  if (config.isSingleCommandCLI || config.hasRootCommand) {
+    argv = [ROOT_COMMAND_SYMBOL, ...argv]
   }
 
   const [id, ...argvSlice] = normalizeArgv(config, argv)
+
+  console.error(`Running command: ${id} with args: ${argvSlice.join(' ')}`)
 
   const runFinally = async (cmd?: Command.Loadable, error?: Error) => {
     marker?.stop()
@@ -88,6 +90,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // find & run command
   const cmd = config.findCommand(id)
+  console.error(`Found command: ${cmd?.id}`)
   if (!cmd) {
     const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) {

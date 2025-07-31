@@ -73,6 +73,7 @@ export interface Config {
   getAllCommandIDs(): string[]
   getAllCommands(): Command.Loadable[]
   getPluginsList(): Plugin[]
+  readonly hasRootCommand: boolean
   /**
    * path to home directory
    *

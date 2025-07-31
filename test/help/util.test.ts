@@ -5,6 +5,7 @@ import sinon from 'sinon'
 import {Args, Command, Config} from '../../src'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
+import {ROOT_COMMAND_SYMBOL} from '../../src/symbols'
 import configuredHelpClass from './_test-help-class'
 import {MyHelp} from './_test-help-class-identifier'
 
@@ -196,6 +197,95 @@ describe('util', () => {
       })
       const actual = standardizeIDFromArgv(['foo', 'bar', 'my-arg', 'hello=world', '--baz'], config)
       expect(actual).to.deep.equal(['foo:bar', 'my-arg', 'hello=world', '--baz'])
+    })
+
+    describe('root command scenarios', () => {
+      it('should return root command with args when ROOT_COMMAND_SYMBOL is present and no valid subcommand', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'codey'], config)
+        expect(actual).to.deep.equal([ROOT_COMMAND_SYMBOL, 'codey'])
+      })
+
+      it('should return subcommand when ROOT_COMMAND_SYMBOL is present and valid subcommand exists', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar'], config)
+        expect(actual).to.deep.equal(['foo:bar'])
+      })
+
+      it('should return subcommand with remaining args when ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        stubCommands({
+          id: 'foo:bar',
+          args: {
+            name: Args.string(),
+          },
+        })
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', 'baz'], config)
+        expect(actual).to.deep.equal(['foo:bar', 'baz'])
+      })
+
+      it('should return subcommand with flags when ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', '--flag'], config)
+        expect(actual).to.deep.equal(['foo:bar', '--flag'])
+      })
+
+      it('should handle misspelled subcommands when ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'ba'], config)
+        expect(actual).to.deep.equal(['foo:ba'])
+      })
+
+      it('should filter empty strings when ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', '', 'bar'], config)
+        expect(actual).to.deep.equal(['foo:bar'])
+      })
+
+      it('should return root command when ROOT_COMMAND_SYMBOL is present with only empty args', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, '', ''], config)
+        expect(actual).to.deep.equal([ROOT_COMMAND_SYMBOL])
+      })
+
+      it('should handle partial command matches when ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar', 'foo:bar:baz']))
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', 'baz'], config)
+        expect(actual).to.deep.equal(['foo:bar:baz'])
+      })
+
+      it('should stop at args when command has strict args and ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        stubCommands({
+          id: 'foo:bar',
+          args: {
+            name: Args.string(),
+          },
+          strict: true,
+        })
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', 'baz', 'extra'], config)
+        expect(actual).to.deep.equal(['foo:bar', 'baz', 'extra'])
+      })
+
+      it('should stop building command when command has variable args and ROOT_COMMAND_SYMBOL is present', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar']))
+        stubCommands({
+          id: 'foo:bar',
+          strict: false,
+        })
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', 'baz'], config)
+        expect(actual).to.deep.equal(['foo:bar', 'baz'])
+      })
+
+      it('should continue building command when command has variable args and a more specific command exists', () => {
+        sinon.stub(util, 'collectUsableIds').returns(new Set(['foo', 'foo:bar', 'foo:bar:baz']))
+        stubCommands({
+          id: 'foo:bar',
+          strict: false,
+        })
+        const actual = standardizeIDFromArgv([ROOT_COMMAND_SYMBOL, 'foo', 'bar', 'baz'], config)
+        expect(actual).to.deep.equal(['foo:bar:baz'])
+      })
     })
   })
 })
