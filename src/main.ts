@@ -61,8 +61,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   const [id, ...argvSlice] = normalizeArgv(config, argv)
 
-  console.error(`Running command: ${id} with args: ${argvSlice.join(' ')}`)
-
   const runFinally = async (cmd?: Command.Loadable, error?: Error) => {
     marker?.stop()
     if (!initMarker?.stopped) initMarker?.stop()
@@ -90,7 +88,6 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // find & run command
   const cmd = config.findCommand(id)
-  console.error(`Found command: ${cmd?.id}`)
   if (!cmd) {
     const topic = config.flexibleTaxonomy ? null : config.findTopic(id)
     if (topic) {
