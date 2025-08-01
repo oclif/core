@@ -4,6 +4,7 @@ import sinon from 'sinon'
 
 import {Config, Interfaces} from '../../src'
 import {Command} from '../../src/command'
+import PluginLoader from '../../src/config/plugin-loader'
 import {Plugin as IPlugin} from '../../src/interfaces'
 import * as fs from '../../src/util/fs'
 import * as os from '../../src/util/os'
@@ -461,6 +462,96 @@ describe('Config', () => {
       sinon.stub(fs, 'safeReadJson').resolves()
       const config = await Config.load({root, pjson})
       expect(config).to.have.property('theme', undefined)
+    })
+  })
+
+  describe('hasRootCommand', () => {
+    beforeEach(() => {
+      sinon.stub(Config.prototype, 'loadPluginsAndCommands').resolves()
+    })
+
+    afterEach(() => {
+      sinon.restore()
+    })
+
+    it('should be false when commands is a string', async () => {
+      const pjson = {
+        name: 'foo',
+        version: '1.0.0',
+        oclif: {
+          commands: './lib/commands',
+        },
+      }
+      // @ts-expect-error mock
+      sinon.stub(PluginLoader.prototype, 'loadRoot').resolves({
+        pjson,
+      })
+      const config = await Config.load({root})
+      expect(config.hasRootCommand).to.be.false
+    })
+
+    it('should be false when strategy is not pattern', async () => {
+      const pjson = {
+        name: 'foo',
+        version: '1.0.0',
+        oclif: {
+          commands: {
+            strategy: 'explicit',
+            target: './lib/commands',
+            includeRoot: true,
+          },
+        },
+      }
+
+      sinon.stub(PluginLoader.prototype, 'loadRoot').resolves({
+        // @ts-expect-error mock
+        pjson,
+      })
+      const config = await Config.load({root})
+      expect(config.hasRootCommand).to.be.false
+    })
+
+    it('should be false when includeRoot is false', async () => {
+      const pjson = {
+        name: 'foo',
+        version: '1.0.0',
+        oclif: {
+          commands: {
+            strategy: 'pattern',
+            target: './lib/commands',
+            includeRoot: false,
+          },
+        },
+      }
+
+      sinon.stub(PluginLoader.prototype, 'loadRoot').resolves({
+        // @ts-expect-error mock
+        pjson,
+      })
+
+      const config = await Config.load({root})
+      expect(config.hasRootCommand).to.be.false
+    })
+
+    it('should be true when strategy is pattern and includeRoot is true', async () => {
+      const pjson = {
+        name: 'foo',
+        version: '1.0.0',
+        oclif: {
+          commands: {
+            strategy: 'pattern',
+            target: './lib/commands',
+            includeRoot: true,
+          },
+        },
+      }
+
+      sinon.stub(PluginLoader.prototype, 'loadRoot').resolves({
+        // @ts-expect-error mock
+        pjson,
+      })
+      const config = await Config.load({root})
+      expect(config.hasRootCommand).to.be.true
     })
   })
 })
