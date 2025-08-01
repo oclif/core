@@ -1,0 +1,18 @@
+{
+  "name": "root-cmd-cli",
+  "version": "0.0.0",
+  "description": "CLI with root command",
+  "private": true,
+  "files": [],
+  "oclif": {
+    "commands": {
+      "strategy": "pattern",
+      "target": "./src/commands",
+      "includeRoot": true
+    },
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  }
+}

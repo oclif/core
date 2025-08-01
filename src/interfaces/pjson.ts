@@ -70,6 +70,13 @@ export type CommandDiscovery = {
    * ```
    */
   identifier?: string
+  /**
+   * If true, the root index file in the `target` directory will be considered a command file.
+   * This can be used to allow a multi-command CLI to have a root command instead of just showing help.
+   *
+   * This is only used when `strategy` is `pattern`.
+   */
+  includeRoot?: boolean
 }
 
 export type HookOptions = {
@@ -247,14 +254,14 @@ export type OclifConfiguration = {
   }
   /**
    * Tar flags configuration for different platforms.
-   * 
+   *
    * {
    *  "tarFlags": {
    *   "win32": "--force-local",
    *   "darwin": "--no-xattrs"
    *  }
    * }
-   * 
+   *
    */
   tarFlags?: {
     [platform: string]: string

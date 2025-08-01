@@ -92,6 +92,7 @@ export class Config implements IConfig {
   public dataDir!: string
   public dirname!: string
   public flexibleTaxonomy!: boolean
+  public hasRootCommand = false
   public home!: string
   public isSingleCommandCLI = false
   public name!: string
@@ -364,6 +365,12 @@ export class Config implements IConfig {
       typeof this.pjson.oclif.commands !== 'string' &&
         this.pjson.oclif.commands?.strategy === 'single' &&
         this.pjson.oclif.commands?.target,
+    )
+
+    this.hasRootCommand = Boolean(
+      typeof this.pjson.oclif.commands !== 'string' &&
+        this.pjson.oclif.commands?.strategy === 'pattern' &&
+        this.pjson.oclif.commands?.includeRoot,
     )
 
     this.maybeAdjustDebugSetting()

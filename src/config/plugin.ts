@@ -11,7 +11,7 @@ import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
 import {Topic} from '../interfaces/topic'
 import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
-import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
+import {ROOT_COMMAND_SYMBOL} from '../symbols'
 import {cacheCommand} from '../util/cache-command'
 import {findRoot} from '../util/find-root'
 import {readJson} from '../util/fs'
@@ -53,13 +53,14 @@ const GLOB_PATTERNS = [
   '!**/*.+(d.ts|test.ts|test.js|spec.ts|spec.js|d.mts|d.cts)?(x)',
 ]
 
-function processCommandIds(files: string[]): string[] {
+function processCommandIds(files: string[], includeRoot = false): string[] {
   return files.map((file) => {
     const p = parse(file)
     const topics = p.dir.split('/')
     const command = p.name !== 'index' && p.name
+    if (includeRoot && !command && p.dir.length === 0 && p.name === 'index') return ROOT_COMMAND_SYMBOL
     const id = [...topics, command].filter(Boolean).join(':')
-    return id === '' ? SINGLE_COMMAND_CLI_SYMBOL : id
+    return id === '' ? ROOT_COMMAND_SYMBOL : id
   })
 }
 
@@ -149,7 +150,13 @@ export class Plugin implements IPlugin {
         try {
           ;({filePath, isESM, module} = cachedCommandCanBeUsed(this.manifest, id)
             ? await loadWithDataFromManifest(this.manifest.commands[id], this.root)
-            : await loadWithData(this, join(commandsDir ?? this.pjson.oclif.commands, ...id.split(':'))))
+            : await loadWithData(
+                this,
+                join(
+                  commandsDir ?? this.pjson.oclif.commands,
+                  ...(id === ROOT_COMMAND_SYMBOL ? ['index'] : id.split(':')),
+                ),
+              ))
           this._debug(isESM ? '(import)' : '(require)', filePath)
         } catch (error: any) {
           if (!opts.must && error.code === 'MODULE_NOT_FOUND') return
@@ -369,7 +376,7 @@ export class Plugin implements IPlugin {
 
     this._debug(`loading IDs from ${commandsDir}`)
     const files = await glob(this.commandDiscoveryOpts?.globPatterns ?? GLOB_PATTERNS, {cwd: commandsDir})
-    return processCommandIds(files)
+    return processCommandIds(files, this.commandDiscoveryOpts?.includeRoot)
   }
 
   private async getCommandIdsFromTarget(): Promise<string[] | undefined> {
@@ -401,7 +408,7 @@ export class Plugin implements IPlugin {
     if (this.commandDiscoveryOpts?.strategy === 'single' && this.commandDiscoveryOpts.target) {
       const filePath = await tsPath(this.root, this.commandDiscoveryOpts?.target ?? this.root, this)
       const module = await load(this, filePath)
-      this.commandCache = {[SINGLE_COMMAND_CLI_SYMBOL]: searchForCommandClass(module)}
+      this.commandCache = {[ROOT_COMMAND_SYMBOL]: searchForCommandClass(module)}
       return this.commandCache
     }
   }
