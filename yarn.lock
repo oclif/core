@@ -3423,9 +3423,9 @@ eslint-config-oclif@^5.2.2:
     eslint-plugin-unicorn "^48.0.1"
 
 eslint-config-oclif@^6:
-  version "6.0.89"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.89.tgz#a25ead791207f21642073f861c305711e8c38cd5"
-  integrity sha512-c4SRbD8WyTzdRkLOwrimz72DxmZfjLVo1Yklsmgd2JdZiFOjtdRfqoTeefFnzxUEZQ8Ws2QijpHicYMOpbjhpg==
+  version "6.0.90"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.90.tgz#67edcf977bfedc16cd104e79ec4710374e6e28a9"
+  integrity sha512-bdYiRSV7D72Vwz7YW8GDOoqpGgcnOpBPSwIudHr5nddNB5VIuqJOecCIlua+DqscMZtQJ+1RyuMuKK9xzdAL7w==
   dependencies:
     "@eslint/compat" "^1.3.1"
     "@eslint/eslintrc" "^3.3.1"
@@ -3440,7 +3440,7 @@ eslint-config-oclif@^6:
     eslint-plugin-import "^2.32.0"
     eslint-plugin-jsdoc "^50.8.0"
     eslint-plugin-mocha "^10.5.0"
-    eslint-plugin-n "^17.21.0"
+    eslint-plugin-n "^17.21.3"
     eslint-plugin-perfectionist "^4"
     eslint-plugin-unicorn "^56.0.1"
     typescript-eslint "^8.38.0"
@@ -3599,18 +3599,18 @@ eslint-plugin-n@^15.1.0:
     resolve "^1.22.1"
     semver "^7.3.8"
 
-eslint-plugin-n@^17.21.0:
-  version "17.21.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-17.21.0.tgz#6b1833e5e8fd07a69bbab2be429771ff2309db5e"
-  integrity sha512-1+iZ8We4ZlwVMtb/DcHG3y5/bZOdazIpa/4TySo22MLKdwrLcfrX0hbadnCvykSQCCmkAnWmIP8jZVb2AAq29A==
+eslint-plugin-n@^17.21.3:
+  version "17.21.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-17.21.3.tgz#a07592c28390ac742bf52acae89048c997a7b91c"
+  integrity sha512-MtxYjDZhMQgsWRm/4xYLL0i2EhusWT7itDxlJ80l1NND2AL2Vi5Mvneqv/ikG9+zpran0VsVRXTEHrpLmUZRNw==
   dependencies:
     "@eslint-community/eslint-utils" "^4.5.0"
     enhanced-resolve "^5.17.1"
     eslint-plugin-es-x "^7.8.0"
     get-tsconfig "^4.8.1"
     globals "^15.11.0"
+    globrex "^0.1.2"
     ignore "^5.3.2"
-    minimatch "^9.0.5"
     semver "^7.6.3"
     ts-declaration-location "^1.0.6"
 
@@ -4320,6 +4320,11 @@ globby@^11.0.1, globby@^11.0.3, globby@^11.1.0:
     ignore "^5.2.0"
     merge2 "^1.4.1"
     slash "^3.0.0"
+
+globrex@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
+  integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
 gonzales-pe@^4.2.3, gonzales-pe@^4.3.0:
   version "4.3.0"
