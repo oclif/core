@@ -50,7 +50,7 @@ export class CommandHelp extends HelpFormatter {
 
   protected arg(arg: Command.Arg.Any): string {
     const name = arg.name.toUpperCase()
-    if (arg.required) return `${name}`
+    if (arg.required) return `<${name}>`
     return `[${name}]`
   }
 
@@ -59,7 +59,8 @@ export class CommandHelp extends HelpFormatter {
 
     return args.map((a) => {
       // Add ellipsis to indicate that the argument takes multiple values if strict is false
-      const name = this.command.strict === false ? `${a.name.toUpperCase()}...` : a.name.toUpperCase()
+      let name = this.command.strict === false ? `${a.name.toUpperCase()}...` : a.name.toUpperCase()
+      name = a.required ? `<${name}>` : `[${name}]`
       let description = a.description || ''
       if (a.default)
         description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
