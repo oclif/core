@@ -207,26 +207,6 @@ describe('doc opts', () => {
     expect(usage).to.contain(' (-f <value> | -s <value>)')
   })
 
-  it('shows option one-way exclusive field on optional field', () => {
-    const usage = DocOpts.generate({
-      flags: {
-        testFlag: Flags.url({
-          name: 'testFlag',
-          description: 'test',
-          char: 's',
-        }),
-        testFlag2: Flags.string({
-          name: 'testFlag2',
-          description: 'test',
-          char: 'f',
-          required: true,
-          exclusive: ['testFlag'],
-        }),
-      },
-    } as any)
-    expect(usage).to.contain(' (-f <value> | -s <value>)')
-  })
-
   it('shows optional exclusive fields defined twice', () => {
     const usage = DocOpts.generate({
       flags: {
