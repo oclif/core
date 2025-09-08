@@ -1,3 +1,12 @@
+## [4.5.3](https://github.com/oclif/core/compare/4.5.2...4.5.3) (2025-09-08)
+
+
+### Bug Fixes
+
+* **parser:** stdin compacting issue on multiline input ([#1459](https://github.com/oclif/core/issues/1459)) ([#1460](https://github.com/oclif/core/issues/1460)) ([cc15549](https://github.com/oclif/core/commit/cc1554911d14b85d7b8209a587f252732c3b78f1))
+
+
+
 ## [4.5.2](https://github.com/oclif/core/compare/4.5.1...4.5.2) (2025-07-23)
 
 
