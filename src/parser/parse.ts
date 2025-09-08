@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import {EOL} from 'node:os'
 import {createInterface} from 'node:readline'
 
 import Cache from '../cache'
@@ -68,7 +69,7 @@ export const readStdin = async (): Promise<null | string> => {
   }
 
   return new Promise((resolve) => {
-    let result = ''
+    const lines: string[] = []
     const ac = new AbortController()
     const {signal} = ac
     const timeout = setTimeout(() => ac.abort(), 10)
@@ -80,10 +81,11 @@ export const readStdin = async (): Promise<null | string> => {
     })
 
     rl.on('line', (line) => {
-      result += line
+      lines.push(line)
     })
 
     rl.once('close', () => {
+      const result = lines.join(EOL)
       clearTimeout(timeout)
       debug('resolved from stdin', result)
       globalThis.oclif = {...globalThis.oclif, stdinCache: result}
