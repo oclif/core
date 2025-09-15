@@ -40,6 +40,7 @@
     "@types/indent-string": "^4.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^18",
+    "@types/picomatch": "^4.0.2",
     "@types/pnpapi": "^0.0.5",
     "@types/sinon": "^17.0.3",
     "@types/supports-color": "^8.1.3",
