@@ -9,7 +9,7 @@
     "ansis": "^3.17.0",
     "clean-stack": "^3.0.1",
     "cli-spinners": "^2.9.2",
-    "debug": "^4.4.0",
+    "debug": "^4.4.3",
     "ejs": "^3.1.10",
     "get-package-type": "^0.1.0",
     "indent-string": "^4.0.0",
