@@ -980,14 +980,14 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.48"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.48.tgz#09397afa7fed0e0927dec12b401c0e73e96362a4"
-  integrity sha512-He579UlYewPKiqPq4ufq+AhO8NLXChyN7+mQtEs2ExwigIJuKeAEBTNukTwI1B4c5ctMj3a7cAoiY3tUgZTSHg==
+  version "5.4.49"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.49.tgz#4ad135cbadfed212badb7cce1184e9362521e35f"
+  integrity sha512-OeDLxEjbfEj5AN/wEKXzSY4VC+svBVdjrlHjxm4/e1ZnK3ZuSe1MeABmJc4mXmWwG/zagtNtSAKmTOWhe+WmmA==
   dependencies:
     "@oclif/core" "^4.5.4"
     ansis "^3.17.0"
     debug "^4.4.0"
-    npm "^10.9.3"
+    npm "^10.9.4"
     npm-package-arg "^11.0.3"
     npm-run-path "^5.3.0"
     object-treeify "^4.0.1"
@@ -6306,10 +6306,10 @@ npm-user-validate@^3.0.0:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-3.0.0.tgz#9b1410796bf1f1d78297a8096328c55d3083f233"
   integrity sha512-9xi0RdSmJ4mPYTC393VJPz1Sp8LyCx9cUnm/L9Qcb3cFO8gjT4mN20P9FAsea8qDHdQ7LtcN8VLh2UT47SdKCw==
 
-npm@^10.9.3:
-  version "10.9.3"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-10.9.3.tgz#e803ef2166aa96eda9b795a9acee1877c8b4e6f2"
-  integrity sha512-6Eh1u5Q+kIVXeA8e7l2c/HpnFFcwrkt37xDMujD5be1gloWa9p6j3Fsv3mByXXmqJHy+2cElRMML8opNT7xIJQ==
+npm@^10.9.4:
+  version "10.9.4"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-10.9.4.tgz#61e81f9dc6ea559d9173e69aae772bc8fe75c3ce"
+  integrity sha512-OnUG836FwboQIbqtefDNlyR0gTHzIfwRfE3DuiNewBvnMnWEpB0VEXwBlFVgqpNzIgYo/MHh3d2Hel/pszapAA==
   dependencies:
     "@isaacs/string-locale-compare" "^1.1.0"
     "@npmcli/arborist" "^8.0.1"
