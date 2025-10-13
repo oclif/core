@@ -12,6 +12,8 @@ export type {
   ArgDefinition,
   ArgInput,
   BooleanFlag,
+  Completion,
+  CompletionContext,
   CustomOptions,
   Deprecation,
   Flag,
