@@ -1,5 +1,6 @@
 import {Command} from '../command'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
+import {Config} from './config'
 
 export type FlagOutput = {[name: string]: any}
 export type ArgOutput = {[name: string]: any}
@@ -231,6 +232,21 @@ export type OptionFlagProps = FlagProps & {
    * Should only be used on one flag at a time.
    */
   allowStdin?: boolean | 'only'
+  /**
+   * Optional dynamic completion configuration.
+   * Provides intelligent autocomplete suggestions for flag values based on context.
+   * Requires autocomplete plugin to be installed.
+   *
+   * @example
+   * ```typescript
+   * completion: {
+   *   options: async (ctx) => {
+   *     return ['option1', 'option2', 'option3']
+   *   }
+   * }
+   * ```
+   */
+  completion?: Completion
 }
 
 export type FlagParserContext = Command & {token: FlagToken}
@@ -437,6 +453,59 @@ export type ParserInput = {
   strict: boolean
   context: ParserContext | undefined
   '--'?: boolean | undefined
+}
+
+/**
+ * Context provided to flag completion functions
+ */
+export type CompletionContext = {
+  /**
+   * Parsed arguments from the current command line
+   */
+  args?: {[name: string]: string}
+
+  /**
+   * Array of raw arguments
+   */
+  argv?: string[]
+
+  /**
+   * oclif configuration object
+   */
+  config: Config
+
+  /**
+   * Parsed flags from the current command line
+   */
+  flags?: {[name: string]: string}
+}
+
+/**
+ * Completion configuration for a flag
+ */
+export type Completion = {
+  /**
+   * Function that returns completion options based on context
+   *
+   * @param ctx - Context containing parsed args, flags, and config
+   * @returns Promise resolving to array of completion strings
+   *
+   * @example
+   * ```typescript
+   * static flags = {
+   *   'target-org': Flags.string({
+   *     description: 'Target org',
+   *     completion: {
+   *       options: async (ctx) => {
+   *         const orgs = await getAuthenticatedOrgs()
+   *         return orgs.map(o => o.alias)
+   *       }
+   *     }
+   *   })
+   * }
+   * ```
+   */
+  options(ctx: CompletionContext): Promise<string[]>
 }
 
 export type ParserContext = Command & {
