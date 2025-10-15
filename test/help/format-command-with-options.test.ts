@@ -46,7 +46,7 @@ multiline help`,
     <value>] [-l <value>]
 
 ARGUMENTS
-  APP_NAME  app to use
+  [APP_NAME]  app to use
 
 OPTIONS
   -f, --foo=foo        foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo
@@ -95,7 +95,7 @@ ALIASES
     <value>]
 
 ARGUMENTS
-  APP_NAME
+  [APP_NAME]
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
@@ -144,7 +144,7 @@ ALIASES
     <value>]
 
 ARGUMENTS
-  APP_NAME
+  [APP_NAME]
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
@@ -198,7 +198,7 @@ ALIASES
   $ oclif apps:create [APP_NAME] [--force]
 
 ARGUMENTS
-  APP_NAME  app to use
+  [APP_NAME]  app to use
 
 OPTIONS
   --force  forces
@@ -269,9 +269,9 @@ OPTIONS
     <value>] [--flag3 <value>]
 
 ARGUMENTS
-  ARG1  [default: .]
-  ARG2  [default: .] arg2 desc
-  ARG3  arg3 desc
+  [ARG1]  [default: .]
+  [ARG2]  [default: .] arg2 desc
+  [ARG3]  arg3 desc
 
 OPTIONS
   --flag1=flag1  [default: .]
@@ -312,7 +312,7 @@ OPTIONS
   $ oclif apps:create [ARG1]
 
 ARGUMENTS
-  ARG1  (option1|option2) Show the options`)
+  [ARG1]  (option1|option2) Show the options`)
     })
   })
 
