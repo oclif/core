@@ -87,7 +87,9 @@ export type ArgDefaultHelp<T, P = CustomOptions> =
   | T
   | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
 
-export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>}
+export type FlagRelationship =
+  | string
+  | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>; dependencies?: string[]}
 export type Relationship = {
   type: 'all' | 'some' | 'none'
   flags: FlagRelationship[]
