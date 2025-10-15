@@ -1,3 +1,12 @@
+## [4.5.6](https://github.com/oclif/core/compare/4.5.5...4.5.6) (2025-10-15)
+
+
+### Bug Fixes
+
+* indicate whether an argument is optional in the help command ([#1453](https://github.com/oclif/core/issues/1453)) ([#1482](https://github.com/oclif/core/issues/1482)) ([94e46f8](https://github.com/oclif/core/commit/94e46f8d0405a4e0f6c008c8dfad6d70a8276e38))
+
+
+
 ## [4.5.5](https://github.com/oclif/core/compare/4.5.4...4.5.5) (2025-10-11)
 
 
