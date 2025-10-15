@@ -48,7 +48,7 @@ multiline help`,
     [-r <value>] [-l <value>]
 
 ARGUMENTS
-  APP_NAME  app to use
+  [APP_NAME]  app to use
 
 FLAGS
   -f, --foo=<value>     foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfo
@@ -131,7 +131,7 @@ DESCRIPTION
     [-r <value>]
 
 ARGUMENTS
-  APP_NAME
+  [APP_NAME]
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
@@ -188,7 +188,7 @@ ALIASES
     [-r <value>]
 
 ARGUMENTS
-  APP_NAME
+  [APP_NAME]
       app to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
       useapp to useapp to useapp to useapp to useapp to useapp to useapp to useapp
       to useapp to useapp to useapp to useapp to useapp to useapp to useapp to
@@ -285,7 +285,7 @@ DESCRIPTION
   $ oclif apps:create [APP_NAME] [--json] [--force]
 
 ARGUMENTS
-  APP_NAME  app to use
+  [APP_NAME]  app to use
 
 FLAGS
   --force  forces
@@ -474,9 +474,9 @@ FLAGS
     <value>] [--flag3 <value>]
 
 ARGUMENTS
-  ARG1  [default: .]
-  ARG2  [default: .] arg2 desc
-  ARG3  arg3 desc
+  [ARG1]  [default: .]
+  [ARG2]  [default: .] arg2 desc
+  [ARG3]  arg3 desc
 
 FLAGS
   --flag1=<value>  [default: .]
@@ -606,7 +606,7 @@ FLAG DESCRIPTIONS
   $ oclif apps:create [ARG1]
 
 ARGUMENTS
-  ARG1  (option1|option2) Show the options`)
+  [ARG1]  (option1|option2) Show the options`)
     })
 
     it('should output arg with ... if static is false', async () => {
@@ -625,7 +625,7 @@ ARGUMENTS
   $ oclif apps:create [ARG1...]
 
 ARGUMENTS
-  ARG1...  Show the options`)
+  [ARG1...]  Show the options`)
     })
   })
 
