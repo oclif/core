@@ -1,6 +1,5 @@
 import {Command} from '../command'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
-import {Config} from './config'
 
 export type FlagOutput = {[name: string]: any}
 export type ArgOutput = {[name: string]: any}
@@ -456,38 +455,12 @@ export type ParserInput = {
 }
 
 /**
- * Context provided to flag completion functions
- */
-export type CompletionContext = {
-  /**
-   * Parsed arguments from the current command line
-   */
-  args?: {[name: string]: string}
-
-  /**
-   * Array of raw arguments
-   */
-  argv?: string[]
-
-  /**
-   * oclif configuration object
-   */
-  config: Config
-
-  /**
-   * Parsed flags from the current command line
-   */
-  flags?: {[name: string]: string}
-}
-
-/**
  * Completion configuration for a flag
  */
 export type Completion = {
   /**
-   * Function that returns completion options based on context
+   * Function that returns completion options
    *
-   * @param ctx - Context containing parsed args, flags, and config
    * @returns Promise resolving to array of completion strings
    *
    * @example
@@ -496,7 +469,7 @@ export type Completion = {
    *   'target-org': Flags.string({
    *     description: 'Target org',
    *     completion: {
-   *       options: async (ctx) => {
+   *       options: async () => {
    *         const orgs = await getAuthenticatedOrgs()
    *         return orgs.map(o => o.alias)
    *       }
@@ -505,7 +478,7 @@ export type Completion = {
    * }
    * ```
    */
-  options(ctx: CompletionContext): Promise<string[]>
+  options(): Promise<string[]>
 }
 
 export type ParserContext = Command & {

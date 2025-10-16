@@ -13,7 +13,6 @@ export type {
   ArgInput,
   BooleanFlag,
   Completion,
-  CompletionContext,
   CustomOptions,
   Deprecation,
   Flag,
