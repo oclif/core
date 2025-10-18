@@ -980,9 +980,9 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.49"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.49.tgz#4ad135cbadfed212badb7cce1184e9362521e35f"
-  integrity sha512-OeDLxEjbfEj5AN/wEKXzSY4VC+svBVdjrlHjxm4/e1ZnK3ZuSe1MeABmJc4mXmWwG/zagtNtSAKmTOWhe+WmmA==
+  version "5.4.50"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.50.tgz#0749200c71d9e9e36cd11cb97c441927dd3ad6b2"
+  integrity sha512-HNhmmgxH0xoFsYKubtWWhgSasbDEyoT+o/q5QDljiytNvqWP3wWiP6cqqWvGpKG2El7+g17crdWpv4jzrf3Lyg==
   dependencies:
     "@oclif/core" "^4.5.4"
     ansis "^3.17.0"
@@ -991,7 +991,7 @@
     npm-package-arg "^11.0.3"
     npm-run-path "^5.3.0"
     object-treeify "^4.0.1"
-    semver "^7.7.2"
+    semver "^7.7.3"
     validate-npm-package-name "^5.0.1"
     which "^4.0.0"
     yarn "^1.22.22"
