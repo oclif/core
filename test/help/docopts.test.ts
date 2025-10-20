@@ -246,6 +246,154 @@ describe('doc opts', () => {
     expect(usage).to.contain(' [-s <value> | -f <value>]')
   })
 
+  it('shows optional one-way combinable fields', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' [-f <value> | -s <value>]')
+  })
+
+  it('shows one-way combinable field on required field', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+          required: true,
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' (-f <value> | -s <value>)')
+  })
+
+  it('shows required one-way combinable field on optional field', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          required: true,
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' (-f <value> | -s <value>)')
+  })
+
+  it('shows optional combinable field on optional field', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' [-f <value> | -s <value>]')
+  })
+
+  it('shows optional combinable fields defined twice', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+          combinable: ['testFlag3'],
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' [-s <value> | -f <value>]')
+  })
+
+  it('shows optional combinable - exclusive fields defined twice', () => {
+    const usage = DocOpts.generate({
+      flags: {
+        testFlag: Flags.url({
+          name: 'testFlag',
+          description: 'test',
+          char: 's',
+          exclusive: ['testFlag2'],
+        }),
+        testFlag2: Flags.string({
+          name: 'testFlag2',
+          description: 'test',
+          char: 'f',
+          combinable: ['testFlag3'],
+        }),
+        testFlag3: Flags.string({
+          name: 'testFlag3',
+          description: 'test',
+          char: 'd',
+        }),
+      },
+    } as any)
+    expect(usage).to.contain(' [-s <value> | -f <value>]')
+  })
+
   it('shows optional two-way depended fields', () => {
     const usage = DocOpts.generate({
       flags: {

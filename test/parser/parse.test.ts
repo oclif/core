@@ -1544,6 +1544,69 @@ See more help with --help`)
     })
   })
 
+  describe('combinable', () => {
+    it('ignores', async () => {
+      await parse([], {
+        flags: {
+          foo: Flags.string({combinable: ['yes', 'force']}),
+          bar: Flags.string({char: 'b'}),
+          config: Flags.string({char: 'c'}),
+          dir: Flags.string({char: 'd'}),
+          yes: Flags.boolean({char: 'y'}),
+          force: Flags.boolean({char: 'f'}),
+        },
+      })
+    })
+
+    it('succeeds when no combinable flag is provided', async () => {
+      const out = await parse(['--foo', 'a'], {
+        flags: {
+          foo: Flags.string({combinable: ['yes', 'force']}),
+          bar: Flags.string({char: 'b'}),
+          config: Flags.string({char: 'c'}),
+          dir: Flags.string({char: 'd'}),
+          yes: Flags.boolean({char: 'y'}),
+          force: Flags.boolean({char: 'f'}),
+        },
+      })
+      expect(out.flags.foo).to.equal('a')
+    })
+
+    it('succeeds when a combinable flag is provided', async () => {
+      const out = await parse(['--foo', 'a', '--yes'], {
+        flags: {
+          foo: Flags.string({combinable: ['yes', 'force']}),
+          bar: Flags.string({char: 'b'}),
+          config: Flags.string({char: 'c'}),
+          dir: Flags.string({char: 'd'}),
+          yes: Flags.boolean({char: 'y'}),
+          force: Flags.boolean({char: 'f'}),
+        },
+      })
+      expect(out.flags.foo).to.equal('a')
+    })
+
+    it('fails', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', 'a', '--bar', 'b'], {
+          flags: {
+            foo: Flags.string({combinable: ['yes', 'force']}),
+            bar: Flags.string({char: 'b'}),
+            config: Flags.string({char: 'c'}),
+            dir: Flags.string({char: 'd'}),
+            yes: Flags.boolean({char: 'y'}),
+            force: Flags.boolean({char: 'f'}),
+          },
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include(`Only the following can be provided when using --foo: --yes, --force`)
+    })
+  })
+
   describe('exactlyOne', () => {
     it('throws if neither is set', async () => {
       let message = ''

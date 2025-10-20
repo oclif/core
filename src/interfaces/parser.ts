@@ -89,7 +89,7 @@ export type ArgDefaultHelp<T, P = CustomOptions> =
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>}
 export type Relationship = {
-  type: 'all' | 'some' | 'none'
+  type: 'all' | 'some' | 'none' | 'only'
   flags: FlagRelationship[]
 }
 
@@ -142,6 +142,10 @@ export type FlagProps = {
    * List of flags that cannot be used with this flag.
    */
   exclusive?: string[]
+  /**
+   * List of the only flags that can be used with this flag.
+   */
+  combinable?: string[]
   /**
    * Exactly one of these flags must be provided.
    */
