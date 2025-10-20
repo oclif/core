@@ -18,7 +18,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node_version: [lts/*, latest]
+        # TODO: revert this back to lts/* and latest
+        node_version: [lts/*, 24]
         exclude:
           - os: windows-latest
             node_version: lts/*
@@ -40,14 +41,13 @@ jobs:
     # For whatever reason the windows-latest runner doesn't like it when you shell yarn commands in the sf repo
     # which is an integral part of the setup for the tests. Instead, we replicate the setup here.
     needs: linux-unit-tests
-    strategy:
-      fail-fast: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          # TODO: revert this back to latest
+          node-version: 24
           cache: yarn
       - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
       - run: yarn build

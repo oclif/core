@@ -13,6 +13,7 @@ describe('Salesforce CLI (sf)', () => {
 
   before(async () => {
     process.env.SF_TELEMETRY_DISABLE_ACKNOWLEDGEMENT = 'true'
+    process.env.SF_DISABLE_TELEMETRY = 'true'
     executor = await setup(__filename, {
       repo: 'https://github.com/salesforcecli/cli',
     })
