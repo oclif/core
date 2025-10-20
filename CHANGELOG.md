@@ -1,3 +1,12 @@
+# [4.6.0](https://github.com/oclif/core/compare/4.5.6...4.6.0) (2025-10-20)
+
+
+### Features
+
+* support the 'combinable' & 'only' flag relationships ([#1487](https://github.com/oclif/core/issues/1487)) ([#1488](https://github.com/oclif/core/issues/1488)) ([d13b448](https://github.com/oclif/core/commit/d13b448f229f182b065e0847cf4b761b8f2cbbd8))
+
+
+
 ## [4.5.6](https://github.com/oclif/core/compare/4.5.5...4.5.6) (2025-10-15)
 
 
