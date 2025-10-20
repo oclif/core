@@ -194,8 +194,24 @@ export class DocOpts {
         this.combineElementsToFlag(elementMap, flag.name, flag.dependsOn, ' ')
       }
 
+      let exclusive: Set<string> | undefined
       if (Array.isArray(flag.exclusive)) {
-        this.combineElementsToFlag(elementMap, flag.name, flag.exclusive, ' | ')
+        exclusive = new Set(flag.exclusive)
+      }
+
+      if (Array.isArray(flag.combinable)) {
+        const combinableFlags = new Set(flag.combinable)
+        exclusive ??= new Set<string>()
+        for (const item of this.flagList) {
+          // each flag not in the "combinable" list, is equivalent to an "exclusive" flag
+          if (flag !== item && !combinableFlags.has(item.name)) {
+            exclusive.add(item.name)
+          }
+        }
+      }
+
+      if (exclusive !== undefined && exclusive.size > 0) {
+        this.combineElementsToFlag(elementMap, flag.name, [...exclusive], ' | ')
       }
     }
 

@@ -25,6 +25,7 @@ async function cacheFlags(
       aliases: flag.aliases,
       char: flag.char,
       charAliases: flag.charAliases,
+      combinable: flag.combinable,
       dependsOn: flag.dependsOn,
       deprecateAliases: flag.deprecateAliases,
       deprecated: flag.deprecated,

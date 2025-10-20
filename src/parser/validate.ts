@@ -71,6 +71,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
             ...(flag.relationships ? validateRelationships(name, flag) : []),
             ...(flag.dependsOn ? [validateDependsOn(name, flag.dependsOn)] : []),
             ...(flag.exclusive ? [validateExclusive(name, flag.exclusive)] : []),
+            ...(flag.combinable ? [validateCombinable(name, flag.combinable)] : []),
             ...(flag.exactlyOne ? [validateExactlyOne(name, flag.exactlyOne)] : []),
           ]
         }
@@ -172,6 +173,30 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     return {...base, status: 'success'}
   }
 
+  async function validateCombinable(name: string, flags: FlagRelationship[]): Promise<Validation> {
+    const base = {name, validationFn: 'validateCombinable'}
+    const combinableFlags = new Set(flags.map((flag) => (typeof flag === 'string' ? flag : flag.name)))
+    const resolved = await resolveFlags(flags)
+
+    for (const flag of Object.keys(parse.output.flags)) {
+      // do not enforce exclusivity for flags that were defaulted
+      if (parse.output.metadata.flags && parse.output.metadata.flags[flag]?.setFromDefault) continue
+      if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault) continue
+      if (flag !== name && parse.output.flags[flag] !== undefined && !combinableFlags.has(flag)) {
+        const formattedFlags = Object.keys(resolved)
+          .map((f) => `--${f}`)
+          .join(', ')
+        return {
+          ...base,
+          reason: `Only the following can be provided when using --${name}: ${formattedFlags}`,
+          status: 'failed',
+        }
+      }
+    }
+
+    return {...base, status: 'success'}
+  }
+
   async function validateExactlyOne(name: string, flags: FlagRelationship[]): Promise<Validation> {
     const base = {name, validationFn: 'validateExactlyOne'}
 
@@ -233,6 +258,10 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
         case 'none': {
           return validateExclusive(name, relationship.flags)
+        }
+
+        case 'only': {
+          return validateCombinable(name, relationship.flags)
         }
 
         case 'some': {
