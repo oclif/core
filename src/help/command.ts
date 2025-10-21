@@ -190,9 +190,25 @@ export class CommandHelp extends HelpFormatter {
       if (noChar) left = left.replace('    ', '')
 
       let right = flag.summary || flag.description || ''
+
+      // Build metadata string (default, env, or both)
+      const metadata: string[] = []
       const canBeCached = !(this.opts.respectNoCacheDefault === true && flag.noCacheDefault === true)
-      if (flag.type === 'option' && flag.default && canBeCached) {
-        right = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${flag.default}]`)} ${right}`
+
+      if (flag.type === 'option') {
+        if (flag.default && canBeCached) {
+          metadata.push(`default: ${flag.default}`)
+        }
+
+        if (flag.env) {
+          metadata.push(`env: ${flag.env}`)
+        }
+      } else if (flag.type === 'boolean' && flag.env) {
+        metadata.push(`env: ${flag.env}`)
+      }
+
+      if (metadata.length > 0) {
+        right = `${colorize(this.config?.theme?.flagDefaultValue, `[${metadata.join(', ')}]`)} ${right}`
       }
 
       if (flag.required) right = `${colorize(this.config?.theme?.flagRequired, '(required)')} ${right}`
