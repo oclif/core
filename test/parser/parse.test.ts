@@ -1806,7 +1806,7 @@ See more help with --help`)
       expect(out.flags.foo).to.equal(undefined)
     })
 
-    it('is false', async () => {
+    it('is false when negation is used', async () => {
       const out = await parse(['--no-foo'], {
         flags: {
           foo: Flags.boolean({allowNo: true}),
@@ -1815,13 +1815,22 @@ See more help with --help`)
       expect(out.flags.foo).to.equal(false)
     })
 
-    it('is true', async () => {
+    it('is true when negation is not used', async () => {
       const out = await parse(['--foo'], {
         flags: {
           foo: Flags.boolean({allowNo: true}),
         },
       })
       expect(out.flags.foo).to.equal(true)
+    })
+
+    it('is false with negation of alias', async () => {
+      const out = await parse(['--no-bar'], {
+        flags: {
+          foo: Flags.boolean({char: 'f', allowNo: true, aliases: ['bar']}),
+        },
+      })
+      expect(out.flags.foo).to.equal(false)
     })
   })
 

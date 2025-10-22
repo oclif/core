@@ -114,6 +114,8 @@ const validateOptions = (flag: OptionFlag<any>, input: string): string => {
   return input
 }
 
+const NEGATION = '--no-'
+
 export class Parser<
   T extends ParserInput,
   TFlags extends OutputFlags<T['flags']>,
@@ -397,15 +399,19 @@ export class Parser<
       if (tokenLength) {
         // boolean
         if (fws.inputFlag.flag.type === 'boolean' && last(fws.tokens)?.input) {
+          const doesNotContainNegation = (i: FlagWithStrategy) => {
+            const possibleNegations = [i.inputFlag.name, ...(i.inputFlag.flag.aliases ?? [])].map(
+              (n) => `${NEGATION}${n}`,
+            )
+            const input = last(i.tokens)?.input
+            if (!input) return true
+            return !possibleNegations.includes(input)
+          }
+
           return {
             ...fws,
             valueFunction: async (i) =>
-              parseFlagOrThrowError(
-                last(i.tokens)?.input !== `--no-${i.inputFlag.name}`,
-                i.inputFlag.flag,
-                this.context,
-                last(i.tokens),
-              ),
+              parseFlagOrThrowError(doesNotContainNegation(i), i.inputFlag.flag, this.context, last(i.tokens)),
           }
         }
 
@@ -652,9 +658,14 @@ export class Parser<
       return this.flagAliases[name].name
     }
 
-    if (arg.startsWith('--no-')) {
-      const flag = this.booleanFlags[arg.slice(5)]
+    if (arg.startsWith(NEGATION)) {
+      const flag = this.booleanFlags[arg.slice(NEGATION.length)]
       if (flag && flag.allowNo) return flag.name
+
+      const flagAlias = this.flagAliases[arg.slice(NEGATION.length)]
+      if (flagAlias && flagAlias.type === 'boolean' && flagAlias.allowNo) {
+        return flagAlias.name
+      }
     }
   }
 
