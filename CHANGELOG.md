@@ -1,3 +1,12 @@
+# [4.7.0](https://github.com/oclif/core/compare/4.6.0...4.7.0) (2025-10-22)
+
+
+### Features
+
+* support allowNo with alias ([d6de26f](https://github.com/oclif/core/commit/d6de26fca79b63fac7b5f3d87f7d3a07bab7aa0a))
+
+
+
 # [4.6.0](https://github.com/oclif/core/compare/4.5.6...4.6.0) (2025-10-20)
 
 
