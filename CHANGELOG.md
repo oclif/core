@@ -1,3 +1,12 @@
+## [4.7.2](https://github.com/oclif/core/compare/4.7.1...4.7.2) (2025-10-23)
+
+
+### Bug Fixes
+
+* retain description when hiding summary in help ([#1493](https://github.com/oclif/core/issues/1493)) ([3647672](https://github.com/oclif/core/commit/36476723a934e6c1d4069a979da1ec4242f7e9eb))
+
+
+
 ## [4.7.1](https://github.com/oclif/core/compare/4.7.0...4.7.1) (2025-10-23)
 
 
