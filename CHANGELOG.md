@@ -1,3 +1,12 @@
+## [4.7.1](https://github.com/oclif/core/compare/4.7.0...4.7.1) (2025-10-23)
+
+
+### Bug Fixes
+
+* warn about unparsed arguments ([#1490](https://github.com/oclif/core/issues/1490)) ([5ad6bf0](https://github.com/oclif/core/commit/5ad6bf0dacd29519d724ebe0c695ceab4e4cfe13))
+
+
+
 # [4.7.0](https://github.com/oclif/core/compare/4.6.0...4.7.0) (2025-10-22)
 
 
