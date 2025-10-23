@@ -114,6 +114,9 @@ OPTIONS
                        newliney
                        newliney
 
+DESCRIPTION
+  description of apps:create
+
 ALIASES
   $ oclif app:init
   $ oclif create`)
@@ -170,6 +173,9 @@ OPTIONS
       newliney
       newliney
       newliney
+
+DESCRIPTION
+  description of apps:create
 
 ALIASES
   $ oclif app:init

@@ -93,7 +93,7 @@ export class CommandHelp extends HelpFormatter {
 
     let description: string[] | undefined
     if (this.opts.hideCommandSummaryInDescription) {
-      description = (cmd.description || '').split(POSSIBLE_LINE_FEED).slice(1)
+      description = [(cmd.description || '').split(POSSIBLE_LINE_FEED).at(-1) ?? '']
     } else if (cmd.description) {
       const summary = cmd.summary ? `${cmd.summary}\n` : null
       description = summary
