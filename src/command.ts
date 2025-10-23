@@ -27,7 +27,7 @@ import {makeDebug} from './logger'
 import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
 import {toConfiguredId} from './util/ids'
-import {uniq} from './util/util'
+import {isProd, uniq} from './util/util'
 import {ux} from './ux'
 
 const pjson = Cache.getInstance().get('@oclif/core')
@@ -109,6 +109,7 @@ export abstract class Command {
   public static usage: string | string[] | undefined
   protected debug: (...args: any[]) => void
   public id: string | undefined
+  public parsed = false
 
   public constructor(
     public argv: string[],
@@ -178,6 +179,12 @@ export abstract class Command {
     }
 
     if (result && this.jsonEnabled()) this.logJson(this.toSuccessJson(result))
+
+    if (!this.parsed && !isProd()) {
+      process.emitWarning(`Command ${this.id} did not parse its arguments. Did you forget to call 'this.parse'?`, {
+        code: 'UnparsedCommand',
+      })
+    }
 
     return result as T
   }
@@ -283,7 +290,7 @@ export abstract class Command {
     this.argv = [...argvToParse]
     const results = await Parser.parse<F, B, A>(argvToParse, opts)
     this.warnIfFlagDeprecated(results.flags ?? {})
-
+    this.parsed = true
     return results
   }
 
