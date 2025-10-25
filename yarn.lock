@@ -948,10 +948,10 @@
     proc-log "^5.0.0"
     which "^5.0.0"
 
-"@oclif/core@^4", "@oclif/core@^4.5.4":
-  version "4.5.4"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.5.4.tgz#d82bf4516d1e8a210aab4ccde826a0ce6cadf514"
-  integrity sha512-78YYJls8+KG96tReyUsesKKIKqC0qbFSY1peUSrt0P2uGsrgAuU9axQ0iBQdhAlIwZDcTyaj+XXVQkz2kl/O0w==
+"@oclif/core@^4", "@oclif/core@^4.7.2":
+  version "4.7.2"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.7.2.tgz#9ebf36b4693500685956f3405c55526d191aa5ef"
+  integrity sha512-AmZnhEnyD7bFxmzEKRaOEr0kzonmwIip72eWZPWB5+7D9ayHa/QFX08zhaQT9eOo0//ed64v5p5QZIbYCbQaJQ==
   dependencies:
     ansi-escapes "^4.3.2"
     ansis "^3.17.0"
@@ -964,7 +964,7 @@
     is-wsl "^2.2.0"
     lilconfig "^3.1.3"
     minimatch "^9.0.5"
-    semver "^7.6.3"
+    semver "^7.7.3"
     string-width "^4.2.3"
     supports-color "^8"
     tinyglobby "^0.2.14"
@@ -980,11 +980,11 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.50"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.50.tgz#0749200c71d9e9e36cd11cb97c441927dd3ad6b2"
-  integrity sha512-HNhmmgxH0xoFsYKubtWWhgSasbDEyoT+o/q5QDljiytNvqWP3wWiP6cqqWvGpKG2El7+g17crdWpv4jzrf3Lyg==
+  version "5.4.51"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.51.tgz#b051c562fecac57a34f81630657038003b88572b"
+  integrity sha512-n9WT0MSw6mQyZOAiMeRDZIhz3l1OKbkyviR5IEWgrkP0lKZz5+0t3jWKHLp45US1sg/42YWzkuo7/m4MLvfxkQ==
   dependencies:
-    "@oclif/core" "^4.5.4"
+    "@oclif/core" "^4.7.2"
     ansis "^3.17.0"
     debug "^4.4.0"
     npm "^10.9.4"
