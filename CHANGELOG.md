@@ -1,3 +1,12 @@
+# [4.8.0](https://github.com/oclif/core/compare/4.7.2...4.8.0) (2025-10-28)
+
+
+### Features
+
+* show env in flag help ([97c0bde](https://github.com/oclif/core/commit/97c0bded336293f90aacbcf8255316fa0a1efe21))
+
+
+
 ## [4.7.2](https://github.com/oclif/core/compare/4.7.1...4.7.2) (2025-10-23)
 
 
