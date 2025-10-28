@@ -967,3 +967,251 @@ FLAGS
   -c, --cFlag=<value>`)
   })
 })
+
+describe('formatCommand with env and default values', () => {
+  let config: Config
+  let help: TestHelp
+
+  before(async () => {
+    config = await Config.load(process.cwd())
+  })
+
+  beforeEach(() => {
+    help = new TestHelp(config)
+  })
+
+  describe('option flags', () => {
+    it('should show default value for option flag with default', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({default: 'myDefault', description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  [default: myDefault] my flag`)
+    })
+
+    it('should show env variable for option flag with env', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({env: 'MY_FLAG', description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  [env: MY_FLAG] my flag`)
+    })
+
+    it('should show both default and env for option flag with both', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({default: 'myDefault', env: 'MY_FLAG', description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  [default: myDefault, env: MY_FLAG] my flag`)
+    })
+
+    it('should not show default when noCacheDefault is true and respectNoCacheDefault is true', async () => {
+      const helpWithRespectNoCache = new TestHelp(config, {respectNoCacheDefault: true})
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({default: 'secret', noCacheDefault: true, description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = helpWithRespectNoCache.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  my flag`)
+    })
+
+    it('should show env but not default when noCacheDefault is true and respectNoCacheDefault is true', async () => {
+      const helpWithRespectNoCache = new TestHelp(config, {respectNoCacheDefault: true})
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({
+              default: 'secret',
+              env: 'MY_FLAG',
+              noCacheDefault: true,
+              description: 'my flag',
+            }),
+          },
+        }),
+      )
+
+      const output = helpWithRespectNoCache.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  [env: MY_FLAG] my flag`)
+    })
+
+    it('should show default value when noCacheDefault is true but respectNoCacheDefault is not set', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({default: 'myDefault', noCacheDefault: true, description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag <value>]
+
+FLAGS
+  --myFlag=<value>  [default: myDefault] my flag`)
+    })
+  })
+
+  describe('boolean flags', () => {
+    it('should show env variable for boolean flag with env', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.boolean({env: 'MY_FLAG', description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag]
+
+FLAGS
+  --myFlag  [env: MY_FLAG] my flag`)
+    })
+
+    it('should not show default for boolean flag (even if it has one)', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.boolean({default: false, description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag]
+
+FLAGS
+  --myFlag  my flag`)
+    })
+
+    it('should show env for boolean flag with env, ignoring default', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.boolean({default: false, env: 'MY_FLAG', description: 'my flag'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--myFlag]
+
+FLAGS
+  --myFlag  [env: MY_FLAG] my flag`)
+    })
+  })
+
+  describe('multiple flags with mixed configurations', () => {
+    it('should handle multiple flags with different configurations', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            optionWithDefault: flags.string({default: 'defaultValue', description: 'option with default'}),
+            optionWithEnv: flags.string({env: 'OPTION_ENV', description: 'option with env'}),
+            optionWithBoth: flags.string({
+              default: 'defaultValue',
+              env: 'OPTION_BOTH',
+              description: 'option with both',
+            }),
+            booleanWithEnv: flags.boolean({env: 'BOOL_ENV', description: 'boolean with env'}),
+            plainOption: flags.string({description: 'plain option'}),
+            plainBoolean: flags.boolean({description: 'plain boolean'}),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd [--optionWithDefault <value>] [--optionWithEnv
+    <value>] [--optionWithBoth <value>] [--booleanWithEnv] [--plainOption
+    <value>] [--plainBoolean]
+
+FLAGS
+  --booleanWithEnv             [env: BOOL_ENV] boolean with env
+  --optionWithBoth=<value>     [default: defaultValue, env: OPTION_BOTH] option
+                               with both
+  --optionWithDefault=<value>  [default: defaultValue] option with default
+  --optionWithEnv=<value>      [env: OPTION_ENV] option with env
+  --plainBoolean               plain boolean
+  --plainOption=<value>        plain option`)
+    })
+  })
+
+  describe('with required flags', () => {
+    it('should show required after default and env', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:cmd',
+          flags: {
+            myFlag: flags.string({
+              default: 'defaultValue',
+              env: 'MY_FLAG',
+              required: true,
+              description: 'my flag',
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:cmd --myFlag <value>
+
+FLAGS
+  --myFlag=<value>  (required) [default: defaultValue, env: MY_FLAG] my flag`)
+    })
+  })
+})
