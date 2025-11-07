@@ -12,7 +12,11 @@ export async function parse<
   TFlags extends OutputFlags<any>,
   BFlags extends OutputFlags<any>,
   TArgs extends OutputArgs<any>,
->(argv: string[], options: Input<TFlags, BFlags, TArgs>): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
+>(
+  argv: string[],
+  options: Input<TFlags, BFlags, TArgs>,
+  runValidation = true,
+): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
   const input = {
     '--': options['--'],
     args: (options.args ?? {}) as ArgInput<any>,
@@ -23,6 +27,6 @@ export async function parse<
   }
   const parser = new Parser(input)
   const output = await parser.parse()
-  await validate({input, output})
+  if (runValidation) await validate({input, output})
   return output as ParserOutput<TFlags, BFlags, TArgs>
 }
