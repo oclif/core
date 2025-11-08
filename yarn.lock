@@ -435,7 +435,7 @@
   resolved "https://registry.yarnpkg.com/@eslint-community/regexpp/-/regexpp-4.12.1.tgz#cfc6cffe39df390a3841cde2abccf92eaa7ae0e0"
   integrity sha512-CCZCDJuduB9OUkFkY2IgppNZMi2lBQgD2qzwXkEia16cge2pijY/aXi96CJMquDMn3nJdlPV1A5KrJEXwfLNzQ==
 
-"@eslint/compat@^1.4.0", "@eslint/compat@^1.4.1":
+"@eslint/compat@^1.4.1":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@eslint/compat/-/compat-1.4.1.tgz#81eaabb3e0b080350582c1a8092a2d355fabf03e"
   integrity sha512-cfO82V9zxxGBxcQDr1lfaYB7wykTa0b00mGa36FrJl7iTFd0Z2cHfEYuxcBRP/iNijCsWsEkA+jzT8hGYmv33w==
@@ -469,13 +469,6 @@
   version "0.15.2"
   resolved "https://registry.yarnpkg.com/@eslint/core/-/core-0.15.2.tgz#59386327d7862cc3603ebc7c78159d2dcc4a868f"
   integrity sha512-78Md3/Rrxh83gCxoUc0EiciuOHsIITzLy53m3d9UyiW8y9Dj2D29FeETqyKA+BRK76tnTp6RXWb3pCay8Oyomg==
-  dependencies:
-    "@types/json-schema" "^7.0.15"
-
-"@eslint/core@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@eslint/core/-/core-0.16.0.tgz#490254f275ba9667ddbab344f4f0a6b7a7bd7209"
-  integrity sha512-nmC8/totwobIiFcGkDza3GIKfAw1+hLiYVrh3I1nIomQ8PEr5cxg34jnkmGawul/ep52wGRAcyeDCNtWKSOj4Q==
   dependencies:
     "@types/json-schema" "^7.0.15"
 
@@ -3384,11 +3377,11 @@ eslint-config-oclif@^5.2.2:
     eslint-plugin-unicorn "^48.0.1"
 
 eslint-config-oclif@^6:
-  version "6.0.114"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.114.tgz#72cbf5961ae8608b75998aab02ac2e1f2a02291c"
-  integrity sha512-KBl29BbP9dELCBqiF0fVNXp1tDB97ZWEjW2mXzDWkvvVWdDxdrmCM5nV4PJdnzlaGQ559FwfbUS2rWag4VsvAQ==
+  version "6.0.115"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.115.tgz#e16435e2d4308dd6e3b86cb3f205008d2d95e634"
+  integrity sha512-WxwiKCzES27wFg2uJQ5uHyCbb6E+50fNf3gz0e4Ie+gplc9qXG42I6Sv7ugUMJOZ6FdJTrYZ0IZFUldMA8MvmQ==
   dependencies:
-    "@eslint/compat" "^1.4.0"
+    "@eslint/compat" "^1.4.1"
     "@eslint/eslintrc" "^3.3.1"
     "@eslint/js" "^9.38.0"
     "@stylistic/eslint-plugin" "^3.1.0"
