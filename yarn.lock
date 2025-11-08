@@ -472,13 +472,6 @@
   dependencies:
     "@types/json-schema" "^7.0.15"
 
-"@eslint/core@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@eslint/core/-/core-0.16.0.tgz#490254f275ba9667ddbab344f4f0a6b7a7bd7209"
-  integrity sha512-nmC8/totwobIiFcGkDza3GIKfAw1+hLiYVrh3I1nIomQ8PEr5cxg34jnkmGawul/ep52wGRAcyeDCNtWKSOj4Q==
-  dependencies:
-    "@types/json-schema" "^7.0.15"
-
 "@eslint/core@^0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@eslint/core/-/core-0.17.0.tgz#77225820413d9617509da9342190a2019e78761c"
@@ -955,10 +948,10 @@
     proc-log "^5.0.0"
     which "^5.0.0"
 
-"@oclif/core@^4", "@oclif/core@^4.7.2":
-  version "4.7.2"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.7.2.tgz#9ebf36b4693500685956f3405c55526d191aa5ef"
-  integrity sha512-AmZnhEnyD7bFxmzEKRaOEr0kzonmwIip72eWZPWB5+7D9ayHa/QFX08zhaQT9eOo0//ed64v5p5QZIbYCbQaJQ==
+"@oclif/core@^4", "@oclif/core@^4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.8.0.tgz#bde8fad00019c8c0a8e27787b4b42c4670842785"
+  integrity sha512-jteNUQKgJHLHFbbz806aGZqf+RJJ7t4gwF4MYa8fCwCxQ8/klJNWc0MvaJiBebk7Mc+J39mdlsB4XraaCKznFw==
   dependencies:
     ansi-escapes "^4.3.2"
     ansis "^3.17.0"
@@ -987,11 +980,11 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.52"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.52.tgz#4195d77d251afca7f39c2ca663096c05326c1a3d"
-  integrity sha512-OWdTWM7bQ81x8fis+HaFN7nmNvGzF6g6XZ89jWmtWCL4kgHc/v7YZnujr31C5vAyV1OWDaqWdLOB1RoTdvX3rQ==
+  version "5.4.53"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.53.tgz#db0e722d8d8c38cbe48bb0dbf3458e74d87a9ec1"
+  integrity sha512-jezB3NEz8fQdb/jrZq8YPvEiF+aH0wHiexVCvnj7Rmy+mmTHicEuGJMPiYeJNcRvG687raIhc6TjyMMPKi0W4A==
   dependencies:
-    "@oclif/core" "^4.7.2"
+    "@oclif/core" "^4.8.0"
     ansis "^3.17.0"
     debug "^4.4.0"
     npm "^10.9.4"
