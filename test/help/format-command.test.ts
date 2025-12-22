@@ -1214,4 +1214,78 @@ FLAGS
   --myFlag=<value>  (required) [default: defaultValue, env: MY_FLAG] my flag`)
     })
   })
+
+  describe('integer flags with min/max', () => {
+    it('should display min and max values', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:minmax',
+          flags: {
+            port: flags.integer({
+              description: 'port number',
+              min: 1024,
+              max: 65_535,
+              default: 3000,
+            }),
+            retries: flags.integer({
+              description: 'retry attempts',
+              min: 0,
+              max: 10,
+              required: true,
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:minmax --retries <value> [--port <value>]
+
+FLAGS
+  --port=<value>     [default: 3000, min: 1024, max: 65535] port number
+  --retries=<value>  (required) [min: 0, max: 10] retry attempts`)
+    })
+
+    it('should display only min when max is not set', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:min',
+          flags: {
+            count: flags.integer({
+              description: 'item count',
+              min: 1,
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:min [--count <value>]
+
+FLAGS
+  --count=<value>  [min: 1] item count`)
+    })
+
+    it('should display only max when min is not set', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'test:max',
+          flags: {
+            limit: flags.integer({
+              description: 'max items',
+              max: 100,
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif test:max [--limit <value>]
+
+FLAGS
+  --limit=<value>  [max: 100] max items`)
+    })
+  })
 })
