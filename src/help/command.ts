@@ -203,6 +203,14 @@ export class CommandHelp extends HelpFormatter {
         if (flag.env) {
           metadata.push(`env: ${flag.env}`)
         }
+
+        if ((flag as any).min !== undefined) {
+          metadata.push(`min: ${(flag as any).min}`)
+        }
+
+        if ((flag as any).max !== undefined) {
+          metadata.push(`max: ${(flag as any).max}`)
+        }
       } else if (flag.type === 'boolean' && flag.env) {
         metadata.push(`env: ${flag.env}`)
       }
