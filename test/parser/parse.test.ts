@@ -2113,6 +2113,571 @@ See more help with --help`)
       })
     })
   })
+
+  describe('constraints', () => {
+    it('error thrown when global constraints and flag-level constraints co-exist', async () => {
+      let message: string = ''
+      try {
+        await parse([], {
+          flags: {
+            foo: Flags.string({
+              exclusive: ['bar']
+            }),
+            bar: Flags.string({
+              exclusive: ['foo']
+            })
+          },
+          constraints: [
+            flags(['foo', 'bar']).are.mutuallyExclusive
+          ]
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+      expect(message).to.include('FILLER MESSAGE')
+    })
+
+    it('empty constraint array counts as no-op', async () => {
+      const out = await parse(['--foo', 'a'], {
+        flags: {
+          foo: Flags.string({
+            required: true
+          })
+        },
+        constraints: []
+      })
+      expect(out.flags.foo).to.equal('a')
+    })
+
+    describe('.required', () => {
+      const cmd = {
+        flags: {
+          foo: Flags.boolean(),
+          bar: Flags.boolean(),
+          baz: Flags.boolean()
+        },
+        constraints: [
+            flags(['foo', 'bar', 'baz']).are.required
+        ]
+      }
+      it('succeeds if all flags are present', async () => {
+        const out = await parse(['--foo', '--bar', '--baz'], cmd)
+        expect(out.flags.foo).to.equal(true)
+        expect(out.flags.bar).to.equal(true)
+        expect(out.flags.baz).to.equal(true)
+      })
+
+      it('fails if any flag is absent', async () => {
+        let message: string = '';
+        try {
+          await parse(['--foo', '--bar'], cmd)
+        } catch (err: any) {
+          message = err.message
+        }
+
+        expect(message).to.include('FILLER')
+      })
+
+      describe('.atLeastN()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flags(['foo', 'bar', 'baz']).are.required.atLeastN(2)
+          ]
+        }
+
+        it('succeeds if exactly N flags are present', async () => {
+          const out = await parse(['--foo', '--bar'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('succeeds if >N flags are present', async () => {
+          const out = await parse(['--foo', '--bar', '--baz'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('fails if <N flags are present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.atMostN()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flags(['foo', 'bar', 'baz']).are.required.atMostN(2)
+          ]
+        }
+
+        it('succeeds if exactly N flags are present', async () => {
+          const out = await parse(['--foo', '--bar'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails if >N flags are present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo', '--bar', '--baz'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+
+        it('succeeds if <N flags are present', async () => {
+          const out = await parse(['--foo'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+      })
+
+      describe('.exactlyN()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flags(['foo', 'bar', 'baz']).are.required.exactlyN(2)
+          ]
+        }
+        it('succeeds if exactly N flags are present', async () => {
+          const out = await parse(['--foo', '--bar'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails if >N flags are present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo', '--bar', '--baz'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+
+        it('fails if <N flags are present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+    })
+
+    describe('dependence and exclusivity', () => {
+
+      describe('.mutuallyDependent', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flags(['foo', 'bar', 'baz']).are.mutuallyDependent
+          ]
+        }
+        it('succeeds if all mutually dependent flags are present', async () => {
+          const out = await parse(['--foo', '--bar', '--baz'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('succeeds if no mutually dependent flags are present', async () => {
+          const out = await parse([], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails if only some mutually dependent flags are present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.mutuallyExclusive', () => {
+
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flags(['foo', 'bar', 'baz']).are.mutuallyExclusive
+          ]
+        }
+
+        it('succeeds if only one mutually exclusive flag is present', async () => {
+          const out = await parse(['--foo'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('succeeds if no mutually exclusive flags are present', async () => {
+          const out = await parse([], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails if more than one mutually dependent flag is present', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo', '--bar'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.dependentOn()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+              flags(['bar', 'baz']).are.dependentOn('foo')
+          ]
+        }
+        it('succeeds if no flags are used', async () => {
+          const out = await parse([], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('succeeds if only parent flag is used', async () => {
+          const out = await parse(['--foo'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('succeeds if parent and child flag used together', async () => {
+          const out = await parse(['--foo', '--bar'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails if child flag used without parent', async () => {
+          let message: string = '';
+          try {
+            await parse(['--bar'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.exclusiveWith()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+              flags(['bar', 'baz']).are.exclusiveWith('foo', 'fee')
+          ]
+        }
+
+        it('succeeds if no flags are used', async () => {
+          const out = await parse([], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.fee).to.equal(false)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('succeeds if only group-A flags are used', async () => {
+          const out = await parse(['--bar', '--baz'], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.fee).to.equal(false)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('succeeds if only group-B flags are used', async () => {
+          const out = await parse(['--foo', '--fee'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.fee).to.equal(true)
+          expect(out.flags.bar).to.equal(false)
+          expect(out.flags.baz).to.equal(false)
+        })
+
+        it('fails when flags from both groups are used', async () => {
+          let message: string = '';
+          try {
+            await parse(['--foo', '--bar'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('combinationOf()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+              flags(['bar', 'baz']).are.exclusiveWith(combinationOf('foo', 'fee'))
+          ]
+        }
+
+        it('child flags are not exclusive with individual parent flags', async () => {
+          const out = await parse(['--bar', '--baz', '--foo'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.fee).to.equal(false)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('child flags are exclusive with combination of parent flags', async () => {
+          let message: string = '';
+          try {
+            await parse(['--bar', '--foo', '--fee'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+    })
+
+    describe('conditionality', () => {
+
+      describe('.flagsPresent()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+              flag('bar').is.exclusiveWith('baz').when.flagsPresent(['foo', 'fee'])
+          ]
+        }
+
+        it('constraints are not applied when conditioned flags are absent', async () => {
+          const out = await parse(['--bar', '--baz'], cmd)
+          expect(out.flags.foo).to.equal(false)
+          expect(out.flags.fee).to.equal(false)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('constraints are applied when ANY conditioned flag is present', async () => {
+          let message: string = ''
+          try {
+            await parse(['--bar', '--baz', '--foo'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.flagsAbsent()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.boolean(),
+            baz: Flags.boolean()
+          },
+          constraints: [
+            flag('bar').is.exclusiveWith('baz').when.flagsAbsent(['foo', 'fee'])
+          ]
+        }
+
+        it('constraints are not applied when all conditioned flags are present', async () => {
+          const out = await parse(['--bar', '--baz', '--foo', '--fee'], cmd)
+          expect(out.flags.foo).to.equal(true)
+          expect(out.flags.fee).to.equal(true)
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('constraints are applied when ANY conditioned flag is absent', async () => {
+          let message: string = ''
+          try {
+            await parse(['--bar', '--baz', '--foo'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.anyFlagsSatisfyCriteria()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.string(),
+            baz: Flags.string()
+          },
+          constraints: [
+            flags('bar', 'baz').are.mutuallyExclusive.when.anyFlagsSatisfyCriteria({
+              foo: (val: string) => val === 'beep',
+              fee: (val: string) => val === 'boop'
+            })
+          ]
+        }
+
+        it('constraints are not applied when no criteria are satisfied', async () => {
+          const out = await parse(['--bar', '--baz', '--foo', 'red', '--fee', 'blue'], cmd)
+          expect(out.flags.foo).to.equal('red')
+          expect(out.flags.fee).to.equal('blue')
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('constraints are applied when any criteria is met', async () => {
+          let message: string = ''
+          try {
+            await parse(['--bar', '--baz', '--foo', 'beep', '--fee', 'red'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+
+      describe('.allFlagsSatisfyCriteria()', () => {
+        const cmd = {
+          flags: {
+            foo: Flags.boolean(),
+            fee: Flags.boolean(),
+            bar: Flags.string(),
+            baz: Flags.string()
+          },
+          constraints: [
+            flags('bar', 'baz').are.mutuallyExclusive.when.anyFlagsSatisfyCriteria({
+              foo: (val: string) => val === 'beep',
+              fee: (val: string) => val === 'boop'
+            })
+          ]
+        }
+
+        it('constraints are not applied when no criteria are satisfied', async () => {
+          const out = await parse(['--bar', '--baz', '--foo', 'red', '--fee', 'blue'], cmd)
+          expect(out.flags.foo).to.equal('red')
+          expect(out.flags.fee).to.equal('blue')
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('constraints are not applied when only some criteria are satisfied', async () => {
+          const out = await parse(['--bar', '--baz', '--foo', 'beep', '--fee', 'blue'], cmd)
+          expect(out.flags.foo).to.equal('beep')
+          expect(out.flags.fee).to.equal('blue')
+          expect(out.flags.bar).to.equal(true)
+          expect(out.flags.baz).to.equal(true)
+        })
+
+        it('constraints are applied when all criteria are met', async () => {
+          let message: string = ''
+          try {
+            await parse(['--bar', '--baz', '--foo', 'beep', '--fee', 'boop'], cmd)
+          } catch (err: any) {
+            message = err.message
+          }
+
+          expect(message).to.include('FILLER')
+        })
+      })
+    })
+
+    describe('logic', () => {
+      describe('.and', () => {
+
+      })
+
+      describe('.or', () => {
+
+      })
+
+      describe('complex grouping', () => {
+
+      })
+    })
+
+    describe('error cases', () => {
+      it('rejects incomplete constraints', async () => {
+
+      })
+
+      it('rejects malformed constraints', async () => {
+
+      })
+
+      it('rejects constraints on non-existent flags', async () => {
+
+      })
+    })
+  })
 })
 
 describe('allowStdin', () => {
