@@ -217,6 +217,14 @@ export class CommandHelp extends HelpFormatter {
         right += colorize(this.config?.theme?.flagOptions, `\n<options: ${flag.options.join('|')}>`)
       }
 
+      if (flag.dependsOn && flag.dependsOn.length > 0) {
+        right += colorize(this.config?.theme?.flagOptions, `\n<depends on: --${flag.dependsOn.join(', --')}>`)
+      }
+
+      if (flag.exclusive && flag.exclusive.length > 0) {
+        right += colorize(this.config?.theme?.flagOptions, `\n<exclusive with: --${flag.exclusive.join(', --')}>`)
+      }
+
       return [left, colorize(this.config?.theme?.sectionDescription, right.trim())]
     })
   }
