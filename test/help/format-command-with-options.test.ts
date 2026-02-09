@@ -460,4 +460,64 @@ EXAMPLES
     $ oclif oclif:command --help`)
     })
   })
+
+  describe('flag dependsOn and exclusive', () => {
+    it('should show dependsOn in flag help', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            environment: flags.string({description: 'environment to deploy to'}),
+            config: flags.string({description: 'config file', dependsOn: ['environment']}),
+          },
+          id: 'apps:deploy',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.include('<depends on: --environment>')
+    })
+
+    it('should show exclusive in flag help', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            verbose: flags.boolean({description: 'verbose output'}),
+            quiet: flags.boolean({description: 'quiet output', exclusive: ['verbose']}),
+          },
+          id: 'apps:run',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.include('<exclusive with: --verbose>')
+    })
+
+    it('should show multiple dependsOn flags', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            environment: flags.string({description: 'environment'}),
+            region: flags.string({description: 'region'}),
+            config: flags.string({description: 'config file', dependsOn: ['environment', 'region']}),
+          },
+          id: 'apps:deploy',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.include('<depends on: --environment, --region>')
+    })
+
+    it('should show multiple exclusive flags', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          flags: {
+            json: flags.boolean({description: 'output as json'}),
+            csv: flags.boolean({description: 'output as csv'}),
+            text: flags.boolean({description: 'output as text', exclusive: ['json', 'csv']}),
+          },
+          id: 'apps:list',
+        }),
+      )
+      const output = help.formatCommand(cmd)
+      expect(output).to.include('<exclusive with: --json, --csv>')
+    })
+  })
 })
