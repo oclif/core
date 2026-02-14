@@ -45,7 +45,6 @@ process.stdout.on('error', (err: any) => {
  * An abstract class which acts as the base for each command
  * in your project.
  */
-
 export abstract class Command {
   private static readonly _base = `${pjson.name}@${pjson.version}`
   /** An array of aliases for this command. */
@@ -293,7 +292,6 @@ export abstract class Command {
     this.parsed = true
     return results
   }
-
   /**
    * actual command run code goes here
    */
