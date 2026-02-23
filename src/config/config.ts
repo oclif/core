@@ -19,7 +19,7 @@ import {settings} from '../settings'
 import {determinePriority} from '../util/determine-priority'
 import {safeReadJson} from '../util/fs'
 import {toStandardizedId} from '../util/ids'
-import {getHomeDir, getPlatform} from '../util/os'
+import {getHomeDir, getParentProcessName, getPlatform} from '../util/os'
 import {compact, isProd} from '../util/util'
 import {ux} from '../ux'
 import {parseTheme} from '../ux/theme'
@@ -194,17 +194,21 @@ export class Config implements IConfig {
   }
 
   protected _shell(): string {
-    let shellPath
-    const {COMSPEC} = process.env
-    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
-    if (SHELL) {
-      shellPath = SHELL.split('/')
-    } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
-      shellPath = ['powershell']
-    } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
-      shellPath = ['cmd.exe']
-    } else if (this.windows && COMSPEC) {
-      shellPath = COMSPEC.split(/\\|\//)
+    let shellPath: string[]
+    const potentialUnixShell: string | undefined = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
+    if (potentialUnixShell) {
+      shellPath = potentialUnixShell.split('/')
+    } else if (this.windows) {
+      const parentProcess: string | undefined = getParentProcessName()
+      if (parentProcess === 'powershell.exe' || parentProcess === 'pwsh.exe') {
+        shellPath = ['powershell']
+      } else if (parentProcess === 'cmd.exe') {
+        shellPath = ['cmd.exe']
+      } else if (process.env.COMSPEC) {
+        shellPath = process.env.COMSPEC.split(/\\|\//)
+      } else {
+        shellPath = ['unknown']
+      }
     } else {
       shellPath = ['unknown']
     }
@@ -362,8 +366,8 @@ export class Config implements IConfig {
 
     this.isSingleCommandCLI = Boolean(
       typeof this.pjson.oclif.commands !== 'string' &&
-        this.pjson.oclif.commands?.strategy === 'single' &&
-        this.pjson.oclif.commands?.target,
+      this.pjson.oclif.commands?.strategy === 'single' &&
+      this.pjson.oclif.commands?.target,
     )
 
     this.maybeAdjustDebugSetting()
