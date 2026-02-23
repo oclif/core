@@ -5,7 +5,8 @@ import {sep} from 'node:path'
 import {Config} from '../../src'
 
 const getShell = () =>
-  osUserInfo().shell?.split(sep)?.pop() || (process.platform === 'win32' ? 'powershell' : 'unknown')
+  osUserInfo().shell?.split(sep)?.pop() ||
+  (process.platform === 'win32' ? (process.env.COMSPEC ?? 'unknown') : 'unknown')
 
 describe('config shell', () => {
   it('has a default shell', async () => {
