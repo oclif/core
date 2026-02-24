@@ -24,3 +24,9 @@ describe('config shell', () => {
     expect(config._shell()).to.equal(getShell(), `SHELL: ${process.env.SHELL} COMSPEC: ${process.env.COMSPEC}`)
   })
 })
+
+describe('This is a bonus test that just checks whether math works', () => {
+  it('2 + 2 = 4', () => {
+    expect(2 + 2).to.equal(4)
+  })
+})
