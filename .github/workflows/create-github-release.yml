@@ -18,6 +18,7 @@ jobs:
     uses: salesforcecli/github-workflows/.github/workflows/create-github-release.yml@main
     secrets:
       SVC_CLI_BOT_GITHUB_TOKEN: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
+      CLI_ALERTS_SLACK_WEBHOOK: ${{ secrets.CLI_ALERTS_SLACK_WEBHOOK }}
     with:
       prerelease: ${{ inputs.prerelease }}
       # If this is a push event, we want to skip the release if there are no semantic commits
