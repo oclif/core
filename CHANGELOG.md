@@ -1,3 +1,12 @@
+## [4.8.3](https://github.com/oclif/core/compare/4.8.2...4.8.3) (2026-03-02)
+
+
+### Bug Fixes
+
+* expanded process title checks for windows shell identification @W-21239801@ ([d2c1913](https://github.com/oclif/core/commit/d2c19134d8708b5e71a3ab0f6ce638a041aaf8e1))
+
+
+
 ## [4.8.2](https://github.com/oclif/core/compare/4.8.1...4.8.2) (2026-02-28)
 
 
