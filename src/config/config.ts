@@ -199,9 +199,15 @@ export class Config implements IConfig {
     const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
-    } else if (this.windows && process.title.toLowerCase().includes('powershell')) {
+    } else if (
+      this.windows &&
+      (process.title.toLowerCase().includes('powershell') || process.title.toLowerCase().includes('pwsh'))
+    ) {
       shellPath = ['powershell']
-    } else if (this.windows && process.title.toLowerCase().includes('command prompt')) {
+    } else if (
+      this.windows &&
+      (process.title.toLowerCase().includes('command prompt') || process.title.toLowerCase().includes('cmd'))
+    ) {
       shellPath = ['cmd.exe']
     } else if (this.windows && COMSPEC) {
       shellPath = COMSPEC.split(/\\|\//)
@@ -362,8 +368,8 @@ export class Config implements IConfig {
 
     this.isSingleCommandCLI = Boolean(
       typeof this.pjson.oclif.commands !== 'string' &&
-        this.pjson.oclif.commands?.strategy === 'single' &&
-        this.pjson.oclif.commands?.target,
+      this.pjson.oclif.commands?.strategy === 'single' &&
+      this.pjson.oclif.commands?.target,
     )
 
     this.maybeAdjustDebugSetting()
