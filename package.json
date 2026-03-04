@@ -28,7 +28,7 @@
     "@commitlint/config-conventional": "^19",
     "@eslint/compat": "^1.4.1",
     "@oclif/plugin-help": "^6",
-    "@oclif/plugin-plugins": "^5",
+    "@oclif/plugin-plugins": "^5.4.57",
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^4",
     "@types/benchmark": "^2.1.5",
