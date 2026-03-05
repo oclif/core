@@ -132,7 +132,8 @@ export class Config implements IConfig {
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) {
       debug(`reloading config from ${opts._base} to ${BASE}`)
-      const config = new Config({...opts.options, plugins: opts.plugins})
+      const pluginMap: Map<string, IPlugin> = new Map(opts.getPluginsList().map((p) => [p.name, p]))
+      const config = new Config({...opts.options, plugins: pluginMap})
       await config.load()
       return config
     }
