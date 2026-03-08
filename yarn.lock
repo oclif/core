@@ -496,7 +496,7 @@
     "@eslint/css-tree" "^3.6.1"
     "@eslint/plugin-kit" "^0.3.1"
 
-"@eslint/eslintrc@^3.3.3", "@eslint/eslintrc@^3.3.5":
+"@eslint/eslintrc@^3.3.4", "@eslint/eslintrc@^3.3.5":
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-3.3.5.tgz#c131793cfc1a7b96f24a83e0a8bbd4b881558c60"
   integrity sha512-4IlJx0X0qftVsN5E+/vGujTRIFtwuLbNsVUe7TO6zYPDR1O6nFwvwhIKEKSrl6dZchmYBITazxKoUYOjdtjlRg==
@@ -3387,12 +3387,12 @@ eslint-config-oclif@^5.2.2:
     eslint-plugin-unicorn "^48.0.1"
 
 eslint-config-oclif@^6:
-  version "6.0.144"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.144.tgz#e91f269290e63a2c12424d1a015da07489826da6"
-  integrity sha512-87Zn12V0wnkxPSsm9TdIyZ4v5uNceqjMilyyR8Snk/oxCtOaawy/6mU1DwzS1zv4tnspZgeLJn+Y1ZI8Mf7BQw==
+  version "6.0.146"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.146.tgz#963c505c50d115d21f82f3f67288fbe1695fd134"
+  integrity sha512-x59Gopo4wQiuuGOUQ2D3HaIpU1LaeksPql3vTGBNnAM0dNmHWqchMvaYczoRVBx0tfGVljWGYqDA0I/355cF4Q==
   dependencies:
     "@eslint/compat" "^1.4.1"
-    "@eslint/eslintrc" "^3.3.3"
+    "@eslint/eslintrc" "^3.3.4"
     "@eslint/js" "^9.38.0"
     "@stylistic/eslint-plugin" "^3.1.0"
     "@typescript-eslint/eslint-plugin" "^8"
@@ -3407,7 +3407,7 @@ eslint-config-oclif@^6:
     eslint-plugin-n "^17.24.0"
     eslint-plugin-perfectionist "^4"
     eslint-plugin-unicorn "^56.0.1"
-    typescript-eslint "^8.56.0"
+    typescript-eslint "^8.56.1"
 
 eslint-config-prettier@^10:
   version "10.1.8"
@@ -8452,7 +8452,7 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript-eslint@^8.56.0:
+typescript-eslint@^8.56.1:
   version "8.56.1"
   resolved "https://registry.yarnpkg.com/typescript-eslint/-/typescript-eslint-8.56.1.tgz#15a9fcc5d2150a0d981772bb36f127a816fe103f"
   integrity sha512-U4lM6pjmBX7J5wk4szltF7I1cGBHXZopnAXCMXb3+fZ3B/0Z3hq3wS/CCUB2NZBNAExK92mCU2tEohWuwVMsDQ==
