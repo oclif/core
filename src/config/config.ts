@@ -131,24 +131,11 @@ export class Config implements IConfig {
 
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) {
-      /**
-       * Reload the Config based on the version required by the command.
-       * This is needed because the command is given the Config instantiated
-       * by the root plugin, which may be a different version than the one
-       * required by the command.
-       *
-       * Doing this ensures that the command can freely use any method on Config that
-       * exists in the version of Config required by the command but may not exist on the
-       * root's instance of Config.
-       */
-      if (BASE !== opts._base) {
-        debug(`reloading config from ${opts._base} to ${BASE}`)
-        const config = new Config({...opts.options, plugins: opts.plugins})
-        await config.load()
-        return config
-      }
-
-      return opts
+      debug(`reloading config from ${opts._base} to ${BASE}`)
+      const pluginMap: Map<string, IPlugin> = new Map(opts.getPluginsList().map((p) => [p.name, p]))
+      const config = new Config({...opts.options, plugins: pluginMap})
+      await config.load()
+      return config
     }
 
     const config = new Config(opts)
