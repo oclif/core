@@ -1,3 +1,12 @@
+## [4.8.4](https://github.com/oclif/core/compare/4.8.3...4.8.4) (2026-03-09)
+
+
+### Bug Fixes
+
+* --flags-dir works on 3rd party plugins @W-21178947@ ([8bd57c0](https://github.com/oclif/core/commit/8bd57c095d44ab0ef5e426493d971596ef7acce4))
+
+
+
 ## [4.8.3](https://github.com/oclif/core/compare/4.8.2...4.8.3) (2026-03-02)
 
 
