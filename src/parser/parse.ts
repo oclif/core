@@ -4,6 +4,7 @@ import {createInterface} from 'node:readline'
 
 import Cache from '../cache'
 import {
+  Arg,
   ArgParserContext,
   ArgToken,
   BooleanFlag,
@@ -277,162 +278,93 @@ export class Parser<
     let stdinRead = false
     const ctx = this.context as ArgParserContext
 
+    const parseArgInput = async (name: string, arg: Arg<unknown>, input: string): Promise<void> => {
+      if (arg.options && !arg.options.includes(input)) {
+        throw new ArgInvalidOptionError(arg, input)
+      }
+
+      ctx.token = {arg: name, input, type: 'arg'}
+      const parsed = await arg.parse(input, ctx, arg)
+      argv.push(parsed)
+      args[name] = parsed
+    }
+
+    const applyDefault = async (name: string, arg: Arg<unknown>): Promise<void> => {
+      if (args[name] !== undefined) return
+      if (!arg.default && arg.default !== false) return
+      const value = typeof arg.default === 'function' ? await arg.default() : arg.default
+      argv.push(value)
+      args[name] = value
+    }
+
+    const tryStdin = async (name: string, arg: Arg<unknown>): Promise<void> => {
+      if (arg.ignoreStdin || stdinRead) return
+      let stdin = await readStdin()
+      stdinRead = true
+      if (!stdin) return
+      stdin = stdin.trim()
+      await parseArgInput(name, arg, stdin)
+    }
+
     const argEntries = Object.entries(this.input.args)
     const variadicIndex = argEntries.findIndex(([, arg]) => arg.multiple)
 
     if (variadicIndex === -1) {
-      // Original logic: no variadic arg
       for (const [name, arg] of argEntries) {
         const token = tokens.find((t) => t.arg === name)
         ctx.token = token!
 
-        if (token) {
-          if (arg.options && !arg.options.includes(token.input)) {
-            throw new ArgInvalidOptionError(arg, token.input)
-          }
+        await (token ? parseArgInput(name, arg, token.input) : tryStdin(name, arg))
+        await applyDefault(name, arg)
+      }
 
-          const parsed = await arg.parse(token.input, ctx, arg)
-          argv.push(parsed)
-          args[token.arg] = parsed
-        } else if (!arg.ignoreStdin && !stdinRead) {
-          let stdin = await readStdin()
-          if (stdin) {
-            stdin = stdin.trim()
-            const parsed = await arg.parse(stdin, ctx, arg)
-            argv.push(parsed)
-            args[name] = parsed
-          }
-
-          stdinRead = true
-        }
-
-        if (!args[name] && (arg.default || arg.default === false)) {
-          if (typeof arg.default === 'function') {
-            const f = await arg.default()
-            argv.push(f)
-            args[name] = f
-          } else {
-            argv.push(arg.default)
-            args[name] = arg.default
-          }
-        }
+      // Append unmatched tokens to argv (for strict: false)
+      for (const token of tokens) {
+        if (args[token.arg] !== undefined) continue
+        argv.push(token.input)
       }
     } else {
-      // Shift/pop algorithm for variadic args
       const tokenInputs = tokens.map((t) => t.input)
 
-      // Shift: consume pre-variadic args from the front
+      // Consume pre-variadic args from the front
       for (let i = 0; i < variadicIndex; i++) {
         const [name, arg] = argEntries[i]
         const input = tokenInputs.shift()
-        if (input !== undefined) {
-          if (arg.options && !arg.options.includes(input)) {
-            throw new ArgInvalidOptionError(arg, input)
-          }
-
-          ctx.token = {arg: name, input, type: 'arg'}
-          const parsed = await arg.parse(input, ctx, arg)
-          argv.push(parsed)
-          args[name] = parsed
-        } else if (!arg.ignoreStdin && !stdinRead) {
-          let stdin = await readStdin()
-          if (stdin) {
-            stdin = stdin.trim()
-            ctx.token = {arg: name, input: stdin, type: 'arg'}
-            const parsed = await arg.parse(stdin, ctx, arg)
-            argv.push(parsed)
-            args[name] = parsed
-          }
-
-          stdinRead = true
-        }
-
-        if (!args[name] && (arg.default || arg.default === false)) {
-          if (typeof arg.default === 'function') {
-            const f = await arg.default()
-            argv.push(f)
-            args[name] = f
-          } else {
-            argv.push(arg.default)
-            args[name] = arg.default
-          }
-        }
+        await (input === undefined ? tryStdin(name, arg) : parseArgInput(name, arg, input))
+        await applyDefault(name, arg)
       }
 
-      // Pop: consume post-variadic args from the back
-      const postVariadicArgs: Array<{arg: (typeof argEntries)[number][1]; input: string; name: string}> = []
+      // Consume post-variadic args from the back
+      const postVariadicParsing: Array<{arg: Arg<unknown>; input: string; name: string}> = []
       for (let i = argEntries.length - 1; i > variadicIndex; i--) {
         const [name, arg] = argEntries[i]
         const input = tokenInputs.pop()
         if (input !== undefined) {
-          postVariadicArgs.unshift({arg, input, name})
+          postVariadicParsing.unshift({arg, input, name})
         }
       }
 
-      // Middle: everything remaining goes to the variadic arg
+      // Everything remaining goes to the variadic arg
       const [variadicName, variadicArg] = argEntries[variadicIndex]
       if (tokenInputs.length > 0) {
         const parsedValues: unknown[] = []
         for (const input of tokenInputs) {
-          if (variadicArg.options && !variadicArg.options.includes(input)) {
-            throw new ArgInvalidOptionError(variadicArg, input)
-          }
-
-          ctx.token = {arg: variadicName, input, type: 'arg'}
-          const parsed = await variadicArg.parse(input, ctx, variadicArg)
-          parsedValues.push(parsed)
-          argv.push(parsed)
+          await parseArgInput(variadicName, variadicArg, input)
+          parsedValues.push(args[variadicName])
         }
 
         args[variadicName] = parsedValues
       }
 
-      // Process the popped post-variadic args (in order)
-      for (const {arg, input, name} of postVariadicArgs) {
-        if (arg.options && !arg.options.includes(input)) {
-          throw new ArgInvalidOptionError(arg, input)
-        }
-
-        ctx.token = {arg: name, input, type: 'arg'}
-        const parsed = await arg.parse(input, ctx, arg)
-        argv.push(parsed)
-        args[name] = parsed
+      for (const {arg, input, name} of postVariadicParsing) {
+        await parseArgInput(name, arg, input)
       }
 
-      // Handle defaults for variadic arg if no values provided
-      if (!args[variadicName] && (variadicArg.default || variadicArg.default === false)) {
-        if (typeof variadicArg.default === 'function') {
-          const f = await variadicArg.default()
-          argv.push(f)
-          args[variadicName] = f
-        } else {
-          argv.push(variadicArg.default)
-          args[variadicName] = variadicArg.default
-        }
-      }
-
-      // Handle defaults for post-variadic args that weren't provided
+      // Apply defaults for any args that didn't receive values
+      await applyDefault(variadicName, variadicArg)
       for (let i = variadicIndex + 1; i < argEntries.length; i++) {
         const [name, arg] = argEntries[i]
-        if (!args[name] && (arg.default || arg.default === false)) {
-          if (typeof arg.default === 'function') {
-            const f = await arg.default()
-            argv.push(f)
-            args[name] = f
-          } else {
-            argv.push(arg.default)
-            args[name] = arg.default
-          }
-        }
-      }
-    }
-
-    // Append any unmatched tokens to argv (for strict: false)
-    // Skip this when a variadic arg is present, since all tokens are already handled
-    if (variadicIndex === -1) {
-      for (const token of tokens) {
-        if (args[token.arg] !== undefined) continue
-        argv.push(token.input)
+        await applyDefault(name, arg)
       }
     }
 
