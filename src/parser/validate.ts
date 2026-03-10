@@ -43,7 +43,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     }
 
     const maxArgs = Object.keys(parse.input.args).length
-    if (parse.input.strict && parse.output.argv.length > maxArgs) {
+    const hasVariadicArg = Object.values(parse.input.args).some((arg) => arg.multiple)
+    if (parse.input.strict && !hasVariadicArg && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({
         args: extras,
