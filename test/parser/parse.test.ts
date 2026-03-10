@@ -2205,4 +2205,58 @@ describe('allowStdin', () => {
     expect(out.flags.myflag).to.equals(stdinValue)
     expect(out.raw[0].input).to.equal('x')
   })
+
+  describe('variadic args', () => {
+    describe('definition-time validation', () => {
+      it('throws when more than one arg has multiple: true', async () => {
+        try {
+          await parse(['a', 'b'], {
+            args: {
+              first: Args.string({multiple: true}),
+              second: Args.string({multiple: true}),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Invalid argument spec')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('throws when a non-required arg follows a variadic arg', async () => {
+        try {
+          await parse(['a', 'b'], {
+            args: {
+              first: Args.string({multiple: true}),
+              second: Args.string(),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Invalid argument spec')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('allows a required arg after a variadic arg', async () => {
+        // This should not throw - parsing will be handled in Task 3
+        // For now just verify it doesn't throw InvalidArgsSpecError
+        const out = await parse(['a', 'b'], {
+          args: {
+            source: Args.string({multiple: true}),
+            dest: Args.string({required: true}),
+          },
+        })
+        // The actual parsing of variadic args isn't implemented yet,
+        // but the validation should pass
+        expect(out.args).to.have.property('source')
+      })
+    })
+  })
 })
