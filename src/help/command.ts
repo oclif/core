@@ -58,8 +58,9 @@ export class CommandHelp extends HelpFormatter {
     if (args.filter((a) => a.description).length === 0) return
 
     return args.map((a) => {
-      // Add ellipsis to indicate that the argument takes multiple values if strict is false
-      let name = this.command.strict === false ? `${a.name.toUpperCase()}...` : a.name.toUpperCase()
+      // Add ellipsis for variadic args, or for all args when strict is false (backward compat)
+      const suffix = a.multiple ? '...' : this.command.strict === false ? '...' : ''
+      let name = `${a.name.toUpperCase()}${suffix}`
       name = a.required ? `${name}` : `[${name}]`
       let description = a.description || ''
       if (a.default)
