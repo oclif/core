@@ -197,6 +197,11 @@ export type ArgProps = {
    * If true, the flag will be required.
    */
   required?: boolean
+  /**
+   * If true, the arg accepts multiple values. Only one arg per command can have multiple: true.
+   * All args after a variadic arg must be required.
+   */
+  multiple?: boolean
 
   options?: string[]
   ignoreStdin?: boolean
