@@ -144,6 +144,19 @@ export class DeprecateAliases extends Command {
   }
 }
 
+// deprecateAliases with hiddenAliases
+export class DeprecateHiddenAliases extends Command {
+  static deprecateAliases = true
+
+  static hiddenAliases = ['foo:bar:hidden']
+
+  static id = 'foo:bar:v2'
+
+  async run(): Promise<void> {
+    'run'
+  }
+}
+
 export class LongDescription extends Command {
   static description =
     'This is a very long command description that should wrap after too many characters have been entered'

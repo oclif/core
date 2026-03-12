@@ -315,7 +315,7 @@ export abstract class Command {
   protected warnIfCommandDeprecated(): void {
     const [id] = normalizeArgv(this.config)
 
-    if (this.ctor.deprecateAliases && this.ctor.aliases.includes(id)) {
+    if (this.ctor.deprecateAliases && [...this.ctor.aliases, ...this.ctor.hiddenAliases].includes(id)) {
       const cmdName = toConfiguredId(this.ctor.id, this.config)
       const aliasName = toConfiguredId(id, this.config)
       this.warn(formatCommandDeprecationWarning(aliasName, {to: cmdName}))
