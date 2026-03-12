@@ -1,3 +1,12 @@
+# [4.9.0](https://github.com/oclif/core/compare/4.8.4...4.9.0) (2026-03-12)
+
+
+### Features
+
+* warn on hidden, deprecated aliases ([af47f67](https://github.com/oclif/core/commit/af47f6704496d8741316f5b24a1108ac71ec9262))
+
+
+
 ## [4.8.4](https://github.com/oclif/core/compare/4.8.3...4.8.4) (2026-03-09)
 
 
