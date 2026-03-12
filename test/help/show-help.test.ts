@@ -15,6 +15,7 @@ import {
   DbCreate,
   DbTopic,
   DeprecateAliases,
+  DeprecateHiddenAliases,
 } from './fixtures/fixtures'
 import {monkeyPatchCommands} from './help-test-utils'
 
@@ -286,6 +287,24 @@ USAGE
 
 ALIASES
   $ oclif foo:bar:alias`)
+  })
+
+  it('show deprecation warning when using hidden alias', async () => {
+    monkeyPatchCommands(config, [
+      {
+        name: 'plugin-1',
+        commands: [DeprecateHiddenAliases],
+        topics: [],
+      },
+    ])
+
+    const help = new TestHelp(config as any)
+    await help.showHelp(['foo:bar:hidden'])
+    const output = help.getOutput()
+    expect(output).to.equal(`The "foo:bar:hidden" command has been deprecated. Use "foo:bar:v2" instead.
+
+USAGE
+  $ oclif foo:bar:hidden`)
   })
 })
 

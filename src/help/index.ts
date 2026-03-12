@@ -213,8 +213,10 @@ export class Help extends HelpBase {
       )
     }
 
-    if (command.deprecateAliases && command.aliases.includes(name)) {
-      const actualCmd = this.config.commands.find((c) => c.aliases.includes(name))
+    if (command.deprecateAliases && [...(command.aliases ?? []), ...(command.hiddenAliases ?? [])].includes(name)) {
+      const actualCmd = this.config.commands.find((c) =>
+        [...(c.aliases ?? []), ...(c.hiddenAliases ?? [])].includes(name),
+      )
       const actualCmdName = actualCmd ? toConfiguredId(actualCmd.id, this.config) : ''
       const opts = {...command.deprecationOptions, ...(actualCmd ? {to: actualCmdName} : {})}
       this.log(`${formatCommandDeprecationWarning(toConfiguredId(name, this.config), opts)}\n`)
