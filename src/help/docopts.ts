@@ -98,14 +98,13 @@ export class DocOpts {
   public toString(): string {
     const opts = ['<%= command.id %>']
     if (this.cmd.args) {
-      // If strict is false, add ellipsis to indicate that the argument takes multiple values
-      const suffix = this.cmd.strict === false ? '...' : ''
       const a =
         Object.values(ensureArgObject(this.cmd.args))
           .filter((arg) => !arg.hidden)
-          .map((arg) =>
-            arg.required ? `${arg.name.toUpperCase()}${suffix}` : `[${arg.name.toUpperCase()}${suffix}]`,
-          ) || []
+          .map((arg) => {
+            const suffix = arg.multiple ? '...' : this.cmd.strict === false ? '...' : ''
+            return arg.required ? `${arg.name.toUpperCase()}${suffix}` : `[${arg.name.toUpperCase()}${suffix}]`
+          }) || []
       opts.push(...a)
     }
 

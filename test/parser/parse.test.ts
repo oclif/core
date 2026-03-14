@@ -2205,4 +2205,240 @@ describe('allowStdin', () => {
     expect(out.flags.myflag).to.equals(stdinValue)
     expect(out.raw[0].input).to.equal('x')
   })
+
+  describe('variadic args', () => {
+    describe('definition-time validation', () => {
+      it('throws when more than one arg has multiple: true', async () => {
+        try {
+          await parse(['a', 'b'], {
+            args: {
+              first: Args.string({multiple: true}),
+              second: Args.string({multiple: true}),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Invalid argument spec')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('throws when a non-required arg follows a variadic arg', async () => {
+        try {
+          await parse(['a', 'b'], {
+            args: {
+              first: Args.string({multiple: true}),
+              second: Args.string(),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Invalid argument spec')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('allows a required arg after a variadic arg', async () => {
+        const out = await parse(['a', 'b'], {
+          args: {
+            source: Args.string({multiple: true}),
+            dest: Args.string({required: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({source: ['a'], dest: 'b'})
+      })
+    })
+
+    describe('parsing', () => {
+      it('variadic arg as last arg', async () => {
+        const out = await parse(['a', 'b', 'c'], {
+          args: {
+            files: Args.string({multiple: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b', 'c']})
+        expect(out.argv).to.deep.equal(['a', 'b', 'c'])
+      })
+
+      it('variadic arg as first arg with required trailing arg', async () => {
+        const out = await parse(['a', 'b', 'c', './dest'], {
+          args: {
+            source: Args.string({multiple: true}),
+            dest: Args.string({required: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({source: ['a', 'b', 'c'], dest: './dest'})
+        expect(out.argv).to.deep.equal(['a', 'b', 'c', './dest'])
+      })
+
+      it('variadic arg in the middle', async () => {
+        const out = await parse(['tar', 'a', 'b', 'c', './out.tar'], {
+          args: {
+            format: Args.string({required: true}),
+            source: Args.string({multiple: true}),
+            dest: Args.string({required: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({format: 'tar', source: ['a', 'b', 'c'], dest: './out.tar'})
+        expect(out.argv).to.deep.equal(['tar', 'a', 'b', 'c', './out.tar'])
+      })
+
+      it('variadic arg with single value', async () => {
+        const out = await parse(['a', './dest'], {
+          args: {
+            source: Args.string({multiple: true}),
+            dest: Args.string({required: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({source: ['a'], dest: './dest'})
+      })
+
+      it('variadic arg with no values when not required', async () => {
+        const out = await parse([], {
+          args: {
+            files: Args.string({multiple: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({})
+      })
+
+      it('variadic required arg with no values throws', async () => {
+        try {
+          await parse([], {
+            args: {
+              files: Args.string({multiple: true, required: true}),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Missing 1 required arg')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('variadic arg with flags interspersed', async () => {
+        const out = await parse(['a', '--flag', 'val', 'b', 'c'], {
+          args: {
+            files: Args.string({multiple: true}),
+          },
+          flags: {
+            flag: Flags.string(),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b', 'c']})
+        expect(out.flags).to.deep.equal({flag: 'val'})
+      })
+
+      it('variadic arg with flags interspersed and trailing required arg', async () => {
+        const out = await parse(['a', '--flag', 'val', 'b', 'c', '/dest'], {
+          args: {
+            files: Args.string({multiple: true, required: true}),
+            dest: Args.string({required: true}),
+          },
+          flags: {
+            flag: Flags.string(),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b', 'c'], dest: '/dest'})
+        expect(out.flags).to.deep.equal({flag: 'val'})
+      })
+
+      it('variadic arg with boolean flag interspersed', async () => {
+        const out = await parse(['--verbose', 'a', 'b', '-f', 'c'], {
+          args: {
+            files: Args.string({multiple: true}),
+          },
+          flags: {
+            verbose: Flags.boolean({char: 'v'}),
+            force: Flags.boolean({char: 'f'}),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b', 'c']})
+        expect(out.flags).to.deep.equal({verbose: true, force: true})
+      })
+
+      it('variadic arg with flags interspersed and leading required arg', async () => {
+        const out = await parse(['src', 'a', '--flag=val', 'b', 'c'], {
+          args: {
+            source: Args.string({required: true}),
+            files: Args.string({multiple: true}),
+          },
+          flags: {
+            flag: Flags.string(),
+          },
+        })
+        expect(out.args).to.deep.equal({source: 'src', files: ['a', 'b', 'c']})
+        expect(out.flags).to.deep.equal({flag: 'val'})
+      })
+
+      it('variadic middle arg with flags interspersed and both leading and trailing required args', async () => {
+        const out = await parse(['src', '--verbose', 'a', 'b', '--flag', 'val', 'c', '/dest'], {
+          args: {
+            source: Args.string({required: true}),
+            files: Args.string({multiple: true, required: true}),
+            dest: Args.string({required: true}),
+          },
+          flags: {
+            verbose: Flags.boolean(),
+            flag: Flags.string(),
+          },
+        })
+        expect(out.args).to.deep.equal({source: 'src', files: ['a', 'b', 'c'], dest: '/dest'})
+        expect(out.flags).to.deep.equal({verbose: true, flag: 'val'})
+      })
+
+      it('variadic integer arg', async () => {
+        const out = await parse(['1', '2', '3'], {
+          args: {
+            nums: Args.integer({multiple: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({nums: [1, 2, 3]})
+      })
+
+      it('variadic arg with options validation rejects invalid', async () => {
+        try {
+          await parse(['a', 'b', 'invalid'], {
+            args: {
+              vals: Args.string({multiple: true, options: ['a', 'b', 'c']}),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Expected invalid to be one of')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('variadic arg with valid options', async () => {
+        const out = await parse(['a', 'b', 'c'], {
+          args: {
+            vals: Args.string({multiple: true, options: ['a', 'b', 'c']}),
+          },
+        })
+        expect(out.args).to.deep.equal({vals: ['a', 'b', 'c']})
+      })
+
+      it('does not throw UnexpectedArgsError with variadic args', async () => {
+        const out = await parse(['a', 'b', 'c', 'd', 'e'], {
+          args: {
+            files: Args.string({multiple: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b', 'c', 'd', 'e']})
+      })
+    })
+  })
 })

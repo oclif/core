@@ -197,6 +197,11 @@ export type ArgProps = {
    * If true, the flag will be required.
    */
   required?: boolean
+  /**
+   * If true, the arg accepts multiple values. Only one arg per command can have multiple: true.
+   * All args after a variadic arg must be required.
+   */
+  multiple?: boolean
 
   options?: string[]
   ignoreStdin?: boolean
@@ -264,7 +269,13 @@ export type Arg<T, P = CustomOptions> = ArgProps & {
 }
 
 export type ArgDefinition<T, P = CustomOptions> = {
+  // multiple + required/defaulted -> T[]
+  (options: P & {multiple: true} & ({required: true} | {default: ArgDefault<T[]>}) & Partial<Arg<T, P>>): Arg<T[], P>
+  // multiple only -> T[] | undefined
+  (options: P & {multiple: true} & Partial<Arg<T, P>>): Arg<T[] | undefined, P>
+  // required/defaulted (no multiple) -> T
   (options: P & ({required: true} | {default: ArgDefault<T>}) & Partial<Arg<T, P>>): Arg<T, P>
+  // optional (no multiple) -> T | undefined
   (options?: P & Partial<Arg<T, P>>): Arg<T | undefined, P>
 }
 

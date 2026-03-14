@@ -69,6 +69,7 @@ async function cacheArgs(
       default: await cacheDefaultValue(arg, respectNoCacheDefault),
       description: arg.description,
       hidden: arg.hidden,
+      multiple: arg.multiple,
       name,
       noCacheDefault: arg.noCacheDefault,
       options: arg.options,

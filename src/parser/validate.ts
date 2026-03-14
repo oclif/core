@@ -13,6 +13,28 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   let cachedResolvedFlags: Record<string, unknown> | undefined
 
   function validateArgs() {
+    // Validate variadic arg constraints (definition-time checks)
+    const argEntries = Object.entries(parse.input.args)
+    let variadicArgFound = false
+    for (const [, arg] of argEntries) {
+      if (arg.multiple) {
+        if (variadicArgFound) {
+          throw new InvalidArgsSpecError({
+            args: parse.input.args,
+            parse,
+          })
+        }
+
+        variadicArgFound = true
+      } else if (variadicArgFound && !arg.required) {
+        // All args after a variadic arg must be required
+        throw new InvalidArgsSpecError({
+          args: parse.input.args,
+          parse,
+        })
+      }
+    }
+
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({
         flags: parse.output.nonExistentFlags,
@@ -21,7 +43,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     }
 
     const maxArgs = Object.keys(parse.input.args).length
-    if (parse.input.strict && parse.output.argv.length > maxArgs) {
+    const hasVariadicArg = Object.values(parse.input.args).some((arg) => arg.multiple)
+    if (parse.input.strict && !hasVariadicArg && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({
         args: extras,
@@ -35,9 +58,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     for (const [name, arg] of Object.entries(parse.input.args)) {
       if (!arg.required) {
         hasOptional = true
-      } else if (hasOptional) {
+      } else if (hasOptional && !variadicArgFound) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
+        // Skip this check when a variadic arg is present, since the variadic
+        // validation above already enforces that args after a variadic are required
         throw new InvalidArgsSpecError({
           args: parse.input.args,
           parse,

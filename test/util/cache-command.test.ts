@@ -153,6 +153,7 @@ describe('cacheCommand', () => {
           description: 'arg1 desc',
           name: 'arg1',
           hidden: false,
+          multiple: undefined,
           required: true,
           options: ['af', 'b'],
           default: 'a',
