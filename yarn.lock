@@ -496,7 +496,7 @@
     "@eslint/css-tree" "^3.6.1"
     "@eslint/plugin-kit" "^0.3.1"
 
-"@eslint/eslintrc@^3.3.4", "@eslint/eslintrc@^3.3.5":
+"@eslint/eslintrc@^3.3.5":
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-3.3.5.tgz#c131793cfc1a7b96f24a83e0a8bbd4b881558c60"
   integrity sha512-4IlJx0X0qftVsN5E+/vGujTRIFtwuLbNsVUe7TO6zYPDR1O6nFwvwhIKEKSrl6dZchmYBITazxKoUYOjdtjlRg==
@@ -511,7 +511,7 @@
     minimatch "^3.1.5"
     strip-json-comments "^3.1.1"
 
-"@eslint/js@9.39.4", "@eslint/js@^9.38.0":
+"@eslint/js@9.39.4", "@eslint/js@^9.39.4":
   version "9.39.4"
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.39.4.tgz#a3f83bfc6fd9bf33a853dfacd0b49b398eb596c1"
   integrity sha512-nE7DEIchvtiFTwBw4Lfbu59PG+kCofhjsKaCWzxTpt4lfRjRMqG6uMBzKXuEcyXhOHoUp9riAm7/aWYGhXZ9cw==
@@ -3254,13 +3254,13 @@ eslint-config-oclif@^5.2.2:
     eslint-plugin-unicorn "^48.0.1"
 
 eslint-config-oclif@^6:
-  version "6.0.146"
-  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.146.tgz#963c505c50d115d21f82f3f67288fbe1695fd134"
-  integrity sha512-x59Gopo4wQiuuGOUQ2D3HaIpU1LaeksPql3vTGBNnAM0dNmHWqchMvaYczoRVBx0tfGVljWGYqDA0I/355cF4Q==
+  version "6.0.148"
+  resolved "https://registry.yarnpkg.com/eslint-config-oclif/-/eslint-config-oclif-6.0.148.tgz#a66704971d19459a5743c8244d46dbbd3f7d8cfa"
+  integrity sha512-WhunT0kumapHtxh+I/LgSIavl5pu3s1ZfmtOmq+LahsffsX8ufyDFuuwIunxD6QcALuFxusANRn3r6MNeAivjQ==
   dependencies:
     "@eslint/compat" "^1.4.1"
-    "@eslint/eslintrc" "^3.3.4"
-    "@eslint/js" "^9.38.0"
+    "@eslint/eslintrc" "^3.3.5"
+    "@eslint/js" "^9.39.4"
     "@stylistic/eslint-plugin" "^3.1.0"
     "@typescript-eslint/eslint-plugin" "^8"
     "@typescript-eslint/parser" "^8"
