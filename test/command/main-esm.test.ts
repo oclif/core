@@ -3,12 +3,14 @@ import {expect} from 'chai'
 import {resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
+import {getPlatform} from '../../src/util/os'
+
 // This tests file URL / import.meta.url simulation.
 const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString()
 
 let root = resolve(__dirname, '../../package.json')
 const pjson = require(root)
-const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
+const version = `@oclif/core/${pjson.version} ${getPlatform()}-${process.arch} node-${process.version}`
 
 root = convertToFileURL(root)
 

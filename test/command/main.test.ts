@@ -3,8 +3,10 @@ import {expect} from 'chai'
 import {readFileSync} from 'node:fs'
 import {join, resolve} from 'node:path'
 
+import {getPlatform} from '../../src/util/os'
+
 const pjson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'))
-const version = `@oclif/core/${pjson.version} ${process.platform}-${process.arch} node-${process.version}`
+const version = `@oclif/core/${pjson.version} ${getPlatform()}-${process.arch} node-${process.version}`
 
 describe('main', () => {
   it('should run plugins', async () => {

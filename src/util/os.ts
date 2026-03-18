@@ -1,3 +1,4 @@
+import WSL from 'is-wsl'
 import {homedir, platform} from 'node:os'
 
 /**
@@ -20,6 +21,6 @@ export function getHomeDir(): string {
  *
  * @returns The process' platform
  */
-export function getPlatform(): NodeJS.Platform {
-  return platform()
+export function getPlatform(): 'wsl' | NodeJS.Platform {
+  return WSL ? 'wsl' : platform()
 }
