@@ -2213,7 +2213,7 @@ describe('allowStdin', () => {
           await parse(['a', 'b'], {
             args: {
               first: Args.string({multiple: true}),
-              second: Args.string({multiple: true}),
+              second: Args.string({multiple: true, required: true}),
             },
           })
           assert.fail('Expected error')
@@ -2226,12 +2226,30 @@ describe('allowStdin', () => {
         }
       })
 
-      it('throws when a non-required arg follows a variadic arg', async () => {
+      it('throws when an optional arg follows a variadic arg', async () => {
         try {
           await parse(['a', 'b'], {
             args: {
               first: Args.string({multiple: true}),
               second: Args.string(),
+            },
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Invalid argument spec')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('throws when an optional arg precedes a variadic arg', async () => {
+        try {
+          await parse(['a', 'b'], {
+            args: {
+              first: Args.string(),
+              second: Args.string({multiple: true}),
             },
           })
           assert.fail('Expected error')
@@ -2256,7 +2274,7 @@ describe('allowStdin', () => {
     })
 
     describe('parsing', () => {
-      it('variadic arg as last arg', async () => {
+      it('variadic as only arg', async () => {
         const out = await parse(['a', 'b', 'c'], {
           args: {
             files: Args.string({multiple: true}),
@@ -2266,7 +2284,18 @@ describe('allowStdin', () => {
         expect(out.argv).to.deep.equal(['a', 'b', 'c'])
       })
 
-      it('variadic arg as first arg with required trailing arg', async () => {
+      it('variadic as last arg', async () => {
+        const out = await parse(['json', 'a', 'b', 'c'], {
+          args: {
+            format: Args.string({required: true}),
+            files: Args.string({multiple: true}),
+          },
+        })
+        expect(out.args).to.deep.equal({format: 'json', files: ['a', 'b', 'c']})
+        expect(out.argv).to.deep.equal(['json', 'a', 'b', 'c'])
+      })
+
+      it('variadic as first arg with required trailing arg', async () => {
         const out = await parse(['a', 'b', 'c', './dest'], {
           args: {
             source: Args.string({multiple: true}),
