@@ -28,8 +28,12 @@ export class CLIParseError extends CLIError {
 export class InvalidArgsSpecError extends CLIParseError {
   public args: ArgInput
 
-  constructor({args, exit, parse}: CLIParseErrorOptions & {args: ArgInput}) {
+  constructor({args, exit, parse, reason}: CLIParseErrorOptions & {args: ArgInput; reason?: string}) {
     let message = 'Invalid argument spec'
+    if (reason) {
+      message += `: ${reason}`
+    }
+
     const namedArgs = Object.values(args).filter((a) => a.name)
     if (namedArgs.length > 0) {
       const list = renderList(

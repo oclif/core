@@ -2219,7 +2219,7 @@ describe('allowStdin', () => {
           assert.fail('Expected error')
         } catch (error: unknown) {
           if (error instanceof Error) {
-            expect(error.message).to.include('Invalid argument spec')
+            expect(error.message).to.include('only one variadic arg')
           } else {
             assert.fail('Expected an Error instance')
           }
@@ -2237,7 +2237,7 @@ describe('allowStdin', () => {
           assert.fail('Expected error')
         } catch (error: unknown) {
           if (error instanceof Error) {
-            expect(error.message).to.include('Invalid argument spec')
+            expect(error.message).to.include('args after a variadic arg must be required')
           } else {
             assert.fail('Expected an Error instance')
           }
@@ -2255,7 +2255,7 @@ describe('allowStdin', () => {
           assert.fail('Expected error')
         } catch (error: unknown) {
           if (error instanceof Error) {
-            expect(error.message).to.include('Invalid argument spec')
+            expect(error.message).to.include('args before a variadic arg must be required')
           } else {
             assert.fail('Expected an Error instance')
           }

@@ -15,25 +15,43 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   function validateArgs() {
     // Validate variadic arg constraints (definition-time checks)
     const argEntries = Object.entries(parse.input.args)
-    let variadicArgFound = false
-    for (const [, arg] of argEntries) {
-      if (arg.multiple) {
-        if (variadicArgFound) {
-          throw new InvalidArgsSpecError({
-            args: parse.input.args,
-            parse,
-          })
-        }
+    const variadicIndex = argEntries.findIndex(([, arg]) => arg.multiple)
 
-        variadicArgFound = true
-      } else if (variadicArgFound && !arg.required) {
-        // All args after a variadic arg must be required
+    if (variadicIndex !== -1) {
+      // Only one variadic arg is allowed
+      const secondVariadic = argEntries.findIndex(([, arg], i) => i > variadicIndex && arg.multiple)
+      if (secondVariadic !== -1) {
         throw new InvalidArgsSpecError({
           args: parse.input.args,
           parse,
+          reason: 'only one variadic arg (multiple: true) is allowed',
         })
       }
+
+      // All args before a variadic arg must be required (otherwise assignment is ambiguous)
+      for (let i = 0; i < variadicIndex; i++) {
+        if (!argEntries[i][1].required) {
+          throw new InvalidArgsSpecError({
+            args: parse.input.args,
+            parse,
+            reason: `args before a variadic arg must be required, but "${argEntries[i][0]}" is optional`,
+          })
+        }
+      }
+
+      // All args after a variadic arg must be required (otherwise assignment is ambiguous)
+      for (let i = variadicIndex + 1; i < argEntries.length; i++) {
+        if (!argEntries[i][1].required) {
+          throw new InvalidArgsSpecError({
+            args: parse.input.args,
+            parse,
+            reason: `args after a variadic arg must be required, but "${argEntries[i][0]}" is optional`,
+          })
+        }
+      }
     }
+
+    const variadicArgFound = variadicIndex !== -1
 
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({
