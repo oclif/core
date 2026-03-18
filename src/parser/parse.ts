@@ -293,7 +293,12 @@ export class Parser<
       if (args[name] !== undefined) return
       if (!arg.default && arg.default !== false) return
       const value = typeof arg.default === 'function' ? await arg.default() : arg.default
-      argv.push(value)
+      if (Array.isArray(value)) {
+        for (const v of value) argv.push(v)
+      } else {
+        argv.push(value)
+      }
+
       args[name] = value
     }
 

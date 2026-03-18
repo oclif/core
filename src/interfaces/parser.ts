@@ -270,9 +270,14 @@ export type Arg<T, P = CustomOptions> = ArgProps & {
 
 export type ArgDefinition<T, P = CustomOptions> = {
   // multiple + required/defaulted -> T[]
-  (options: P & {multiple: true} & ({required: true} | {default: ArgDefault<T[]>}) & Partial<Arg<T, P>>): Arg<T[], P>
+  (
+    options: P & {multiple: true} & ({required: true} | {default: ArgDefault<T[]>}) &
+      Omit<Partial<Arg<T, P>>, 'default'> & {default?: ArgDefault<T[] | undefined>},
+  ): Arg<T[], P>
   // multiple only -> T[] | undefined
-  (options: P & {multiple: true} & Partial<Arg<T, P>>): Arg<T[] | undefined, P>
+  (
+    options: P & {multiple: true} & Omit<Partial<Arg<T, P>>, 'default'> & {default?: ArgDefault<T[] | undefined>},
+  ): Arg<T[] | undefined, P>
   // required/defaulted (no multiple) -> T
   (options: P & ({required: true} | {default: ArgDefault<T>}) & Partial<Arg<T, P>>): Arg<T, P>
   // optional (no multiple) -> T | undefined

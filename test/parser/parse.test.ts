@@ -2337,6 +2337,26 @@ describe('allowStdin', () => {
         expect(out.args).to.deep.equal({})
       })
 
+      it('variadic arg with array default when no values provided', async () => {
+        const out = await parse([], {
+          args: {
+            files: Args.string({multiple: true, default: ['a', 'b']}),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['a', 'b']})
+        expect(out.argv).to.deep.equal(['a', 'b'])
+      })
+
+      it('variadic arg ignores array default when values are provided', async () => {
+        const out = await parse(['x', 'y'], {
+          args: {
+            files: Args.string({multiple: true, default: ['a', 'b']}),
+          },
+        })
+        expect(out.args).to.deep.equal({files: ['x', 'y']})
+        expect(out.argv).to.deep.equal(['x', 'y'])
+      })
+
       it('variadic required arg with no values throws', async () => {
         try {
           await parse([], {
