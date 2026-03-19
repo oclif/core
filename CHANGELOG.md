@@ -1,3 +1,23 @@
+# [4.10.0](https://github.com/oclif/core/compare/4.9.0...4.10.0) (2026-03-19)
+
+
+### Bug Fixes
+
+* include multiple property in cached arg metadata ([32b4bb7](https://github.com/oclif/core/commit/32b4bb7a72daf9eb6ff632afcb8632bcc540c266))
+* provide clearer messages on invalid variadic args ([454ae3d](https://github.com/oclif/core/commit/454ae3d812c976d46cd619c869e6679003270daf))
+
+
+### Features
+
+* add ArgDefinition overloads for variadic arg return types ([6fea593](https://github.com/oclif/core/commit/6fea59323826764cd945dc6c9d5f4bf5de49c660))
+* add definition-time validation for variadic arg constraints ([20d2543](https://github.com/oclif/core/commit/20d2543221f756cda11d3d039614b2484bd26734))
+* add multiple property to ArgProps interface ([fb76263](https://github.com/oclif/core/commit/fb762633f7d47e4c8dc31922e67e887788e470bb))
+* allow array of default values for varargs ([da42b29](https://github.com/oclif/core/commit/da42b292ff0d6a8c00b25562dbcd40db3a0199db))
+* implement variadic arg parsing with shift/pop algorithm ([eba40b5](https://github.com/oclif/core/commit/eba40b5150c5afb507bb37e4915f69c12075ba05))
+* show ... suffix for variadic args in help text ([fc53652](https://github.com/oclif/core/commit/fc536527659295a67365da38f097799af5a9dee1))
+
+
+
 # [4.9.0](https://github.com/oclif/core/compare/4.8.4...4.9.0) (2026-03-12)
 
 
