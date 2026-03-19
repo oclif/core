@@ -13,6 +13,46 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   let cachedResolvedFlags: Record<string, unknown> | undefined
 
   function validateArgs() {
+    // Validate variadic arg constraints (definition-time checks)
+    const argEntries = Object.entries(parse.input.args)
+    const variadicIndex = argEntries.findIndex(([, arg]) => arg.multiple)
+
+    if (variadicIndex !== -1) {
+      // Only one variadic arg is allowed
+      const secondVariadic = argEntries.findIndex(([, arg], i) => i > variadicIndex && arg.multiple)
+      if (secondVariadic !== -1) {
+        throw new InvalidArgsSpecError({
+          args: parse.input.args,
+          parse,
+          reason: 'only one variadic arg (multiple: true) is allowed',
+        })
+      }
+
+      // All args before a variadic arg must be required (otherwise assignment is ambiguous)
+      for (let i = 0; i < variadicIndex; i++) {
+        if (!argEntries[i][1].required) {
+          throw new InvalidArgsSpecError({
+            args: parse.input.args,
+            parse,
+            reason: `args before a variadic arg must be required, but "${argEntries[i][0]}" is optional`,
+          })
+        }
+      }
+
+      // All args after a variadic arg must be required (otherwise assignment is ambiguous)
+      for (let i = variadicIndex + 1; i < argEntries.length; i++) {
+        if (!argEntries[i][1].required) {
+          throw new InvalidArgsSpecError({
+            args: parse.input.args,
+            parse,
+            reason: `args after a variadic arg must be required, but "${argEntries[i][0]}" is optional`,
+          })
+        }
+      }
+    }
+
+    const variadicArgFound = variadicIndex !== -1
+
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({
         flags: parse.output.nonExistentFlags,
@@ -21,7 +61,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     }
 
     const maxArgs = Object.keys(parse.input.args).length
-    if (parse.input.strict && parse.output.argv.length > maxArgs) {
+    const hasVariadicArg = Object.values(parse.input.args).some((arg) => arg.multiple)
+    if (parse.input.strict && !hasVariadicArg && parse.output.argv.length > maxArgs) {
       const extras = parse.output.argv.slice(maxArgs)
       throw new UnexpectedArgsError({
         args: extras,
@@ -35,9 +76,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     for (const [name, arg] of Object.entries(parse.input.args)) {
       if (!arg.required) {
         hasOptional = true
-      } else if (hasOptional) {
+      } else if (hasOptional && !variadicArgFound) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
+        // Skip this check when a variadic arg is present, since the variadic
+        // validation above already enforces that args after a variadic are required
         throw new InvalidArgsSpecError({
           args: parse.input.args,
           parse,

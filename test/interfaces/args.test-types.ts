@@ -47,6 +47,11 @@ export class MyCommand extends Command {
     defaultCustom: Args.custom<MyType>({
       parse: async () => ({foo: true}),
     })({default: {foo: true}}),
+
+    // variadic args
+    requiredVariadic: Args.string({multiple: true, required: true}),
+    optionalVariadic: Args.string({multiple: true}),
+    defaultVariadic: Args.string({multiple: true, default: ['a', 'b']}),
   }
 
   static description = 'describe the command here'
@@ -103,6 +108,12 @@ export class MyCommand extends Command {
     expectType<MyType>(this.args.defaultCustom)
     expectNotType<undefined>(this.args.defaultCustom)
     expectType<MyType | undefined>(this.args.optionalCustom)
+
+    expectType<string[]>(this.args.requiredVariadic)
+    expectNotType<undefined>(this.args.requiredVariadic)
+    expectType<string[]>(this.args.defaultVariadic)
+    expectNotType<undefined>(this.args.defaultVariadic)
+    expectType<string[] | undefined>(this.args.optionalVariadic)
 
     return result.args
   }

@@ -436,6 +436,53 @@ describe('doc opts', () => {
     expect(usage).to.contain(' (-s <value> -f <value>)')
   })
 
+  it('shows ... suffix for variadic arg as last arg', () => {
+    const usage = DocOpts.generate({
+      args: {
+        files: Args.string({name: 'files', required: true, multiple: true, description: 'files to process'}),
+      },
+      flags: {},
+      id: 'process',
+    } as any)
+    expect(usage).to.contain('FILES...')
+  })
+
+  it('shows ... suffix for variadic arg with trailing required arg', () => {
+    const usage = DocOpts.generate({
+      args: {
+        source: Args.string({name: 'source', required: true, multiple: true, description: 'source files'}),
+        dest: Args.string({name: 'dest', required: true, description: 'destination'}),
+      },
+      flags: {},
+      id: 'cp',
+    } as any)
+    expect(usage).to.contain('SOURCE... DEST')
+  })
+
+  it('shows ... suffix only on the variadic arg, not on others', () => {
+    const usage = DocOpts.generate({
+      args: {
+        format: Args.string({name: 'format', required: true, description: 'output format'}),
+        source: Args.string({name: 'source', required: true, multiple: true, description: 'source files'}),
+        dest: Args.string({name: 'dest', required: true, description: 'destination'}),
+      },
+      flags: {},
+      id: 'convert',
+    } as any)
+    expect(usage).to.equal('<%= command.id %> FORMAT SOURCE... DEST')
+  })
+
+  it('shows optional variadic arg with brackets and ellipsis', () => {
+    const usage = DocOpts.generate({
+      args: {
+        files: Args.string({name: 'files', multiple: true, description: 'optional files'}),
+      },
+      flags: {},
+      id: 'process',
+    } as any)
+    expect(usage).to.contain('[FILES...]')
+  })
+
   it('is uses helpValues as expected', () => {
     const usage = DocOpts.generate({
       flags: {
