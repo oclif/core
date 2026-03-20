@@ -1,3 +1,12 @@
+## [4.10.1](https://github.com/oclif/core/compare/4.10.0...4.10.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* refresh yarn.lock ([745f56e](https://github.com/oclif/core/commit/745f56ebea25382c6006ba68a9846d0c44f57da8))
+
+
+
 # [4.10.0](https://github.com/oclif/core/compare/4.9.0...4.10.0) (2026-03-19)
 
 
