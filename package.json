@@ -35,7 +35,7 @@
     "@types/chai": "^4.3.16",
     "@types/chai-as-promised": "^7.1.8",
     "@types/clean-stack": "^2.1.1",
-    "@types/debug": "^4.1.10",
+    "@types/debug": "^4.1.13",
     "@types/ejs": "^3.1.5",
     "@types/indent-string": "^4.0.1",
     "@types/mocha": "^10.0.10",
