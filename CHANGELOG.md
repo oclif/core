@@ -1,3 +1,12 @@
+## [4.10.2](https://github.com/oclif/core/compare/4.10.1...4.10.2) (2026-03-21)
+
+
+### Bug Fixes
+
+* **deps:** bump flatted from 3.3.2 to 3.4.2 ([64f4b92](https://github.com/oclif/core/commit/64f4b92a797041a2194c4e29d061e4a399e783f1))
+
+
+
 ## [4.10.1](https://github.com/oclif/core/compare/4.10.0...4.10.1) (2026-03-20)
 
 
