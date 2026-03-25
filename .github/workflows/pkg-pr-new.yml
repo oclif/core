@@ -1,0 +1,86 @@
+name: Publish Preview Packages
+
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-preview:
+    if: "contains(github.event.pull_request.labels.*.name, 'trigger: preview')"
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish preview packages
+        run: npx pkg-pr-new publish --json pkg-pr-new-output.json --comment=off --compact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Create or update comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const output = JSON.parse(fs.readFileSync('pkg-pr-new-output.json', 'utf8'));
+
+            const sha = context.payload.pull_request?.head?.sha;
+            const shortSha = sha?.substring(0, 7) || 'unknown';
+            const BOT_COMMENT_IDENTIFIER = '<!-- pkg.pr.new -->';
+            const BACKTICKS = '```';
+
+            const pkg = output.packages[0];
+            const body = `## Preview this PR with [pkg.pr.new](https://pkg.pr.new)
+
+            ${BACKTICKS}bash
+            npm install ${pkg.url}
+            ${BACKTICKS}
+
+            [View Commit](https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${sha}) (${shortSha})
+
+            ${BOT_COMMENT_IDENTIFIER}
+            `;
+
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.data.find((c) => c.body?.includes(BOT_COMMENT_IDENTIFIER));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
