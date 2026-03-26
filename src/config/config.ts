@@ -1,5 +1,4 @@
 import * as ejs from 'ejs'
-import WSL from 'is-wsl'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {join, resolve, sep} from 'node:path'
 import {fileURLToPath, URL} from 'node:url'
@@ -322,7 +321,7 @@ export class Config implements IConfig {
     this.valid = this.rootPlugin.valid
 
     this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
-    this.platform = WSL ? 'wsl' : getPlatform()
+    this.platform = getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases

@@ -4,9 +4,10 @@ import sinon from 'sinon'
 
 import {Config} from '../../src'
 import {Help} from '../../src/help'
+import {getPlatform} from '../../src/util/os'
 
 const VERSION = require('../../package.json').version
-const USER_AGENT = `@oclif/core/${VERSION} ${process.platform}-${process.arch} node-${process.version}`
+const USER_AGENT = `@oclif/core/${VERSION} ${getPlatform()}-${process.arch} node-${process.version}`
 
 describe('formatRoot', () => {
   let config: Config
