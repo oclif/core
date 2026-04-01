@@ -24,6 +24,10 @@ export class MyCommand extends Command {
     requiredOption: Args.option({options: stages})({required: true}),
     defaultOption: Args.option({options: stages})({default: 'production'}),
 
+    optionalMultipleOption: Args.option({options: stages})({multiple: true}),
+    requiredMultipleOption: Args.option({options: stages})({multiple: true, required: true}),
+    defaultMultipleOption: Args.option({options: stages})({multiple: true, default: ['production']}),
+
     requiredBoolean: Args.boolean({required: true}),
     optionalBoolean: Args.boolean(),
     defaultBoolean: Args.boolean({default: true}),
@@ -126,6 +130,12 @@ export class MyCommand extends Command {
     expectType<(typeof stages)[number]>(this.args.defaultOption)
     expectNotType<undefined>(this.args.defaultOption)
     expectType<(typeof stages)[number] | undefined>(this.args.optionalOption)
+
+    expectType<(typeof stages)[number][]>(this.args.requiredMultipleOption)
+    expectNotType<undefined>(this.args.requiredMultipleOption)
+    expectType<(typeof stages)[number][]>(this.args.defaultMultipleOption)
+    expectNotType<undefined>(this.args.defaultMultipleOption)
+    expectType<(typeof stages)[number][] | undefined>(this.args.optionalMultipleOption)
 
     return result.args
   }

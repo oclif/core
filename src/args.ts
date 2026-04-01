@@ -99,7 +99,7 @@ type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
  * }
  */
 export function option<T extends readonly string[]>(
-  defaults: Partial<Arg<ReadonlyElementOf<T>>> & {options: T},
+  defaults: Omit<Partial<Arg<ReadonlyElementOf<T>>>, 'default' | 'multiple' | 'required'> & {options: T},
 ): ArgDefinition<(typeof defaults.options)[number]> {
   return (options: any = {}) => ({
     parse: async (i: string, _context: Command, _opts: Record<string, unknown>) => i,
