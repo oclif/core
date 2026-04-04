@@ -1,3 +1,12 @@
+## [4.10.5](https://github.com/oclif/core/compare/4.10.4...4.10.5) (2026-04-04)
+
+
+### Bug Fixes
+
+* **deps:** bump minimatch from 10.2.4 to 10.2.5 ([45ff39a](https://github.com/oclif/core/commit/45ff39afb97090296c2dbfb8f087ddcf0aed810f))
+
+
+
 ## [4.10.4](https://github.com/oclif/core/compare/4.10.3...4.10.4) (2026-04-03)
 
 
