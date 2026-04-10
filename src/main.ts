@@ -8,7 +8,7 @@ import * as Interfaces from './interfaces'
 import {getLogger, setLogger} from './logger'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
-import {ux} from './ux'
+import {loadVersionClass} from './version'
 
 export const helpAddition = (argv: string[], config: Interfaces.Config): boolean => {
   if (argv.length === 0 && !config.isSingleCommandCLI) return true
@@ -74,7 +74,9 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
 
   // display version if applicable
   if (versionAddition(argv, config)) {
-    ux.stdout(config.userAgent)
+    const VersionClass = await loadVersionClass(config)
+    const version = new VersionClass(config)
+    await version.showVersion()
     await runFinally()
     return
   }
