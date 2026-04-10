@@ -83,16 +83,21 @@ export type HookOptions = {
   identifier: string
 }
 
-export type HelpLocationOptions = {
+export type ClassLocationOptions = {
   /**
-   * The file path containing help class.
+   * The file path containing the class.
    */
   target: string
   /**
-   * The name of the export to use when loading the help class from the `target` file. Defaults to `default`.
+   * The name of the export to use when loading the class from the `target` file. Defaults to `default`.
    */
   identifier: string
 }
+
+/**
+ * @deprecated Use {@link ClassLocationOptions} instead.
+ */
+export type HelpLocationOptions = ClassLocationOptions
 
 export type S3Templates = {
   baseDir?: string
@@ -174,7 +179,11 @@ export type OclifConfiguration = {
   /**
    * The location of your custom help class.
    */
-  helpClass?: string | HelpLocationOptions
+  helpClass?: string | ClassLocationOptions
+  /**
+   * The location of your custom version class.
+   */
+  versionClass?: string | ClassLocationOptions
   /**
    * Options for the help output.
    */
@@ -247,14 +256,14 @@ export type OclifConfiguration = {
   }
   /**
    * Tar flags configuration for different platforms.
-   * 
+   *
    * {
    *  "tarFlags": {
    *   "win32": "--force-local",
    *   "darwin": "--no-xattrs"
    *  }
    * }
-   * 
+   *
    */
   tarFlags?: {
     [platform: string]: string
