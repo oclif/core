@@ -13,6 +13,7 @@ import {
   ArgOutput,
   ArgProps,
   BooleanFlagProps,
+  Constraint,
   Deprecation,
   FlagInput,
   FlagOutput,
@@ -53,6 +54,7 @@ export abstract class Command {
   /** An order-dependent object of arguments for the command */
   public static args: ArgInput = {}
   public static baseFlags: FlagInput
+  public static constraints: Constraint[]
   /**
    * Emit deprecation warning when a command alias is used
    */
@@ -276,6 +278,7 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
+      constraints: options.constraints,
       flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
     }
 

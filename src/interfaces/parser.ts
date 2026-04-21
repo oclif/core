@@ -1,4 +1,5 @@
 import {Command} from '../command'
+import {Validation} from '../parser/errors'
 import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
 
 export type FlagOutput = {[name: string]: any}
@@ -443,6 +444,7 @@ export type Flag<T> = BooleanFlag<T> | OptionFlag<T>
 export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags extends ArgOutput> = {
   flags?: FlagInput<TFlags>
   baseFlags?: FlagInput<BFlags>
+  constraints?: Constraint[] | undefined
   enableJsonFlag?: true | false
   args?: ArgInput<AFlags>
   strict?: boolean | undefined
@@ -453,6 +455,7 @@ export type Input<TFlags extends FlagOutput, BFlags extends FlagOutput, AFlags e
 export type ParserInput = {
   argv: string[]
   flags: FlagInput<any>
+  constraints: Constraint[] | undefined
   args: ArgInput<any>
   strict: boolean
   context: ParserContext | undefined
@@ -466,3 +469,40 @@ export type ParserContext = Command & {
 export type FlagInput<T extends FlagOutput = {[flag: string]: any}> = {[P in keyof T]: Flag<T[P]>}
 
 export type ArgInput<T extends ArgOutput = {[arg: string]: any}> = {[P in keyof T]: Arg<T[P]>}
+
+export type SimpleFlagCriterionTester = {
+  [key: string]: (val: any) => boolean
+}
+
+export type ComplexFlagCriterionTester = (flags: FlagOutput) => boolean
+
+type SimpleFlagGroup = string
+
+type ComplexFlagGroup = {
+  type: 'all'
+  flags: string[]
+}
+
+export type FlagGroup = SimpleFlagGroup | ComplexFlagGroup
+
+export interface Constraint {
+  _evaluateAgainstFlags(flags: FlagOutput): Validation
+  allFlagCriteriaSatisfied(criterionTester: SimpleFlagCriterionTester): Constraint
+  and: Constraint
+  anyFlagCriterionSatisfied(criterionTester: SimpleFlagCriterionTester): Constraint
+  are: Constraint
+  dependentOn(...dependencyFlagGroups: FlagGroup[]): Constraint
+  exclusiveWith(...exclusionFlagGroups: FlagGroup[]): Constraint
+  is: Constraint
+  mutuallyDependent(): Constraint
+  mutuallyExclusive(): Constraint
+  or: Constraint
+  requiredAll(): Constraint
+  requiredAny(): Constraint
+  requiredAtLeastN(n: number): Constraint
+  requiredAtMostN(n: number): Constraint
+  requiredExactlyN(n: number): Constraint
+  thisIsTrue(flagTester: ComplexFlagCriterionTester): Constraint
+  unless: Constraint
+  when: Constraint
+}

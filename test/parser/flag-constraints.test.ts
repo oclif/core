@@ -1,4 +1,4 @@
-// eslint-disable max-nested-callbacks
+/* eslint-disable max-nested-callbacks */
 
 import {expect} from 'chai'
 
@@ -32,7 +32,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('flags --foo, --bar, and --baz are all required')
+        expect(message).to.include('These flags are required: --foo, --bar, --baz. Found only: --foo.')
       })
     })
 
@@ -61,7 +61,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('flags --foo, --bar, and --baz cannot all be absent')
+        expect(message).to.include('Must provide at least one of these flags: --foo, --bar, --baz.')
       })
     })
 
@@ -90,7 +90,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('Exactly 2 of the following flags must be present: --foo, --bar, --baz. Found 1.')
+        expect(message).to.include('Must provide exactly 2 of the following: --foo, --bar, --baz. Found 1.')
       })
 
       it('is violated when more than N flags are present', async () => {
@@ -101,7 +101,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('Exactly 2 of the following flags must be present: --foo, --bar, --baz. Found 3.')
+        expect(message).to.include('Must provide exactly 2 of the following: --foo, --bar, --baz. Found 3.')
       })
     })
 
@@ -130,7 +130,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('At least 2 of the following flags must be present: --foo, --bar, --baz. Found 1.')
+        expect(message).to.include('Must provide at least 2 of the following: --foo, --bar, --baz. Found 1.')
       })
 
       it('is satisfied when more than N flags are present', async () => {
@@ -173,7 +173,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('At most 2 of the following flags must be present: --foo, --bar, --baz. Found 3.')
+        expect(message).to.include('Must provide at most 2 of the following: --foo, --bar, --baz. Found 3.')
       })
     })
   })
@@ -256,7 +256,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('--foo requires one of the following: --bar; --baz.')
+        expect(message).to.include('Flag --foo requires at least one of the following: --bar, --baz.')
       })
 
       it('implies no dependency between dependency flags themselves', async () => {
@@ -299,7 +299,9 @@ describe('flag constraints tests', () => {
               message = error.message
             }
 
-            expect(message).to.include('--foo requires one of the following: combination of --bar and --baz.')
+            expect(message).to.include(
+              'Flag --foo requires at least one of the following: combination of --bar and --baz.',
+            )
           })
         })
 
@@ -338,7 +340,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              '--foo requires one of the following: combination of --bar1 and --bar2, combination of --baz1 and --baz2.',
+              'Flag --foo requires at least one of the following: combination of --bar1 and --bar2, combination of --baz1 and --baz2.',
             )
           })
         })
@@ -372,7 +374,9 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('flags --foo, --bar, --baz are mutually exclusive.')
+        expect(message).to.include(
+          'The following flags are mutually exclusive: --foo, --bar, --baz. Found: --foo, --bar.',
+        )
       })
 
       it('is satisfied when only one mutually exclusive flag is used', async () => {
@@ -408,7 +412,7 @@ describe('flag constraints tests', () => {
           message = error.message
         }
 
-        expect(message).to.include('flags --foo, --bar, --baz are mutually exclusive.')
+        expect(message).to.include('Flag --foo cannot be used with any of the following: --bar, --baz.')
       })
 
       it('is satisfied when only excluded flag is included', async () => {
@@ -490,7 +494,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              '--foo cannot be used with any of the following: (--bar1 and --bar2), (--baz1 and --baz2).',
+              'Flag --foo cannot be used with any of the following: combination of --bar1 and --bar2, combination of --baz1 and --baz2.',
             )
           })
 
