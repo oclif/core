@@ -16,28 +16,32 @@ export function combinationOf(...flagNames: string[]): FlagGroup {
   }
 }
 
+type ConstraintApplicatorFunction = (flags: FlagOutput) => string
+
 class ConstraintImpl implements Constraint {
   public readonly are: ConstraintImpl = this
   public readonly is: ConstraintImpl = this
   private readonly constrainedFlags: string[]
-  private constraintApplicatorFunction: (flags: FlagOutput) => string | null
-  private constraintType: string
+  private constraintApplicatorFunctionHolder: ConstraintApplicatorFunctionHolder =
+    new ConstraintApplicatorFunctionHolder()
   private topLevelCondition: Condition | undefined
   private underConstructionCondition: Condition | undefined
 
   public constructor(constrainedFlags: string[]) {
     this.constrainedFlags = constrainedFlags
-    this.constraintType = 'default'
-    this.constraintApplicatorFunction = () => null
   }
 
   public get and(): ConstraintImpl {
     if (this.topLevelCondition === undefined) {
-      throw new Error('FILLER: NO CONDITION')
+      throw new Error(
+        `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'and' requires a 'when' or 'unless'.`,
+      )
     }
 
     if (this.underConstructionCondition) {
-      throw new Error('FILLER: CONDITION ALREADY BEING CONSTRUCTED')
+      throw new Error(
+        `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'and' cannot directly follow '${this.underConstructionCondition.getName()}'`,
+      )
     }
 
     this.topLevelCondition = new AndCondition(this.topLevelCondition)
@@ -47,11 +51,15 @@ class ConstraintImpl implements Constraint {
 
   public get or(): ConstraintImpl {
     if (this.topLevelCondition === undefined) {
-      throw new Error('FILLER: NO CONDITION')
+      throw new Error(
+        `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'or' requires a 'when' or 'unless'.`,
+      )
     }
 
     if (this.underConstructionCondition) {
-      throw new Error('FILLER: CONDITION ALREADY BEING CONSTRUCTED')
+      throw new Error(
+        `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'or' cannot directly follow '${this.underConstructionCondition.getName()}'`,
+      )
     }
 
     this.topLevelCondition = new OrCondition(this.topLevelCondition)
@@ -65,6 +73,7 @@ class ConstraintImpl implements Constraint {
       this.topLevelCondition = newUnless
     }
 
+    // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
       this.underConstructionCondition = newUnless
     } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
@@ -74,7 +83,7 @@ class ConstraintImpl implements Constraint {
       this.underConstructionCondition.setRight(newUnless)
       this.underConstructionCondition = newUnless
     } else {
-      throw new TypeError('FILLER: UNKNOWN SCENARIO')
+      throw new TypeError('UNKNOWN CONDITION TYPE')
     }
 
     return this
@@ -86,6 +95,7 @@ class ConstraintImpl implements Constraint {
       this.topLevelCondition = newWhen
     }
 
+    // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
       this.underConstructionCondition = newWhen
     } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
@@ -95,27 +105,50 @@ class ConstraintImpl implements Constraint {
       this.underConstructionCondition.setRight(newWhen)
       this.underConstructionCondition = newWhen
     } else {
-      throw new TypeError('FILLER: Unsupported scenario')
+      throw new TypeError('UNKNOWN CONDITION TYPE')
     }
 
     return this
   }
 
   public _evaluateAgainstFlags(flags: FlagOutput): Validation {
-    const conditionSatisfied = this.topLevelCondition ? this.topLevelCondition.isSatisfied(flags) : true
-    const constraintResult = this.constraintApplicatorFunction(flags)
-    return {
-      name: this.constrainedFlags.join(','),
-      reason: constraintResult ?? '',
-      status: conditionSatisfied && constraintResult !== null ? 'failed' : 'success',
-      validationFn: this.constraintType,
+    let conditionSatisfied: boolean = false
+    try {
+      conditionSatisfied = this.topLevelCondition ? this.topLevelCondition.isSatisfied(flags) : true
+    } catch (error: any) {
+      return {
+        name: this.constrainedFlags.join(','),
+        reason: `Error evaluating constraint conditions on ${createFlagString(this.constrainedFlags)}: ${error.message}`,
+        status: 'failed',
+        validationFn: 'constraintCondition',
+      }
+    }
+
+    try {
+      const applicationResult: string = this.constraintApplicatorFunctionHolder.applyConstraintApplicatorFunction(flags)
+      return {
+        name: this.constrainedFlags.join(','),
+        reason: applicationResult,
+        status: conditionSatisfied && applicationResult !== '' ? 'failed' : 'success',
+        validationFn: this.constraintApplicatorFunctionHolder.constraintType ?? '',
+      }
+    } catch (error: any) {
+      // istanbul ignore next
+      return {
+        name: this.constrainedFlags.join(','),
+        reason: `Error evaluating constraint on ${createFlagString(this.constrainedFlags)}: ${error.message}`,
+        status: 'failed',
+        validationFn: 'constraintApplication',
+      }
     }
   }
 
   public allFlagCriteriaSatisfied(criterionTester: SingleFlagTester): ConstraintImpl {
-    this.constraintType = 'allFlagCriteriaSatisfied'
+    // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
-      throw new Error('Filler: INVALID CONDITION')
+      throw new Error(
+        `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: allFlagCriteriaSatisfied must immediately follow a when/unless/and/or`,
+      )
     } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new AllFlagCriteriaSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
@@ -123,16 +156,18 @@ class ConstraintImpl implements Constraint {
       this.underConstructionCondition.setRight(new AllFlagCriteriaSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
     } else {
-      throw new TypeError('Unsupported scenario')
+      throw new TypeError('UNKNOWN CONDITION TYPE')
     }
 
     return this
   }
 
   public anyFlagCriterionSatisfied(criterionTester: SingleFlagTester): ConstraintImpl {
-    this.constraintType = 'anyFlagCriterionSatisfied'
+    // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
-      throw new Error('Filler: INVALID CONDITION')
+      throw new Error(
+        `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: anyFlagCriterionSatisfied must immediately follow a when/unless/and/or`,
+      )
     } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new AnyFlagCriterionSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
@@ -140,29 +175,28 @@ class ConstraintImpl implements Constraint {
       this.underConstructionCondition.setRight(new AnyFlagCriterionSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
     } else {
-      throw new TypeError('Filler: Unsupported scenario')
+      throw new TypeError('UNKNOWN CONDITION TYPE')
     }
 
     return this
   }
 
   public dependentOn(...dependencyFlagGroups: FlagGroup[]): ConstraintImpl {
-    this.constraintType = 'oneWayDependency'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('dependentOn', (flags: FlagOutput) => {
       const foundConstraintFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundConstraintFlags.length === 0) {
-        return null
+        return ''
       }
 
       for (const dependencyFlagGroup of dependencyFlagGroups) {
         if (typeof dependencyFlagGroup === 'string') {
           if (dependencyFlagGroup in flags && flags[dependencyFlagGroup] !== undefined) {
-            return null
+            return ''
           }
         } else {
           const foundFlagsInDependencyGroup = filterFlagsPresentInInput(dependencyFlagGroup.flags, flags)
           if (foundFlagsInDependencyGroup.length === dependencyFlagGroup.flags.length) {
-            return null
+            return ''
           }
         }
       }
@@ -172,17 +206,15 @@ class ConstraintImpl implements Constraint {
         ? `Flags ${createFlagString(this.constrainedFlags)} require`
         : `Flag ${createFlagString(this.constrainedFlags)} requires`
       return `${header} at least one of the following${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(dependencyFlagGroups)}.`
-    }
-
+    })
     return this
   }
 
   public exclusiveWith(...exclusionFlagGroups: FlagGroup[]): ConstraintImpl {
-    this.constraintType = 'oneWayExclusivity'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('exclusiveWith', (flags: FlagOutput) => {
       const foundConstraintFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundConstraintFlags.length === 0) {
-        return null
+        return ''
       }
 
       let exclusionGroupFound = false
@@ -202,100 +234,97 @@ class ConstraintImpl implements Constraint {
       }
 
       if (!exclusionGroupFound) {
-        return null
+        return ''
       }
 
       const multipleConstrainedFlags = this.constrainedFlags.length > 1
       const header: string = multipleConstrainedFlags ? 'Flags' : 'Flag'
       return `${header} ${createFlagString(this.constrainedFlags)} cannot be used with any of the following${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(exclusionFlagGroups)}.`
-    }
-
+    })
     return this
   }
 
   public mutuallyDependent(): ConstraintImpl {
-    this.constraintType = 'mutualDependency'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('mutuallyDependent', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length === 0 || foundFlags.length === this.constrainedFlags.length) {
-        return null
+        return ''
       }
 
       return `The following flags are mutually dependent${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(this.constrainedFlags)}. Found only ${createFlagString(foundFlags)}.`
-    }
+    })
 
     return this
   }
 
   public mutuallyExclusive(): ConstraintImpl {
-    this.constraintType = 'mutualExclusivity'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('mutuallyExclusive', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length <= 1) {
-        return null
+        return ''
       }
 
       return `The following flags are mutually exclusive${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(this.constrainedFlags)}. Found: ${createFlagString(foundFlags)}.`
-    }
+    })
 
     return this
   }
 
   public requiredAll(): ConstraintImpl {
-    this.constraintType = 'requiredAll'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('requiredAll', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length === this.constrainedFlags.length) {
-        return null
+        return ''
       }
 
       const requirement = this.constrainedFlags.length > 1 ? 'These flags are required' : 'This flag is required'
       const findings = foundFlags.length > 0 ? `Found only: ${createFlagString(foundFlags)}.` : 'Found none.'
       return `${requirement}${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(this.constrainedFlags)}. ${findings}`
-    }
+    })
 
     return this
   }
 
   public requiredAny(): ConstraintImpl {
-    this.constraintType = 'requiredAny'
-    this.constraintApplicatorFunction = (flags: FlagOutput) => {
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator('requiredAny', (flags: FlagOutput) => {
       const foundFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length > 0) {
-        return null
+        return ''
       }
 
       return `Must provide at least one of these flags${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(this.constrainedFlags)}.`
-    }
+    })
 
     return this
   }
 
   public requiredAtLeastN(n: number): ConstraintImpl {
-    this.constraintType = `requiredAtLeast${n}`
-    this.constraintApplicatorFunction = (flags: FlagOutput) =>
-      required(n, 'AT_LEAST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined)
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredAtLeast${n}`, (flags: FlagOutput) =>
+      required(n, 'AT_LEAST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
+    )
     return this
   }
 
   public requiredAtMostN(n: number): ConstraintImpl {
-    this.constraintType = `requiredAtMost${n}`
-    this.constraintApplicatorFunction = (flags: FlagOutput) =>
-      required(n, 'AT_MOST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined)
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredAtMost${n}`, (flags: FlagOutput) =>
+      required(n, 'AT_MOST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
+    )
     return this
   }
 
   public requiredExactlyN(n: number): ConstraintImpl {
-    this.constraintType = `requiredExactly${n}`
-    this.constraintApplicatorFunction = (flags: FlagOutput) =>
-      required(n, 'EXACTLY_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined)
+    this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredExactly${n}`, (flags: FlagOutput) =>
+      required(n, 'EXACTLY_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
+    )
     return this
   }
 
   public thisIsTrue(flagTester: MultiFlagTester): ConstraintImpl {
-    this.constraintType = 'complexCustomConstraint'
+    // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
-      throw new Error('Filler: INVALID CONDITION')
+      throw new Error(
+        `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: thisIsTrue must immediately follow a when/unless/and/or`,
+      )
     } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new ThisIsTrueCondition(flagTester))
       this.underConstructionCondition = undefined
@@ -303,10 +332,36 @@ class ConstraintImpl implements Constraint {
       this.underConstructionCondition.setRight(new ThisIsTrueCondition(flagTester))
       this.underConstructionCondition = undefined
     } else {
-      throw new TypeError('FILLER: Unsupported scenario')
+      throw new TypeError('UNKNOWN CONDITION TYPE')
     }
 
     return this
+  }
+}
+
+class ConstraintApplicatorFunctionHolder {
+  public constraintType: string | undefined
+  private constraintApplicatorFunction: ConstraintApplicatorFunction | undefined
+
+  public applyConstraintApplicatorFunction(flags: FlagOutput): string {
+    return (
+      this.constraintApplicatorFunction ??
+      function () {
+        return ''
+      }
+    )(flags)
+  }
+
+  public setConstraintApplicator(constraintType: string, constraintFunction: ConstraintApplicatorFunction): void {
+    if (this.constraintApplicatorFunction) {
+      // This error is meant to be seen by the developer of the command, not its user.
+      throw new Error(
+        `Misconfigured Constraint: Cannot apply multiple kinds of constraint within one statement: ${this.constraintType}, ${constraintType}. Use multiple constraint expressions instead.`,
+      )
+    }
+
+    this.constraintType = constraintType
+    this.constraintApplicatorFunction = constraintFunction
   }
 }
 
@@ -333,10 +388,10 @@ function required(
   soughtFlags: string[],
   providedFlags: FlagOutput,
   hasConditions: boolean,
-): string | null {
+): string {
   const foundFlags: string[] = filterFlagsPresentInInput(soughtFlags, providedFlags)
   if (Requirement[requirementType].fn(n, foundFlags.length)) {
-    return null
+    return ''
   }
 
   return `Must provide ${Requirement[requirementType].label} ${n} of the following${hasConditions ? ' under current circumstances:' : ':'} ${createFlagString(soughtFlags)}. Found ${foundFlags.length}.`
@@ -358,6 +413,7 @@ function createFlagString(flags: FlagGroup[]): string {
 }
 
 abstract class Condition {
+  abstract getName(): string
   abstract isSatisfied(flags: FlagOutput): boolean
 }
 
@@ -365,6 +421,7 @@ abstract class UnaryOpCondition extends Condition {
   protected condition: Condition | undefined
 
   public setCondition(condition: Condition): void {
+    // istanbul ignore if - should be unreachable
     if (this.condition) {
       throw new Error('FILLER: DUPLICATE CONDITION')
     }
@@ -374,22 +431,30 @@ abstract class UnaryOpCondition extends Condition {
 }
 
 class WhenCondition extends UnaryOpCondition {
+  public getName(): string {
+    return 'when'
+  }
+
   public isSatisfied(flags: FlagOutput): boolean {
     if (this.condition) {
       return this.condition.isSatisfied(flags)
     }
 
-    throw new Error('FILLER: INVALID WHERE')
+    throw new Error("'when' expression without any conditions")
   }
 }
 
 class UnlessCondition extends UnaryOpCondition {
+  public getName(): string {
+    return 'unless'
+  }
+
   public isSatisfied(flags: FlagOutput): boolean {
     if (this.condition) {
       return !this.condition.isSatisfied(flags)
     }
 
-    throw new Error('FILLER: INVALID UNLESS')
+    throw new Error("'unless' expression without any conditions")
   }
 }
 
@@ -399,6 +464,10 @@ class AllFlagCriteriaSatisfiedCondition extends Condition {
   public constructor(tester: SingleFlagTester) {
     super()
     this.tester = tester
+  }
+
+  public getName(): string {
+    return 'allFlagCriteriaSatisfied'
   }
 
   public isSatisfied(flags: FlagOutput): boolean {
@@ -420,6 +489,10 @@ class AnyFlagCriterionSatisfiedCondition extends Condition {
     this.tester = tester
   }
 
+  public getName(): string {
+    return 'anyFlagCriterionSatisfied'
+  }
+
   public isSatisfied(flags: FlagOutput): boolean {
     for (const testedFlag of Object.keys(this.tester)) {
       if (this.tester[testedFlag](flags[testedFlag])) {
@@ -437,6 +510,10 @@ class ThisIsTrueCondition extends Condition {
   public constructor(tester: MultiFlagTester) {
     super()
     this.tester = tester
+  }
+
+  public getName(): string {
+    return 'thisIsTrue'
   }
 
   public isSatisfied(flags: FlagOutput): boolean {
@@ -459,12 +536,20 @@ abstract class BinaryCondition extends Condition {
 }
 
 class AndCondition extends BinaryCondition {
+  public getName(): string {
+    return 'and'
+  }
+
   public isSatisfied(flags: FlagOutput): boolean {
     return this.left.isSatisfied(flags) && (this.right ? this.right.isSatisfied(flags) : true)
   }
 }
 
 class OrCondition extends BinaryCondition {
+  public getName(): string {
+    return 'or'
+  }
+
   public isSatisfied(flags: FlagOutput): boolean {
     return this.left.isSatisfied(flags) || (this.right ? this.right.isSatisfied(flags) : false)
   }

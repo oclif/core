@@ -7,6 +7,185 @@ import * as Flags from '../../src/flags'
 import {parse} from '../../src/parser'
 
 describe('flag constraints tests', () => {
+  it('properly handles error thrown within constraint condition evaluation', async () => {
+    let message = ''
+    const tester = {
+      foo(_v: any) {
+        throw new Error('test-only-error!')
+      },
+    }
+    try {
+      await parse(['--foo', 'a'], {
+        flags: {
+          foo: Flags.string(),
+        },
+        constraints: [Constraints.flag('foo').is.requiredAll().when.anyFlagCriterionSatisfied(tester)],
+      })
+    } catch (error: any) {
+      message = error.message
+    }
+
+    expect(message).to.include('Error evaluating constraint conditions on --foo: test-only-error')
+  })
+
+  describe('validations', () => {
+    const flags = {
+      foo: Flags.string(),
+      bar: Flags.string(),
+      baz: Flags.string(),
+    }
+
+    it('constraint expression that applies multiple constraints is forbidden', async () => {
+      let message = ''
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const command = {
+          flags,
+          constraints: [Constraints.flag('foo').is.requiredAll().requiredAny()],
+        }
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include(
+        'Misconfigured Constraint: Cannot apply multiple kinds of constraint within one statement: requiredAll, requiredAny. Use multiple constraint expressions instead.',
+      )
+    })
+
+    for (const op of ['and', 'or']) {
+      describe(`binary operator .${op}`, () => {
+        const typedOp: 'and' | 'or' = op as 'and' | 'or'
+
+        it(`cannot use .${typedOp} without at least one preceding .when/.unless`, async () => {
+          let message = ''
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const command = {
+              flags,
+              constraints: [
+                Constraints.flag('foo')
+                  .is.requiredAny()
+                  [typedOp].thisIsTrue(() => true),
+              ],
+            }
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.include(`Misconfigured constraint on --foo: '${op}' requires a 'when' or 'unless'.`)
+        })
+
+        it(`cannot use .${typedOp} immediately after a .when/.unless`, async () => {
+          let message = ''
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const command = {
+              flags,
+              constraints: [
+                Constraints.flag('foo')
+                  .is.requiredAny()
+                  .when[typedOp].thisIsTrue(() => true),
+              ],
+            }
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.include(`Misconfigured constraint on --foo: '${op}' cannot directly follow 'when'`)
+        })
+      })
+    }
+
+    for (const logicalOp of ['allFlagCriteriaSatisfied', 'anyFlagCriterionSatisfied']) {
+      const typedOp: 'allFlagCriteriaSatisfied' | 'anyFlagCriterionSatisfied' = logicalOp as
+        | 'allFlagCriteriaSatisfied'
+        | 'anyFlagCriterionSatisfied'
+
+      it(`cannot use .${typedOp} without an immediately preceding .when/.unless/.and/.or`, async () => {
+        let message = ''
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const command = {
+            flags,
+            constraints: [Constraints.flag('foo').is.requiredAny()[typedOp]({})],
+          }
+        } catch (error: any) {
+          message = error.message
+        }
+
+        expect(message).to.include(
+          `Misconfigured constraint condition on --foo: ${typedOp} must immediately follow a when/unless/and/or`,
+        )
+      })
+    }
+
+    it('cannot use .thisIsTrue without an immediately preceding .when/.unless/.and/.or', async () => {
+      let message = ''
+      try {
+        const command = {
+          flags,
+          constraints: [
+            Constraints.flag('foo')
+              .is.requiredAny()
+              .thisIsTrue((_flags) => true),
+          ],
+        }
+        await parse(['--foo', 'a'], command)
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include(
+        `Misconfigured constraint condition on --foo: thisIsTrue must immediately follow a when/unless/and/or`,
+      )
+    })
+
+    for (const conditionOp of ['when', 'unless']) {
+      describe(`conditional operator .${conditionOp}`, () => {
+        const typedOp: 'when' | 'unless' = conditionOp as 'when' | 'unless'
+
+        it(`.${conditionOp} is invalid without any logical operators`, async () => {
+          let message = ''
+          try {
+            const command = {
+              flags,
+              constraints: [Constraints.flag('foo').is.requiredAny()[typedOp]],
+            }
+            await parse(['--foo', 'a'], command)
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.include(
+            `Error evaluating constraint conditions on --foo: '${conditionOp}' expression without any conditions`,
+          )
+        })
+
+        it(`.${conditionOp} can only hold one operator`, async () => {
+          let message = ''
+          try {
+            const command = {
+              flags,
+              constraints: [
+                Constraints.flag('foo')
+                  .is.requiredAny()
+                  [typedOp].allFlagCriteriaSatisfied({})
+                  .anyFlagCriterionSatisfied({}),
+              ],
+            }
+            await parse(['--foo', 'a'], command)
+          } catch (error: any) {
+            message = error.message
+          }
+
+          expect(message).to.include(
+            `Misconfigured constraint condition on --foo: anyFlagCriterionSatisfied must immediately follow a when/unless/and/or`,
+          )
+        })
+      })
+    }
+  })
+
   describe('requirement constraints', () => {
     describe('.requiredAll()', () => {
       const command = {
