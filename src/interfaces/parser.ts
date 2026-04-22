@@ -470,11 +470,11 @@ export type FlagInput<T extends FlagOutput = {[flag: string]: any}> = {[P in key
 
 export type ArgInput<T extends ArgOutput = {[arg: string]: any}> = {[P in keyof T]: Arg<T[P]>}
 
-export type SimpleFlagCriterionTester = {
+export type SingleFlagTester = {
   [key: string]: (val: any) => boolean
 }
 
-export type ComplexFlagCriterionTester = (flags: FlagOutput) => boolean
+export type MultiFlagTester = (flags: FlagOutput) => boolean
 
 type SimpleFlagGroup = string
 
@@ -487,9 +487,9 @@ export type FlagGroup = SimpleFlagGroup | ComplexFlagGroup
 
 export interface Constraint {
   _evaluateAgainstFlags(flags: FlagOutput): Validation
-  allFlagCriteriaSatisfied(criterionTester: SimpleFlagCriterionTester): Constraint
+  allFlagCriteriaSatisfied(criterionTester: SingleFlagTester): Constraint
   and: Constraint
-  anyFlagCriterionSatisfied(criterionTester: SimpleFlagCriterionTester): Constraint
+  anyFlagCriterionSatisfied(criterionTester: SingleFlagTester): Constraint
   are: Constraint
   dependentOn(...dependencyFlagGroups: FlagGroup[]): Constraint
   exclusiveWith(...exclusionFlagGroups: FlagGroup[]): Constraint
@@ -502,7 +502,7 @@ export interface Constraint {
   requiredAtLeastN(n: number): Constraint
   requiredAtMostN(n: number): Constraint
   requiredExactlyN(n: number): Constraint
-  thisIsTrue(flagTester: ComplexFlagCriterionTester): Constraint
+  thisIsTrue(flagTester: MultiFlagTester): Constraint
   unless: Constraint
   when: Constraint
 }

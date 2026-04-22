@@ -2,7 +2,8 @@
 
 import {expect} from 'chai'
 
-import {Constraints, Flags} from '../../src'
+import * as Constraints from '../../src/constraints'
+import * as Flags from '../../src/flags'
 import {parse} from '../../src/parser'
 
 describe('flag constraints tests', () => {
@@ -547,11 +548,11 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
-      it('constraint is not applied when any flag criterion is not satisfied', async () => {
+      it('constraint is not applied when any flag criterion is unsatisfied', async () => {
         const out = await parse(['--foo1', 'a1', '--foo2', 'a2', '--bar', 'b', '--baz', 'yeet'], command)
         expect(out.flags.foo1).to.equal('a1')
         expect(out.flags.foo2).to.equal('a2')
@@ -595,7 +596,7 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
@@ -640,7 +641,7 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
@@ -693,7 +694,7 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
     })
@@ -717,9 +718,9 @@ describe('flag constraints tests', () => {
       }
 
       it('subclause verity is irrelevant when constraint is not violated', async () => {
-        const out = await parse(['--foo1', 'a1', '--foo2', 'a2', '--bar', 'b', '--baz', 'c'], command)
+        const out = await parse(['--foo1', 'a1', '--bar', 'b', '--baz', 'c'], command)
         expect(out.flags.foo1).to.equal('a1')
-        expect(out.flags.foo2).to.equal('a2')
+        expect(out.flags.foo2).to.be.undefined
         expect(out.flags.bar).to.equal('b')
         expect(out.flags.baz).to.equal('c')
       })
@@ -733,16 +734,16 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
       it('constraint is not applied when the left subclause is false', async () => {
-        const out = await parse(['--foo1', 'a1', '--foo2', 'a2', '--bar', 'b', '--baz', 'c'], command)
+        const out = await parse(['--foo1', 'a1', '--foo2', 'a2', '--bar', 'b', '--baz', 'b'], command)
         expect(out.flags.foo1).to.equal('a1')
         expect(out.flags.foo2).to.equal('a2')
         expect(out.flags.bar).to.equal('b')
-        expect(out.flags.baz).to.equal('c')
+        expect(out.flags.baz).to.equal('b')
       })
 
       it('constraint is not applied when the right subclause is false', async () => {
@@ -773,9 +774,9 @@ describe('flag constraints tests', () => {
       it('subclause verity is irrelevant when constraint is not violated', async () => {
         const out = await parse(['--foo1', 'a1', '--bar', 'b', '--baz', 'c'], command)
         expect(out.flags.foo1).to.equal('a1')
-        expect(out.flags.foo2).to.equal('a2')
+        expect(out.flags.foo2).to.be.undefined
         expect(out.flags.bar).to.equal('b')
-        expect(out.flags.baz).to.equal('b')
+        expect(out.flags.baz).to.equal('c')
       })
 
       it('constraint is applied if only the left subclause is true', async () => {
@@ -787,7 +788,7 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
@@ -800,7 +801,7 @@ describe('flag constraints tests', () => {
         }
 
         expect(message).to.include(
-          'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+          'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
         )
       })
 
@@ -849,7 +850,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
 
@@ -862,7 +863,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
         })
@@ -893,7 +894,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
 
@@ -906,7 +907,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
 
@@ -955,7 +956,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
 
@@ -968,7 +969,7 @@ describe('flag constraints tests', () => {
             }
 
             expect(message).to.include(
-              'flags --foo1, --foo2 are mutually exclusive in this instance. Check command documentation and adjust flags accordingly.',
+              'The following flags are mutually exclusive under current circumstances: --foo1, --foo2. Found: --foo1, --foo2.',
             )
           })
 
