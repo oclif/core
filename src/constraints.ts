@@ -70,8 +70,16 @@ class ConstraintImpl implements Constraint {
   /**
    * Chain property allowing constraint conditions to be combined with logical AND.
    *
+   * By default, logical operators are evaluated left-to-right, but groups can be created with additional {@code when}/{@code unless} clauses.
+   *
    * @example <caption> when someFn returns true AND someOtherFn returns true, using --foo requires --bar to be used as well.</caption>
    * flag('foo').is.dependentOn('bar').when.thisIsTrue(someFn).and.thisIsTrue(someOtherFn)
+   *
+   * @example <caption>--foo requires --bar when (fnA returns true AND fnB returns true) OR fnC returns true</caption>
+   * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.thisIsTrue(fnB).or.thisIsTrue(fnC)
+   *
+   * @example <caption>--foo requires --bar when fnA returns true AND (fnB returns true OR fnC returns true)</caption>
+   * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.when.thisIsTrue(fnB).or.thisIsTrue(fnC)
    */
   public get and(): ConstraintImpl {
     if (this.topLevelCondition === undefined) {
@@ -94,8 +102,17 @@ class ConstraintImpl implements Constraint {
   /**
    * Chain property allowing constraint conditions to be combined with logical OR.
    *
+   * By default, logical operators are evaluated left-to-right, but groups can be created with additional {@code when}/{@code unless} clauses.
+   *
    * @example <caption> when EITHER someFn OR someOtherFn return true, using --foo requires --bar to be used as well.</caption>
    * flag('foo').is.dependentOn('bar').when.thisIsTrue(someFn).or.thisIsTrue(someOtherFn)
+   *
+   * @example <caption>--foo requires --bar when (fnA returns true AND fnB returns true) OR fnC returns true</caption>
+   * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.thisIsTrue(fnB).or.thisIsTrue(fnC)
+   *
+   * @example <caption>--foo requires --bar when fnA returns true AND (fnB returns true OR fnC returns true)</caption>
+   * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.when.thisIsTrue(fnB).or.thisIsTrue(fnC)
+   *
    */
   public get or(): ConstraintImpl {
     if (this.topLevelCondition === undefined) {
