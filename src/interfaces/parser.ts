@@ -203,7 +203,7 @@ export type ArgProps = {
    */
   multiple?: boolean
 
-  options?: string[]
+  options?: readonly string[]
   ignoreStdin?: boolean
   /**
    * If true, the value returned by defaultHelp will not be cached in the oclif.manifest.json.
@@ -261,7 +261,7 @@ export type ArgParser<T, P = CustomOptions> = (
 ) => Promise<T>
 
 export type Arg<T, P = CustomOptions> = ArgProps & {
-  options?: T[]
+  options?: readonly T[]
   defaultHelp?: ArgDefaultHelp<T>
   input: string[]
   default?: ArgDefault<T | undefined>

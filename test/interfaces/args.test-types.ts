@@ -12,11 +12,21 @@ type MyType = {
   foo: boolean
 }
 
+const stages = ['production', 'staging', 'development'] as const
+
 export class MyCommand extends Command {
   static args = {
     requiredString: Args.string({required: true}),
     optionalString: Args.string(),
     defaultString: Args.string({default: 'default'}),
+
+    optionalOption: Args.option({options: stages})(),
+    requiredOption: Args.option({options: stages})({required: true}),
+    defaultOption: Args.option({options: stages})({default: 'production'}),
+
+    optionalMultipleOption: Args.option({options: stages})({multiple: true}),
+    requiredMultipleOption: Args.option({options: stages})({multiple: true, required: true}),
+    defaultMultipleOption: Args.option({options: stages})({multiple: true, default: ['production']}),
 
     requiredBoolean: Args.boolean({required: true}),
     optionalBoolean: Args.boolean(),
@@ -114,6 +124,18 @@ export class MyCommand extends Command {
     expectType<string[]>(this.args.defaultVariadic)
     expectNotType<undefined>(this.args.defaultVariadic)
     expectType<string[] | undefined>(this.args.optionalVariadic)
+
+    expectType<(typeof stages)[number]>(this.args.requiredOption)
+    expectNotType<undefined>(this.args.requiredOption)
+    expectType<(typeof stages)[number]>(this.args.defaultOption)
+    expectNotType<undefined>(this.args.defaultOption)
+    expectType<(typeof stages)[number] | undefined>(this.args.optionalOption)
+
+    expectType<(typeof stages)[number][]>(this.args.requiredMultipleOption)
+    expectNotType<undefined>(this.args.requiredMultipleOption)
+    expectType<(typeof stages)[number][]>(this.args.defaultMultipleOption)
+    expectNotType<undefined>(this.args.defaultMultipleOption)
+    expectType<(typeof stages)[number][] | undefined>(this.args.optionalMultipleOption)
 
     return result.args
   }
