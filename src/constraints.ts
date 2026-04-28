@@ -29,7 +29,7 @@ export function flags(...flagNames: string[]): ConstraintImpl {
  * Declare a set of flags to be evaluated as one instead of separately.
  *
  * @example
- * flag('foo').is.dependentOn(combinationOf('bar', 'baz))
+ * flag('foo').is.dependentOn(combinationOf('bar', 'baz'))
  *
  * @param flagNames Flags to be combined
  */
@@ -608,7 +608,9 @@ abstract class UnaryOpCondition extends Condition {
   public setCondition(condition: Condition): void {
     // istanbul ignore if - should be unreachable
     if (this.condition) {
-      throw new Error('FILLER: DUPLICATE CONDITION')
+      throw new Error(
+        `Duplicate conditions applied to '${this.getName()}' clause: '${this.condition.getName()}' and '${condition.getName()}'.`,
+      )
     }
 
     this.condition = condition

@@ -278,7 +278,6 @@ export abstract class Command {
     const opts = {
       context: this,
       ...options,
-      constraints: options.constraints,
       flags: aggregateFlags<F, B>(options.flags, options.baseFlags, options.enableJsonFlag),
     }
 
