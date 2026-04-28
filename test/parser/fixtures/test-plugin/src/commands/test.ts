@@ -1,4 +1,4 @@
-import {Args, Command, Flags} from '../../../../../../src'
+import {Args, Command, Constraints, Flags} from '../../../../../../src'
 
 export default class Test extends Command {
   public static readonly args = {
@@ -16,7 +16,11 @@ export default class Test extends Command {
     flag2: Flags.boolean({
       dependsOn: ['flag1'],
     }),
+    flag3: Flags.string(),
+    flag4: Flags.string(),
   }
+
+  public static readonly constraints = [Constraints.flags('flag3', 'flag4').are.mutuallyDependent()]
 
   public async run(): Promise<unknown> {
     const {args, flags} = await this.parse(Test)

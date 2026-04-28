@@ -17,6 +17,7 @@ export async function parse<
     '--': options['--'],
     args: (options.args ?? {}) as ArgInput<any>,
     argv,
+    constraints: options.constraints,
     context: options.context,
     flags: (options.flags ?? {}) as FlagInput<any>,
     strict: options.strict !== false,
