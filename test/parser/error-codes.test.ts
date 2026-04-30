@@ -40,6 +40,7 @@ describe('configurable error codes', () => {
     nonExistentFlag: 104,
     requiredArgs: 105,
     unexpectedArgs: 106,
+    violatedFlagConstraint: 107,
   }
 
   beforeEach(async () => {
@@ -116,6 +117,20 @@ describe('configurable error codes', () => {
     it('should use configured exit code for failed flag validation', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(() => config.runCommand('test', ['arg1', 'arg2', 'arg3']), exitCodes.unexpectedArgs)
+    })
+  })
+
+  describe('violatedFlagConstraint', () => {
+    it('should use default exit code for violated flag constraint', async () => {
+      await runCommand(() => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']), defaultExitCode)
+    })
+
+    it('should use configured exit code for violated flag constraint', async () => {
+      sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
+      await runCommand(
+        () => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']),
+        exitCodes.violatedFlagConstraint,
+      )
     })
   })
 })

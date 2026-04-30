@@ -131,3 +131,13 @@ export class FailedFlagValidationError extends CLIParseError {
     super({exit: Cache.getInstance().get('exitCodes')?.failedFlagValidation ?? exit, message, parse})
   }
 }
+
+export class ViolatedFlagConstraintError extends CLIParseError {
+  constructor({exit, failed, parse}: CLIParseErrorOptions & {failed: Validation[]}) {
+    const reasons = failed.map((r) => r.reason)
+    const deduped = uniq(reasons)
+    const errString = deduped.length === 1 ? 'error' : 'errors'
+    const message = `The following ${errString} occurred:\n ${colorize('dim', deduped.join('\n'))}`
+    super({exit: Cache.getInstance().get('exitCodes')?.violatedFlagConstraint ?? exit, message, parse})
+  }
+}

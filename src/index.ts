@@ -32,6 +32,7 @@ checkNodeVersion()
 export * as Args from './args'
 export {Command} from './command'
 export {Config, Plugin} from './config'
+export * as Constraints from './constraints'
 export * as Errors from './errors'
 export {handle} from './errors/handle'
 export {execute} from './execute'

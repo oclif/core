@@ -162,6 +162,7 @@ export type OclifConfiguration = {
     default?: number
     failedFlagParsing?: number
     failedFlagValidation?: number
+    violatedFlagConstraint?: number
     invalidArgsSpec?: number
     nonExistentFlag?: number
     requiredArgs?: number
@@ -247,14 +248,14 @@ export type OclifConfiguration = {
   }
   /**
    * Tar flags configuration for different platforms.
-   * 
+   *
    * {
    *  "tarFlags": {
    *   "win32": "--force-local",
    *   "darwin": "--no-xattrs"
    *  }
    * }
-   * 
+   *
    */
   tarFlags?: {
     [platform: string]: string

@@ -7,6 +7,7 @@ import {
   RequiredArgsError,
   UnexpectedArgsError,
   Validation,
+  ViolatedFlagConstraintError,
 } from './errors'
 
 export async function validate(parse: {input: ParserInput; output: ParserOutput}): Promise<void> {
@@ -143,6 +144,21 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         failed,
         parse,
       })
+  }
+
+  function validateConstraints() {
+    if (parse.input.constraints) {
+      const validations = parse.input.constraints.map((c) => c._evaluateAgainstFlags(parse.output.flags))
+
+      const failed = validations.filter((v) => v.status === 'failed')
+
+      if (failed.length > 0) {
+        throw new ViolatedFlagConstraintError({
+          failed,
+          parse,
+        })
+      }
+    }
   }
 
   async function resolveFlags(flags: FlagRelationship[]): Promise<Record<string, unknown>> {
@@ -319,5 +335,6 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   }
 
   validateArgs()
-  return validateFlags()
+  await validateFlags()
+  validateConstraints()
 }
