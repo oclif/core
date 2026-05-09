@@ -1,3 +1,12 @@
+## [4.11.2](https://github.com/oclif/core/compare/4.11.1...4.11.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* **deps:** bump semver from 7.7.4 to 7.8.0 ([1471fe3](https://github.com/oclif/core/commit/1471fe3c85c1f2407f0b1d06d0b82caee58356a5))
+
+
+
 ## [4.11.1](https://github.com/oclif/core/compare/4.11.0...4.11.1) (2026-05-07)
 
 
