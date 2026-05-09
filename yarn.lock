@@ -859,10 +859,10 @@
     node-gyp "^12.1.0"
     proc-log "^6.0.0"
 
-"@oclif/core@^4", "@oclif/core@^4.8.0":
-  version "4.8.3"
-  resolved "https://registry.npmjs.org/@oclif/core/-/core-4.8.3.tgz"
-  integrity sha512-f7Rc1JBZO0wNMyDmNzP5IFOv5eM97S9pO4JUFdu2OLyk73YeBI9wog1Yyf666NOQvyptkbG1xh8inzMDQLNTyQ==
+"@oclif/core@^4", "@oclif/core@^4.11.1":
+  version "4.11.1"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.11.1.tgz#f72284b4e14c4a3f47a9952ed2234f000fc23536"
+  integrity sha512-+N5yqeoOKPnT0p+ZJiNutMILsZukZrEpsVup24XERla594EkGSWS9tiCqRfvzr1xfvf/AhM9pb0yPaf8L3Y9Uw==
   dependencies:
     ansi-escapes "^4.3.2"
     ansis "^3.17.0"
@@ -874,7 +874,7 @@
     indent-string "^4.0.0"
     is-wsl "^2.2.0"
     lilconfig "^3.1.3"
-    minimatch "^10.2.4"
+    minimatch "^10.2.5"
     semver "^7.7.3"
     string-width "^4.2.3"
     supports-color "^8"
@@ -891,11 +891,11 @@
     "@oclif/core" "^4"
 
 "@oclif/plugin-plugins@^5":
-  version "5.4.62"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.62.tgz#55e92740dcac28a7520b73dfafbad1e5cd0a0367"
-  integrity sha512-AFFKQpn/SHJE5ETiyQYBJjg7895WmvrBjEKvLWnJX+fNuOVSf6WLbiRqJI7kEaLUmmL8O1EtMcc18COxTOSgIw==
+  version "5.4.65"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-plugins/-/plugin-plugins-5.4.65.tgz#fdcbcecf469cdda354569aa3d57cc6446816979f"
+  integrity sha512-K89X9huMks8ZEsr9uuoG+iStMdCsDGyeO3WiS42sHQz+87BTPvsaW8w5LsDtndSrO9TwLyMSFv6K46D+j0Ltag==
   dependencies:
-    "@oclif/core" "^4.8.0"
+    "@oclif/core" "^4.11.1"
     ansis "^3.17.0"
     debug "^4.4.0"
     npm "^11.13.0"
@@ -5042,7 +5042,7 @@ min-indent@^1.0.0:
   resolved "https://registry.npmjs.org/min-indent/-/min-indent-1.0.1.tgz"
   integrity sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
 
-minimatch@^10.0.3, minimatch@^10.1.1, minimatch@^10.2.2, minimatch@^10.2.4, minimatch@^10.2.5:
+minimatch@^10.0.3, minimatch@^10.1.1, minimatch@^10.2.2, minimatch@^10.2.5:
   version "10.2.5"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-10.2.5.tgz#bd48687a0be38ed2961399105600f832095861d1"
   integrity sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==
