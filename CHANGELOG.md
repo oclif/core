@@ -1,3 +1,12 @@
+## [4.11.3](https://github.com/oclif/core/compare/4.11.2...4.11.3) (2026-05-15)
+
+
+### Bug Fixes
+
+* updating tinyglobby dependency [skip-validate-pr] ([1dc29ff](https://github.com/oclif/core/commit/1dc29ffa97964467f9fc2f554081ad0684d0fe47))
+
+
+
 ## [4.11.2](https://github.com/oclif/core/compare/4.11.1...4.11.2) (2026-05-09)
 
 
