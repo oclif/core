@@ -4,6 +4,7 @@ import {CLIError} from './errors'
 import {loadHelpClass} from './help'
 import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfaces'
 import {dirExists, fileExists} from './util/fs'
+import {loadVersionClass} from './version'
 
 type NotArray<T> = T extends Array<any> ? never : T
 /**
@@ -156,7 +157,9 @@ export const version = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<v
     description: 'Show CLI version.',
     ...opts,
     async parse(_, ctx) {
-      ctx.log(ctx.config.userAgent)
+      const VersionClass = await loadVersionClass(ctx.config)
+      const versionInstance = new VersionClass(ctx.config)
+      await versionInstance.showVersion()
       ctx.exit(0)
     },
   })
