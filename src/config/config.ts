@@ -1,4 +1,5 @@
 import * as ejs from 'ejs'
+import {execSync} from 'node:child_process'
 import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
 import {join, resolve, sep} from 'node:path'
 import {fileURLToPath, URL} from 'node:url'
@@ -181,22 +182,11 @@ export class Config implements IConfig {
 
   protected _shell(): string {
     let shellPath
-    const {COMSPEC} = process.env
     const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
     if (SHELL) {
       shellPath = SHELL.split('/')
-    } else if (
-      this.windows &&
-      (process.title.toLowerCase().includes('powershell') || process.title.toLowerCase().includes('pwsh'))
-    ) {
-      shellPath = ['powershell']
-    } else if (
-      this.windows &&
-      (process.title.toLowerCase().includes('command prompt') || process.title.toLowerCase().includes('cmd'))
-    ) {
-      shellPath = ['cmd.exe']
-    } else if (this.windows && COMSPEC) {
-      shellPath = COMSPEC.split(/\\|\//)
+    } else if (this.windows) {
+      shellPath = [this.determineWindowsShell()]
     } else {
       shellPath = ['unknown']
     }
@@ -211,8 +201,8 @@ export class Config implements IConfig {
       join(this.home, category === 'data' ? '.local/share' : '.' + category)
     return join(base, this.dirname)
   }
-  public findCommand(id: string, opts: {must: true}): Command.Loadable
 
+  public findCommand(id: string, opts: {must: true}): Command.Loadable
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
 
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
@@ -689,6 +679,20 @@ export class Config implements IConfig {
       bucket,
       host,
       templates,
+    }
+  }
+
+  private determineWindowsShell(): string {
+    try {
+      const parentProcessName = execSync(
+        `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID - ${process.ppid}').Name"`,
+        {encoding: 'utf8'},
+      )
+      return parentProcessName.includes('powershell') || parentProcessName.includes('pwsh')
+        ? 'powershell'
+        : (process.env.COMSPEC ?? 'cmd.exe')
+    } catch {
+      return process.env.COMSPEC ?? 'cmd.exe'
     }
   }
 

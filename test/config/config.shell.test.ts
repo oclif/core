@@ -5,7 +5,10 @@ import {sep} from 'node:path'
 import {Config} from '../../src'
 
 const getShell = () =>
-  osUserInfo().shell?.split(sep)?.pop() || (process.platform === 'win32' ? 'powershell' : 'unknown')
+  osUserInfo().shell?.split(sep)?.pop() ||
+  // When you use yarn or npx or whatever to run the tests on Windows, it will use the system's default shell, which
+  // derived from COMSPEC and is almost always 'cmd.exe'
+  (process.platform === 'win32' ? 'cmd.exe' : 'unknown')
 
 describe('config shell', () => {
   it('has a default shell', async () => {
