@@ -1,7 +1,6 @@
 import * as ejs from 'ejs'
-import {execSync} from 'node:child_process'
-import {arch, userInfo as osUserInfo, release, tmpdir, type} from 'node:os'
-import {join, resolve, sep} from 'node:path'
+import {arch, release, tmpdir, type} from 'node:os'
+import {join, resolve} from 'node:path'
 import {fileURLToPath, URL} from 'node:url'
 
 import Cache from '../cache'
@@ -19,7 +18,7 @@ import {settings} from '../settings'
 import {determinePriority} from '../util/determine-priority'
 import {safeReadJson} from '../util/fs'
 import {toStandardizedId} from '../util/ids'
-import {getHomeDir, getPlatform} from '../util/os'
+import {getHomeDir, getPlatform, getShell} from '../util/os'
 import {compact, isProd} from '../util/util'
 import {ux} from '../ux'
 import {parseTheme} from '../ux/theme'
@@ -180,20 +179,6 @@ export class Config implements IConfig {
     }
   }
 
-  protected _shell(): string {
-    let shellPath
-    const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(sep)?.pop()
-    if (SHELL) {
-      shellPath = SHELL.split('/')
-    } else if (this.windows) {
-      shellPath = [this.determineWindowsShell()]
-    } else {
-      shellPath = ['unknown']
-    }
-
-    return shellPath.at(-1) ?? 'unknown'
-  }
-
   protected dir(category: 'cache' | 'config' | 'data'): string {
     const base =
       process.env[`XDG_${category.toUpperCase()}_HOME`] ||
@@ -324,7 +309,7 @@ export class Config implements IConfig {
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
-    this.shell = this._shell()
+    this.shell = getShell()
 
     this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
@@ -679,20 +664,6 @@ export class Config implements IConfig {
       bucket,
       host,
       templates,
-    }
-  }
-
-  private determineWindowsShell(): string {
-    try {
-      const parentProcessName = execSync(
-        `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
-        {encoding: 'utf8'},
-      )
-      return parentProcessName.includes('powershell') || parentProcessName.includes('pwsh')
-        ? 'powershell'
-        : (process.env.COMSPEC ?? 'cmd.exe')
-    } catch {
-      return process.env.COMSPEC ?? 'cmd.exe'
     }
   }
 

@@ -23,7 +23,6 @@ describe('config shell', () => {
       },
     })
     await config.load()
-    // @ts-expect-error because _shell is private
-    expect(config._shell()).to.equal(getShell(), `SHELL: ${process.env.SHELL} COMSPEC: ${process.env.COMSPEC}`)
+    expect(config.shell).to.equal(getShell(), `SHELL: ${process.env.SHELL} COMSPEC: ${process.env.COMSPEC}`)
   })
 })
