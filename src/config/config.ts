@@ -685,7 +685,7 @@ export class Config implements IConfig {
   private determineWindowsShell(): string {
     try {
       const parentProcessName = execSync(
-        `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID - ${process.ppid}').Name"`,
+        `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
         {encoding: 'utf8'},
       )
       return parentProcessName.includes('powershell') || parentProcessName.includes('pwsh')
