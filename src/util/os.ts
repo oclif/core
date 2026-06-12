@@ -33,7 +33,7 @@ export function getShell(): string {
   if (SHELL) {
     shellPath = SHELL.split('/')
   } else if (getPlatform() === 'win32') {
-    shellPath = [determineWindowsShell()]
+    shellPath = determineWindowsShell().split(path.sep)
   } else {
     shellPath = ['unknown']
   }
