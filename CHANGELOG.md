@@ -1,3 +1,15 @@
+## [4.11.5](https://github.com/oclif/core/compare/4.11.4...4.11.5) (2026-06-15)
+
+
+### Bug Fixes
+
+* refactored shell identification code ([a33c256](https://github.com/oclif/core/commit/a33c25607551960ce0ea6351f89260b7863adacd))
+* test failure ([a6ebe3e](https://github.com/oclif/core/commit/a6ebe3e1171919360256e01f55f48011dd1e6104))
+* typo in powershell command ([e8b6efa](https://github.com/oclif/core/commit/e8b6efa4f87222e2d4e83cee23cd98c3b758b555))
+* windows shell identification is more reliable @W-22969497@ ([ee8376d](https://github.com/oclif/core/commit/ee8376d6136d606ecc5500d1404928231b2ebe64))
+
+
+
 ## [4.11.4](https://github.com/oclif/core/compare/4.11.3...4.11.4) (2026-05-23)
 
 
