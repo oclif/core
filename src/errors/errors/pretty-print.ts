@@ -30,28 +30,47 @@ const formatSuggestions = (suggestions?: string[]): string | undefined => {
   return `${label}\n${indent(multiple, 2)}`
 }
 
-export default function prettyPrint(error: Error & PrettyPrintableError & CLIErrorDisplayOptions): string | undefined {
-  if (settings.debug) {
-    return error.stack
+type CombinedErrorType = Error & PrettyPrintableError & CLIErrorDisplayOptions
+
+function isCombinedErrorType(obj: any): obj is CombinedErrorType {
+  return Boolean(obj) && 'name' in obj && 'message' in obj
+}
+
+export default function prettyPrint(error: CombinedErrorType): string | undefined {
+  const prettyPrintedErrors: string[] = []
+  let currentError: unknown = error
+  let isDeep: boolean = false
+  while (isCombinedErrorType(currentError)) {
+    if (settings.debug && currentError.stack) {
+      prettyPrintedErrors.push(`${isDeep ? 'Caused by: ' : ''}${currentError.stack}`)
+    } else {
+      const {bang, code, message, name: errorSuffix, ref, suggestions} = currentError
+
+      // errorSuffix is pulled from the 'name' property on CLIError
+      // and is like either Error or Warning
+      const formattedHeader = message ? `${errorSuffix || 'Error'}: ${message}` : undefined
+      const formattedCode = code ? `Code: ${code}` : undefined
+      const formattedSuggestions = formatSuggestions(suggestions)
+      const formattedReference = ref ? `Reference: ${ref}` : undefined
+
+      const formatted = [formattedHeader, formattedCode, formattedSuggestions, formattedReference]
+        .filter(Boolean)
+        .join('\n')
+
+      let output = `${isDeep ? 'Caused by: ' : ''}${formatted}`
+      output = wrap(output, errtermwidth - 6, {hard: true, trim: false} as any)
+      if (!settings.debug) {
+        output = indent(output, 3)
+        output = indent(output, 1, {includeEmptyLines: true, indent: bang || ''} as any)
+        output = indent(output, 1)
+      }
+
+      prettyPrintedErrors.push(output)
+    }
+
+    isDeep = true
+    currentError = currentError.cause ?? null
   }
 
-  const {bang, code, message, name: errorSuffix, ref, suggestions} = error
-
-  // errorSuffix is pulled from the 'name' property on CLIError
-  // and is like either Error or Warning
-  const formattedHeader = message ? `${errorSuffix || 'Error'}: ${message}` : undefined
-  const formattedCode = code ? `Code: ${code}` : undefined
-  const formattedSuggestions = formatSuggestions(suggestions)
-  const formattedReference = ref ? `Reference: ${ref}` : undefined
-
-  const formatted = [formattedHeader, formattedCode, formattedSuggestions, formattedReference]
-    .filter(Boolean)
-    .join('\n')
-
-  let output = wrap(formatted, errtermwidth - 6, {hard: true, trim: false} as any)
-  output = indent(output, 3)
-  output = indent(output, 1, {includeEmptyLines: true, indent: bang || ''} as any)
-  output = indent(output, 1)
-
-  return output
+  return prettyPrintedErrors.join('\n')
 }
