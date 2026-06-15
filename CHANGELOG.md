@@ -1,3 +1,12 @@
+## [4.11.6](https://github.com/oclif/core/compare/4.11.5...4.11.6) (2026-06-15)
+
+
+### Bug Fixes
+
+* causative errors are now also pretty-printed. @W-22797799@ ([e4dd03c](https://github.com/oclif/core/commit/e4dd03c70d212bf0d1736358b2bca073d5e49f12))
+
+
+
 ## [4.11.5](https://github.com/oclif/core/compare/4.11.4...4.11.5) (2026-06-15)
 
 
