@@ -1,7 +1,7 @@
 import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
-import {Command as Base, Flags} from '../../src'
+import {Command as Base, Errors, Flags} from '../../src'
 
 class Command extends Base {
   static description = 'test command'
@@ -370,6 +370,36 @@ describe('command', () => {
 
       const cmd = new CMD(['--json'], {} as any)
       expect(cmd.jsonEnabled()).to.equal(false)
+    })
+  })
+
+  describe('--json error rendering', () => {
+    it('includes the message of a plain Error', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          throw new Error('boom under json')
+        }
+      }
+
+      const {stdout} = await captureOutput(async () => CMD.run(['--json']))
+      expect(JSON.parse(stdout).error.message).to.equal('boom under json')
+    })
+
+    it('includes the message of a CLIError alongside its oclif metadata', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          throw new Errors.CLIError('kaboom under json')
+        }
+      }
+
+      const {stdout} = await captureOutput(async () => CMD.run(['--json']))
+      const json = JSON.parse(stdout)
+      expect(json.error.message).to.equal('kaboom under json')
+      expect(json.error.oclif.exit).to.equal(2)
     })
   })
 })
