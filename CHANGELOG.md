@@ -1,3 +1,12 @@
+## [4.11.7](https://github.com/oclif/core/compare/4.11.6...4.11.7) (2026-06-17)
+
+
+### Bug Fixes
+
+* include error message in --json output ([2cb3a76](https://github.com/oclif/core/commit/2cb3a7620eb2e11d11a155bb51d6bf91cca9384f)), closes [#1608](https://github.com/oclif/core/issues/1608)
+
+
+
 ## [4.11.6](https://github.com/oclif/core/compare/4.11.5...4.11.6) (2026-06-15)
 
 
