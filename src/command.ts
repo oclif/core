@@ -302,6 +302,13 @@ export abstract class Command {
   public abstract run(): Promise<any>
 
   protected toErrorJson(err: unknown): any {
+    if (err instanceof Error) {
+      // `Error.prototype.message`/`.name` are non-enumerable, so they are dropped
+      // by `JSON.stringify` in `logJson`. Surface them explicitly while preserving
+      // any enumerable own properties (e.g. a `CLIError`'s `oclif` metadata).
+      return {error: {...err, message: err.message, name: err.name}}
+    }
+
     return {error: err}
   }
 
