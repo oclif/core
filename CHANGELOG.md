@@ -1,3 +1,12 @@
+## [4.11.9](https://github.com/oclif/core/compare/4.11.8...4.11.9) (2026-06-21)
+
+
+### Bug Fixes
+
+* **deps:** bump tar from 7.5.12 to 7.5.16 ([153400e](https://github.com/oclif/core/commit/153400ebb3690f40621961c69c95a90ebd1994a2))
+
+
+
 ## [4.11.8](https://github.com/oclif/core/compare/4.11.7...4.11.8) (2026-06-21)
 
 
