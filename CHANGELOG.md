@@ -1,3 +1,12 @@
+## [4.11.11](https://github.com/oclif/core/compare/4.11.10...4.11.11) (2026-06-23)
+
+
+### Bug Fixes
+
+* **deps:** bump undici from 6.25.0 to 6.27.0 ([319945a](https://github.com/oclif/core/commit/319945a3df0ea99e96053b170c455baa0f4812a6))
+
+
+
 ## [4.11.10](https://github.com/oclif/core/compare/4.11.9...4.11.10) (2026-06-22)
 
 
