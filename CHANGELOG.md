@@ -1,3 +1,12 @@
+## [4.11.12](https://github.com/oclif/core/compare/4.11.11...4.11.12) (2026-07-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @sigstore/verify from 3.1.0 to 3.1.1 ([e00068f](https://github.com/oclif/core/commit/e00068f19a0a4a1ae6cb8ab7c2cb39cf504f0f36))
+
+
+
 ## [4.11.11](https://github.com/oclif/core/compare/4.11.10...4.11.11) (2026-06-23)
 
 
