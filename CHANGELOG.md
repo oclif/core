@@ -1,3 +1,12 @@
+## [4.11.14](https://github.com/oclif/core/compare/4.11.13...4.11.14) (2026-07-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @sigstore/core from 3.2.0 to 3.2.1 ([b45271f](https://github.com/oclif/core/commit/b45271f2816313df69b292778b46c317a7c629a1))
+
+
+
 ## [4.11.13](https://github.com/oclif/core/compare/4.11.12...4.11.13) (2026-07-02)
 
 
