@@ -1,3 +1,12 @@
+## [4.11.13](https://github.com/oclif/core/compare/4.11.12...4.11.13) (2026-07-02)
+
+
+### Bug Fixes
+
+* **deps:** bump sigstore from 4.1.0 to 4.1.1 ([5d7fe54](https://github.com/oclif/core/commit/5d7fe5425b666451ad6573859d34a4d55b830850))
+
+
+
 ## [4.11.12](https://github.com/oclif/core/compare/4.11.11...4.11.12) (2026-07-02)
 
 
