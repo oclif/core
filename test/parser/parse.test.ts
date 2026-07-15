@@ -1376,6 +1376,76 @@ See more help with --help`)
 
       expect(message).to.include('Expected invalidopt to be one of: myopt, myotheropt')
     })
+
+    describe('Args.option()', () => {
+      const stages = ['production', 'staging', 'development'] as const
+
+      it('parses a single valid option', async () => {
+        const out = await parse(['staging'], {
+          args: {stage: Args.option({options: stages})()},
+        })
+        expect(out.args.stage).to.equal('staging')
+      })
+
+      it('rejects an invalid option', async () => {
+        try {
+          await parse(['invalid'], {
+            args: {stage: Args.option({options: stages})()},
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Expected invalid to be one of: production, staging, development')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('applies the default when the arg is omitted', async () => {
+        const out = await parse([], {
+          args: {stage: Args.option({options: stages})({default: 'production'})},
+        })
+        expect(out.args.stage).to.equal('production')
+      })
+
+      it('errors when a required option is missing', async () => {
+        try {
+          await parse([], {
+            args: {stage: Args.option({options: stages})({required: true})},
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Missing 1 required arg')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+
+      it('parses multiple valid options', async () => {
+        const out = await parse(['production', 'staging', 'development'], {
+          args: {stage: Args.option({options: stages})({multiple: true})},
+        })
+        expect(out.args.stage).to.deep.equal(['production', 'staging', 'development'])
+      })
+
+      it('rejects when one of multiple options is invalid', async () => {
+        try {
+          await parse(['production', 'invalid'], {
+            args: {stage: Args.option({options: stages})({multiple: true})},
+          })
+          assert.fail('Expected error')
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            expect(error.message).to.include('Expected invalid to be one of: production, staging, development')
+          } else {
+            assert.fail('Expected an Error instance')
+          }
+        }
+      })
+    })
   })
 
   describe('env', () => {
