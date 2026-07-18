@@ -137,7 +137,7 @@ export class Help extends HelpBase {
     return this.section('COMMANDS', body)
   }
 
-  protected formatRoot(): string {
+  public formatRoot(): string {
     const help = new RootHelp(this.config, this.opts)
     return help.root()
   }

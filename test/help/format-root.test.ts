@@ -21,7 +21,6 @@ describe('formatRoot', () => {
   })
 
   function getRootHelp(): string {
-    // @ts-expect-error private member
     const root = new Help(config).formatRoot()
     return ansis
       .strip(root)
