@@ -142,6 +142,7 @@ jobs:
       preSwapCommands: 'npx yarn-deduplicate; yarn install'
       preExternalBuildCommands: 'shx rm -rf node_modules/@salesforce/sf-plugins-core/node_modules/@oclif/core'
       ignoreScripts: true
+      branch: ${{ matrix.externalProjectGitUrl == https://github.com/salesforcecli/plugin-user && 'jf/auth-fix' || 'main' }}
     secrets:
       TESTKIT_AUTH_URL: ${{ secrets.TESTKIT_AUTH_URL }}
       TESTKIT_HUB_USERNAME: ${{ secrets.TESTKIT_HUB_USERNAME }}
