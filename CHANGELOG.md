@@ -1,3 +1,12 @@
+# [4.12.0](https://github.com/oclif/core/compare/4.11.14...4.12.0) (2026-07-21)
+
+
+### Features
+
+* add `Args.option()` for typed arg options ([93139f7](https://github.com/oclif/core/commit/93139f70d058a4f7dc6725a8fadfd5391001ff27))
+
+
+
 ## [4.11.14](https://github.com/oclif/core/compare/4.11.13...4.11.14) (2026-07-02)
 
 
