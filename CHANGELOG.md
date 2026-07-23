@@ -1,3 +1,12 @@
+# [4.13.0](https://github.com/oclif/core/compare/4.12.0...4.13.0) (2026-07-23)
+
+
+### Features
+
+* expose root help formatter ([644c4aa](https://github.com/oclif/core/commit/644c4aaf82d82315e0db7d4bfd3422ad8a80dbff))
+
+
+
 # [4.12.0](https://github.com/oclif/core/compare/4.11.14...4.12.0) (2026-07-21)
 
 
