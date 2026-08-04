@@ -1,3 +1,12 @@
+## [4.13.3](https://github.com/oclif/core/compare/4.13.2...4.13.3) (2026-08-04)
+
+
+### Bug Fixes
+
+* **deps:** bump ip-address from 10.2.0 to 10.4.0 ([e13240b](https://github.com/oclif/core/commit/e13240be167ccca8db3bcfb861629e018f50a776))
+
+
+
 ## [4.13.2](https://github.com/oclif/core/compare/4.13.1...4.13.2) (2026-07-27)
 
 
