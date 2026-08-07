@@ -28,7 +28,6 @@ describe('formatCommand', () => {
 multiline help`,
         enableJsonFlag: true,
         args: {
-          // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use'}),
         },
         flags: {
@@ -82,7 +81,6 @@ ALIASES
         id: 'apps:create',
         description: 'creates an app',
         args: {
-          // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use', hidden: true}),
         },
         flags: {
@@ -112,7 +110,6 @@ DESCRIPTION
           description: 'description of apps:create',
           enableJsonFlag: true,
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'.repeat(35)}),
           },
           flags: {
@@ -169,7 +166,6 @@ ALIASES
           aliases: ['app:init', 'create'],
           enableJsonFlag: true,
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'.repeat(35)}),
           },
           flags: {
@@ -271,7 +267,6 @@ DESCRIPTION
           aliases: ['app:init', 'create'],
           enableJsonFlag: true,
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'}),
           },
           flags: {
