@@ -309,7 +309,7 @@ export class Config implements IConfig {
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
-    this.shell = getShell()
+    this.shell = await getShell()
 
     this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')

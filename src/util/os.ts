@@ -1,7 +1,9 @@
-import WSL from 'is-wsl'
 import {execSync} from 'node:child_process'
 import {homedir, userInfo as osUserInfo, platform} from 'node:os'
 import path from 'node:path'
+
+// eslint-disable-next-line perfectionist/sort-imports -- Conflicts with other import rules in the case of `require` statements.
+const wslUtils = require('wsl-utils')
 
 /**
  * Call os.homedir() and return the result
@@ -24,16 +26,16 @@ export function getHomeDir(): string {
  * @returns The process' platform
  */
 export function getPlatform(): 'wsl' | NodeJS.Platform {
-  return WSL ? 'wsl' : platform()
+  return wslUtils.isWsl ? 'wsl' : platform()
 }
 
-export function getShell(): string {
+export async function getShell(): Promise<string> {
   let shellPath
   const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(path.sep)?.pop()
   if (SHELL) {
     shellPath = SHELL.split('/')
   } else if (getPlatform() === 'win32') {
-    shellPath = determineWindowsShell().split(path.sep)
+    shellPath = (await determineWindowsShell()).split(path.sep)
   } else {
     shellPath = ['unknown']
   }
@@ -41,10 +43,10 @@ export function getShell(): string {
   return shellPath.at(-1) ?? 'unknown'
 }
 
-function determineWindowsShell(): string {
+async function determineWindowsShell(): Promise<string> {
   try {
     const parentProcessName = execSync(
-      `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
+      `${await wslUtils.powerShellPath()} -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
       {encoding: 'utf8'},
     )
     return parentProcessName.includes('powershell') || parentProcessName.includes('pwsh')
