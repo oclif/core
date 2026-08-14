@@ -43,7 +43,7 @@ describe('Config with flexible taxonomy', () => {
 
   async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
     sinon.stub(os, 'getHomeDir').returns('/my/home')
-    sinon.stub(os, 'getPlatform').returns('darwin')
+    sinon.stub(os, 'getPlatform').resolves('darwin')
 
     const load = async (): Promise<void> => {}
     const findCommand = async (): Promise<Command.Class> => MyCommandClass

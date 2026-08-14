@@ -116,7 +116,7 @@ describe('Config', () => {
   describe('darwin', () => {
     it('should have darwin specific paths', async () => {
       sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sinon.stub(os, 'getPlatform').returns('darwin')
+      sinon.stub(os, 'getPlatform').resolves('darwin')
       const config = await Config.load()
 
       expect(config).to.have.property('cacheDir', join('/my/home/Library/Caches/@oclif/core'))
@@ -129,7 +129,7 @@ describe('Config', () => {
   describe('linux', () => {
     it('should have linux specific paths', async () => {
       sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sinon.stub(os, 'getPlatform').returns('linux')
+      sinon.stub(os, 'getPlatform').resolves('linux')
       const config = await Config.load()
 
       expect(config).to.have.property('cacheDir', join('/my/home/.cache/@oclif/core'))
@@ -142,7 +142,7 @@ describe('Config', () => {
   describe('win32', () => {
     it('should have win32 specific paths', async () => {
       sinon.stub(os, 'getHomeDir').returns(join('/my/home'))
-      sinon.stub(os, 'getPlatform').returns('win32')
+      sinon.stub(os, 'getPlatform').resolves('win32')
       process.env.LOCALAPPDATA = '/my/home/localappdata'
       const config = await Config.load()
 
@@ -248,7 +248,7 @@ describe('Config', () => {
   describe('findCommand', () => {
     async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
       sinon.stub(os, 'getHomeDir').returns('/my/home')
-      sinon.stub(os, 'getPlatform').returns('darwin')
+      sinon.stub(os, 'getPlatform').resolves('darwin')
 
       class MyCommandClass extends Command {
         aliases: string[] = []
