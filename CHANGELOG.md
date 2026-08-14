@@ -1,3 +1,12 @@
+## [4.13.5](https://github.com/oclif/core/compare/4.13.4...4.13.5) (2026-08-14)
+
+
+### Bug Fixes
+
+* replaced require with dynamic import (W-23807278) ([d35e325](https://github.com/oclif/core/commit/d35e325edc943bfa54e1f120c835cf6f37cd954e))
+
+
+
 ## [4.13.4](https://github.com/oclif/core/compare/4.13.3...4.13.4) (2026-08-14)
 
 
