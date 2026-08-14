@@ -1,3 +1,12 @@
+## [4.13.4](https://github.com/oclif/core/compare/4.13.3...4.13.4) (2026-08-14)
+
+
+### Bug Fixes
+
+* resolved security vulnerability in powershell path (W-23807278) ([911e9d2](https://github.com/oclif/core/commit/911e9d257d4862dd4935f05e944fa5ab3bf948e9))
+
+
+
 ## [4.13.3](https://github.com/oclif/core/compare/4.13.2...4.13.3) (2026-08-04)
 
 
