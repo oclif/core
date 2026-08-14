@@ -10,11 +10,16 @@ const convertToFileURL = (filepath: string) => pathToFileURL(filepath).toString(
 
 let root = resolve(__dirname, '../../package.json')
 const pjson = require(root)
-const version = `@oclif/core/${pjson.version} ${getPlatform()}-${process.arch} node-${process.version}`
 
 root = convertToFileURL(root)
 
 describe('main-esm', () => {
+  let version: string
+
+  before(async () => {
+    version = `@oclif/core/${pjson.version} ${await getPlatform()}-${process.arch} node-${process.version}`
+  })
+
   it('runs plugins', async () => {
     const {stdout} = await runCommand(['plugins'], {root})
     expect(stdout).to.equal('No plugins installed.\n')
