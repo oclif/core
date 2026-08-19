@@ -1,3 +1,12 @@
+# [4.14.0](https://github.com/oclif/core/compare/4.13.5...4.14.0) (2026-08-19)
+
+
+### Features
+
+* bumping to eslint v10 (W-23473845) ([248de04](https://github.com/oclif/core/commit/248de042ece58a10c6af4708490fcfd36e881ab8))
+
+
+
 ## [4.13.5](https://github.com/oclif/core/compare/4.13.4...4.13.5) (2026-08-14)
 
 
