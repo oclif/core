@@ -37,7 +37,6 @@ export class CLIError extends Error implements OclifError {
     this.suggestions = options.suggestions
   }
 
-  // eslint-disable-next-line getter-return
   get bang(): string | undefined {
     try {
       return colorize('red', process.platform === 'win32' ? '»' : '›')
@@ -73,7 +72,6 @@ export namespace CLIError {
       this.name = 'Warning'
     }
 
-    // eslint-disable-next-line getter-return
     get bang(): string | undefined {
       try {
         return colorize('yellow', process.platform === 'win32' ? '»' : '›')

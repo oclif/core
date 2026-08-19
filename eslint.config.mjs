@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url'
 
 const gitignorePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.gitignore')
 
+// eslint disable-next-line import-x/no-anonymous-default-export
 export default [
   includeIgnoreFile(gitignorePath),
   ...oclif,

@@ -23,7 +23,6 @@ describe('formatCommand', () => {
       makeCommandClass({
         aliases: ['app:init', 'create'],
         args: {
-          // eslint-disable-next-line camelcase
           app_name: Args.string({description: 'app to use'}),
         },
         deprecateAliases: true,
@@ -75,7 +74,6 @@ ALIASES
         makeCommandClass({
           aliases: ['app:init', 'create'],
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'.repeat(35)}),
           },
           description: 'description of apps:create',
@@ -127,7 +125,6 @@ ALIASES
         makeCommandClass({
           aliases: ['app:init', 'create'],
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'.repeat(35)}),
           },
           description: 'description of apps:create',
@@ -189,7 +186,6 @@ ALIASES
         makeCommandClass({
           aliases: ['app:init', 'create'],
           args: {
-            // eslint-disable-next-line camelcase
             app_name: Args.string({description: 'app to use'}),
           },
           description: 'description of apps:create\nthese values are after and will show up in the command description',
