@@ -2501,9 +2501,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 1
     },
-    "import-x/newline-after-import": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 3
     }
