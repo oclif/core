@@ -6,9 +6,14 @@ import {join, resolve} from 'node:path'
 import {getPlatform} from '../../src/util/os'
 
 const pjson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'))
-const version = `@oclif/core/${pjson.version} ${getPlatform()}-${process.arch} node-${process.version}`
 
 describe('main', () => {
+  let version: string
+
+  before(async () => {
+    version = `@oclif/core/${pjson.version} ${await getPlatform()}-${process.arch} node-${process.version}`
+  })
+
   it('should run plugins', async () => {
     const {result} = await runCommand<
       Array<{

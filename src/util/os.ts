@@ -1,4 +1,3 @@
-import WSL from 'is-wsl'
 import {execSync} from 'node:child_process'
 import {homedir, userInfo as osUserInfo, platform} from 'node:os'
 import path from 'node:path'
@@ -23,17 +22,17 @@ export function getHomeDir(): string {
  *
  * @returns The process' platform
  */
-export function getPlatform(): 'wsl' | NodeJS.Platform {
-  return WSL ? 'wsl' : platform()
+export async function getPlatform(): Promise<'wsl' | NodeJS.Platform> {
+  return (await import('wsl-utils')).isWsl ? 'wsl' : platform()
 }
 
-export function getShell(): string {
+export async function getShell(): Promise<string> {
   let shellPath
   const SHELL = process.env.SHELL ?? osUserInfo().shell?.split(path.sep)?.pop()
   if (SHELL) {
     shellPath = SHELL.split('/')
-  } else if (getPlatform() === 'win32') {
-    shellPath = determineWindowsShell().split(path.sep)
+  } else if ((await getPlatform()) === 'win32') {
+    shellPath = (await determineWindowsShell()).split(path.sep)
   } else {
     shellPath = ['unknown']
   }
@@ -41,10 +40,10 @@ export function getShell(): string {
   return shellPath.at(-1) ?? 'unknown'
 }
 
-function determineWindowsShell(): string {
+async function determineWindowsShell(): Promise<string> {
   try {
     const parentProcessName = execSync(
-      `powershell.exe -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
+      `${await (await import('wsl-utils')).powerShellPath()} -NoProfile -Command "(Get-CimInstance Win32_Process -Filter 'ProcessID = ${process.ppid}').Name"`,
       {encoding: 'utf8'},
     )
     return parentProcessName.includes('powershell') || parentProcessName.includes('pwsh')

@@ -296,7 +296,7 @@ export class Config implements IConfig {
     this.valid = this.rootPlugin.valid
 
     this.arch = arch() === 'ia32' ? 'x86' : (arch() as any)
-    this.platform = getPlatform()
+    this.platform = await getPlatform()
     this.windows = this.platform === 'win32'
     this.bin = this.pjson.oclif.bin || this.name
     this.binAliases = this.pjson.oclif.binAliases
@@ -309,7 +309,7 @@ export class Config implements IConfig {
     if (this.platform === 'win32') this.dirname = this.dirname.replace('/', '\\')
 
     this.userAgent = `${this.name}/${this.version} ${this.platform}-${this.arch} node-${process.version}`
-    this.shell = getShell()
+    this.shell = await getShell()
 
     this.home = process.env.HOME || (this.windows && this.windowsHome()) || getHomeDir() || tmpdir()
     this.cacheDir = this.scopedEnvVar('CACHE_DIR') || this.macosCacheDir() || this.dir('cache')
