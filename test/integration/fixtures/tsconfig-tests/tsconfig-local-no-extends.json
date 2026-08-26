@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "tsconfig-local-no-extends": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "tsconfig-local-no-extends": true
   },
   "ts-node": {
     "tsconfig-local-no-extends": true

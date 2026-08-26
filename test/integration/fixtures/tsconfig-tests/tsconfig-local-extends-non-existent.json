@@ -1,9 +1,7 @@
 {
   "extends": "DOES_NOT_EXIST.json",
   "compilerOptions": {
-    "tsconfig-local-extends-non-existent": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "tsconfig-local-extends-non-existent": true
   },
   "ts-node": {
     "tsconfig-local-extends-non-existent": true

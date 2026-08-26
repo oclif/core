@@ -1,9 +1,7 @@
 {
   "extends": "@salesforce/dev-config/tsconfig-strict.json",
   "compilerOptions": {
-    "tsconfig-local-extends-local-extends-node-modules": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "tsconfig-local-extends-local-extends-node-modules": true
   },
   "ts-node": {
     "tsconfig-local-extends-local-extends-node-modules": true
