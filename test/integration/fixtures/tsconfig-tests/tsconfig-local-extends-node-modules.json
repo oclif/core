@@ -1,7 +1,9 @@
 {
   "extends": "@tsconfig/strictest/tsconfig.json",
   "compilerOptions": {
-    "tsconfig-local-extends-node-modules": true
+    "tsconfig-local-extends-node-modules": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
   },
   "ts-node": {
     "tsconfig-local-extends-node-modules": true

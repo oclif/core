@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "outDir": "./lib",
-    "rootDirs": ["./src"]
+    "rootDirs": ["./src"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
   },
   "include": ["./src/**/*"]
 }

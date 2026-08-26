@@ -1,7 +1,10 @@
 {
   "extends": "../tsconfig",
   "compilerOptions": {
-    "sourceMap": true
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "sourceMap": true,
+    "types": ["node", "mocha", "chai", "chai-as-promised", "sinon"]
   },
   "include": ["./**/*", "../src/**/*"]
 }
