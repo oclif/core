@@ -2022,23 +2022,11 @@
     }
   },
   "test/command/fixtures/bundled-cli/src/commands/foo/bar.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }
   },
   "test/command/fixtures/bundled-cli/src/commands/foo/baz.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }
@@ -2047,23 +2035,11 @@
     "@typescript-eslint/consistent-type-imports": {
       "count": 1
     },
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }
   },
   "test/command/fixtures/bundled-cli/src/index.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "import-x/newline-after-import": {
       "count": 1
     },
@@ -2072,37 +2048,7 @@
     }
   },
   "test/command/fixtures/single-cmd-cli/src/index.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
-      "count": 1
-    }
-  },
-  "test/command/fixtures/typescript/src/commands/foo/bar/fail.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/command/fixtures/typescript/src/commands/foo/bar/succeed.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/command/fixtures/typescript/src/commands/foo/baz.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
       "count": 1
     }
   },
@@ -2232,75 +2178,17 @@
       "count": 1
     }
   },
-  "test/config/fixtures/typescript/src/commands/foo/bar/baz.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/config/fixtures/typescript/src/commands/foo/bar/fail.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/config/fixtures/typescript/src/commands/foo/bar/test-result.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
   "test/config/fixtures/typescript/src/hooks/finally.ts": {
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/config/fixtures/typescript/src/hooks/init.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
       "count": 1
     }
   },
   "test/config/fixtures/typescript/src/hooks/postrun.ts": {
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
-    },
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    }
-  },
-  "test/config/fixtures/typescript/src/hooks/prerun.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
     }
   },
   "test/config/fixtures/wildcard/src/commands/foo.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }
@@ -2815,15 +2703,6 @@
     "@typescript-eslint/consistent-type-imports": {
       "count": 2
     },
-    "@typescript-eslint/no-unnecessary-type-conversion": {
-      "count": 1
-    },
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 2
     }
@@ -2841,12 +2720,6 @@
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 12
     },
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "@typescript-eslint/restrict-template-expressions": {
       "count": 1
     },
@@ -2861,29 +2734,14 @@
     },
     "unicorn/no-break-in-nested-loop": {
       "count": 2
-    },
-    "unicorn/no-unnecessary-boolean-comparison": {
-      "count": 1
     }
   },
   "test/parser/fixtures/test-plugin/src/commands/invalid.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }
   },
   "test/parser/fixtures/test-plugin/src/commands/test.ts": {
-    "@typescript-eslint/no-useless-default-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 1
-    },
     "n/file-extension-in-import": {
       "count": 1
     }

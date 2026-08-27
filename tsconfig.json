@@ -5,7 +5,7 @@
     "module": "Node16",
     "outDir": "./lib",
     "pretty": true,
-    "rootDirs": ["./src"],
+    "rootDir": "./src",
     "strict": true,
     "target": "ES2022",
     "allowSyntheticDefaultImports": true,
