@@ -1,3 +1,17 @@
+# [5.0.0](https://github.com/oclif/core/compare/4.14.0...5.0.0) (2026-08-31)
+
+
+* feat!: require Node >=22 ([940ad2d](https://github.com/oclif/core/commit/940ad2dacc6315e0aae2fbdac243dc1f5b0462e0))
+* feat!: upgrade core to V5 ([01d00b9](https://github.com/oclif/core/commit/01d00b9affc7f5dc76b35b89b6818839c1d6b0b6))
+
+
+### BREAKING CHANGES
+
+* drop EOL Node versions
+* require Node >=22, drop EOL Node versions
+
+
+
 # [4.14.0](https://github.com/oclif/core/compare/4.13.5...4.14.0) (2026-08-19)
 
 
