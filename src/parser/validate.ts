@@ -274,7 +274,9 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const base = {name, validationFn: 'validateDependsOn'}
     const resolved = await resolveFlags(flags)
 
-    const foundAll = Object.values(resolved).every((val) => val !== undefined)
+    const foundAll = Object.entries(resolved).every(
+      ([flag, value]) => value !== undefined && !parse.output.metadata.flags?.[flag]?.setFromDefault,
+    )
     if (!foundAll) {
       const formattedFlags = Object.keys(resolved)
         .map((f) => `--${f}`)

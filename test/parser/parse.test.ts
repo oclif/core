@@ -1575,6 +1575,52 @@ See more help with --help`)
 
       expect(message).to.include('All of the following must be provided when using --foo: --bar')
     })
+
+    it('fails when a dependency is set from its default', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', 'a'], {
+          flags: {
+            foo: Flags.string({dependsOn: ['bar']}),
+            bar: Flags.string({default: 'b'}),
+          },
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include('All of the following must be provided when using --foo: --bar')
+    })
+
+    it('succeeds when a dependency explicitly matches its default', async () => {
+      const out = await parse(['--foo', 'a', '--bar', 'b'], {
+        flags: {
+          foo: Flags.string({dependsOn: ['bar']}),
+          bar: Flags.string({default: 'b'}),
+        },
+      })
+
+      expect(out.flags.foo).to.equal('a')
+      expect(out.flags.bar).to.equal('b')
+    })
+  })
+
+  describe("relationships: 'all'", () => {
+    it('fails when a dependency is set from its default', async () => {
+      let message = ''
+      try {
+        await parse(['--foo', 'a'], {
+          flags: {
+            foo: Flags.string({relationships: [{flags: ['bar'], type: 'all'}]}),
+            bar: Flags.string({default: 'b'}),
+          },
+        })
+      } catch (error: any) {
+        message = error.message
+      }
+
+      expect(message).to.include('All of the following must be provided when using --foo: --bar')
+    })
   })
 
   describe('exclusive', () => {
