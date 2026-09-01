@@ -1,9 +1,21 @@
+import {fileURLToPath} from 'node:url'
+
 import {CLIError} from './errors'
 import {handle} from './errors/handle'
 import {flush} from './flush'
-import {LoadOptions} from './interfaces'
+import {LoadOptions, Options} from './interfaces'
 import {run} from './main'
 import {settings} from './settings'
+
+type ExecuteLoadOptions = LoadOptions | (Omit<Options, 'root'> & {root?: string})
+
+function resolveLoadOptions(dir?: string, loadOptions?: ExecuteLoadOptions): LoadOptions {
+  if (!dir || !loadOptions || typeof loadOptions === 'string' || '_base' in loadOptions) {
+    return (loadOptions ?? dir) as LoadOptions
+  }
+
+  return {root: dir.startsWith('file://') ? fileURLToPath(dir) : dir, ...loadOptions}
+}
 
 /**
  * Load and run oclif CLI
@@ -46,7 +58,7 @@ export async function execute(options: {
   args?: string[]
   development?: boolean
   dir?: string
-  loadOptions?: LoadOptions
+  loadOptions?: ExecuteLoadOptions
 }): Promise<unknown> {
   if (!options.dir && !options.loadOptions) {
     throw new CLIError('dir or loadOptions is required.')
@@ -58,7 +70,7 @@ export async function execute(options: {
     settings.debug = true
   }
 
-  return run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
+  return run(options.args ?? process.argv.slice(2), resolveLoadOptions(options.dir, options.loadOptions))
     .then(async (result) => {
       flush()
       return result
