@@ -1,4 +1,4 @@
-import {ArgInput} from './parser'
+import {type ArgInput} from './parser'
 
 /**
  * Infer the args that are returned by Command.parse. This is useful for when you want to assign the args as a class property.

@@ -1,8 +1,8 @@
 import {minimatch} from 'minimatch'
 import {join} from 'node:path'
 
-import {PJSON} from '../interfaces'
-import {Plugin as IPlugin, Options} from '../interfaces/plugin'
+import {type PJSON} from '../interfaces'
+import {type Plugin as IPlugin, type Options} from '../interfaces/plugin'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {readJson} from '../util/fs'
 import {isProd} from '../util/util'
@@ -38,18 +38,20 @@ function findMatchingDependencies(dependencies: Record<string, string>, patterns
 }
 
 export default class PluginLoader {
-  public errors: (Error | string)[] = []
+  public errors: Array<Error | string> = []
   public plugins: PluginsMap = new Map()
-  private pluginsProvided = false
+  private readonly pluginsProvided: boolean = false
 
   constructor(public options: PluginLoaderOptions) {
-    if (options.plugins) {
-      this.pluginsProvided = true
-      this.plugins = Array.isArray(options.plugins) ? new Map(options.plugins.map((p) => [p.name, p])) : options.plugins
+    if (!options.plugins) {
+      return
     }
+
+    this.pluginsProvided = true
+    this.plugins = Array.isArray(options.plugins) ? new Map(options.plugins.map((p) => [p.name, p])) : options.plugins
   }
 
-  public async loadChildren(opts: LoadOpts): Promise<{errors: (Error | string)[]; plugins: PluginsMap}> {
+  public async loadChildren(opts: LoadOpts): Promise<{errors: Array<Error | string>; plugins: PluginsMap}> {
     if (!this.pluginsProvided || opts.force) {
       await this.loadUserPlugins(opts)
       await this.loadDevPlugins(opts)
@@ -105,41 +107,43 @@ export default class PluginLoader {
   }
 
   private async loadDevPlugins(opts: LoadOpts): Promise<void> {
-    if (opts.devPlugins !== false) {
-      // do not load oclif.devPlugins in production
-      if (isProd()) return
-      try {
-        const {devPlugins} = opts.rootPlugin.pjson.oclif
-        if (devPlugins) {
+    if (opts.devPlugins === false) {
+      return
+    }
+
+    // do not load oclif.devPlugins in production
+    if (isProd()) return
+    try {
+      const {devPlugins} = opts.rootPlugin.pjson.oclif
+      if (devPlugins) {
+        const allDeps = {...opts.rootPlugin.pjson.dependencies, ...opts.rootPlugin.pjson.devDependencies}
+        const plugins = findMatchingDependencies(allDeps ?? {}, devPlugins)
+        await this.loadPlugins(opts.rootPlugin.root, 'dev', plugins)
+      }
+
+      const {dev: pluginAdditionsDev, path} = opts.pluginAdditions ?? {core: []}
+      if (pluginAdditionsDev) {
+        if (path) {
+          // If path is provided, load plugins from the path
+          const pjson = await readJson<PJSON>(join(path, 'package.json'))
+          const allDeps = {...pjson.dependencies, ...pjson.devDependencies}
+          const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
+          await this.loadPlugins(path, 'dev', plugins)
+        } else {
           const allDeps = {...opts.rootPlugin.pjson.dependencies, ...opts.rootPlugin.pjson.devDependencies}
-          const plugins = findMatchingDependencies(allDeps ?? {}, devPlugins)
+          const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
           await this.loadPlugins(opts.rootPlugin.root, 'dev', plugins)
         }
-
-        const {dev: pluginAdditionsDev, path} = opts.pluginAdditions ?? {core: []}
-        if (pluginAdditionsDev) {
-          if (path) {
-            // If path is provided, load plugins from the path
-            const pjson = await readJson<PJSON>(join(path, 'package.json'))
-            const allDeps = {...pjson.dependencies, ...pjson.devDependencies}
-            const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
-            await this.loadPlugins(path, 'dev', plugins)
-          } else {
-            const allDeps = {...opts.rootPlugin.pjson.dependencies, ...opts.rootPlugin.pjson.devDependencies}
-            const plugins = findMatchingDependencies(allDeps ?? {}, pluginAdditionsDev)
-            await this.loadPlugins(opts.rootPlugin.root, 'dev', plugins)
-          }
-        }
-      } catch (error: any) {
-        process.emitWarning(error)
       }
+    } catch (error: any) {
+      process.emitWarning(error)
     }
   }
 
   private async loadPlugins(
     root: string,
     type: string,
-    plugins: ({name?: string; root?: string; tag?: string; url?: string} | string)[],
+    plugins: Array<string | {name?: string; root?: string; tag?: string; url?: string}>,
     parent?: Plugin,
   ): Promise<void> {
     if (!plugins || plugins.length === 0) return

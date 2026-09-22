@@ -4,22 +4,22 @@ import {createInterface} from 'node:readline'
 
 import Cache from '../cache'
 import {
-  Arg,
-  ArgParserContext,
-  ArgToken,
-  BooleanFlag,
-  Flag,
-  FlagParserContext,
-  FlagToken,
-  Metadata,
-  MetadataFlag,
-  OptionFlag,
-  OutputArgs,
-  OutputFlags,
-  ParserContext,
-  ParserInput,
-  ParserOutput,
-  ParsingToken,
+  type Arg,
+  type ArgParserContext,
+  type ArgToken,
+  type BooleanFlag,
+  type Flag,
+  type FlagParserContext,
+  type FlagToken,
+  type Metadata,
+  type MetadataFlag,
+  type OptionFlag,
+  type OutputArgs,
+  type OutputFlags,
+  type ParserContext,
+  type ParserInput,
+  type ParserOutput,
+  type ParsingToken,
 } from '../interfaces/parser'
 import {makeDebug} from '../logger'
 import {isTruthy, last, pickBy} from '../util/util'
@@ -53,7 +53,7 @@ declare global {
   var oclif: {stdinCache?: string}
 }
 
-export const readStdin = async (): Promise<null | string> => {
+export const readStdin = async (): Promise<undefined | string> => {
   const {stdin, stdout} = process
 
   // process.stdin.isTTY is true whenever it's running in a terminal.
@@ -62,7 +62,7 @@ export const readStdin = async (): Promise<null | string> => {
   // This means that reading from stdin could hang indefinitely while waiting for a non-existent pipe.
   // Because of this, we have to set a timeout to prevent the process from hanging.
 
-  if (stdin.isTTY) return null
+  if (stdin.isTTY) return undefined
 
   if (globalThis.oclif?.stdinCache) {
     debug('resolved stdin from global cache', globalThis.oclif.stdinCache)
@@ -73,7 +73,9 @@ export const readStdin = async (): Promise<null | string> => {
     const lines: string[] = []
     const ac = new AbortController()
     const {signal} = ac
-    const timeout = setTimeout(() => ac.abort(), 10)
+    const timeout = setTimeout(() => {
+      ac.abort()
+    }, 10)
 
     const rl = createInterface({
       input: stdin,
@@ -99,7 +101,7 @@ export const readStdin = async (): Promise<null | string> => {
         debug('stdin aborted')
         clearTimeout(timeout)
         rl.close()
-        resolve(null)
+        resolve(undefined)
       },
       {once: true},
     )
@@ -124,10 +126,10 @@ export class Parser<
   TArgs extends OutputArgs<T['args']>,
 > {
   private readonly argv: string[]
-  private readonly booleanFlags: {[k: string]: BooleanFlag<any>}
+  private readonly booleanFlags: Record<string, BooleanFlag<any>>
   private readonly context: ParserContext
   private currentFlag?: OptionFlag<any>
-  private readonly flagAliases: {[k: string]: BooleanFlag<any> | OptionFlag<any>}
+  private readonly flagAliases: Record<string, BooleanFlag<any> | OptionFlag<any>>
   private readonly raw: ParsingToken[] = []
 
   constructor(private readonly input: T) {
@@ -143,7 +145,7 @@ export class Parser<
   }
 
   private get _argTokens(): ArgToken[] {
-    return this.raw.filter((o) => o.type === 'arg') as ArgToken[]
+    return this.raw.filter((o) => o.type === 'arg')
   }
 
   public async parse(): Promise<ParserOutput<TFlags, BFlags, TArgs>> {
@@ -158,12 +160,12 @@ export class Parser<
           const sliced = arg.slice(i + 1)
           this.argv.unshift(sliced)
 
-          const equalsParsed = await parseFlag(arg.slice(0, i))
-          if (!equalsParsed) {
+          const isEqualsParsed = await parseFlag(arg.slice(0, i))
+          if (!isEqualsParsed) {
             this.argv.shift()
           }
 
-          return equalsParsed
+          return isEqualsParsed
         }
 
         return false
@@ -213,17 +215,17 @@ export class Parser<
       return true
     }
 
-    let parsingFlags = true
+    let isParsingFlags = true
     const nonExistentFlags: string[] = []
-    let dashdash = false
+    let isDashdash = false
     const originalArgv = [...this.argv]
 
     while (this.argv.length > 0) {
-      const input = this.argv.shift() as string
-      if (parsingFlags && input.startsWith('-') && input !== '-') {
+      const input = this.argv.shift()!
+      if (isParsingFlags && input.startsWith('-') && input !== '-') {
         // attempt to parse as arg
         if (this.input['--'] !== false && input === '--') {
-          parsingFlags = false
+          isParsingFlags = false
           continue
         }
 
@@ -232,7 +234,7 @@ export class Parser<
         }
 
         if (input === '--') {
-          dashdash = true
+          isDashdash = true
           continue
         }
 
@@ -246,7 +248,7 @@ export class Parser<
         }
       }
 
-      if (parsingFlags && this.currentFlag && this.currentFlag.multiple && !this.currentFlag.multipleNonGreedy) {
+      if (isParsingFlags && this.currentFlag && this.currentFlag.multiple && !this.currentFlag.multipleNonGreedy) {
         this.raw.push({flag: this.currentFlag.name, input, type: 'flag'})
         continue
       }
@@ -259,7 +261,9 @@ export class Parser<
     const [{args, argv}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
     this._debugOutput(argv, args, flags)
 
-    const unsortedArgv = (dashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]) as string[]
+    const unsortedArgv = (
+      isDashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]
+    ) as string[]
 
     return {
       args: args as TArgs,
@@ -275,7 +279,7 @@ export class Parser<
     const argv: unknown[] = []
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
-    let stdinRead = false
+    let isStdinRead = false
     const ctx = this.context as ArgParserContext
 
     const parseArgInput = async (name: string, arg: Arg<unknown>, input: string): Promise<void> => {
@@ -303,9 +307,9 @@ export class Parser<
     }
 
     const tryStdin = async (name: string, arg: Arg<unknown>): Promise<void> => {
-      if (arg.ignoreStdin || stdinRead) return
+      if (arg.ignoreStdin || isStdinRead) return
       let stdin = await readStdin()
-      stdinRead = true
+      isStdinRead = true
       if (!stdin) return
       stdin = stdin.trim()
       await parseArgInput(name, arg, stdin)
@@ -473,7 +477,7 @@ export class Parser<
         // multiple with custom delimiter
         if (fws.inputFlag.flag.type === 'option' && fws.inputFlag.flag.delimiter && fws.inputFlag.flag.multiple) {
           // regex that will identify unescaped delimiters
-          const makeDelimiter = (delimiter: string) => new RegExp(`(?<!\\\\)${delimiter}`)
+          const makeDelimiter = (delimiter: string) => new RegExp(String.raw`(?<!\\)${delimiter}`)
           return {
             ...fws,
             valueFunction: async (i) =>
@@ -498,7 +502,7 @@ export class Parser<
                     )
                     .map(async (v) =>
                       parseFlagOrThrowError(v, i.inputFlag.flag, this.context, {
-                        ...(last(i.tokens) as FlagToken),
+                        ...last(i.tokens)!,
                         input: v,
                       }),
                     ),
@@ -513,9 +517,9 @@ export class Parser<
             ...fws,
             valueFunction: async (i: FlagWithStrategy) =>
               Promise.all(
-                (fws.tokens ?? []).map((token) =>
+                (fws.tokens ?? []).map(async (token) =>
                   parseFlagOrThrowError(
-                    validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input as string),
+                    validateOptions(i.inputFlag.flag as OptionFlag<any>, token.input),
                     i.inputFlag.flag,
                     this.context,
                     token,
@@ -531,7 +535,7 @@ export class Parser<
             ...fws,
             valueFunction: async (i: FlagWithStrategy) =>
               parseFlagOrThrowError(
-                validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input as string),
+                validateOptions(i.inputFlag.flag as OptionFlag<any>, last(fws.tokens)?.input!),
                 i.inputFlag.flag,
                 this.context,
                 last(fws.tokens),
@@ -558,8 +562,7 @@ export class Parser<
         if (fws.inputFlag.flag.type === 'boolean') {
           return {
             ...fws,
-            valueFunction: async (i: FlagWithStrategy) =>
-              isTruthy(process.env[i.inputFlag.flag.env as string] ?? 'false'),
+            valueFunction: async (i: FlagWithStrategy) => isTruthy(process.env[i.inputFlag.flag.env!] ?? 'false'),
           }
         }
       }
@@ -680,26 +683,26 @@ export class Parser<
       flags: fwsArrayToObject(finalFlags),
       metadata: {
         flags: Object.fromEntries(
-          finalFlags.filter((fws) => fws.metadata).map((fws) => [fws.inputFlag.name, fws.metadata as MetadataFlag]),
+          finalFlags.filter((fws) => fws.metadata).map((fws) => [fws.inputFlag.name, fws.metadata!]),
         ),
       },
     }
   }
 
   private _setNames() {
-    for (const k of Object.keys(this.input.flags)) {
-      this.input.flags[k].name = k
+    for (const [k, value] of Object.entries(this.input.flags)) {
+      value.name = k
     }
 
-    for (const k of Object.keys(this.input.args)) {
-      this.input.args[k].name = k
+    for (const [k, value] of Object.entries(this.input.args)) {
+      value.name = k
     }
   }
 
   private findFlag(arg: string): {isLong: boolean; name?: string | undefined} {
     const isLong = arg.startsWith('--')
-    const short = isLong ? false : arg.startsWith('-')
-    const name = isLong ? this.findLongFlag(arg) : short ? this.findShortFlag(arg) : undefined
+    const isShort = isLong ? false : arg.startsWith('-')
+    const name = isLong ? this.findLongFlag(arg) : isShort ? this.findShortFlag(arg) : undefined
     return {isLong, name}
   }
 
@@ -736,7 +739,7 @@ export class Parser<
 
   private mapAndValidateFlags(): Map<string, FlagToken[]> {
     const flagTokenMap = new Map<string, FlagToken[]>()
-    for (const token of this.raw.filter((o) => o.type === 'flag') as FlagToken[]) {
+    for (const token of this.raw.filter((o) => o.type === 'flag')) {
       // fail fast if there are any invalid flags
       if (!(token.flag in this.input.flags)) {
         throw new CLIError(`Unexpected flag ${token.flag}`)

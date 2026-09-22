@@ -1,9 +1,11 @@
 import {error} from './errors/error'
 
-function timeout(p: Promise<any>, ms: number) {
-  function wait(ms: number, unref = false) {
+async function timeout(p: Promise<any>, ms: number) {
+  async function wait(ms: number, unref = false) {
     return new Promise((resolve) => {
-      const t: any = setTimeout(() => resolve(null), ms)
+      const t: any = setTimeout(() => {
+        resolve(null)
+      }, ms)
       if (unref) t.unref()
     })
   }
@@ -13,11 +15,13 @@ function timeout(p: Promise<any>, ms: number) {
 
 async function _flush() {
   const p = new Promise((resolve) => {
-    process.stdout.once('drain', () => resolve(null))
+    process.stdout.once('drain', () => {
+      resolve(null)
+    })
   })
-  const flushed = process.stdout.write('')
+  const isFlushed = process.stdout.write('')
 
-  if (flushed) return
+  if (isFlushed) return
 
   return p
 }

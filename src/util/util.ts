@@ -1,21 +1,21 @@
-export function pickBy<T extends {[s: string]: T[keyof T]} | ArrayLike<T[keyof T]>>(
+export function pickBy<T extends Record<string, T[keyof T]> | ArrayLike<T[keyof T]>>(
   obj: T,
   fn: (i: T[keyof T]) => boolean,
 ): Partial<T> {
-  return Object.entries(obj).reduce((o, [k, v]) => {
+  return Object.entries(obj).reduce<any>((o, [k, v]) => {
     if (fn(v)) o[k] = v
     return o
-  }, {} as any)
+  }, {})
 }
 
-export function compact<T>(a: (T | undefined)[]): T[] {
+export function compact<T>(a: Array<T | undefined>): T[] {
   return a.filter((a): a is T => Boolean(a))
 }
 
 export function uniqBy<T>(arr: T[], fn: (cur: T) => any): T[] {
   return arr.filter((a, i) => {
     const aVal = fn(a)
-    return !arr.some((b, j) => j > i && fn(b) === aVal)
+    return arr.every((b, j) => !(j > i && fn(b) === aVal))
   })
 }
 
@@ -91,16 +91,16 @@ export function mapValues<T extends Record<string, any>, TResult>(
   obj: {[P in keyof T]: T[P]},
   fn: (i: T[keyof T], k: keyof T) => TResult,
 ): {[P in keyof T]: TResult} {
-  return Object.entries(obj).reduce((o, [k, v]) => {
-    o[k] = fn(v as any, k as any)
+  return Object.entries(obj).reduce<any>((o, [k, v]) => {
+    o[k] = fn(v, k)
     return o
-  }, {} as any)
+  }, {})
 }
 
 function get(obj: Record<string, any>, path: string): unknown {
   return path.split('.').reduce((o, p) => o?.[p], obj)
 }
 
-export function mergeNestedObjects(objs: Record<string, any>[], path: string): Record<string, any> {
+export function mergeNestedObjects(objs: Array<Record<string, any>>, path: string): Record<string, any> {
   return Object.fromEntries(objs.flatMap((o) => Object.entries(get(o, path) ?? {})).reverse())
 }

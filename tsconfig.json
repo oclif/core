@@ -13,5 +13,8 @@
     "noErrorTruncation": true,
     "moduleResolution": "Node16"
   },
+  "ts-node": {
+    "transpileOnly": true
+  },
   "include": ["./src/**/*"]
 }

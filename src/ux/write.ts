@@ -1,5 +1,6 @@
 import {format} from 'node:util'
-export const stdout = (str?: string | string[] | undefined, ...args: string[]): void => {
+
+export const stdout = (str?: string | string[], ...args: string[]): void => {
   if (!str && args) {
     console.log(format(...args))
   } else if (!str) {
@@ -11,7 +12,7 @@ export const stdout = (str?: string | string[] | undefined, ...args: string[]): 
   }
 }
 
-export const stderr = (str?: string | string[] | undefined, ...args: string[]): void => {
+export const stderr = (str?: string | string[], ...args: string[]): void => {
   if (!str && args) {
     console.error(format(...args))
   } else if (!str) {

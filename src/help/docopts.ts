@@ -1,7 +1,7 @@
-import {Command} from '../command'
+import {type Command} from '../command'
 import {ensureArgObject} from '../util/ensure-arg-object'
 /**
- * DocOpts - See http://docopt.org/.
+ * DocOpts - See https://docopt.org/.
  *
  * flag.exclusive: groups elements when one of the mutually exclusive cases is a required flag: (--apple | --orange)
  * flag.exclusive: groups elements when none of the mutually exclusive cases is required (optional flags): [--apple | --orange]
@@ -57,10 +57,10 @@ import {ensureArgObject} from '../util/ensure-arg-object'
  *
  */
 export class DocOpts {
-  private flagList: Command.Flag.Any[]
-  private flagMap: {[index: string]: Command.Flag.Any}
+  private readonly flagList: Command.Flag.Any[]
+  private flagMap: Record<string, Command.Flag.Any>
 
-  public constructor(private cmd: Command.Loadable) {
+  public constructor(private readonly cmd: Command.Loadable) {
     // Create a new map with references to the flags that we can manipulate.
     this.flagMap = {}
     this.flagList = Object.entries(cmd.flags || {})
@@ -102,7 +102,7 @@ export class DocOpts {
         Object.values(ensureArgObject(this.cmd.args))
           .filter((arg) => !arg.hidden)
           .map((arg) => {
-            const suffix = arg.multiple ? '...' : this.cmd.strict === false ? '...' : ''
+            const suffix = arg.multiple || this.cmd.strict === false ? '...' : ''
             return arg.required ? `${arg.name.toUpperCase()}${suffix}` : `[${arg.name.toUpperCase()}${suffix}]`
           }) || []
       opts.push(...a)
@@ -125,7 +125,7 @@ export class DocOpts {
   }
 
   private combineElementsToFlag(
-    elementMap: {[index: string]: string},
+    elementMap: Record<string, string>,
     flagName: string,
     flagNames: string[],
     unionString: string,
@@ -155,7 +155,7 @@ export class DocOpts {
     delete this.flagMap[flagName]
   }
 
-  private generateElements(elementMap: {[index: string]: string} = {}, flagGroups: Command.Flag.Any[] = []): string[] {
+  private generateElements(elementMap: Record<string, string> = {}, flagGroups: Command.Flag.Any[] = []): string[] {
     const elementStrs = []
     for (const flag of flagGroups) {
       let type = ''
@@ -173,8 +173,8 @@ export class DocOpts {
     return elementStrs
   }
 
-  private groupFlagElements(): {[index: string]: string} {
-    const elementMap: {[index: string]: string} = {}
+  private groupFlagElements(): Record<string, string> {
+    const elementMap: Record<string, string> = {}
 
     // Generate all doc opt elements for combining
     // Show required flags first

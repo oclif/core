@@ -4,7 +4,7 @@ import {expect} from 'chai'
 import {settings} from '../../src'
 import {CLIError} from '../../src/errors'
 import prettyPrint from '../../src/errors/errors/pretty-print'
-import {PrettyPrintableError} from '../../src/interfaces/errors'
+import {type PrettyPrintableError} from '../../src/interfaces/errors'
 
 describe('pretty-print', () => {
   it('pretty prints a simple error', async () => {

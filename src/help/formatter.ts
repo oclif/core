@@ -4,15 +4,16 @@ import width from 'string-width'
 import widestLine from 'widest-line'
 import wrap from 'wrap-ansi'
 
-import {Command} from '../command'
-import * as Interfaces from '../interfaces'
+import type * as Interfaces from '../interfaces'
+
+import {type Command} from '../command'
 import {stdtermwidth} from '../screen'
 import {colorize} from '../ux/theme'
 import {template} from './util'
 
-export type HelpSectionKeyValueTable = {description: string; name: string}[]
+export type HelpSectionKeyValueTable = Array<{description: string; name: string}>
 export type HelpSection =
-  | {body: [string, string | undefined][] | HelpSectionKeyValueTable | string | undefined; header: string}
+  | {body: Array<[string, string | undefined]> | HelpSectionKeyValueTable | string | undefined; header: string}
   | undefined
 export type HelpSectionRenderer = (
   data: {args: Command.Arg.Any[]; cmd: Command.Loadable; flags: Command.Flag.Any[]},
@@ -73,7 +74,7 @@ export class HelpFormatter {
   }
 
   public renderList(
-    input: (string | undefined)[][],
+    input: Array<Array<string | undefined>>,
     opts: {
       indentation: number
       multiline?: boolean | undefined
@@ -128,7 +129,7 @@ export class HelpFormatter {
       if (opts.stripAnsi) right = ansis.strip(right)
       right = this.wrap(right.trim(), opts.indentation + maxLength + 2)
 
-      const [first, ...lines] = right!.split('\n').map((s) => s.trim())
+      const [first, ...lines] = right.split('\n').map((s) => s.trim())
       cur += ' '.repeat(maxLength - width(cur) + 2)
       cur += first
       if (lines.length === 0) {
@@ -153,14 +154,14 @@ export class HelpFormatter {
 
   public section(
     header: string,
-    body: [string, string | undefined][] | HelpSection | HelpSectionKeyValueTable | string,
+    body: Array<[string, string | undefined]> | HelpSection | HelpSectionKeyValueTable | string,
   ): string {
     // Always render template strings with the provided render function before wrapping and indenting
     let newBody: any
     if (typeof body! === 'string') {
-      newBody = this.render(body!)
+      newBody = this.render(body)
     } else if (Array.isArray(body)) {
-      newBody = (body! as [string, HelpSectionKeyValueTable | string | undefined][]).map((entry) => {
+      newBody = (body as Array<[string, HelpSectionKeyValueTable | string | undefined]>).map((entry) => {
         if ('name' in entry) {
           const tableEntry = entry as unknown as {description: string; name: string}
           return [this.render(tableEntry.name), this.render(tableEntry.description)]
@@ -170,7 +171,7 @@ export class HelpFormatter {
         return [this.render(left), right && this.render(right as string)]
       })
     } else if ('header' in body!) {
-      return this.section(body!.header, body!.body)
+      return this.section(body.header, body.body)
     } else {
       newBody = (body! as unknown as HelpSectionKeyValueTable)
         .map((entry: {description: string; name: string}) => [entry.name, entry.description])

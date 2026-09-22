@@ -1,9 +1,9 @@
-import {Command} from '../command'
-import {Logger} from './logger'
-import {HookOptions, PJSON} from './pjson'
-import {Topic} from './topic'
+import {type Command} from '../command'
+import {type Logger} from './logger'
+import {type HookOptions, type PJSON} from './pjson'
+import {type Topic} from './topic'
 
-export interface PluginOptions {
+export type PluginOptions = {
   children?: Plugin[] | undefined
   errorOnManifestCreate?: boolean | undefined
   flexibleTaxonomy?: boolean | undefined
@@ -19,7 +19,7 @@ export interface PluginOptions {
   url?: string | undefined
 }
 
-export interface Options extends PluginOptions {
+export type Options = {
   channel?: string | undefined
   devPlugins?: boolean | undefined
   enablePerf?: boolean | undefined
@@ -36,9 +36,9 @@ export interface Options extends PluginOptions {
   plugins?: Map<string, Plugin> | undefined
   userPlugins?: boolean | undefined
   version?: string | undefined
-}
+} & PluginOptions
 
-export interface Plugin {
+export type Plugin = {
   /**
    * ../config version
    */
@@ -53,7 +53,7 @@ export interface Plugin {
   findCommand(id: string, opts: {must: true}): Promise<Command.Class>
   findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class> | undefined
   readonly hasManifest: boolean
-  hooks: {[key: string]: HookOptions[]}
+  hooks: Record<string, HookOptions[]>
   /**
    * True if the plugin is the root plugin.
    */

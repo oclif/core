@@ -1,5 +1,5 @@
-import {HelpOptions} from './help'
-import {Theme} from './theme'
+import {type HelpOptions} from './help'
+import {type Theme} from './theme'
 
 export type CommandDiscovery = {
   /**
@@ -129,7 +129,7 @@ export type OclifConfiguration = {
   /**
    * Plugin aliases.
    */
-  aliases?: {[name: string]: null | string}
+  aliases?: Record<string, undefined | string>
   /**
    * The name of the executable.
    */
@@ -183,7 +183,7 @@ export type OclifConfiguration = {
   /**
    * Register hooks to run at various points in the CLI lifecycle.
    */
-  hooks?: {[name: string]: string | string[] | HookOptions | HookOptions[] | (string | HookOptions)[]}
+  hooks?: Record<string, string | string[] | HookOptions | HookOptions[] | Array<string | HookOptions>>
   /**
    * Plugins that can be installed just-in-time.
    */
@@ -239,13 +239,14 @@ export type OclifConfiguration = {
   /**
    * Customize the topics in the CLI.
    */
-  topics?: {
-    [k: string]: {
+  topics?: Record<
+    string,
+    {
       description?: string
       hidden?: boolean
       subtopics?: OclifConfiguration['topics']
     }
-  }
+  >
   /**
    * Tar flags configuration for different platforms.
    *
@@ -257,9 +258,7 @@ export type OclifConfiguration = {
    * }
    *
    */
-  tarFlags?: {
-    [platform: string]: string
-  }
+  tarFlags?: Record<string, string>
   update?: {
     autoupdate?: {
       debounce?: number
@@ -303,15 +302,15 @@ export type LinkedPlugin = {
 
 export type UserPJSON = {
   oclif: {
-    plugins?: (UserPlugin | LinkedPlugin)[]
+    plugins?: Array<UserPlugin | LinkedPlugin>
   }
   private?: boolean
 }
 
 export type PJSON = {
   [k: string]: any
-  dependencies?: {[name: string]: string}
-  devDependencies?: {[name: string]: string}
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
   name: string
   oclif: OclifConfiguration
   version: string

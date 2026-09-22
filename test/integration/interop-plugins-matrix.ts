@@ -11,8 +11,8 @@ export type PluginConfig = {
       flags: Record<string, string | boolean>
     }
     whenNotProvided: {
-      args: Record<string, string | null | boolean>
-      flags: Record<string, string | null | boolean>
+      args: Record<string, string | undefined | boolean>
+      flags: Record<string, string | undefined | boolean>
     }
   }
 }

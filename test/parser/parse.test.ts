@@ -6,7 +6,7 @@ import sinon from 'sinon'
 
 import {Args, Flags} from '../../src'
 import {CLIError} from '../../src/errors'
-import {FlagDefault} from '../../src/interfaces/parser'
+import {type FlagDefault} from '../../src/interfaces/parser'
 import {parse} from '../../src/parser'
 import * as parser from '../../src/parser/parse'
 
@@ -2187,7 +2187,7 @@ See more help with --help`)
 
 describe('allowStdin', () => {
   const stdinValue = 'x'
-  const stdinPromise = new Promise<null | string>((resolve) => {
+  const stdinPromise = new Promise<undefined | string>((resolve) => {
     resolve(stdinValue)
   })
 

@@ -1,6 +1,7 @@
 import ansis from 'ansis'
 
-import * as Interfaces from '../interfaces'
+import type * as Interfaces from '../interfaces'
+
 import {compact} from '../util/util'
 import {colorize} from '../ux/theme'
 import {HelpFormatter} from './formatter'
@@ -24,7 +25,7 @@ export default class RootHelp extends HelpFormatter {
   root(): string {
     let description = this.config.pjson.oclif.description || this.config.pjson.description || ''
     description = this.render(description)
-    description = description.split('\n')[0]
+    description = description.split('\n', 1)[0]
     let output = compact([
       colorize(this.config?.theme?.commandSummary, description),
       this.version(),
