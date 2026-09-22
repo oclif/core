@@ -2187,7 +2187,7 @@ See more help with --help`)
 
 describe('readStdin', () => {
   let originalEnv: string | undefined
-  const originalIsTTY = process.stdin.isTTY
+  const wasTTY = process.stdin.isTTY
 
   beforeEach(() => {
     originalEnv = process.env.OCLIF_STDIN_TIMEOUT_MS
@@ -2201,7 +2201,7 @@ describe('readStdin', () => {
       process.env.OCLIF_STDIN_TIMEOUT_MS = originalEnv
     }
 
-    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: originalIsTTY})
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: wasTTY})
     sinon.restore()
   })
 
