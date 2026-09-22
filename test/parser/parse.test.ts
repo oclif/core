@@ -2185,6 +2185,79 @@ See more help with --help`)
   })
 })
 
+describe('readStdin', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    originalEnv = process.env.OCLIF_STDIN_TIMEOUT_MS
+    delete globalThis.oclif?.stdinCache
+  })
+
+  afterEach(() => {
+    if (originalEnv === undefined) {
+      delete process.env.OCLIF_STDIN_TIMEOUT_MS
+    } else {
+      process.env.OCLIF_STDIN_TIMEOUT_MS = originalEnv
+    }
+
+    sinon.restore()
+  })
+
+  it('should use OCLIF_STDIN_TIMEOUT_MS env var for timeout', async () => {
+    process.env.OCLIF_STDIN_TIMEOUT_MS = '5000'
+    const spy = sinon.spy(globalThis, 'setTimeout')
+
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: undefined})
+    try {
+      await parser.readStdin()
+    } catch {
+      // may abort, that's fine
+    }
+
+    const stdinTimeoutCall = spy.getCalls().find((call) => {
+      const delay = call.args[1]
+      return delay === 5000
+    })
+    expect(stdinTimeoutCall).to.not.be.undefined
+  })
+
+  it('should default to 10ms when OCLIF_STDIN_TIMEOUT_MS is not set', async () => {
+    delete process.env.OCLIF_STDIN_TIMEOUT_MS
+    const spy = sinon.spy(globalThis, 'setTimeout')
+
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: undefined})
+    try {
+      await parser.readStdin()
+    } catch {
+      // may abort, that's fine
+    }
+
+    const stdinTimeoutCall = spy.getCalls().find((call) => {
+      const delay = call.args[1]
+      return delay === 10
+    })
+    expect(stdinTimeoutCall).to.not.be.undefined
+  })
+
+  it('should default to 10ms when OCLIF_STDIN_TIMEOUT_MS is invalid', async () => {
+    process.env.OCLIF_STDIN_TIMEOUT_MS = 'not-a-number'
+    const spy = sinon.spy(globalThis, 'setTimeout')
+
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: undefined})
+    try {
+      await parser.readStdin()
+    } catch {
+      // may abort, that's fine
+    }
+
+    const stdinTimeoutCall = spy.getCalls().find((call) => {
+      const delay = call.args[1]
+      return delay === 10
+    })
+    expect(stdinTimeoutCall).to.not.be.undefined
+  })
+})
+
 describe('allowStdin', () => {
   const stdinValue = 'x'
   const stdinPromise = new Promise<null | string>((resolve) => {
