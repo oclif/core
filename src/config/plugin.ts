@@ -298,6 +298,7 @@ export class Plugin implements IPlugin {
               if (isErrorOnManifestCreate) {
                 throw this.addErrorScope(error, scope)
               }
+
               this.warn(error, scope)
             }
           }),
