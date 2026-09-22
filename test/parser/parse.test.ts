@@ -2187,6 +2187,7 @@ See more help with --help`)
 
 describe('readStdin', () => {
   let originalEnv: string | undefined
+  const originalIsTTY = process.stdin.isTTY
 
   beforeEach(() => {
     originalEnv = process.env.OCLIF_STDIN_TIMEOUT_MS
@@ -2200,6 +2201,7 @@ describe('readStdin', () => {
       process.env.OCLIF_STDIN_TIMEOUT_MS = originalEnv
     }
 
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: originalIsTTY})
     sinon.restore()
   })
 
@@ -2241,6 +2243,24 @@ describe('readStdin', () => {
 
   it('should default to 10ms when OCLIF_STDIN_TIMEOUT_MS is invalid', async () => {
     process.env.OCLIF_STDIN_TIMEOUT_MS = 'not-a-number'
+    const spy = sinon.spy(globalThis, 'setTimeout')
+
+    Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: undefined})
+    try {
+      await parser.readStdin()
+    } catch {
+      // may abort, that's fine
+    }
+
+    const stdinTimeoutCall = spy.getCalls().find((call) => {
+      const delay = call.args[1]
+      return delay === 10
+    })
+    expect(stdinTimeoutCall).to.not.be.undefined
+  })
+
+  it('should default to 10ms when OCLIF_STDIN_TIMEOUT_MS is 0', async () => {
+    process.env.OCLIF_STDIN_TIMEOUT_MS = '0'
     const spy = sinon.spy(globalThis, 'setTimeout')
 
     Object.defineProperty(process.stdin, 'isTTY', {configurable: true, value: undefined})
