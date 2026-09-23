@@ -851,7 +851,7 @@
       "count": 2
     },
     "@typescript-eslint/no-shadow": {
-      "count": 1
+      "count": 2
     },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 3
@@ -884,6 +884,9 @@
       "count": 1
     },
     "unicorn/consistent-conditional-object-spread": {
+      "count": 1
+    },
+    "unicorn/import-style": {
       "count": 1
     },
     "unicorn/logical-assignment-operators": {
@@ -2468,7 +2471,7 @@
       "count": 3
     },
     "n/file-extension-in-import": {
-      "count": 5
+      "count": 6
     },
     "unicorn/import-style": {
       "count": 1
