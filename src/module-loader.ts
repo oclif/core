@@ -1,3 +1,4 @@
+/* eslint-disable import-x/newline-after-import, import-x/first -- these rules cause circular fix problems */
 const getPackageType = require('get-package-type')
 import {lstatSync} from 'node:fs'
 import {extname, join, sep} from 'node:path'

@@ -1,3 +1,4 @@
+/* eslint-disable import-x/newline-after-import, import-x/first -- these rules cause circular fix problems */
 const wordwrap = require('wordwrap')
 
 import {stdtermwidth} from '../screen'

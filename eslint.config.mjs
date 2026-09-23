@@ -18,6 +18,7 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
       'import/no-named-as-default-member': 'off',
       'no-useless-constructor': 'off',
+      'n/file-extension-in-import': 'off',
       'perfectionist/sort-intersection-types': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-union-types': 'off',
