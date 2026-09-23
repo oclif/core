@@ -1,4 +1,5 @@
 import ansis from 'ansis'
+import {isAbsolute, join} from 'node:path'
 
 import {Command} from '../command'
 import {tsPath} from '../config/ts-path'
@@ -402,11 +403,30 @@ function determineLocation(helpClass: string | HelpLocationOptions): HelpLocatio
 export async function loadHelpClass(config: Interfaces.Config): Promise<HelpBaseDerived> {
   if (config.pjson.oclif?.helpClass) {
     const {identifier, target} = determineLocation(config.pjson.oclif?.helpClass)
-    try {
-      const path = (await tsPath(config.root, target)) ?? target
+
+    const loadClass = async (path: string): Promise<HelpBaseDerived> => {
       const module = await load(config, path)
       const helpClass = module[identifier] ?? (identifier === 'default' ? extractClass(module) : undefined)
       return extractClass(helpClass)
+    }
+
+    // The compiled artifact that `helpClass` points at (e.g. "./dist/help/myHelp.js").
+    const compiledPath = isAbsolute(target) ? target : join(config.root, target)
+
+    try {
+      // `tsPath` may rewrite the compiled path to the TypeScript source for local
+      // development. That source can be unloadable in some runtimes — e.g. an ESM
+      // CLI executed under plain `node` without `tsx` registered, where the `.js`
+      // specifiers in the source can't be resolved to their `.ts` siblings.
+      const path = (await tsPath(config.root, target)) ?? target
+      try {
+        return await loadClass(path)
+      } catch (error: any) {
+        // If we tried (and failed) to load transpiled source, fall back to the
+        // configured compiled artifact before giving up.
+        if (path === compiledPath) throw error
+        return await loadClass(compiledPath)
+      }
     } catch (error: any) {
       throw new Error(`Unable to load configured help class "${target}", failed with message:\n${error.message}`)
     }
