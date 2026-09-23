@@ -149,7 +149,8 @@ async function testRunner({
     }
   }
 
-  const devExecutable = devRunTime === 'default' ? 'dev' : `${devRunTime} dev`
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- type assertion necessary for compilation.
+  const devExecutable = (devRunTime === 'default' ? 'dev' : `${devRunTime} dev`) as 'dev' | 'bun dev' | 'tsx dev'
 
   let cjsExecutor: Executor
   let esmExecutor: Executor
