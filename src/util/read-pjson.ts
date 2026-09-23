@@ -1,7 +1,7 @@
 import {lilconfig} from 'lilconfig'
 import {join} from 'node:path'
 
-import {PJSON} from '../interfaces'
+import {type PJSON} from '../interfaces'
 import {makeDebug} from '../logger'
 import {readJson} from './fs'
 

@@ -4,10 +4,10 @@ import {lstatSync} from 'node:fs'
 import {extname, join, sep} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
-import {Command} from './command'
+import {type Command} from './command'
 import {tsPath} from './config/ts-path'
 import {ModuleLoadError} from './errors/errors/module-load'
-import {Config as IConfig, Plugin as IPlugin} from './interfaces'
+import {type Config as IConfig, type Plugin as IPlugin} from './interfaces'
 import {existsSync} from './util/fs'
 
 /**
@@ -16,7 +16,7 @@ import {existsSync} from './util/fs'
 
 const SUPPORTED_EXTENSIONS: string[] = ['.ts', '.js', '.mjs', '.cjs', '.mts', '.cts', '.tsx', '.jsx']
 
-const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (<IPlugin>config).type !== undefined
+const isPlugin = (config: IConfig | IPlugin): config is IPlugin => (config as IPlugin).type !== undefined
 
 function handleError(error: any, isESM: boolean | undefined, path: string): never {
   if (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND') {
@@ -176,19 +176,19 @@ async function resolvePath(config: IConfig | IPlugin, modulePath: string): Promi
       (isPlugin(config) ? await tsPath(config.root, modulePath, config) : await tsPath(config.root, modulePath)) ??
       modulePath
 
-    let fileExists = false
+    let isFileExists = false
     let isDirectory = false
     if (existsSync(filePath)) {
-      fileExists = true
+      isFileExists = true
       try {
         if (lstatSync(filePath)?.isDirectory?.()) {
-          fileExists = false
+          isFileExists = false
           isDirectory = true
         }
       } catch {}
     }
 
-    if (!fileExists) {
+    if (!isFileExists) {
       // Try all supported extensions.
       let foundPath = findFile(filePath)
       if (!foundPath && isDirectory) {
@@ -214,7 +214,7 @@ async function resolvePath(config: IConfig | IPlugin, modulePath: string): Promi
  *
  * @returns {string | null} Modified file path including extension or null if file is not found.
  */
-function findFile(filePath: string): null | string {
+function findFile(filePath: string): undefined | string {
   for (const extension of SUPPORTED_EXTENSIONS) {
     const testPath = `${filePath}${extension}`
 
@@ -223,5 +223,5 @@ function findFile(filePath: string): null | string {
     }
   }
 
-  return null
+  return undefined
 }

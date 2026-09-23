@@ -4,26 +4,26 @@ import {inspect} from 'node:util'
 import Cache from './cache'
 import {Config} from './config'
 import * as Errors from './errors'
-import {PrettyPrintableError} from './errors'
+import {type PrettyPrintableError} from './errors'
 import {formatCommandDeprecationWarning, formatFlagDeprecationWarning, normalizeArgv} from './help/util'
-import {LoadOptions} from './interfaces/config'
-import {CommandError} from './interfaces/errors'
+import {type LoadOptions} from './interfaces/config'
+import {type CommandError} from './interfaces/errors'
 import {
-  ArgInput,
-  ArgOutput,
-  ArgProps,
-  BooleanFlagProps,
-  Constraint,
-  Deprecation,
-  FlagInput,
-  FlagOutput,
-  Arg as IArg,
-  Flag as IFlag,
-  Input,
-  OptionFlagProps,
-  ParserOutput,
+  type ArgInput,
+  type ArgOutput,
+  type ArgProps,
+  type BooleanFlagProps,
+  type Constraint,
+  type Deprecation,
+  type FlagInput,
+  type FlagOutput,
+  type Arg as IArg,
+  type Flag as IFlag,
+  type Input,
+  type OptionFlagProps,
+  type ParserOutput,
 } from './interfaces/parser'
-import {Plugin} from './interfaces/plugin'
+import {type Plugin} from './interfaces/plugin'
 import {makeDebug} from './logger'
 import * as Parser from './parser'
 import {aggregateFlags} from './util/aggregate-flags'
@@ -206,14 +206,12 @@ export abstract class Command {
   }
 
   public error(input: Error | string, options: {code?: string; exit: false} & PrettyPrintableError): void
-
   public error(input: Error | string, options?: {code?: string; exit?: number} & PrettyPrintableError): never
-
   public error(
     input: Error | string,
     options: {code?: string; exit?: false | number} & PrettyPrintableError = {},
   ): void {
-    return Errors.error(input, options as any)
+    Errors.error(input, options as any)
   }
 
   public exit(code = 0): never {
@@ -252,10 +250,12 @@ export abstract class Command {
   }
 
   public log(message = '', ...args: any[]): void {
-    if (!this.jsonEnabled()) {
-      message = typeof message === 'string' ? message : inspect(message)
-      ux.stdout(message, ...args)
+    if (this.jsonEnabled()) {
+      return
     }
+
+    message = typeof message === 'string' ? message : inspect(message)
+    ux.stdout(message, ...args)
   }
 
   protected logJson(json: unknown): void {
@@ -263,10 +263,12 @@ export abstract class Command {
   }
 
   public logToStderr(message = '', ...args: any[]): void {
-    if (!this.jsonEnabled()) {
-      message = typeof message === 'string' ? message : inspect(message)
-      ux.stderr(message, ...args)
+    if (this.jsonEnabled()) {
+      return
     }
+
+    message = typeof message === 'string' ? message : inspect(message)
+    ux.stderr(message, ...args)
   }
 
   protected async parse<F extends FlagOutput, B extends FlagOutput, A extends ArgOutput>(
@@ -395,7 +397,7 @@ export namespace Command {
    * is executed then the `load` method is used to require the command class.
    */
   export type Loadable = Cached & {
-    load(): Promise<Command.Class>
+    load(): Promise<Class>
   }
 
   /**
@@ -406,12 +408,12 @@ export namespace Command {
     [key: string]: unknown
     aliasPermutations?: string[] | undefined
     aliases: string[]
-    args: {[name: string]: Arg.Cached}
+    args: Record<string, Arg.Cached>
     deprecateAliases?: boolean | undefined
     deprecationOptions?: Deprecation | undefined
     description?: string | undefined
     examples?: Example[] | undefined
-    flags: {[name: string]: Flag.Cached}
+    flags: Record<string, Flag.Cached>
     hasDynamicHelp?: boolean
     hidden: boolean
     hiddenAliases: string[]
@@ -445,9 +447,9 @@ export namespace Command {
   }
 
   export type Example =
+    | string
     | {
         command: string
         description: string
       }
-    | string
 }

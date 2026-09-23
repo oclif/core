@@ -2,7 +2,7 @@ import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
 import {error} from '../../src/errors'
-import {PrettyPrintableError} from '../../src/interfaces/errors'
+import {type PrettyPrintableError} from '../../src/interfaces/errors'
 
 function isPrettyPrintableError(error: any): error is PrettyPrintableError {
   return error.code !== undefined && error.ref !== undefined && error.suggestions !== undefined
@@ -69,9 +69,9 @@ describe('error', () => {
   })
 
   it('does not rethrow error when exit: false option is set', async () => {
-    const {stdout, stderr} = await captureOutput(async () =>
-      error('an error is reported but is not rethrown', {exit: false}),
-    )
+    const {stdout, stderr} = await captureOutput(async () => {
+      error('an error is reported but is not rethrown', {exit: false})
+    })
     expect(stderr).to.contain('Error: an error is reported but is not rethrown')
     expect(stdout).to.be.empty
   })

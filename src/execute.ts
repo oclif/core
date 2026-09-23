@@ -1,7 +1,7 @@
 import {CLIError} from './errors'
 import {handle} from './errors/handle'
 import {flush} from './flush'
-import {LoadOptions} from './interfaces'
+import {type LoadOptions} from './interfaces'
 import {run} from './main'
 import {settings} from './settings'
 

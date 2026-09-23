@@ -1,9 +1,9 @@
-import {Command} from '../command'
-import {Validation} from '../parser/errors'
-import {AlphabetLowercase, AlphabetUppercase} from './alphabet'
+import {type Command} from '../command'
+import {type Validation} from '../parser/errors'
+import {type AlphabetLowercase, type AlphabetUppercase} from './alphabet'
 
-export type FlagOutput = {[name: string]: any}
-export type ArgOutput = {[name: string]: any}
+export type FlagOutput = Record<string, any>
+export type ArgOutput = Record<string, any>
 
 export type CLIParseErrorOptions = {
   parse: {
@@ -39,7 +39,7 @@ export type ParsingToken = ArgToken | FlagToken
 export type FlagUsageOptions = {displayRequired?: boolean}
 
 export type Metadata = {
-  flags: {[key: string]: MetadataFlag}
+  flags: Record<string, MetadataFlag>
 }
 
 export type MetadataFlag = {
@@ -166,7 +166,7 @@ export type FlagProps = {
   /**
    * Alternate short chars that can be used for this flag.
    */
-  charAliases?: (AlphabetLowercase | AlphabetUppercase)[]
+  charAliases?: Array<AlphabetLowercase | AlphabetUppercase>
   /**
    * Emit deprecation warning when a flag alias is provided
    */
@@ -315,12 +315,12 @@ type ReturnTypeSwitches = {multiple: boolean; requiredOrDefaulted: boolean}
  */
 type FlagReturnType<T, R extends ReturnTypeSwitches> = R['requiredOrDefaulted'] extends true
   ? R['multiple'] extends true
-    ? [T] extends [Array<unknown>]
+    ? [T] extends [unknown[]]
       ? T
       : T[]
     : T
   : R['multiple'] extends true
-    ? [T] extends [Array<unknown>]
+    ? [T] extends [unknown[]]
       ? T | undefined
       : T[] | undefined
     : T | undefined
@@ -466,13 +466,11 @@ export type ParserContext = Command & {
   token?: FlagToken | ArgToken | undefined
 }
 
-export type FlagInput<T extends FlagOutput = {[flag: string]: any}> = {[P in keyof T]: Flag<T[P]>}
+export type FlagInput<T extends FlagOutput = Record<string, any>> = {[P in keyof T]: Flag<T[P]>}
 
-export type ArgInput<T extends ArgOutput = {[arg: string]: any}> = {[P in keyof T]: Arg<T[P]>}
+export type ArgInput<T extends ArgOutput = Record<string, any>> = {[P in keyof T]: Arg<T[P]>}
 
-export type SingleFlagTester = {
-  [key: string]: (val: any) => boolean
-}
+export type SingleFlagTester = Record<string, (val: any) => boolean>
 
 export type MultiFlagTester = (flags: FlagOutput) => boolean
 
@@ -485,7 +483,7 @@ type ComplexFlagGroup = {
 
 export type FlagGroup = SimpleFlagGroup | ComplexFlagGroup
 
-export interface Constraint {
+export type Constraint = {
   _evaluateAgainstFlags(flags: FlagOutput): Validation
   allFlagCriteriaSatisfied(criterionTester: SingleFlagTester): Constraint
   and: Constraint

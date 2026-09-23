@@ -3,12 +3,12 @@ import {inspect} from 'node:util'
 import {glob} from 'tinyglobby'
 
 import Cache from '../cache'
-import {Command} from '../command'
+import {type Command} from '../command'
 import {CLIError, error} from '../errors'
-import {Manifest} from '../interfaces/manifest'
-import {CommandDiscovery, HookOptions, PJSON} from '../interfaces/pjson'
-import {Plugin as IPlugin, PluginOptions} from '../interfaces/plugin'
-import {Topic} from '../interfaces/topic'
+import {type Manifest} from '../interfaces/manifest'
+import {type CommandDiscovery, type HookOptions, type PJSON} from '../interfaces/pjson'
+import {type Plugin as IPlugin, type PluginOptions} from '../interfaces/plugin'
+import {type Topic} from '../interfaces/topic'
 import {load, loadWithData, loadWithDataFromManifest} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
@@ -40,7 +40,7 @@ const cachedCommandCanBeUsed = (manifest: Manifest | undefined, id: string): boo
 
 const searchForCommandClass = (cmd: any) => {
   if (typeof cmd.run === 'function') return cmd
-  if (cmd.default && cmd.default.run) return cmd.default
+  if (cmd.default?.run) return cmd.default
   return Object.values(cmd).find((cmd: any) => typeof cmd.run === 'function')
 }
 
@@ -107,7 +107,7 @@ export class Plugin implements IPlugin {
   commands!: Command.Loadable[]
   commandsDir: string | undefined
   hasManifest = false
-  hooks!: {[key: string]: HookOptions[]}
+  hooks!: Record<string, HookOptions[]>
   isRoot = false
   manifest!: Manifest
   moduleType!: 'commonjs' | 'module'
@@ -119,6 +119,7 @@ export class Plugin implements IPlugin {
   type!: string
   valid = false
   version!: string
+  readonly #base = `${_pjson.name}@${_pjson.version}`
   private commandCache: CommandCache | undefined
   private commandDiscoveryOpts: CommandDiscovery | undefined
   private flexibleTaxonomy!: boolean
@@ -130,9 +131,7 @@ export class Plugin implements IPlugin {
   }
 
   public async findCommand(id: string, opts: {must: true}): Promise<Command.Class>
-
   public async findCommand(id: string, opts?: {must: boolean}): Promise<Command.Class | undefined>
-
   public async findCommand(id: string, opts: {must?: boolean} = {}): Promise<Command.Class | undefined> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.findCommand#${this.name}.${id}`, {
       id,
@@ -192,11 +191,9 @@ export class Plugin implements IPlugin {
     // However there could be child plugins nested inside the linked plugin, in which
     // case we still need to search for the child plugin's root.
     const root =
-      this.options.pjson && this.options.isRoot
+      (this.options.pjson && this.options.isRoot) || (this.type === 'link' && !this.parent)
         ? this.options.root
-        : this.type === 'link' && !this.parent
-          ? this.options.root
-          : await findRoot(this.options.name, this.options.root)
+        : await findRoot(this.options.name, this.options.root)
     if (!root) throw new CLIError(`could not find package.json with ${inspect(this.options)}`)
     this.root = root
     this._debug(`loading ${this.type} plugin from ${root}`)
@@ -238,15 +235,15 @@ export class Plugin implements IPlugin {
   }
 
   private async _manifest(): Promise<Manifest> {
-    const ignoreManifest = Boolean(this.options.ignoreManifest)
-    const errorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
-    const respectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
+    const isIgnoreManifest = Boolean(this.options.ignoreManifest)
+    const isErrorOnManifestCreate = Boolean(this.options.errorOnManifestCreate)
+    const isRespectNoCacheDefault = Boolean(this.options.respectNoCacheDefault)
 
     const readManifest = async (dotfile = false): Promise<Manifest | undefined> => {
       try {
         const p = join(this.root, `${dotfile ? '.' : ''}oclif.manifest.json`)
         const manifest = await readJson<Manifest>(p)
-        if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-')[0] !== this.version.split('-')[0]) {
+        if (!process.env.OCLIF_NEXT_VERSION && manifest.version.split('-', 1)[0] !== this.version.split('-', 1)[0]) {
           process.emitWarning(
             `Mismatched version in ${this.name} plugin manifest. Expected: ${this.version} Received: ${manifest.version}\nThis usually means you have an oclif.manifest.json file that should be deleted in development. This file should be automatically generated when publishing.`,
           )
@@ -265,7 +262,7 @@ export class Plugin implements IPlugin {
     }
 
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `plugin.manifest#${this.name}`, {plugin: this.name})
-    if (!ignoreManifest) {
+    if (!isIgnoreManifest) {
       const manifest = await readManifest()
       if (manifest) {
         marker?.addDetails({commandCount: Object.keys(manifest.commands).length, fromCache: true})
@@ -282,7 +279,7 @@ export class Plugin implements IPlugin {
           this.commandIDs.map(async (id) => {
             try {
               const found = await this.findCommand(id, {must: true})
-              const cached = await cacheCommand(found, this, respectNoCacheDefault)
+              const cached = await cacheCommand(found, this, isRespectNoCacheDefault)
 
               // Ensure that id is set to the id being processed
               // This is necessary because the id is set by findCommand but if there
@@ -292,20 +289,23 @@ export class Plugin implements IPlugin {
               if (this.flexibleTaxonomy) {
                 const permutations = getCommandIdPermutations(id)
                 const aliasPermutations = cached.aliases.flatMap((a) => getCommandIdPermutations(a))
-                return [id, {...cached, aliasPermutations, permutations} as Command.Cached]
+                return [id, {...cached, aliasPermutations, permutations}]
               }
 
               return [id, cached]
             } catch (error: any) {
               const scope = `findCommand (${id})`
-              if (Boolean(errorOnManifestCreate) === false) this.warn(error, scope)
-              else throw this.addErrorScope(error, scope)
+              if (isErrorOnManifestCreate) {
+                throw this.addErrorScope(error, scope)
+              }
+
+              this.warn(error, scope)
             }
           }),
         )
       )
         .filter((f): f is [string, Command.Cached] => Boolean(f))
-        .reduce<{[k: string]: Command.Cached}>((commands, [id, c]) => {
+        .reduce<Record<string, Command.Cached>>((commands, [id, c]) => {
           commands[id] = c
           return commands
         }, {}),
@@ -320,7 +320,7 @@ export class Plugin implements IPlugin {
     err.name = err.name ?? inspect(err).trim()
     err.detail = compact([
       err.detail,
-      `module: ${this._base}`,
+      `module: ${this.#base}`,
       scope && `task: ${scope}`,
       `plugin: ${this.name}`,
       `root: ${this.root}`,

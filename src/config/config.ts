@@ -4,13 +4,27 @@ import {join, resolve} from 'node:path'
 import {fileURLToPath, URL} from 'node:url'
 
 import Cache from '../cache'
-import {Command} from '../command'
+import {type Command} from '../command'
 import {CLIError, error, exit, warn} from '../errors'
 import {getHelpFlagAdditions} from '../help/util'
-import {Hook, Hooks, OclifConfiguration, PJSON, S3Templates, Topic, UserPJSON} from '../interfaces'
-import {ArchTypes, Config as IConfig, LoadOptions, PlatformTypes, VersionDetails} from '../interfaces/config'
-import {Plugin as IPlugin, Options} from '../interfaces/plugin'
-import {Theme} from '../interfaces/theme'
+import {
+  type Hook,
+  type Hooks,
+  type OclifConfiguration,
+  type PJSON,
+  type S3Templates,
+  type Topic,
+  type UserPJSON,
+} from '../interfaces'
+import {
+  type ArchTypes,
+  type Config as IConfig,
+  type LoadOptions,
+  type PlatformTypes,
+  type VersionDetails,
+} from '../interfaces/config'
+import {type Plugin as IPlugin, type Options} from '../interfaces/plugin'
+import {type Theme} from '../interfaces/theme'
 import {makeDebug as loggerMakeDebug, setLogger} from '../logger'
 import {loadWithData} from '../module-loader'
 import {OCLIF_MARKER_OWNER, Performance} from '../performance'
@@ -41,7 +55,7 @@ function displayWarnings() {
 }
 
 function channelFromVersion(version: string) {
-  const m = version.match(/[^-]+(?:-([^.]+))?/)
+  const m = /[^-]+(?:-([^.]+))?/.exec(version)
   return (m && m[1]) || 'stable'
 }
 
@@ -50,7 +64,7 @@ function isConfig(o: any): o is Config {
 }
 
 class Permutations extends Map<string, Set<string>> {
-  private validPermutations = new Map<string, string>()
+  private readonly validPermutations = new Map<string, string>()
 
   public add(permutation: string, commandId: string): void {
     this.validPermutations.set(permutation, commandId)
@@ -98,7 +112,7 @@ export class Config implements IConfig {
   public nsisCustomization?: string | undefined
   public pjson!: PJSON
   public platform!: PlatformTypes
-  public plugins: Map<string, IPlugin> = new Map()
+  public plugins = new Map<string, IPlugin>()
   public root!: string
   public shell!: string
   public theme?: Theme | undefined
@@ -110,14 +124,14 @@ export class Config implements IConfig {
   public version!: string
   protected warned = false
   public windows!: boolean
-  private _base = BASE
+  private readonly _base = BASE
   private _commandIDs!: string[]
-  private _commands = new Map<string, Command.Loadable>()
-  private _topics = new Map<string, Topic>()
-  private commandPermutations = new Permutations()
+  private readonly _commands = new Map<string, Command.Loadable>()
+  private readonly _topics = new Map<string, Topic>()
+  private readonly commandPermutations = new Permutations()
   private pluginLoader!: PluginLoader
   private rootPlugin!: IPlugin
-  private topicPermutations = new Permutations()
+  private readonly topicPermutations = new Permutations()
 
   constructor(public options: Options) {}
 
@@ -131,7 +145,7 @@ export class Config implements IConfig {
     if (typeof opts === 'string') opts = {root: opts}
     if (isConfig(opts)) {
       debug(`reloading config from ${opts._base} to ${BASE}`)
-      const pluginMap: Map<string, IPlugin> = new Map(opts.getPluginsList().map((p) => [p.name, p]))
+      const pluginMap = new Map<string, IPlugin>(opts.getPluginsList().map((p) => [p.name, p]))
       const config = new Config({...opts.options, plugins: pluginMap})
       await config.load()
       return config
@@ -165,7 +179,7 @@ export class Config implements IConfig {
   }
 
   public get versionDetails(): VersionDetails {
-    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ')
+    const [cliVersion, architecture, nodeVersion] = this.userAgent.split(' ', 3)
     return {
       architecture,
       cliVersion,
@@ -189,7 +203,6 @@ export class Config implements IConfig {
 
   public findCommand(id: string, opts: {must: true}): Command.Loadable
   public findCommand(id: string, opts?: {must: boolean}): Command.Loadable | undefined
-
   public findCommand(id: string, opts: {must?: boolean} = {}): Command.Loadable | undefined {
     const lookupId = this.getCmdLookupId(id)
     const command = this._commands.get(lookupId)
@@ -217,21 +230,19 @@ export class Config implements IConfig {
     const possibleMatches = [...this.commandPermutations.get(partialCmdId)].map((k) => this._commands.get(k)!)
 
     const matches = possibleMatches.filter((command) => {
-      const cmdFlags = Object.entries(command.flags).flatMap(([flag, def]) =>
-        def.char ? [def.char, flag] : [flag],
-      ) as string[]
+      const cmdFlags = new Set(
+        Object.entries(command.flags).flatMap(([flag, def]) => (def.char ? [def.char, flag] : [flag])),
+      )
 
       // A command is a match if the provided flags belong to the full command
-      return flags.every((f) => cmdFlags.includes(f))
+      return flags.every((f) => cmdFlags.has(f))
     })
 
     return matches
   }
 
   public findTopic(id: string, opts: {must: true}): Topic
-
   public findTopic(id: string, opts?: {must: boolean}): Topic | undefined
-
   public findTopic(name: string, opts: {must?: boolean} = {}): Topic | undefined {
     const lookupId = this.getTopicLookupId(name)
     const topic = this._topics.get(lookupId)
@@ -255,10 +266,12 @@ export class Config implements IConfig {
     const commands = [...this._commands.values()]
     const validPermutations = [...this.commandPermutations.getAllValid()]
     for (const permutation of validPermutations) {
-      if (!this._commands.has(permutation)) {
-        const cmd = this._commands.get(this.getCmdLookupId(permutation))!
-        commands.push({...cmd, id: permutation})
+      if (this._commands.has(permutation)) {
+        continue
       }
+
+      const cmd = this._commands.get(this.getCmdLookupId(permutation))!
+      commands.push({...cmd, id: permutation})
     }
 
     return commands
@@ -400,11 +413,7 @@ export class Config implements IConfig {
     return (this.platform === 'darwin' && join(this.home, 'Library', 'Caches', this.dirname)) || undefined
   }
 
-  public async runCommand<T = unknown>(
-    id: string,
-    argv: string[] = [],
-    cachedCommand: Command.Loadable | null = null,
-  ): Promise<T> {
+  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Loadable): Promise<T> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)
@@ -514,7 +523,7 @@ export class Config implements IConfig {
         },
       }
 
-      const hooks = p.hooks[event] || []
+      const hooks = p.hooks[event as string] || []
 
       for (const hook of hooks) {
         const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runHook#${p.name}(${hook.target})`)
@@ -593,7 +602,7 @@ export class Config implements IConfig {
   }
 
   public scopedEnvVar(k: string): string | undefined {
-    return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k]) as string]
+    return process.env[this.scopedEnvVarKeys(k).find((k) => process.env[k])!]
   }
 
   /**
@@ -629,7 +638,7 @@ export class Config implements IConfig {
   }
 
   protected windowsHomedriveHome(): string | undefined {
-    return process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE!, process.env.HOMEPATH!)
+    return process.env.HOMEDRIVE && process.env.HOMEPATH && join(process.env.HOMEDRIVE, process.env.HOMEPATH)
   }
 
   protected windowsUserprofileHome(): string | undefined {
@@ -649,7 +658,7 @@ export class Config implements IConfig {
           "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-<%- platform %>-<%- arch %><%- ext %>",
         versioned:
           "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>",
-        ...(s3?.templates && s3?.templates.target),
+        ...s3?.templates?.target,
       },
       vanilla: {
         baseDir: '<%- bin %>',
@@ -657,7 +666,7 @@ export class Config implements IConfig {
         unversioned: "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %><%- ext %>",
         versioned:
           "<%- channel === 'stable' ? '' : 'channels/' + channel + '/' %><%- bin %>-v<%- version %>/<%- bin %>-v<%- version %><%- ext %>",
-        ...(s3?.templates && s3?.templates.vanilla),
+        ...s3?.templates?.vanilla,
       },
     }
     return {
@@ -815,13 +824,15 @@ export class Config implements IConfig {
   }
 
   private maybeAdjustDebugSetting(): void {
-    if (this.scopedEnvVarTrue('DEBUG')) {
-      settings.debug = true
-      displayWarnings()
+    if (!this.scopedEnvVarTrue('DEBUG')) {
+      return
     }
+
+    settings.debug = true
+    displayWarnings()
   }
 
-  private warn(err: {detail: string; name: string} | Error | string, scope?: string): void {
+  private warn(err: Error | string | {detail: string; name: string}, scope?: string): void {
     if (this.warned) return
 
     if (typeof err === 'string') {

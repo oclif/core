@@ -6,8 +6,8 @@ import spinners from 'cli-spinners'
 import Cache from '../../cache'
 import {errtermwidth} from '../../screen'
 import {colorize} from '../theme'
-import {ActionBase, ActionType} from './base'
-import {Options} from './types'
+import {ActionBase, type ActionType} from './base'
+import {type Options} from './types'
 
 export default class SpinnerAction extends ActionBase {
   public type: ActionType = 'spinner'
@@ -36,14 +36,16 @@ export default class SpinnerAction extends ActionBase {
   }
 
   protected _start(opts: Options): void {
-    this.color = (Cache.getInstance().get('config')?.theme?.spinner as string | undefined) ?? this.color
+    this.color = Cache.getInstance().get('config')?.theme?.spinner ?? this.color
     if (opts.style) this.frames = this.getFrames(opts)
 
     this._reset()
     if (this.spinner) clearInterval(this.spinner)
     this._render()
     this.spinner = setInterval(
-      (icon) => this._render.bind(this)(icon),
+      (icon) => {
+        this._render.bind(this)(icon)
+      },
       process.platform === 'win32' ? 500 : 100,
       'spinner',
     )

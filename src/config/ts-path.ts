@@ -1,11 +1,12 @@
+import type * as TSNode from 'ts-node'
+
 import {access} from 'node:fs/promises'
 import {join, relative as pathRelative, sep} from 'node:path'
 import {pathToFileURL} from 'node:url'
-import * as TSNode from 'ts-node'
 
 import Cache from '../cache'
 import {memoizedWarn} from '../errors/warn'
-import {Plugin, TSConfig} from '../interfaces'
+import {type Plugin, type TSConfig} from '../interfaces'
 import {settings} from '../settings'
 import {existsSync} from '../util/fs'
 import {readTSConfig} from '../util/read-tsconfig'
@@ -197,7 +198,7 @@ function cannotTranspileEsm(
 function cannotUseTsNode(root: string, plugin: Plugin | undefined, isProduction: boolean): boolean {
   if (plugin?.moduleType !== 'module' || isProduction) return false
 
-  const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.')[0], 10)
+  const nodeMajor = Number.parseInt(process.version.replace('v', '').split('.', 1)[0], 10)
   return RUN_TIME === 'ts-node' && nodeMajor >= 20
 }
 
@@ -278,16 +279,8 @@ async function determinePath(root: string, orig: string, plugin: Plugin | undefi
  * if there is a tsconfig and the original sources exist, it attempts to require ts-node
  */
 export async function tsPath(root: string, orig: string, plugin: Plugin): Promise<string>
-export async function tsPath(
-  root: string,
-  orig: string | undefined,
-  plugin?: Plugin | undefined,
-): Promise<string | undefined>
-export async function tsPath(
-  root: string,
-  orig: string | undefined,
-  plugin?: Plugin | undefined,
-): Promise<string | undefined> {
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined>
+export async function tsPath(root: string, orig: string | undefined, plugin?: Plugin): Promise<string | undefined> {
   const rootPlugin = plugin?.options.isRoot ? plugin : Cache.getInstance().get('rootPlugin')
 
   if (!orig) return orig

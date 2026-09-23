@@ -12,8 +12,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import {Command, Flags, flush, handle} from '../../src'
-import {PluginConfig, plugins} from './interop-plugins-matrix'
-import {Executor, Script, setup} from './util'
+import {type PluginConfig, plugins} from './interop-plugins-matrix'
+import {type Executor, type Script, setup} from './util'
 
 const TESTS = ['cjs', 'esm', 'precore', 'coreV1', 'coreV2', 'coreV3', 'esbuild'] as const
 const DEV_RUN_TIMES = ['default', 'bun', 'tsx'] as const
@@ -149,7 +149,7 @@ async function testRunner({
     }
   }
 
-  const devExecutable = (devRunTime === 'default' ? 'dev' : `${devRunTime} dev`) as 'dev' | 'bun dev' | 'tsx dev'
+  const devExecutable = devRunTime === 'default' ? 'dev' : `${devRunTime} dev`
 
   let cjsExecutor: Executor
   let esmExecutor: Executor

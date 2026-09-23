@@ -1,4 +1,4 @@
-import {ActionBase, ActionType} from './base'
+import {ActionBase, type ActionType} from './base'
 
 export default class SimpleAction extends ActionBase {
   public type: ActionType = 'simple'

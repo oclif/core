@@ -1,7 +1,7 @@
 import {readdir, readFile} from 'node:fs/promises'
 import {join, parse} from 'node:path'
 
-import {Hook} from '../../../../../../src'
+import {type Hook} from '../../../../../../src'
 
 const hook: Hook.Preparse = async function ({argv, options}) {
   const flagsToIgnore = new Set(
@@ -32,9 +32,9 @@ const hook: Hook.Preparse = async function ({argv, options}) {
   )
 
   for (const [flagName, flagOptions] of Object.entries(groupAliasFlags)) {
-    const groupAliasFlagPresent = argv.includes(`--${flagName}`) || argv.includes(`-${flagOptions.char}`)
+    const isGroupAliasFlagPresent = argv.includes(`--${flagName}`) || argv.includes(`-${flagOptions.char}`)
 
-    if (groupAliasFlagPresent) {
+    if (isGroupAliasFlagPresent) {
       // @ts-expect-error because the type isn't aware of the custom flag we made
       for (const groupAliasOption of flagOptions.groupAlias) {
         if (flagsToIgnore.has(groupAliasOption.flag)) continue

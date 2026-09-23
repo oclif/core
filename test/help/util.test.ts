@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {resolve} from 'node:path'
 import sinon from 'sinon'
 
-import {Args, Command, Config} from '../../src'
+import {Args, type Command, Config} from '../../src'
 import * as tsPath from '../../src/config/ts-path'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'

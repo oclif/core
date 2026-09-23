@@ -1,4 +1,5 @@
 import {isTruthy} from './util/util'
+
 function checkCWD() {
   try {
     process.cwd()
@@ -47,7 +48,7 @@ export {
   type HelpSectionRenderer,
   loadHelpClass,
 } from './help'
-export * as Interfaces from './interfaces'
+export type * as Interfaces from './interfaces'
 export {type Hook} from './interfaces/hooks'
 export {getLogger} from './logger'
 export {run} from './main'
