@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/oclif/core/compare/5.0.0...5.0.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* getting CI/CD green again (W-24099831) ([3c01350](https://github.com/oclif/core/commit/3c01350b90cc200aff667df6f0e4442673084fb4))
+
+
+
 # [5.0.0](https://github.com/oclif/core/compare/4.14.0...5.0.0) (2026-08-31)
 
 
