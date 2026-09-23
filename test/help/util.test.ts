@@ -3,6 +3,7 @@ import {resolve} from 'node:path'
 import sinon from 'sinon'
 
 import {Args, Command, Config} from '../../src'
+import * as tsPath from '../../src/config/ts-path'
 import * as util from '../../src/config/util'
 import {loadHelpClass, standardizeIDFromArgv} from '../../src/help'
 import configuredHelpClass from './_test-help-class'
@@ -65,6 +66,19 @@ describe('util', () => {
 
       expect(MyHelp).to.not.be.undefined
       expect(await loadHelpClass(config)).to.deep.equal(MyHelp)
+    })
+
+    it('falls back to the compiled help class when the resolved source path fails to load', async () => {
+      config.pjson.oclif.helpClass = '../test/help/_test-help-class'
+      config.root = resolve(__dirname, '..')
+
+      // Simulate `tsPath` rewriting the compiled path to TypeScript source that
+      // the current runtime can't load (e.g. an ESM CLI under plain `node` with
+      // no `tsx` registered). The load should fall back to the compiled artifact.
+      sinon.stub(tsPath, 'tsPath').resolves(resolve(__dirname, '_non-existent-source-help-class'))
+
+      expect(configuredHelpClass).to.not.be.undefined
+      expect(await loadHelpClass(config)).to.deep.equal(configuredHelpClass)
     })
 
     describe('error cases', () => {
