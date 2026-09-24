@@ -1,3 +1,18 @@
+# [5.1.0](https://github.com/oclif/core/compare/5.0.1...5.1.0) (2026-09-24)
+
+
+### Bug Fixes
+
+* rename boolean var to satisfy unicorn/consistent-boolean-name ([a1316cc](https://github.com/oclif/core/commit/a1316ccb7bdb5175887f1b3d4cfd0b78c9c81cfe))
+
+
+### Features
+
+* support OCLIF_STDIN_TIMEOUT_MS env var for stdin read timeout @W-24151668@ ([effcb65](https://github.com/oclif/core/commit/effcb654e607dcf57c1bf4236178f11f7bfe0594))
+* support OCLIF_STDIN_TIMEOUT_MS env var for stdin read timeout @W-24151668@ ([a869149](https://github.com/oclif/core/commit/a86914909ce2bd061be50cbc94f5fd711a8bbafe))
+
+
+
 ## [5.0.1](https://github.com/oclif/core/compare/5.0.0...5.0.1) (2026-09-23)
 
 
