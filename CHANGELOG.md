@@ -1,3 +1,12 @@
+## [5.1.2](https://github.com/oclif/core/compare/5.1.1...5.1.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **deps:** bump browserslist from 4.28.2 to 4.28.9 ([1ba8dfd](https://github.com/oclif/core/commit/1ba8dfd292436b95fc1ccba374b384722b24fcb2))
+
+
+
 ## [5.1.1](https://github.com/oclif/core/compare/5.1.0...5.1.1) (2026-09-25)
 
 
