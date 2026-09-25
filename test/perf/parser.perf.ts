@@ -12,7 +12,7 @@ import {parse} from '../../src/parser'
 const suite = new Suite()
 
 // eslint-disable-next-line no-promise-executor-return
-const delay100 = () => new Promise((resolve) => setTimeout(resolve, 100))
+const delay100 = async () => new Promise((resolve) => setTimeout(resolve, 100))
 
 suite
   .add('simple', {
@@ -82,7 +82,7 @@ suite
           'exactly-one': Flags.string({exactlyOne}),
 
           'parsed-string-as-number': Flags.integer({
-            parse: (input) => Promise.resolve(Number.parseInt(input, 10) + 1000),
+            parse: async (input) => Number.parseInt(input, 10) + 1000,
           }),
           dir: Flags.directory({exists: true}),
           file: Flags.file({exists: true}),

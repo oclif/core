@@ -2,7 +2,7 @@ import {readdir, readFile} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
 import {memoizedWarn} from '../errors/warn'
-import {TSConfig} from '../interfaces'
+import {type TSConfig} from '../interfaces'
 import {makeDebug} from '../logger'
 import {mergeNestedObjects} from './util'
 
@@ -33,7 +33,7 @@ async function upUntil(path: string, test: (path: string) => Promise<boolean>): 
 }
 
 export async function readTSConfig(root: string, tsconfigName = 'tsconfig.json'): Promise<TSConfig | undefined> {
-  const found: Record<string, any>[] = []
+  const found: Array<Record<string, any>> = []
 
   let typescript: typeof import('typescript') | undefined
   try {

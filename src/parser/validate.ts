@@ -1,4 +1,4 @@
-import {Arg, Flag, FlagRelationship, ParserInput, ParserOutput} from '../interfaces/parser'
+import {type Arg, type Flag, type FlagRelationship, type ParserInput, type ParserOutput} from '../interfaces/parser'
 import {uniq} from '../util/util'
 import {
   FailedFlagValidationError,
@@ -6,7 +6,7 @@ import {
   NonExistentFlagsError,
   RequiredArgsError,
   UnexpectedArgsError,
-  Validation,
+  type Validation,
   ViolatedFlagConstraintError,
 } from './errors'
 
@@ -52,7 +52,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       }
     }
 
-    const variadicArgFound = variadicIndex !== -1
+    const isVariadicArgFound = variadicIndex !== -1
 
     if (parse.output.nonExistentFlags?.length > 0) {
       throw new NonExistentFlagsError({
@@ -71,13 +71,13 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
       })
     }
 
-    const missingRequiredArgs: Arg<any>[] = []
+    const missingRequiredArgs: Array<Arg<any>> = []
     let hasOptional = false
 
     for (const [name, arg] of Object.entries(parse.input.args)) {
       if (!arg.required) {
         hasOptional = true
-      } else if (hasOptional && !variadicArgFound) {
+      } else if (hasOptional && !isVariadicArgFound) {
         // (required arg) check whether an optional has occurred before
         // optionals should follow required, not before
         // Skip this check when a variadic arg is present, since the variadic
@@ -147,17 +147,19 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
   }
 
   function validateConstraints() {
-    if (parse.input.constraints) {
-      const validations = parse.input.constraints.map((c) => c._evaluateAgainstFlags(parse.output.flags))
+    if (!parse.input.constraints) {
+      return
+    }
 
-      const failed = validations.filter((v) => v.status === 'failed')
+    const validations = parse.input.constraints.map((c) => c._evaluateAgainstFlags(parse.output.flags))
 
-      if (failed.length > 0) {
-        throw new ViolatedFlagConstraintError({
-          failed,
-          parse,
-        })
-      }
+    const failed = validations.filter((v) => v.status === 'failed')
+
+    if (failed.length > 0) {
+      throw new ViolatedFlagConstraintError({
+        failed,
+        parse,
+      })
     }
   }
 
@@ -168,11 +170,11 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
         return [flag, parse.output.flags[flag]]
       }
 
-      const result = await flag.when(parse.output.flags)
-      return result ? [flag.name, parse.output.flags[flag.name]] : null
+      const isResult = await flag.when(parse.output.flags)
+      return isResult ? [flag.name, parse.output.flags[flag.name]] : null
     })
     const resolved = await Promise.all(promises)
-    cachedResolvedFlags = Object.fromEntries(resolved.filter((r) => r !== null) as [string, unknown][])
+    cachedResolvedFlags = Object.fromEntries(resolved.filter((r) => r !== null) as Array<[string, unknown]>)
     return cachedResolvedFlags
   }
 
@@ -184,7 +186,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const intersection = Object.entries(parse.input.flags)
       .map((entry) => entry[0]) // array of flag names
       .filter((flagName) => parse.output.flags[flagName] !== undefined) // with values
-      .filter((flagName) => flag.exactlyOne && flag.exactlyOne.includes(flagName)) // and in the exactlyOne list
+      .filter((flagName) => flag.exactlyOne?.includes(flagName)) // and in the exactlyOne list
     if (intersection.length === 0) {
       // the command's exactlyOne may or may not include itself, so we'll use Set to add + de-dupe
       const deduped = uniq(flag.exactlyOne?.map((flag) => `--${flag}`) ?? []).join(', ')
@@ -200,7 +202,7 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const intersection = Object.entries(parse.input.flags)
       .map((entry) => entry[0]) // array of flag names
       .filter((flagName) => parse.output.flags[flagName] !== undefined) // with values
-      .filter((flagName) => flag.atLeastOne && flag.atLeastOne.includes(flagName)) // and in the atLeastOne list
+      .filter((flagName) => flag.atLeastOne?.includes(flagName)) // and in the atLeastOne list
     if (intersection.length === 0) {
       // the command's atLeastOne may or may not include itself, so we'll use Set to add + de-dupe
       const deduped = uniq(flag.atLeastOne?.map((flag) => `--${flag}`) ?? []).join(', ')
@@ -217,8 +219,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const keys = getPresentFlags(resolved)
     for (const flag of keys) {
       // do not enforce exclusivity for flags that were defaulted
-      if (parse.output.metadata.flags && parse.output.metadata.flags[flag]?.setFromDefault) continue
-      if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault) continue
+      if (parse.output.metadata.flags?.[flag]?.setFromDefault) continue
+      if (parse.output.metadata.flags?.[name]?.setFromDefault) continue
       if (parse.output.flags[flag] !== undefined) {
         const flagValue = parse.output.metadata.flags?.[flag]?.defaultHelp ?? parse.output.flags[flag]
         return {
@@ -239,8 +241,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
 
     for (const flag of Object.keys(parse.output.flags)) {
       // do not enforce exclusivity for flags that were defaulted
-      if (parse.output.metadata.flags && parse.output.metadata.flags[flag]?.setFromDefault) continue
-      if (parse.output.metadata.flags && parse.output.metadata.flags[name]?.setFromDefault) continue
+      if (parse.output.metadata.flags?.[flag]?.setFromDefault) continue
+      if (parse.output.metadata.flags?.[name]?.setFromDefault) continue
       if (flag !== name && parse.output.flags[flag] !== undefined && !combinableFlags.has(flag)) {
         const formattedFlags = Object.keys(resolved)
           .map((f) => `--${f}`)
@@ -274,8 +276,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const base = {name, validationFn: 'validateDependsOn'}
     const resolved = await resolveFlags(flags)
 
-    const foundAll = Object.values(resolved).every((val) => val !== undefined)
-    if (!foundAll) {
+    const isFoundAll = Object.values(resolved).every((val) => val !== undefined)
+    if (!isFoundAll) {
       const formattedFlags = Object.keys(resolved)
         .map((f) => `--${f}`)
         .join(', ')
@@ -293,8 +295,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     const base = {name, validationFn: 'validateSome'}
 
     const resolved = await resolveFlags(flags)
-    const foundAtLeastOne = Object.values(resolved).some(Boolean)
-    if (!foundAtLeastOne) {
+    const isFoundAtLeastOne = Object.values(resolved).some(Boolean)
+    if (!isFoundAtLeastOne) {
       const formattedFlags = Object.keys(resolved)
         .map((f) => `--${f}`)
         .join(', ')
@@ -308,8 +310,8 @@ export async function validate(parse: {input: ParserInput; output: ParserOutput}
     return {...base, status: 'success'}
   }
 
-  function validateRelationships(name: string, flag: Flag<any>): Promise<Validation>[] {
-    return (flag.relationships ?? []).map((relationship) => {
+  function validateRelationships(name: string, flag: Flag<any>): Array<Promise<Validation>> {
+    return (flag.relationships ?? []).map(async (relationship) => {
       switch (relationship.type) {
         case 'all': {
           return validateDependsOn(name, relationship.flags)

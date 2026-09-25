@@ -1,12 +1,12 @@
 export type CommandError = Error & {exitCode?: number}
 
-export interface OclifError {
+export type OclifError = {
   oclif: {
     exit?: number | undefined
   }
 }
 
-export interface PrettyPrintableError {
+export type PrettyPrintableError = {
   /**
    * a unique error code for this error class
    */

@@ -2,10 +2,10 @@ import {URL} from 'node:url'
 
 import {CLIError} from './errors'
 import {loadHelpClass} from './help'
-import {BooleanFlag, CustomOptions, FlagDefinition, OptionFlag} from './interfaces'
+import {type BooleanFlag, type CustomOptions, type FlagDefinition, type OptionFlag} from './interfaces'
 import {dirExists, fileExists} from './util/fs'
 
-type NotArray<T> = T extends Array<any> ? never : T
+type NotArray<T> = T extends any[] ? never : T
 /**
  * Create a custom flag.
  *
@@ -177,7 +177,7 @@ export const help = (opts: Partial<BooleanFlag<boolean>> = {}): BooleanFlag<void
     },
   })
 
-type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
+type ReadonlyElementOf<T extends readonly unknown[]> = T[number]
 /**
  * Create a custom flag that infers the flag type from the provided options.
  *
@@ -193,12 +193,12 @@ type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
  * }
  */
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ReadonlyElementOf<T>[], P>> & {
+  defaults: Partial<OptionFlag<Array<ReadonlyElementOf<T>>, P>> & {
     multiple: true
     options: T
   } & (
       | {
-          default: OptionFlag<ReadonlyElementOf<T>[], P>['default'] | undefined
+          default: OptionFlag<Array<ReadonlyElementOf<T>>, P>['default'] | undefined
         }
       | {required: true}
     ),
@@ -221,8 +221,8 @@ export function option<T extends readonly string[], P extends CustomOptions>(
 ): FlagDefinition<(typeof defaults.options)[number], P, {multiple: false; requiredOrDefaulted: false}>
 
 export function option<T extends readonly string[], P extends CustomOptions>(
-  defaults: Partial<OptionFlag<ReadonlyElementOf<T>[], P>> & {
-    default?: OptionFlag<ReadonlyElementOf<T>[], P>['default'] | undefined
+  defaults: Partial<OptionFlag<Array<ReadonlyElementOf<T>>, P>> & {
+    default?: OptionFlag<Array<ReadonlyElementOf<T>>, P>['default'] | undefined
     multiple: true
     options: T
     required?: false | undefined

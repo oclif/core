@@ -1,7 +1,7 @@
 import ansis from 'ansis'
 import {expect} from 'chai'
 
-import {Config, Interfaces} from '../../src'
+import {Config, type Interfaces} from '../../src'
 import {TestHelp} from './help-test-utils'
 
 describe('formatHelp', () => {

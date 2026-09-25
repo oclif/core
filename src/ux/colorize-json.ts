@@ -1,4 +1,5 @@
 import {colorize} from './theme'
+
 const tokenTypes = [
   {regex: /^\s+/, tokenType: 'whitespace'},
   {regex: /^[{}]/, tokenType: 'brace'},
@@ -42,7 +43,7 @@ function serializer(replacer: Replacer | undefined, cycleReplacer: Replacer | un
       // eslint-disable-next-line no-bitwise, @typescript-eslint/no-unused-expressions
       ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
       // eslint-disable-next-line no-bitwise, @typescript-eslint/no-unused-expressions
-      ~thisPos ? keys.splice(thisPos, Number.POSITIVE_INFINITY, key) : keys.push(key)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
       // @ts-expect-error because `this` is not typed
       if (stack.includes(value)) value = cycleReplacer.call(this, key, value)
     } else stack.push(value)
@@ -64,7 +65,7 @@ export function stringifyInput(json?: unknown, options?: Options): string {
 export function tokenize(json?: unknown, options?: Options) {
   let input = stringifyInput(json, options)
   const tokens = []
-  let foundToken = false
+  let isFoundToken = false
 
   do {
     for (const tokenType of tokenTypes) {
@@ -72,11 +73,11 @@ export function tokenize(json?: unknown, options?: Options) {
       if (match) {
         tokens.push({type: tokenType.tokenType, value: match[0]})
         input = input.slice(match[0].length)
-        foundToken = true
+        isFoundToken = true
         break
       }
     }
-  } while (hasRemainingTokens(input, foundToken))
+  } while (hasRemainingTokens(input, isFoundToken))
 
   return tokens
 }

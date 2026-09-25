@@ -1,4 +1,4 @@
-import {Flag, FlagUsageOptions} from '../interfaces/parser'
+import {type Flag, type FlagUsageOptions} from '../interfaces/parser'
 import {sortBy} from '../util/util'
 import {colorize} from '../ux'
 
@@ -21,7 +21,10 @@ export function flagUsage(flag: Flag<any>, options: FlagUsageOptions = {}): [str
   return [` ${label.join(',').trim()}${usage}`, description] as [string, string | undefined]
 }
 
-export function flagUsages(flags: Flag<any>[], options: FlagUsageOptions = {}): [string, string | undefined][] {
+export function flagUsages(
+  flags: Array<Flag<any>>,
+  options: FlagUsageOptions = {},
+): Array<[string, string | undefined]> {
   if (flags.length === 0) return []
   return sortBy(flags, (f) => [f.char ? -1 : 1, f.char, f.name]).map((f) => flagUsage(f, options))
 }

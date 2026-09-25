@@ -11,7 +11,9 @@ export type PluginConfig = {
       flags: Record<string, string | boolean>
     }
     whenNotProvided: {
+      // eslint-disable-next-line @typescript-eslint/no-restricted-types -- these tests care deeply about the difference between null and undefined
       args: Record<string, string | null | boolean>
+      // eslint-disable-next-line @typescript-eslint/no-restricted-types -- these tests care deeply about the difference between null and undefined
       flags: Record<string, string | null | boolean>
     }
   }

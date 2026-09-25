@@ -1,4 +1,4 @@
-export {PrettyPrintableError} from '../interfaces'
+export type {PrettyPrintableError} from '../interfaces'
 export {error} from './error'
 export {CLIError} from './errors/cli'
 export {ExitError} from './errors/exit'

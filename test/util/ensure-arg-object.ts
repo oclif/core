@@ -1,6 +1,7 @@
 import {expect} from 'chai'
 
 import {ensureArgObject} from '../../src/util/ensure-arg-object'
+
 describe('ensureArgObject', () => {
   it('should convert array of arguments to an object', () => {
     const args = [

@@ -1,4 +1,4 @@
-export interface TSConfig {
+export type TSConfig = {
   compilerOptions: {
     baseUrl?: string
     emitDecoratorMetadata?: boolean

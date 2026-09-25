@@ -1,7 +1,7 @@
 import indent from 'indent-string'
 import wrap from 'wrap-ansi'
 
-import {PrettyPrintableError} from '../../interfaces/errors'
+import {type PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
 import {settings} from '../../settings'
 
@@ -9,7 +9,7 @@ import {settings} from '../../settings'
 type CLIErrorDisplayOptions = {bang?: string | undefined; name?: string | undefined}
 
 export function applyPrettyPrintOptions(error: Error, options: PrettyPrintableError): PrettyPrintableError {
-  const prettyErrorKeys: (keyof PrettyPrintableError)[] = ['message', 'code', 'ref', 'suggestions']
+  const prettyErrorKeys: Array<keyof PrettyPrintableError> = ['message', 'code', 'ref', 'suggestions']
 
   for (const key of prettyErrorKeys) {
     const applyOptionsKey = !(key in error) && options[key]
@@ -22,8 +22,8 @@ export function applyPrettyPrintOptions(error: Error, options: PrettyPrintableEr
 }
 
 const formatSuggestions = (suggestions?: string[]): string | undefined => {
-  const label = 'Try this:'
   if (!suggestions || suggestions.length === 0) return undefined
+  const label = 'Try this:'
   if (suggestions.length === 1) return `${label} ${suggestions[0]}`
 
   const multiple = suggestions.map((suggestion) => `* ${suggestion}`).join('\n')
@@ -39,7 +39,7 @@ function isCombinedErrorType(obj: any): obj is CombinedErrorType {
 export default function prettyPrint(error: CombinedErrorType): string | undefined {
   const prettyPrintedErrors: string[] = []
   let currentError: unknown = error
-  let isDeep: boolean = false
+  let isDeep = false
   while (isCombinedErrorType(currentError)) {
     if (settings.debug && currentError.stack) {
       prettyPrintedErrors.push(`${isDeep ? 'Caused by: ' : ''}${currentError.stack}`)
@@ -58,10 +58,10 @@ export default function prettyPrint(error: CombinedErrorType): string | undefine
         .join('\n')
 
       let output = `${isDeep ? 'Caused by: ' : ''}${formatted}`
-      output = wrap(output, errtermwidth - 6, {hard: true, trim: false} as any)
+      output = wrap(output, errtermwidth - 6, {hard: true, trim: false})
       if (!settings.debug) {
         output = indent(output, 3)
-        output = indent(output, 1, {includeEmptyLines: true, indent: bang || ''} as any)
+        output = indent(output, 1, {includeEmptyLines: true, indent: bang || ''})
         output = indent(output, 1)
       }
 

@@ -1,4 +1,4 @@
-export interface HelpOptions {
+export type HelpOptions = {
   all?: boolean
   /**
    * Use docopts as the usage. Defaults to true.
@@ -52,7 +52,7 @@ export interface HelpOptions {
   stripAnsi?: boolean
   /**
    * Use USAGE, but some may want to use USAGE as used in gnu man pages. See help recommendations at
-   * http://www.gnu.org/software/help2man/#--help-recommendations
+   * https://www.gnu.org/software/help2man/#--help-recommendations
    */
   usageHeader?: string
 }
