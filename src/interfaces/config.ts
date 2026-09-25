@@ -25,7 +25,8 @@ export type VersionDetails = {
   shell?: string
 }
 
-export type Config = {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export interface Config {
   /**
    * process.arch
    */

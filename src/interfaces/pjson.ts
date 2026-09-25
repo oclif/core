@@ -129,7 +129,8 @@ export type OclifConfiguration = {
   /**
    * Plugin aliases.
    */
-  aliases?: Record<string, undefined | string>
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style, @typescript-eslint/no-restricted-types
+  aliases?: {[name: string]: null | string}
   /**
    * The name of the executable.
    */

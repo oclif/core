@@ -413,7 +413,12 @@ export class Config implements IConfig {
     return (this.platform === 'darwin' && join(this.home, 'Library', 'Caches', this.dirname)) || undefined
   }
 
-  public async runCommand<T = unknown>(id: string, argv: string[] = [], cachedCommand?: Command.Loadable): Promise<T> {
+  public async runCommand<T = unknown>(
+    id: string,
+    argv: string[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-restricted-types
+    cachedCommand: Command.Loadable | null = null,
+  ): Promise<T> {
     const marker = Performance.mark(OCLIF_MARKER_OWNER, `config.runCommand#${id}`)
     debug('runCommand %s %o', id, argv)
     let c = cachedCommand ?? this.findCommand(id)

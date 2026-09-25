@@ -48,7 +48,8 @@ export {
   type HelpSectionRenderer,
   loadHelpClass,
 } from './help'
-export type * as Interfaces from './interfaces'
+// eslint-disable-next-line @typescript-eslint/consistent-type-exports
+export * as Interfaces from './interfaces'
 export {type Hook} from './interfaces/hooks'
 export {getLogger} from './logger'
 export {run} from './main'
