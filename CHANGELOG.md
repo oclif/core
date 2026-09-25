@@ -1,3 +1,15 @@
+## [5.1.1](https://github.com/oclif/core/compare/5.1.0...5.1.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* feedback from code review (W-24099831) ([b36c51b](https://github.com/oclif/core/commit/b36c51be4737e31c55b2a8f79f43be273e7413bd))
+* resolved autofixable eslint violations (W-24099831) ([b9eabd3](https://github.com/oclif/core/commit/b9eabd3cd28a0a906ea3f9b3177b13f8128735c8))
+* resolved busted interoperability tests (W-24099831) ([b6866f0](https://github.com/oclif/core/commit/b6866f021584f9effb46ed860cc67f7ef661cd0e))
+* resolved circular eslint fixes (W-24099831) ([d0935c1](https://github.com/oclif/core/commit/d0935c1ef55e310d55857be01dbe16fe3c43ac43))
+
+
+
 # [5.1.0](https://github.com/oclif/core/compare/5.0.1...5.1.0) (2026-09-24)
 
 
