@@ -1,3 +1,12 @@
+## [5.1.5](https://github.com/oclif/core/compare/5.1.4...5.1.5) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump postcss-selector-parser from 7.1.5 to 7.1.6 ([1321fb6](https://github.com/oclif/core/commit/1321fb6a7a07dca5726fedff85e12f25a83de3c9))
+
+
+
 ## [5.1.4](https://github.com/oclif/core/compare/5.1.3...5.1.4) (2026-10-09)
 
 
