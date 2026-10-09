@@ -1,3 +1,12 @@
+## [5.1.3](https://github.com/oclif/core/compare/5.1.2...5.1.3) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump ip-address from 10.5.0 to 10.7.2 ([9c89025](https://github.com/oclif/core/commit/9c890255bb39e16f1eec368e5a0ab49047b00032))
+
+
+
 ## [5.1.2](https://github.com/oclif/core/compare/5.1.1...5.1.2) (2026-09-25)
 
 
