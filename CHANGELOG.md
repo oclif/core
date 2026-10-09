@@ -1,3 +1,12 @@
+## [5.1.6](https://github.com/oclif/core/compare/5.1.5...5.1.6) (2026-10-09)
+
+
+### Bug Fixes
+
+* **deps:** bump undici from 6.28.0 to 6.29.0 ([506e039](https://github.com/oclif/core/commit/506e039c83fc6b4da4399f5e8b33126d8903a664))
+
+
+
 ## [5.1.5](https://github.com/oclif/core/compare/5.1.4...5.1.5) (2026-10-09)
 
 
