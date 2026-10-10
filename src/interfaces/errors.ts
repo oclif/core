@@ -1,4 +1,4 @@
-export type CommandError = Error & {exitCode?: number}
+export type CommandError = Error & {exitCode?: number} & Partial<OclifError>
 
 export type OclifError = {
   oclif: {
