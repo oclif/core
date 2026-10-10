@@ -1,3 +1,12 @@
+## [5.1.7](https://github.com/oclif/core/compare/5.1.6...5.1.7) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** bump @humanfs/node from 0.16.6 to 0.16.8 ([d4abfc2](https://github.com/oclif/core/commit/d4abfc28e13421074b40ac3ed621c0056e9b8a5a))
+
+
+
 ## [5.1.6](https://github.com/oclif/core/compare/5.1.5...5.1.6) (2026-10-09)
 
 
