@@ -192,7 +192,7 @@ export abstract class Command {
   }
 
   protected async catch(err: CommandError): Promise<any> {
-    process.exitCode = process.exitCode ?? err.exitCode ?? 1
+    process.exitCode = process.exitCode ?? err.oclif?.exit ?? err.exitCode ?? 1
     if (this.jsonEnabled()) {
       this.logJson(this.toErrorJson(err))
     } else {
