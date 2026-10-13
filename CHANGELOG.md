@@ -1,3 +1,12 @@
+## [5.1.8](https://github.com/oclif/core/compare/5.1.7...5.1.8) (2026-10-13)
+
+
+### Bug Fixes
+
+* use the error's oclif exit code when --json is enabled ([bf35f78](https://github.com/oclif/core/commit/bf35f7889003417e3dd8f06979b336cebcf89a85))
+
+
+
 ## [5.1.7](https://github.com/oclif/core/compare/5.1.6...5.1.7) (2026-10-10)
 
 
