@@ -1,13 +1,11 @@
-/* eslint-disable n/file-extension-in-import -- Node 24 tests run from TypeScript source through ts-node. */
 import {fileURLToPath} from 'node:url'
 
-import type {LoadOptions, Options} from './interfaces'
+import type {LoadOptions, Options} from './interfaces/index.js'
 
-import {CLIError} from './errors'
-import {handle} from './errors/handle'
-import {flush} from './flush'
-import {run} from './main'
-import {settings} from './settings'
+import {CLIError, handle} from './errors/index.js'
+import {flush} from './flush.js'
+import {run} from './main.js'
+import {settings} from './settings.js'
 
 type ExecuteOptions = Omit<Options, 'root'> & {root?: string}
 
@@ -66,11 +64,9 @@ type ExecuteArguments = {
 }
 
 export function execute(
-  options: ExecuteArguments & {dir: string; loadOptions?: LoadOptions | ExecuteOptions},
-): Promise<unknown>
-// eslint-disable-next-line @typescript-eslint/unified-signatures -- The overload requires dir when object load options omit root.
-export function execute(
-  options: ExecuteArguments & {dir?: string; loadOptions: Exclude<LoadOptions, undefined>},
+  options:
+    | (ExecuteArguments & {dir: string; loadOptions?: LoadOptions | ExecuteOptions})
+    | (ExecuteArguments & {dir?: string; loadOptions: Exclude<LoadOptions, undefined>}),
 ): Promise<unknown>
 export async function execute(
   options: ExecuteArguments & {dir?: string; loadOptions?: LoadOptions | ExecuteOptions},
@@ -90,7 +86,7 @@ export async function execute(
       options.args ?? process.argv.slice(2),
       normalizeLoadOptions(options.dir, options.loadOptions),
     )
-    flush()
+    await flush()
     return result
   } catch (error) {
     return handle(error instanceof Error ? error : new Error(String(error)))
