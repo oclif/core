@@ -1,11 +1,12 @@
 import {fileURLToPath} from 'node:url'
 
-import type {LoadOptions, Options} from './interfaces/index.js'
+import type {LoadOptions, Options} from './interfaces'
 
-import {CLIError, handle} from './errors/index.js'
-import {flush} from './flush.js'
-import {run} from './main.js'
-import {settings} from './settings.js'
+import {CLIError} from './errors'
+import {handle} from './errors/handle'
+import {flush} from './flush'
+import {run} from './main'
+import {settings} from './settings'
 
 type ExecuteOptions = Omit<Options, 'root'> & {root?: string}
 
