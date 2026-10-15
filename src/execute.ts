@@ -1,9 +1,26 @@
+import {fileURLToPath} from 'node:url'
+
+import type {LoadOptions, Options} from './interfaces'
+
 import {CLIError} from './errors'
 import {handle} from './errors/handle'
 import {flush} from './flush'
-import {type LoadOptions} from './interfaces'
 import {run} from './main'
 import {settings} from './settings'
+
+type ExecuteOptions = Omit<Options, 'root'> & {root?: string}
+
+function isOptions(loadOptions: LoadOptions | ExecuteOptions): loadOptions is ExecuteOptions {
+  return typeof loadOptions === 'object' && loadOptions !== null && !('runCommand' in loadOptions)
+}
+
+function normalizeLoadOptions(dir: string | undefined, loadOptions: LoadOptions | ExecuteOptions): LoadOptions {
+  if (!loadOptions || !isOptions(loadOptions)) return loadOptions ?? dir
+
+  const root = loadOptions.root ?? (dir?.startsWith('file://') ? fileURLToPath(dir) : dir)
+  if (!root) throw new CLIError('dir or loadOptions.root is required.')
+  return {...loadOptions, root}
+}
 
 /**
  * Load and run oclif CLI
@@ -42,12 +59,19 @@ import {settings} from './settings'
  * })()
  * ```
  */
-export async function execute(options: {
+type ExecuteArguments = {
   args?: string[]
   development?: boolean
-  dir?: string
-  loadOptions?: LoadOptions
-}): Promise<unknown> {
+}
+
+export function execute(
+  options:
+    | (ExecuteArguments & {dir: string; loadOptions?: LoadOptions | ExecuteOptions})
+    | (ExecuteArguments & {dir?: string; loadOptions: Exclude<LoadOptions, undefined>}),
+): Promise<unknown>
+export async function execute(
+  options: ExecuteArguments & {dir?: string; loadOptions?: LoadOptions | ExecuteOptions},
+): Promise<unknown> {
   if (!options.dir && !options.loadOptions) {
     throw new CLIError('dir or loadOptions is required.')
   }
@@ -58,10 +82,14 @@ export async function execute(options: {
     settings.debug = true
   }
 
-  return run(options.args ?? process.argv.slice(2), options.loadOptions ?? options.dir)
-    .then(async (result) => {
-      flush()
-      return result
-    })
-    .catch(async (error) => handle(error))
+  try {
+    const result = await run(
+      options.args ?? process.argv.slice(2),
+      normalizeLoadOptions(options.dir, options.loadOptions),
+    )
+    await flush()
+    return result
+  } catch (error) {
+    return handle(error instanceof Error ? error : new Error(String(error)))
+  }
 }

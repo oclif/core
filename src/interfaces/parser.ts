@@ -71,8 +71,7 @@ export type FlagDefault<T, P = CustomOptions> = T | ((context: DefaultContext<P 
  * @param context The context of the flag.
  */
 export type FlagDefaultHelp<T, P = CustomOptions> =
-  | T
-  | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<string | undefined>)
+  T | ((context: DefaultContext<P & OptionFlag<T, P>>) => Promise<string | undefined>)
 
 /**
  * Type to define a default value for an arg.
@@ -85,8 +84,7 @@ export type ArgDefault<T, P = CustomOptions> = T | ((context: DefaultContext<Arg
  * @param context The context of the arg.
  */
 export type ArgDefaultHelp<T, P = CustomOptions> =
-  | T
-  | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
+  T | ((context: DefaultContext<Arg<T, P>>) => Promise<string | undefined>)
 
 export type FlagRelationship = string | {name: string; when: (flags: Record<string, unknown>) => Promise<boolean>}
 export type Relationship = {

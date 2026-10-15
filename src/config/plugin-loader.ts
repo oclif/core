@@ -12,6 +12,7 @@ import {makeDebug} from './util'
 const debug = makeDebug()
 
 type PluginLoaderOptions = {
+  ignoreManifest?: boolean | undefined
   plugins?: IPlugin[] | PluginsMap | undefined
   root: string
 }
@@ -68,7 +69,12 @@ export default class PluginLoader {
       rootPlugin = plugins.find((p) => p.root === this.options.root) ?? plugins[0]
     } else {
       const marker = Performance.mark(OCLIF_MARKER_OWNER, 'plugin.load#root')
-      rootPlugin = new Plugin({isRoot: true, pjson, root: this.options.root})
+      rootPlugin = new Plugin({
+        ignoreManifest: this.options.ignoreManifest,
+        isRoot: true,
+        pjson,
+        root: this.options.root,
+      })
       await rootPlugin.load()
       marker?.addDetails({
         commandCount: rootPlugin.commands.length,
@@ -154,6 +160,7 @@ export default class PluginLoader {
         try {
           const name = typeof plugin === 'string' ? plugin : plugin.name!
           const opts: Options = {
+            ignoreManifest: this.options.ignoreManifest,
             name,
             root,
             type,
