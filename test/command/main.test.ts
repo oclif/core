@@ -1,6 +1,6 @@
 import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
-import {readFileSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {join, resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
 
@@ -116,6 +116,42 @@ COMMANDS
     await execute({args: ['foo', 'baz'], dir: root, loadOptions: {ignoreManifest: true}})
 
     expect(Cache.default.getInstance().get('config')?.options).to.include({ignoreManifest: true, root})
+  })
+
+  it('ignores a stale manifest when loading commands through execute', async () => {
+    const root = mkdtempSync(join(__dirname, 'tmp-'))
+    const fixture = resolve(__dirname, 'fixtures/typescript')
+    mkdirSync(join(root, 'src/commands/foo'), {recursive: true})
+    writeFileSync(join(root, 'package.json'), readFileSync(join(fixture, 'package.json')))
+    writeFileSync(join(root, 'tsconfig.json'), readFileSync(join(fixture, 'tsconfig.json')))
+    writeFileSync(join(root, 'src/commands/foo/baz.ts'), readFileSync(join(fixture, 'src/commands/foo/baz.ts')))
+    writeFileSync(
+      join(root, 'oclif.manifest.json'),
+      JSON.stringify({
+        commands: {
+          'foo:baz': {
+            aliases: [],
+            args: {},
+            description: 'stale manifest description',
+            flags: {},
+            hidden: false,
+            hiddenAliases: [],
+            id: 'foo:baz',
+          },
+        },
+        version: '0.0.0',
+      }),
+    )
+
+    try {
+      await execute({args: ['foo', 'baz'], dir: join(root, 'package.json'), loadOptions: {ignoreManifest: true}})
+
+      expect(Cache.default.getInstance().get('config')?.findCommand('foo:baz')?.description).to.equal(
+        'foo baz description',
+      )
+    } finally {
+      rmSync(root, {force: true, recursive: true})
+    }
   })
 
   it('accepts undefined load options', async () => {
