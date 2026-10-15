@@ -631,20 +631,8 @@
     }
   },
   "src/execute.ts": {
-    "@typescript-eslint/consistent-type-imports": {
-      "count": 1
-    },
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/use-unknown-in-catch-callback-variable": {
-      "count": 1
-    },
-    "n/file-extension-in-import": {
-      "count": 6
     }
   },
   "src/flags.ts": {
@@ -2093,9 +2081,6 @@
       "count": 1
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
-    "n/file-extension-in-import": {
       "count": 1
     },
     "unicorn/import-style": {

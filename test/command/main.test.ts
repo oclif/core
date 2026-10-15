@@ -1,9 +1,20 @@
+/* eslint-disable n/file-extension-in-import -- Tests run from TypeScript source through ts-node. */
 import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {readFileSync} from 'node:fs'
 import {join, resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
+
+import type CacheType from '../../src/cache'
+import type {execute as executeType} from '../../src/execute'
+import type {LoadOptions} from '../../src/interfaces'
 
 import {getPlatform} from '../../src/util/os'
+
+const Cache = require('../../src/cache') as {default: typeof CacheType} // eslint-disable-line n/no-missing-require
+const {execute} = require('../../src/execute') as {execute: typeof executeType} // eslint-disable-line n/no-missing-require
+
+const loadOptions: LoadOptions = undefined
 
 const pjson = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8'))
 
@@ -98,6 +109,38 @@ COMMANDS
       root: resolve(__dirname, 'fixtures/typescript/package.json'),
     })
     expect(stdout).to.equal('it works!\n')
+  })
+
+  it('merges load options with the directory', async () => {
+    const root = resolve(__dirname, 'fixtures/typescript/package.json')
+
+    await execute({args: ['foo', 'baz'], dir: root, loadOptions: {ignoreManifest: true}})
+
+    expect(Cache.default.getInstance().get('config')?.options).to.include({ignoreManifest: true, root})
+  })
+
+  it('accepts undefined load options', async () => {
+    const root = resolve(__dirname, 'fixtures/typescript/package.json')
+
+    await execute({args: ['foo', 'baz'], dir: root, loadOptions})
+
+    expect(Cache.default.getInstance().get('config')?.options).to.include({root})
+  })
+
+  it('prefers an explicit load options root over the directory', async () => {
+    const root = resolve(__dirname, 'fixtures/typescript/package.json')
+
+    await execute({args: ['foo', 'baz'], dir: __dirname, loadOptions: {ignoreManifest: true, root}})
+
+    expect(Cache.default.getInstance().get('config')?.options).to.include({ignoreManifest: true, root})
+  })
+
+  it('uses a file URL directory as the load options root', async () => {
+    const root = resolve(__dirname, 'fixtures/typescript/package.json')
+
+    await execute({args: ['foo', 'baz'], dir: pathToFileURL(root).href, loadOptions: {ignoreManifest: true}})
+
+    expect(Cache.default.getInstance().get('config')?.options).to.include({ignoreManifest: true, root})
   })
 
   it('should catch errors from commands', async () => {
