@@ -1,7 +1,7 @@
-/* eslint-disable n/file-extension-in-import -- Source files compile extensionless imports to Node16-compatible paths. */
+/* eslint-disable n/file-extension-in-import -- Node 24 tests run from TypeScript source through ts-node. */
 import {fileURLToPath} from 'node:url'
 
-import type {Config, LoadOptions, Options} from './interfaces'
+import type {LoadOptions, Options} from './interfaces'
 
 import {CLIError} from './errors'
 import {handle} from './errors/handle'
@@ -11,13 +11,11 @@ import {settings} from './settings'
 
 type ExecuteOptions = Omit<Options, 'root'> & {root?: string}
 
-export type ExecuteLoadOptions = Config | ExecuteOptions | string | undefined
-
-function isOptions(loadOptions: Exclude<ExecuteLoadOptions, undefined>): loadOptions is ExecuteOptions {
+function isOptions(loadOptions: LoadOptions | ExecuteOptions): loadOptions is ExecuteOptions {
   return typeof loadOptions === 'object' && loadOptions !== null && !('runCommand' in loadOptions)
 }
 
-function normalizeLoadOptions(dir: string | undefined, loadOptions: ExecuteLoadOptions | undefined): LoadOptions {
+function normalizeLoadOptions(dir: string | undefined, loadOptions: LoadOptions | ExecuteOptions): LoadOptions {
   if (!loadOptions || !isOptions(loadOptions)) return loadOptions ?? dir
 
   const root = loadOptions.root ?? (dir?.startsWith('file://') ? fileURLToPath(dir) : dir)
@@ -62,12 +60,21 @@ function normalizeLoadOptions(dir: string | undefined, loadOptions: ExecuteLoadO
  * })()
  * ```
  */
-export async function execute(options: {
+type ExecuteArguments = {
   args?: string[]
   development?: boolean
-  dir?: string
-  loadOptions?: ExecuteLoadOptions
-}): Promise<unknown> {
+}
+
+export function execute(
+  options: ExecuteArguments & {dir: string; loadOptions?: LoadOptions | ExecuteOptions},
+): Promise<unknown>
+// eslint-disable-next-line @typescript-eslint/unified-signatures -- The overload requires dir when object load options omit root.
+export function execute(
+  options: ExecuteArguments & {dir?: string; loadOptions: Exclude<LoadOptions, undefined>},
+): Promise<unknown>
+export async function execute(
+  options: ExecuteArguments & {dir?: string; loadOptions?: LoadOptions | ExecuteOptions},
+): Promise<unknown> {
   if (!options.dir && !options.loadOptions) {
     throw new CLIError('dir or loadOptions is required.')
   }
