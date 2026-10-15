@@ -1,11 +1,13 @@
 import {getLogger} from '../logger'
 
 export function makeDebug(...scope: string[]): (..._: any) => void {
-  return (formatter: unknown, ...args: unknown[]) => getLogger(['config', ...scope].join(':')).debug(formatter, ...args)
+  return (formatter: unknown, ...args: unknown[]) => {
+    getLogger(['config', ...scope].join(':')).debug(formatter, ...args)
+  }
 }
 
 // Adapted from https://github.com/angus-c/just/blob/master/packages/array-permutations/index.js
-export function getPermutations(arr: string[]): Array<string[]> {
+export function getPermutations(arr: string[]): string[][] {
   if (arr.length === 0) return []
   if (arr.length === 1) return [arr]
 
@@ -13,9 +15,7 @@ export function getPermutations(arr: string[]): Array<string[]> {
   const partialPermutations = getPermutations(arr.slice(1))
   const first = arr[0]
 
-  for (let i = 0, len = partialPermutations.length; i < len; i++) {
-    const partial = partialPermutations[i]
-
+  for (const partial of partialPermutations) {
     for (let j = 0, len2 = partial.length; j <= len2; j++) {
       const start = partial.slice(0, j)
       const end = partial.slice(j)

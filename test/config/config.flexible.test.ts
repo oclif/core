@@ -5,10 +5,10 @@ import {Flags} from '../../src'
 import {Command} from '../../src/command'
 import {Config} from '../../src/config/config'
 import {getCommandIdPermutations} from '../../src/config/util'
-import {Plugin as IPlugin} from '../../src/interfaces'
+import {type Plugin as IPlugin} from '../../src/interfaces'
 import * as os from '../../src/util/os'
 
-interface Options {
+type Options = {
   commandIds?: string[]
   types?: string[]
 }
@@ -24,9 +24,7 @@ class MyCommandClass extends Command {
 
   _base = ''
 
-  run(): Promise<any> {
-    return Promise.resolve()
-  }
+  async run(): Promise<any> {}
 }
 
 describe('Config with flexible taxonomy', () => {

@@ -1,13 +1,14 @@
 import ansis from 'ansis'
 
-import {Command} from '../command'
-import * as Interfaces from '../interfaces'
+import type * as Interfaces from '../interfaces'
+
+import {type Command} from '../command'
 import {ensureArgObject} from '../util/ensure-arg-object'
 import {toConfiguredId, toStandardizedId} from '../util/ids'
 import {castArray, compact, sortBy} from '../util/util'
 import {colorize} from '../ux/theme'
 import {DocOpts} from './docopts'
-import {HelpFormatter, HelpSection, HelpSectionRenderer} from './formatter'
+import {HelpFormatter, type HelpSection, type HelpSectionRenderer} from './formatter'
 
 // Don't use os.EOL because we need to ensure that a string
 // written on any platform, that may use \r\n or \n, will be
@@ -50,18 +51,18 @@ export class CommandHelp extends HelpFormatter {
 
   protected arg(arg: Command.Arg.Any): string {
     const name = arg.name.toUpperCase()
-    if (arg.required) return `${name}`
+    if (arg.required) return name
     return `[${name}]`
   }
 
-  protected args(args: Command.Arg.Any[]): [string, string | undefined][] | undefined {
+  protected args(args: Command.Arg.Any[]): Array<[string, string | undefined]> | undefined {
     if (args.filter((a) => a.description).length === 0) return
 
     return args.map((a) => {
       // Add ellipsis for variadic args, or for all args when strict is false (backward compat)
-      const suffix = a.multiple ? '...' : this.command.strict === false ? '...' : ''
+      const suffix = a.multiple || this.command.strict === false ? '...' : ''
       let name = `${a.name.toUpperCase()}${suffix}`
-      name = a.required ? `${name}` : `[${name}]`
+      name = a.required ? name : `[${name}]`
       let description = a.description || ''
       if (a.default)
         description = `${colorize(this.config?.theme?.flagDefaultValue, `[default: ${a.default}]`)} ${description}`
@@ -153,8 +154,7 @@ export class CommandHelp extends HelpFormatter {
     let label = flag.helpLabel
 
     if (!label) {
-      const labels = []
-      labels.push(flag.char ? `-${flag.char[0]}` : '  ')
+      const labels = [flag.char ? `-${flag.char[0]}` : '  ']
       if (flag.name) {
         if (flag.type === 'boolean' && flag.allowNo) {
           labels.push(`--[no-]${flag.name.trim()}`)
@@ -179,16 +179,16 @@ export class CommandHelp extends HelpFormatter {
     return colorize(this.config.theme?.flag, label)
   }
 
-  protected flags(flags: Array<Command.Flag.Any>): [string, string | undefined][] | undefined {
+  protected flags(flags: Command.Flag.Any[]): Array<[string, string | undefined]> | undefined {
     if (flags.length === 0) return
 
-    const noChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
+    const isNoChar = flags.reduce((previous, current) => previous && current.char === undefined, true)
 
     // eslint-disable-next-line complexity
     return flags.map((flag) => {
       let left = this.flagHelpLabel(flag)
 
-      if (noChar) left = left.replace('    ', '')
+      if (isNoChar) left = left.replace(' '.repeat(4), '')
 
       let right = flag.summary || flag.description || ''
 
@@ -222,7 +222,7 @@ export class CommandHelp extends HelpFormatter {
     })
   }
 
-  protected flagsDescriptions(flags: Array<Command.Flag.Any>): string | undefined {
+  protected flagsDescriptions(flags: Command.Flag.Any[]): string | undefined {
     const flagsWithExtendedDescriptions = flags.filter((flag) => flag.summary && flag.description)
     if (flagsWithExtendedDescriptions.length === 0) return
 
@@ -232,7 +232,7 @@ export class CommandHelp extends HelpFormatter {
         const summary = flag.summary || ''
         let flagHelp = this.flagHelpLabel(flag, true)
 
-        if (!flag.char) flagHelp = flagHelp.replace('    ', '')
+        if (!flag.char) flagHelp = flagHelp.replace(' '.repeat(4), '')
 
         flagHelp +=
           flagHelp.length + summary.length + 2 < this.opts.maxWidth
@@ -267,7 +267,7 @@ export class CommandHelp extends HelpFormatter {
         // Generate can return a list of sections
         if (Array.isArray(body)) {
           return body
-            .map((helpSection) => helpSection && helpSection.body && this.section(helpSection.header, helpSection.body))
+            .map((helpSection) => helpSection?.body && this.section(helpSection.header, helpSection.body))
             .join('\n\n')
         }
 
@@ -277,12 +277,12 @@ export class CommandHelp extends HelpFormatter {
     return output
   }
 
-  protected groupFlags(flags: Array<Command.Flag.Any>): {
-    flagGroups: {[name: string]: Array<Command.Flag.Any>}
-    mainFlags: Array<Command.Flag.Any>
+  protected groupFlags(flags: Command.Flag.Any[]): {
+    flagGroups: Record<string, Command.Flag.Any[]>
+    mainFlags: Command.Flag.Any[]
   } {
-    const mainFlags: Array<Command.Flag.Any> = []
-    const flagGroups: {[index: string]: Array<Command.Flag.Any>} = {}
+    const mainFlags: Command.Flag.Any[] = []
+    const flagGroups: Record<string, Command.Flag.Any[]> = {}
 
     for (const flag of flags) {
       const group = flag.helpGroup

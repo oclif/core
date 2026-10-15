@@ -1,8 +1,8 @@
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
 
-import {Config} from './config/config'
-import {OclifConfiguration, Plugin} from './interfaces'
+import {type Config} from './config/config'
+import {type OclifConfiguration, type Plugin} from './interfaces'
 
 type CacheContents = {
   rootPlugin: Plugin

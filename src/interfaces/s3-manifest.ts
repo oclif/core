@@ -1,4 +1,4 @@
-export interface S3Manifest {
+export type S3Manifest = {
   baseDir: string
   gz: string
   node: {

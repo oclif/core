@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 
-import {Config, Interfaces} from '../../src'
-import {Command} from '../../src/command'
+import {Config, type Interfaces} from '../../src'
+import {type Command} from '../../src/command'
 import {CommandHelp, Help} from '../../src/help'
 import {AppsAdminAdd, AppsAdminTopic, AppsCreate, AppsDestroy, AppsIndexWithDesc, AppsTopic} from './fixtures/fixtures'
 import {monkeyPatchCommands} from './help-test-utils'
@@ -27,7 +27,7 @@ ${this.indent(this.wrap('force  it '.repeat(29)))}`,
 class TestHelp extends Help {
   CommandHelpClass = TestCommandHelp
 
-  public declare config: Config
+  declare public config: Config
   public output: string[] = []
   constructor(config: Interfaces.Config, opts: Partial<Interfaces.HelpOptions> = {}) {
     opts.stripAnsi = true

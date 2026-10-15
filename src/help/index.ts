@@ -1,11 +1,12 @@
 import ansis from 'ansis'
 import {isAbsolute, join} from 'node:path'
 
-import {Command} from '../command'
+import type * as Interfaces from '../interfaces'
+
+import {type Command} from '../command'
 import {tsPath} from '../config/ts-path'
 import {error} from '../errors/error'
-import * as Interfaces from '../interfaces'
-import {HelpLocationOptions} from '../interfaces/pjson'
+import {type HelpLocationOptions} from '../interfaces/pjson'
 import {load} from '../module-loader'
 import {SINGLE_COMMAND_CLI_SYMBOL} from '../symbols'
 import {cacheDefaultValue} from '../util/cache-default-value'
@@ -17,6 +18,7 @@ import {CommandHelp} from './command'
 import {HelpFormatter} from './formatter'
 import RootHelp from './root'
 import {formatCommandDeprecationWarning, getHelpFlagAdditions, standardizeIDFromArgv} from './util'
+
 export {CommandHelp} from './command'
 export {HelpFormatter, type HelpSection, type HelpSectionKeyValueTable, type HelpSectionRenderer} from './formatter'
 export {getHelpFlagAdditions, normalizeArgv, standardizeIDFromArgv} from './util'
@@ -115,7 +117,7 @@ export class Help extends HelpBase {
     return help.generate()
   }
 
-  protected formatCommands(commands: Array<Command.Loadable>): string {
+  protected formatCommands(commands: Command.Loadable[]): string {
     if (commands.length === 0) return ''
     const body = this.renderList(
       commands
@@ -145,7 +147,7 @@ export class Help extends HelpBase {
 
   protected formatTopic(topic: Interfaces.Topic): string {
     let description = this.render(topic.description || '')
-    const summary = description.split('\n')[0]
+    const summary = description.split('\n', 1)[0]
     description = description.split('\n').slice(1).join('\n')
     let topicID = `${topic.name}:COMMAND`
     if (this.config.topicSeparator !== ':') topicID = topicID.replaceAll(':', this.config.topicSeparator)
@@ -172,7 +174,8 @@ export class Help extends HelpBase {
         if (this.config.topicSeparator !== ':') c.name = c.name.replaceAll(':', this.config.topicSeparator)
         return [
           colorize(this.config?.theme?.topic, c.name),
-          c.description && this.render(colorize(this.config?.theme?.sectionDescription, c.description.split('\n')[0])),
+          c.description &&
+            this.render(colorize(this.config?.theme?.sectionDescription, c.description.split('\n', 1)[0])),
         ]
       }),
       {
@@ -189,7 +192,7 @@ export class Help extends HelpBase {
   }
 
   protected log(...args: string[]) {
-    return this.opts.sendToStderr ? ux.stderr(args) : ux.stdout(args)
+    this.opts.sendToStderr ? ux.stderr(args) : ux.stdout(args)
   }
 
   public async showCommandHelp(command: Command.Loadable): Promise<void> {
@@ -219,7 +222,7 @@ export class Help extends HelpBase {
         [...(c.aliases ?? []), ...(c.hiddenAliases ?? [])].includes(name),
       )
       const actualCmdName = actualCmd ? toConfiguredId(actualCmd.id, this.config) : ''
-      const opts = {...command.deprecationOptions, ...(actualCmd ? {to: actualCmdName} : {})}
+      const opts = {...command.deprecationOptions, ...(actualCmd && {to: actualCmdName})}
       this.log(`${formatCommandDeprecationWarning(toConfiguredId(name, this.config), opts)}\n`)
     }
 
@@ -381,17 +384,15 @@ export class Help extends HelpBase {
 
   protected summary(c: Command.Loadable): string | undefined {
     if (this.opts.sections && !this.opts.sections.map((s) => s.toLowerCase()).includes('summary')) return
-    if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n')[0]))
-    return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n')[0])
+    if (c.summary) return colorize(this.config?.theme?.commandSummary, this.render(c.summary.split('\n', 1)[0]))
+    return c.description && colorize(this.config?.theme?.commandSummary, this.render(c.description).split('\n', 1)[0])
   }
 }
 
-interface HelpBaseDerived {
-  new (config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>): HelpBase
-}
+type HelpBaseDerived = new (config: Interfaces.Config, opts?: Partial<Interfaces.HelpOptions>) => HelpBase
 
 function extractClass(exported: any): HelpBaseDerived {
-  return exported && exported.default ? exported.default : exported
+  return exported?.default ? exported.default : exported
 }
 
 function determineLocation(helpClass: string | HelpLocationOptions): HelpLocationOptions {

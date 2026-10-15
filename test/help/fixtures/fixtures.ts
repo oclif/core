@@ -1,5 +1,5 @@
 import {Command} from '../../../src'
-import {Topic} from '../../../src/interfaces'
+import {type Topic} from '../../../src/interfaces'
 
 // apps
 

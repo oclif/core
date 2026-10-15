@@ -1,6 +1,6 @@
 import ansis from 'ansis'
 
-import {STANDARD_ANSI, StandardAnsi, Theme} from '../interfaces/theme'
+import {STANDARD_ANSI, type StandardAnsi, type Theme} from '../interfaces/theme'
 import {supportsColor} from './supports-color'
 
 function isStandardAnsi(color: any): color is StandardAnsi {

@@ -1,9 +1,9 @@
-import {Command} from '../command'
-import {Config} from './config'
-import {Input, OutputFlags} from './parser'
-import {Plugin} from './plugin'
+import {type Command} from '../command'
+import {type Config} from './config'
+import {type Input, type OutputFlags} from './parser'
+import {type Plugin} from './plugin'
 
-interface HookMeta {
+type HookMeta = {
   options: Record<string, unknown>
   return: any
 }
@@ -16,7 +16,7 @@ type Context = {
   warn(message: string): void
 }
 
-export interface Hooks {
+export type Hooks = {
   [event: string]: HookMeta
   command_incomplete: {
     options: {argv: string[]; id: string; matches: Command.Loadable[]}
@@ -126,7 +126,7 @@ export namespace Hook {
    */
   export type JitPluginNotInstalled = Hook<'jit_plugin_not_installed'>
 
-  export interface Context {
+  export type Context = {
     config: Config
     debug(...args: any[]): void
     error(message: Error | string, options?: {code?: string; exit?: number}): void
@@ -135,7 +135,7 @@ export namespace Hook {
     warn(message: string): void
   }
 
-  export interface Result<T> {
+  export type Result<T> = {
     failures: Array<{error: Error; plugin: Plugin}>
     successes: Array<{plugin: Plugin; result: T}>
   }

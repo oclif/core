@@ -1,5 +1,11 @@
-import {Constraint, FlagGroup, FlagOutput, MultiFlagTester, SingleFlagTester} from './interfaces/parser'
-import {Validation} from './parser/errors'
+import {
+  type Constraint,
+  type FlagGroup,
+  type FlagOutput,
+  type MultiFlagTester,
+  type SingleFlagTester,
+} from './interfaces/parser'
+import {type Validation} from './parser/errors'
 
 /**
  * Establish a constraint on a single flag.
@@ -58,8 +64,9 @@ class ConstraintImpl implements Constraint {
    */
   public readonly is: ConstraintImpl = this
   private readonly constrainedFlags: string[]
-  private constraintApplicatorFunctionHolder: ConstraintApplicatorFunctionHolder =
+  private readonly constraintApplicatorFunctionHolder: ConstraintApplicatorFunctionHolder =
     new ConstraintApplicatorFunctionHolder()
+
   private topLevelCondition: Condition | undefined
   private underConstructionCondition: Condition | undefined
 
@@ -81,7 +88,7 @@ class ConstraintImpl implements Constraint {
    * @example <caption>--foo requires --bar when fnA returns true AND (fnB returns true OR fnC returns true)</caption>
    * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.when.thisIsTrue(fnB).or.thisIsTrue(fnC)
    */
-  public get and(): ConstraintImpl {
+  public get and(): this {
     if (this.topLevelCondition === undefined) {
       throw new Error(
         `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'and' requires a 'when' or 'unless'.`,
@@ -114,7 +121,7 @@ class ConstraintImpl implements Constraint {
    * flag('foo').is.dependentOn('bar').when.thisIsTrue(fnA).and.when.thisIsTrue(fnB).or.thisIsTrue(fnC)
    *
    */
-  public get or(): ConstraintImpl {
+  public get or(): this {
     if (this.topLevelCondition === undefined) {
       throw new Error(
         `Misconfigured constraint on ${createFlagString(this.constrainedFlags)}: 'or' requires a 'when' or 'unless'.`,
@@ -138,7 +145,7 @@ class ConstraintImpl implements Constraint {
    * @example
    * flag('foo').is.dependentOn('bar').unless.thisIsTrue(someFn)
    */
-  public get unless(): ConstraintImpl {
+  public get unless(): this {
     const newUnless: Condition = new UnlessCondition()
     if (this.topLevelCondition === undefined) {
       this.topLevelCondition = newUnless
@@ -166,7 +173,7 @@ class ConstraintImpl implements Constraint {
    * @example
    * flag('foo').is.dependentOn('bar').when.thisIsTrue(someFn)
    */
-  public get when(): ConstraintImpl {
+  public get when(): this {
     const newWhen: Condition = new WhenCondition()
     if (this.topLevelCondition === undefined) {
       this.topLevelCondition = newWhen
@@ -189,9 +196,9 @@ class ConstraintImpl implements Constraint {
   }
 
   public _evaluateAgainstFlags(flags: FlagOutput): Validation {
-    let conditionSatisfied: boolean = false
+    let isConditionSatisfied = false
     try {
-      conditionSatisfied = this.topLevelCondition ? this.topLevelCondition.isSatisfied(flags) : true
+      isConditionSatisfied = this.topLevelCondition ? this.topLevelCondition.isSatisfied(flags) : true
     } catch (error: any) {
       return {
         name: this.constrainedFlags.join(','),
@@ -206,7 +213,7 @@ class ConstraintImpl implements Constraint {
       return {
         name: this.constrainedFlags.join(','),
         reason: applicationResult,
-        status: conditionSatisfied && applicationResult !== '' ? 'failed' : 'success',
+        status: isConditionSatisfied && applicationResult !== '' ? 'failed' : 'success',
         validationFn: this.constraintApplicatorFunctionHolder.constraintType ?? '',
       }
     } catch (error: any) {
@@ -232,13 +239,15 @@ class ConstraintImpl implements Constraint {
    * @param criterionTester An object whose keys are flag names and whose values are functions that accept the
    * value of that flag and return a boolean.
    */
-  public allFlagCriteriaSatisfied(criterionTester: SingleFlagTester): ConstraintImpl {
+  public allFlagCriteriaSatisfied(criterionTester: SingleFlagTester): this {
     // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
       throw new Error(
         `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: allFlagCriteriaSatisfied must immediately follow a when/unless/and/or`,
       )
-    } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
+    }
+
+    if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new AllFlagCriteriaSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
     } else if (this.underConstructionCondition instanceof BinaryCondition) {
@@ -263,13 +272,15 @@ class ConstraintImpl implements Constraint {
    * @param criterionTester An object whose keys are flag names and whose values are functions that accept the
    * value of that flag and return a boolean.
    */
-  public anyFlagCriterionSatisfied(criterionTester: SingleFlagTester): ConstraintImpl {
+  public anyFlagCriterionSatisfied(criterionTester: SingleFlagTester): this {
     // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
       throw new Error(
         `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: anyFlagCriterionSatisfied must immediately follow a when/unless/and/or`,
       )
-    } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
+    }
+
+    if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new AnyFlagCriterionSatisfiedCondition(criterionTester))
       this.underConstructionCondition = undefined
     } else if (this.underConstructionCondition instanceof BinaryCondition) {
@@ -296,7 +307,7 @@ class ConstraintImpl implements Constraint {
    *
    * @param dependencyFlagGroups
    */
-  public dependentOn(...dependencyFlagGroups: FlagGroup[]): ConstraintImpl {
+  public dependentOn(...dependencyFlagGroups: FlagGroup[]): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('dependentOn', (flags: FlagOutput) => {
       const foundConstraintFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundConstraintFlags.length === 0) {
@@ -316,8 +327,8 @@ class ConstraintImpl implements Constraint {
         }
       }
 
-      const multipleConstrainedFlags = this.constrainedFlags.length > 1
-      const header: string = multipleConstrainedFlags
+      const isMultipleConstrainedFlags = this.constrainedFlags.length > 1
+      const header: string = isMultipleConstrainedFlags
         ? `Flags ${createFlagString(this.constrainedFlags)} require`
         : `Flag ${createFlagString(this.constrainedFlags)} requires`
       return `${header} at least one of the following${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(dependencyFlagGroups)}.`
@@ -339,35 +350,35 @@ class ConstraintImpl implements Constraint {
    *
    * @param exclusionFlagGroups
    */
-  public exclusiveWith(...exclusionFlagGroups: FlagGroup[]): ConstraintImpl {
+  public exclusiveWith(...exclusionFlagGroups: FlagGroup[]): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('exclusiveWith', (flags: FlagOutput) => {
       const foundConstraintFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundConstraintFlags.length === 0) {
         return ''
       }
 
-      let exclusionGroupFound = false
+      let isExclusionGroupFound = false
       for (const exclusionFlagGroup of exclusionFlagGroups) {
         if (typeof exclusionFlagGroup === 'string') {
           if (exclusionFlagGroup in flags && flags[exclusionFlagGroup] !== undefined) {
-            exclusionGroupFound = true
+            isExclusionGroupFound = true
             break
           }
         } else {
           const foundFlagsInExclusionGroup = filterFlagsPresentInInput(exclusionFlagGroup.flags, flags)
           if (foundFlagsInExclusionGroup.length === exclusionFlagGroup.flags.length) {
-            exclusionGroupFound = true
+            isExclusionGroupFound = true
             break
           }
         }
       }
 
-      if (!exclusionGroupFound) {
+      if (!isExclusionGroupFound) {
         return ''
       }
 
-      const multipleConstrainedFlags = this.constrainedFlags.length > 1
-      const header: string = multipleConstrainedFlags ? 'Flags' : 'Flag'
+      const isMultipleConstrainedFlags = this.constrainedFlags.length > 1
+      const header: string = isMultipleConstrainedFlags ? 'Flags' : 'Flag'
       return `${header} ${createFlagString(this.constrainedFlags)} cannot be used with any of the following${this.topLevelCondition ? ' under current circumstances:' : ':'} ${createFlagString(exclusionFlagGroups)}.`
     })
     return this
@@ -379,7 +390,7 @@ class ConstraintImpl implements Constraint {
    * @example <caption>--foo cannot be used without --bar, and vice versa</caption>
    * flags('foo', 'bar').are.mutuallyDependent()
    */
-  public mutuallyDependent(): ConstraintImpl {
+  public mutuallyDependent(): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('mutuallyDependent', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length === 0 || foundFlags.length === this.constrainedFlags.length) {
@@ -398,7 +409,7 @@ class ConstraintImpl implements Constraint {
    * @example <caption>--foo and --bar cannot both be used at the same time</caption>
    * flags('foo', 'bar').are.mutuallyExclusive()
    */
-  public mutuallyExclusive(): ConstraintImpl {
+  public mutuallyExclusive(): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('mutuallyExclusive', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length <= 1) {
@@ -417,7 +428,7 @@ class ConstraintImpl implements Constraint {
    * @example <caption>--foo and --bar are both always required</caption>
    * flags('foo', 'bar').are.requiredAll()
    */
-  public requiredAll(): ConstraintImpl {
+  public requiredAll(): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('requiredAll', (flags: FlagOutput) => {
       const foundFlags: string[] = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length === this.constrainedFlags.length) {
@@ -438,7 +449,7 @@ class ConstraintImpl implements Constraint {
    * @example <caption>Must use at least one of --foo, --bar, or --baz</caption>
    * flags('foo', 'bar', 'baz').are.requiredAny()
    */
-  public requiredAny(): ConstraintImpl {
+  public requiredAny(): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator('requiredAny', (flags: FlagOutput) => {
       const foundFlags = filterFlagsPresentInInput(this.constrainedFlags, flags)
       if (foundFlags.length > 0) {
@@ -459,7 +470,7 @@ class ConstraintImpl implements Constraint {
    *
    * @param n
    */
-  public requiredAtLeastN(n: number): ConstraintImpl {
+  public requiredAtLeastN(n: number): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredAtLeast${n}`, (flags: FlagOutput) =>
       required(n, 'AT_LEAST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
     )
@@ -474,7 +485,7 @@ class ConstraintImpl implements Constraint {
    *
    * @param n
    */
-  public requiredAtMostN(n: number): ConstraintImpl {
+  public requiredAtMostN(n: number): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredAtMost${n}`, (flags: FlagOutput) =>
       required(n, 'AT_MOST_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
     )
@@ -489,7 +500,7 @@ class ConstraintImpl implements Constraint {
    *
    * @param n
    */
-  public requiredExactlyN(n: number): ConstraintImpl {
+  public requiredExactlyN(n: number): this {
     this.constraintApplicatorFunctionHolder.setConstraintApplicator(`requiredExactly${n}`, (flags: FlagOutput) =>
       required(n, 'EXACTLY_N', this.constrainedFlags, flags, this.topLevelCondition !== undefined),
     )
@@ -504,13 +515,15 @@ class ConstraintImpl implements Constraint {
    *
    * @param flagTester A method that accepts the flag values mapped by their name, and returns a boolean
    */
-  public thisIsTrue(flagTester: MultiFlagTester): ConstraintImpl {
+  public thisIsTrue(flagTester: MultiFlagTester): this {
     // istanbul ignore else - All cases covered
     if (this.underConstructionCondition === undefined) {
       throw new Error(
         `Misconfigured constraint condition on ${createFlagString(this.constrainedFlags)}: thisIsTrue must immediately follow a when/unless/and/or`,
       )
-    } else if (this.underConstructionCondition instanceof UnaryOpCondition) {
+    }
+
+    if (this.underConstructionCondition instanceof UnaryOpCondition) {
       this.underConstructionCondition.setCondition(new ThisIsTrueCondition(flagTester))
       this.underConstructionCondition = undefined
     } else if (this.underConstructionCondition instanceof BinaryCondition) {

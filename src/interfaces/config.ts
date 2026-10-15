@@ -1,9 +1,9 @@
-import {Command} from '../command'
-import {Hook, Hooks} from './hooks'
-import {OclifConfiguration, PJSON, S3Templates} from './pjson'
-import {Options, Plugin} from './plugin'
-import {Theme} from './theme'
-import {Topic} from './topic'
+import {type Command} from '../command'
+import {type Hook, type Hooks} from './hooks'
+import {type OclifConfiguration, type PJSON, type S3Templates} from './pjson'
+import {type Options, type Plugin} from './plugin'
+import {type Theme} from './theme'
+import {type Topic} from './topic'
 
 export type LoadOptions = Config | Options | string | undefined
 export type PlatformTypes = 'wsl' | NodeJS.Platform
@@ -25,6 +25,7 @@ export type VersionDetails = {
   shell?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface Config {
   /**
    * process.arch
@@ -133,7 +134,7 @@ export interface Config {
 
 export namespace Config {
   export namespace s3Key {
-    export interface Options {
+    export type Options = {
       [key: string]: any
       arch?: ArchTypes
       platform?: PlatformTypes

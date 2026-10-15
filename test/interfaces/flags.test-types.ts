@@ -5,7 +5,7 @@
 import {URL} from 'node:url'
 import {expectNotType, expectType} from 'tsd'
 
-import {Command, Flags, Interfaces} from '../../src'
+import {Command, Flags, type Interfaces} from '../../src'
 
 abstract class BaseCommand extends Command {
   static enableJsonFlag = true
@@ -145,13 +145,13 @@ export class MyCommand extends BaseCommand {
     url: Flags.url(),
     'url#opts:required': Flags.url({required: true}),
     'url#opts:default': Flags.url({
-      default: new URL('http://example.com'),
+      default: new URL('https://example.com'),
       defaultHelp: async (_ctx) => 'Example URL',
     }),
 
     'url#opts:multiple': Flags.url({multiple: true}),
     'url#opts:multiple,required': Flags.url({multiple: true, required: true}),
-    'url#opts:multiple,default': Flags.url({multiple: true, default: [new URL('http://example.com')]}),
+    'url#opts:multiple,default': Flags.url({multiple: true, default: [new URL('https://example.com')]}),
 
     custom: Flags.custom<MyType>({
       parse: async () => ({foo: true}),
@@ -465,11 +465,11 @@ export class MyCommand extends BaseCommand {
     expectNotType<undefined>(this.flags['option#opts:default'])
     expectType<(typeof options)[number] | undefined>(this.flags.option)
 
-    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,required'])
+    expectType<Array<(typeof options)[number]>>(this.flags['option#opts:multiple,required'])
     expectNotType<undefined>(this.flags['option#opts:multiple,required'])
-    expectType<(typeof options)[number][]>(this.flags['option#opts:multiple,default'])
+    expectType<Array<(typeof options)[number]>>(this.flags['option#opts:multiple,default'])
     expectNotType<undefined>(this.flags['option#opts:multiple,default'])
-    expectType<(typeof options)[number][] | undefined>(this.flags['option#opts:multiple'])
+    expectType<Array<(typeof options)[number]> | undefined>(this.flags['option#opts:multiple'])
 
     expectType<string>(this.flags['custom#defs:required'])
     expectNotType<undefined>(this.flags['custom#defs:required'])
@@ -503,7 +503,7 @@ export class MyCommand extends BaseCommand {
 
     expectType<string[] | undefined>(this.flags['custom#defs:multiple,parse'])
 
-    expectType<(typeof options)[number][] | undefined>(this.flags['option#defs:multiple,prase'])
+    expectType<Array<(typeof options)[number]> | undefined>(this.flags['option#defs:multiple,prase'])
 
     expectType<string | undefined>(this.flags['custom#defs:multiple=true;opts:multiple=false'])
     expectType<string[] | undefined>(this.flags['custom#defs:multiple=false;opts:multiple=true'])

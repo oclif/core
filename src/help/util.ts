@@ -1,7 +1,7 @@
 import ejs from 'ejs'
 
 import {collectUsableIds} from '../config/util'
-import {Deprecation, Config as IConfig} from '../interfaces'
+import {type Deprecation, type Config as IConfig} from '../interfaces'
 import {toStandardizedId} from '../util/ids'
 
 export function template(context: any): (t: string) => string {
@@ -63,7 +63,7 @@ export function standardizeIDFromArgv(argv: string[], config: IConfig): string[]
 export function getHelpFlagAdditions(config: IConfig): string[] {
   const helpFlags = ['--help']
   const additionalHelpFlags = config.pjson.oclif.additionalHelpFlags ?? []
-  return [...new Set([...additionalHelpFlags, ...helpFlags]).values()]
+  return [...new Set([...additionalHelpFlags, ...helpFlags])]
 }
 
 export function formatFlagDeprecationWarning(flag: string, opts: Deprecation | true): string {

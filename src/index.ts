@@ -1,4 +1,5 @@
 import {isTruthy} from './util/util'
+
 function checkCWD() {
   try {
     process.cwd()
@@ -47,6 +48,7 @@ export {
   type HelpSectionRenderer,
   loadHelpClass,
 } from './help'
+// eslint-disable-next-line @typescript-eslint/consistent-type-exports
 export * as Interfaces from './interfaces'
 export {type Hook} from './interfaces/hooks'
 export {getLogger} from './logger'

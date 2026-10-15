@@ -1,11 +1,11 @@
 import ansis from 'ansis'
-import {ExecException, execSync, ExecSyncOptionsWithBufferEncoding} from 'node:child_process'
+import {type ExecException, execSync, type ExecSyncOptionsWithBufferEncoding} from 'node:child_process'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {mkdir, rm} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {basename, dirname, join, resolve} from 'node:path'
 
-import {Interfaces} from '../../src'
+import {type Interfaces} from '../../src'
 
 const debug = require('debug')('integration')
 
@@ -66,7 +66,7 @@ export class Executor {
     this.debug = debug.extend(`${this.testFileName}:${this.parentDir}:${this.pluginName}`)
   }
 
-  public clone(repo: string, branch?: string): Promise<Result> {
+  public async clone(repo: string, branch?: string): Promise<Result> {
     const cmd = branch
       ? `git clone --branch ${branch} ${repo} ${this.pluginDir} --depth 1`
       : `git clone ${repo} ${this.pluginDir} --depth 1`
@@ -75,12 +75,12 @@ export class Executor {
     return result
   }
 
-  public exec(cmd: string, options?: ExecOptions): Promise<Result> {
+  public async exec(cmd: string, options?: ExecOptions): Promise<Result> {
     const cwd = options?.cwd ?? process.cwd()
-    const silent = options?.silent ?? true
+    const isSilent = options?.silent ?? true
     return new Promise((resolve) => {
       this.debug(cmd, ansis.dim(`(cwd: ${cwd})`))
-      if (silent) {
+      if (isSilent) {
         try {
           const r = execSync(cmd, {...options, stdio: 'pipe', cwd})
           const stdout = r.toString()
@@ -104,9 +104,9 @@ export class Executor {
     })
   }
 
-  public executeCommand(cmd: string, script: Script = 'run', options: ExecOptions = {}): Promise<Result> {
+  public async executeCommand(cmd: string, script: Script = 'run', options: ExecOptions = {}): Promise<Result> {
     if (script.includes(' ')) {
-      const [runtime, theScript] = script.split(' ')
+      const [runtime, theScript] = script.split(' ', 2)
       const executable =
         process.platform === 'win32'
           ? join('bin', `${theScript}.cmd`)
@@ -121,8 +121,8 @@ export class Executor {
     return this.executeInTestDir(`${executable} ${cmd}`, options)
   }
 
-  public executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
-    return this.exec(cmd, {...options, cwd: this.pluginDir} as ExecOptions)
+  public async executeInTestDir(cmd: string, options?: ExecOptions): Promise<Result> {
+    return this.exec(cmd, {...options, cwd: this.pluginDir})
   }
 }
 
@@ -167,14 +167,14 @@ export async function setup(testFile: string, options: SetupOptions): Promise<Ex
   if (options.plugins) {
     const pluginDeps = options.plugins.reduce((x, y) => ({...x, [y]: 'latest'}), {})
     pjson = updatePkgJson(pluginDir, {
-      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
+      ...(!options.noLinkCore && {resolutions: {'@oclif/core': resolve('.')}}),
       dependencies: {...dependencies, ...pluginDeps},
       devDependencies,
       oclif: {plugins: options.plugins},
     })
   } else {
     pjson = updatePkgJson(pluginDir, {
-      ...(options.noLinkCore ? {} : {resolutions: {'@oclif/core': resolve('.')}}),
+      ...(!options.noLinkCore && {resolutions: {'@oclif/core': resolve('.')}}),
       devDependencies,
       dependencies,
     })

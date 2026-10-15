@@ -35,8 +35,8 @@ class Marker {
   public module: string
   public scope: string
   public stopped = false
-  private startMarker: string
-  private stopMarker: string
+  private readonly startMarker: string
+  private readonly stopMarker: string
 
   constructor(
     public owner: string,
@@ -45,8 +45,8 @@ class Marker {
   ) {
     this.startMarker = `${this.name}-start`
     this.stopMarker = `${this.name}-stop`
-    const [caller, scope] = name.split('#')
-    const [module, method] = caller.split('.')
+    const [caller, scope] = name.split('#', 2)
+    const [module, method] = caller.split('.', 2)
     this.module = module
     this.method = method
     this.scope = scope
@@ -71,9 +71,9 @@ class Marker {
 export class Performance {
   private static _oclifPerf: PerfHighlights
   /* Key: marker.owner */
-  private static _results = new Map<string, PerfResult[]>()
+  private static readonly _results = new Map<string, PerfResult[]>()
   /* Key: marker.name */
-  private static markers = new Map<string, Marker>()
+  private static readonly markers = new Map<string, Marker>()
 
   /**
    * Collect performance results into static Performance.results
@@ -130,22 +130,19 @@ export class Performance {
 
         const hookRunTimes = oclifResults
           .filter(({name}) => name.startsWith('config.runHook#'))
-          .reduce(
-            (acc, perfResult) => {
-              const event = perfResult.details.event as string
-              if (event) {
-                if (!acc[event]) acc[event] = {}
-                acc[event][perfResult.scope!] = perfResult.duration
-              } else {
-                const event = perfResult.scope!
-                if (!acc[event]) acc[event] = {}
-                acc[event].total = perfResult.duration
-              }
+          .reduce<Record<string, Record<string, number>>>((acc, perfResult) => {
+            const event = perfResult.details.event as string
+            if (event) {
+              if (!acc[event]) acc[event] = {}
+              acc[event][perfResult.scope!] = perfResult.duration
+            } else {
+              const event = perfResult.scope!
+              if (!acc[event]) acc[event] = {}
+              acc[event].total = perfResult.duration
+            }
 
-              return acc
-            },
-            {} as Record<string, Record<string, number>>,
-          )
+            return acc
+          }, {})
 
         const pluginLoadTimeByType = Object.fromEntries(
           oclifResults
@@ -289,8 +286,6 @@ export class Performance {
   /** returns a map of owner, PerfResult[].  Excludes oclif PerfResult, which you can get from oclifPerf */
   public static get results(): Map<string, PerfResult[]> {
     if (!Performance.enabled) return new Map()
-    return new Map<string, PerfResult[]>(
-      [...Performance._results.entries()].filter(([owner]) => owner !== OCLIF_MARKER_OWNER),
-    )
+    return new Map<string, PerfResult[]>([...Performance._results].filter(([owner]) => owner !== OCLIF_MARKER_OWNER))
   }
 }

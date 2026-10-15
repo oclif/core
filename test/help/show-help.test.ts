@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import sinon from 'sinon'
 
-import {Config, Interfaces} from '../../src'
+import {Config, type Interfaces} from '../../src'
 import {Help} from '../../src/help'
 import {
   AppsAdminAdd,
@@ -120,7 +120,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any, {hideAliasesFromRoot: true})
+    const help = new TestHelp(config, {hideAliasesFromRoot: true})
     await help.showHelp([])
     const output = help.getOutput()
     expect(output).to.equal(`base library for oclif CLIs
@@ -144,7 +144,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp([])
     const output = help.getOutput()
     expect(output).to.equal(`base library for oclif CLIs
@@ -179,7 +179,7 @@ describe('showHelp for a topic', () => {
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['apps'])
     const output = help.getOutput()
     expect(output).to.equal(`This topic is for the apps topic
@@ -201,7 +201,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['apps'])
     const output = help.getOutput()
     expect(output).to.equal(`This topic is for the apps topic
@@ -226,7 +226,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['apps'])
     const output = help.getOutput()
     expect(output).to.equal(`This topic is for the apps topic
@@ -252,7 +252,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['apps'])
     const output = help.getOutput()
     expect(output).to.equal(`This topic is for the apps topic
@@ -277,7 +277,7 @@ COMMANDS
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['foo:bar:alias'])
     const output = help.getOutput()
     expect(output).to.equal(`The "foo:bar:alias" command has been deprecated. Use "foo:bar" instead.
@@ -298,7 +298,7 @@ ALIASES
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['foo:bar:hidden'])
     const output = help.getOutput()
     expect(output).to.equal(`The "foo:bar:hidden" command has been deprecated. Use "foo:bar:v2" instead.
@@ -347,7 +347,7 @@ DESCRIPTION
       },
     ])
 
-    const help = new TestHelp(config as any)
+    const help = new TestHelp(config)
     await help.showHelp(['apps'])
     const output = help.getOutput()
     expect(output).to.equal(`List all apps (app index command)

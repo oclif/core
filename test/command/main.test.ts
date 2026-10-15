@@ -1,4 +1,3 @@
-/* eslint-disable n/file-extension-in-import -- Node 24 tests run from TypeScript source through ts-node. */
 import {runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {readFileSync} from 'node:fs'

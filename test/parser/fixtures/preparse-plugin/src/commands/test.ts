@@ -1,5 +1,5 @@
-import {Command, Flags, Interfaces} from '../../../../../../src'
-import {BooleanFlag} from '../../../../../../src/interfaces'
+import {Command, Flags, type Interfaces} from '../../../../../../src'
+import {type BooleanFlag} from '../../../../../../src/interfaces'
 
 type GroupAliasOption = {
   flag: string

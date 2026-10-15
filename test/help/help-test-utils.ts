@@ -1,6 +1,6 @@
 import ansis from 'ansis'
 
-import {Interfaces} from '../../src'
+import {type Interfaces} from '../../src'
 import {Command} from '../../src/command'
 import {CommandHelp, Help} from '../../src/help'
 import {cacheCommand} from '../../src/util/cache-command'
@@ -75,7 +75,7 @@ export function makeCommandClass(cmdProps: Partial<Command.Class & Command.Loada
 export function monkeyPatchCommands(
   config: any,
   plugins: Array<{name: string; commands: Command.Class[]; topics: Interfaces.Topic[]}>,
-  override: boolean = true,
+  override = true,
 ) {
   const pluginsMap = new Map()
   for (const plugin of plugins) {

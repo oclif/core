@@ -4,7 +4,7 @@
 import {URL} from 'node:url'
 import {expectNotType, expectType} from 'tsd'
 
-import {Args, Command, Interfaces} from '../../src'
+import {Args, Command, type Interfaces} from '../../src'
 
 type MyArgs = Interfaces.InferredArgs<typeof MyCommand.args>
 
@@ -46,7 +46,7 @@ export class MyCommand extends Command {
 
     optionalUrl: Args.url(),
     requiredUrl: Args.url({required: true}),
-    defaultUrl: Args.url({default: new URL('http://example.com')}),
+    defaultUrl: Args.url({default: new URL('https://example.com')}),
 
     optionalCustom: Args.custom<MyType>({
       parse: async () => ({foo: true}),
@@ -131,11 +131,11 @@ export class MyCommand extends Command {
     expectNotType<undefined>(this.args.defaultOption)
     expectType<(typeof stages)[number] | undefined>(this.args.optionalOption)
 
-    expectType<(typeof stages)[number][]>(this.args.requiredMultipleOption)
+    expectType<Array<(typeof stages)[number]>>(this.args.requiredMultipleOption)
     expectNotType<undefined>(this.args.requiredMultipleOption)
-    expectType<(typeof stages)[number][]>(this.args.defaultMultipleOption)
+    expectType<Array<(typeof stages)[number]>>(this.args.defaultMultipleOption)
     expectNotType<undefined>(this.args.defaultMultipleOption)
-    expectType<(typeof stages)[number][] | undefined>(this.args.optionalMultipleOption)
+    expectType<Array<(typeof stages)[number]> | undefined>(this.args.optionalMultipleOption)
 
     return result.args
   }

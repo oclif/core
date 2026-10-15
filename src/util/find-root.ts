@@ -3,13 +3,14 @@ import type {getPackageInformation, PackageInformation, PackageLocator} from 'pn
 
 import {basename, dirname, join} from 'node:path'
 
-import {PJSON} from '../interfaces'
+import {type PJSON} from '../interfaces'
 import {getLogger} from '../logger'
 import {safeReadJson} from './fs'
 
 export function debug(...scope: string[]): (..._: any) => void {
-  return (formatter: unknown, ...args: unknown[]) =>
+  return (formatter: unknown, ...args: unknown[]) => {
     getLogger(['find-root', ...scope].join(':')).debug(formatter, ...args)
+  }
 }
 
 // essentially just "cd .."

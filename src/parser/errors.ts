@@ -1,6 +1,6 @@
 import Cache from '../cache'
 import {CLIError} from '../errors'
-import {Arg, ArgInput, CLIParseErrorOptions, OptionFlag} from '../interfaces/parser'
+import {type Arg, type ArgInput, type CLIParseErrorOptions, type OptionFlag} from '../interfaces/parser'
 import {uniq} from '../util/util'
 import renderList from '../ux/list'
 import {colorize} from '../ux/theme'
@@ -50,14 +50,14 @@ export class InvalidArgsSpecError extends CLIParseError {
 }
 
 export class RequiredArgsError extends CLIParseError {
-  public args: Arg<any>[]
+  public args: Array<Arg<any>>
 
   constructor({
     args,
     exit,
     flagsWithMultiple,
     parse,
-  }: CLIParseErrorOptions & {args: Arg<any>[]; flagsWithMultiple?: string[]}) {
+  }: CLIParseErrorOptions & {args: Array<Arg<any>>; flagsWithMultiple?: string[]}) {
     let message = `Missing ${args.length} required arg${args.length === 1 ? '' : 's'}`
     const namedArgs = args.filter((a) => a.name)
     if (namedArgs.length > 0) {

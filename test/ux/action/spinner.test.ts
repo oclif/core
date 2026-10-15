@@ -3,7 +3,7 @@ import {expect} from 'chai'
 
 import Spinner from '../../../src/ux/action/spinner'
 
-const sleep = (ms: number) =>
+const sleep = async (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms)
   })

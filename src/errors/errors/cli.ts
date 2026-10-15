@@ -3,7 +3,7 @@ import indent from 'indent-string'
 import wrap from 'wrap-ansi'
 
 import Cache from '../../cache'
-import {OclifError, PrettyPrintableError} from '../../interfaces/errors'
+import {type OclifError, type PrettyPrintableError} from '../../interfaces/errors'
 import {errtermwidth} from '../../screen'
 import {settings} from '../../settings'
 import {colorize} from '../../ux/theme'
@@ -57,7 +57,7 @@ export class CLIError extends Error implements OclifError {
     }
 
     let output = `${this.name}: ${this.message}`
-    output = wrap(output, errtermwidth - 6, {hard: true, trim: false} as any)
+    output = wrap(output, errtermwidth - 6, {hard: true, trim: false})
     output = indent(output, 3)
     output = indent(output, 1, {includeEmptyLines: true, indent: this.bang} as any)
     output = indent(output, 1)

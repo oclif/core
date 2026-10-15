@@ -1,4 +1,4 @@
-import {Command} from '../command'
+import {type Command} from '../command'
 
 /**
  * This function is responsible for locating the correct plugin to use for a named command id

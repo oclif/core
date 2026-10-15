@@ -2,13 +2,13 @@ import {expect} from 'chai'
 import {join, resolve} from 'node:path'
 import sinon from 'sinon'
 
-import {Config, Interfaces} from '../../src'
+import {Config, type Interfaces} from '../../src'
 import {Command} from '../../src/command'
-import {Plugin as IPlugin} from '../../src/interfaces'
+import {type Plugin as IPlugin} from '../../src/interfaces'
 import * as fs from '../../src/util/fs'
 import * as os from '../../src/util/os'
 
-interface Options {
+type Options = {
   commandIds?: string[]
   types?: string[]
 }
@@ -259,9 +259,7 @@ describe('Config', () => {
 
         _base = ''
 
-        run(): Promise<any> {
-          return Promise.resolve()
-        }
+        async run(): Promise<any> {}
       }
 
       const load = async (): Promise<void> => {}

@@ -1,10 +1,11 @@
 import {fileURLToPath, URL} from 'node:url'
 
+import type * as Interfaces from './interfaces'
+
 import Cache from './cache'
-import {Command} from './command'
+import {type Command} from './command'
 import {Config} from './config'
 import {getHelpFlagAdditions, loadHelpClass, normalizeArgv} from './help'
-import * as Interfaces from './interfaces'
 import {getLogger, setLogger} from './logger'
 import {OCLIF_MARKER_OWNER, Performance} from './performance'
 import {SINGLE_COMMAND_CLI_SYMBOL} from './symbols'
@@ -23,9 +24,8 @@ export const helpAddition = (argv: string[], config: Interfaces.Config): boolean
 
 export const versionAddition = (argv: string[], config?: Interfaces.Config): boolean => {
   const additionalVersionFlags = config?.pjson.oclif.additionalVersionFlags ?? []
-  const mergedVersionFlags = [...new Set(['--version', ...additionalVersionFlags]).values()]
-  if (mergedVersionFlags.includes(argv[0])) return true
-  return false
+  const mergedVersionFlags = [...new Set(['--version', ...additionalVersionFlags])]
+  return Boolean(mergedVersionFlags.includes(argv[0]))
 }
 
 export async function run(argv?: string[], options?: Interfaces.LoadOptions): Promise<unknown> {
@@ -46,7 +46,7 @@ export async function run(argv?: string[], options?: Interfaces.LoadOptions): Pr
   debug(`process.execArgv: ${process.execArgv}`)
   debug('process.argv: %O', process.argv)
 
-  argv = argv ?? process.argv.slice(2)
+  argv ??= process.argv.slice(2)
   // Handle the case when a file URL string or URL is passed in such as 'import.meta.url'; covert to file path.
   if (options && ((typeof options === 'string' && options.startsWith('file://')) || options instanceof URL)) {
     options = fileURLToPath(options)

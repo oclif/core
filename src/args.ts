@@ -1,7 +1,7 @@
 import {URL} from 'node:url'
 
-import {Command} from './command'
-import {Arg, ArgDefinition} from './interfaces/parser'
+import {type Command} from './command'
+import {type Arg, type ArgDefinition} from './interfaces/parser'
 import {dirExists, fileExists} from './util/fs'
 import {isNotFalsy} from './util/util'
 
@@ -82,7 +82,7 @@ export const url = custom<URL>({
 const stringArg = custom({})
 export {stringArg as string}
 
-type ReadonlyElementOf<T extends ReadonlyArray<unknown>> = T[number]
+type ReadonlyElementOf<T extends readonly unknown[]> = T[number]
 
 /**
  * Create an arg that infers the type from the provided options.

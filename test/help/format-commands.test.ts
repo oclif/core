@@ -1,13 +1,13 @@
 import {expect} from 'chai'
 
-import {Command} from '../../src/command'
-
-const g: any = globalThis
-g.oclif.columns = 80
 import {Config} from '../../src'
+import {type Command} from '../../src/command'
 import {Help} from '../../src/help'
 import {AppsCreate, AppsDestroy, LongDescription} from './fixtures/fixtures'
 import {makeLoadable} from './help-test-utils'
+
+const g: any = globalThis
+g.oclif.columns = 80
 
 // extensions to expose method as public for testing
 class TestHelp extends Help {

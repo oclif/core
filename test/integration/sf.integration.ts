@@ -2,7 +2,7 @@ import ansis from 'ansis'
 import {expect} from 'chai'
 import {arch} from 'node:os'
 
-import {Executor, setup} from './util'
+import {type Executor, setup} from './util'
 
 function parseJson(json: string) {
   return JSON.parse(ansis.strip(json))

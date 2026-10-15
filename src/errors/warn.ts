@@ -1,4 +1,4 @@
-import {OclifError} from '../interfaces'
+import {type OclifError} from '../interfaces'
 import {getLogger} from '../logger'
 import {stderr} from '../ux/write'
 import {addOclifExitCode, CLIError} from './errors/cli'

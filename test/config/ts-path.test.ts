@@ -4,7 +4,7 @@ import sinon from 'sinon'
 import * as tsNode from 'ts-node'
 
 import * as configTsNode from '../../src/config/ts-path'
-import {Interfaces, settings} from '../../src/index'
+import {type Interfaces, settings} from '../../src/index'
 import * as util from '../../src/util/read-tsconfig'
 
 const root = resolve(__dirname, 'fixtures/typescript')

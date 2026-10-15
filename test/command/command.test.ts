@@ -402,4 +402,69 @@ describe('command', () => {
       expect(json.error.oclif.exit).to.equal(2)
     })
   })
+
+  describe('--json exit code', () => {
+    let exitCode: typeof process.exitCode
+
+    beforeEach(() => {
+      exitCode = process.exitCode
+      process.exitCode = undefined
+    })
+
+    afterEach(() => {
+      process.exitCode = exitCode
+    })
+
+    it('is the exit of a CLIError, as it is without --json', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          this.error('usage error under json', {exit: 2})
+        }
+      }
+
+      await captureOutput(async () => CMD.run(['--json']))
+      expect(process.exitCode).to.equal(2)
+    })
+
+    it('is the code passed to this.exit', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          this.exit(3)
+        }
+      }
+
+      await captureOutput(async () => CMD.run(['--json']))
+      expect(process.exitCode).to.equal(3)
+    })
+
+    it('is the exitCode of an error that has no oclif exit', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          throw Object.assign(new Error('exit code under json'), {exitCode: 4})
+        }
+      }
+
+      await captureOutput(async () => CMD.run(['--json']))
+      expect(process.exitCode).to.equal(4)
+    })
+
+    it('is 1 for an error that states no exit', async () => {
+      class CMD extends Command {
+        static enableJsonFlag = true
+
+        async run() {
+          throw new Error('no exit under json')
+        }
+      }
+
+      await captureOutput(async () => CMD.run(['--json']))
+      expect(process.exitCode).to.equal(1)
+    })
+  })
 })

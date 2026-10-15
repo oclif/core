@@ -1,7 +1,7 @@
 import makeDebugger from 'debug'
 
-import {LoadOptions} from './interfaces/config'
-import {Logger} from './interfaces/logger'
+import {type LoadOptions} from './interfaces/config'
+import {type Logger} from './interfaces/logger'
 
 const OCLIF_NS = 'oclif'
 
@@ -10,7 +10,9 @@ function makeLogger(namespace: string = OCLIF_NS): Logger {
   return {
     child: (ns: string, delimiter?: string) => makeLogger(`${namespace}${delimiter ?? ':'}${ns}`),
     debug,
-    error: (formatter: unknown, ...args: unknown[]) => makeLogger(`${namespace}:error`).debug(formatter, ...args),
+    error(formatter: unknown, ...args: unknown[]) {
+      makeLogger(`${namespace}:error`).debug(formatter, ...args)
+    },
     info: debug,
     namespace,
     trace: debug,
@@ -78,7 +80,9 @@ function set(newLogger: Logger): void {
  * Convenience function to create a debug function for a specific namespace
  */
 export function makeDebug(namespace: string): Logger['debug'] {
-  return (formatter: unknown, ...args: unknown[]) => getLogger(namespace).debug(formatter, ...args)
+  return (formatter: unknown, ...args: unknown[]) => {
+    getLogger(namespace).debug(formatter, ...args)
+  }
 }
 
 export function setLogger(loadOptions: LoadOptions) {

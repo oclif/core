@@ -1,6 +1,6 @@
-import {Command} from '../command'
-import {ArgInput, FlagInput} from '../interfaces/parser'
-import {Plugin as IPlugin} from '../interfaces/plugin'
+import {type Command} from '../command'
+import {type ArgInput, type FlagInput} from '../interfaces/parser'
+import {type Plugin as IPlugin} from '../interfaces/plugin'
 import {aggregateFlags} from './aggregate-flags'
 import {cacheDefaultValue} from './cache-default-value'
 import {ensureArgObject} from './ensure-arg-object'
@@ -110,9 +110,9 @@ export async function cacheCommand(
     hidden: cmd.hidden,
     hiddenAliases: cmd.hiddenAliases ?? [],
     id: cmd.id,
-    pluginAlias: plugin && plugin.alias,
-    pluginName: plugin && plugin.name,
-    pluginType: plugin && plugin.type,
+    pluginAlias: plugin?.alias,
+    pluginName: plugin?.name,
+    pluginType: plugin?.type,
     state: cmd.state,
     strict: cmd.strict,
     summary: cmd.summary,

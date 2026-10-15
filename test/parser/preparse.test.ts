@@ -3,8 +3,9 @@ import fs from 'node:fs/promises'
 import {join, resolve} from 'node:path'
 import sinon from 'sinon'
 
-import {Config, Interfaces} from '../../src'
-import Test from './fixtures/preparse-plugin/src/commands/test'
+import type Test from './fixtures/preparse-plugin/src/commands/test'
+
+import {Config, type Interfaces} from '../../src'
 
 type TestReturnType = {
   args: Interfaces.InferredArgs<typeof Test.args>

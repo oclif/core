@@ -53,13 +53,13 @@ describe('configurable error codes', () => {
 
   describe('failedFlagParsing', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('test', ['--flag1', '100', '--flag2', 'arg1']), defaultExitCode)
+      await runCommand(async () => config.runCommand('test', ['--flag1', '100', '--flag2', 'arg1']), defaultExitCode)
     })
 
     it('should use configured exit code for failed flag parsing', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(
-        () => config.runCommand('test', ['--flag1', '100', '--flag2', 'arg1']),
+        async () => config.runCommand('test', ['--flag1', '100', '--flag2', 'arg1']),
         exitCodes.failedFlagParsing,
       )
     })
@@ -67,68 +67,71 @@ describe('configurable error codes', () => {
 
   describe('failedFlagValidation', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('test', ['--flag2', 'arg1']), defaultExitCode)
+      await runCommand(async () => config.runCommand('test', ['--flag2', 'arg1']), defaultExitCode)
     })
 
     it('should use configured exit code for failed flag validation', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
-      await runCommand(() => config.runCommand('test', ['--flag2', 'arg1']), exitCodes.failedFlagValidation)
+      await runCommand(async () => config.runCommand('test', ['--flag2', 'arg1']), exitCodes.failedFlagValidation)
     })
   })
 
   describe('invalidArgsSpec', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('invalid', ['arg1', 'arg2']), defaultExitCode)
+      await runCommand(async () => config.runCommand('invalid', ['arg1', 'arg2']), defaultExitCode)
     })
 
     it('should use configured exit code for invalid args spec', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
-      await runCommand(() => config.runCommand('invalid', ['arg1', 'arg2']), exitCodes.invalidArgsSpec)
+      await runCommand(async () => config.runCommand('invalid', ['arg1', 'arg2']), exitCodes.invalidArgsSpec)
     })
   })
 
   describe('nonExistentFlag', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('test', ['--DOES_NOT_EXIST', 'arg1']), defaultExitCode)
+      await runCommand(async () => config.runCommand('test', ['--DOES_NOT_EXIST', 'arg1']), defaultExitCode)
     })
 
     it('should use configured exit code for failed flag validation', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
-      await runCommand(() => config.runCommand('test', ['--DOES_NOT_EXIST', 'arg1']), exitCodes.nonExistentFlag)
+      await runCommand(async () => config.runCommand('test', ['--DOES_NOT_EXIST', 'arg1']), exitCodes.nonExistentFlag)
     })
   })
 
   describe('requiredArgs', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('test', ['--flag1', '1']), defaultExitCode)
+      await runCommand(async () => config.runCommand('test', ['--flag1', '1']), defaultExitCode)
     })
 
     it('should use configured exit code for failed flag validation', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
-      await runCommand(() => config.runCommand('test', ['--flag1', '1']), exitCodes.requiredArgs)
+      await runCommand(async () => config.runCommand('test', ['--flag1', '1']), exitCodes.requiredArgs)
     })
   })
 
   describe('unexpectedArgs', () => {
     it('should use default exit code for failed flag parsing', async () => {
-      await runCommand(() => config.runCommand('test', ['arg1', 'arg2', 'arg3']), defaultExitCode)
+      await runCommand(async () => config.runCommand('test', ['arg1', 'arg2', 'arg3']), defaultExitCode)
     })
 
     it('should use configured exit code for failed flag validation', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
-      await runCommand(() => config.runCommand('test', ['arg1', 'arg2', 'arg3']), exitCodes.unexpectedArgs)
+      await runCommand(async () => config.runCommand('test', ['arg1', 'arg2', 'arg3']), exitCodes.unexpectedArgs)
     })
   })
 
   describe('violatedFlagConstraint', () => {
     it('should use default exit code for violated flag constraint', async () => {
-      await runCommand(() => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']), defaultExitCode)
+      await runCommand(
+        async () => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']),
+        defaultExitCode,
+      )
     })
 
     it('should use configured exit code for violated flag constraint', async () => {
       sinon.stub(Cache.prototype, 'get').withArgs('exitCodes').returns(exitCodes)
       await runCommand(
-        () => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']),
+        async () => config.runCommand('test', ['--flag1', '2', '--flag3', 'asdf', 'arg1']),
         exitCodes.violatedFlagConstraint,
       )
     })
