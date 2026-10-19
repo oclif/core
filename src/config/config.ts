@@ -288,7 +288,11 @@ export class Config implements IConfig {
     if (settings.debug) displayWarnings()
     setLogger(this.options)
     const marker = Performance.mark(OCLIF_MARKER_OWNER, 'config.load')
-    this.pluginLoader = new PluginLoader({plugins: this.options.plugins, root: this.options.root})
+    this.pluginLoader = new PluginLoader({
+      ignoreManifest: this.options.ignoreManifest,
+      plugins: this.options.plugins,
+      root: this.options.root,
+    })
     this.rootPlugin = await this.pluginLoader.loadRoot({pjson: this.options.pjson})
 
     // Cache the root plugin so that we can reference it later when determining if

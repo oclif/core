@@ -309,17 +309,6 @@
       "count": 2
     }
   },
-  "src/execute.ts": {
-    "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/use-unknown-in-catch-callback-variable": {
-      "count": 1
-    }
-  },
   "src/flags.ts": {
     "@typescript-eslint/consistent-type-assertions": {
       "count": 1
