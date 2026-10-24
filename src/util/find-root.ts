@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import type {getPackageInformation, PackageInformation, PackageLocator} from 'pnpapi'
 
+import {realpath} from 'node:fs/promises'
 import {basename, dirname, join} from 'node:path'
 
 import {type PJSON} from '../interfaces'
@@ -68,6 +69,9 @@ async function findPluginRoot(root: string, name?: string) {
  * Find plugin root directory for plugins installed into node_modules that don't have a `main` or `export`.
  * This will go up directories until it finds a directory with the plugin installed into it.
  *
+ * The root is returned as its real path, as require.resolve returns it, so that a plugin installed through a
+ * symlink (as pnpm installs every package) finds its own dependencies, which sit next to the real directory.
+ *
  * See https://github.com/oclif/config/pull/289#issuecomment-983904051
  */
 async function findRootLegacy(name: string | undefined, root: string): Promise<string | undefined> {
@@ -76,10 +80,10 @@ async function findRootLegacy(name: string | undefined, root: string): Promise<s
     let cur
     if (name) {
       cur = join(next, 'node_modules', name, 'package.json')
-      if (await safeReadJson<PJSON>(cur)) return dirname(cur)
+      if (await safeReadJson<PJSON>(cur)) return realpath(dirname(cur))
 
       const pkg = await safeReadJson<PJSON>(join(next, 'package.json'))
-      if (pkg?.name === name) return next
+      if (pkg?.name === name) return realpath(next)
     } else {
       cur = join(next, 'package.json')
       if (await safeReadJson<PJSON>(cur)) return dirname(cur)
