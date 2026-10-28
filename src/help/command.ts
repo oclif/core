@@ -1,4 +1,5 @@
 import ansis from 'ansis'
+import width from 'string-width'
 
 import type * as Interfaces from '../interfaces'
 
@@ -235,7 +236,8 @@ export class CommandHelp extends HelpFormatter {
         if (!flag.char) flagHelp = flagHelp.replace(' '.repeat(4), '')
 
         flagHelp +=
-          flagHelp.length + summary.length + 2 < this.opts.maxWidth
+          // maxWidth is a terminal width, so compare against display width instead of code unit count
+          width(flagHelp) + width(summary) + 2 < this.opts.maxWidth
             ? '  ' + summary
             : '\n\n' + this.indent(this.wrap(summary, this.indentSpacing * 2))
 

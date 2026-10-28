@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+import width from 'string-width'
 
 import {Args, Config, Flags as flags} from '../../src'
 import {makeCommandClass, makeLoadable, TestHelp} from './help-test-utils'
@@ -580,6 +581,67 @@ FLAG DESCRIPTIONS
     summaryone line summaryone line summaryone line summaryone line summaryone
     line summaryone line summaryone line summaryone line summaryone line
     summaryone line summary
+
+    single line description`)
+    })
+
+    it('should wrap a full-width flag summary that does not fit in maxWidth', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          flags: {
+            opt: flags.string({
+              // 42 chars but 84 columns wide, so it must not be put on the label line
+              summary: '한글로쓴플래그요약설명입니다또박또박적어봅니다다시한번길게적어보는중입니다그렇습니다',
+              description: 'single line description',
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create [--opt <value>]
+
+FLAGS
+  --opt=<value>  한글로쓴플래그요약설명입니다또박또박적어봅니다다시한번길게적어
+                 보는중입니다그렇습니다
+
+FLAG DESCRIPTIONS
+  --opt=<value>
+
+    한글로쓴플래그요약설명입니다또박또박적어봅니다다시한번길게적어보는중입니다그
+    렇습니다
+
+    single line description`)
+
+      for (const line of output.split('\n')) {
+        expect(width(line)).to.be.at.most(80)
+      }
+    })
+
+    it('should keep an ascii flag summary of the same length on the label line', async () => {
+      const cmd = await makeLoadable(
+        makeCommandClass({
+          id: 'apps:create',
+          flags: {
+            opt: flags.string({
+              summary: 'a one line flag summary written in english xyz',
+              description: 'single line description',
+            }),
+          },
+        }),
+      )
+
+      const output = help.formatCommand(cmd)
+      expect(output).to.equal(`USAGE
+  $ oclif apps:create [--opt <value>]
+
+FLAGS
+  --opt=<value>  a one line flag summary written in english xyz
+
+FLAG DESCRIPTIONS
+  --opt=<value>  a one line flag summary written in english xyz
 
     single line description`)
     })
