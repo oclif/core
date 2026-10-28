@@ -1,3 +1,12 @@
+## [5.1.10](https://github.com/oclif/core/compare/5.1.9...5.1.10) (2026-10-28)
+
+
+### Bug Fixes
+
+* measure flag summary by display width ([dbe89ff](https://github.com/oclif/core/commit/dbe89ff67efc1979f7167f6f1f1861663a659f32))
+
+
+
 ## [5.1.9](https://github.com/oclif/core/compare/5.1.8...5.1.9) (2026-10-19)
 
 
