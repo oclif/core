@@ -1,3 +1,12 @@
+## [5.1.12](https://github.com/oclif/core/compare/5.1.11...5.1.12) (2026-11-09)
+
+
+### Bug Fixes
+
+* **deps:** bump minimatch from 10.2.6 to 11.0.1 ([69a0bd2](https://github.com/oclif/core/commit/69a0bd26ad907206663fc9722f6965377b130e44))
+
+
+
 ## [5.1.11](https://github.com/oclif/core/compare/5.1.10...5.1.11) (2026-11-01)
 
 
