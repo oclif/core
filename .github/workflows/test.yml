@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node_version: [24]
+        node_version: [lts/*, 24]
         exclude:
           - os: windows-latest
             node_version: lts/*
