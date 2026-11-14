@@ -128,6 +128,7 @@ export class Parser<
   BFlags extends OutputFlags<T['flags']>,
   TArgs extends OutputArgs<T['args']>,
 > {
+  private readonly argTokenPositions = new Map<ArgToken, number>()
   private readonly argv: string[]
   private readonly booleanFlags: Record<string, BooleanFlag<any>>
   private readonly context: ParserContext
@@ -220,10 +221,13 @@ export class Parser<
 
     let isParsingFlags = true
     const nonExistentFlags: string[] = []
+    const nonExistentFlagPositions: number[] = []
     let isDashdash = false
+    let dashdashPosition = -1
     const originalArgv = [...this.argv]
 
     while (this.argv.length > 0) {
+      const position = originalArgv.length - this.argv.length
       const input = this.argv.shift()!
       if (isParsingFlags && input.startsWith('-') && input !== '-') {
         // attempt to parse as arg
@@ -238,6 +242,7 @@ export class Parser<
 
         if (input === '--') {
           isDashdash = true
+          dashdashPosition = position
           continue
         }
 
@@ -247,6 +252,7 @@ export class Parser<
           // this is a misspelled flag or a non-existent flag,
           // e.g. --hekp instead of --help
           nonExistentFlags.push(input)
+          nonExistentFlagPositions.push(position)
           continue
         }
       }
@@ -258,19 +264,25 @@ export class Parser<
 
       // not a flag, parse as arg
       const arg = Object.keys(this.input.args)[this._argTokens.length]
-      this.raw.push({arg, input, type: 'arg'})
+      const token: ArgToken = {arg, input, type: 'arg'}
+      this.raw.push(token)
+      this.argTokenPositions.set(token, position)
     }
 
     const [{args, argv}, {flags, metadata}] = await Promise.all([this._args(), this._flags()])
     this._debugOutput(argv, args, flags)
 
-    const unsortedArgv = (
-      isDashdash ? [...argv, ...nonExistentFlags, '--'] : [...argv, ...nonExistentFlags]
-    ) as string[]
+    const argvWithPositions = [
+      ...argv,
+      ...nonExistentFlags.map((value, index) => ({position: nonExistentFlagPositions[index], value})),
+    ]
+
+    if (isDashdash) argvWithPositions.push({position: dashdashPosition, value: '--'})
+    argvWithPositions.sort((a, b) => a.position - b.position)
 
     return {
       args: args as TArgs,
-      argv: unsortedArgv.sort((a, b) => originalArgv.indexOf(a) - originalArgv.indexOf(b)),
+      argv: argvWithPositions.map(({value}) => value),
       flags,
       metadata,
       nonExistentFlags,
@@ -278,21 +290,28 @@ export class Parser<
     }
   }
 
-  private async _args(): Promise<{args: Record<string, unknown>; argv: unknown[]}> {
-    const argv: unknown[] = []
+  private async _args(): Promise<{
+    args: Record<string, unknown>
+    argv: Array<{position: number; value: unknown}>
+  }> {
+    const argv: Array<{position: number; value: unknown}> = []
     const args = {} as Record<string, unknown>
     const tokens = this._argTokens
     let isStdinRead = false
     const ctx = this.context as ArgParserContext
 
-    const parseArgInput = async (name: string, arg: Arg<unknown>, input: string): Promise<void> => {
+    const pushValue = (value: unknown, token?: ArgToken): void => {
+      argv.push({position: token ? (this.argTokenPositions.get(token) ?? -1) : -1, value})
+    }
+
+    const parseArgInput = async (name: string, arg: Arg<unknown>, input: string, token?: ArgToken): Promise<void> => {
       if (arg.options && !arg.options.includes(input)) {
         throw new ArgInvalidOptionError(arg, input)
       }
 
-      ctx.token = {arg: name, input, type: 'arg'}
+      ctx.token = token ?? {arg: name, input, type: 'arg'}
       const parsed = await arg.parse(input, ctx, arg)
-      argv.push(parsed)
+      pushValue(parsed, token)
       args[name] = parsed
     }
 
@@ -301,9 +320,9 @@ export class Parser<
       if (!arg.default && arg.default !== false) return
       const value = typeof arg.default === 'function' ? await arg.default() : arg.default
       if (Array.isArray(value)) {
-        for (const v of value) argv.push(v)
+        for (const v of value) pushValue(v)
       } else {
-        argv.push(value)
+        pushValue(value)
       }
 
       args[name] = value
@@ -324,52 +343,51 @@ export class Parser<
     if (variadicIndex === -1) {
       for (const [name, arg] of argEntries) {
         const token = tokens.find((t) => t.arg === name)
-        ctx.token = token!
 
-        await (token ? parseArgInput(name, arg, token.input) : tryStdin(name, arg))
+        await (token ? parseArgInput(name, arg, token.input, token) : tryStdin(name, arg))
         await applyDefault(name, arg)
       }
 
       // Append unmatched tokens to argv (for strict: false)
       for (const token of tokens) {
         if (args[token.arg] !== undefined) continue
-        argv.push(token.input)
+        pushValue(token.input, token)
       }
     } else {
-      const tokenInputs = tokens.map((t) => t.input)
+      const tokenQueue = [...tokens]
 
       // Consume pre-variadic args from the front
       for (let i = 0; i < variadicIndex; i++) {
         const [name, arg] = argEntries[i]
-        const input = tokenInputs.shift()
-        await (input === undefined ? tryStdin(name, arg) : parseArgInput(name, arg, input))
+        const token = tokenQueue.shift()
+        await (token === undefined ? tryStdin(name, arg) : parseArgInput(name, arg, token.input, token))
         await applyDefault(name, arg)
       }
 
       // Consume post-variadic args from the back
-      const postVariadicParsing: Array<{arg: Arg<unknown>; input: string; name: string}> = []
+      const postVariadicParsing: Array<{arg: Arg<unknown>; input: string; name: string; token: ArgToken}> = []
       for (let i = argEntries.length - 1; i > variadicIndex; i--) {
         const [name, arg] = argEntries[i]
-        const input = tokenInputs.pop()
-        if (input !== undefined) {
-          postVariadicParsing.unshift({arg, input, name})
+        const token = tokenQueue.pop()
+        if (token !== undefined) {
+          postVariadicParsing.unshift({arg, input: token.input, name, token})
         }
       }
 
       // Everything remaining goes to the variadic arg
       const [variadicName, variadicArg] = argEntries[variadicIndex]
-      if (tokenInputs.length > 0) {
+      if (tokenQueue.length > 0) {
         const parsedValues: unknown[] = []
-        for (const input of tokenInputs) {
-          await parseArgInput(variadicName, variadicArg, input)
+        for (const token of tokenQueue) {
+          await parseArgInput(variadicName, variadicArg, token.input, token)
           parsedValues.push(args[variadicName])
         }
 
         args[variadicName] = parsedValues
       }
 
-      for (const {arg, input, name} of postVariadicParsing) {
-        await parseArgInput(name, arg, input)
+      for (const {arg, input, name, token} of postVariadicParsing) {
+        await parseArgInput(name, arg, input, token)
       }
 
       // Apply defaults for any args that didn't receive values

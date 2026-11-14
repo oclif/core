@@ -609,9 +609,6 @@
     "unicorn/consistent-class-member-order": {
       "count": 1
     },
-    "unicorn/no-array-sort": {
-      "count": 1
-    },
     "unicorn/no-computed-property-existence-check": {
       "count": 5
     },
