@@ -970,6 +970,39 @@ See more help with --help`)
       expect(out.argv).to.deep.equal([100])
     })
 
+    describe('keeps argv in command line order', () => {
+      it('does not move parsed values ahead of string args', async () => {
+        const out = await parse(['x', '7', 'z'], {
+          args: {a: Args.string(), b: Args.integer(), c: Args.string()},
+        })
+        expect(out.args).to.deep.equal({a: 'x', b: 7, c: 'z'})
+        expect(out.argv).to.deep.equal(['x', 7, 'z'])
+      })
+
+      it('does not move boolean args ahead of string args', async () => {
+        const out = await parse(['x', 'true', 'z'], {
+          args: {a: Args.string(), b: Args.boolean(), c: Args.string()},
+        })
+        expect(out.argv).to.deep.equal(['x', true, 'z'])
+      })
+
+      it('keeps unmatched args in place when strict is false', async () => {
+        const out = await parse(['x', '7', 'extra1', 'extra2'], {
+          args: {a: Args.string(), b: Args.integer()},
+          strict: false,
+        })
+        expect(out.argv).to.deep.equal(['x', 7, 'extra1', 'extra2'])
+      })
+
+      it('does not reorder args that repeat a flag value', async () => {
+        const out = await parse(['--name', 'b', 'a', 'b'], {
+          args: {first: Args.string(), second: Args.string()},
+          flags: {name: Flags.string()},
+        })
+        expect(out.argv).to.deep.equal(['a', 'b'])
+      })
+    })
+
     it('parse with a default does not parse default', async () => {
       const out = await parse([], {
         flags: {foo: Flags.string({parse: async (input) => input.toUpperCase(), default: 'baz'})},
