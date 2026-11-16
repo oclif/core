@@ -1,4 +1,4 @@
-import {runCommand} from '@oclif/test'
+import {captureOutput, runCommand} from '@oclif/test'
 import {expect} from 'chai'
 import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
 import {join, resolve} from 'node:path'
@@ -8,6 +8,7 @@ import type CacheType from '../../src/cache'
 import type {execute as executeType} from '../../src/execute'
 import type {LoadOptions} from '../../src/interfaces'
 
+import {Config, run} from '../../src'
 import {getPlatform} from '../../src/util/os'
 
 const Cache = require('../../src/cache') as {default: typeof CacheType} // eslint-disable-line n/no-missing-require
@@ -176,6 +177,18 @@ COMMANDS
     await execute({args: ['foo', 'baz'], dir: pathToFileURL(root).href, loadOptions: {ignoreManifest: true}})
 
     expect(Cache.default.getInstance().get('config')?.options).to.include({ignoreManifest: true, root})
+  })
+
+  it('runs with the subclass of Config it is given', async () => {
+    class CustomConfig extends Config {}
+
+    const custom = new CustomConfig({root: resolve(__dirname, 'fixtures/typescript/package.json')})
+    await custom.load()
+
+    const {stdout} = await captureOutput(async () => run(['foo', 'baz'], custom))
+
+    expect(stdout).to.equal('running Baz\n')
+    expect(Cache.default.getInstance().get('config')).to.be.an.instanceOf(CustomConfig)
   })
 
   it('should catch errors from commands', async () => {

@@ -146,7 +146,10 @@ export class Config implements IConfig {
     if (isConfig(opts)) {
       debug(`reloading config from ${opts._base} to ${BASE}`)
       const pluginMap = new Map<string, IPlugin>(opts.getPluginsList().map((p) => [p.name, p]))
-      const config = new Config({...opts.options, plugins: pluginMap})
+      // Rebuild with the class of the given config, so a subclass of Config is kept. A config that only
+      // looks like one, as from another copy of @oclif/core, is rebuilt with the class load was called on.
+      const ConfigClass = opts instanceof this ? (opts.constructor as typeof Config) : this
+      const config = new ConfigClass({...opts.options, plugins: pluginMap})
       await config.load()
       return config
     }
