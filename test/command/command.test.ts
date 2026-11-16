@@ -1,7 +1,7 @@
 import {captureOutput} from '@oclif/test'
 import {expect} from 'chai'
 
-import {Command as Base, Errors, Flags} from '../../src'
+import {Command as Base, Config, Errors, Flags} from '../../src'
 
 class Command extends Base {
   static description = 'test command'
@@ -35,6 +35,22 @@ describe('command', () => {
 
     const {result} = await captureOutput(async () => Command.run([]))
     expect(result).to.equal(101)
+  })
+
+  it('runs with the subclass of Config it is given', async () => {
+    class CustomConfig extends Config {}
+
+    class ConfigCommand extends Base {
+      async run() {
+        return this.config
+      }
+    }
+
+    const custom = new CustomConfig({root: __dirname})
+    await custom.load()
+
+    const {result} = await captureOutput(async () => ConfigCommand.run([], custom))
+    expect(result).to.be.an.instanceOf(CustomConfig)
   })
 
   it('errors out', async () => {

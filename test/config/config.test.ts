@@ -245,6 +245,35 @@ describe('Config', () => {
     expect(config.topics.map((t) => t.name)).to.have.members(['t1', 't1:t1-1', 't1:t1-1:t1-1-1', 't1:t1-1:t1-1-2'])
   })
 
+  describe('load from a config', () => {
+    class CustomConfig extends Config {}
+
+    it('rebuilds a subclass of Config as that subclass, with its plugins', async () => {
+      const custom = new CustomConfig({pjson, root})
+      await custom.load()
+
+      const config = await Config.load(custom)
+
+      expect(config).to.be.an.instanceOf(CustomConfig)
+      expect(config).to.not.equal(custom)
+      expect(config.getPluginsList()).to.have.members(custom.getPluginsList())
+    })
+
+    it('rebuilds a config that only looks like one as a Config', async () => {
+      const original = await Config.load({pjson, root})
+      const lookalike = {
+        _base: '@oclif/core@0.0.0',
+        getPluginsList: () => original.getPluginsList(),
+        options: original.options,
+      } as unknown as Config
+
+      const config = await Config.load(lookalike)
+
+      expect(config.constructor).to.equal(Config)
+      expect(config.getPluginsList()).to.have.members(original.getPluginsList())
+    })
+  })
+
   describe('findCommand', () => {
     async function loadConfig({commandIds = ['foo:bar', 'foo:baz'], types = []}: Options = {}) {
       sinon.stub(os, 'getHomeDir').returns('/my/home')
